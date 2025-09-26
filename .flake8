@@ -1,0 +1,3 @@
+[flake8]
+exclude = .git,__pycache__,.mypy_cache,.pytest_cache,.venv,venv,.cache,toys/training/wikipedia_full_data,toys/training/wikipedia_simple_data,toys/training/checkpoints,toys/training/logs,toys/training/knowledge,memories/public/meta,memories/private/,toys/experiments
+max-line-length = 120 

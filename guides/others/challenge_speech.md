@@ -1,0 +1,7 @@
+This model is unique - not typical like transformers or other AI models. In the past I used to consider that training will have to teach the model how to speak - but now it is evident that we should work towards something else. The model should be able to speak as is - training will teach it how to remember and learn new context. Testing even with only one article should incentivise the model and reproduce at least some portion of the text. We have to think out of the box here. Also the model does not understand queries, so we need to just prompt it with the beginning of a sentence of that article.
+
+Our ontology, phenomenology, and epistemology are not random - they are the world on which the model learns and generates. The tokenizer, orbits, and theta maps function on these spaces - not independently. 
+
+Active “short” context is still just 6 introns (6 bytes) deep, because the diameter of the state‐graph is 6. Every new intron you feed in updates the 48-bit state, then only that state carries forward—there’s no sliding window longer than six steps in the physics itself.
+
+Passive “long” memory (the PhenotypeStore / phenotype store) remains effectively unbounded, since any past (state_index, token_id) pair you’ve seen is retained (subject only to your storage limits and any pruning you choose). You can always look up learned masks for any state, no matter how long ago it occurred.

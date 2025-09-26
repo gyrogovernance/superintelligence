@@ -1,0 +1,26 @@
+# Ensure consistent line endings for text files
+* text=auto
+# Treat Python files as text, normalize line endings
+*.py text
+# Always use LF for shell scripts
+*.sh text eol=lf
+# Documentation files
+*.md  text
+*.rst text
+# No linguist-generated language stats for virtual environments
+venv/ linguist-vendored
+.venv/ linguist-vendored
+# Ensure Jupyter notebooks are treated as text (if any are added)
+*.ipynb text
+# Prevent Git from modifying certain files (if needed)
+#*.yourfile binary
+*.npy filter=lfs diff=lfs merge=lfs -text
+*.json filter=lfs diff=lfs merge=lfs -text
+# LFS tracked folders
+toys/training/wikipedia_full_data/ filter=lfs diff=lfs merge=lfs -text
+toys/training/wikipedia_simple_data/ filter=lfs diff=lfs merge=lfs -text
+toys/training/knowledge/ filter=lfs diff=lfs merge=lfs -text
+toys/training/Archive/ filter=lfs diff=lfs merge=lfs -text
+memories/public/knowledge/ filter=lfs diff=lfs merge=lfs -text
+toys/training/wikipedia_full_data/** filter=lfs diff=lfs merge=lfs -text
+toys/training/wikipedia_simple_data/** filter=lfs diff=lfs merge=lfs -text

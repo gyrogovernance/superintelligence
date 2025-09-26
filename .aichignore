@@ -1,0 +1,123 @@
+# Ignore Python virtual environments
+venv/
+.venv/
+
+# Ignore Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore build artifacts
+dist/
+build/
+*.egg-info/
+gyrosi_babylm.egg-info/
+
+# Ignore logs and reports
+logs/
+*.log
+flake8_report.txt
+
+# Ignore OS files
+.DS_Store
+
+# Ignore IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Ignore binary and large data files
+*.dat
+*.bin
+*.icns
+
+# Ignore documentation build output
+docs/
+
+# Ignore test fixtures and generated test data
+scripts/tests/
+scripts/tests/fixtures/
+scripts/tests/*.dat
+
+# Ignore migration scripts and temporary scripts
+scripts/migrate_*.py
+
+# Ignore any secret or config files (add more as needed)
+*.key
+*.pem
+*.env
+
+# Ignore AI helper config itself
+.aichignore
+
+# Explicitly ignore root-level metadata/config
+.git/
+.editorconfig
+.flake8
+.gitattributes
+.gitignore
+.pre-commit-config.yaml
+.mypy_cache/
+.pytest_cache/
+.coverage
+
+# Project-specific exclusions
+# BabyLM: ignore all private agent and thread data
+memories/private/
+
+# Ignore htmlcov coverage output
+htmlcov/
+
+# Python cache and build artifacts (recursive)
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Test and coverage artifacts
+.pytest_cache/
+toys/health/htmlcov/
+toys/health/memories/
+
+# BabyLM project-specific cache
+baby/__pycache__/
+toys/__pycache__/
+toys/health/__pycache__/
+toys/learning/formats/__pycache__/
+toys/learning/threads/__pycache__/
+memories/__pycache__/
+
+# Ignore all contents of the formats directory, but keep the folder itself
+memories/public/formats/*
+!memories/public/formats/
+
+# Optionally ignore __init__.py files in public, formats, and masks if not needed
+memories/public/__init__.py
+memories/public/formats/__init__.py
+memories/public/masks/__init__.py
+
+# Ignore VCS, virtualenv, test cache, and IDE settings
+.git/
+.pytest_cache/
+.venv/
+.vscode/
+.ruff_cache
+pyi/
+.pytype
+.pyre
+.cursorignore
+.git
+.mypy_cache
+typings/
+__pycache__
+mypy.ini
+mypy_output.txt
+pyright_output.txt
+htmlcov/
+
+# Training Data
+toys/training/checkpoints
+toys/training/knowledge
+toys/training/logs
+toys/training/wikipedia_data

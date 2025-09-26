@@ -1,0 +1,51 @@
+name: Build Meta Assets
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install minimal dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy
+
+      - name: Build ontology_keys.npy
+        run: |
+          python -m baby.information ontology \
+                 --output memories/public/meta/ontology_keys.npy
+
+      - name: Build epistemology.npy
+        run: |
+          python -m baby.information epistemology \
+                 --keys memories/public/meta/ontology_keys.npy \
+                 --output memories/public/meta/epistemology.npy
+
+      - name: Build phenomenology_map.npy
+        run: |
+          python -m baby.information phenomenology \
+                 --ep  memories/public/meta/epistemology.npy \
+                 --keys memories/public/meta/ontology_keys.npy \
+                 --output memories/public/meta/phenomenology_map.npy
+
+      - name: Add and commit LFS files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git lfs track "memories/public/meta/*.npy"
+          git add memories/public/meta/ontology_keys.npy memories/public/meta/phenomenology_map.npy memories/public/meta/epistemology.npy memories/public/meta/theta.npy memories/public/meta/orbit_sizes.npy
+          git commit -m "Add prebuilt ontology assets [skip ci]" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
