@@ -1,3 +1,6 @@
+# Artificial Superintelligence Architecture (ASI/AGI)
+> **Gyroscopic Alignment Development Lab**
+
 <div align="center">
   <img src="toys/assets/GyroSI_Baby_Cover_Image.png" alt="GyroSI Cover" />
 
