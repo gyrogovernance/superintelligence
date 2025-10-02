@@ -188,7 +188,7 @@ MIT License - see [LICENSE](LICENSE) for details.
   author = {Basil Korompilias},
   title = {GyroSI Baby LM: Gyroscopic Superintelligence},
   year = {2025},
-  url = {https://github.com/GyroSuperintelligence/BabyLM},
+  url = {https://github.com/gyrogovernance/superintelligence},
   note = {Implementation of physics-based superintelligence through 
           recursive structural alignment and intrinsic ethical constraints}
 }
