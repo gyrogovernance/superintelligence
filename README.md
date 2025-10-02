@@ -184,7 +184,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## 📖 Citation
 
 ```bibtex
-@software{gyrosi2025,
+@software{gyrosirepo,
   author = {Basil Korompilias},
   title = {GyroSI Baby LM: Gyroscopic Superintelligence},
   year = {2025},
