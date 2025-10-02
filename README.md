@@ -16,6 +16,18 @@
 
 </div>
 
+<div align="center">
+
+### G Y R O G O V E R N A N C E
+
+[![Home](./assets/menu/home_badge.svg)](https://gyrogovernance.com)
+[![Science](./assets/menu/science_badge.svg)](https://github.com/gyrogovernance/science)
+[![Superintelligence](./assets/menu/superintelligence_badge.svg)](https://github.com/gyrogovernance/superintelligence)
+[![Diagnostics](./assets/menu/diagnostics_badge.svg)](https://github.com/gyrogovernance/diagnostics)
+[![Protocols](./assets/menu/protocols_badge.svg)](https://github.com/gyrogovernance/protocols)
+
+</div>
+
 ---
 
 ## 🌀 What is GyroSI?
