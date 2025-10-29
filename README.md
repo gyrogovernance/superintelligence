@@ -4,6 +4,19 @@
 <div align="center">
   <img src="toys/assets/GyroSI_Baby_Cover_Image.png" alt="GyroSI Cover" />
 
+<div align="center">
+
+### G Y R O G O V E R N A N C E
+
+[![Home](/assets/menu/gyro_icon_home.svg)](https://gyrogovernance.com)
+[![Apps](/assets/menu/gyro_icon_apps.svg)](https://github.com/gyrogovernance/apps)
+[![Diagnostics](/assets/menu/gyro_icon_diagnostics.svg)](https://github.com/gyrogovernance/diagnostics)
+[![Tools](/assets/menu/gyro_icon_tools.svg)](https://github.com/gyrogovernance/tools)
+[![Science](/assets/menu/gyro_icon_science.svg)](https://github.com/gyrogovernance/science)
+[![Superintelligence](/assets/menu/gyro_icon_si.svg)](https://github.com/gyrogovernance/superintelligence)
+
+</div>
+
 <h1>💫 GyroSI Baby LM 👶</h1>
 <h3>Gyroscopic Superintelligence: Baby Language Model</h3>
 <p><em>Applied AI Ethics through Physics, not Semantics</em></p>
