@@ -2,11 +2,12 @@
 > **Gyroscopic Alignment Models Lab**
 
 <div align="center">
-  <img src="toys/assets/GyroSI_Baby_Cover_Image.png" alt="GyroSI Cover" />
+
+![Superintelligence](/assets/gyro_cover_si.png)
 
 <div align="center">
 
-### G Y R O G O V E R N A N C E
+**G Y R O  - G O V E R N A N C E** 
 
 [![Home](/assets/menu/gyro_icon_home.svg)](https://gyrogovernance.com)
 [![Apps](/assets/menu/gyro_icon_apps.svg)](https://github.com/gyrogovernance/apps)
