@@ -94,11 +94,11 @@ This solves three fundamental problems:
 
 ## 📚 Documentation
 
-- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.](/guides/Genetics.md)
+- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.](/guides/GyroSI_Specs.md)
 
 - 📖 [Alignment - The Walk Model: Logic Formalism](/guides/Alignment.md)
 
-- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/guides/Physics.md)
+- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/guides/CommonGovernanceModel.md)
 
 - 🔬 [Lab - Deep Physics Experiments: Cosmology, Biology and Beyond](https://github.com/GyroSuperintelligence/CGM)
 

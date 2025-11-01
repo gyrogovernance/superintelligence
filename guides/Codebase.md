@@ -386,8 +386,8 @@ The GyroSI system enforces strict separation between the core physics kernel, ru
 │   └── policies.py           # PhenotypeStore, storage overlays, policy and maintenance functions
 ├── baby.sh
 ├── guides/
-│   ├── Genetics.md
-│   └── Physics.md
+│   ├── GyroSI_Specs.md
+│   └── CommonGovernanceModel.md
 ├── memories/
 │   ├── __init__.py
 │   ├── memory_preferences.json # Reserved for Memory Preferences

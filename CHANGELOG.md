@@ -971,7 +971,7 @@ Applied explicit state buffer zeroing before use to guarantee valid state transi
 
 **2\. Bit Family Prioritization per Cycle Step**
 
-*   Implemented priority weights for bit families (L0, LI, FG, BG) at each step in the cycle, directly following `Genetics.md`.
+*   Implemented priority weights for bit families (L0, LI, FG, BG) at each step in the cycle, directly following `GyroSI_Specs.md`.
 *   Token scoring and selection now reflect the physical role of each cycle phase.
 
 **3\. Monodromic Fold in Learning and Generation**
@@ -2497,7 +2497,7 @@ Updated all code and tests to use per-format access (self.formats\[self.format\_
 
 Fixed all test failures and ensured robust multi-format operation.
 
-Updated Genetics.md to clarify format access, pattern index cycling, and pattern distance matrix storage.
+Updated GyroSI_Specs.md to clarify format access, pattern index cycling, and pattern distance matrix storage.
 
 Implemented stable UUIDs for public formats using uuid.uuid5 and a fixed namespace, enabling reproducible curriculum and format references.
 
@@ -2521,7 +2521,7 @@ Fixed TypedDict access warnings for optional keys.
 *   Clarified and retained 'agent\_uuid' in gene keys for agent association/ownership (not privacy)
 *   Refactored thread/gene key creation, storage, and tests to use the new privacy model
 *   Updated all relevant code and tests for clarity, security, and future extensibility
-*   Major revision of Genetics.md: fully integrated Common Governance Model (CGM) theory, mapping all system components to CGM stages (CS, UNA, ONA, BU)
+*   Major revision of GyroSI_Specs.md: fully integrated Common Governance Model (CGM) theory, mapping all system components to CGM stages (CS, UNA, ONA, BU)
 *   Clarified and formalized the dual nature of BU (Egress/Recollection and Ingress/Closure) in both documentation and code
 *   Updated all terminology to remove analogies (e.g., "physicist/linguist"), using only precise CGM language
 *   Ensured the spec and implementation match: \_generate\_response\_byte now documented and implemented as a two-stage ONA/BU process using combined resonance and confidence
