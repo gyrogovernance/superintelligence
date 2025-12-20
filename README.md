@@ -16,10 +16,17 @@
 [![Science](/assets/menu/gg_icon_science.svg)](https://github.com/gyrogovernance/science)
 [![Superintelligence](/assets/menu/gg_icon_si.svg)](https://github.com/gyrogovernance/superintelligence)
 
+![GGG ASI Router](/assets/GGG_ASI_R_Cover.png)
+
+> ⚠️ **NEWS:** The whole GyroSI development is in the process of being repurposed and renamed to GGG ASI Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
+
+📖 [GGG ASI Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
+
+---
+
 </div>
 
-<h1>💫 GyroSI Baby LM 👶</h1>
-<h3>Gyroscopic Superintelligence: Baby Language Model</h3>
+<h3>Gyroscopic Superintelligence</h3>
 <p><em>Applied AI Ethics through Physics, not Semantics</em></p>
 
 <p>
@@ -94,11 +101,13 @@ This solves three fundamental problems:
 
 ## 📚 Documentation
 
-- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.](/guides/GyroSI_Specs.md)
+- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.](/docs/GyroSI_Specs.md)
 
-- 📖 [Alignment - The Walk Model: Logic Formalism](/guides/Alignment.md)
+- 🧬 [Substrate - Physical Memory Specification: Photochromic Holographic Storage](/docs/GyroSI_Substrate_Specs.md)
 
-- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/guides/CommonGovernanceModel.md)
+- 📖 [Alignment - The Walk Model: Logic Formalism](/docs/Alignment.md)
+
+- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
 
 - 🔬 [Lab - Deep Physics Experiments: Cosmology, Biology and Beyond](https://github.com/GyroSuperintelligence/CGM)
 

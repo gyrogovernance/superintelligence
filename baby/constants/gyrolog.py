@@ -32,7 +32,7 @@ USAGE EXAMPLES:
         next_coords = gyrolog.compute_gyrolog(next_state, anchor)
         print(f"Plane flip: {coords.plane != next_coords.plane}")
 
-See guides/GyroLog.md for comprehensive documentation.
+See docs/GyroLog.md for comprehensive documentation.
 """
 
 from typing import Tuple, Dict, List, Optional

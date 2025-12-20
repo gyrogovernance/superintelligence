@@ -84,7 +84,7 @@ toys/training/logs/
 toys/training/trash/
 
 # Documentation builds
-guides/build/
+docs/build/
 site/
 
 # Jupyter Notebook
@@ -134,3 +134,4 @@ last-test-run.txt
 last_test_run.txt
 
 
+docs/notes/

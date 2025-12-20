@@ -3,6 +3,17 @@
 
 ---
 
+## [v0.9.9-Router] – 2025-12-20
+
+ADDED: guides\GyroSI_Substrate_Specs.md
+This is a revision of an old study, and a refinement so it can match the overal GyroSI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
+
+> ⚠️ **NEWS:** The whole GyroSI development is in the process of being repurposed and renamed to GGG ASI Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
+
+📖 [GGG ASI Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
+
+---
+
 ## [v0.9.8.0-Physics] – 2025-09-22
 My latest work focuses on getting our physics right first, before coming back into any language related matters. Since GyroSI is a physics grounded architecture, is possible to simulate spacetime topology through its algorithms, and that makes it a perfect computational framework for any experiment and study in physics - from simulating particles, to exploring cosmological hypotheses - all, in blasting fast speeds, as our holographic memory architecture does not rely on computationally expensive operations.
 
@@ -58,7 +69,7 @@ Implemented a physics-grounded coordinate system that maps 48-bit GyroSI states 
   - Anchor invariance confirms anchor-free invariants
   - Coordinate consistency ensures stable computation
 
-* **Documentation**: Created comprehensive `guides/GyroLog.md` with usage examples, physics interpretation, and integration patterns for practical GyroSI operations.
+* **Documentation**: Created comprehensive `docs/GyroLog.md` with usage examples, physics interpretation, and integration patterns for practical GyroSI operations.
 
 **Technical Implementation**
 
@@ -151,7 +162,7 @@ This implementation perfectly matches the CGM (Common Governance Model) principl
 
 **Reference Documentation**
 
-This implementation realizes the walking model described in `guides/Alignment.md`, which articulates how GyroSI implements intelligence as recursive walking on a 48-bit geometric manifold using the same principles that govern efficient bipedal locomotion.
+This implementation realizes the walking model described in `docs/Alignment.md`, which articulates how GyroSI implements intelligence as recursive walking on a 48-bit geometric manifold using the same principles that govern efficient bipedal locomotion.
 
 **What This Achieves**
 
@@ -541,7 +552,7 @@ The initial integration produced repetitive and nonsensical output, which led to
 
 Even with a working state machine, the sequence of generated tokens was not a valid message according to the Harmony protocol, causing persistent parsing failures. This required an iterative investigation.
 
-\*   \*\*Reading the Documentation:\*\* We repeatedly consulted \`guides/docs/harmony.md\` to understand the precise token structure required for a valid message.
+\*   \*\*Reading the Documentation:\*\* We repeatedly consulted \`docs/docs/harmony.md\` to understand the precise token structure required for a valid message.
 
 \*   \*\*Iteration 1: Incorrect Token Sequence:\*\* Our first attempts involved prepending various combinations of \`start\_token\_id\`, the "assistant" role, \`channel\_token\_id\`, and \`message\_token\_id\`. These all failed because the structure was incomplete.
 
