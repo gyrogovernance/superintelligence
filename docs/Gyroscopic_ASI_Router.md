@@ -1,18 +1,23 @@
 ![Moments: GGG ASI Router](/assets/GGG_ASI_R_Cover.png)
 
-# Moments: GGG ASI Router
+# GGG ASI Router
 Preliminary Architectural Specification
 
-**Core references**
-- [GyroSI Core Physics Specification](/docs/GyroSI_Specs.md)
-- [Common Governance Model (CGM) Foundations](/docs/CommonGovernanceModel.md)
+## Documentation
+
+**Core specifications:**
+- [GyroSI Core Physics Specification](/docs/GyroSI_Specs.md) - Algorithmic formalism and physics implementation
+- [Common Governance Model (CGM) Foundations](/docs/CommonGovernanceModel.md) - Theoretical foundations
+
+**Framework and context:**
+- [The Human Mark (THM): AI Safety Framework](https://github.com/gyrogovernance/tools?tab=readme-ov-file#thm) - Source-type ontology of Authority and Agency
 - [Framework: Gyroscopic Global Governance (GGG) Sociotechnical Sandbox](https://github.com/gyrogovernance/tools?tab=readme-ov-file#ggg)
 
 ---
 
 ## Status and intent
 
-This document specifies **Moments: GGG ASI Router** as a deterministic routing kernel for Post‑AGI coordination. It is intended for publication and implementation. It is complete in scope, while remaining preliminary in the sense that some deterministic projection details may be refined as the reference implementation stabilises.
+This document specifies **GGG ASI Router** as a deterministic routing kernel for Post‑AGI coordination. It is complete in scope, while remaining preliminary in the sense that some deterministic projection details may be refined as the reference implementation stabilises.
 
 The Router is designed to be small, auditable, and composable. It is not presented as a new financial instrument, a blockchain, or a semantic governance layer.
 
@@ -20,7 +25,7 @@ The Router is designed to be small, auditable, and composable. It is not present
 
 ## 1. Purpose
 
-Moments: GGG ASI Router is a deterministic routing kernel that mediates interaction between an **Authentic human participant** and a set of **Derivative capabilities**. These capabilities may include language models, specialised models, tools, services, and local or remote compute utilities. The Router maintains a compact internal state and uses it to route each interaction step in a traceable and replayable manner.
+GGG ASI Router is a deterministic routing kernel that mediates interaction between an **Authentic human participant** and a set of **Derivative capabilities**. These capabilities may include language models, specialised models, tools, services, and local or remote compute utilities. The Router maintains a compact internal state and uses it to route each interaction step in a traceable and replayable manner.
 
 The Router defines Artificial Superintelligence as an operational function: **stable, traceable coordination across heterogeneous capabilities** (see Section 7 for the canonical aperture equilibrium A* = 0.0207).
 
@@ -32,7 +37,7 @@ The Router is designed to route, not to emulate any capability.
 
 ### 2.1 Framework lineage
 
-Moments: GGG ASI Router is grounded in:
+GGG ASI Router is grounded in:
 
 - **Common Governance Model (CGM)** as the constitutional structure of coherent recursive operation.
 - **The Human Mark (THM)** as the source-type ontology of Authority and Agency in sociotechnical systems.
@@ -99,7 +104,7 @@ The Router kernel does not require any specific wall-clock interpretation, but i
 
 ## 4. System overview
 
-Moments: GGG ASI Router is composed of three layers:
+GGG ASI Router is composed of three layers:
 
 1. **Kernel**: deterministic physics core, no semantics.
 2. **App**: user interface and local orchestration over the kernel, still non-semantic.
@@ -301,7 +306,7 @@ The routing policy is separable from the kernel physics. Policy may evolve witho
 
 ## 11. Closed routing cycle
 
-Moments: GGG ASI Router treats interaction as a closed loop:
+GGG ASI Router treats interaction as a closed loop:
 
 1. External input is transcribed into introns.
 2. The internal state advances through lawful transitions.

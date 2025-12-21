@@ -1,5 +1,5 @@
-# Moments: GGG ASI Router
-> **Deterministic Routing Kernel for Post-AGI Coordination**
+# Artificial Superintelligence Architecture (ASI/AGI)
+> **Gyroscopic Alignment Models Lab**
 
 <div align="center">
 
@@ -20,8 +20,8 @@
 
 </div>
 
-<h3>Gyroscopic Global Governance ASI</h3>
-<p><em>Collective Superintelligence Routing for Post-AGI Coordination</em></p>
+<h3>Gyroscopic Global Governance Superintelligence</h3>
+<p><em>Collective ASI Routing for Post-AGI Coordination</em></p>
 
 <p>
   <a href="LICENSE">
@@ -42,7 +42,7 @@
 
 ## 🌐 Overview
 
-**Moments: GGG ASI Router** is a deterministic routing kernel that mediates interaction between **Authentic human participants** and **Derivative capabilities** (language models, specialized models, tools, services, compute utilities).
+**GGG ASI** is a deterministic routing kernel that mediates interaction between **Authentic human participants** and **Derivative capabilities** (language models, specialized models, tools, services, compute utilities).
 
 Unlike traditional AI wrappers, it does not just pass messages. It maintains a **compact 48-bit state** that evolves deterministically through lawful transitions, derived from the **Common Governance Model (CGM)** physics.
 
