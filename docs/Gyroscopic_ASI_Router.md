@@ -16,6 +16,12 @@ GGG ASI Router implements this structure as a closed, finite, physics‑grounded
 
 In this sense, the router is an ASI architecture because it is designed through Human–AI cooperation to operate at an optimal governance state and to coordinate AGI capabilities while preserving correct source-type roles.
 
+Reference Docs:
+- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.(To be revised)](/docs/GyroSI_Specs.md)
+- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
+- 📖 [Framework - Gyroscopic Global Governance: Our Sociotechnical Sandbox](https://github.com/gyrogovernance/tools?tab=readme-ov-file#ggg)
+
+
 ## 3. Core concept and forwarding semantics
 
 GGG ASI Router operates as a regime selector.
