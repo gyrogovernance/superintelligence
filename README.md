@@ -101,15 +101,13 @@ Each step advances state deterministically through lawful transitions.
 
 ## 📚 Documentation
 
-- 📖 [**Moments: GGG ASI Router** - Preliminary Architectural Specification](/docs/Gyroscopic_ASI_Router.md)
+- 📖 [**GGG ASI Router** - Preliminary Architectural Specification](/docs/Gyroscopic_ASI_Router.md)
 
 - 📖 [GyroSI: Our Algorithmic Formalism](/docs/GyroSI_Specs.md)
 
 - 🧬 [Substrate: Physical Memory Specification](/docs/GyroSI_Substrate_Specs.md)
 
 - 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
-
-- 🔬 [Lab - Deep Physics Experiments: Cosmology, Biology and Beyond](https://github.com/GyroSuperintelligence/CGM)
 
 ---
 
