@@ -16,18 +16,12 @@
 [![Science](/assets/menu/gg_icon_science.svg)](https://github.com/gyrogovernance/science)
 [![Superintelligence](/assets/menu/gg_icon_si.svg)](https://github.com/gyrogovernance/superintelligence)
 
-![GGG ASI Router](/assets/GGG_ASI_R_Cover.png)
-
-> **NEWS:** GyroSI has been repurposed as a deterministic routing mechanism operating at the canonical Superintelligence Aperture equilibrium. ASI is not another model.
-
-📖 [Read the full architectural specification](/docs/Gyroscopic_ASI_Router.md)
-
 ---
 
 </div>
 
-<h3>Moments: GGG ASI Router</h3>
-<p><em>Deterministic Routing Kernel for Post-AGI Coordination</em></p>
+<h3>Gyroscopic Global Governance ASI</h3>
+<p><em>Collective Superintelligence Routing for Post-AGI Coordination</em></p>
 
 <p>
   <a href="LICENSE">
@@ -39,7 +33,6 @@
 </p>
 
 </div>
-
 
 ---
 
@@ -53,7 +46,7 @@
 
 Unlike traditional AI wrappers, it does not just pass messages. It maintains a **compact 48-bit state** that evolves deterministically through lawful transitions, derived from the **Common Governance Model (CGM)** physics.
 
-It defines **Artificial Superintelligence (ASI)** as an operational function: **stable, traceable coordination across heterogeneous capabilities at the canonical Superintelligence Aperture equilibrium (A* = 0.0207)**.
+It defines **Artificial Superintelligence (ASI)** as an operational function: **stable, traceable coordination across heterogeneous capabilities**.
 
 ---
 
@@ -98,7 +91,7 @@ Each step advances state deterministically through lawful transitions.
 ## 🚀 Capabilities
 
 - **Deterministic Routing**: Same history always yields same routing decision.
-- **Superintelligence Index (SI)**: Measures alignment to canonical aperture (SI = 100 at A* = 0.0207).
+- **Superintelligence Index (SI)**: Measures alignment via tetrahedral governance geometry.
 - **Moments Accumulation**: Non-semantic alignment units accumulated over cycles, convertible to domain units.
 - **Tetrahedral Projection**: Routes via Hodge-decomposed geometry across four CGM stages.
 - **Full Auditability**: Complete ledger enables deterministic replay.

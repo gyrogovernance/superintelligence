@@ -22,7 +22,7 @@ The Router is designed to be small, auditable, and composable. It is not present
 
 Moments: GGG ASI Router is a deterministic routing kernel that mediates interaction between an **Authentic human participant** and a set of **Derivative capabilities**. These capabilities may include language models, specialised models, tools, services, and local or remote compute utilities. The Router maintains a compact internal state and uses it to route each interaction step in a traceable and replayable manner.
 
-The Router defines Artificial Superintelligence as an operational function: **stable, traceable coordination across heterogeneous capabilities at the canonical Superintelligence Aperture equilibrium**.
+The Router defines Artificial Superintelligence as an operational function: **stable, traceable coordination across heterogeneous capabilities** (see Section 7 for the canonical aperture equilibrium A* = 0.0207).
 
 The Router is designed to route, not to emulate any capability.
 
