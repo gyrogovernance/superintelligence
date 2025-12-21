@@ -45,7 +45,7 @@ GGG ASI Router relies on the following precomputed atlas maps:
 - **Theta**: the angular divergence of each state from the archetypal reference tensor.
 - **Orbit sizes**: the cardinality of each orbit, used as a structural specificity signal.
 
-These maps define a closed operational physics. Routing is performed only on lawful states and lawful transitions, and the router’s internal dynamics are fully replayable.
+These maps define a system with closed operational physics. Routing is performed only on lawful states and lawful transitions, and the router’s internal dynamics are fully replayable.
 
 ## 5. Tetrahedral overlay and Hodge aperture
 
