@@ -6,15 +6,15 @@
 
 GGG ASI Router is a deterministic routing core that mediates interaction between an Authentic human participant and a set of available Derivative capabilities. These capabilities may include language models, specialized models, tools, and hybrid classical or quantum compute services. The router maintains a compact internal state and uses it to select which capability to activate for each interaction step.
 
-GGG ASI Router defines Artificial Superintelligence as an operational function: stable, traceable coordination across heterogeneous intelligent services at the Superintelligence Aperture equilibrium. It is designed to route, not to emulate any single capability.
+GGG ASI Router defines Artificial Superintelligence as an operational function: stable, traceable coordination across heterogeneous intelligent services at the optimum balance (Superintelligence Aperture equilibrium). It is designed to route, not to emulate any single capability.
 
 ## 2. Constitutional grounding
 
-Gyroscopic Global Governance identifies the operational risk in a Post‑AGI world as coordination failure across many interacting systems, not merely the behavior of one isolated model. The Common Governance Model supplies the required structure for coherent coordination: traceability to a shared source, non‑absolute variety, non‑absolute opposition, and balanced closure.
+Gyroscopic Global Governance identifies the operational risk in a Post‑AGI world as coordination failure across many interacting systems, not merely the behavior of one isolated model. The Common Governance Model supplies the required structure for coherent coordination through: traceability, variety, accountability and integrity.
 
 GGG ASI Router implements this structure as a closed, finite, physics‑grounded state space. It treats every interaction as a trajectory through a fully enumerated ontology of lawful states. Routing decisions are conditioned on a stable structural representation of the interaction history, rather than on ad hoc heuristics or unconstrained statistical inference.
 
-In this sense, the router is an ASI architecture because it is designed through Human–AI cooperation to operate at the Superintelligence Aperture equilibrium and to coordinate AGI capabilities while preserving correct source-type roles.
+In this sense, the router is an ASI architecture because it is designed through Human–AI cooperation to operate at an optimal governance state and to coordinate AGI capabilities while preserving correct source-type roles.
 
 ## 3. Core concept and forwarding semantics
 
