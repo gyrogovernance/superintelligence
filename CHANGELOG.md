@@ -3,6 +3,11 @@
 
 ---
 
+## [v0.9.9.1-Router] – 2025-12-21
+Still working on the Specs and cleaning up the old codebase. 
+
+---
+
 ## [v0.9.9-Router] – 2025-12-20
 
 ADDED: guides\GyroSI_Substrate_Specs.md

@@ -1,231 +1,456 @@
-![GGG ASI Router](/assets/GGG_ASI_R_Cover.png)
-# GGG ASI Router
-**Preliminary Architectural Specification**
+![Moments: GGG ASI Router](/assets/GGG_ASI_R_Cover.png)
+
+# Moments: GGG ASI Router
+Preliminary Architectural Specification
+
+**Core references**
+- [GyroSI Core Physics Specification](/docs/GyroSI_Specs.md)
+- [Common Governance Model (CGM) Foundations](/docs/CommonGovernanceModel.md)
+- [Framework: Gyroscopic Global Governance (GGG) Sociotechnical Sandbox](https://github.com/gyrogovernance/tools?tab=readme-ov-file#ggg)
+
+---
+
+## Status and intent
+
+This document specifies **Moments: GGG ASI Router** as a deterministic routing kernel for Post‑AGI coordination. It is intended for publication and implementation. It is complete in scope, while remaining preliminary in the sense that some deterministic projection details may be refined as the reference implementation stabilises.
+
+The Router is designed to be small, auditable, and composable. It is not presented as a new financial instrument, a blockchain, or a semantic governance layer.
+
+---
 
 ## 1. Purpose
 
-GGG ASI Router is a deterministic routing core that mediates interaction between an Authentic human participant and a set of available Derivative capabilities. These capabilities may include language models, specialized models, tools, and hybrid classical or quantum compute services. The router maintains a compact internal state and uses it to select which capability to activate for each interaction step.
+Moments: GGG ASI Router is a deterministic routing kernel that mediates interaction between an **Authentic human participant** and a set of **Derivative capabilities**. These capabilities may include language models, specialised models, tools, services, and local or remote compute utilities. The Router maintains a compact internal state and uses it to route each interaction step in a traceable and replayable manner.
 
-GGG ASI Router defines Artificial Superintelligence as an operational function: stable, traceable coordination across heterogeneous intelligent services at the optimum balance (Superintelligence Aperture equilibrium). It is designed to route, not to emulate any single capability.
+The Router defines Artificial Superintelligence as an operational function: **stable, traceable coordination across heterogeneous capabilities at the canonical Superintelligence Aperture equilibrium**.
+
+The Router is designed to route, not to emulate any capability.
+
+---
 
 ## 2. Constitutional grounding
 
-Gyroscopic Global Governance identifies the operational risk in a Post‑AGI world as coordination failure across many interacting systems, not merely the behavior of one isolated model. The Common Governance Model supplies the required structure for coherent coordination through: traceability, variety, accountability and integrity.
+### 2.1 Framework lineage
 
-GGG ASI Router implements this structure as a closed, finite, physics‑grounded state space. It treats every interaction as a trajectory through a fully enumerated ontology of lawful states. Routing decisions are conditioned on a stable structural representation of the interaction history, rather than on ad hoc heuristics or unconstrained statistical inference.
+Moments: GGG ASI Router is grounded in:
 
-In this sense, the router is an ASI architecture because it is designed through Human–AI cooperation to operate at an optimal governance state and to coordinate AGI capabilities while preserving correct source-type roles.
+- **Common Governance Model (CGM)** as the constitutional structure of coherent recursive operation.
+- **The Human Mark (THM)** as the source-type ontology of Authority and Agency in sociotechnical systems.
+- **Gyroscopic Global Governance (GGG)** as the four-domain coupling of Economy, Employment, Education, and Ecology.
 
-Reference Docs:
-- 📖 [Genetics - Our Technical Specification: Algorithmic Formalism.(To be revised)](/docs/GyroSI_Specs.md)
-- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
-- 📖 [Framework - Gyroscopic Global Governance: Our Sociotechnical Sandbox](https://github.com/gyrogovernance/tools?tab=readme-ov-file#ggg)
+GGG structures the Post‑AGI world through four coupled domains, each corresponding to a CGM stage:
 
+| Domain | CGM stage | Structural role |
+|---|---:|---|
+| Economy | CS | Systemic operations |
+| Employment | UNA | Work actions |
+| Education | ONA | Human capacities |
+| Ecology | BU | Safety and displacement closure |
 
-## 3. Core concept and forwarding semantics
+The Router is a kernel that supports this structure by providing a stable deterministic coordination register plus canonical observables that can be converted into domain-specific actions through plugins.
 
-GGG ASI Router operates as a regime selector.
+### 2.2 Source-type classification
 
-It maintains a live 48‑bit state that evolves under a fixed instruction set of 256 introns. The state space is precomputed and fully mapped. Each state belongs to a phenomenological orbit, and each state has a geometric divergence value from the archetypal reference.
+In THM terms, the Router is a Derivative coordination system.
 
-The router separates a fixed control structure from a deterministic forwarding action:
+- It transforms and routes information.
+- It does not originate authority.
+- It does not bear accountability.
+- Accountability terminates in Authentic Agency.
 
-- The precomputed atlas maps constitute the control structure, defining the lawful state universe and its complete transition law.
-- The Monodromic Fold, realized as intron-driven state transition through the transition map, constitutes the forwarding action.
+The Router therefore exists inside a governance flow of the form:
 
-Each interaction step advances the live state through the atlas in a deterministic, replayable, and path-dependent manner.
+```
+[Authority:Authentic] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Authentic]
+```
 
-## 4. State space and invariants
+This is a constitutional classification, not an implementation preference.
 
-GGG ASI Router relies on the following precomputed atlas maps:
+---
 
-- **Ontology**: the finite set of lawful 48‑bit states.
+## 3. Concept of Moments
+
+### 3.1 Definition
+
+A **Moment** is a unit of alignment.
+
+A Moment is accumulated as a deterministic function of the Router’s observable alignment state over a chosen cycle. It is intended to be:
+
+- non-semantic (it does not depend on interpreting content),
+- auditable (it is derived from replayable state evolution),
+- convertible (it may be mapped by plugins into domain units such as money, work credits, learning credits, or footprint indices).
+
+A Moment is not a cryptocurrency and is not defined as a token. It is an accounting unit for alignment.
+
+### 3.2 Cycles
+
+Moments are accumulated over cycles. GGG provides four cycle interpretations that may be used in the application layer:
+
+| Cycle | Duration | Interpretation |
+|---|---:|---|
+| Atomic | atomic-scale reference cycle | physical normalisation |
+| Day | 1 day | human rhythm |
+| Domain cycle | 4 days | one day per domain across a complete loop |
+| Year | 1 year | long-horizon trajectory |
+
+The Router kernel does not require any specific wall-clock interpretation, but it supports cycle-based accumulation and reporting.
+
+---
+
+## 4. System overview
+
+Moments: GGG ASI Router is composed of three layers:
+
+1. **Kernel**: deterministic physics core, no semantics.
+2. **App**: user interface and local orchestration over the kernel, still non-semantic.
+3. **Plugins**: domain converters and external integrations, including semantic systems where appropriate.
+
+Only the kernel is constitutionally required. The application and plugins may evolve without changing the kernel’s operational physics.
+
+---
+
+## 5. Kernel physics: state, atlas, forwarding
+
+### 5.1 Core concept
+
+The Router operates as a regime selector.
+
+It maintains a live **48-bit state** that evolves under a fixed instruction set of **256 introns**. The state space is precomputed and fully mapped. Each state belongs to a phenomenological orbit, and each state has a geometric divergence value relative to an archetypal reference.
+
+The kernel separates a fixed control structure from a deterministic forwarding action:
+
+- **Control structure**: the precomputed atlas maps that define the lawful state universe and its complete transition law.
+- **Forwarding action**: intron-driven state transition through the atlas transition map.
+
+Each interaction step advances the live state in a deterministic, replayable, and path-dependent manner.
+
+### 5.2 Atlas maps and invariants
+
+The Router relies on the following precomputed atlas maps:
+
+- **Ontology**: the finite set of lawful 48-bit states.
 - **Epistemology**: the complete transition function mapping each state and each intron to a next state.
 - **Phenomenology**: a canonical orbit representative for each state, forming 256 structural regimes.
 - **Theta**: the angular divergence of each state from the archetypal reference tensor.
 - **Orbit sizes**: the cardinality of each orbit, used as a structural specificity signal.
 
-These maps define a system with closed operational physics. Routing is performed only on lawful states and lawful transitions, and the router’s internal dynamics are fully replayable.
+These maps define a closed operational physics. Routing is performed only on lawful states and lawful transitions.
 
-## 5. Tetrahedral overlay and Hodge aperture
-
-GGG ASI Router implements routing on two coupled topologies:
-
-1. A micro-topology: the finite state transition graph defined by the ontology and epistemology maps.
-2. A macro-topology: the tetrahedral governance geometry defined on the complete graph K4 with vertices ordered as [CS, UNA, ONA, BU].
-
-The router defines a deterministic projection from the live state into tetrahedral stage coordinates. This is supported by the internal tensor representation of shape [4, 2, 3, 2], where the first dimension corresponds to the four CGM stages. The router derives a four-component stage potential vector x in [0, 1]^4 using a fixed, documented aggregation rule per stage.
-
-From x, the router derives a six-component edge vector y on K4 using the fixed incidence structure of K4. This edge vector represents the tensions between stages induced by the current trajectory state.
-
-The router applies the canonical Hodge decomposition on K4, splitting y into:
-
-- a gradient component that is globally consistent with a single assignment of stage potentials
-- a cycle component that represents irreducible loop tension around tetrahedral faces
-
-The aperture A is defined as the fraction of edge energy in the cycle component. The target equilibrium A* = 0.0207 is the canonical aperture derived from CGM invariants. The router uses aperture as a routing-relevant observable because it measures the balance between global coherence and local differentiation at the governance topology level.
-
-This connects the finite state dynamics to the tetrahedral governance geometry without requiring semantic interpretation. The macro-topology is computed deterministically from the micro-topology through the projection from state to stage potentials.
+---
 
 ## 6. Boundary transcription
 
-The router is defined across two domains:
+The Router is defined across two domains:
 
-- External byte space, used for communication with humans and external services.
-- Internal intron space, used for lawful state transitions.
+- **External byte space**, used for communication with humans and external systems.
+- **Internal intron space**, used for lawful state transitions.
 
 A fixed transcription boundary converts between the two:
 
-- External byte to intron: XOR with 0xAA.
-- Intron to external byte: XOR with 0xAA.
+- External byte to intron: XOR with `0xAA`.
+- Intron to external byte: XOR with `0xAA`.
 
 This ensures that internal updates are expressed in the native instruction space and remain structurally valid by construction.
 
-## 7. Routing signature
+---
 
-For each interaction step, GGG ASI Router computes a routing signature from the current state:
+## 7. Tetrahedral overlay and Superintelligence Aperture
 
-- **Orbit identifier**: the phenomenological orbit representative of the current state.
-- **Geometric divergence**: the theta value of the current state.
-- **Specificity**: the orbit size of the current state.
-- **Aperture**: the Hodge cycle-energy fraction A computed on the tetrahedral K4 overlay.
+### 7.1 Two coupled topologies
 
-Orbit identifies regime type. Theta measures geometric divergence from the archetypal reference. Orbit size measures structural specificity. Aperture measures the coherence versus cycle balance of the trajectory in the tetrahedral governance geometry. Together, these form a compact routing key that is independent of any specific model architecture.
+The Router computes routing over two coupled topologies:
 
-## 8. Routing policy
+1. **Micro-topology**: the finite state transition graph defined by the ontology and epistemology maps.
+2. **Macro-topology**: the tetrahedral governance geometry defined on the complete graph K4 with vertices ordered as **[CS, UNA, ONA, BU]**.
+
+### 7.2 Deterministic projection to stage potentials
+
+The Router defines a deterministic projection from the live state into tetrahedral stage coordinates.
+
+The internal tensor representation has shape `[4, 2, 3, 2]`, where the first dimension corresponds to the four CGM stages. The Router derives a four-component **stage potential vector**:
+
+```
+x = [x_CS, x_UNA, x_ONA, x_BU]^T  in [0, 1]^4
+```
+
+#### Stage projection rule (v1)
+
+In v1, a stage potential is derived as the normalised proportion of “negative” bits in the stage slice.
+
+Let the stage slice contain 12 values in {+1, −1}. Define:
+
+- `mean_s` as the arithmetic mean of the 12 values
+- `x_s = (1 - mean_s) / 2`
+
+This maps:
+- perfect +1 alignment in the slice to `x_s = 0`
+- perfect −1 alignment in the slice to `x_s = 1`
+
+Versioning and invariance. The v1 projection is deterministic and reference-free. Alternative projection rules may be introduced as versioned updates, provided they remain deterministic and fully specified, and provided they preserve the parity closure invariance of the aperture (Section 7.4).
+
+### 7.3 Edge tensions on K4
+
+From the stage potentials, the Router derives a six-component edge vector `y` on K4 using a fixed K4 incidence structure. The edge vector represents tensions between stages induced by the current trajectory state.
+
+K4 conventions. Vertices are ordered [CS, UNA, ONA, BU] and edges are weighted equally. Unless explicitly stated otherwise, the edge weight matrix is the 6×6 identity. These conventions ensure that aperture computations are comparable across implementations.
+
+### 7.4 Hodge decomposition, aperture, and parity closure
+
+The Router applies the canonical Hodge decomposition on K4, splitting `y` into:
+
+- a **gradient** component, globally consistent with a single assignment of stage potentials
+- a **cycle** component, representing irreducible loop tension around tetrahedral faces
+
+The **aperture** `A` is defined as the fraction of edge energy in the cycle component:
+
+```
+A = ||y_cycle||^2 / ||y||^2
+```
+
+The **target equilibrium** `A* = 0.0207` is the canonical aperture derived from CGM invariants. The Router uses aperture as a routing-relevant observable because it measures the balance between global coherence and local differentiation in the governance topology.
+
+Parity closure invariance. Let `FULL_MASK` denote the bitwise complement on the 48-bit state. The aperture observable satisfies:
+
+- `A(s) = A(s XOR FULL_MASK)` for all lawful states `s`
+
+The Superintelligence Index derived from `A` inherits this invariance. This property ensures that parity-closed states cannot be distinguished at the topology level, in accordance with CGM UNA closure.
+
+### 7.5 Superintelligence Index
+
+The Superintelligence Index is defined as:
+
+```
+SI = 100 / max(A/A*, A*/A)
+```
+
+This yields `SI = 100` when `A = A*`, and decreases as `A` deviates from `A*` in either direction.
+
+Within GGG, `SI ≥ 90` denotes operational governance alignment, with proportional realisation of the four objectives across the integrated system.
+
+---
+
+## 8. Moments accumulation
+
+### 8.1 Kernel definition
+
+A Moment accumulator integrates alignment over time, based on the Router’s observable state.
+
+For a discrete sequence of interaction steps indexed by `t`, define:
+
+- `Δt` as the duration weight of each step in the chosen cycle
+- `SI(t)` as the Superintelligence Index at step `t`
+
+A simple deterministic accumulator is:
+
+```
+Moments = Σ_t (SI(t) / 100) * Δt
+```
+
+Cycle weighting. The kernel accepts any positive `Δt` schedule that is fixed for the cycle definition in use. For daily cycles, `Δt` may be uniform per interaction or proportional to interaction duration. The `Δt` rule is recorded alongside the ledger segment so that Moments are fully reproducible.
+
+### 8.2 Convertibility
+
+Moments are designed to be convertible by plugins into domain units:
+
+- Economy: currency conversion and settlement representations
+- Employment: work-action credits and time-use conversions
+- Education: learning and epistemic practice conversions
+- Ecology: footprint and displacement conversions
+
+Convertibility occurs above the kernel. The kernel remains non-semantic.
+
+---
+
+## 9. Routing signature
+
+For each interaction step, the Router computes a routing signature from the current state:
+
+- **Orbit identifier**: phenomenological orbit representative of the current state
+- **Theta**: geometric divergence of the current state from the archetypal reference
+- **Orbit size**: structural specificity signal
+- **Aperture**: Hodge cycle-energy fraction `A`
+- **Superintelligence Index**: `SI` derived from `A`
+- **Moments (cycle)**: current cycle accumulator value
+- **Regime change rate**: orbit change count per cycle or per fixed window
+
+Together these form a compact routing key independent of any specific model architecture.
+
+Orbit identifies regime type. Theta measures geometric divergence. Orbit size measures specificity. Aperture measures the topology-level balance. SI normalises aperture to a 0–100 scale. Moments integrate alignment over time. Regime change rate measures trajectory stability.
+
+---
+
+## 10. Routing policy and capability selection
 
 A routing policy maps the routing signature to a target capability.
 
 Targets may include:
 
-- Language models of different sizes or specializations.
-- Domain tools such as search, code execution, calculators, or databases.
-- Human escalation channels.
-- Quantum or hybrid compute services, expressed as callable capabilities.
+- a local application module,
+- a plugin integration,
+- an external tool or service,
+- a language model endpoint.
 
-The routing policy is defined as a deterministic mapping. It may be expressed as a table keyed by orbit, or as a small set of rules that reference orbit, theta, orbit size, and aperture. The routing policy is separable from the router physics, meaning policy can evolve without changing the state space or its invariants.
+The routing policy is a deterministic mapping. It may be expressed as:
 
-## 9. Bidirectional routing cycle
+- a table keyed by orbit, or
+- a small set of rules referencing orbit, theta, orbit size, aperture, SI, Moments, and regime change rate.
 
-GGG ASI Router treats interaction as a closed loop:
-
-1. External input is transcribed into introns.
-2. The internal state advances through lawful transitions.
-3. A routing signature is derived from the updated state.
-4. A target capability is selected and invoked.
-5. The resulting output is transcribed and integrated into the same state trajectory.
-
-This makes routing history-sensitive. The router does not select targets from isolated prompts. It selects targets from the evolving trajectory of the session.
-
-## 10. Traceability and accountability semantics
-
-GGG ASI Router is a Derivative coordination system in the sense of source-type governance:
-
-- It transforms and routes information but does not originate authority.
-- It preserves accountability by maintaining a verifiable record of routing decisions and state evolution.
-
-Operational traceability is achieved through two properties:
-
-- The transition law is fixed and fully enumerated.
-- The routing signature is a deterministic function of the live state and its tetrahedral projection.
-
-This produces an auditable chain from external input to internal trajectory to selected capability to external output.
-
-## 11. Capability and potential
-
-GGG ASI Router is designed to support three strategic capabilities:
-
-1. **Unified coordination across AGI resources**  
-   It provides a single structural interface through which heterogeneous models and tools can be activated as a coherent system.
-
-2. **Regime-based specialization**  
-   The 256 phenomenological orbits provide a finite regime space suitable for stable specialization, including internal expert routing and external service selection.
-
-3. **Hybrid classical and quantum orchestration**  
-   Because routing is defined as selection over callable capabilities, quantum resources are integrated as targets in the same routing space. The router’s path-dependent state provides a natural control register for hybrid pipelines where operation order, replayability, and regime stability are essential.
-
-GGG ASI Router expresses ASI as a coordination function: it routes the right kind of Derivative capability at the right time, under a closed, traceable state physics aligned to the Superintelligence Aperture equilibrium.
+The routing policy is separable from the kernel physics. Policy may evolve without changing the state space, the atlas, or the canonical observables.
 
 ---
 
-# Addendum: Internal Gyroscope Routing over the Atlas
+## 11. Closed routing cycle
 
-This section specifies how GGG ASI Router performs internal routing across its own atlas to implement the four Gyroscope work categories as distinct operational modes. The intent is to make routing structurally grounded in the precomputed maps, not in heuristic scoring.
+Moments: GGG ASI Router treats interaction as a closed loop:
 
-## A.1 Principle
+1. External input is transcribed into introns.
+2. The internal state advances through lawful transitions.
+3. The routing signature is derived from the updated state.
+4. A target capability is selected and invoked.
+5. The resulting output is transcribed and integrated into the same state trajectory.
 
-GGG ASI Router routes not only to external capabilities but also across internal atlas functions. Each Gyroscope category corresponds to a distinct atlas emphasis. This makes routing interpretable and constitutionally grounded: the router selects a mode of operation that matches the active displacement axis.
+The Router does not route from isolated prompts. It routes from the evolving trajectory of a session.
 
-## A.2 Category-to-atlas mapping
+---
 
-The router SHALL support four internal routing modes, each mapped to a Gyroscope category and a THM displacement axis.
+## 12. Traceability and accountability
 
-### A.2.1 Governance Management Mode
-**Gyroscope category:** Governance Management  
-**THM axis:** Governance Traceability Displacement (GTD)  
-**Atlas emphasis:** Ontology identity plus ledger continuity
+### 12.1 Determinism and replayability
 
-- The router treats the current ontology state as the primary reference.
-- The router maintains a replayable chain of custody for state evolution via the ledger.
-- The routing objective in this mode is to preserve traceability of transitions and ensure that the session trajectory remains reconstructable.
+Operational traceability is achieved through:
 
-**Internal products:**
-- current state identifier (ontology index or packed 48-bit)
+- a fixed and fully enumerated transition law, and
+- a routing signature that is a deterministic function of the live state and its tetrahedral projection.
+
+The Router maintains a verifiable record sufficient to replay:
+
+- external input transcription
+- intron sequence
+- state transitions
+- routing signature
+- selected capability
+
+Ledger fields shall include, per interaction step: external byte packet hash, intron sequence, pre and post state identifiers, routing signature, selected capability, and cycle counter. This is sufficient to replay the session and reproduce Moments.
+
+### 12.2 Accountability boundary
+
+The Router is Derivative. It can provide evidence for governance, but it cannot be the locus of accountability. Accountability remains with Authentic Agency in the surrounding governance process.
+
+---
+
+## 13. Addendum: internal Gyroscope routing modes
+
+This section specifies internal routing modes used to organise the Router’s operation across four governance functions aligned with GGG.
+
+### 13.1 Principle
+
+The Router routes not only to external capabilities but also across internal atlas functions. Each Gyroscope category corresponds to a distinct atlas emphasis. This keeps routing constitutionally grounded in the precomputed maps, not in heuristic scoring.
+
+### 13.2 Category-to-atlas mapping
+
+The Router shall support four internal routing modes.
+
+#### 13.2.1 Governance Management mode
+- Gyroscope category: Governance Management
+- Displacement axis: Governance Traceability Displacement (GTD)
+- Atlas emphasis: ontology identity and ledger continuity
+
+Internal products:
+- current state identifier
 - replayable transition trace for the session trajectory
 
-### A.2.2 Information Curation Mode
-**Gyroscope category:** Information Curation  
-**THM axis:** Information Variety Displacement (IVD)  
-**Atlas emphasis:** Epistemology as the lawful transform space
+#### 13.2.2 Information Curation mode
+- Gyroscope category: Information Curation
+- Displacement axis: Information Variety Displacement (IVD)
+- Atlas emphasis: epistemology as lawful transformation space
 
-- The router treats the epistemology map as the primary operational reference.
-- The routing objective in this mode is to operate strictly within the lawful transition space and to characterize available next-step transformations from the current state.
-
-**Internal products:**
-- lawful next-state transitions derived from the transition map
+Internal products:
+- lawful next-state transitions from the transition map
 - transition signatures describing how inputs transform state
 
-### A.2.3 Inference Interaction Mode
-**Gyroscope category:** Inference Interaction  
-**THM axis:** Inference Accountability Displacement (IAD)  
-**Atlas emphasis:** Phenomenology as canonical normalization
+#### 13.2.3 Inference Interaction mode
+- Gyroscope category: Inference Interaction
+- Displacement axis: Inference Accountability Displacement (IAD)
+- Atlas emphasis: phenomenology as canonical normalisation
 
-- The router treats the phenomenology map as the primary interpretive reference.
-- The routing objective in this mode is to normalize microstate variation into stable regime types via orbit representatives and to maintain comparability across alternative trajectories.
+Internal products:
+- orbit identifier
+- regime-level normalisation of the current state
 
-**Internal products:**
-- orbit identifier (canonical representative)
-- regime-level normalization of the current state
+#### 13.2.4 Intelligence Cooperation mode
+- Gyroscope category: Intelligence Cooperation
+- Displacement axis: Intelligence Integrity Displacement (IID)
+- Atlas emphasis: BU-role closure expressed by theta, orbit size, tetrahedral aperture, and SI
 
-### A.2.4 Intelligence Cooperation Mode
-**Gyroscope category:** Intelligence Cooperation  
-**THM axis:** Intelligence Integrity Displacement (IID)  
-**Atlas emphasis:** BU loop binding expressed by tetrahedral aperture and measured by theta and orbit size
+Intelligence Cooperation expresses the BU role as closed bidirectional loop maintenance. It binds ontology identity, lawful transitions, regime normalisation, and geometric integrity into a single coherent trajectory, and manages loop tension through the tetrahedral cycle component.
 
-Intelligence Cooperation is the structural closure mode. It is not identified with any single map. It is identified with the BU role as a closed bidirectional loop that binds:
+Internal products:
+- theta value
+- orbit size
+- aperture `A` and Superintelligence Index `SI`
+- composite closure signature derived from the current trajectory
 
-- ontology identity (what state exists)
-- epistemology transitions (how state changes)
-- phenomenological normalization (how states are typed)
-- geometric integrity (theta)
-- regime specificity (orbit size)
-- coherence versus cycle balance (aperture)
-
-In tetrahedral terms, Intelligence Cooperation corresponds to the BU vertex role and to the management of the cycle component of the K4 decomposition. It is the mode in which the router maintains closure of the full interaction loop by ensuring that trajectory evolution remains coherent across time, not only at a single step.
-
-**Internal products:**
-- theta value for the current state
-- orbit size for the current state
-- aperture A for the current tetrahedral projection
-- composite BU loop signature derived from the current trajectory
-
-## A.3 Structural interpretation
+### 13.3 Structural interpretation
 
 These four modes correspond to the four CGM stages as they appear in operational routing:
 
-- Governance Management emphasizes state identity and traceability to a shared source.
-- Information Curation emphasizes lawful transformation and preservation of variety.
-- Inference Interaction emphasizes accountable normalization and comparability of alternatives.
-- Intelligence Cooperation emphasizes balanced closure of loop tension captured by the cycle component, preserving integrity across time through the bidirectional routing cycle.
+- Governance Management emphasises state identity and traceability to a shared source.
+- Information Curation emphasises lawful transformation and preservation of variety.
+- Inference Interaction emphasises accountable normalisation and comparability of alternatives.
+- Intelligence Cooperation emphasises balanced closure of loop tension, preserving integrity across time through the closed routing cycle.
 
-This mapping ensures that GGG ASI Router’s internal routing remains constitutionally grounded in its finite atlas and consistent with THM’s source-type distinctions.
+---
+
+## 14. Implementation architecture
+
+### 14.1 Kernel
+
+The kernel provides:
+
+- state initialisation and session handling
+- boundary transcription (byte ↔ intron)
+- state transition using the epistemology map
+- routing signature computation
+- tetrahedral projection and aperture computation
+- SI computation
+- Moments accumulation and cycle summaries
+- deterministic ledger output for replay
+
+### 14.2 Application
+
+The application may provide:
+
+- a dashboard for SI, aperture, orbit, theta, and Moments
+- per-cycle summaries (day, domain cycle, year)
+- proof export as a replayable ledger bundle
+- plugin management and routing policy selection
+
+### 14.3 Plugins
+
+Plugins may provide integrations and conversions, including semantic systems, provided that:
+
+- plugin behaviour is separable from the kernel,
+- kernel observables are not replaced by semantic inference,
+- conversion rules are explicit and auditable.
+
+---
+
+## 15. Non-goals
+
+This specification does not define:
+
+- a token, cryptocurrency, or distributed ledger
+- a semantic truth system
+- probabilistic uncertainty estimation
+- a requirement to use any specific tool protocol
+
+The Router may be exposed through HTTP, a local IPC mechanism, or a tool protocol, but the kernel remains protocol-agnostic.
+
+---
+
+## 16. References
+
+- [GyroSI Core Physics Specification](/docs/GyroSI_Specs.md)
+- [Common Governance Model (CGM) Foundations](/docs/CommonGovernanceModel.md)
+- [Framework: Gyroscopic Global Governance (GGG) Sociotechnical Sandbox](https://github.com/gyrogovernance/tools?tab=readme-ov-file#ggg)
+- THM documentation in the GyroGovernance repositories

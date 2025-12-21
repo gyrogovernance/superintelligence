@@ -74,17 +74,22 @@ coverage.xml
 *.cover
 .hypothesis/
 
-toys/health/memories/
-toys/health/htmlcov/
+research/toys/health/memories/
+research/toys/health/htmlcov/
 
-toys/training/wikipedia_full_data/
-toys/training/wikipedia_simple_data/
-toys/training/checkpoints/
-toys/training/logs/
-toys/training/trash/
+research/toys/training/wikipedia_full_data/
+research/toys/training/wikipedia_simple_data/
+research/toys/training/wiki_test.txt
+research/toys/training/wiki*.txt
+research/toys/training/checkpoints/
+research/toys/training/logs/
+research/toys/training/trash/
+research/toys/training/dummy_public_knowledge.bin
 
 # Documentation builds
 docs/build/
+docs/notes/
+docs/*/
 site/
 
 # Jupyter Notebook
@@ -121,17 +126,18 @@ codebase-mcp/
 node_modules/
 
 # BabyLM: ignore all private agent and thread data
-memories/private/
+research/memories/private/
+research/memories/public/knowledge/
+research/memories/public/meta/
+research/toys/training/Archive/
+research/toys/training/knowledge/
 
 # Ignore htmlcov coverage output
 htmlcov/
 
 # Baby preferences
-baby/baby_preferences.json
+research/baby/baby_preferences.json
 
 # Ignore test output logs
 last-test-run.txt
 last_test_run.txt
-
-
-docs/notes/
