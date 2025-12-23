@@ -29,6 +29,8 @@ The Router is defined by a minimal set of constitutive axioms. These choices def
 ### 1.1 Interface Axiom
 The external interface alphabet is the set of 8-bit bytes `{0, ..., 255}`.
 
+**Source-Type Classification**: Under The Human Mark (THM), the Router is a **Derivative** coordination system. It transforms information but does not originate authority or bear accountability. It mediates the flow: `[Authority:Authentic] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Authentic]`.
+
 ### 1.2 Boundary Map Axiom
 Input bytes `b` are mapped to internal actions `a` via a fixed involution:
 `a = b XOR 0xAA`
@@ -148,9 +150,32 @@ The kernel emits a structured signature for the current state `i`:
 
 This signature allows application layers to make routing decisions based on structural properties (e.g., "route to capability X if SI > 90", "enforce loop closure if defect > threshold").
 
-### 4.3 Ledger
+### 4.3 Internal Routing Modes
+The Router supports four internal modes corresponding to the GGG domains and THM displacement axes. These modes guide policy selection based on the kernel signature:
+
+1. **Governance Management (CS)**: Emphasizes ontology identity and ledger continuity to prevent Governance Traceability Displacement (GTD).
+2. **Information Curation (UNA)**: Emphasizes lawful transformation and variety to prevent Information Variety Displacement (IVD).
+3. **Inference Interaction (ONA)**: Emphasizes stage-resolved differentiation (Stage Profile) to prevent Inference Accountability Displacement (IAD).
+4. **Intelligence Cooperation (BU)**: Emphasizes closure and integrity (Loop Defects, Aperture) to prevent Intelligence Integrity Displacement (IID).
+
+### 4.4 Closed Routing Cycle
+Interaction is treated as a closed loop:
+1. External input is transcribed to actions.
+2. Internal state advances through the epistemology.
+3. Routing signature is computed.
+4. **Routing Policy**: A deterministic map selects a target capability based on the signature and active mode.
+5. Output is transcribed and integrated into the trajectory.
+
+### 4.5 Ledger
 The kernel optionally records every transition in an append-only binary ledger for full replayability and auditing.
 Record format: `[Event Code (1)] [State Before (6)] [Action (1)] [State After (6)]`.
+
+### 4.6 Moments Accumulation
+A **Moment** is a unit of alignment accumulation derived from the kernel state. For a discrete sequence of interaction steps indexed by `t` with duration `Δt`, Moments are accumulated deterministically:
+
+`Moments = Σ_t (SI(t) / 100) * Δt`
+
+Moments serve as a convertible accounting unit for alignment work across domains. They accumulate over defined cycles (Atomic, Day, Domain Cycle, Year) and can be mapped by application layers into domain-specific units (e.g., currency, credits).
 
 ---
 
