@@ -21,7 +21,7 @@
 </div>
 
 <h3>Gyroscopic Global Governance Superintelligence</h3>
-<p><em>Collective ASI Routing for Post-AGI Coordination</em></p>
+<p><em>Collective ASI Alignment Routing for Post-AGI Coordination</em></p>
 
 <p>
   <a href="LICENSE">
@@ -54,12 +54,11 @@ It defines **Artificial Superintelligence (ASI)** as an operational function: **
 
 Every interaction is a trajectory through a precomputed finite state space (the **GyroSI Atlas**).
 
-1.  **Input:** External input transcribed to introns (256 instruction operators via XOR boundary).
+1.  **Input:** External input transcribed to actions (256 instruction operators via XOR boundary).
 2.  **State:** Lawful transitions advance the 48-bit state.
-3.  **Regime:** State maps to one of 256 phenomenological orbits.
-4.  **Routing Signature:** Router computes orbit, theta, aperture, SI, and Moments.
-5.  **Capability Selection:** Deterministic policy maps signature to target capability.
-6.  **Ledger:** Full trajectory logged for replay and Moments accumulation.
+3.  **Routing Signature:** Router computes stage profile, loop defects, aperture, SI, and Moments.
+4.  **Capability Selection:** Deterministic policy maps signature to target capability.
+5.  **Ledger:** Full trajectory logged for replay and Moments accumulation.
 
 This ensures that **governance is structural**: the router enforces traceability, boundedness, and consistency by construction.
 
@@ -79,10 +78,10 @@ Five precomputed maps define the closed operational physics:
 | Map | Function |
 |-----|----------|
 | **Ontology** | Finite set of all lawful 48-bit states. |
-| **Epistemology** | Complete transition function: (state, intron) → next state. |
-| **Phenomenology** | Maps states to 256 canonical orbit representatives. |
-| **Theta (θ)** | Angular divergence from archetypal reference. |
-| **Orbit Sizes** | Orbit cardinality (structural specificity signal). |
+| **Epistemology** | Complete transition function: (state, action) → next state. |
+| **Stage Profile** | Stage-resolved distinction counts (4-vector, 0-12 per stage). |
+| **Loop Defects** | BU commutator loop holonomy defects (3-vector, 0-48 per loop). |
+| **Aperture** | Hodge-derived openness fraction (scalar, 0-1). |
 
 Each step advances state deterministically through lawful transitions.
 
@@ -101,7 +100,7 @@ Each step advances state deterministically through lawful transitions.
 
 ## 📚 Documentation
 
-- 📖 [**GGG ASI Alignment Router** - Preliminary Architectural Specification](/docs/Gyroscopic_ASI_Router.md)
+- 📖 [**GGG ASI Alignment Router** - Kernel Specification](/docs/Gyroscopic_ASI_AlignmentRouter.md)
 
 - 📖 [GyroSI: Our Algorithmic Formalism](/docs/GyroSI_Specs.md)
 
@@ -129,7 +128,7 @@ The Router is grounded in:
 
 The Router operates as a Derivative coordination system: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Authentic Agency.
 
-Mathematical formalism uses gyrogroup structures and Hodge decomposition over K4, maintaining parity closure invariance.
+Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, with face-cycle matrices aligned to BU commutator loops.
 
 ---
 
