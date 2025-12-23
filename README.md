@@ -101,7 +101,7 @@ Each step advances state deterministically through lawful transitions.
 
 ## 📚 Documentation
 
-- 📖 [**GGG ASI Router** - Preliminary Architectural Specification](/docs/Gyroscopic_ASI_Router.md)
+- 📖 [**GGG ASI Alignment Router** - Preliminary Architectural Specification](/docs/Gyroscopic_ASI_Router.md)
 
 - 📖 [GyroSI: Our Algorithmic Formalism](/docs/GyroSI_Specs.md)
 
@@ -144,7 +144,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ```bibtex
 @software{GGG_ASI_R_2025,
   author = {Basil Korompilias},
-  title = {Moments: GGG ASI Router},
+  title = {Moments: GGG ASI Alignment Router},
   year = {2025},
   url = {https://github.com/gyrogovernance/superintelligence},
   note = {Deterministic routing kernel for Post-AGI coordination through 

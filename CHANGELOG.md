@@ -1,6 +1,15 @@
 
 💫 Gyroscopic Superintelligence Baby 👶 - Language Model - CHANGELOG
 
+
+---
+
+## [v0.9.9.2-Router] – 2025-12-22
+
+**Router Kernel v1: Minimal 5-Map Architecture**
+
+Implemented clean Router kernel with exactly 5 persisted maps: ontology, epistemology, stage_profile, loop_defects, and aperture. Removed all legacy analysis artifacts (SCC/orbits, theta, parity symmetrization). Fixed face-cycle matrix alignment with BU commutator loops and corrected layer mask semantics to match tensor bit order. Improved numerical stability in projection computations. Eliminated all legacy "intron" terminology in favor of "action" naming.
+
 ---
 
 ## [v0.9.9.1-Router] – 2025-12-21
@@ -13,9 +22,9 @@ Still working on the Specs and cleaning up the old codebase.
 ADDED: guides\GyroSI_Substrate_Specs.md
 This is a revision of an old study, and a refinement so it can match the overal GyroSI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
 
-> ⚠️ **NEWS:** The whole GyroSI development is in the process of being repurposed and renamed to GGG ASI Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
+> ⚠️ **NEWS:** The whole GyroSI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
 
-📖 [GGG ASI Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
+📖 [GGG ASI Alignment Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
 
 ---
 

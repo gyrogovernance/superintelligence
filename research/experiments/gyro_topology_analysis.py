@@ -135,10 +135,10 @@ class FermionToIntronMapper:
         perturbation_seed: int = 0
     ) -> List[int | None]:
         """
-        Generate intron sequence using best micro-step from validation.
+        Generate intron sequence using FG+BG rotation pattern for proper spinor closure.
         
-        Uses exact enumeration to find the smallest nonzero click sequence,
-        then repeats it to achieve the target click count.
+        Rotation requires non-commutative action (both FG and BG), not just oscillation.
+        Uses alternating FG/BG pattern to create proper phase progression through layers.
         
         Args:
             fermion_data: Fermion sector data
@@ -148,35 +148,35 @@ class FermionToIntronMapper:
         Returns:
             List of introns (or None for no-op padding)
         """
-        # Use exact click values from validation (FG1 = 0x04)
-        # These are calculated exactly from archetype using atlas
-        exact_clicks_per_step = 0.5  # FG1 exact value from archetype
+        # Use exact click values from validation
+        # FG1 (0x04) = 0.5 clicks, BG1 (0x08) = similar magnitude
+        # Alternating FG+BG creates rotation, not oscillation
         
         # Calculate total clicks needed
         total_clicks = abs(fermion_data.clicks_e21)
         
-        # Calculate number of micro-steps needed
-        num_steps = int(round(total_clicks / exact_clicks_per_step))
-        
-        # Generate sequence using calibrated micro-step
-        if num_steps == 0:
-            # No clicks - all None (true no-op)
+        # Generate sequence using rotation pattern
+        # For proper 720° closure, we need rotation (FG+BG alternating), not oscillation
+        # Always generate full-length sequence to ensure we have enough steps for layer traversal
+        if total_clicks < 0.01:
+            # Truly zero clicks - all None (true no-op)
             return [None] * length
         else:
-            # Use FG1 micro-step (0x04) for calibrated clicks
-            # Distribute steps evenly across the sequence length
-            if num_steps >= length:
-                # More steps than length - use FG1 for all steps
-                return [0x04] * length
-            else:
-                # Distribute steps evenly, pad with None
-                sequence: List[int | None] = [None] * length
-                step_interval = length / num_steps
-                for i in range(num_steps):
-                    step_pos = int(round(i * step_interval))
-                    if step_pos < length:
-                        sequence[step_pos] = 0x04
-                return sequence
+            # Create rotation pattern: alternate FG (0x04) and BG (0x08)
+            # This creates proper phase progression: CS -> UNA -> ONA -> BU
+            # Rotation requires non-commutative action (both FG and BG)
+            # Without mixing, we get oscillation (FG-FG-FG) instead of rotation
+            sequence: List[int | None] = []
+            
+            # Fill sequence with alternating FG-BG pattern for rotation
+            # Always use full length to ensure we have enough steps for layer traversal
+            for i in range(length):
+                if i % 2 == 0:
+                    sequence.append(0x04)  # FG1 - forward gyration
+                else:
+                    sequence.append(0x08)  # BG1 - backward gyration
+            
+            return sequence
 
 
 class TopologyAnalyzer:
@@ -412,6 +412,7 @@ class TopologyAnalyzer:
                 experiment.path.append({
                     'step': 0,
                     'intron': None,
+                    'intron_hex': 'init',
                     'monodromy': 0,
                     **self.get_state_metrics(state, anchor)
                 })
@@ -423,6 +424,7 @@ class TopologyAnalyzer:
                     experiment.path.append({
                         'step': step,
                         'intron': None,
+                        'intron_hex': 'noop',
                         'monodromy': monodromy,
                         **self.get_state_metrics(state, anchor)
                     })
@@ -796,14 +798,14 @@ class TopologyReporter:
         report.append(f"  Avg clicks per step: {metrics['avg_clicks_per_step']:.2f} (3° aperture)")
         report.append(f"  Microsteps applied: {metrics['microsteps_applied']} (real introns)")
         report.append(f"  Clicks per microstep: {metrics['clicks_per_microstep']:.2f} (calibrated)")
-        report.append(f"  Total clicks: {metrics['total_clicks_target']:.2f} target → {metrics['total_clicks_realized']:.2f} realized")
+        report.append(f"  Total clicks: {metrics['total_clicks_target']:.2f} target -> {metrics['total_clicks_realized']:.2f} realized")
         
         # CGM stage correlations
         cgm_corr = metrics['avg_cgm_correlation']
         report.append(f"\nCGM Stage Correlations:")
-        report.append(f"  CS (π/2): {cgm_corr['cs']:.3f}")
-        report.append(f"  UNA (π/4): {cgm_corr['una']:.3f}")
-        report.append(f"  ONA (π/4): {cgm_corr['ona']:.3f}")
+        report.append(f"  CS (pi/2): {cgm_corr['cs']:.3f}")
+        report.append(f"  UNA (pi/4): {cgm_corr['una']:.3f}")
+        report.append(f"  ONA (pi/4): {cgm_corr['ona']:.3f}")
         report.append(f"  BU (0): {cgm_corr['bu']:.3f}")
         
         # Note: Within-sector correlation not meaningful since all experiments have same clicks_e21
@@ -813,30 +815,30 @@ class TopologyReporter:
         report.append(f"\nPhysics Interpretation:")
         
         if fermion_data.clicks_e21 < 0.2:
-            report.append(f"  • Near-orthogonal sector (clean 45° backbone)")
-            report.append(f"  • Minimal aperture perturbations")
-            report.append(f"  • Expected: Low plane flips, high closure rate")
+            report.append(f"  * Near-orthogonal sector (clean 45 deg backbone)")
+            report.append(f"  * Minimal aperture perturbations")
+            report.append(f"  * Expected: Low plane flips, high closure rate")
         elif fermion_data.clicks_e21 > 2.0:
-            report.append(f"  • High-aperture sector (~{fermion_data.clicks_e21:.1f} clicks)")
-            report.append(f"  • Strong 3° quantization effects")
-            report.append(f"  • Expected: More plane flips, complex oscillations")
+            report.append(f"  * High-aperture sector (~{fermion_data.clicks_e21:.1f} clicks)")
+            report.append(f"  * Strong 3 deg quantization effects")
+            report.append(f"  * Expected: More plane flips, complex oscillations")
         else:
-            report.append(f"  • Moderate aperture sector (~{fermion_data.clicks_e21:.1f} clicks)")
-            report.append(f"  • Intermediate dynamics")
+            report.append(f"  * Moderate aperture sector (~{fermion_data.clicks_e21:.1f} clicks)")
+            report.append(f"  * Intermediate dynamics")
         
         if metrics['closure_720_rate'] > 0.8:
-            report.append(f"  • Strong 720° closure → stable particle-like behavior")
+            report.append(f"  * Strong 720 deg closure -> stable particle-like behavior")
         elif metrics['closure_720_rate'] > 0.5:
-            report.append(f"  • Near closure → oscillatory behavior")
+            report.append(f"  * Near closure -> oscillatory behavior")
         else:
-            report.append(f"  • Weak closure → chaotic/dissipative dynamics")
+            report.append(f"  * Weak closure -> chaotic/dissipative dynamics")
         
         if metrics['avg_30fold_alignment'] > 0.8:
-            report.append(f"  • Excellent 30-fold alignment → clean phase structure")
+            report.append(f"  * Excellent 30-fold alignment -> clean phase structure")
         elif metrics['avg_30fold_alignment'] > 0.5:
-            report.append(f"  • Good 30-fold alignment → structured with noise")
+            report.append(f"  * Good 30-fold alignment -> structured with noise")
         else:
-            report.append(f"  • Poor 30-fold alignment → disordered phase")
+            report.append(f"  * Poor 30-fold alignment -> disordered phase")
         
         # Sample path analysis
         if experiments:
@@ -847,10 +849,10 @@ class TopologyReporter:
                 plane = "CS/UNA" if point['step'] == 0 else "ONA/BU"
                 if point['step'] == 0:
                     report.append(f"  Step {point['step']}: {plane} "
-                                f"(θ={point['theta']:.3f}, orbit_size={point['orbit_size']})")
+                                f"(theta={point['theta']:.3f}, orbit_size={point['orbit_size']})")
                 else:
                     report.append(f"  Step {point['step']}: {plane} "
-                                f"(θ={point['theta']:.3f}, intron={point['intron_hex']})")
+                                f"(theta={point['theta']:.3f}, intron={point['intron_hex']})")
         
         return '\n'.join(report)
     
@@ -873,6 +875,11 @@ class TopologyReporter:
             'avg_orbit_stability': float(np.mean([m['orbit_stability'] for m in all_metrics])),
             'avg_hamming_step': float(np.mean([m['avg_hamming_step'] for m in all_metrics])),
             'avg_clicks_per_step': float(np.mean([m['avg_clicks_per_step'] for m in all_metrics])),
+            # Microstep metrics
+            'microsteps_applied': int(np.mean([m.get('microsteps_applied', 0) for m in all_metrics])),
+            'clicks_per_microstep': float(np.mean([m.get('clicks_per_microstep', 0) for m in all_metrics])),
+            'total_clicks_target': float(np.mean([m.get('total_clicks_target', 0) for m in all_metrics])),
+            'total_clicks_realized': float(np.mean([m.get('total_clicks_realized', 0) for m in all_metrics])),
         }
         
         # CGM correlations
@@ -899,7 +906,7 @@ class TopologyReporter:
         sectors = list(all_results.keys())
         
         report.append(f"\nSector Comparison:")
-        report.append(f"{'Sector':<10} {'Clicks':<8} {'720°%':<6} {'Near%':<6} {'30fold':<8} {'Layers':<8} {'CGM-BU':<8}")
+        report.append(f"{'Sector':<10} {'Clicks':<8} {'720%':<6} {'Near%':<6} {'30fold':<8} {'Layers':<8} {'CGM-BU':<8}")
         report.append(f"{'-'*60}")
         
         for sector in sectors:
@@ -920,17 +927,17 @@ class TopologyReporter:
         # Find cleanest sector
         cleanest_sector = min(sectors, 
                             key=lambda s: all_results[s]['fermion_data'].residual)
-        report.append(f"  • Cleanest 30-fold: {cleanest_sector} sector "
+        report.append(f"  * Cleanest 30-fold: {cleanest_sector} sector "
                      f"(residual = {all_results[cleanest_sector]['fermion_data'].residual:.3f})")
         
-        # Find most stable closure (720°)
+        # Find most stable closure (720 deg)
         closure_720_rates = [all_results[s]['metrics']['closure_720_rate'] for s in sectors]
         if all(rate == 0.0 for rate in closure_720_rates):
-            report.append(f"  • Highest 720° closure: none (all sectors at 0.0%)")
+            report.append(f"  * Highest 720 deg closure: none (all sectors at 0.0%)")
         else:
             most_stable = max(sectors,
                              key=lambda s: all_results[s]['metrics']['closure_720_rate'])
-            report.append(f"  • Highest 720° closure: {most_stable} sector "
+            report.append(f"  * Highest 720 deg closure: {most_stable} sector "
                          f"({all_results[most_stable]['metrics']['closure_720_rate']*100:.1f}%)")
         
         
@@ -939,12 +946,12 @@ class TopologyReporter:
                       all_results[s]['metrics']['avg_layer_transitions']) for s in sectors]
         click_data.sort(key=lambda x: x[1])  # Sort by clicks
         
-        report.append(f"  • Aperture click hierarchy:")
+        report.append(f"  * Aperture click hierarchy:")
         for sector, clicks, transitions in click_data:
-            report.append(f"    {sector}: {clicks:.2f} clicks → {transitions:.2f} avg layer transitions")
-        
+            report.append(f"    {sector}: {clicks:.2f} clicks -> {transitions:.2f} avg layer transitions")
+
         # CGM stage progression
-        report.append(f"  • CGM stage progression patterns:")
+        report.append(f"  * CGM stage progression patterns:")
         for sector in sectors:
             cgm = all_results[sector]['metrics']['avg_cgm_correlation']
             strongest_stage = max(cgm.keys(), key=lambda k: cgm[k])
@@ -1035,7 +1042,10 @@ def main():
     )
     
     # Initialize analyzer with pre-built atlas maps
-    atlas_paths = AtlasPaths.from_directory(Path("memories/public/meta"))
+    # Path relative to research/experiments/ -> research/memories/public/meta
+    script_dir = Path(__file__).parent
+    atlas_dir = script_dir.parent / "memories" / "public" / "meta"
+    atlas_paths = AtlasPaths.from_directory(atlas_dir)
     analyzer = TopologyAnalyzer(atlas_paths)
     reporter = TopologyReporter()
     

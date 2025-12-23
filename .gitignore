@@ -141,3 +141,6 @@ research/baby/baby_preferences.json
 # Ignore test output logs
 last-test-run.txt
 last_test_run.txt
+
+# Atlas build artifacts (generated, not source)
+data/atlas/

@@ -36,11 +36,16 @@ def load_states_from_maps(sample: int, seed: int) -> Any:
     """Load states using the proper GyroSI maps for correct geometry"""
     rng = np.random.default_rng(seed)
     
+    # Path relative to research/experiments/ -> research/memories/public/meta
+    from pathlib import Path
+    script_dir = Path(__file__).parent
+    maps_dir = script_dir.parent / "memories" / "public" / "meta"
+    
     # Load the GyroSI maps
-    ontology_keys = np.load('memories/public/meta/ontology_keys.npy', mmap_mode='r')
-    phenomenology_map = np.load('memories/public/meta/phenomenology_map.npy', mmap_mode='r')
-    theta_map = np.load('memories/public/meta/theta.npy', mmap_mode='r')
-    orbit_sizes = np.load('memories/public/meta/orbit_sizes.npy', mmap_mode='r')
+    ontology_keys = np.load(maps_dir / 'ontology_keys.npy', mmap_mode='r')
+    phenomenology_map = np.load(maps_dir / 'phenomenology_map.npy', mmap_mode='r')
+    theta_map = np.load(maps_dir / 'theta.npy', mmap_mode='r')
+    orbit_sizes = np.load(maps_dir / 'orbit_sizes.npy', mmap_mode='r')
     
     print(f"Loaded GyroSI maps: {len(ontology_keys)} states, {len(np.unique(phenomenology_map))} orbits")
     print(f"Orbit sizes range: {orbit_sizes.min()} to {orbit_sizes.max()}")

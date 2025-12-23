@@ -135,8 +135,9 @@ def free_anchor_calibration(anchor_stage: str,
 
 # -----------------------------
 # Maps-dependent (if available)
-# -----------------------------
-DEFAULT_META_DIR = Path("memories/public/meta")
+# Path relative to research/experiments/ -> research/memories/public/meta
+_SCRIPT_DIR = Path(__file__).parent
+DEFAULT_META_DIR = _SCRIPT_DIR.parent / "memories" / "public" / "meta"
 PATH_EPI = DEFAULT_META_DIR / "epistemology.npy"
 
 # Stage intron masks
