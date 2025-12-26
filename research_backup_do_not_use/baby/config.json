@@ -1,0 +1,22 @@
+{
+    "version":  {
+                    "atlas_version":  "1.0.0",
+                    "address_version":  "1.0.0",
+                    "config_version":  "1.0.0"
+                },
+    "atlas":  {
+                  "epistemology":  "memories/public/meta/epistemology.npy",
+                  "ontology_keys":  "memories/public/meta/ontology_keys.npy",
+                  "theta":  "memories/public/meta/theta.npy",
+                  "phenomenology_map":  "memories/public/meta/phenomenology_map.npy",
+                  "orbit_sizes":  "memories/public/meta/orbit_sizes.npy"
+              },
+    "stores":  {
+                   "rep_channel":  "memories/public/knowledge/passive_memory.bin",
+                   "atlas_ledger": "memories/public/knowledge/atlas_ledger.dat"
+               },
+    "runtime":  {
+                    "anchor_prefix_tokens":  8,
+                    "enable_core_gate":  true
+                }
+}

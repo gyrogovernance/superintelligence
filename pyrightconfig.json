@@ -118,14 +118,7 @@
     "**/*.cover",
     ".hypothesis",
 
-    "research/toys/health/htmlcov",
-
-    "research/toys/training/wikipedia_full_data",
-    "research/toys/training/wikipedia_simple_data",
-    "research/toys/training/checkpoints",
-    "research/toys/training/logs",
-    "research/toys/training/trash",
-    "research/toys/experiments",
+    "research_backup_do_not_use",
 
     "docs/build",
     "site",

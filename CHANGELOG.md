@@ -1,6 +1,80 @@
 
-💫 Gyroscopic Superintelligence Baby 👶 - Language Model - CHANGELOG
+💫 Gyroscopic Superintelligence - CHANGELOG
 
+---
+
+## [v0.9.9.3-Router] – 2025-12-23 to 2025-12-27
+
+**Router Kernel: Verified Properties & Exact Invariants**
+
+Upgraded the router kernel specification from "describes an implementation" to "states a finite physics with proven theorems" by establishing certified invariants backed by exhaustive tests.
+
+**Specification Upgrades**
+
+* **Verified Algebraic Properties Section**: Added Section 6.3 with 8 certified properties (P1-P8) proven by test suite:
+  - P1: Mask separation (256 distinct A-masks, B-mask always zero)
+  - P2: Per-byte bijection (each epistemology column is a permutation)
+  - P3: Exact ontology characterization (cartesian product structure: 256×256 = 65,536 states)
+  - P4: Radius-2 reachability (all states reachable in ≤2 steps from archetype)
+  - P5: Depth-2 closed-form composition (exact decoupling law)
+  - P6: Depth-2 commutation law (commutes iff x=y, exactly 256/65,536 pairs)
+  - P7: Depth-4 alternation identity (xyxy = yxyx = id, BU-Egress discrete analogue)
+  - P8: Trajectory closed form for arbitrary-length words
+
+* **Explicit Inverse Formula**: Added Section 5.1 with exact inverse formula enabling full trajectory reconstruction from (final state, byte sequence).
+
+* **Derived Closure Invariant**: Upgraded Section 6.2 from "empirical observation" to "derived structure" with complete proof that 65,536 states and diameter 2 follow from transition law algebra.
+
+* **Exact Commutativity Law**: Replaced sampling threshold (≥95%) with exact law: `T_y(T_x(s)) = T_x(T_y(s))` iff `x=y`. Among 256×256 pairs, exactly 256 commute (0.39%), not approximately 1%.
+
+* **Clarified Type B Transformation**: Fixed misleading "unchanged" language - Type B is not mask-mutated before gyration, but is transformed by gyration itself.
+
+* **Non-normative Appendix**: Moved number theory (256 zenzizenzizenzic, 65,536 superperfect) to clearly marked non-normative appendix.
+
+**Test Suite Expansion**
+
+* **TestClosedFormDepthLaws**: Added 4 new tests certifying exact algebraic laws:
+  - `test_step_is_bijective_with_explicit_inverse`: Proves explicit inverse formula works
+  - `test_depth2_decoupling_closed_form`: Certifies exact depth-2 law: `T_y(T_x(A,B)) = (A XOR m_x, B XOR m_y)`
+  - `test_depth4_alternation_is_identity`: Proves depth-4 alternation returns to identity
+  - `test_depth2_commutes_iff_same_byte`: Exhaustively proves commutes iff x=y (all 256×256 pairs)
+
+* **TestCGMChirality**: Added 2 tests validating CS axiom:
+  - `test_gyration_not_pure_swap`: Verifies gyration includes flip, not just swap
+  - `test_gyration_asymmetry`: Validates CS chirality: new_A depends on old_B, new_B depends on mutated_A
+
+* **TestAtlasGlobalGroupFacts**: Added 3 atlas-backed global invariant tests:
+  - `test_each_byte_column_is_permutation`: Proves each byte is bijection on ontology
+  - `test_bfs_radius_two_from_archetype`: Proves all states reachable in ≤2 steps
+  - `test_depth4_alternation_identity_on_all_states_for_selected_pairs`: Atlas-level confirmation
+
+* **TestOntologyStructure**: Added test proving ontology equals exact cartesian product A_set × B_set
+
+* **TestCGMDepthProperties**: Added depth-2 non-commutativity rate validation (80-99% for UNA)
+
+* **TestPhenomenologyValidation**: Added tests ensuring loaded phenomenology matches constants exactly
+
+**Kernel Implementation Fixes**
+
+* **Dynamic Archetype Index**: Updated `RouterKernel` to find archetype index dynamically (not assume index 0), storing as `archetype_index` property.
+
+* **Neutral Baseline Byte**: Changed default `last_byte` from 0x00 to 0xAA (GENE_MIC_S) after reset, providing neutral baseline signature (0xAA XOR 0xAA = 0x00 → mask_a = 0).
+
+**Test Infrastructure**
+
+* **Test Runner Script**: Created `tests/run_tests.py` with `-m pytest -v -s` flags for convenient test execution.
+
+* **Conftest Cleanup**: Removed redundant path additions from test files; conftest.py centralizes path setup.
+
+* **Linter Fixes**: Fixed all linter errors (unused variables, unused imports).
+
+**Documentation**
+
+* **README.md**: Updated to reflect verified properties, exact invariants, 3-map atlas structure (not 5), and 24-bit states (not 48-bit).
+
+* **System_Architecture.md**: Complete spec upgrade with markdown-compatible math notation (removed all LaTeX), verified properties section, explicit inverse formula, and exact laws replacing empirical observations.
+
+**Test Results**: 87 tests passing, including 9 new certified invariant tests. All verified properties hold as exact invariants.
 
 ---
 

@@ -42,23 +42,23 @@
 
 ## 🌐 Overview
 
-**GGG ASI** is a deterministic routing kernel that mediates interaction between **Authentic human participants** and **Derivative capabilities** (language models, specialized models, tools, services, compute utilities).
+**GGG ASI Router** is a deterministic finite-state routing kernel that coordinates interaction between **Authentic human participants** and **Derivative capabilities** (language models, specialized models, tools, services, compute utilities).
 
-Unlike traditional AI wrappers, it does not just pass messages. It maintains a **compact 48-bit state** that evolves deterministically through lawful transitions, derived from the **Common Governance Model (CGM)** physics.
+Unlike traditional AI wrappers, it does not just pass messages. It maintains a **compact 24-bit state** that evolves deterministically through a minimal transition law derived from the **Common Governance Model (CGM)**.
 
-It defines **Artificial Superintelligence (ASI)** as an operational function: **stable, traceable coordination across heterogeneous capabilities**.
+It defines **Artificial Superintelligence (ASI)** as an operational network equilibrium: **stable, traceable coordination across heterogeneous human-AI systems** maintaining four constitutive governance principles (Governance Traceability, Information Variety, Inference Accountability, Intelligence Integrity) at a canonical structural balance.
 
 ---
 
-### 🗝️ Core Function: Regime-Based Routing
+### 🗝️ Core Function: State-Based Routing
 
-Every interaction is a trajectory through a precomputed finite state space (the **GyroSI Atlas**).
+Every interaction is a trajectory through a precomputed finite state space (the **Atlas**).
 
-1.  **Input:** External input transcribed to actions (256 instruction operators via XOR boundary).
-2.  **State:** Lawful transitions advance the 48-bit state.
-3.  **Routing Signature:** Router computes stage profile, loop defects, aperture, SI, and Moments.
-4.  **Capability Selection:** Deterministic policy maps signature to target capability.
-5.  **Ledger:** Full trajectory logged for replay and Moments accumulation.
+1. **Input**: External bytes transcribed to introns via fixed XOR with 0xAA.
+2. **State Transition**: Each byte advances the 24-bit state through one of 256 unique operations (pure XOR mutation + FIFO gyration with complement).
+3. **Routing Signature**: Router computes observables from current state for capability routing.
+4. **Capability Selection**: Deterministic policy maps signature to target capability.
+5. **Ledger**: Full trajectory logged for deterministic replay and audit.
 
 This ensures that **governance is structural**: the router enforces traceability, boundedness, and consistency by construction.
 
@@ -73,38 +73,41 @@ The router is composed of three layers:
 3. **Plugins**: Domain converters and external integrations.
 
 ### The Atlas Maps
-Five precomputed maps define the closed operational physics:
+
+Three precomputed maps define the closed operational physics:
 
 | Map | Function |
 |-----|----------|
-| **Ontology** | Finite set of all lawful 48-bit states. |
-| **Epistemology** | Complete transition function: (state, action) → next state. |
-| **Stage Profile** | Stage-resolved distinction counts (4-vector, 0-12 per stage). |
-| **Loop Defects** | BU commutator loop holonomy defects (3-vector, 0-48 per loop). |
-| **Aperture** | Hodge-derived openness fraction (scalar, 0-1). |
+| **Ontology** | Finite set of exactly 65,536 reachable 24-bit states, sorted. |
+| **Epistemology** | Complete transition table: [65,536, 256] next-state indices. Each column is a permutation (bijection). |
+| **Phenomenology** | Fixed constants: archetype, transcription gauge (0xAA), 256 transformation masks. |
 
-Each step advances state deterministically through lawful transitions.
+Each step advances state deterministically. All states are reachable from the archetype in at most 2 steps (diameter 2). The state space exhibits exact algebraic closure: 256 distinct masks on Type A × 256 possible Type B values from gyration history = 65,536 reachable states.
 
 ---
 
 ## 🚀 Capabilities
 
-- **Deterministic Routing**: Same history always yields same routing decision.
-- **Superintelligence Index (SI)**: Measures alignment via tetrahedral governance geometry.
-- **Moments Accumulation**: Non-semantic alignment units accumulated over cycles, convertible to domain units.
-- **Tetrahedral Projection**: Routes via Hodge-decomposed geometry across four CGM stages.
-- **Full Auditability**: Complete ledger enables deterministic replay.
+- **Deterministic Routing**: Same initial state and byte sequence always yield same final state and routing decision.
+- **Exact Reversibility**: Explicit inverse formula enables full trajectory reconstruction from (final state, byte sequence).
+- **Verified Algebraic Properties**: Test suite certifies exact invariants:
+  - **P2**: Each byte induces a bijection (every epistemology column is a permutation)
+  - **P4**: Diameter 2 from archetype (256 states after 1 byte, 65,536 after 2 bytes)
+  - **P6**: Depth-2 commutativity: `T_y(T_x(s)) = T_x(T_y(s))` iff `x=y` (256/65,536 pairs commute)
+  - **P7**: Depth-4 alternation identity: `xyxy = yxyx = id` for all byte pairs
+  - **P8**: Closed-form trajectory formula for arbitrary-length words
+- **Full Auditability**: Complete byte ledger enables deterministic replay and exact backward reconstruction.
+- **Minimal Physics**: Pure XOR mutation + FIFO gyration with complement. No learned weights, no hidden continuous state.
+- **Finite Closed Manifold**: Exactly 65,536 states with proven 256² cartesian product structure (Property P3).
 - **Hybrid Ready**: Routes to any capability: models, quantum services, tools, or humans.
 
 ---
 
 ## 📚 Documentation
 
-- 📖 [**GGG ASI Alignment Router** - Kernel Specification](/docs/Gyroscopic_ASI_AlignmentRouter.md)
+- 📖 [**GGG ASI Alignment Router** - Kernel Specification](/docs/System_Architecture.md)
 
-- 📖 [GyroSI: Our Algorithmic Formalism](/docs/GyroSI_Specs.md)
-
-- 🧬 [Substrate: Physical Memory Specification](/docs/GyroSI_Substrate_Specs.md)
+- 🧬 [Substrate: Future Physical Memory Specification](/docs/GyroSI_Substrate_Specs.md)
 
 - 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
 
