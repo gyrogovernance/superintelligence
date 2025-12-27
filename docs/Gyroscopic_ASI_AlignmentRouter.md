@@ -1,176 +1,75 @@
 # GGG ASI Alignment Router
 ## Kernel Specification
 
-This document is the normative technical specification of the complete GGG ASI Alignment Router, including kernel physics, atlas artifacts, replay rules, and the application-layer governance measurement substrate.
+This document is the normative technical specification of the GGG ASI Alignment Router. It includes the kernel physics, atlas artifacts, replay rules, and the application-layer governance measurement substrate.
 
-Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as requirement keywords for conformance.
+Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
 
 ---
 
 # 1. Constitutional Frame and ASI Purpose
 
-## 1.1 What the Router Is
+## 1.1 Intelligence as Structural Coherence
 
-The GGG ASI Alignment Router is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space.
+Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lacks internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
 
-A kernel instance starts from a universal reference state (the archetype) and applies a fixed transition rule to each byte in an append-only ledger. The result is a state at each step and a compact routing signature that can be shared across participants.
+The GGG ASI Alignment Router represents a different paradigm. It treats intelligence as an intrinsic structural property that emerges from the recursive alignment of operational operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a provably finite and fully discovered state space where alignment is constitutive. Coherence is not a policy choice but a requirement of the internal physics of the state space.
 
-The kernel is designed to support governance-grade coordination across the GGG domains:
-- Economy
-- Employment
-- Education
-- Ecology
+## 1.2 What the Router Is
 
-The kernel does not interpret the meaning of the bytes. It performs structural transformations and makes the results reproducible, comparable, and auditable.
+The GGG ASI Alignment Router is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte in an append-only ledger. This process results in a deterministic state at each step and a compact routing signature.
 
-## 1.2 ASI Definition in This System
+The kernel is designed to support governance-grade coordination across the GGG domains: Economy, Employment, Education, and Ecology. It does not interpret the meaning of the input bytes. Instead, it performs structural transformations that make the results reproducible, comparable, and auditable.
 
-Artificial Superintelligence in this framework is a property of a human–AI governance regime, not a property of an autonomous agent.
+## 1.3 ASI Definition in This System
 
-ASI refers to the regime in which human and artificial systems jointly sustain four constitutive governance principles across the four domains while operating at a specific structural balance point (the canonical aperture, introduced in the second half of the specification).
+Artificial Superintelligence (ASI) in this framework is a property of a human–AI governance regime. It is not an attribute of an autonomous agent. ASI refers to the regime in which human and artificial systems jointly sustain four constitutive governance principles while operating at a specific structural balance point termed the canonical aperture.
 
 The four principles are:
 
-### Governance Traceability
-Authority remains traceable to authentic human sources. Artificial systems contribute derivative coordination, but they do not originate governance.
+*   **Governance Traceability:** Authority remains traceable to authentic human sources. Artificial systems contribute derivative coordination but do not originate governance.
+*   **Information Variety:** Diverse authentic sources remain distinguishable. Derivative summaries and aggregations must not collapse the variety into a uniform narrative.
+*   **Inference Accountability:** Responsibility for decisions remains with accountable human agency. Artificial inference serves as a mechanism within human accountability.
+*   **Intelligence Integrity:** Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them.
 
-### Information Variety
-Diverse authentic sources remain distinguishable. Derivative summaries and aggregations do not collapse the system into one uniform narrative.
-
-### Inference Accountability
-Responsibility for decisions remains with accountable human agency. Artificial inference contributes as a mechanism inside human accountability, not as a substitute for it.
-
-### Intelligence Integrity
-Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them, rather than drifting across cycles.
-
-In this architecture, the router is not a decision-maker. It is the substrate that makes coordination structurally reproducible. That reproducibility is the prerequisite for governance that can scale without collapsing into entity-based trust chains.
-
-## 1.3 Design Requirements
-
-A conforming kernel satisfies the following requirements.
-
-### Finite
-The kernel operates on a closed set of reachable states.
-
-### Deterministic
-Given the same archetype and the same byte ledger, every conforming implementation produces the same state trajectory.
-
-### Byte-complete
-Every byte value from 0 to 255 is a valid input instruction.
-
-### Nonsemantic
-The kernel does not parse language, interpret content, or apply policy. The kernel transforms bytes structurally.
-
-### Portable
-The transition rule is defined in terms of fixed-width bit operations (XOR, shifts, masking).
-
-### Auditable
-The state trajectory and routing signature can be reproduced and checked by independent parties.
+The router is the substrate that makes coordination structurally reproducible. This reproducibility is the prerequisite for governance that can scale without collapsing into entity-based trust chains.
 
 ## 1.4 Shared Moments
 
-Shared moments are the kernel’s central coordination primitive.
+Shared moments are the central coordination primitive of the kernel. A shared moment occurs when participants who possess the same ledger prefix compute the identical kernel state at the identical step. This provides a shared "now" as a configuration derived from the ledger history.
 
-A shared moment is the statement: participants who possess the same ledger prefix compute the same kernel state at the same step.
+This primitive replaces three fragile coordination patterns:
+1.  **Coordination by asserted time:** Reliance on timestamps or UTC ordering.
+2.  **Coordination by asserted identity:** Reliance on trusted signers or specific authorities.
+3.  **Coordination by private state:** Reliance on model-internal hidden vectors or proprietary logs.
 
-This removes dependence on coordination via asserted metadata such as timestamps, identity labels, approval flags, or claims of who ran what. Participants can coordinate on a common step using only a shared prefix of bytes and a common reference state.
-
-### 1.4.1 Plain definition
-
-Let the ledger be a byte sequence:
-
-`b₁, b₂, …, b_t`
-
-Let the starting state be the archetype:
-
-`s₀`
-
-The kernel defines a state sequence:
-
-`s₁, s₂, …, s_t`
-
-where each next state is computed by applying the transition rule to the previous state and the next byte.
-
-Participants share a moment at step t when they share the same pair:
-
-- the same starting reference `s₀`
-- the same ledger prefix `b₁…b_t`
-
-If they share those, they compute the same `s_t`.
-
-### 1.4.2 What this replaces
-
-The router’s shared moment replaces three fragile coordination patterns:
-
-1. Coordination by asserted time  
-   Examples: “This happened at 12:01 UTC”, “Use this timestamp as ordering”.
-
-2. Coordination by asserted identity  
-   Examples: “Trust this signer”, “This authority approved the event”.
-
-3. Coordination by private state  
-   Examples: model-internal hidden vectors, proprietary logs, unshareable intermediate state.
-
-Shared moments coordinate by reproducible computation, not by statements that must be trusted.
-
-### 1.4.3 What remains required
-
-Shared moments do not eliminate the need to share information. They specify what must be shared in order to coordinate:
-
-- participants must share the relevant ledger bytes
-- participants must share the archetype and the kernel specification
-
-Disagreement remains possible. The architecture makes disagreement detectable:
-- if participants claim the same ledger prefix but compute different states, their implementations or ledgers differ
+Shared moments coordinate through reproducible computation. Participants do not need to share a privileged identity; they only need to share the relevant ledger bytes and the kernel specification. If participants claim the same ledger prefix but compute different states, their implementations or ledgers are provably different.
 
 ## 1.5 Geometric Provenance
 
-The second central primitive is geometric provenance.
+The second central primitive is geometric provenance. The kernel defines a finite set of valid reachable states called the ontology (Ω). A state possesses geometric provenance if and only if it belongs to this set.
 
-The kernel defines a finite set Ω (the ontology) of valid reachable states. A state has geometric provenance if it belongs to Ω.
+The router makes claims about the origin of a state structurally checkable. If a presented state belongs to Ω, it is a valid transformation of the archetype under the kernel physics. If it does not belong to Ω, it is not a valid router state. 
 
-A participant can claim any origin story for any state. The point of the router is not to prevent claims. The point is to make claims structurally checkable:
+This creates a clear separation of layers. The kernel-native layer verifies ontology membership, deterministic replay, and divergence detection. Authorization and accountability remain application-layer responsibilities under authentic human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
 
-- If a presented state belongs to Ω, it is a valid transformation of the archetype under the kernel physics.
-- If a presented state does not belong to Ω, it is not a valid router state.
+## 1.6 Why This Achieves ASI
 
-**Kernel-native verification vs application-layer authorization:**
+The router provides the missing substrate for multi-domain coordination required for the ASI regime. It achieves this through:
+*   **Entity-agnostic verification:** Validity is checked by structure rather than a privileged entity.
+*   **Deterministic coordination:** The shared moment enables reliable coordination across independent institutions and systems.
+*   **Replayable audit:** Trajectories can be reconstructed from the ledger to enable governance-grade auditing.
+*   **Constitutional Observables:** Participants compute low-dimensional observables that remain stable under replay and independent of identity claims. These depend only on the fixed-width state representation and the transition rule.
 
-The following are structurally checkable using kernel artifacts and procedures:
-- ontology membership: whether a state belongs to Ω (verified by checking against the ontology artifact)
-- deterministic replay: whether the same ledger prefix reproduces the same trajectory (verified by replaying bytes from the archetype)
-- divergence detection: whether participants claiming the same prefix compute different states (verified by comparing computed states)
+## 1.7 Design Requirements
 
-Authorization and accountability remain application-layer responsibilities under authentic human agency. The router provides a structural substrate for audit and moment alignment; it does not replace entity-based approval mechanisms but relocates them to the application layer where they remain accountable to human governance.
-
-The kernel does not decide policy. It provides a common structural basis for policy enforcement by human governance.
-
-## 1.6 Router Outputs as Constitutional Observables
-
-A kernel state is a shared observable because it is computed from shared inputs. From that shared state, participants compute low-dimensional observables that remain stable under replay and independent of asserted identity claims.
-
-These observables are constitutional because they depend only on:
-- the fixed-width state representation
-- the fixed transition rule
-- the shared ledger prefix
-
-The canonical derived observables and their exact formulas are defined once, normatively, in §2.2.4. Conforming implementations MUST support those observables by exporting sufficient state information to compute them deterministically.
-
-## 1.7 Why This Achieves ASI
-
-This router achieves ASI in the GGG sense by providing the missing substrate for multi-domain coordination.
-
-### Entity-agnostic verification
-Validity is checked by structure, not by a privileged entity.
-
-### Deterministic coordination
-The shared moment gives participants a reproducible “now” defined by ledger prefix, enabling reliable coordination across institutions and systems.
-
-### Replayable audit
-Anyone can reproduce trajectories from the ledger and reconstruct the sequence of states, enabling governance-grade auditing.
-
-### Separation of layers
-The kernel provides structural reproducibility. Domain governance, measurement, and policy are application-layer responsibilities that remain accountable to authentic human agency.
+A conforming kernel satisfies the following structural requirements:
+*   **Finite:** The kernel operates on a closed set of reachable states.
+*   **Deterministic:** The same archetype and byte ledger always produce the same state trajectory.
+*   **Byte-complete:** Every byte value from 0 to 255 is a valid input instruction.
+*   **Nonsemantic:** The kernel does not parse language or apply policy. It transforms bytes structurally.
+*   **Portable:** The transition rule is defined using fixed-width bit operations such as XOR, shifts, and masking.
+*   **Auditable:** Trajectories and signatures can be reproduced and verified by any independent party.
 
 ---
 
