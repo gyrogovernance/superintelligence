@@ -5,9 +5,11 @@
 
 ![Superintelligence](/assets/gyro_cover_asi.png)
 
+</div>
+
 <div align="center">
 
-**G Y R O  - G O V E R N A N C E** 
+**G Y R O  - G O V E R N A N C E**
 
 [![Home](/assets/menu/gg_icon_home.svg)](https://gyrogovernance.com)
 [![Apps](/assets/menu/gg_icon_apps.svg)](https://github.com/gyrogovernance/apps)
@@ -16,108 +18,37 @@
 [![Science](/assets/menu/gg_icon_science.svg)](https://github.com/gyrogovernance/science)
 [![Superintelligence](/assets/menu/gg_icon_asi.svg)](https://github.com/gyrogovernance/superintelligence)
 
----
-
-</div>
-
-<h3>Gyroscopic Global Governance Superintelligence</h3>
-<p><em>Collective ASI Alignment Routing for Post-AGI Coordination</em></p>
-
-<p>
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
-  </a>
-  <a href="https://www.python.org">
-    <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
-  </a>
-</p>
-
 </div>
 
 ---
 
-> ⚠️ **Research Status**: This is an active research project demonstrating theoretical principles. The architecture is complete but implementation is ongoing. Not ready for production use.
+# GGG ASI Alignment Router
+ Collective Superintelligence Alignment Routing for Post‑AGI Coordination
 
----
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+
+Status: research implementation. The kernel physics and measurement substrate are specified and tested. Interface and deployment integration are evolving.
 
 ## 🌐 Overview
 
-**GGG ASI Router** is a deterministic finite-state routing kernel that coordinates interaction between **Authentic human participants** and **Derivative capabilities** (language models, specialized models, tools, services, compute utilities).
+GGG ASI Alignment Router is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
 
-Unlike traditional AI wrappers, it does not just pass messages. It maintains a **compact 24-bit state** that evolves deterministically through a minimal transition law derived from the **Common Governance Model (CGM)**.
+In this project, Artificial Superintelligence is treated as an operational regime: stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
+- **Governance Traceability**
+- **Information Variety**
+- **Inference Accountability**
+- **Intelligence Integrity**
 
-It defines **Artificial Superintelligence (ASI)** as an operational network equilibrium: **stable, traceable coordination across heterogeneous human-AI systems** maintaining four constitutive governance principles (Governance Traceability, Information Variety, Inference Accountability, Intelligence Integrity) at a canonical structural balance.
+The router does not interpret content and does not decide policy. It provides shared moments, geometric provenance, and replayable measurement so that authorization and accountability remain under authentic human agency at the application layer.
 
----
+## 🗝️ Key ideas
 
-### 🗝️ Core Function: State-Based Routing
+- **Shared moments:** Participants who share the same archetype and the same ledger prefix compute the same kernel state at the same step. Coordination is grounded in reproducible computation rather than asserted metadata (timestamps, approvals, identity claims) or private model state.
 
-Every interaction is a trajectory through a precomputed finite state space (the **Atlas**).
+- **Geometric provenance:** Valid states lie in a finite ontology Ω compiled into an atlas. Membership and replay are structurally checkable from artifacts.
 
-1. **Input**: External bytes transcribed to introns via fixed XOR with 0xAA.
-2. **State Transition**: Each byte advances the 24-bit state through one of 256 unique operations (pure XOR mutation + FIFO gyration with complement).
-3. **Routing Signature**: Router computes observables from current state for capability routing.
-4. **Capability Selection**: Deterministic policy maps signature to target capability.
-5. **Ledger**: Full trajectory logged for deterministic replay and audit.
-
-This ensures that **governance is structural**: the router enforces traceability, boundedness, and consistency by construction.
-
----
-
-## 🏗️ Architecture: Three-Layer Structure
-
-The router is composed of three layers:
-
-1. **Kernel**: Deterministic physics core with no semantics.
-2. **App**: User interface and local orchestration over the kernel.
-3. **Plugins**: Domain converters and external integrations.
-
-### The Atlas Maps
-
-Three precomputed maps define the closed operational physics:
-
-| Map | Function |
-|-----|----------|
-| **Ontology** | Finite set of exactly 65,536 reachable 24-bit states, sorted. |
-| **Epistemology** | Complete transition table: [65,536, 256] next-state indices. Each column is a permutation (bijection). |
-| **Phenomenology** | Fixed constants: archetype, transcription gauge (0xAA), 256 transformation masks. |
-
-Each step advances state deterministically. All states are reachable from the archetype in at most 2 steps (diameter 2). The state space exhibits exact algebraic closure: 256 distinct masks on Type A × 256 possible Type B values from gyration history = 65,536 reachable states.
-
----
-
-## 🚀 Capabilities
-
-- **Deterministic Routing**: Same initial state and byte sequence always yield same final state and routing decision.
-- **Exact Reversibility**: Explicit inverse formula enables full trajectory reconstruction from (final state, byte sequence).
-- **Verified Algebraic Properties**: Test suite certifies exact invariants:
-  - **P2**: Each byte induces a bijection (every epistemology column is a permutation)
-  - **P4**: Diameter 2 from archetype (256 states after 1 byte, 65,536 after 2 bytes)
-  - **P6**: Depth-2 commutativity: `T_y(T_x(s)) = T_x(T_y(s))` iff `x=y` (256/65,536 pairs commute)
-  - **P7**: Depth-4 alternation identity: `xyxy = yxyx = id` for all byte pairs
-  - **P8**: Closed-form trajectory formula for arbitrary-length words
-- **Full Auditability**: Complete byte ledger enables deterministic replay and exact backward reconstruction.
-- **Minimal Physics**: Pure XOR mutation + FIFO gyration with complement. No learned weights, no hidden continuous state.
-- **Finite Closed Manifold**: Exactly 65,536 states with proven 256² cartesian product structure (Property P3).
-- **Hybrid Ready**: Routes to any capability: models, quantum services, tools, or humans.
-
----
-
-## 📚 Documentation
-
-- 📖 [**GGG ASI Alignment Router** - Kernel Specification](/docs/System_Architecture.md)
-
-- 🧬 [Substrate: Future Physical Memory Specification](/docs/GyroSI_Substrate_Specs.md)
-
-- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](/docs/CommonGovernanceModel.md)
-
----
-
-## 📂 Repository Structure
-
-- `src/`: Implementation directories for physics core and router kernel.
-- `research/`: Archive of earlier experiments including "GyroSI Baby LM" (direct language generation via physics).
-- `docs/`: Specifications and theoretical documentation.
+- **Governance measurement substrate:** Application-layer GovernanceEvents update per-domain K4 edge ledgers. Hodge decomposition splits each ledger into gradient and cycle components, and aperture is computed as the cycle-energy fraction. This yields a replayable coordination metric independent of model internals.
 
 ---
 
@@ -135,6 +66,79 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 
 ---
 
+## 📚 Documentation
+
+Primary technical reference:
+- 📖 [**GGG ASI Alignment Router** - Kernel Specifications](docs/Gyroscopic_ASI_AlignmentRouter.md)
+
+Supporting theory:
+- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](docs/CGM_Paper.md)
+- 📖 [The Human Mark (THM) - Source-Type Ontology](docs/THM_Paper.md)
+- 📖 [Gyroscopic Global Governance (GGG) - Four-Domain Coupling](docs/GGG_Paper.md)
+
+Future Development:
+- 🧬 [Substrate: Physical Memory Specification](docs/GyroSI_Substrate_Specs.md)
+
+---
+
+## Repository structure
+
+- `src/router/` kernel physics, atlas builder, kernel runtime
+- `src/app/` coordinator, governance events, domain ledgers, aperture
+- `src/plugins/` analytics helpers, adapters, framework connectors
+- `docs/` specifications and notes
+- `src/tests/` exhaustive kernel and measurement verification
+
+---
+
+## 🚩 Quick start
+
+### Install
+Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
+
+### Build the atlas
+The atlas compiles the kernel physics into three artifacts: ontology, epistemology, and phenomenology.
+
+```bash
+python -m src.router.atlas --out data/atlas
+```
+
+### Run tests
+```bash
+python -m pytest -v -s tests/
+```
+
+### Minimal usage
+
+```python
+from pathlib import Path
+from src.app.coordination import Coordinator
+from src.app.events import Domain, EdgeID, GovernanceEvent
+
+c = Coordinator(Path("data/atlas"))
+
+# Shared-moment stepping
+c.step_bytes(b"Hello world")
+
+# Application-layer governance update (ledger event)
+c.apply_event(
+    GovernanceEvent(
+        domain=Domain.ECONOMY,
+        edge_id=EdgeID.GOV_INFO,
+        magnitude=1.0,
+        confidence=0.8,
+        meta={"source": "example"},
+    ),
+    bind_to_kernel_moment=True,
+)
+
+status = c.get_status()
+print(status.kernel)
+print(status.apertures)
+```
+
+---
+
 ## 📜 License
 
 MIT License - see [LICENSE](LICENSE) for details.
@@ -144,13 +148,12 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## 📖 Citation
 
 ```bibtex
-@software{GGG_ASI_R_2025,
+@software{GGG_ASI_AR_2025,
   author = {Basil Korompilias},
-  title = {Moments: GGG ASI Alignment Router},
+  title = {GGG ASI Alignment Router},
   year = {2025},
   url = {https://github.com/gyrogovernance/superintelligence},
-  note = {Deterministic routing kernel for Post-AGI coordination through 
-          physics-based state transitions and canonical observables}
+  note = {Deterministic routing kernel for Post-AGI coordination through physics-based state transitions and canonical observables}
 }
 ```
 
@@ -166,7 +169,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-<div style="border: 1px solid #ccc; padding: 1em; font-size: 0.6em; background-color: #f9f9f9; border-radius: 6px; line-height: 1.5;">
   <p><strong>🤖 AI Disclosure</strong></p>
   <p>All code architecture, documentation, and theoretical models in this project were authored and architected by Basil Korompilias.</p>
   <p>Artificial intelligence was employed solely as a technical assistant, limited to code drafting, formatting, verification, and editorial services, always under direct human supervision.</p>
@@ -174,6 +176,4 @@ MIT License - see [LICENSE](LICENSE) for details.
   <p>Responsibility for the validity, coherence, and ethical direction of this project remains fully human.</p>
   <p><strong>Acknowledgements:</strong><br>
   This project benefited from AI language model services accessed through LMArena, Cursor IDE, OpenAI (ChatGPT), Anthropic (Opus), and Google (Gemini).</p>
-</div>
-
 

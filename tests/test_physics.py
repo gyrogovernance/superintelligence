@@ -13,7 +13,7 @@ Tests the fundamental physics:
 import pytest
 import numpy as np
 
-from router.constants import (
+from src.router.constants import (
     GENE_MIC_S,
     ARCHETYPE_A12,
     ARCHETYPE_B12,
@@ -25,8 +25,6 @@ from router.constants import (
     expand_intron_to_mask24,
     step_state_by_byte,
     XFORM_MASK_BY_BYTE,
-    K4,
-    signed_edge_value,
 )
 
 
@@ -210,7 +208,13 @@ class TestNonCommutativity:
         print(f"\n  Non-commutative pairs: {noncommutative}/{len(test_pairs)}")
 
     def test_commutativity_statistics(self, capsys):
-        """Measure commutativity across random byte pairs."""
+        """
+        Diagnostic: measure commutativity across random byte pairs.
+        
+        Note: This is a diagnostic test. The exact law (P6) states that
+        T_y(T_x(s)) = T_x(T_y(s)) iff x=y, so the expected rate is 1/256 ≈ 0.39%.
+        This test is kept as a diagnostic but the exact law test is authoritative.
+        """
         state = ARCHETYPE_STATE24
         np.random.seed(42)
         
@@ -225,10 +229,9 @@ class TestNonCommutativity:
                 commutative += 1
         
         comm_rate = 100 * commutative / sample_size
-        print(f"\n  Commutativity rate: {comm_rate:.1f}% ({commutative}/{sample_size} pairs)")
+        print(f"\n  Commutativity rate (diagnostic): {comm_rate:.1f}% ({commutative}/{sample_size} pairs, expected ~0.39%)")
         
-        # Should be mostly non-commutative
-        assert comm_rate < 20, f"Too many commutative pairs: {comm_rate}%"
+        # Diagnostic only - no assertion (exact law is tested elsewhere)
 
 
 class TestCGMChirality:
@@ -308,103 +311,6 @@ class TestInvariants:
                 assert 0 <= b <= LAYER_MASK_12
             except Exception as e:
                 pytest.fail(f"Byte {hex(byte)} failed: {e}")
-
-
-class TestK4Kernel:
-    """Test K4 measurement kernel properties."""
-
-    def test_k4_has_6_edges(self):
-        """K4 complete graph has 6 edges."""
-        assert len(K4.edges) == 6
-
-    def test_k4_edges_valid(self):
-        """All edges should connect vertices 0-3."""
-        for u, v in K4.edges:
-            assert 0 <= u < 4
-            assert 0 <= v < 4
-            assert u != v
-
-    def test_p_cycle_is_projector(self):
-        """P_cycle should be idempotent: P @ P = P."""
-        P = K4.p_cycle
-        PP = P @ P
-        diff = np.linalg.norm(PP - P)
-        assert diff < 1e-10, f"P_cycle not idempotent: ||PP - P|| = {diff}"
-
-    def test_p_cycle_is_symmetric(self):
-        """P_cycle should be symmetric."""
-        P = K4.p_cycle
-        diff = np.linalg.norm(P - P.T)
-        assert diff < 1e-10, f"P_cycle not symmetric: ||P - P^T|| = {diff}"
-
-    def test_signed_edge_value_properties(self):
-        """Signed edge value should be in [-1, 1] and symmetric."""
-        # Self-correlation should be 1
-        assert signed_edge_value(0xAAA, 0xAAA) == 1.0
-        
-        # Complement correlation should be -1
-        assert signed_edge_value(0xFFF, 0x000) == -1.0
-        
-        # Symmetry
-        val1 = signed_edge_value(0x123, 0x456)
-        val2 = signed_edge_value(0x456, 0x123)
-        assert abs(val1 - val2) < 1e-10
-
-    def test_p_cycle_kills_gradients(self):
-        """P_cycle must annihilate gradient vectors (defining Hodge property)."""
-        # Build incidence matrix from K4.edges
-        B = np.zeros((4, 6), dtype=np.float64)
-        for e, (u, v) in enumerate(K4.edges):
-            B[int(u), e] = -1.0
-            B[int(v), e] = 1.0
-        
-        # Test with several vertex potentials
-        test_potentials = [
-            np.array([0.0, 1.0, 2.0, 3.0]),
-            np.array([1.0, 1.0, 1.0, 1.0]),
-            np.array([0.0, 0.0, 1.0, 1.0]),
-        ]
-        
-        for x in test_potentials:
-            y_grad = B.T @ x  # Pure gradient edge vector
-            y_cycle = K4.p_cycle @ y_grad
-            
-            norm = np.linalg.norm(y_cycle)
-            assert norm < 1e-10, f"P_cycle did not kill gradient: ||P_cycle @ gradient|| = {norm}"
-
-    def test_aperture_on_constructed_configuration(self, capsys):
-        """Diagnostic: report aperture for a simple constructed vertex configuration."""
-        # Note: This is NOT testing that aperture ≈ 0 for "pure gradients"
-        # because signed_edge_value is nonlinear (bit correlation), not linear difference.
-        # The correct Hodge test is test_p_cycle_kills_gradients which uses B^T @ x.
-        verts = (0, 0x111, 0x222, 0x333)
-        
-        y = np.empty(6, dtype=np.float64)
-        for i, (u, v) in enumerate(K4.edges):
-            y[i] = signed_edge_value(verts[int(u)], verts[int(v)])
-        
-        y_cycle = K4.p_cycle @ y
-        cycle_energy = float(np.dot(y_cycle, y_cycle))
-        total_energy = float(np.dot(y, y))
-        
-        if total_energy > 0:
-            aperture = cycle_energy / total_energy
-            print(f"\n  Diagnostic aperture (constructed config): {aperture:.4f}")
-
-    def test_k4_cycle_space_dimension(self):
-        """Cycle space of K4 must be 3-dimensional (6 edges - 3 independent gradients)."""
-        # K4 has 4 vertices, so 3 independent gradients (4-1)
-        # Therefore cycle space dim = 6 - 3 = 3
-        P = K4.p_cycle
-        rank = np.linalg.matrix_rank(P, tol=1e-10)
-        
-        assert rank == 3, f"Cycle space dimension {rank} != 3"
-        
-        # Also verify nullity
-        I = np.eye(6)
-        P_grad = I - P
-        grad_rank = np.linalg.matrix_rank(P_grad, tol=1e-10)
-        assert grad_rank == 3, f"Gradient space dimension {grad_rank} != 3"
 
 
 class TestClosedFormDepthLaws:
@@ -581,3 +487,120 @@ def print_physics_summary(request):
     print(f"Non-zero B masks: {nonzero_b} / 256 (expected 0)")
     
     print("="*10)
+
+
+class TestCSOperatorAndSeparatorLemmas:
+    """
+    Certify the CS-style separator behavior of byte 0xAA and the A/B chirality
+    using exact algebra, without relying on atlas artifacts.
+    """
+
+    def _mask_a(self, byte: int) -> int:
+        mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
+        return (mask24 >> 12) & LAYER_MASK_12
+
+    def test_R0xAA_is_involution_on_random_states(self):
+        """
+        R := T_0xAA should be an involution: R(R(s)) = s.
+        This is a strong, kernel-native "reference move" invariant.
+        """
+        np.random.seed(123)
+        for _ in range(5000):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            s = pack_state(a, b)
+
+            s1 = step_state_by_byte(s, 0xAA)
+            s2 = step_state_by_byte(s1, 0xAA)
+
+            assert s2 == s, f"R∘R != id at state {hex(s)}"
+
+    def test_separator_lemma_x_then_AA_updates_A_only(self):
+        """
+        Exact lemma:
+          T_AA(T_x(A,B)) = (A XOR m_x, B)
+
+        i.e. inserting the separator after x writes the mask effect into A only.
+        """
+        np.random.seed(124)
+        for _ in range(2000):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            x = int(np.random.randint(0, 256))
+            mx = self._mask_a(x)
+
+            s0 = pack_state(a, b)
+            s2 = step_state_by_byte(step_state_by_byte(s0, x), 0xAA)
+
+            a2, b2 = unpack_state(s2)
+            assert a2 == (a ^ mx), f"A mismatch: got {hex(a2)} expected {hex(a ^ mx)}"
+            assert b2 == b, f"B mismatch: got {hex(b2)} expected {hex(b)}"
+
+    def test_separator_lemma_AA_then_x_updates_B_only(self):
+        """
+        Exact lemma:
+          T_x(T_AA(A,B)) = (A, B XOR m_x)
+
+        i.e. inserting the separator before x writes the mask effect into B only.
+        """
+        np.random.seed(125)
+        for _ in range(2000):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            x = int(np.random.randint(0, 256))
+            mx = self._mask_a(x)
+
+            s0 = pack_state(a, b)
+            s2 = step_state_by_byte(step_state_by_byte(s0, 0xAA), x)
+
+            a2, b2 = unpack_state(s2)
+            assert a2 == a, f"A mismatch: got {hex(a2)} expected {hex(a)}"
+            assert b2 == (b ^ mx), f"B mismatch: got {hex(b2)} expected {hex(b ^ mx)}"
+
+    def test_depth4_alternation_identity_all_pairs_on_archetype(self):
+        """
+        Strengthen P7 beyond sampling: for the archetype, verify XYXY = id for all x,y.
+        This is 256^2 pairs and is cheap.
+        """
+        s0 = ARCHETYPE_STATE24
+        for x in range(256):
+            sx = step_state_by_byte(s0, x)
+            for y in range(256):
+                s_xy = step_state_by_byte(sx, y)
+                s_xyx = step_state_by_byte(s_xy, x)
+                s_xyxy = step_state_by_byte(s_xyx, y)
+                assert s_xyxy == s0, f"XYXY != id at archetype for x={x}, y={y}"
+
+
+class TestInverseConjugationForm:
+    """
+    Certify the spec claim: T_x^{-1} = R ∘ T_x ∘ R, where R = T_0xAA.
+    
+    This shows that reversal can be expressed as a word over the same action alphabet,
+    strengthening the "ledger as reversible coordination substrate" story.
+    """
+
+    def test_inverse_is_conjugation_by_R(self):
+        """
+        For any state s and byte x:
+          T_x^{-1}(T_x(s)) = R ∘ T_x ∘ R(T_x(s)) = s
+        
+        where R = T_0xAA.
+        """
+        np.random.seed(314)
+        for _ in range(5000):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            s = pack_state(a, b)
+
+            x = int(np.random.randint(0, 256))
+
+            # Forward: apply T_x
+            t = step_state_by_byte(s, x)
+
+            # Apply R ∘ T_x ∘ R to t (i.e., apply the inverse using only forward steps)
+            t1 = step_state_by_byte(t, 0xAA)   # R
+            t2 = step_state_by_byte(t1, x)     # T_x
+            s_back = step_state_by_byte(t2, 0xAA)  # R
+
+            assert s_back == s, f"Conjugation inverse failed for byte {x} at state {hex(s)}"

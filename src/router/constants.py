@@ -6,12 +6,10 @@ Defines:
 - transcription: intron = byte XOR 0xAA
 - pure XOR transformation
 - FIFO gyration (A↔B swap with flip)
-- K4/Hodge kernel for aperture
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
@@ -98,37 +96,3 @@ def step_state_by_byte(state24: int, byte: int) -> int:
     new_b = a1 ^ LAYER_MASK_12
     
     return pack_state(new_a, new_b)
-
-
-@dataclass(frozen=True)
-class K4Kernel:
-    """Fixed K4 edge list and cycle projector."""
-    edges: NDArray[np.uint8]
-    p_cycle: NDArray[np.float64]
-
-
-def build_k4_kernel() -> K4Kernel:
-    edges = np.array(
-        [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)],
-        dtype=np.uint8,
-    )
-
-    B = np.zeros((4, 6), dtype=np.float64)
-    for e, (u, v) in enumerate(edges):
-        B[int(u), e] = -1.0
-        B[int(v), e] = 1.0
-
-    BBt = B @ B.T
-    P_grad = B.T @ np.linalg.pinv(BBt) @ B
-    P_cycle = np.eye(6) - P_grad
-    return K4Kernel(edges=edges, p_cycle=P_cycle)
-
-
-K4 = build_k4_kernel()
-
-
-def signed_edge_value(u12: int, v12: int) -> float:
-    """Signed correlation on 12-bit space."""
-    diff = (int(u12) ^ int(v12)) & LAYER_MASK_12
-    d = diff.bit_count()
-    return (12.0 - 2.0 * float(d)) / 12.0

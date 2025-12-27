@@ -1,9 +1,45 @@
 
-💫 Gyroscopic Superintelligence - CHANGELOG
+💫 GGG ASI Alignment Router - CHANGELOG
+
+```            
+┏━┓╻ ╻┏━┓┏━╸┏━┓╻┏┓╻╺┳╸┏━╸╻  ╻  ╻┏━╸┏━╸┏┓╻┏━╸┏━╸
+┗━┓┃ ┃┣━┛┣╸ ┣┳┛┃┃┗┫ ┃ ┣╸ ┃  ┃  ┃┃╺┓┣╸ ┃┗┫┃  ┣╸ 
+┗━┛┗━┛╹  ┗━╸╹┗╸╹╹ ╹ ╹ ┗━╸┗━╸┗━╸╹┗━┛┗━╸╹ ╹┗━╸┗━╸
+┏━┓┏━┓╻ ╻╺┳╸┏━╸┏━┓                             
+┣┳┛┃ ┃┃ ┃ ┃ ┣╸ ┣┳┛                             
+╹┗╸┗━┛┗━┛ ╹ ┗━╸╹┗╸                             
+```
+---
+
+## [v0.9.9.4-Router] – 2025-12-27
+
+**Application Infrastructure & Specification Refinement**
+
+**Application & Plugin Infrastructure**
+* Implemented Coordinator orchestration layer with byte log and event log for deterministic replay
+* Established plugin architecture with explicit edge mapping policies and audit metadata
+* Added status reporting with kernel signature, ledger state, and aperture metrics
+
+**Test Suite Expansion**
+* Expanded test coverage to 101 tests, all passing
+* Added tests for Coordinator workflow, event binding, and plugin determinism
+
+**Specification Improvements**
+* Restructured specification into stable conformance profiles (Kernel, Measurement, Runtime)
+* Added normative language conventions (MUST/SHOULD/MAY) and bit indexing specifications
+* Documented complete operational runtime including Coordinator, plugins, and audit logs
+* Consolidated build procedures and reference helpers into appendices
+* Fixed section numbering and cross-references throughout
+* See [GGG ASI Alignment Router - Kernel Specification](/docs/Gyroscopic_ASI_AlignmentRouter.md) for complete normative specification
+
+**General Corrections & Improvements**
+* Improved integration between specification and implementation
+* Enhanced clarity of kernel-native verification vs application-layer authorization
+* Standardized terminology and removed redundant definitions
 
 ---
 
-## [v0.9.9.3-Router] – 2025-12-23 to 2025-12-27
+## [v0.9.9.3-Router] – 2025-12-23 to 2025-12-26
 
 **Router Kernel: Verified Properties & Exact Invariants**
 

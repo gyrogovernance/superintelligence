@@ -13,8 +13,8 @@ import pytest
 import numpy as np
 from pathlib import Path
 
-from router.kernel import RouterKernel
-from router.constants import ARCHETYPE_STATE24, unpack_state
+from src.router.kernel import RouterKernel
+from src.router.constants import ARCHETYPE_STATE24, unpack_state
 
 
 # Fixture: Kernel loaded from atlas
@@ -54,8 +54,6 @@ class TestAtlasLoading:
 
     def test_phenomenology_loaded(self, kernel):
         """Phenomenology constants should load."""
-        assert kernel.k4_edges is not None
-        assert kernel.p_cycle is not None
         assert kernel.archetype_a12 is not None
         assert kernel.xform_mask_by_byte is not None
 
@@ -178,51 +176,6 @@ class TestMultiStepRouting:
         assert forward_idx != reverse_idx
 
 
-class TestApertureMeasurement:
-    """Test K4 aperture computation."""
-
-    def test_signature_has_aperture(self, kernel):
-        """Signature should include aperture value."""
-        kernel.reset()
-        sig = kernel.signature()
-        
-        assert hasattr(sig, 'aperture')
-        assert 0.0 <= sig.aperture <= 1.0
-
-    def test_signature_with_byte(self, kernel):
-        """signature_with_byte should use specified byte for measurement."""
-        kernel.reset()
-        
-        sig0 = kernel.signature_with_byte(0x00)
-        sig1 = kernel.signature_with_byte(0xFF)
-        
-        # Different bytes should (usually) give different apertures
-        # (not guaranteed for all states, but likely)
-        assert sig0 is not None
-        assert sig1 is not None
-
-    def test_aperture_changes_with_byte(self, kernel):
-        """Aperture should depend on the instruction byte."""
-        kernel.reset()
-        
-        apertures = []
-        for byte in [0x00, 0x42, 0xAA, 0xFF]:
-            sig = kernel.signature_with_byte(byte)
-            apertures.append(sig.aperture)
-        
-        # At least some should differ
-        unique = len(set(apertures))
-        assert unique > 1, "All apertures identical across different bytes"
-
-    def test_aperture_bounded(self, kernel):
-        """Aperture should always be in [0, 1]."""
-        kernel.reset()
-        
-        for byte in range(0, 256, 16):  # Sample every 16th byte
-            sig = kernel.signature_with_byte(byte)
-            assert 0.0 <= sig.aperture <= 1.0, f"Byte {hex(byte)}: aperture = {sig.aperture}"
-
-
 class TestSignatureProperties:
     """Test signature dataclass properties."""
 
@@ -235,7 +188,6 @@ class TestSignatureProperties:
         assert hasattr(sig, 'state_hex')
         assert hasattr(sig, 'a_hex')
         assert hasattr(sig, 'b_hex')
-        assert hasattr(sig, 'aperture')
 
     def test_signature_hex_format(self, kernel):
         """Hex strings should have correct length."""
@@ -355,17 +307,100 @@ def print_routing_summary(request):
     print(f"Archetype state: {hex(int(kernel.ontology[kernel.archetype_index]))}")
     print(f"Archetype index: {kernel.archetype_index}")
     print(f"Archetype A12: {hex(kernel.archetype_a12)}")
-    
-    # Measure aperture distribution
-    kernel.reset()
-    apertures = []
-    for byte in range(0, 256, 4):  # Sample every 4th byte
-        sig = kernel.signature_with_byte(byte)
-        apertures.append(sig.aperture)
-    
-    print(f"\nAperture statistics (sample n={len(apertures)}):")
-    print(f"  Min: {min(apertures):.4f}")
-    print(f"  Max: {max(apertures):.4f}")
-    print(f"  Mean: {np.mean(apertures):.4f}")
-    print(f"  Std: {np.std(apertures):.4f}")
     print("="*10)
+
+
+class TestHorizonFixedPoints:
+    """
+    Atlas-backed certification of the horizon set as the fixed-point set of byte 0xAA.
+
+    Fixed points of R := T_0xAA satisfy:
+      R(s) = s  <=>  A12 == (B12 XOR 0xFFF)
+
+    Within Ω this set should have exactly 256 states.
+    """
+
+    def test_R0xAA_fixed_points_match_horizon_set_and_count(self, kernel):
+        epi = kernel.epistemology
+        ont = kernel.ontology
+        n = ont.shape[0]
+
+        idxs = np.arange(n, dtype=np.int64)
+        fixed = (epi[idxs, 0xAA].astype(np.int64) == idxs)
+
+        # Compute horizon condition directly from state bits
+        states = ont.astype(np.uint32)
+        a = ((states >> 12) & 0xFFF).astype(np.uint16)
+        b = (states & 0xFFF).astype(np.uint16)
+
+        horizon = (a == (b ^ 0xFFF))
+
+        assert np.array_equal(fixed, horizon), "Fixed-point set of 0xAA != horizon set A==~B in Ω"
+
+        fixed_count = int(fixed.sum())
+        assert fixed_count == 256, f"Expected 256 horizon states in Ω, got {fixed_count}"
+
+        # Archetype must be in the horizon set
+        assert fixed[kernel.archetype_index], "Archetype is not a fixed point of 0xAA (should be on horizon)"
+
+
+class TestRowFanoutDistinctness:
+    """
+    For a fixed current state, all 256 bytes must yield 256 distinct next states.
+    This is a per-row property of epistemology (different from per-byte permutation columns).
+    """
+
+    def test_row_fanout_is_256_for_all_states(self, kernel):
+        """
+        Exhaustive check: every state in the ontology must have 256 distinct successors.
+        This verifies Property P13 for all states, not just a sample.
+        
+        Implementation: sort each row and verify no adjacent duplicates after sorting.
+        This is faster than checking uniqueness per row.
+        """
+        epi = kernel.epistemology
+
+        # Sort each row and check adjacent entries are all different.
+        # If any duplicate exists, some adjacent pair will be equal after sorting.
+        sorted_rows = np.sort(epi, axis=1)
+        assert np.all(sorted_rows[:, 1:] != sorted_rows[:, :-1]), "Found duplicate successor in a row"
+
+
+class TestEpistemologyMatchesVectorizedStep:
+    """
+    Exhaustive certification:
+      epistemology[i, byte] == index(step_state_by_byte(ontology[i], byte))
+
+    Implemented vectorized per byte (fast enough to run regularly).
+    """
+
+    def test_epistemology_matches_vectorized_step_for_all_states_all_bytes(self, kernel):
+        ont = kernel.ontology.astype(np.uint32)
+        epi = kernel.epistemology
+
+        a = ((ont >> 12) & 0xFFF).astype(np.uint32)
+        b = (ont & 0xFFF).astype(np.uint32)
+
+        # Ensure ontology is sorted as assumed by searchsorted
+        assert np.all(ont[:-1] <= ont[1:]), "Ontology must be sorted for this test"
+
+        for byte in range(256):
+            mask24 = int(kernel.xform_mask_by_byte[byte])
+            m = (mask24 >> 12) & 0xFFF
+
+            new_a = (b ^ 0xFFF).astype(np.uint32)
+            new_b = ((a ^ m) ^ 0xFFF).astype(np.uint32)
+            new_state = ((new_a << 12) | new_b).astype(np.uint32)
+
+            idx = np.searchsorted(ont, new_state).astype(np.int64)
+
+            # Bounds check
+            assert np.all((idx >= 0) & (idx < ont.size)), f"Byte {byte}: index out of bounds"
+
+            # Membership check (should always hold)
+            assert np.all(ont[idx] == new_state), f"Byte {byte}: vectorized next_state not in ontology"
+
+            expected = idx.astype(np.uint32)
+            actual = epi[:, byte]
+
+            assert np.array_equal(actual, expected), f"Byte {byte}: epistemology column mismatch vs vectorized step"

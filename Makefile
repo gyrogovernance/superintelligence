@@ -11,7 +11,7 @@ LLVM_PREFIX=$(shell brew --prefix llvm)
 export CC=$(LLVM_PREFIX)/bin/clang
 export CXX=$(LLVM_PREFIX)/bin/clang++
 
-.PHONY: help venv install system-deps setup clean run-wikipedia
+.PHONY: help venv install system-deps setup clean run-wikipedia check-imports test
 
 help:
 	@echo "Available targets:"
@@ -20,6 +20,8 @@ help:
 	@echo "  make system-deps  - Install system dependencies (Homebrew, llvm)"
 	@echo "  make setup        - Full setup: system deps + venv + install"
 	@echo "  make clean        - Remove __pycache__ and build artifacts"
+	@echo "  make check-imports - Check that all imports use src.router (not router)"
+	@echo "  make test         - Run all tests"
 	@echo "  make run-wikipedia - Run the Wikipedia training script"
 
 venv:
@@ -45,6 +47,14 @@ clean:
 	find . -type f -name '*.pyo' -delete
 	find . -type f -name '*.log' -delete
 	find . -type f -name '*.tmp' -delete
+
+check-imports:
+	@echo "Checking import namespace consistency..."
+	$(PYTHON) scripts/check_imports.py
+
+test:
+	@echo "Running all tests..."
+	$(PYTHON) -m pytest tests/ -v
 
 run-wikipedia:
 	LLVM_PREFIX=$(shell brew --prefix llvm) && \

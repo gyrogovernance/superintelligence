@@ -1,0 +1,43 @@
+# Ruff configuration for superintelligence project
+# Enforces consistent import namespace: use src.router, not router
+
+[lint]
+# Select rules
+select = [
+    "F",   # Pyflakes
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "TID", # flake8-tidy-imports
+]
+
+# Ignore specific rules
+ignore = []
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+# Exclude patterns
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "research_backup_do_not_use",
+    "typings",
+]
+
+[lint.per-file-ignores]
+# Allow relative imports in __init__.py files
+"__init__.py" = ["F401"]
+
+[lint.isort]
+# Enforce src.router imports (not router)
+known-first-party = ["src"]
+
+[lint.flake8-tidy-imports]
+# Ban relative imports that could cause namespace confusion
+ban-relative-imports = false

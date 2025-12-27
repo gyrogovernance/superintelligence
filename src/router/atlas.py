@@ -24,7 +24,6 @@ try:
         ARCHETYPE_B12,
         ARCHETYPE_STATE24,
         GENE_MIC_S,
-        K4,
         XFORM_MASK_BY_BYTE,
         step_state_by_byte,
     )
@@ -41,7 +40,6 @@ except ImportError:
         ARCHETYPE_B12,
         ARCHETYPE_STATE24,
         GENE_MIC_S,
-        K4,
         XFORM_MASK_BY_BYTE,
         step_state_by_byte,
     )
@@ -66,53 +64,52 @@ class AtlasPaths:
 
 def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     """
-    Discover all reachable 24-bit states using all 256 byte actions.
+    Build ontology directly as A_set × B_set using proven closed-form algebra.
     
-    Explores the full action space: each byte is a distinct operator.
+    By Property P3, Ω = A_set × B_set where:
+    - A_set = {ARCHETYPE_A12 XOR m_b : b in [0,255]} (256 elements)
+    - B_set = {ARCHETYPE_B12 XOR m_b : b in [0,255]} (256 elements)
+    
+    This is faster and more direct than BFS exploration.
     """
     print("Building ontology...")
     paths.base.mkdir(parents=True, exist_ok=True)
 
-    # Use canonical archetype from constants
-    archetype = ARCHETYPE_STATE24
-
-    visited: set[int] = {archetype}
-    frontier = [archetype]
-    iterations = 0
-
-    while frontier:
-        iterations += 1
-        nxt: list[int] = []
-        for s in frontier:
-            # Explore all 256 byte actions
-            for byte in range(256):
-                t = step_state_by_byte(s, byte)
-                if t not in visited:
-                    visited.add(t)
-                    nxt.append(t)
-        frontier = nxt
-        if iterations <= 5 or iterations % 10 == 0:
-            print(f"  Iteration {iterations}: {len(visited)} states discovered")
-
-    ontology = np.array(sorted(visited), dtype=np.uint32)
+    # Extract A-masks from XFORM_MASK_BY_BYTE
+    masks_a = np.array([(int(XFORM_MASK_BY_BYTE[b]) >> 12) & 0xFFF for b in range(256)], dtype=np.uint16)
+    
+    # Build A_set and B_set directly
+    a_set = (ARCHETYPE_A12 ^ masks_a).astype(np.uint16) & 0xFFF
+    b_set = (ARCHETYPE_B12 ^ masks_a).astype(np.uint16) & 0xFFF
+    
+    # Cartesian product: all combinations
+    a_grid, b_grid = np.meshgrid(a_set, b_set, indexing='ij')
+    
+    # Pack into 24-bit states
+    ontology = ((a_grid.astype(np.uint32) << 12) | b_grid.astype(np.uint32)).flatten()
+    
+    # Sort for consistent ordering and ensure uint32 dtype
+    ontology = np.sort(ontology).astype(np.uint32)
+    
     np.save(paths.ontology, ontology)
     
     file_size = paths.ontology.stat().st_size
     print(f"Ontology complete: {len(ontology):,} unique states")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
-    print(f"  Explored in {iterations} iterations")
+    print(f"  Built directly as 256 × 256 cartesian product")
     
     # Verify byte sensitivity
-    unique_from_archetype = len({step_state_by_byte(archetype, b) for b in range(256)})
+    unique_from_archetype = len({step_state_by_byte(ARCHETYPE_STATE24, b) for b in range(256)})
     print(f"  Unique transitions from archetype: {unique_from_archetype} / 256 bytes")
     return ontology
 
 
 def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> None:
     """
-    Build epistemology as [N,256] indices using byte-sensitive transitions.
+    Build epistemology as [N,256] indices using vectorized column-wise construction.
     
     Each column corresponds to an input byte (0-255), encoding the next state index.
+    Uses vectorized step law computation (same as test) for speed and correctness.
     """
     print("Building epistemology...")
     n = int(ontology.size)
@@ -120,29 +117,42 @@ def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> None:
     from numpy.lib.format import open_memmap
     epi = open_memmap(str(paths.epistemology), mode="w+", dtype=np.uint32, shape=(n, 256))
 
-    # Build lookup: state value -> ontology index
-    state_to_idx = {int(ontology[i]): i for i in range(n)}
+    # Ensure ontology is sorted for searchsorted
+    assert np.all(ontology[:-1] <= ontology[1:]), "Ontology must be sorted"
 
-    # Compute transitions for each state and byte
-    for i in range(n):
-        s = int(ontology[i])
-        
-        for byte in range(256):
-            t = step_state_by_byte(s, byte)
-            if t not in state_to_idx:
-                raise RuntimeError(f"Epistemology closure violation: state {hex(s)} + byte {byte} -> {hex(t)} not in ontology")
-            epi[i, byte] = np.uint32(state_to_idx[t])
+    # Unpack all states into A and B components (vectorized)
+    a = ((ontology >> 12) & 0xFFF).astype(np.uint32)
+    b = (ontology & 0xFFF).astype(np.uint32)
 
-        if (i + 1) % 50_000 == 0:
+    # Build column-wise (byte-by-byte) for better cache locality
+    for byte in range(256):
+        mask24 = int(XFORM_MASK_BY_BYTE[byte])
+        m = (mask24 >> 12) & 0xFFF
+
+        # Vectorized step law: compute next states for all ontology states at once
+        new_a = (b ^ 0xFFF).astype(np.uint32)
+        new_b = ((a ^ m) ^ 0xFFF).astype(np.uint32)
+        new_state = ((new_a << 12) | new_b).astype(np.uint32)
+
+        # Find indices using binary search (fast for sorted array)
+        idx = np.searchsorted(ontology, new_state).astype(np.int64)
+
+        # Verify membership (should always hold by closure)
+        assert np.all(ontology[idx] == new_state), f"Byte {byte}: closure violation detected"
+
+        # Write column
+        epi[:, byte] = idx.astype(np.uint32)
+
+        if (byte + 1) % 32 == 0:
             epi.flush()
-            print(f"  Processed {i + 1:,} / {n:,} states ({100 * (i + 1) / n:.1f}%)")
+            print(f"  Processed {byte + 1:,} / 256 bytes ({100 * (byte + 1) / 256:.1f}%)")
 
     epi.flush()
     
-    # Verify uniqueness: count distinct transitions per state
+    # Verify uniqueness: count distinct transitions per state (sample)
     unique_per_state = []
     for i in range(min(10, n)):  # Sample first 10 states
-        unique = len(set(int(epi[i, b]) for b in range(256)))
+        unique = len(np.unique(epi[i, :]))
         unique_per_state.append(unique)
     avg_unique = sum(unique_per_state) / len(unique_per_state) if unique_per_state else 0
     
@@ -169,8 +179,6 @@ def build_phenomenology(paths: AtlasPaths) -> None:
         archetype_b12=np.uint16(ARCHETYPE_B12),
         gene_mic_s=np.uint8(GENE_MIC_S),
         xform_mask_by_byte=XFORM_MASK_BY_BYTE,
-        k4_edges=np.array(K4.edges, dtype=np.uint8),
-        k4_p_cycle=np.array(K4.p_cycle, dtype=np.float64),
     )
     
     file_size = paths.phenomenology.stat().st_size
@@ -178,7 +186,7 @@ def build_phenomenology(paths: AtlasPaths) -> None:
     print(f"Phenomenology complete: measurement constants")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024:.2f} KB)")
     print(f"  Unique masks: {unique_masks} / 256 bytes")
-    print(f"  Contents: archetype_state24, archetype_a12, archetype_b12, gene_mic_s, xform_mask_by_byte, k4_edges, k4_p_cycle")
+    print(f"  Contents: archetype_state24, archetype_a12, archetype_b12, gene_mic_s, xform_mask_by_byte")
 
 
 def build_all(base_dir: Path) -> None:

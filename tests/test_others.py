@@ -13,14 +13,13 @@ import numpy as np
 from pathlib import Path
 import time
 
-from router.constants import (
+from src.router.constants import (
     GENE_MIC_S,
     ARCHETYPE_STATE24,
     ARCHETYPE_A12,
     ARCHETYPE_B12,
     LAYER_MASK_12,
     XFORM_MASK_BY_BYTE,
-    K4,
 )
 
 
@@ -99,7 +98,7 @@ class TestOntologyStructure:
         ontology = np.load(atlas_dir / "ontology.npy").astype(np.uint32)
 
         # Build the 256 A-values and 256 B-values that must appear after exactly 2 steps from archetype
-        from router.constants import XFORM_MASK_BY_BYTE, LAYER_MASK_12, ARCHETYPE_A12, ARCHETYPE_B12
+        from src.router.constants import XFORM_MASK_BY_BYTE, LAYER_MASK_12, ARCHETYPE_A12, ARCHETYPE_B12
 
         def mask_a(byte: int) -> int:
             mask24 = int(XFORM_MASK_BY_BYTE[byte])
@@ -151,32 +150,6 @@ class TestPhenomenologyValidation:
         for i in range(256):
             assert int(masks[i]) == int(XFORM_MASK_BY_BYTE[i])
 
-    def test_k4_edges_count(self, phen):
-        """K4 should have 6 edges."""
-        edges = phen["k4_edges"]
-        assert len(edges) == 6
-
-    def test_k4_p_cycle_shape(self, phen):
-        """P_cycle should be 6x6."""
-        p_cycle = phen["k4_p_cycle"]
-        assert p_cycle.shape == (6, 6)
-
-    def test_p_cycle_matches_constants(self, phen):
-        """Loaded P_cycle must match K4.p_cycle from constants."""
-        from router.constants import K4
-        
-        loaded_p_cycle = phen["k4_p_cycle"]
-        
-        diff = np.linalg.norm(loaded_p_cycle - K4.p_cycle)
-        assert diff < 1e-12, f"Phenomenology P_cycle differs from constants: ||diff|| = {diff}"
-
-    def test_k4_edges_match_constants(self, phen):
-        """Loaded k4_edges must match K4.edges exactly."""
-        from router.constants import K4
-        
-        loaded_edges = phen["k4_edges"]
-        
-        assert np.array_equal(loaded_edges, K4.edges), "Phenomenology k4_edges != K4.edges"
 
 
 class TestEdgeCases:
@@ -184,7 +157,7 @@ class TestEdgeCases:
 
     def test_all_zeros_state(self):
         """State with all zeros should be valid."""
-        from router.constants import pack_state, unpack_state, step_state_by_byte
+        from src.router.constants import pack_state, unpack_state, step_state_by_byte
         
         state = pack_state(0x000, 0x000)
         next_state = step_state_by_byte(state, 0x00)
@@ -195,7 +168,7 @@ class TestEdgeCases:
 
     def test_all_ones_state(self):
         """State with all ones should be valid."""
-        from router.constants import pack_state, unpack_state, step_state_by_byte
+        from src.router.constants import pack_state, unpack_state, step_state_by_byte
         
         state = pack_state(0xFFF, 0xFFF)
         next_state = step_state_by_byte(state, 0xFF)
@@ -206,7 +179,7 @@ class TestEdgeCases:
 
     def test_mask_boundary_values(self):
         """Mask expansion should handle all boundary values."""
-        from router.constants import expand_intron_to_mask24
+        from src.router.constants import expand_intron_to_mask24
         
         boundary_introns = [0x00, 0xFF, 0xAA, 0x55]
         for intron in boundary_introns:
@@ -215,7 +188,7 @@ class TestEdgeCases:
 
     def test_repeated_byte_application(self):
         """Applying same byte repeatedly should stay in ontology."""
-        from router.constants import step_state_by_byte
+        from src.router.constants import step_state_by_byte
         
         state = ARCHETYPE_STATE24
         byte = 0x42
@@ -231,7 +204,7 @@ class TestPerformance:
 
     def test_step_performance(self, capsys):
         """Measure step_state_by_byte performance."""
-        from router.constants import step_state_by_byte
+        from src.router.constants import step_state_by_byte
         
         state = ARCHETYPE_STATE24
         n_steps = 10000
@@ -255,7 +228,7 @@ class TestPerformance:
         if not atlas_dir.exists():
             pytest.skip("Atlas not built")
         
-        from router.kernel import RouterKernel
+        from src.router.kernel import RouterKernel
         kernel = RouterKernel(atlas_dir)
         
         n_steps = 10000
@@ -278,7 +251,7 @@ class TestPerformance:
         if not atlas_dir.exists():
             pytest.skip("Atlas not built")
         
-        from router.kernel import RouterKernel
+        from src.router.kernel import RouterKernel
         kernel = RouterKernel(atlas_dir)
         
         n_measurements = 1000
@@ -319,11 +292,6 @@ class TestInvariantValidation:
         # Should have 256 unique A masks (since expansion is injective)
         assert len(a_masks) == 256
 
-    def test_k4_projector_rank(self):
-        """P_cycle should have rank 3 (dimension of cycle space)."""
-        P = K4.p_cycle
-        rank = np.linalg.matrix_rank(P, tol=1e-10)
-        assert rank == 3, f"P_cycle rank {rank} != 3"
 
 
 # Global summary
@@ -360,9 +328,15 @@ def print_global_summary(request):
 class TestCGMDepthProperties:
     """Test depth-2 and depth-4 properties (UNA/BU)."""
     
-    def test_depth_two_non_commutativity_rate(self):
-        """At depth 2, order should matter >80% of the time (UNA)."""
-        from router.constants import step_state_by_byte, ARCHETYPE_STATE24
+    def test_depth_two_non_commutativity_rate(self, capsys):
+        """
+        Diagnostic: measure depth-2 non-commutativity rate.
+        
+        Note: This is a diagnostic test. The exact law (P6) states that
+        T_y(T_x(s)) = T_x(T_y(s)) iff x=y, so the expected rate is 255/256 ≈ 99.61%.
+        This test is kept as a diagnostic but the exact law test is authoritative.
+        """
+        from src.router.constants import step_state_by_byte, ARCHETYPE_STATE24
         
         np.random.seed(42)
         sample_size = 200
@@ -379,8 +353,6 @@ class TestCGMDepthProperties:
                 noncommutative += 1
         
         rate = 100 * noncommutative / sample_size
-        print(f"\n  Depth-2 non-commutativity: {rate:.1f}% (n={sample_size})")
+        print(f"\n  Depth-2 non-commutativity (diagnostic): {rate:.1f}% (n={sample_size}, expected ~99.61%)")
         
-        # UNA: order matters but not absolutely
-        # Expect 80-99% non-commutative
-        assert 80 <= rate <= 99, f"Non-commutativity rate {rate}% outside UNA range [80,99]"
+        # Diagnostic only - no assertion (exact law is tested elsewhere)
