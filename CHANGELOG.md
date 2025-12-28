@@ -30,7 +30,7 @@
 * Documented complete operational runtime including Coordinator, plugins, and audit logs
 * Consolidated build procedures and reference helpers into appendices
 * Fixed section numbering and cross-references throughout
-* See [GGG ASI Alignment Router - Kernel Specification](/docs/Gyroscopic_ASI_AlignmentRouter.md) for complete normative specification
+* See [GGG ASI Alignment Router - Kernel Specification](/docs/GGG_ASI_AR_Specs.md) for complete normative specification
 
 **General Corrections & Improvements**
 * Improved integration between specification and implementation

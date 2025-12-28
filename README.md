@@ -69,7 +69,7 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 ## 📚 Documentation
 
 Primary technical reference:
-- 📖 [**GGG ASI Alignment Router** - Kernel Specifications](docs/Gyroscopic_ASI_AlignmentRouter.md)
+- 📖 [**GGG ASI Alignment Router** - Kernel Specifications](docs/GGG_ASI_AR_Specs.md)
 
 Supporting theory:
 - 📖 [Physics - Common Governance Model: Our Theoretical Foundations](docs/CGM_Paper.md)
