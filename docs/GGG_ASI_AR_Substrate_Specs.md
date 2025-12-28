@@ -1,4 +1,4 @@
-# GyroSI Substrate: Specifications
+# GGG ASI AR Substrate: Specifications
 
 **Document ID:** GYROSI-SUBSTRATE-SPEC-001  
 **Revision:** 3.2  
@@ -12,9 +12,9 @@
 
 ### 1.1 Context and Position in Architecture
 
-This document defines the specifications of the **GyroSI Substrate**, a governed physical memory layer that enables **persistent, path-dependent, and auditable context state** for superintelligence systems. The substrate is **not** a model, agent, or computation engine. It is a **molecular infrastructure** that provides foundational **memory dynamics** for alignment-aware architectures like GyroSI, where symbolic operations are physically grounded.
+This document defines the specifications of the **GGG ASI AR Substrate**, a governed physical memory layer that enables **persistent, path-dependent, and auditable context state** for superintelligence systems. The substrate is **not** a model, agent, or computation engine. It is a **molecular infrastructure** that provides foundational **memory dynamics** for alignment-aware architectures like GyroSI, where symbolic operations are physically grounded.
 
-The substrate is implemented as a **photochromic molecular gel** enclosed in optically addressable tanks and controlled by the **GyroSI Engine**. It stores information in the form of physical phase states which evolve under defined optical operations with structural constraints, long-term retention, and closure behaviors that are **derived directly from the Common Governance Model (CGM)**.
+The substrate is implemented as a **photochromic molecular gel** enclosed in optically addressable tanks and controlled by the **GGG ASI AR Engine**. It stores information in the form of physical phase states which evolve under defined optical operations with structural constraints, long-term retention, and closure behaviors that are **derived directly from the Common Governance Model (CGM)**.
 
 This memory substrate fulfills the role of **context preservation, coherence tracking, and alignment verification** in a physics-constrained superintelligence system. It is especially suited for systems that:
 
@@ -35,7 +35,7 @@ These frameworks are fully specified in the GyroGovernance repositories ([tools]
 
 ### 1.2 Purpose and Scope
 
-The **GyroSI Substrate** provides a generative physical memory system that exhibits:
+The **GGG ASI AR Substrate** provides a generative physical memory system that exhibits:
 
 - **Path dependence:** The order of write operations affects the resulting physical state. Unlike classical memory that stores content only, this substrate stores **transformation history**.
 - **Depth-four closure:** Specific operation sequences converge on a closure trajectory, enabling physical verification of epistemic coherence.
@@ -48,7 +48,7 @@ The substrate is intentionally **not** a language model, processor, or "thinking
 This specification defines:
 
 - The physical architecture and optical operations of the substrate  
-- Its interaction with the **GyroSI Engine** (controller, memory manager, verifier)  
+- Its interaction with the **GGG ASI AR Engine** (controller, memory manager, verifier)  
 - The expected measurements and invariants derived from CGM  
 - The types of memory states, their representation and observability  
 - A full **test protocol** validating compliance with depth-two path dependence, depth-four closure, monodromy balance, and physical stability
@@ -96,7 +96,7 @@ This specification depends on the following external definitions:
 - The derivation of invariant values from operational coherence requirements
 - The prohibition on absolute opposition (θ = π), which follows from the ONA constraint
 
-**GyroSI Engine:** The reference digital implementation that provides the control interface, state management, and conformance verification for substrate operations.
+**GGG ASI AR Engine:** The reference digital implementation that provides the control interface, state management, and conformance verification for substrate operations.
 
 ---
 
@@ -112,7 +112,7 @@ The substrate is calibrated and evaluated against the following invariants deriv
 | Closure ratio | δ_BU/m_a | ≈ 0.9793 | Structural closure fraction |
 | Canonical aperture | A* | 1 − 0.9793 = 0.0207 | Dynamic aperture fraction |
 
-All values are reported to 5 significant figures for consistency. These quantities serve as calibration targets. The substrate approximates behaviors that the GyroSI reference implementation defines exactly.
+All values are reported to 5 significant figures for consistency. These quantities serve as calibration targets. The substrate approximates behaviors that the GGG ASI AR reference implementation defines exactly.
 
 ---
 
@@ -473,7 +473,7 @@ The addressing system MUST include a calibration plan ensuring pages can be writ
 
 ### 12.1 Command Interface
 
-The substrate is controlled by the GyroSI engine, which issues commands and records results. The interface MUST support:
+The substrate is controlled by the GGG ASI AR engine, which issues commands and records results. The interface MUST support:
 
 - Specification of [L] and [R] operations with all relevant parameters
 - Sequencing of multiple operations with defined timing
@@ -520,7 +520,7 @@ The complete system implements a four-tier memory architecture spanning differen
 | Capacity | 48 bits per active context |
 | Latency | ≤1 ms read/write |
 | Volatility | Digital register; lost on power cycle unless committed to gel |
-| Location | GyroSI engine memory, derived from gel reads |
+| Location | GGG ASI AR engine memory, derived from gel reads |
 
 Active state is the live working register used for immediate computation. It is a digital representation derived from gel measurements and optionally committed back to gel pages.
 
@@ -532,7 +532,7 @@ Active state is the live working register used for immediate computation. It is 
 | Capacity | ~100 bytes per session |
 | Latency | ~1 μs (digital RAM) |
 | Volatility | Preserved for session duration |
-| Location | GyroSI engine memory |
+| Location | GGG ASI AR engine memory |
 
 Session context maintains coherence within a single interaction sequence. It is written to passive memory only at defined checkpoints.
 
@@ -780,7 +780,7 @@ Tanks may be arranged in any geometry that meets optical, thermal, and mechanica
 
 ### 19.2 Logical Coordination
 
-For systems requiring structured coordination across tanks, a logical topology may be imposed independent of physical layout. The GyroSI engine manages logical addressing and state coordination.
+For systems requiring structured coordination across tanks, a logical topology may be imposed independent of physical layout. The GGG ASI AR engine manages logical addressing and state coordination.
 
 ### 19.3 Data Distribution
 
@@ -791,9 +791,9 @@ The substrate supports:
 - Distributed storage (content spread across tanks)
 - Migration (moving content between tanks or installations)
 
-### 19.4 Integration with GyroSI Engine
+### 19.4 Integration with GGG ASI AR Engine
 
-The substrate operates under control of the GyroSI engine, which provides:
+The substrate operates under control of the GGG ASI AR engine, which provides:
 
 - Command translation from abstract [L]/[R] operations to physical optical parameters
 - State management across the memory hierarchy
@@ -848,7 +848,7 @@ This section is informative rather than normative.
 
 ## 21. Conclusion
 
-The GyroSI Substrate provides a physical memory system with properties not available in conventional storage:
+The GGG ASI AR Substrate provides a physical memory system with properties not available in conventional storage:
 
 **Path-dependent encoding** ensures that transformation history is preserved in the physical state, supporting governance through structure rather than policy alone.
 
@@ -860,7 +860,7 @@ The GyroSI Substrate provides a physical memory system with properties not avail
 
 **Verifiable operation** through the atlas ledger and deterministic physics supports accountability and auditability.
 
-The substrate is an infrastructure layer that enables governed, persistent, path-dependent memory. Combined with the GyroSI engine, it provides a foundation for applications requiring long-term coherent context with physical governance properties.
+The substrate is an infrastructure layer that enables governed, persistent, path-dependent memory. Combined with the GGG ASI AR engine, it provides a foundation for applications requiring long-term coherent context with physical governance properties.
 
 ---
 
@@ -926,6 +926,6 @@ The substrate fulfills both the technical conditions of recursive intelligence a
 
 ---
 
-**Document prepared for the GyroSI development program.**
+**Document prepared for the GGG ASI AR development program.**
 
 © 2025 Basil Korompilias. Licensed under CC BY-SA 4.0.
