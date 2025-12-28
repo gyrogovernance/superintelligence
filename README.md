@@ -77,7 +77,7 @@ Supporting theory:
 - 📖 [Gyroscopic Global Governance (GGG) - Four-Domain Coupling](docs/GGG_Paper.md)
 
 Future Development:
-- 🧬 [Substrate: Physical Memory Specification](docs/GyroSI_Substrate_Specs.md)
+- 🧬 [Substrate: Physical Memory Specification](/docs/GGG_ASI_AR_Substrate_Specs.md)
 
 ---
 
