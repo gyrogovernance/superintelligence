@@ -32,7 +32,9 @@ Status: research implementation. The kernel physics and measurement substrate ar
 
 ## 🌐 Overview
 
-GGG ASI Alignment Router is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
+GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+
+The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
 
 In this project, Artificial Superintelligence is treated as an operational regime: stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
 - **Governance Traceability**

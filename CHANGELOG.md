@@ -12,6 +12,16 @@
 
 ---
 
+## [v0.9.9.5-ACI-CLI] – 2025-12-29
+
+### Documentation
+- **Alignment Convergence Infrastructure (ACI) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how ACI helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the ASI Alignment Router.
+
+### Development Planning
+- **ACI CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Convergence Infrastructure. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, plugin integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
+
+---
+
 ## [v0.9.9.4i-Router] – 2025-12-28
 
 ### Added

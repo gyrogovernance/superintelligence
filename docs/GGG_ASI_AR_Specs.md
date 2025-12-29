@@ -17,7 +17,9 @@ The GGG ASI Alignment Router represents a different paradigm. It treats intellig
 
 ## 1.2 What the Router Is
 
-The GGG ASI Alignment Router is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte in an append-only ledger. This process results in a deterministic state at each step and a compact routing signature.
+GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+
+The algorithm is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte in an append-only ledger. This process results in a deterministic state at each step and a compact routing signature.
 
 The kernel is designed to support governance-grade coordination across the GGG domains: Economy, Employment, Education, and Ecology. It does not interpret the meaning of the input bytes. Instead, it performs structural transformations that make the results reproducible, comparable, and auditable.
 
