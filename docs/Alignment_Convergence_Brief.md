@@ -86,7 +86,7 @@ Alignment Convergence projects are executed through a defined operating arrangem
     This includes the Router, the App workflow, and optional Plugins for tracking and verifying deliverables.
 
 2.  **A Project Sponsor administers funds.**
-    The Sponsor can be an AI Safety Lab running a direct prize competition or a Fiscal Host NGO administering a grant program. The Sponsor retains the final authentic authority for payment decisions and disbursement.
+    The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains the final authentic authority for payment decisions and disbursement.
 
 3.  **Contributors participate through deliverables, not pitches.**
     Participation is based on completing project-defined deliverables within the rules set by the Sponsor. This eliminates the need for individual contributors to write business plans or fundraising narratives.
