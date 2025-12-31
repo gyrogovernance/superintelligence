@@ -38,7 +38,7 @@ The router is the substrate that makes coordination structurally reproducible. T
 
 ## 1.4 Shared Moments
 
-Shared moments are the central coordination primitive of the kernel. A shared moment occurs when participants who possess the same ledger prefix compute the identical kernel state at the identical step. This provides a shared "now" as a configuration derived from the ledger history.
+Shared moments are the central coordination primitive of the kernel. A shared moment occurs when participants who possess the same ledger prefix of length **t** compute the identical kernel state **sₜ**. This provides a shared "now" as a configuration derived from the ledger history.
 
 This primitive replaces three fragile coordination patterns:
 1.  **Coordination by asserted time:** Reliance on timestamps or UTC ordering.
@@ -173,7 +173,7 @@ B12 = state24 & 0xFFF
 
 **2. Hamming distance to archetype:**
 ```python
-archetype_distance = popcount(s_t ^ ARCHETYPE_STATE24)
+archetype_distance = popcount(state24 ^ ARCHETYPE_STATE24)
 ```
 where `popcount(x)` returns the number of set bits in `x`.
 
@@ -671,6 +671,7 @@ state_index = epistemology[state_index, byte]
 ```
 
 A routing signature is emitted on demand and MUST include at minimum:
+- `step` (the current ledger length t, i.e., number of bytes applied)
 - `state_index`
 - `state_hex` (24-bit hex)
 - `a_hex` (12-bit hex)
@@ -711,7 +712,7 @@ Given the final state and the full byte sequence, the full trajectory can be rec
 
 Given final state alone, the past is not uniquely determined. Different byte sequences can reach the same state due to group relations such as the depth-4 identity `xyxy = id` (Property P7).
 
-This is not a deficiency. The ledger is the record of governance events. The state is a shared observable for coordination, not a unique identifier of history.
+This is not a deficiency. The byte ledger is the record of kernel steps. Governance events are recorded separately in the application-layer event log. The state is a shared observable for coordination, not a unique identifier of history.
 
 ## 4.4 Governance Event Model
 
@@ -735,7 +736,7 @@ A GovernanceEvent is a sparse update to exactly one edge coordinate of one domai
 - `domain ∈ {Economy, Employment, Education}`
 - `edge_id ∈ {0..5}` (canonical K₄ edge order)
 - signed increment `Δ = magnitude × confidence`
-- optional binding to a shared moment: `(state_index, last_byte)` for audit
+- optional binding to a shared moment: `(step, state_index, last_byte)` for audit
 
 Normative update rule:
 
@@ -748,6 +749,7 @@ The kernel does not interpret events. Events are application-layer records that 
 ### 4.4.3 Event binding to kernel moments
 
 By default, events SHOULD be bound to the current kernel moment when applied. This binding records:
+- `kernel_step` (ledger length t at the time of binding)
 - `kernel_state_index`: the current ontology index
 - `kernel_last_byte`: the last byte that advanced the kernel
 
@@ -778,7 +780,7 @@ The Coordinator maintains two append-only audit logs:
 - Records the sequence of GovernanceEvents applied to domain ledgers
 - Each entry includes:
   - event index (position in log)
-  - kernel binding (`kernel_state_index`, `kernel_last_byte`) if present
+  - kernel binding (`kernel_step`, `kernel_state_index`, `kernel_last_byte`) if present
   - complete event data (domain, edge_id, magnitude, confidence, metadata)
 - Enables deterministic replay of ledger state and aperture
 
@@ -787,7 +789,7 @@ Both logs are append-only and MUST preserve ordering. Implementations MAY persis
 ### 4.5.3 Status reporting
 
 A Coordinator MUST provide a status report that includes at minimum:
-- Kernel signature fields (`state_index`, `state_hex`, `a_hex`, `b_hex`)
+- Kernel signature fields (`step`, `state_index`, `state_hex`, `a_hex`, `b_hex`)
 - `last_byte` (the last byte that advanced the kernel)
 - `byte_log_len` (length of byte log)
 - `event_log_len` (length of event log)
@@ -948,7 +950,7 @@ The event log defines the governance record. The kernel state defines shared mom
 
 ### 4.10.3 Optional binding to shared moments
 
-Events may record `(state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under authentic human accountability.
+Events may record `(step, state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under authentic human accountability.
 
 ## 4.11 Structural Displacement and Policy Modes
 
@@ -1052,7 +1054,7 @@ Audit logs:
 - preserve ordering in both logs
 
 Event binding:
-- provide a mechanism to bind events to the current kernel moment by recording `kernel_state_index` and `kernel_last_byte`
+- provide a mechanism to bind events to the current kernel moment by recording `kernel_step`, `kernel_state_index`, and `kernel_last_byte`
 
 Status reporting:
 - provide a status report including at minimum:

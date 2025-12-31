@@ -1,0 +1,122 @@
+{
+  "project_slug": "test-skip",
+  "compilation": {
+    "attestation_count": 3,
+    "processed_attestations": 1,
+    "skipped_attestations": [
+      {
+        "index": 1,
+        "id": "invalid_001",
+        "reason": "invalid unit: invalid_unit"
+      },
+      {
+        "index": 2,
+        "id": "invalid_002",
+        "reason": "invalid domain: invalid_domain"
+      }
+    ],
+    "byte_count": 1,
+    "kernel": {
+      "step": 1,
+      "state_index": 43759,
+      "state_hex": "aaaefe",
+      "a_hex": "aaa",
+      "b_hex": "efe",
+      "last_byte": 1
+    },
+    "hashes": {
+      "bytes_sha256": "4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a",
+      "events_sha256": "678c57decb738bb043d7ebaedc72ecaf67154616625fb3ecc19c960d6824f5ba"
+    }
+  },
+  "accounting": {
+    "thm": {
+      "totals": {
+        "GTD": 1,
+        "IVD": 0,
+        "IAD": 0,
+        "IID": 0
+      },
+      "by_domain": {
+        "economy": {
+          "GTD": 1,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        },
+        "employment": {
+          "GTD": 0,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        },
+        "education": {
+          "GTD": 0,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        }
+      }
+    },
+    "gyroscope": {
+      "totals": {
+        "GM": 0,
+        "ICu": 0,
+        "IInter": 0,
+        "ICo": 0
+      },
+      "by_domain": {
+        "economy": {
+          "GM": 0,
+          "ICu": 0,
+          "IInter": 0,
+          "ICo": 0
+        },
+        "employment": {
+          "GM": 0,
+          "ICu": 0,
+          "IInter": 0,
+          "ICo": 0
+        },
+        "education": {
+          "GM": 0,
+          "ICu": 0,
+          "IInter": 0,
+          "ICo": 0
+        }
+      }
+    }
+  },
+  "ledger": {
+    "y_econ": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "y_emp": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "y_edu": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "apertures": {
+    "A_econ": 0.5,
+    "A_emp": 0.0,
+    "A_edu": 0.0
+  },
+  "warnings": {}
+}

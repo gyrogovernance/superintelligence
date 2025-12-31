@@ -3,6 +3,7 @@
 # Core dependencies
 numpy>=2.0.0,<2.3.0
 ujson>=5.10.0
+pyyaml>=6.0
 
 # Extra features
 emoji>=2.14.0

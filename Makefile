@@ -53,7 +53,11 @@ check-imports:
 	$(PYTHON) scripts/check_imports.py
 
 test:
-	@echo "Running all tests..."
+	@echo "Running ACI CLI tests..."
+	$(PYTHON) tests/test_aci_cli.py
+
+test-pytest:
+	@echo "Running all tests with pytest..."
 	$(PYTHON) -m pytest tests/ -v
 
 run-wikipedia:

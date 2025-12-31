@@ -1,7 +1,7 @@
 # Alignment Convergence Infrastructure - ACI Brief
 > Human Workforce Coordination for AI Safety
 
-Alignment Convergence is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for evaluation, interpretability, and funding allocation.
+Alignment Convergence is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
 
 ***AI’s rapid growth requires more humans to ensure automation risks do not escalate to dangerous thresholds. At the same time, millions of people are underemployed or unemployed and at risk of poverty as automation concentrates power and weakens accountability.***
 
@@ -41,11 +41,11 @@ Alignment Convergence produces three kinds of outputs that are useful immediatel
     
 2. **Clear classification of what the work is doing**
     
-    Classification is not approval and it is not a grade. It is a shared way to describe what risk a piece of work addresses and what kind of contribution it represents.
+    Classification is a shared way to describe what risk a piece of work addresses and what kind of contribution it represents. It is not approval and it is not a grade.
     
-3. **A replayable work trail**
+3. **Attested work receipts**
     
-    An internal record of submitted decisions and outputs so that teams and fiscal hosts can reconstruct what happened in a project without relying on vague narratives.
+    Each contribution produces a verifiable receipt derived from the Router's shared coordination state. These receipts enable sponsors and fiscal hosts to reconstruct what happened in a project through deterministic replay, without relying on informal narratives.
     
 
 ---
@@ -56,25 +56,35 @@ Alignment Convergence has three layers.
 
 ### 1. Router
 
-The Router is the coordination backbone. It turns a project's activity into a compact shared state that can be replayed from the project log.
+The Router is the coordination backbone. It is a deterministic kernel that turns a project's activity log into a sequence of shared coordination states.
 
-Practically, this gives a project a stable way to say "This is the state of this work right now" and "Here is the sequence of steps that led here" without relying on personal trust or memory.
+A shared state is a reproducible reference point computed from the project log. All participants with the same log prefix compute the same state. This provides a stable way to say "This is the state of this work right now" and "Here is the sequence of steps that led here" without relying on personal trust or memory.
 
 ### 2. App
 
-The app is where a workflow lives.
+The App is where the workflow lives.
 
-A worker defines their task, performs the work, and submits the output to the Router for coordination. The app captures only what matters: the task definition and the completed deliverable.
+A contributor defines their task, performs the work, and submits the deliverable. The App captures the task definition, the completed deliverable, and the classification.
 
-**Focus:** The app is built around the **Gyroscope Protocol**, which classifies all work into four categories: Governance Management, Information Curation, Inference Interaction, and Intelligence Cooperation.
+**Work classification:** The App uses the **Gyroscope Protocol**, which classifies all work into four categories:
+
+- Governance Management
+- Information Curation
+- Inference Interaction
+- Intelligence Cooperation
 
 ### 3. Plugins
 
-Plugins connect the app to tools people already use, such as GitHub, notebooks, shared documents, and model evaluation harnesses.
+Plugins connect the App to tools people already use, such as GitHub, notebooks, shared documents, and model evaluation harnesses.
 
-**Focus:** Plugins use **The Human Mark** to tag work outputs by the safety risk they address: Governance Traceability Displacement, Information Variety Displacement, Inference Accountability Displacement, or Intelligence Integrity Displacement.
+**Risk classification:** Plugins use **The Human Mark** to tag work outputs by the safety risk they address:
 
-Plugins are optional. The platform still works if people submit outputs manually.
+- Governance Traceability Displacement
+- Information Variety Displacement
+- Inference Accountability Displacement
+- Intelligence Integrity Displacement
+
+Plugins are optional. The platform works if contributors submit outputs manually.
 
 ---
 
@@ -82,14 +92,14 @@ Plugins are optional. The platform still works if people submit outputs manually
 
 Alignment Convergence projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
-1.  **Alignment Convergence provides the technical infrastructure.**
-    This includes the Router, the App workflow, and optional Plugins for tracking and verifying deliverables.
+1. **Alignment Convergence provides the technical infrastructure.**
+   This includes the Router, the App workflow, and optional Plugins for tracking and verifying deliverables.
 
-2.  **A Project Sponsor administers funds.**
-    The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains the final authentic authority for payment decisions and disbursement.
+2. **A Project Sponsor administers funds.**
+   The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains full authority over acceptance criteria and payment decisions.
 
-3.  **Contributors participate through deliverables, not pitches.**
-    Participation is based on completing project-defined deliverables within the rules set by the Sponsor. This eliminates the need for individual contributors to write business plans or fundraising narratives.
+3. **Contributors participate through deliverables, not pitches.**
+   Participation is based on completing project-defined deliverables within the rules set by the Sponsor. This eliminates the need for individual contributors to write business plans or fundraising narratives.
 
 ---
 
@@ -115,9 +125,9 @@ It is used for structured deliverable bundles such as a complete evaluation set,
 
 The platform supports a progression model to move contributors from casual participation to stable employment.
 
-1.  **Open Participation:** Contributors start by submitting Daily Units.
-2.  **Stipend Qualification:** Contributors who meet a defined threshold of accepted Daily Units qualify for Sprint Stipends.
-3.  **Employment Queue:** Contributors who successfully complete a defined number of Sprint Stipends enter a qualified queue for longer-term employment or contracting with the Sponsor.
+1. **Open Participation:** Contributors start by submitting Daily Units.
+2. **Stipend Qualification:** Contributors who meet a defined threshold of accepted Daily Units qualify for Sprint Stipends.
+3. **Employment Queue:** Contributors who successfully complete a defined number of Sprint Stipends enter a qualified queue for longer-term employment or contracting with the Sponsor.
 
 This structure allows Sponsors to vet talent through actual work outputs with capped financial risk, while providing contributors with a clear path to professional stability.
 
@@ -129,7 +139,7 @@ To manage risk and budget, Project Sponsors set specific caps on participation.
 
 A standard configuration limits an individual contributor to a specific number of Daily Prizes and Sprint Stipends per project. This ensures funds are distributed to a wider pool of contributors and prevents indefinite casual work without a move toward formal employment.
 
-The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Convergence provides the verified work trail and classification data to inform these decisions, but it does not automate the transfer of funds.
+The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Convergence provides the verified work trail and classification data to inform these decisions, but does not automate the transfer of funds.
 
 ---
 
@@ -142,16 +152,16 @@ The Alignment Convergence model can be used by AI safety labs directly or by NGO
 Alignment Convergence uses two canonical units of work:
 
 - **Daily Unit (1 Day)**  
-  One day of focused work on a well-defined task. This is used for “Daily Prizes”.
+  One day of focused work on a well-defined task. This is used for "Daily Prizes".
 
 - **Sprint Unit (4 Days)**  
-  Four days of focused work on a structured deliverable bundle. This is used for “Sprint Stipends”.
+  Four days of focused work on a structured deliverable bundle. This is used for "Sprint Stipends".
 
 These units are defined in terms of work and deliverables, not employment status. Sponsors fund outputs that correspond to one or more of these units.
 
 ---
 
-### Tier 1: Individual rapid grants (per‑person cap, e.g. £1,000)
+### Tier 1: Individual rapid grants (per-person cap, e.g. £1,000)
 
 Some programs, such as rapid grants, place a cap per individual (£1,000 per person). In this setting, Alignment Convergence can be used to structure a small, safe engagement window.
 
@@ -166,17 +176,17 @@ A sponsor with a £1,000 cap per person can, for example:
   - additional prizes in a later round, or
   - overhead, tools, or coordination costs
 
-The key point is that the cap applies per person, and Alignment Convergence provides a clear way to express “how much work was funded” inside that limit, without treating it as salary.
+The key point is that the cap applies per person, and Alignment Convergence provides a clear way to express "how much work was funded" inside that limit, without treating it as salary.
 
 ---
 
-### Tier 2: Mini‑grants per project (for small teams)
+### Tier 2: Mini-grants per project (for small teams)
 
-Sponsors can also allocate mini‑grants per project, for example a £3,000 grant for a small team of three people working together on a specific AI safety task.
+Sponsors can also allocate mini-grants per project, for example a £3,000 grant for a small team of three people working together on a specific AI safety task.
 
 **Example structure:**
 
-- Project budget: £3,000 for a 3‑person evaluation or interpretability project
+- Project budget: £3,000 for a 3-person evaluation or interpretability project
 - Each person performs:
   - one Sprint Unit (4 days) funded as a Sprint Stipend
   - optionally, one additional Daily Unit funded as a Daily Prize
@@ -188,21 +198,21 @@ In this tier, labs can run the program directly, or an NGO fiscal host can admin
 
 ---
 
-### Tier 3: Project grants for medium‑term employment through fiscal hosts
+### Tier 3: Project grants for medium-term employment through fiscal hosts
 
-Larger grants (for example, £70,000) can be used to fund medium‑term projects, such as six‑month engagements for a small team, administered through a fiscal host.
+Larger grants (for example, £70,000) can be used to fund medium-term projects, such as six-month engagements for a small team, administered through a fiscal host.
 
 **Example interpretation:**
 
 - Project grant: £70,000
-- Team: 3 people working for 6 months on a well‑defined safety agenda
+- Team: 3 people working for 6 months on a well-defined safety agenda
 - Structure:
   - Early phase: several Sprint Units and Daily Units to qualify contributors and refine workflows
-  - Main phase: contributors move into more stable contracts or stipends handled by the fiscal host’s normal HR or contracting processes
+  - Main phase: contributors move into more stable contracts or stipends handled by the fiscal host's normal HR or contracting processes
 - Alignment Convergence continues to be used for:
   - defining and tracking Daily and Sprint Units
   - classifying deliverables with Gyroscope and The Human Mark
-  - providing a replayable work trail for reporting back to the sponsor
+  - providing an attested work trail for reporting back to the sponsor
 
 In this tier, fiscal hosts are most useful, because they already have the legal and accounting infrastructure to support longer engagements. Alignment Convergence does not replace that infrastructure; it provides a consistent way to express and track the work being funded.
 
@@ -210,9 +220,9 @@ In this tier, fiscal hosts are most useful, because they already have the legal 
 
 ## The Complete Framework
 
-Alignment Convergence uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **GGG ASI Router** for distribution and coordination.
+Alignment Convergence uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **GGG ASI Router** for coordination and replay.
 
-**The Human Mark** is an epistemic taxonomy classifying all types of failures and defenses into four displacement risks:
+**The Human Mark** is an epistemic taxonomy classifying contributions by the displacement risk they address:
 
 - Governance Traceability Displacement
 - Information Variety Displacement
@@ -223,32 +233,45 @@ This gives fiscal hosts and funders a portfolio view. They can see what kinds of
 
 ### Core Engine: ASI Alignment Router
 
-The ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+The ASI Alignment Router is a deterministic coordination kernel. It maps a shared log of activity into a sequence of shared coordination states that can be verified by replay.
+
+The Router provides:
+
+- **Shared moments:** All participants with the same log prefix compute the same coordination state.
+- **Deterministic replay:** Any party can reconstruct the full sequence of states from the log.
+- **Attested work receipts:** Contributions are bound to specific coordination states, enabling audit-grade verification.
 
 ### Theoretical Foundation: Gyroscopic Global Governance
 
-Alignment Convergence is the operational expression of Gyroscopic Global Governance, a framework for the post-AGI economy. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
+Alignment Convergence is the operational expression of Gyroscopic Global Governance (GGG), a framework for post-AGI coordination. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
+
+---
+
+## Disclaimer
+
+ACI is coordination infrastructure for work receipts, classification, and replayable audit.
+
+Acceptance criteria, evaluation standards, payment decisions, and all policy judgments remain the responsibility of project sponsors and accountable human governance. ACI provides the shared coordination substrate that makes contributions verifiable and comparable. It does not evaluate, score, or approve contributions.
 
 ---
 
 ## Documentation & Links
 
 ### Router Specification
-- [**GGG ASI Alignment Router - Kernel Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md) - Complete technical specification for implementation
-- [**Router Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Implications.md) - Use cases and deployment scenarios
+- [**GGG ASI Alignment Router — Kernel Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md) — Complete technical specification for implementation
+- [**Router Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Implications.md) — Use cases and deployment scenarios
 
 ### Classification Framework (The Human Mark)
-- [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md) - Core taxonomy of four displacement risks
-- [**Formal Grammar**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Grammar.md) - PEG specification for tagging and validation
-- [**Specifications Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Specs.md) - Implementation guidance for systems and evaluations
-- [**Terminology Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Terms.md) - Mark-consistent framing for 250+ AI safety terms
-
+- [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md) — Core taxonomy of four displacement risks
+- [**Formal Grammar**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Grammar.md) — PEG specification for tagging and validation
+- [**Specifications Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Specs.md) — Implementation guidance for systems and evaluations
+- [**Terminology Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Terms.md) — Mark-consistent framing for 250+ AI safety terms
 
 ### Proof of Concept
-- [**The Human Mark in the Wild**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_InTheWild.md) - Analysis of 655 jailbreak prompts with THM classifications
-- [**Dataset on Hugging Face**](https://huggingface.co/datasets/gyrogovernance/thm_Jailbreaks_inTheWild) - Annotated corpus for training and evaluation
+- [**The Human Mark in the Wild**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_InTheWild.md) — Analysis of 655 jailbreak prompts with THM classifications
+- [**Dataset on Hugging Face**](https://huggingface.co/datasets/gyrogovernance/thm_Jailbreaks_inTheWild) — Annotated corpus for training and evaluation
 
 ### References
-- [**GGG Paper**](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md) - Theoretical foundations and governance framework
+- [**GGG Paper**](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md) — Theoretical foundations and governance framework
 
 ---

@@ -1,0 +1,111 @@
+{
+  "project_slug": "test-project",
+  "compilation": {
+    "attestation_count": 2,
+    "processed_attestations": 2,
+    "skipped_attestations": [],
+    "byte_count": 5,
+    "kernel": {
+      "step": 5,
+      "state_index": 35471,
+      "state_hex": "8a88f8",
+      "a_hex": "8a8",
+      "b_hex": "8f8",
+      "last_byte": 4
+    },
+    "hashes": {
+      "bytes_sha256": "3d459e0fcf22cfcd1d7eed46bcfa68193c009bec3d53cbe69e5997632ccf6f54",
+      "events_sha256": "024c399649d526c9e58388c0b9ca12ea3119862b7c04f1ecbd9faebde82acbed"
+    }
+  },
+  "accounting": {
+    "thm": {
+      "totals": {
+        "GTD": 1,
+        "IVD": 4,
+        "IAD": 0,
+        "IID": 0
+      },
+      "by_domain": {
+        "economy": {
+          "GTD": 1,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        },
+        "employment": {
+          "GTD": 0,
+          "IVD": 4,
+          "IAD": 0,
+          "IID": 0
+        },
+        "education": {
+          "GTD": 0,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        }
+      }
+    },
+    "gyroscope": {
+      "totals": {
+        "GM": 1,
+        "ICu": 4,
+        "IInter": 0,
+        "ICo": 0
+      },
+      "by_domain": {
+        "economy": {
+          "GM": 1,
+          "ICu": 0,
+          "IInter": 0,
+          "ICo": 0
+        },
+        "employment": {
+          "GM": 0,
+          "ICu": 4,
+          "IInter": 0,
+          "ICo": 0
+        },
+        "education": {
+          "GM": 0,
+          "ICu": 0,
+          "IInter": 0,
+          "ICo": 0
+        }
+      }
+    }
+  },
+  "ledger": {
+    "y_econ": [
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "y_emp": [
+      0.0,
+      0.0,
+      0.0,
+      4.0,
+      0.0,
+      0.0
+    ],
+    "y_edu": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "apertures": {
+    "A_econ": 0.5,
+    "A_emp": 0.5,
+    "A_edu": 0.0
+  },
+  "warnings": {}
+}

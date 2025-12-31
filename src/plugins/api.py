@@ -58,7 +58,21 @@ def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
     confidence = float(d.get("confidence", 1.0))
     meta = dict(d.get("meta", {}))
 
-    return GovernanceEvent(domain=dom, edge_id=edge, magnitude=magnitude, confidence=confidence, meta=meta)
+    # Optional kernel binding fields
+    kernel_step = d.get("kernel_step")
+    kernel_state_index = d.get("kernel_state_index")
+    kernel_last_byte = d.get("kernel_last_byte")
+
+    return GovernanceEvent(
+        domain=dom,
+        edge_id=edge,
+        magnitude=magnitude,
+        confidence=confidence,
+        meta=meta,
+        kernel_step=int(kernel_step) if kernel_step is not None else None,
+        kernel_state_index=int(kernel_state_index) if kernel_state_index is not None else None,
+        kernel_last_byte=int(kernel_last_byte) if kernel_last_byte is not None else None,
+    )
 
 
 def event_to_dict(ev: GovernanceEvent) -> Dict[str, Any]:

@@ -12,6 +12,52 @@
 
 ---
 
+## [v0.9.9.6-ACI-CLI] – 2025-12-30
+
+# High-Level Changelog: ACI Architecture Realignment
+
+This update fundamentally restructures ACI from a "multi-command CLI" into a **deterministic coordination compiler** centered on project files.
+
+## 1. Concept: Moments are Derived Facts
+- **Removed:** Manual `moment.md` files and "moment management" workflows.
+- **New Model:** "Moments" are derived kernel states produced by compiling a project's list of attestations.
+- **Benefit:** Users only edit project files; the system handles all kernel logic automatically.
+
+## 2. Concept: Accounting vs Evaluation
+- **Removed:** 0.0–1.0 scores, confidence sliders, and judgemental metrics.
+- **New Model:** **Attestations** are categorical receipts (THM risk + Gyroscope category).
+- **Behavior:**
+  - **THM** updates the GGG ledger (affects apertures).
+  - **Gyroscope** updates the accounting report (enumerative counts).
+- **Benefit:** Eliminates subjective "grading" while preserving rigorous structural accounting.
+
+## 3. Workflow: Single-Mode "Sync & Verify"
+- **Removed:** Menus, subcommands (`atlas`, `moment`, `bundle`), and interactive prompts.
+- **New Model:** Running `aci` performs a full system pass:
+  1. Auto-builds Atlas/Templates if missing.
+  2. Compiles all Project Markdown files.
+  3. Generates replayable artifacts (`.bytes`, `.events.jsonl`) and Reports.
+  4. Creates and verifies Bundles (`.zip`).
+- **Benefit:** Guarantee of consistency; if the CLI exits successfully, the entire workspace is proven valid and synced.
+
+## 4. Artifacts: Bundle as Integrity Boundary
+- **New Model:** Bundles now include:
+  - Source `project.md`
+  - Compiled logs (`bytes`, `events`)
+  - **Accounting Reports** (`report.json`, `report.md`)
+  - Snapshot `bundle.json`
+- **Verification:** Replays logs from the bundle and validates signature, apertures, and file hashes against the snapshot.
+
+## 5. Kernel: Explicit Step Counting
+- **New Model:** Shared moments are now defined as `(step, state)`.
+- **Implementation:** Kernel, Signature, and Events now explicitly track `step` (ledger length), ensuring precise event binding.
+
+---
+
+**Summary:** ACI is now a "Project Compiler" that turns human claims into verifiable coordination proofs without manual overhead.
+
+---
+
 ## [v0.9.9.5-ACI-CLI] – 2025-12-29
 
 ### Documentation

@@ -3,7 +3,7 @@ Router kernel.
 
 Loads the three atlas artifacts and provides:
 - deterministic stepping by bytes via epistemology
-- state signature (state_index, state_hex, a_hex, b_hex)
+- state signature (step, state_index, state_hex, a_hex, b_hex)
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ from .constants import (
 
 @dataclass(frozen=True)
 class Signature:
+    step: int
     state_index: int
     state_hex: str
     a_hex: str
@@ -44,18 +45,24 @@ class RouterKernel:
         
         self.state_index = self.archetype_index
         self.last_byte: int = GENE_MIC_S
+        self.step: int = 0
 
     def reset(self, state_index: int | None = None) -> None:
         if state_index is None:
             state_index = self.archetype_index
         self.state_index = int(state_index)
         self.last_byte = GENE_MIC_S
+        self.step = 0
 
     def step_byte(self, byte: int) -> None:
         self.last_byte = int(byte) & 0xFF
         self.state_index = int(self.epistemology[self.state_index, self.last_byte])
+        self.step += 1
 
-    def step(self, payload: bytes) -> Signature:
+    def step_payload(self, payload: bytes) -> Signature:
+        """
+        Step through a sequence of bytes and return the final signature.
+        """
         for b in payload:
             self.step_byte(b)
         return self.signature()
@@ -75,6 +82,7 @@ class RouterKernel:
         a, b = unpack_state(s)
 
         return Signature(
+            step=self.step,
             state_index=self.state_index,
             state_hex=f"{s:06x}",
             a_hex=f"{a:03x}",

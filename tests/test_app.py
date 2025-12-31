@@ -109,7 +109,7 @@ class TestCoordinator:
         assert abs(s1.apertures["edu"] - s2.apertures["edu"]) < 1e-12
 
     def test_event_binding_records_kernel_moment(self, atlas_dir):
-        """Events bound to kernel moment should record state_index and last_byte."""
+        """Events bound to kernel moment should record step, state_index and last_byte."""
         c = Coordinator(atlas_dir)
         c.step_bytes(b"\x12\x34")  # advance kernel
 
@@ -117,6 +117,7 @@ class TestCoordinator:
         c.apply_event(ev, bind_to_kernel_moment=True)
 
         last = c.event_log[-1]["event"]
+        assert last["kernel_step"] == len(c.byte_log)  # should be 2 here
         assert last["kernel_state_index"] == c.kernel.state_index
         assert last["kernel_last_byte"] == c.kernel.last_byte
 
@@ -132,6 +133,7 @@ class TestCoordinator:
         c.reset()
 
         assert c.kernel.state_index == c.kernel.archetype_index
+        assert c.kernel.step == 0
         assert len(c.byte_log) == 0
         assert len(c.event_log) == 0
         assert c.ledgers.event_count == 0
@@ -148,6 +150,8 @@ class TestCoordinator:
         assert hasattr(status, "ledgers")
         assert hasattr(status, "apertures")
 
+        assert "step" in status.kernel
+        assert status.kernel["step"] == status.kernel["byte_log_len"]
         assert "state_index" in status.kernel
         assert "state_hex" in status.kernel
         assert "a_hex" in status.kernel

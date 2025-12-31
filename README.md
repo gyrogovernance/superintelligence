@@ -28,11 +28,11 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
-Status: research implementation. The kernel physics and measurement substrate are specified and tested. Interface and deployment integration are evolving.
+Status: research implementation. The kernel physics and measurement substrate are specified and tested. The ACI CLI provides a project-based coordination workflow.
 
 ## 🌐 Overview
 
-GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed coordination of contributions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
 
 The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
 
@@ -98,7 +98,16 @@ Future Development:
 ### Install
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
-### Build the atlas
+### ACI CLI (Recommended)
+The CLI provides a project-based, MD-first workflow:
+
+```bash
+python aci.py
+```
+
+This runs automatically: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. See `data/projects/templates/project_template.md` for the project format.
+
+### Build the atlas (Manual)
 The atlas compiles the kernel physics into three artifacts: ontology, epistemology, and phenomenology.
 
 ```bash
@@ -110,7 +119,7 @@ python -m src.router.atlas --out data/atlas
 python -m pytest -v -s tests/
 ```
 
-### Minimal usage
+### Programmatic usage
 
 ```python
 from pathlib import Path

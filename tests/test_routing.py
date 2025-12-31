@@ -83,6 +83,7 @@ class TestStateTransitions:
     def test_initial_state_is_archetype(self, kernel):
         """Kernel should start at archetype."""
         sig = kernel.signature()
+        assert sig.step == 0
         assert sig.state_index == kernel.archetype_index
         assert sig.state_hex == f"{ARCHETYPE_STATE24:06x}"
 
@@ -126,6 +127,17 @@ class TestStateTransitions:
         
         assert kernel.state_index == kernel.archetype_index
 
+    def test_step_counter_increments_and_resets(self, kernel):
+        """Step counter should increment on each step_byte and reset on reset."""
+        kernel.reset()
+        assert kernel.signature().step == 0
+        kernel.step_byte(0x42)
+        assert kernel.signature().step == 1
+        kernel.step_byte(0x43)
+        assert kernel.signature().step == 2
+        kernel.reset()
+        assert kernel.signature().step == 0
+
 
 class TestMultiStepRouting:
     """Test routing through multiple bytes."""
@@ -145,10 +157,10 @@ class TestMultiStepRouting:
         assert idx1 == idx2
 
     def test_payload_routing(self, kernel):
-        """step() with payload should apply all bytes."""
+        """step_payload() with payload should apply all bytes."""
         payload = b"Hello"
         kernel.reset()
-        sig = kernel.step(payload)
+        sig = kernel.step_payload(payload)
         
         # Manually apply each byte
         kernel.reset()
@@ -157,6 +169,7 @@ class TestMultiStepRouting:
         manual_idx = kernel.state_index
         
         assert sig.state_index == manual_idx
+        assert sig.step == len(payload)
 
     def test_order_matters(self, kernel):
         """Byte order should affect final state (non-commutativity)."""
@@ -184,6 +197,7 @@ class TestSignatureProperties:
         kernel.reset()
         sig = kernel.signature()
         
+        assert hasattr(sig, 'step')
         assert hasattr(sig, 'state_index')
         assert hasattr(sig, 'state_hex')
         assert hasattr(sig, 'a_hex')

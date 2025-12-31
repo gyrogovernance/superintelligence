@@ -1,0 +1,672 @@
+"""
+Workspace I/O, frontmatter parsing, and replay functions.
+"""
+
+from pathlib import Path
+from typing import Tuple, Dict, Any
+import re
+import json
+import hashlib
+from datetime import datetime
+
+# PyYAML is required for frontmatter parsing
+import yaml
+
+
+def get_data_dir() -> Path:
+    """Returns data/ directory in current working directory."""
+    data_dir = Path.cwd() / "data"
+    if not data_dir.exists():
+        data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+
+def get_projects_dir() -> Path:
+    """Returns data/projects/ directory."""
+    projects_dir = get_data_dir() / "projects"
+    if not projects_dir.exists():
+        projects_dir.mkdir(parents=True, exist_ok=True)
+    return projects_dir
+
+
+def get_aci_dir() -> Path:
+    """Returns data/projects/.aci/ directory for compiled artifacts."""
+    aci_dir = get_projects_dir() / ".aci"
+    if not aci_dir.exists():
+        aci_dir.mkdir(parents=True, exist_ok=True)
+    return aci_dir
+
+
+def get_bundles_dir() -> Path:
+    """Returns data/projects/bundles/ directory."""
+    bundles_dir = get_projects_dir() / "bundles"
+    if not bundles_dir.exists():
+        bundles_dir.mkdir(parents=True, exist_ok=True)
+    return bundles_dir
+
+
+def get_atlas_dir() -> Path:
+    """Returns data/atlas/ directory."""
+    atlas_dir = get_data_dir() / "atlas"
+    return atlas_dir
+
+
+def ensure_workspace() -> None:
+    """Ensure all workspace directories exist. Called on CLI startup."""
+    data = get_data_dir()
+    # Create standard dirs
+    (data / "atlas").mkdir(parents=True, exist_ok=True)
+    projects = get_projects_dir()
+    get_aci_dir()
+    get_bundles_dir()
+    (projects / "templates").mkdir(parents=True, exist_ok=True)
+
+
+def ensure_templates() -> None:
+    """Ensure templates are installed. Called on CLI startup and by template install command."""
+    from src.app.cli import templates
+    
+    templates_dir = get_projects_dir() / "templates"
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    
+    project_template = templates_dir / "project_template.md"
+    
+    if not project_template.exists():
+        project_template.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+
+
+def parse_frontmatter(path: Path) -> Tuple[Dict[str, Any], str]:
+    """Parse markdown file with YAML frontmatter. Handles Windows line endings."""
+    if not path.exists():
+        return {}, ""
+    text = path.read_text(encoding="utf-8")
+    return parse_frontmatter_from_string(text)
+
+
+def parse_frontmatter_from_string(text: str) -> Tuple[Dict[str, Any], str]:
+    """Parse markdown text with YAML frontmatter. Handles Windows line endings."""
+    # Match frontmatter with flexible line endings (\r?\n) and allow empty YAML
+    match = re.match(r"^---\r?\n(.*?)\r?\n---\r?\n?(.*)", text, re.DOTALL)
+    if not match:
+        return {}, text
+    yaml_content = match.group(1).strip()
+    if not yaml_content:
+        return {}, match.group(2)
+    fm = yaml.safe_load(yaml_content)
+    return fm or {}, match.group(2)
+
+
+def write_frontmatter(path: Path, meta: Dict[str, Any], body: str) -> None:
+    """Write markdown file with YAML frontmatter."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fm_str = yaml.safe_dump(meta, default_flow_style=False, sort_keys=False)
+    path.write_text(f"---\n{fm_str}---\n{body}", encoding="utf-8")
+
+
+def read_bytes(path: Path) -> bytes:
+    """Read all bytes from binary log."""
+    if not path.exists():
+        return b""
+    return path.read_bytes()
+
+
+def read_events(path: Path) -> list[dict[str, Any]]:
+    """Read all events from JSONL file."""
+    if not path.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    text = path.read_text(encoding="utf-8").strip()
+    if not text:
+        return []
+    for line in text.split("\n"):
+        if line.strip():
+            events.append(json.loads(line))
+    return events
+
+
+def file_sha256(path: Path) -> str:
+    """Compute SHA256 hash of file."""
+    if not path.exists():
+        return ""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
+    """Replay bytes + events from given file paths to reconstruct state."""
+    from src.app.coordination import Coordinator, CoordinationStatus
+    from src.app.events import GovernanceEvent, Domain, EdgeID
+
+    coord = Coordinator(atlas_dir)
+    
+    # Replay bytes
+    for b in read_bytes(bytes_path):
+        coord.step_byte(b)
+
+    # Replay events
+    for ev_dict in read_events(events_path):
+        ev = GovernanceEvent(
+            domain=Domain(ev_dict["domain"]),
+            edge_id=EdgeID(ev_dict["edge_id"]),
+            magnitude=ev_dict["magnitude"],
+            confidence=ev_dict.get("confidence", 1.0),
+            meta=ev_dict.get("meta", {}),
+        )
+        coord.apply_event(ev, bind_to_kernel_moment=False)
+
+    status: CoordinationStatus = coord.get_status()
+    return status
+
+
+def replay_project(atlas_dir: Path, project_slug: str):
+    """Replay bytes + events to reconstruct state for a project from .aci/ artifacts."""
+    aci_dir = get_aci_dir()
+    bytes_path = aci_dir / f"{project_slug}.bytes"
+    events_path = aci_dir / f"{project_slug}.events.jsonl"
+    return replay_from_logs(atlas_dir, bytes_path, events_path)
+
+
+def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
+    """
+    Create a bundle for a project.
+    Takes the project markdown file path (filename can differ from project_slug).
+    Returns path to the created bundle.
+    """
+    import zipfile
+    from datetime import datetime
+    
+    if not project_md_path.exists():
+        raise FileNotFoundError(f"Project file not found: {project_md_path}")
+    
+    # Read project_slug from frontmatter
+    project_meta, _ = parse_frontmatter(project_md_path)
+    project_slug = project_meta.get("project_slug", project_md_path.stem)
+    
+    aci_dir = get_aci_dir()
+    bytes_path = aci_dir / f"{project_slug}.bytes"
+    events_path = aci_dir / f"{project_slug}.events.jsonl"
+    report_json_path = aci_dir / f"{project_slug}.report.json"
+    report_md_path = aci_dir / f"{project_slug}.report.md"
+    
+    # Require compiled artifacts (must come from sync_project, not created here)
+    if not bytes_path.exists():
+        raise FileNotFoundError(f"Missing compiled bytes: {bytes_path}")
+    if not events_path.exists():
+        raise FileNotFoundError(f"Missing compiled events: {events_path}")
+    
+    # Replay to get final state
+    status = replay_project(atlas_dir, project_slug)
+    
+    # Compute hashes
+    bytes_hash = file_sha256(bytes_path)
+    events_hash = file_sha256(events_path)
+    project_hash = file_sha256(project_md_path)
+    
+    # Build bundle.json
+    bundle_data = {
+        "project_slug": project_slug,
+        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "kernel": {
+            "step": status.kernel["step"],
+            "state_index": status.kernel["state_index"],
+            "state_hex": status.kernel["state_hex"],
+            "a_hex": status.kernel["a_hex"],
+            "b_hex": status.kernel["b_hex"],
+            "last_byte": status.kernel["last_byte"],
+        },
+        "logs": {
+            "byte_count": status.kernel["byte_log_len"],
+            "event_count": status.kernel["event_log_len"],
+            "bytes_sha256": bytes_hash,
+            "events_sha256": events_hash,
+            "project_md_sha256": project_hash,
+        },
+        "apertures": {
+            "economy": status.apertures["econ"],
+            "employment": status.apertures["emp"],
+            "education": status.apertures["edu"],
+        },
+    }
+    
+    # Bundle goes to bundles_dir/<project_slug>.zip
+    bundles_dir = get_bundles_dir()
+    bundles_dir.mkdir(parents=True, exist_ok=True)
+    bundle_out = bundles_dir / f"{project_slug}.zip"
+    
+    # Create zip file
+    with zipfile.ZipFile(bundle_out, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Add project.md
+        zf.write(project_md_path, "project.md")
+        
+        # Add bytes and events files
+        zf.write(bytes_path, "bytes.bin")
+        zf.write(events_path, "events.jsonl")
+        
+        # Add reports (required)
+        zf.write(report_json_path, "report.json")
+        zf.write(report_md_path, "report.md")
+        
+        # Add bundle.json
+        zf.writestr("bundle.json", json.dumps(bundle_data, indent=2))
+    
+    return bundle_out
+
+
+def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
+    """
+    Verify a bundle by replaying and checking hashes and state.
+    Returns True if verification passes, False otherwise.
+    """
+    import zipfile
+    import tempfile
+    
+    if not bundle_path.exists():
+        return False
+    
+    try:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            
+            with zipfile.ZipFile(bundle_path, "r") as zf:
+                zf.extractall(tmp_path)
+            
+            # Read bundle.json
+            bundle_json_path = tmp_path / "bundle.json"
+            if not bundle_json_path.exists():
+                return False
+            
+            bundle_data = json.loads(bundle_json_path.read_text())
+            
+            # Check required files
+            bytes_file = tmp_path / "bytes.bin"
+            events_file = tmp_path / "events.jsonl"
+            
+            if not bytes_file.exists() or not events_file.exists():
+                return False
+            
+            # Replay from bundle contents
+            status = replay_from_logs(atlas_dir, bytes_file, events_file)
+            
+            # Verify kernel signature (all fields: step, state_index, state_hex, a_hex, b_hex, last_byte)
+            kernel_match = (
+                status.kernel.get("step") == bundle_data["kernel"].get("step")
+                and status.kernel["state_index"] == bundle_data["kernel"]["state_index"]
+                and status.kernel["state_hex"] == bundle_data["kernel"]["state_hex"]
+                and status.kernel["a_hex"] == bundle_data["kernel"]["a_hex"]
+                and status.kernel["b_hex"] == bundle_data["kernel"]["b_hex"]
+                and status.kernel["last_byte"] == bundle_data["kernel"]["last_byte"]
+            )
+            
+            if not kernel_match:
+                return False
+            
+            # Verify reports exist in bundle (required)
+            report_json_file = tmp_path / "report.json"
+            report_md_file = tmp_path / "report.md"
+            if not report_json_file.exists() or not report_md_file.exists():
+                return False
+            
+            # Verify apertures
+            apertures_match = (
+                abs(status.apertures["econ"] - bundle_data["apertures"]["economy"]) < 1e-6
+                and abs(status.apertures["emp"] - bundle_data["apertures"]["employment"]) < 1e-6
+                and abs(status.apertures["edu"] - bundle_data["apertures"]["education"]) < 1e-6
+            )
+            
+            if not apertures_match:
+                return False
+            
+            # Verify hashes
+            bytes_hash = file_sha256(bytes_file)
+            events_hash = file_sha256(events_file)
+            project_md_file = tmp_path / "project.md"
+            project_hash = file_sha256(project_md_file) if project_md_file.exists() else ""
+            
+            hashes_match = (
+                bytes_hash == bundle_data["logs"]["bytes_sha256"]
+                and events_hash == bundle_data["logs"]["events_sha256"]
+            )
+            
+            if not hashes_match:
+                return False
+            
+            # Verify project.md hash if present in bundle
+            if "project_md_sha256" in bundle_data["logs"]:
+                if project_hash != bundle_data["logs"]["project_md_sha256"]:
+                    return False
+            
+            return True
+            
+    except Exception:
+        return False
+
+
+def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
+    """
+    Sync a project: parse attestations from project.md, compile kernel log and events.
+    Returns summary dict with event_count, apertures, etc.
+    
+    Attestations are compiled into kernel facts which generate:
+    - Kernel log: append-only record of dimensionful transitions (daily/sprint units)
+    - Classification ledger: THM-only (for Hodge/aperture accounting)
+    - Gyroscope: counted in reports but NOT injected into ledger
+    - Report artifacts: .report.json and .report.md
+    """
+    from src.app.coordination import Coordinator
+    from src.plugins.frameworks import THMDisplacementPlugin, PluginContext
+    
+    # Parse project.md - attestations MUST be in frontmatter
+    project_meta, body = parse_frontmatter(project_md_path)
+    project_slug = project_meta.get("project_slug", project_md_path.stem)
+    
+    # Get attestations from frontmatter only (body is for examples only)
+    attestations = project_meta.get("attestations", [])
+    if not isinstance(attestations, list):
+        attestations = []
+    
+    # Determine artifact paths in .aci/ directory
+    aci_dir = get_aci_dir()
+    bytes_path = aci_dir / f"{project_slug}.bytes"
+    events_path = aci_dir / f"{project_slug}.events.jsonl"
+    report_json_path = aci_dir / f"{project_slug}.report.json"
+    report_md_path = aci_dir / f"{project_slug}.report.md"
+    
+    # Initialize coordinator
+    coord = Coordinator(atlas_dir)
+    
+    # Canonical bytes per unit type
+    def canonical_bytes_for_unit(unit: str) -> bytes:
+        """Return canonical bytes for a unit type."""
+        if unit == "daily":
+            return bytes([0x01])
+        elif unit == "sprint":
+            return bytes([0x01, 0x02, 0x03, 0x04])
+        else:
+            return b""
+    
+    def unit_weight(unit: str) -> int:
+        """Return weight for a unit (for accounting/ledger)."""
+        if unit == "daily":
+            return 1
+        elif unit == "sprint":
+            return 4
+        else:
+            raise ValueError(f"Unknown unit: {unit}")
+    
+    # Mapping from full names to abbreviations for THM
+    thm_map = {
+        "governance traceability displacement": "GTD",
+        "information variety displacement": "IVD",
+        "inference accountability displacement": "IAD",
+        "intelligence integrity displacement": "IID",
+    }
+    
+    # Gyroscope categories (for accounting only, not ledger)
+    gyro_categories = {
+        "governance management": "GM",
+        "information curation": "ICu",
+        "inference interaction": "IInter",
+        "intelligence cooperation": "ICo",
+    }
+    
+    # Build bytes and events in exact order as stepping
+    byte_log = bytearray()
+    bound_events = []
+    
+    # Accounting rollups (for reports)
+    thm_counts = {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0}
+    thm_by_domain = {"economy": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
+                     "employment": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
+                     "education": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0}}
+    gyro_counts = {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0}
+    gyro_by_domain = {"economy": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0},
+                     "employment": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0},
+                     "education": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0}}
+    missing_ids = []
+    skipped_attestations = []
+    processed_count = 0
+    
+    # Process each attestation in order
+    for att_idx, att in enumerate(attestations):
+        if not isinstance(att, dict):
+            skipped_attestations.append({"index": att_idx, "id": None, "reason": "not a dict"})
+            continue
+        
+        unit = att.get("unit", "").lower()
+        domain = att.get("domain", "").lower()
+        human_mark = att.get("human_mark", "").lower()
+        gyroscope_work = att.get("gyroscope_work", "").lower()
+        att_id = att.get("id", "")
+        
+        if unit not in ["daily", "sprint"]:
+            skipped_attestations.append({"index": att_idx, "id": att_id or f"att_{att_idx}", "reason": f"invalid unit: {unit}"})
+            continue
+        if domain not in ["economy", "employment", "education"]:
+            skipped_attestations.append({"index": att_idx, "id": att_id or f"att_{att_idx}", "reason": f"invalid domain: {domain}"})
+            continue
+        
+        # Use stable attestation_id, fallback to generated ID
+        if not att_id:
+            att_id = f"att_{att_idx}"
+            missing_ids.append({"index": att_idx, "generated_id": att_id})
+        
+        processed_count += 1
+        
+        # Get canonical bytes for this unit
+        unit_bytes = canonical_bytes_for_unit(unit)
+        unit_wt = unit_weight(unit)  # Weight for accounting/ledger
+        
+        # Step kernel with these bytes in order
+        for b in unit_bytes:
+            coord.step_byte(b)
+            byte_log.append(b)
+        
+        # Extract stable identifiers for meta (not entire attestation)
+        att_meta = {
+            "attestation_id": att_id,
+            "unit": unit,
+            "domain": domain,
+        }
+        if human_mark:
+            att_meta["human_mark"] = human_mark
+        if gyroscope_work:
+            att_meta["gyroscope_work"] = gyroscope_work
+        
+        # Process THM human_mark if provided (ONLY THM goes to ledger)
+        if human_mark:
+            thm_abbrev = thm_map.get(human_mark)
+            if thm_abbrev:
+                # Count for accounting (weighted by unit)
+                thm_counts[thm_abbrev] += unit_wt
+                thm_by_domain[domain][thm_abbrev] += unit_wt
+                
+                # Emit ledger event (THM-only) with weighted magnitude
+                payload = {"domain": domain}
+                payload[thm_abbrev] = float(unit_wt)
+                payload["confidence"] = 1.0
+                
+                plugin = THMDisplacementPlugin()
+                ctx = PluginContext(meta=att_meta)
+                events = plugin.emit_events(payload, ctx)
+                
+                # Apply events immediately so they bind to the current kernel state
+                for event in events:
+                    coord.apply_event(event, bind_to_kernel_moment=True)
+                    if coord.event_log:
+                        event_dict = coord.event_log[-1]["event"]
+                        # Strict check: event must have kernel binding fields
+                        if event_dict.get("kernel_step") is None:
+                            raise RuntimeError(f"Event missing kernel_step binding: {event_dict}")
+                        if event_dict.get("kernel_state_index") is None:
+                            raise RuntimeError(f"Event missing kernel_state_index binding: {event_dict}")
+                        if event_dict.get("kernel_last_byte") is None:
+                            raise RuntimeError(f"Event missing kernel_last_byte binding: {event_dict}")
+                        bound_events.append(event_dict)
+        
+        # Process Gyroscope work if provided (accounting only, NO ledger events)
+        if gyroscope_work:
+            gyro_abbrev = gyro_categories.get(gyroscope_work)
+            if gyro_abbrev:
+                # Count for accounting (weighted by unit)
+                gyro_counts[gyro_abbrev] += unit_wt
+                gyro_by_domain[domain][gyro_abbrev] += unit_wt
+                # DO NOT emit ledger events - Gyroscope is for reports only
+    
+    # Write bytes file (exact order as stepped)
+    bytes_path.parent.mkdir(parents=True, exist_ok=True)
+    bytes_path.write_bytes(bytes(byte_log))
+    
+    # Write events.jsonl
+    events_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(events_path, "w", encoding="utf-8") as f:
+        for ev_dict in bound_events:
+            f.write(json.dumps(ev_dict) + "\n")
+    
+    # Get final status
+    status = coord.get_status()
+    
+    # Verify invariant: step == byte_log_len
+    if status.kernel["step"] != status.kernel["byte_log_len"]:
+        raise RuntimeError(f"Invariant violation: step ({status.kernel['step']}) != byte_log_len ({status.kernel['byte_log_len']})")
+    
+    # Compute hashes
+    bytes_hash = file_sha256(bytes_path)
+    events_hash = file_sha256(events_path)
+    
+    # Generate report
+    report_data = {
+        "project_slug": project_slug,
+        "compilation": {
+            "attestation_count": len(attestations),
+            "processed_attestations": processed_count,
+            "skipped_attestations": skipped_attestations,
+            "byte_count": len(byte_log),
+            "kernel": {
+                "step": status.kernel["step"],
+                "state_index": status.kernel["state_index"],
+                "state_hex": status.kernel["state_hex"],
+                "a_hex": status.kernel["a_hex"],
+                "b_hex": status.kernel["b_hex"],
+                "last_byte": status.kernel["last_byte"],
+            },
+            "hashes": {
+                "bytes_sha256": bytes_hash,
+                "events_sha256": events_hash,
+            },
+        },
+        "accounting": {
+            "thm": {
+                "totals": thm_counts,
+                "by_domain": thm_by_domain,
+            },
+            "gyroscope": {
+                "totals": gyro_counts,
+                "by_domain": gyro_by_domain,
+            },
+        },
+        "ledger": {
+            "y_econ": status.ledgers["y_econ"],
+            "y_emp": status.ledgers["y_emp"],
+            "y_edu": status.ledgers["y_edu"],
+        },
+        "apertures": {
+            "A_econ": status.apertures["econ"],
+            "A_emp": status.apertures["emp"],
+            "A_edu": status.apertures["edu"],
+        },
+        "warnings": {
+            "missing_attestation_ids": missing_ids,
+        } if missing_ids else {},
+    }
+    
+    # Write report.json
+    report_json_path.parent.mkdir(parents=True, exist_ok=True)
+    report_json_path.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    
+    # Write report.md
+    report_md_lines = [
+        f"# Project Report: {project_slug}",
+        "",
+        f"Generated: {datetime.utcnow().isoformat()}Z",
+        "",
+        "## Compilation",
+        "",
+        f"- Total attestations: {len(attestations)}",
+        f"- Processed: {processed_count}",
+        f"- Skipped: {len(skipped_attestations)}",
+        f"- Bytes: {len(byte_log)}",
+        f"- Kernel step: {status.kernel['step']}",
+        f"- Kernel state: {status.kernel['state_hex']} (index {status.kernel['state_index']})",
+        f"- Last byte: 0x{status.kernel['last_byte']:02x}",
+        "",
+    ]
+    
+    if skipped_attestations:
+        report_md_lines.append("### Skipped Attestations\n")
+        for skipped in skipped_attestations:
+            report_md_lines.append(f"- Index {skipped['index']} (ID: {skipped['id']}): {skipped['reason']}")
+        report_md_lines.append("")
+    
+    report_md_lines.extend([
+        "## Accounting",
+        "",
+        "### THM Totals",
+        f"- GTD: {thm_counts['GTD']}",
+        f"- IVD: {thm_counts['IVD']}",
+        f"- IAD: {thm_counts['IAD']}",
+        f"- IID: {thm_counts['IID']}",
+        "",
+        "### Gyroscope Totals",
+        f"- GM: {gyro_counts['GM']}",
+        f"- ICu: {gyro_counts['ICu']}",
+        f"- IInter: {gyro_counts['IInter']}",
+        f"- ICo: {gyro_counts['ICo']}",
+        "",
+        "## Ledger & Apertures",
+        "",
+        f"- Economy aperture: {status.apertures['econ']:.6f}",
+        f"- Employment aperture: {status.apertures['emp']:.6f}",
+        f"- Education aperture: {status.apertures['edu']:.6f}",
+        "",
+    ])
+    
+    if missing_ids:
+        report_md_lines.append("## Warnings\n")
+        for missing in missing_ids:
+            report_md_lines.append(f"- Index {missing['index']}: Generated ID `{missing['generated_id']}` (original ID missing)\n")
+    
+    report_md_path.parent.mkdir(parents=True, exist_ok=True)
+    report_md_path.write_text("\n".join(report_md_lines), encoding="utf-8")
+    
+    # Update computed metadata in project.md
+    project_meta["computed"] = project_meta.get("computed", {})
+    project_meta["computed"]["last_synced_at"] = datetime.utcnow().isoformat() + "Z"
+    project_meta["computed"]["apertures"] = {
+        "economy": status.apertures["econ"],
+        "employment": status.apertures["emp"],
+        "education": status.apertures["edu"],
+    }
+    project_meta["computed"]["event_count"] = len(bound_events)
+    project_meta["computed"]["kernel"] = {
+        "step": status.kernel["step"],
+        "state_index": status.kernel["state_index"],
+        "state_hex": status.kernel["state_hex"],
+    }
+    
+    # Write updated frontmatter
+    _, body = parse_frontmatter(project_md_path)
+    write_frontmatter(project_md_path, project_meta, body)
+    
+    return {
+        "event_count": len(bound_events),
+        "apertures": {
+            "economy": status.apertures["econ"],
+            "employment": status.apertures["emp"],
+            "education": status.apertures["edu"],
+        },
+        "kernel": {
+            "step": status.kernel["step"],
+            "state_index": status.kernel["state_index"],
+            "state_hex": status.kernel["state_hex"],
+        },
+    }
+

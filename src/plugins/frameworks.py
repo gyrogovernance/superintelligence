@@ -96,6 +96,10 @@ class THMDisplacementPlugin(FrameworkPlugin):
             if key in payload:
                 val = float(payload[key])
                 if val != 0.0:
+                    # Use per-signal confidence if available, fallback to global confidence
+                    signal_confidence_key = f"{key}_confidence"
+                    confidence = float(payload.get(signal_confidence_key, payload.get("confidence", 1.0)))
+                    
                     meta_dict = {"plugin": self.name, "signal": key}
                     if ctx.meta:
                         meta_dict.update(ctx.meta)
@@ -104,7 +108,7 @@ class THMDisplacementPlugin(FrameworkPlugin):
                             domain=dom,
                             edge_id=edge,
                             magnitude=val,
-                            confidence=float(payload.get("confidence", 1.0)),
+                            confidence=confidence,
                             meta=meta_dict,
                         )
                     )
@@ -126,7 +130,12 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
 
     def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
         dom_str = str(payload.get("domain", "employment")).lower()
-        dom = Domain.EMPLOYMENT if dom_str == "employment" else None
+        _domain_map = {
+            "economy": Domain.ECONOMY,
+            "employment": Domain.EMPLOYMENT,
+            "education": Domain.EDUCATION,
+        }
+        dom = _domain_map.get(dom_str, None)
         if dom is None:
             return []
 
@@ -141,6 +150,11 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
         # increase Gov–Info tension.
         delta_gm_vs_icu = gm - icu
         if delta_gm_vs_icu != 0.0:
+            # Use minimum confidence of the two signals involved
+            gm_conf = float(payload.get("GM_confidence", payload.get("confidence", 1.0)))
+            icu_conf = float(payload.get("ICu_confidence", payload.get("confidence", 1.0)))
+            confidence = min(gm_conf, icu_conf)
+            
             meta_dict = {"plugin": self.name, "metric": "GM-ICu"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
@@ -149,7 +163,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
                     domain=dom,
                     edge_id=EdgeID.GOV_INFO,
                     magnitude=delta_gm_vs_icu,
-                    confidence=float(payload.get("confidence", 1.0)),
+                    confidence=confidence,
                     meta=meta_dict,
                 )
             )
@@ -158,6 +172,11 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
         # affect Infer–Intel coupling.
         delta_iinter_vs_ico = iinter - ico
         if delta_iinter_vs_ico != 0.0:
+            # Use minimum confidence of the two signals involved
+            iinter_conf = float(payload.get("IInter_confidence", payload.get("confidence", 1.0)))
+            ico_conf = float(payload.get("ICo_confidence", payload.get("confidence", 1.0)))
+            confidence = min(iinter_conf, ico_conf)
+            
             meta_dict = {"plugin": self.name, "metric": "IInter-ICo"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
@@ -166,7 +185,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
                     domain=dom,
                     edge_id=EdgeID.INFER_INTEL,
                     magnitude=delta_iinter_vs_ico,
-                    confidence=float(payload.get("confidence", 1.0)),
+                    confidence=confidence,
                     meta=meta_dict,
                 )
             )

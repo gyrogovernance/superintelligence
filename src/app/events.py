@@ -56,8 +56,9 @@ class GovernanceEvent:
     confidence: float = 1.0
     meta: Dict[str, Any] = field(default_factory=dict)
 
-    # Optional: bind the event to a kernel "moment" (state_index and last_byte)
+    # Optional: bind the event to a kernel "moment" (step, state_index, last_byte)
     # so the event log can be replayed deterministically.
+    kernel_step: Optional[int] = None
     kernel_state_index: Optional[int] = None
     kernel_last_byte: Optional[int] = None
 
@@ -71,6 +72,7 @@ class GovernanceEvent:
             "magnitude": float(self.magnitude),
             "confidence": float(self.confidence),
             "meta": dict(self.meta),
+            "kernel_step": self.kernel_step,
             "kernel_state_index": self.kernel_state_index,
             "kernel_last_byte": self.kernel_last_byte,
         }

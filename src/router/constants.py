@@ -96,3 +96,45 @@ def step_state_by_byte(state24: int, byte: int) -> int:
     new_b = a1 ^ LAYER_MASK_12
     
     return pack_state(new_a, new_b)
+
+
+def popcount(x: int) -> int:
+    """Count the number of set bits (population count)."""
+    return bin(x).count("1")
+
+
+def archetype_distance(state24: int) -> int:
+    """
+    Hamming distance to archetype (canonical observable from §2.2.4).
+    
+    Returns the number of bits that differ between state24 and ARCHETYPE_STATE24.
+    """
+    return popcount(state24 ^ ARCHETYPE_STATE24)
+
+
+def horizon_distance(a12: int, b12: int) -> int:
+    """
+    Horizon distance (canonical observable from §2.2.4).
+    
+    Horizon set H = {(a,b): a = (b ^ 0xFFF)}.
+    Returns popcount(A12 ^ (B12 ^ 0xFFF)).
+    """
+    return popcount(a12 ^ (b12 ^ LAYER_MASK_12))
+
+
+def ab_distance(a12: int, b12: int) -> int:
+    """
+    A/B Hamming distance (canonical observable from §2.2.4).
+    
+    Returns popcount(A12 ^ B12).
+    """
+    return popcount(a12 ^ b12)
+
+
+def component_density(component12: int) -> float:
+    """
+    Component density (canonical observable from §2.2.4).
+    
+    Returns popcount(component12) / 12.0.
+    """
+    return popcount(component12) / 12.0

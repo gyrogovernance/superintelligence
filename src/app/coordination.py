@@ -65,6 +65,7 @@ class Coordinator:
                 magnitude=ev.magnitude,
                 confidence=ev.confidence,
                 meta=dict(ev.meta),  # Copy dict to preserve audit trail immutability
+                kernel_step=self.kernel.step,
                 kernel_state_index=self.kernel.state_index,
                 kernel_last_byte=self.kernel.last_byte,
             )
@@ -74,6 +75,7 @@ class Coordinator:
         self.event_log.append(
             {
                 "event_index": len(self.event_log),
+                "kernel_step": ev.kernel_step,
                 "kernel_state_index": ev.kernel_state_index,
                 "kernel_last_byte": ev.kernel_last_byte,
                 "event": ev.as_dict(),
@@ -87,6 +89,7 @@ class Coordinator:
         sig = self.kernel.signature()
 
         kernel_info = {
+            "step": sig.step,
             "state_index": sig.state_index,
             "state_hex": sig.state_hex,
             "a_hex": sig.a_hex,
