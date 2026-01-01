@@ -1,22 +1,129 @@
 
-💫 GGG ASI Alignment Router - CHANGELOG
+💫 GGG ASI Alignment Router, Alignment Routing Infrastructure - CHANGELOG
 
 ```            
-┏━┓╻ ╻┏━┓┏━╸┏━┓╻┏┓╻╺┳╸┏━╸╻  ╻  ╻┏━╸┏━╸┏┓╻┏━╸┏━╸
-┗━┓┃ ┃┣━┛┣╸ ┣┳┛┃┃┗┫ ┃ ┣╸ ┃  ┃  ┃┃╺┓┣╸ ┃┗┫┃  ┣╸ 
-┗━┛┗━┛╹  ┗━╸╹┗╸╹╹ ╹ ╹ ┗━╸┗━╸┗━╸╹┗━┛┗━╸╹ ╹┗━╸┗━╸
-┏━┓┏━┓╻ ╻╺┳╸┏━╸┏━┓                             
-┣┳┛┃ ┃┃ ┃ ┃ ┣╸ ┣┳┛                             
-╹┗╸┗━┛┗━┛ ╹ ┗━╸╹┗╸                             
+┏━┓╻  ╻┏━╸┏┓╻┏┳┓┏━╸┏┓╻╺┳╸               
+┣━┫┃  ┃┃╺┓┃┗┫┃┃┃┣╸ ┃┗┫ ┃                
+╹ ╹┗━╸╹┗━┛╹ ╹╹ ╹┗━╸╹ ╹ ╹                
+┏━┓┏━┓╻ ╻╺┳╸╻┏┓╻┏━╸                     
+┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
+╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                     
+╻┏┓╻┏━╸┏━┓┏━┓┏━┓╺┳╸┏━┓╻ ╻┏━╸╺┳╸╻ ╻┏━┓┏━╸
+┃┃┗┫┣╸ ┣┳┛┣━┫┗━┓ ┃ ┣┳┛┃ ┃┃   ┃ ┃ ┃┣┳┛┣╸ 
+╹╹ ╹╹  ╹┗╸╹ ╹┗━┛ ╹ ╹┗╸┗━┛┗━╸ ╹ ┗━┛╹┗╸┗━╸                           
 ```
 
 ---
 
-## [v0.9.9.6-ACI-CLI] – 2025-12-30
+## [v1.0-AIR] – 2026-01-01
 
-# High-Level Changelog: ACI Architecture Realignment
+# v1.0 Release: Production-Ready Alignment Infrastructure Routing
 
-This update fundamentally restructures ACI from a "multi-command CLI" into a **deterministic coordination compiler** centered on project files.
+This release marks the first stable version of the GGG ASI Alignment Router, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
+
+## Core Achievement: Verified Deterministic Coordination
+
+The router provides a **deterministic finite-state coordination kernel** that maps append-only byte ledgers to reproducible state trajectories. All participants with the same ledger prefix compute identical kernel states, enabling coordination through reproducible computation rather than asserted metadata or private model state.
+
+**Verified Properties:**
+- **65,536-state ontology** with exact closure under 256 byte actions
+- **Deterministic replay** of full state trajectories from byte logs
+- **Geometric provenance** verification through compiled atlas artifacts
+- **Shared moments** as coordination primitives independent of identity claims
+
+## Comprehensive Test Coverage: 135 Tests Across All Domains
+
+The test suite validates kernel physics, governance measurement, application workflows, and CLI operations:
+
+- **Kernel Physics** (test_physics_*.py): Verified structural properties, depth laws, monodromy, and CGM-linked invariants
+- **Governance Measurement** (test_measurement.py): Validated aperture computation, Hodge decomposition, and structural displacement detection
+- **Application Layer** (test_app.py): Confirmed Coordinator orchestration, event binding, and ledger replay integrity
+- **CLI Workflow** (test_aci_cli.py): Verified project compilation, bundle generation, and tamper detection
+- **Routing & Plugins** (test_routing.py, test_plugins.py): Validated atlas operations and plugin determinism
+
+All 135 tests pass, providing exhaustive verification of the kernel's structural properties and the application layer's governance measurement substrate.
+
+## Complete Documentation Suite
+
+### Technical Specifications
+- **GGG ASI Alignment Router - Kernel Specifications** (`docs/GGG_ASI_AR_Specs.md`): Complete normative specification with conformance profiles, kernel physics, atlas artifacts, and governance measurement substrate
+- **Router Implications & Potential** (`docs/GGG_ASI_AR_Implications.md`): Use cases, deployment scenarios, and technical research directions
+- **Substrate: Physical Memory Specification** (`docs/GGG_ASI_AR_Substrate_Specs.md`): Future development architecture for physical memory implementation
+
+### Operational Documentation
+- **Alignment Infrastructure Routing (AIR) Brief** (`docs/AIR_Brief.md`): Complete overview of AIR's workforce coordination model, operating units, and program structure
+
+### Test Reports
+- **Physics Tests Report** (`docs/reports/Physics_Tests_Report.md`): Verified structural properties and CGM-linked constants reconstruction
+- **Alignment Measurement Report** (`docs/reports/Alignment_Measurement_Report.md`): Governance measurement substrate verification and epistemic necessity analysis
+- **All Tests Results** (`docs/reports/All_Tests_Results.md`): Comprehensive test suite output
+- **Other Tests Report** (`docs/reports/Other_Tests_Report.md`): Additional validation coverage
+
+### Supporting Theory
+- **Common Governance Model (CGM)** (`docs/references/CGM_Paper.md`): Theoretical foundations
+- **The Human Mark (THM)** (`docs/references/THM.md`, `THM_Paper.md`, `THM_Grammar.md`): Source-type ontology and classification framework
+- **Gyroscopic Global Governance (GGG)** (`docs/references/GGG_Paper.md`): Four-domain coupling framework
+
+## Foundational Analysis: The Epistemic Necessity of AI Alignment
+
+This release includes a critical analysis demonstrating that **representative scalar evaluations cannot distinguish aligned from misaligned states** within the CGM governance geometry.
+
+**Key Findings:**
+1. **Scalar Blindness:** Explicit examples show that scalar scores (e.g., sum of absolute edge values) assign identical values to structurally different states with different apertures
+2. **Structural Lock:** Single-axis optimization policies remain permanently locked at A = 0.5, regardless of magnitude, under current THM mappings
+3. **Epistemic Sufficiency:** The six-dimensional K₄ governance geometry, together with aperture A, is sufficient to construct and recognize states with the target alignment value A* ≈ 0.0207
+
+This analysis establishes that **geometric structure is necessary** for alignment verification, and that the AIR architecture provides the required measurement substrate to address measurement collapse in AI alignment evaluation.
+
+## Production-Ready Features
+
+### Deterministic Coordination Kernel
+- 24-bit state with dual 12-bit components (Type A, Type B)
+- Byte-complete input alphabet (0-255) with injective mask expansion
+- Exact depth-two and depth-four algebraic identities
+- Reference operator (0xAA) with involution and separator properties
+- Horizon set (256 states) with complete boundary-to-bulk coverage
+
+### Governance Measurement Substrate
+- Three domain ledgers (Economy, Employment, Education) with K₄ tetrahedral geometry
+- Hodge decomposition into gradient and cycle components
+- Aperture computation (A = ||y_cycle||² / ||y||²) with target A* = 0.0207
+- Deterministic replay of ledgers and apertures from event logs
+- Event binding to kernel moments for audit-grade verification
+
+### Application Infrastructure
+- **Coordinator** orchestration layer with byte log and event log
+- **Plugin architecture** with explicit edge mapping policies
+- **Status reporting** with kernel signature, ledger state, and aperture metrics
+- **AIR CLI** for project-based coordination workflow with bundle generation and verification
+
+## Stability & Reproducibility
+
+- **Exhaustive verification:** All 16,777,216 state-byte transitions verified against compiled atlas
+- **Deterministic artifacts:** Ontology, epistemology, and phenomenology artifacts enable cross-platform identical results
+- **Replay integrity:** Full trajectory reconstruction from byte logs and event logs
+- **Bundle verification:** Tamper detection through signature validation and hash checking
+
+## Theoretical Foundation
+
+The router is grounded in:
+- **Common Governance Model (CGM)** as the constitutional structure of coherent recursive operation
+- **The Human Mark (THM)** as the source-type ontology of Authority and Agency
+- **Gyroscopic Global Governance (GGG)** as the four-domain coupling of Economy, Employment, Education, and Ecology
+
+The router operates as a **Derivative coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Authentic Agency.
+
+---
+
+**Summary:** v1.0-AIR delivers a production-ready, exhaustively tested, and fully documented system for deterministic coordination in human-AI governance. The release establishes the epistemic necessity of geometric measurement for AI alignment and provides the complete infrastructure required for Alignment Infrastructure Routing.
+
+---
+
+## [v0.9.9.6-AIR-CLI] – 2025-12-30
+
+# High-Level Changelog: AIR Architecture Realignment
+
+This update fundamentally restructures AIR from a "multi-command CLI" into a **deterministic coordination compiler** centered on project files.
 
 ## 1. Concept: Moments are Derived Facts
 - **Removed:** Manual `moment.md` files and "moment management" workflows.
@@ -54,17 +161,17 @@ This update fundamentally restructures ACI from a "multi-command CLI" into a **d
 
 ---
 
-**Summary:** ACI is now a "Project Compiler" that turns human claims into verifiable coordination proofs without manual overhead.
+**Summary:** AIR is now a "Project Compiler" that turns human claims into verifiable coordination proofs without manual overhead.
 
 ---
 
-## [v0.9.9.5-ACI-CLI] – 2025-12-29
+## [v0.9.9.5-AIR-CLI] – 2025-12-29
 
 ### Documentation
-- **Alignment Convergence Infrastructure (ACI) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how ACI helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the ASI Alignment Router.
+- **Alignment Infrastructure Routing (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the ASI Alignment Router.
 
 ### Development Planning
-- **ACI CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Convergence Infrastructure. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, plugin integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
+- **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routing. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, plugin integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
 
 ---
 

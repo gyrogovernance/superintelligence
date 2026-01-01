@@ -23,12 +23,12 @@
 ---
 
 # GGG ASI Alignment Router
- Collective Superintelligence Alignment Routing for Post‑AGI Coordination
+Alignment Infrastructure Routing for Post‑AGI Coordination
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
-Status: research implementation. The kernel physics and measurement substrate are specified and tested. The ACI CLI provides a project-based coordination workflow.
+Status: research implementation. The kernel physics and measurement substrate are specified and tested. The AIR CLI provides a project-based coordination workflow.
 
 ## 🌐 Overview
 
@@ -70,16 +70,26 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 
 ## 📚 Documentation
 
-Primary technical reference:
-- 📖 [**GGG ASI Alignment Router** - Kernel Specifications](docs/GGG_ASI_AR_Specs.md)
+### Getting Started
+- 📋 [**Alignment Infrastructure Routing (AIR) Brief**](docs/AIR_Brief.md) - Overview of AIR, workforce coordination, and operating model
 
-Supporting theory:
-- 📖 [Physics - Common Governance Model: Our Theoretical Foundations](docs/CGM_Paper.md)
-- 📖 [The Human Mark (THM) - Source-Type Ontology](docs/THM_Paper.md)
-- 📖 [Gyroscopic Global Governance (GGG) - Four-Domain Coupling](docs/GGG_Paper.md)
+### Technical Specifications
+- 📖 [**GGG ASI Alignment Router** - Kernel Specifications](docs/GGG_ASI_AR_Specs.md) - Complete technical specification for implementation
+- 🔮 [**Router Implications & Potential**](docs/GGG_ASI_AR_Implications.md) - Use cases and deployment scenarios
+- 🧬 [**Substrate: Physical Memory Specification**](docs/GGG_ASI_AR_Substrate_Specs.md) - Future development: physical memory architecture
 
-Future Development:
-- 🧬 [Substrate: Physical Memory Specification](/docs/GGG_ASI_AR_Substrate_Specs.md)
+### Test Reports
+- 📊 [**Physics Tests Report**](docs/reports/Physics_Tests_Report.md) - Verified structural properties and CGM-linked invariants
+- 📊 [**Alignment Measurement Report**](docs/reports/Alignment_Measurement_Report.md) - Governance measurement substrate verification
+- 📊 [**All Tests Results**](docs/reports/All_Tests_Results.md) - Comprehensive test suite results
+- 📊 [**Other Tests Report**](docs/reports/Other_Tests_Report.md) - Additional test coverage and validation
+
+### Supporting Theory
+- 📖 [**Common Governance Model (CGM)**](docs/references/CGM_Paper.md) - Theoretical foundations
+- 📖 [**The Human Mark (THM)**](docs/references/THM.md) - Source-type ontology overview
+- 📖 [**The Human Mark - Paper**](docs/references/THM_Paper.md) - Complete THM specification
+- 📖 [**The Human Mark - Grammar**](docs/references/THM_Grammar.md) - PEG specification for tagging and validation
+- 📖 [**Gyroscopic Global Governance (GGG)**](docs/references/GGG_Paper.md) - Four-domain coupling framework
 
 ---
 
@@ -98,7 +108,7 @@ Future Development:
 ### Install
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
-### ACI CLI (Recommended)
+### AIR CLI (Recommended)
 The CLI provides a project-based, MD-first workflow:
 
 ```bash

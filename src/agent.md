@@ -1,7 +1,7 @@
-## ACI Scope Brief for Assistants
+## AIR Scope Brief for Assistants
 
 ### Purpose
-ACI is a **project-only, Markdown-first coordination compiler** for AI safety work accounting. It turns human project attestations into:
+AIR is a **project-only, Markdown-first coordination compiler** for AI safety work accounting. It turns human project attestations into:
 
 - deterministic **kernel bytes** (canonical time units),
 - deterministic **governance event logs** (THM → ledger),
@@ -9,7 +9,7 @@ ACI is a **project-only, Markdown-first coordination compiler** for AI safety wo
 - deterministic **reports** (accounting rollups),
 - deterministic **bundles** (verification boundary).
 
-The product goal is: **open ACI → auto-sync everything → verify everything → bundle everything → print a short status**.
+The product goal is: **open AIR → auto-sync everything → verify everything → bundle everything → print a short status**.
 
 ---
 
@@ -25,7 +25,7 @@ A moment is a **kernel fact**:
 - moment = **(t, sₜ)** where `t` is byte-count (step) and `sₜ` is the resulting kernel state.
 
 ### Measurement vs evaluation
-ACI does **accounting**, not evaluation.
+AIR does **accounting**, not evaluation.
 
 - Accounting = categorical, additive, replayable (counts and ledgers)
 - No scoring rubrics, no “grade”, no model judgment.

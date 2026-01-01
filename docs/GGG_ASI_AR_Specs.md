@@ -11,13 +11,13 @@ Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as r
 
 ## 1.1 Intelligence as Structural Coherence
 
-Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lacks internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
+Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lack internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
 
 The GGG ASI Alignment Router represents a different paradigm. It treats intelligence as an intrinsic structural property that emerges from the recursive alignment of operational operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a provably finite and fully discovered state space where alignment is constitutive. Coherence is not a policy choice but a requirement of the internal physics of the state space.
 
 ## 1.2 What the Router Is
 
-GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+The GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single-agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
 
 The algorithm is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte in an append-only ledger. This process results in a deterministic state at each step and a compact routing signature.
 

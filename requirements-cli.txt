@@ -1,4 +1,4 @@
-# Minimal requirements for ACI CLI
+# Minimal requirements for AIR CLI
 # For full project dependencies, see requirements.txt
 
 numpy>=2.0.0,<2.3.0

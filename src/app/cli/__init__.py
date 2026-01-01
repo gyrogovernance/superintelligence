@@ -1,4 +1,4 @@
 """
-ACI CLI module.
+AIR CLI module.
 """
 

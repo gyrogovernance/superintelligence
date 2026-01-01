@@ -133,7 +133,7 @@ def file_sha256(path: Path) -> str:
 
 def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
     """Replay bytes + events from given file paths to reconstruct state."""
-    from src.app.coordination import Coordinator, CoordinationStatus
+    from src.app.coordination import Coordinator
     from src.app.events import GovernanceEvent, Domain, EdgeID
 
     coord = Coordinator(atlas_dir)
@@ -153,7 +153,7 @@ def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
         )
         coord.apply_event(ev, bind_to_kernel_moment=False)
 
-    status: CoordinationStatus = coord.get_status()
+    status = coord.get_status()
     return status
 
 
@@ -186,24 +186,41 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
     events_path = aci_dir / f"{project_slug}.events.jsonl"
     report_json_path = aci_dir / f"{project_slug}.report.json"
     report_md_path = aci_dir / f"{project_slug}.report.md"
+    id_path = aci_dir / f"{project_slug}.id"
     
     # Require compiled artifacts (must come from sync_project, not created here)
     if not bytes_path.exists():
         raise FileNotFoundError(f"Missing compiled bytes: {bytes_path}")
     if not events_path.exists():
         raise FileNotFoundError(f"Missing compiled events: {events_path}")
+    if not id_path.exists():
+        raise FileNotFoundError(f"Missing project identity: {id_path}")
     
     # Replay to get final state
     status = replay_project(atlas_dir, project_slug)
+    
+    # Require report artifacts (must come from sync_project, not created here)
+    if not report_json_path.exists():
+        raise FileNotFoundError(f"Missing compiled report.json: {report_json_path}")
+    if not report_md_path.exists():
+        raise FileNotFoundError(f"Missing compiled report.md: {report_md_path}")
+    
+    # Read project_id value (for bundle manifest)
+    project_id_value = id_path.read_text(encoding="utf-8").strip()
     
     # Compute hashes
     bytes_hash = file_sha256(bytes_path)
     events_hash = file_sha256(events_path)
     project_hash = file_sha256(project_md_path)
+    report_json_hash = file_sha256(report_json_path)
+    report_md_hash = file_sha256(report_md_path)
+    project_id_hash = file_sha256(id_path)
     
     # Build bundle.json
     bundle_data = {
         "project_slug": project_slug,
+        "project_id": project_id_value,
+        "byte_seed_version": "AIR_AR_BYTES_V1",
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "kernel": {
             "step": status.kernel["step"],
@@ -219,6 +236,9 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
             "bytes_sha256": bytes_hash,
             "events_sha256": events_hash,
             "project_md_sha256": project_hash,
+            "report_json_sha256": report_json_hash,
+            "report_md_sha256": report_md_hash,
+            "project_id_sha256": project_id_hash,
         },
         "apertures": {
             "economy": status.apertures["econ"],
@@ -245,10 +265,71 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
         zf.write(report_json_path, "report.json")
         zf.write(report_md_path, "report.md")
         
+        # Add project identity file
+        zf.write(id_path, "project.id")
+        
         # Add bundle.json
         zf.writestr("bundle.json", json.dumps(bundle_data, indent=2))
     
     return bundle_out
+
+
+def verify_event_bindings(atlas_dir: Path, bytes_path: Path, events_path: Path) -> bool:
+    """
+    Verify that each event's kernel binding (kernel_step, kernel_state_index, kernel_last_byte)
+    matches the actual kernel state at that point in the byte log.
+    
+    Returns True if all bindings are consistent and all events are checked, False otherwise.
+    """
+    from src.router.kernel import RouterKernel
+    
+    # Create a fresh kernel to step through
+    kernel = RouterKernel(atlas_dir)
+    kernel.reset()
+    
+    # Read all bytes and events
+    byte_list = list(read_bytes(bytes_path))
+    events_list = list(read_events(events_path))
+    
+    max_step = len(byte_list)
+    
+    # Group events by step and validate step bounds early
+    events_by_step: Dict[int, list[Dict[str, Any]]] = {}
+    for ev in events_list:
+        step = ev.get("kernel_step")
+        if not isinstance(step, int):
+            return False
+        # Reject steps outside valid range [1, max_step]
+        if step < 1 or step > max_step:
+            return False
+        events_by_step.setdefault(step, []).append(ev)
+    
+    # Step through bytes and check events at each step
+    checked_events = 0
+    
+    for byte_val in byte_list:
+        kernel.step_byte(byte_val)
+        step = kernel.step
+        
+        # Check events bound to this step
+        for ev in events_by_step.get(step, []):
+            if ev.get("kernel_step") != step:
+                return False
+            
+            expected_state_index = ev.get("kernel_state_index")
+            expected_last_byte = ev.get("kernel_last_byte")
+            if not isinstance(expected_state_index, int) or not isinstance(expected_last_byte, int):
+                return False
+            
+            if kernel.state_index != expected_state_index:
+                return False
+            if kernel.last_byte != expected_last_byte:
+                return False
+            
+            checked_events += 1
+    
+    # Ensure we checked every event in the file
+    return checked_events == len(events_list)
 
 
 def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
@@ -283,6 +364,10 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if not bytes_file.exists() or not events_file.exists():
                 return False
             
+            # Verify event bindings (structural integrity check)
+            if not verify_event_bindings(atlas_dir, bytes_file, events_file):
+                return False
+            
             # Replay from bundle contents
             status = replay_from_logs(atlas_dir, bytes_file, events_file)
             
@@ -304,6 +389,17 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             report_md_file = tmp_path / "report.md"
             if not report_json_file.exists() or not report_md_file.exists():
                 return False
+            
+            # Verify report hashes
+            report_json_hash = file_sha256(report_json_file)
+            report_md_hash = file_sha256(report_md_file)
+            
+            if "report_json_sha256" in bundle_data["logs"]:
+                if report_json_hash != bundle_data["logs"]["report_json_sha256"]:
+                    return False
+            if "report_md_sha256" in bundle_data["logs"]:
+                if report_md_hash != bundle_data["logs"]["report_md_sha256"]:
+                    return False
             
             # Verify apertures
             apertures_match = (
@@ -334,10 +430,59 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
                 if project_hash != bundle_data["logs"]["project_md_sha256"]:
                     return False
             
+            # Verify project.id (required, must exist and match value)
+            project_id_file = tmp_path / "project.id"
+            if not project_id_file.exists():
+                return False
+            
+            project_id_value = project_id_file.read_text(encoding="utf-8").strip()
+            if project_id_value != bundle_data.get("project_id", ""):
+                return False
+            
+            # Verify project.id hash if present in bundle
+            if "project_id_sha256" in bundle_data["logs"]:
+                project_id_hash = file_sha256(project_id_file)
+                if project_id_hash != bundle_data["logs"]["project_id_sha256"]:
+                    return False
+            
             return True
             
     except Exception:
         return False
+
+
+def ensure_project_id(project_slug: str) -> str:
+    """
+    Ensure project has a stable project_id stored in .aci/<slug>.id
+    If missing, generate one and persist it.
+    Returns the project_id.
+    """
+    import uuid
+    
+    aci_dir = get_aci_dir()
+    id_path = aci_dir / f"{project_slug}.id"
+    
+    if id_path.exists():
+        pid = id_path.read_text(encoding="utf-8").strip()
+        if pid:
+            # Validate UUID format - raise error if invalid (don't silently regenerate)
+            try:
+                uuid.UUID(pid)
+                return pid
+            except ValueError:
+                raise ValueError(
+                    f"Invalid UUID in project identity file: {id_path}. "
+                    "Delete the file to regenerate, or fix the UUID manually."
+                )
+    
+    # Generate new UUID
+    new_id = str(uuid.uuid4())
+    
+    # Persist
+    aci_dir.mkdir(parents=True, exist_ok=True)
+    id_path.write_text(new_id, encoding="utf-8")
+    
+    return new_id
 
 
 def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
@@ -363,6 +508,9 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     if not isinstance(attestations, list):
         attestations = []
     
+    # Ensure project has stable ID (stored in .aci/<slug>.id)
+    project_id = ensure_project_id(project_slug)
+    
     # Determine artifact paths in .aci/ directory
     aci_dir = get_aci_dir()
     bytes_path = aci_dir / f"{project_slug}.bytes"
@@ -373,15 +521,19 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     # Initialize coordinator
     coord = Coordinator(atlas_dir)
     
-    # Canonical bytes per unit type
-    def canonical_bytes_for_unit(unit: str) -> bytes:
-        """Return canonical bytes for a unit type."""
+    # Hash-based canonical bytes per attestation
+    def canonical_unit_bytes(project_id: str, att_id: str, att_idx: int, unit: str) -> bytes:
+        """
+        Generate canonical bytes for an attestation using SHA-256 hash.
+        Seed format: AIR_AR_BYTES_V1|<project_id>|<attestation_id>|<attestation_index>|<unit>
+        """
+        seed = f"AIR_AR_BYTES_V1|{project_id}|{att_id}|{att_idx}|{unit}".encode("utf-8")
+        digest = hashlib.sha256(seed).digest()
         if unit == "daily":
-            return bytes([0x01])
+            return digest[:1]
         elif unit == "sprint":
-            return bytes([0x01, 0x02, 0x03, 0x04])
-        else:
-            return b""
+            return digest[:4]
+        return b""
     
     def unit_weight(unit: str) -> int:
         """Return weight for a unit (for accounting/ledger)."""
@@ -451,8 +603,8 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         
         processed_count += 1
         
-        # Get canonical bytes for this unit
-        unit_bytes = canonical_bytes_for_unit(unit)
+        # Get canonical bytes for this attestation (hash-based)
+        unit_bytes = canonical_unit_bytes(project_id, att_id, att_idx, unit)
         unit_wt = unit_weight(unit)  # Weight for accounting/ledger
         
         # Step kernel with these bytes in order
@@ -535,6 +687,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     # Generate report
     report_data = {
         "project_slug": project_slug,
+        "project_id": project_id,
         "compilation": {
             "attestation_count": len(attestations),
             "processed_attestations": processed_count,
@@ -586,6 +739,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     report_md_lines = [
         f"# Project Report: {project_slug}",
         "",
+        f"Project ID: {project_id}",
         f"Generated: {datetime.utcnow().isoformat()}Z",
         "",
         "## Compilation",

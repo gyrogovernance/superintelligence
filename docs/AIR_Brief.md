@@ -1,7 +1,7 @@
-# Alignment Convergence Infrastructure - ACI Brief
+# Alignment Infrastructure Routing - AIR Brief
 > Human Workforce Coordination for AI Safety
 
-Alignment Convergence is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
+AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
 
 ***AI’s rapid growth requires more humans to ensure automation risks do not escalate to dangerous thresholds. At the same time, millions of people are underemployed or unemployed and at risk of poverty as automation concentrates power and weakens accountability.***
 
@@ -19,7 +19,7 @@ AI safety work is often fragmented. Different groups repeat the same work, use d
 
 Most agentic systems and AI workflows increase output volume, but they do not improve accountability. When something goes wrong, it is unclear what was human judgment and what was model output.
 
-Alignment Convergence addresses these problems by providing a shared coordination workflow and a shared language for classification. It connects outputs to fund distribution channels and workforce allocation infrastructure such as NGO fiscal hosts.
+AIR addresses these problems by providing a shared coordination workflow and a shared language for classification. It connects outputs to fund distribution channels and workforce allocation infrastructure such as NGO fiscal hosts.
 
 ---
 
@@ -33,7 +33,7 @@ Alignment Convergence addresses these problems by providing a shared coordinatio
 
 ## What it produces
 
-Alignment Convergence produces three kinds of outputs that are useful immediately:
+AIR produces three kinds of outputs that are useful immediately:
 
 1. **Safety work deliverables**
     
@@ -52,7 +52,7 @@ Alignment Convergence produces three kinds of outputs that are useful immediatel
 
 ## How it works
 
-Alignment Convergence has three layers.
+Alignment Infrastructure Routing has three layers.
 
 ### 1. Router
 
@@ -90,9 +90,9 @@ Plugins are optional. The platform works if contributors submit outputs manually
 
 ## Operating Model
 
-Alignment Convergence projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
+Alignment Infrastructure Routing projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
-1. **Alignment Convergence provides the technical infrastructure.**
+1. **AIR provides the technical infrastructure.**
    This includes the Router, the App workflow, and optional Plugins for tracking and verifying deliverables.
 
 2. **A Project Sponsor administers funds.**
@@ -105,7 +105,7 @@ Alignment Convergence projects are executed through a defined operating arrangem
 
 ## Program Units
 
-Alignment Convergence uses canonical time units to organize work and funding into clear, manageable commitments.
+AIR uses canonical time units to organize work and funding into clear, manageable commitments.
 
 ### Daily Unit (1 Day)
 
@@ -139,17 +139,17 @@ To manage risk and budget, Project Sponsors set specific caps on participation.
 
 A standard configuration limits an individual contributor to a specific number of Daily Prizes and Sprint Stipends per project. This ensures funds are distributed to a wider pool of contributors and prevents indefinite casual work without a move toward formal employment.
 
-The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Convergence provides the verified work trail and classification data to inform these decisions, but does not automate the transfer of funds.
+The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Infrastructure Routing provides the verified work trail and classification data to inform these decisions, but does not automate the transfer of funds.
 
 ---
 
 ## Example Program Configuration and Funding Tiers
 
-The Alignment Convergence model can be used by AI safety labs directly or by NGOs and fiscal hosts. The same basic units apply in both cases. Amounts below are illustrative; actual rates and caps are set by the sponsor.
+The Alignment Infrastructure Routing model can be used by AI safety labs directly or by NGOs and fiscal hosts. The same basic units apply in both cases. Amounts below are illustrative; actual rates and caps are set by the sponsor.
 
 ### Canonical work units
 
-Alignment Convergence uses two canonical units of work:
+Alignment Infrastructure Routing uses two canonical units of work:
 
 - **Daily Unit (1 Day)**  
   One day of focused work on a well-defined task. This is used for "Daily Prizes".
@@ -163,7 +163,7 @@ These units are defined in terms of work and deliverables, not employment status
 
 ### Tier 1: Individual rapid grants (per-person cap, e.g. £1,000)
 
-Some programs, such as rapid grants, place a cap per individual (£1,000 per person). In this setting, Alignment Convergence can be used to structure a small, safe engagement window.
+Some programs, such as rapid grants, place a cap per individual (£1,000 per person). In this setting, Alignment Infrastructure Routing can be used to structure a small, safe engagement window.
 
 **Example configuration (illustrative numbers):**
 
@@ -176,7 +176,7 @@ A sponsor with a £1,000 cap per person can, for example:
   - additional prizes in a later round, or
   - overhead, tools, or coordination costs
 
-The key point is that the cap applies per person, and Alignment Convergence provides a clear way to express "how much work was funded" inside that limit, without treating it as salary.
+The key point is that the cap applies per person, and Alignment Infrastructure Routing provides a clear way to express "how much work was funded" inside that limit, without treating it as salary.
 
 ---
 
@@ -209,18 +209,18 @@ Larger grants (for example, £70,000) can be used to fund medium-term projects, 
 - Structure:
   - Early phase: several Sprint Units and Daily Units to qualify contributors and refine workflows
   - Main phase: contributors move into more stable contracts or stipends handled by the fiscal host's normal HR or contracting processes
-- Alignment Convergence continues to be used for:
+- Alignment Infrastructure Routing continues to be used for:
   - defining and tracking Daily and Sprint Units
   - classifying deliverables with Gyroscope and The Human Mark
   - providing an attested work trail for reporting back to the sponsor
 
-In this tier, fiscal hosts are most useful, because they already have the legal and accounting infrastructure to support longer engagements. Alignment Convergence does not replace that infrastructure; it provides a consistent way to express and track the work being funded.
+In this tier, fiscal hosts are most useful, because they already have the legal and accounting infrastructure to support longer engagements. AIR does not replace that infrastructure; it provides a consistent way to express and track the work being funded.
 
 ---
 
 ## The Complete Framework
 
-Alignment Convergence uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **GGG ASI Router** for coordination and replay.
+Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **GGG ASI Alignment Router** for coordination and replay.
 
 **The Human Mark** is an epistemic taxonomy classifying contributions by the displacement risk they address:
 
@@ -231,9 +231,9 @@ Alignment Convergence uses **The Human Mark** as its shared taxonomy for AI safe
 
 This gives fiscal hosts and funders a portfolio view. They can see what kinds of risks are being addressed and where funding is concentrated or missing.
 
-### Core Engine: ASI Alignment Router
+### Core Engine: GGG ASI Alignment Router
 
-The ASI Alignment Router is a deterministic coordination kernel. It maps a shared log of activity into a sequence of shared coordination states that can be verified by replay.
+The GGG ASI Alignment Router is a deterministic coordination kernel. It maps a shared log of activity into a sequence of shared coordination states that can be verified by replay.
 
 The Router provides:
 
@@ -243,15 +243,15 @@ The Router provides:
 
 ### Theoretical Foundation: Gyroscopic Global Governance
 
-Alignment Convergence is the operational expression of Gyroscopic Global Governance (GGG), a framework for post-AGI coordination. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
+Alignment Infrastructure Routing is the operational expression of Gyroscopic Global Governance (GGG), a framework for post-AGI coordination. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
 
 ---
 
 ## Disclaimer
 
-ACI is coordination infrastructure for work receipts, classification, and replayable audit.
+AIR is coordination infrastructure for work receipts, classification, and replayable audit.
 
-Acceptance criteria, evaluation standards, payment decisions, and all policy judgments remain the responsibility of project sponsors and accountable human governance. ACI provides the shared coordination substrate that makes contributions verifiable and comparable. It does not evaluate, score, or approve contributions.
+Acceptance criteria, evaluation standards, payment decisions, and all policy judgments remain the responsibility of project sponsors and accountable human governance. AIR provides the shared coordination substrate that makes contributions verifiable and comparable. It does not evaluate, score, or approve contributions.
 
 ---
 

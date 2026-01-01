@@ -17,7 +17,7 @@ attestations:
   domain: invalid_domain
   human_mark: Governance Traceability Displacement
 computed:
-  last_synced_at: '2025-12-31T00:18:57.474687Z'
+  last_synced_at: '2026-01-01T20:00:03.344921Z'
   apertures:
     economy: 0.5
     employment: 0.0
@@ -25,8 +25,8 @@ computed:
   event_count: 1
   kernel:
     step: 1
-    state_index: 43759
-    state_hex: aaaefe
+    state_index: 43612
+    state_hex: aaa5c5
 ---
 
 # Test Skip Project

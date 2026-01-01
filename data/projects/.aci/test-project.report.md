@@ -1,6 +1,7 @@
 # Project Report: test-project
 
-Generated: 2025-12-31T00:18:57.458665Z
+Project ID: bcd5ebb9-5388-4464-a5f2-c379a9c53149
+Generated: 2026-01-01T20:00:03.327983Z
 
 ## Compilation
 
@@ -9,8 +10,8 @@ Generated: 2025-12-31T00:18:57.458665Z
 - Skipped: 0
 - Bytes: 5
 - Kernel step: 5
-- Kernel state: 8a88f8 (index 35471)
-- Last byte: 0x04
+- Kernel state: 6262e2 (index 25134)
+- Last byte: 0x06
 
 ## Accounting
 

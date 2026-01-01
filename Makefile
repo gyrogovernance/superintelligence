@@ -53,7 +53,7 @@ check-imports:
 	$(PYTHON) scripts/check_imports.py
 
 test:
-	@echo "Running ACI CLI tests..."
+	@echo "Running AIR CLI tests..."
 	$(PYTHON) tests/test_aci_cli.py
 
 test-pytest:

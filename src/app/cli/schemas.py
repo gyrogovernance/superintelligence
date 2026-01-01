@@ -1,5 +1,5 @@
 """
-Constants for ACI CLI.
+Constants for AIR CLI.
 """
 
 # Canonical target aperture (from CGM)

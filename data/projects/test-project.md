@@ -19,7 +19,7 @@ attestations:
   evidence_links: []
   note: Sprint attestation
 computed:
-  last_synced_at: '2025-12-31T00:18:57.458665Z'
+  last_synced_at: '2026-01-01T20:00:03.328988Z'
   apertures:
     economy: 0.5
     employment: 0.5
@@ -27,8 +27,8 @@ computed:
   event_count: 2
   kernel:
     step: 5
-    state_index: 35471
-    state_hex: 8a88f8
+    state_index: 25134
+    state_hex: 6262e2
 ---
 
 # Test Project

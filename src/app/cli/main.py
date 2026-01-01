@@ -1,5 +1,5 @@
 """
-ACI CLI main entry point.
+AIR CLI main entry point.
 Default behavior: sync all projects, verify, and print status.
 """
 
@@ -14,8 +14,8 @@ def cmd_sync_and_verify_all(args):
     from src.router.atlas import build_all
     
     # Print ASCII-safe banner
-    print("\nACI")
-    print("Alignment Convergence Infrastructure")
+    print("\nAIR")
+    print("Alignment Infrastructure Routing")
     print("-----------------------------------")
     print(ui.header("System Status"))
     

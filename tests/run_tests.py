@@ -33,7 +33,7 @@ def main():
         cmd.append("tests/")
     
     print(f"Running: {' '.join(cmd)}")
-    print("-" * 70)
+    print("-" * 10)
     
     result = subprocess.run(cmd, cwd=project_root)
     sys.exit(result.returncode)

@@ -1,5 +1,6 @@
 {
   "project_slug": "test-project",
+  "project_id": "bcd5ebb9-5388-4464-a5f2-c379a9c53149",
   "compilation": {
     "attestation_count": 2,
     "processed_attestations": 2,
@@ -7,15 +8,15 @@
     "byte_count": 5,
     "kernel": {
       "step": 5,
-      "state_index": 35471,
-      "state_hex": "8a88f8",
-      "a_hex": "8a8",
-      "b_hex": "8f8",
-      "last_byte": 4
+      "state_index": 25134,
+      "state_hex": "6262e2",
+      "a_hex": "626",
+      "b_hex": "2e2",
+      "last_byte": 6
     },
     "hashes": {
-      "bytes_sha256": "3d459e0fcf22cfcd1d7eed46bcfa68193c009bec3d53cbe69e5997632ccf6f54",
-      "events_sha256": "024c399649d526c9e58388c0b9ca12ea3119862b7c04f1ecbd9faebde82acbed"
+      "bytes_sha256": "f0b9d7f4dfb8142b1e09fe6870b42138b75c9c105c3d413f652970370a98be03",
+      "events_sha256": "5f6d95235c5a0a3ba4458f1a9839d8952b21d64c20beb7cee669a537f728064d"
     }
   },
   "accounting": {

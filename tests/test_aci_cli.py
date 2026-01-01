@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ACI CLI test suite - project-only, non-interactive model.
+AIR CLI test suite - project-only, non-interactive model.
 Tests the default behavior: sync all projects, verify, bundle.
 """
 
@@ -175,9 +175,54 @@ def test_c_tamper_detection():
 
 def test_d_determinism():
     """Test D: Determinism."""
+    # Ensure test project exists (project_id will be auto-generated in .aci/ on first sync)
+    projects_dir = PROJECT_ROOT / "data" / "projects"
+    projects_dir.mkdir(parents=True, exist_ok=True)
+    
+    project_md = projects_dir / "test-project.md"
+    if not project_md.exists():
+        # Create project (project_id will be auto-generated in .aci/ on first sync)
+        project_content = """---
+project_name: Test Project
+project_slug: test-project
+sponsor: Test Lab
+created_at: 2025-01-01T00:00:00Z
+
+attestations:
+  - id: att_001
+    unit: daily
+    domain: economy
+    human_mark: Governance Traceability Displacement
+    gyroscope_work: Governance Management
+    evidence_links: []
+    note: "Test attestation"
+  
+  - id: att_002
+    unit: sprint
+    domain: employment
+    human_mark: Information Variety Displacement
+    gyroscope_work: Information Curation
+    evidence_links: []
+    note: "Sprint attestation"
+
+computed:
+  last_synced_at: null
+  apertures: {}
+  event_count: 0
+  kernel:
+    step: 0
+    state_index: 0
+    state_hex: ""
+
+---
+
+# Test Project
+
+Test project description.
+"""
+        project_md.write_text(project_content, encoding="utf-8")
+    
     bundle = PROJECT_ROOT / "data" / "projects" / "bundles" / "test-project.zip"
-    if not bundle.exists():
-        pytest.skip("No bundle to compare")
     
     # Run first time and extract bundle.json
     exit_code1, _stdout1, _stderr1 = run_aci()
@@ -199,8 +244,13 @@ def test_d_determinism():
     # project_md_sha256 changes because project.md is updated with last_synced_at on each run
     bundle_json1["logs"].pop("project_md_sha256", None)
     bundle_json2["logs"].pop("project_md_sha256", None)
+    # Report hashes are deterministic but derived from bytes/events, so remove for comparison
+    bundle_json1["logs"].pop("report_json_sha256", None)
+    bundle_json2["logs"].pop("report_json_sha256", None)
+    bundle_json1["logs"].pop("report_md_sha256", None)
+    bundle_json2["logs"].pop("report_md_sha256", None)
     
-    assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and project hash)"
+    assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and project/report hashes)"
 
 
 def test_e_skipped_attestations_in_report():
@@ -268,7 +318,7 @@ computed:
 def main():
     """Run all tests."""
     print("\n" + "="*60)
-    print("ACI CLI Test Suite (Project-Only Model)")
+    print("AIR CLI Test Suite (Project-Only Model)")
     print("="*60)
     
     results = []

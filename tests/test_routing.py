@@ -313,7 +313,7 @@ def print_routing_summary(request):
     
     kernel = RouterKernel(atlas_dir)
     
-    print("\n" + "="*70)
+    print("\n" + "="*10)
     print("ROUTING TEST SUMMARY")
     print("="*10)
     print(f"Ontology size: {len(kernel.ontology):,} states")

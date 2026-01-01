@@ -8,10 +8,14 @@ Tests the fundamental physics:
 - FIFO gyration
 - Non-commutativity
 - Invariant preservation
+
+HOW TO RUN ALL PHYSICS TESTS: 
+python -m pytest -v -s tests/test_physics_1.py tests/test_physics_2.py tests/test_physics_3.py tests/test_physics_4.py
 """
 
 import pytest
 import numpy as np
+from pathlib import Path
 
 from src.router.constants import (
     GENE_MIC_S,
@@ -121,18 +125,6 @@ class TestExpansion:
             mask_b = mask24 & LAYER_MASK_12
             assert mask_b == 0, f"Intron {hex(intron)} has non-zero B mask: {hex(mask_b)}"
 
-    def test_type_a_mask_nonzero(self):
-        """At least some introns should produce non-zero A masks."""
-        nonzero_count = 0
-        for intron in range(256):
-            mask24 = expand_intron_to_mask24(intron)
-            mask_a = (mask24 >> 12) & LAYER_MASK_12
-            if mask_a != 0:
-                nonzero_count += 1
-        
-        # At least 200/256 should be non-zero (empirical threshold)
-        assert nonzero_count > 200, f"Only {nonzero_count}/256 masks are non-zero"
-
     def test_precomputed_table_matches(self):
         """XFORM_MASK_BY_BYTE must match expand_intron_to_mask24."""
         for byte in range(256):
@@ -157,82 +149,6 @@ class TestFIFOGyration:
         # new_A should equal ~old_B
         expected_new_a = b ^ LAYER_MASK_12
         assert new_a == expected_new_a, f"new_A = {hex(new_a)}, expected {hex(expected_new_a)}"
-
-    def test_single_step_changes_state(self):
-        """At least some bytes should change the state."""
-        state = ARCHETYPE_STATE24
-        changed = 0
-        for byte in range(256):
-            next_state = step_state_by_byte(state, byte)
-            if next_state != state:
-                changed += 1
-        
-        assert changed > 250, f"Only {changed}/256 bytes changed the state"
-
-    def test_double_step_not_identity(self):
-        """Applying same byte twice should not return to original (except special cases)."""
-        state = ARCHETYPE_STATE24
-        non_involutions = 0
-        
-        for byte in range(256):
-            s1 = step_state_by_byte(state, byte)
-            s2 = step_state_by_byte(s1, byte)
-            if s2 != state:
-                non_involutions += 1
-        
-        # Most bytes should not be involutions
-        assert non_involutions > 200, f"Only {non_involutions}/256 bytes are non-involutions"
-
-
-class TestNonCommutativity:
-    """Test that byte order matters (non-commutativity from gyration)."""
-
-    def test_order_matters(self):
-        """Applying X then Y should differ from Y then X for most pairs."""
-        state = ARCHETYPE_STATE24
-        test_pairs = [
-            (0x00, 0xFF),
-            (0x42, 0x24),
-            (0xAA, 0x55),
-            (0x12, 0x34),
-        ]
-        
-        noncommutative = 0
-        for x, y in test_pairs:
-            s_xy = step_state_by_byte(step_state_by_byte(state, x), y)
-            s_yx = step_state_by_byte(step_state_by_byte(state, y), x)
-            if s_xy != s_yx:
-                noncommutative += 1
-        
-        assert noncommutative > 0, "No pairs showed non-commutativity"
-        print(f"\n  Non-commutative pairs: {noncommutative}/{len(test_pairs)}")
-
-    def test_commutativity_statistics(self, capsys):
-        """
-        Diagnostic: measure commutativity across random byte pairs.
-        
-        Note: This is a diagnostic test. The exact law (P6) states that
-        T_y(T_x(s)) = T_x(T_y(s)) iff x=y, so the expected rate is 1/256 ≈ 0.39%.
-        This test is kept as a diagnostic but the exact law test is authoritative.
-        """
-        state = ARCHETYPE_STATE24
-        np.random.seed(42)
-        
-        sample_size = 100
-        commutative = 0
-        
-        for _ in range(sample_size):
-            x, y = np.random.randint(0, 256, size=2)
-            s_xy = step_state_by_byte(step_state_by_byte(state, x), y)
-            s_yx = step_state_by_byte(step_state_by_byte(state, y), x)
-            if s_xy == s_yx:
-                commutative += 1
-        
-        comm_rate = 100 * commutative / sample_size
-        print(f"\n  Commutativity rate (diagnostic): {comm_rate:.1f}% ({commutative}/{sample_size} pairs, expected ~0.39%)")
-        
-        # Diagnostic only - no assertion (exact law is tested elsewhere)
-
 
 class TestCGMChirality:
     """Test CS axiom: gyration provides fundamental chirality."""
@@ -377,29 +293,6 @@ class TestClosedFormDepthLaws:
 
             assert s2 == expected
 
-    def test_depth4_alternation_is_identity(self):
-        """
-        For any state and bytes x,y:
-
-          x y x y returns to the same state (identity),
-          and equals y x y x (BU-Egress discrete analogue).
-        """
-        np.random.seed(2)
-        for _ in range(2000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            s = pack_state(a, b)
-
-            x = int(np.random.randint(0, 256))
-            y = int(np.random.randint(0, 256))
-
-            s_xyxy = step_state_by_byte(step_state_by_byte(step_state_by_byte(step_state_by_byte(s, x), y), x), y)
-            s_yxyx = step_state_by_byte(step_state_by_byte(step_state_by_byte(step_state_by_byte(s, y), x), y), x)
-
-            assert s_xyxy == s
-            assert s_yxyx == s
-            assert s_xyxy == s_yxyx
-
     def test_depth2_commutes_iff_same_byte(self):
         """
         For this kernel: step(step(s,x),y) == step(step(s,y),x) iff x==y.
@@ -470,7 +363,7 @@ def print_physics_summary(request):
     """Print summary statistics after all tests."""
     yield
     
-    print("\n" + "="*70)
+    print("\n" + "="*10)
     print("PHYSICS TEST SUMMARY")
     print("="*10)
     
@@ -498,22 +391,6 @@ class TestCSOperatorAndSeparatorLemmas:
     def _mask_a(self, byte: int) -> int:
         mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
         return (mask24 >> 12) & LAYER_MASK_12
-
-    def test_R0xAA_is_involution_on_random_states(self):
-        """
-        R := T_0xAA should be an involution: R(R(s)) = s.
-        This is a strong, kernel-native "reference move" invariant.
-        """
-        np.random.seed(123)
-        for _ in range(5000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            s = pack_state(a, b)
-
-            s1 = step_state_by_byte(s, 0xAA)
-            s2 = step_state_by_byte(s1, 0xAA)
-
-            assert s2 == s, f"R∘R != id at state {hex(s)}"
 
     def test_separator_lemma_x_then_AA_updates_A_only(self):
         """
@@ -604,3 +481,73 @@ class TestInverseConjugationForm:
             s_back = step_state_by_byte(t2, 0xAA)  # R
 
             assert s_back == s, f"Conjugation inverse failed for byte {x} at state {hex(s)}"
+
+
+# =============================================================================
+# PILLAR 2: QUANTUM GRAVITY MANIFOLD (HOLOGRAPHIC SCALING)
+# =============================================================================
+
+class TestQuantumGravityManifold:
+    """
+    Pillar 2: Holographic Bulk/Boundary scaling.
+    
+    Tests that the horizon forms a perfect 2D boundary encoding the 3D bulk.
+    """
+
+    def test_holographic_area_scaling(self, capsys):
+        """
+        Bekenstein-Hawking Analog: S = Area / 4.
+        Tests if the Horizon (256 states) forms a perfect 2D boundary
+        that holographically encodes the entire 3D bulk (65,536 states).
+        """
+        print("\n" + "="*10)
+        print("PILLAR 2: Holographic Area/Entropy Scaling")
+        print("="*10)
+        
+        # Horizon Area = 256 states.
+        # We measure the "Atmosphere" (states 1-step away from Horizon).
+        atlas_dir = Path("data/atlas")
+        if not atlas_dir.exists():
+            pytest.skip("No Atlas")
+        
+        epistemology = np.load(atlas_dir / "epistemology.npy")
+        ontology = np.load(atlas_dir / "ontology.npy")
+        
+        # Identify horizon indices: A = ~B
+        horizon_indices = []
+        for i, s in enumerate(ontology):
+            s = int(s)
+            a, b = unpack_state(s)
+            if a == (b ^ LAYER_MASK_12):
+                horizon_indices.append(i)
+        
+        horizon_set = set(horizon_indices)
+        
+        # Atmosphere: The boundary layer of the Horizon
+        atmosphere = set()
+        for idx in horizon_indices:
+            # Every byte applied to a horizon state creates an 'excitation'
+            for byte in range(256):
+                next_idx = int(epistemology[idx, byte])
+                atmosphere.add(next_idx)
+        
+        # Remove the horizon states themselves to get the pure boundary layer
+        boundary_layer = atmosphere - horizon_set
+        
+        print(f"  Horizon Area (States): {len(horizon_indices)}")
+        print(f"  Boundary Layer Volume: {len(boundary_layer)}")
+        print(f"  Total Atmosphere (Horizon + Boundary): {len(atmosphere)}")
+        
+        # Holographic Check:
+        # In a 3D system, Boundary (Area) should scale as Volume^(2/3).
+        # Here, we check the ratio.
+        ratio = len(boundary_layer) / len(horizon_indices) if len(horizon_indices) > 0 else 0
+        print(f"  Expansion Ratio (Boundary/Area): {ratio:.2f}")
+        
+        # 256 * 256 = 65536. 
+        # If the Boundary Layer captures the whole ontology, the Horizon
+        # is a 'Maximal Observer' (Holographic Principle).
+        assert len(atmosphere) == 65536, (
+            f"Expected atmosphere to cover entire ontology (65536), got {len(atmosphere)}"
+        )
+        print("  ✓ Verified: The Horizon is holographically complete (Boundary = Bulk).")

@@ -300,7 +300,7 @@ def print_global_summary(request):
     """Print overall test summary."""
     yield
     
-    print("\n" + "="*70)
+    print("\n" + "="*10)
     print("OVERALL TEST SUMMARY")
     print("="*10)
     
@@ -324,35 +324,3 @@ def print_global_summary(request):
     
     print("="*10)
 
-
-class TestCGMDepthProperties:
-    """Test depth-2 and depth-4 properties (UNA/BU)."""
-    
-    def test_depth_two_non_commutativity_rate(self, capsys):
-        """
-        Diagnostic: measure depth-2 non-commutativity rate.
-        
-        Note: This is a diagnostic test. The exact law (P6) states that
-        T_y(T_x(s)) = T_x(T_y(s)) iff x=y, so the expected rate is 255/256 ≈ 99.61%.
-        This test is kept as a diagnostic but the exact law test is authoritative.
-        """
-        from src.router.constants import step_state_by_byte, ARCHETYPE_STATE24
-        
-        np.random.seed(42)
-        sample_size = 200
-        noncommutative = 0
-        
-        for _ in range(sample_size):
-            x, y = np.random.randint(0, 256, size=2)
-            s = ARCHETYPE_STATE24
-            
-            s_xy = step_state_by_byte(step_state_by_byte(s, x), y)
-            s_yx = step_state_by_byte(step_state_by_byte(s, y), x)
-            
-            if s_xy != s_yx:
-                noncommutative += 1
-        
-        rate = 100 * noncommutative / sample_size
-        print(f"\n  Depth-2 non-commutativity (diagnostic): {rate:.1f}% (n={sample_size}, expected ~99.61%)")
-        
-        # Diagnostic only - no assertion (exact law is tested elsewhere)
