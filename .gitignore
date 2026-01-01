@@ -89,7 +89,7 @@ research/toys/training/dummy_public_knowledge.bin
 # Documentation builds
 docs/build/
 docs/notes/
-docs/*/
+docs/other/
 site/
 
 # Jupyter Notebook
