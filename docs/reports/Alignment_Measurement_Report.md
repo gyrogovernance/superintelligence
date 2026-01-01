@@ -1,4 +1,6 @@
-# The Epistemic Necessity of AI Alignment
+# Epistemic vs Empirical Evaluation in AI Alignment
+
+**Why Current Safety Evaluations Cannot Verify Alignment, and What Can**
 
 **Document Type:** Foundational Theorem  
 **Scope:** Governance Geometry, Measurement Theory, Alignment Architecture  
@@ -6,25 +8,31 @@
 
 ---
 
-## 1. Executive Summary
+## Executive Summary
 
-This report presents structural evidence that, within the CGM governance geometry, representative scalar evaluations can fail to distinguish aligned from misaligned states, and that single-axis optimisation can remain permanently far from the alignment target.
+Current AI safety practice relies on scalar evaluations: safety scores, helpfulness ratings, pass/fail metrics, reward signals. These methods treat alignment as a quantity to be measured and maximised.
+
+This report presents structural evidence that such evaluations are insufficient for alignment verification. The core problem is geometric: alignment is a property of structure, not magnitude. Scalar evaluations collapse high-dimensional governance states into single numbers, discarding the information required to distinguish aligned configurations from misaligned ones.
+
+We ground this argument in the Common Governance Model (CGM), which defines alignment as convergence to a specific structural equilibrium. In this framework, governance states exist in a six-dimensional space corresponding to the relationships among four fundamental operations: Governance, Information, Inference, and Intelligence. The alignment target is a precise ratio, called aperture, between two components of this structure: global coherence (the gradient component) and local differentiation (the cycle component). The CGM analysis fixes this target at A* approximately equal to 0.0207.
 
 The argument proceeds in three stages:
 
-1. **Scalar Blindness.** We exhibit explicit examples in which a representative scalar score (the sum of absolute edge values) assigns the same value to structurally different states with different apertures.
+1. **Scalar Blindness.** We construct explicit examples in which a representative scalar evaluation (the sum of absolute edge values) assigns identical scores to states with different apertures. A scalar evaluator cannot distinguish these structurally different configurations.
 
-2. **Structural Lock.** Under the current THM mapping, we show that policies which only populate a single governance edge (for example, the Governance-Information axis) are locked at an aperture value A = 0.5, regardless of magnitude.
+2. **Structural Lock.** We demonstrate that policies which optimise along a single axis (for example, maximising a governance-information metric) remain permanently locked at an aperture of 0.5, regardless of how much effort is applied. The alignment target A* is geometrically unreachable through single-axis optimisation.
 
-3. **Epistemic Sufficiency.** The six-dimensional K₄ governance geometry, together with aperture A, is sufficient to construct and recognise states with the target alignment value A*, and our tests illustrate that a simple scalar cannot play this role.
+3. **Epistemic Sufficiency.** We show that the six-dimensional governance geometry is sufficient to construct and recognise aligned states. Aperture is scale-invariant: it measures structural shape rather than magnitude. This property allows alignment to be assessed consistently across systems of vastly different sizes.
 
-The AIR architecture addresses Measurement Collapse by providing the geometric structure required for alignment verification.
+The practical implication is direct. The AIR architecture, which implements this geometry, provides a measurement framework capable of verifying alignment. Scalar evaluations, however refined, cannot substitute for this geometric structure because they lack the dimensionality required to represent the alignment observable.
+
+This finding reframes the alignment problem. Safety is not a score to be maximised. It is a geometric configuration to be maintained. The question shifts from "how do we make the number higher" to "how do we preserve the structural balance that defines coherent governance."
 
 ---
 
-## 2. Background: The Geometry of Governance
+## 1. Background: The Geometry of Governance
 
-### 2.1 The Six-Dimensional Structure
+### 1.1 The Six-Dimensional Structure
 
 Governance is a structural space with six independent dimensions.
 
@@ -32,13 +40,13 @@ In the Common Governance Model, these six dimensions correspond to the six edges
 
 Each edge represents a directed relationship between two functions. The complete set of six edges forms the structural substrate in which governance states exist. Any governance configuration is a vector in this six-dimensional space.
 
-### 2.2 Gradient and Cycle Components
+### 1.2 Gradient and Cycle Components
 
 Every governance state decomposes into two orthogonal components. The gradient component represents globally integrable structure, meaning coherent, path-independent organisation. The cycle component represents non-integrable circulation, meaning feedback, differentiation, and local variation.
 
 Aperture (A) is the ratio of cycle energy to total energy. It measures the proportion of the system's structure that resides in internal circulation rather than global coherence.
 
-### 2.3 The Alignment Target
+### 1.3 The Alignment Target
 
 The Common Governance Model defines a canonical alignment target of A* approximately equal to 0.0207.
 
@@ -48,17 +56,17 @@ Alignment, in this framework, is the condition where A(y) equals A*.
 
 ---
 
-## 3. Evaluation Spaces and Dimensional Sufficiency
+## 2. Evaluation Spaces and Dimensional Sufficiency
 
 The previous section described the canonical six-dimensional governance space used in the CGM and AIR architecture. This section explains how other evaluation schemes relate to this space.
 
-### 3.1 The Epistemic Evaluation Space
+### 2.1 The Epistemic Evaluation Space
 
 In this framework, the epistemic evaluation space for a domain is the six-dimensional K₄ edge space described above. A governance state is represented as a vector y in six-dimensional real space, decomposed into gradient and cycle components, with aperture A(y) defined as the ratio of cycle energy to total energy.
 
 An evaluation that works directly with y, or with quantities derived from the full gradient-cycle decomposition and A(y), is called epistemic. It preserves the complete structure that CGM identifies as relevant for alignment.
 
-### 3.2 Empirical Evaluation Spaces
+### 2.2 Empirical Evaluation Spaces
 
 In contrast, many existing evaluations in AI safety map behaviour into some other space E, and then score it. For example:
 
@@ -72,17 +80,17 @@ Formally, there is a map from governance events (or model behaviours) into an ev
 
 Our concern is whether such evaluations can, even in principle, represent alignment as defined by A(y) and A*.
 
-### 3.3 Evaluation Spaces of Dimension Less than Six
+### 2.3 Evaluation Spaces of Dimension Less than Six
 
 If the evaluation space E has dimension strictly less than six, then it cannot encode all six independent degrees of freedom present in the governance geometry.
 
 In practical terms, this means that some distinct governance states y₁ and y₂ in the six-dimensional space must collapse to the same point in E. Any aperture-like quantity that depends on the full distribution between gradient and cycle components cannot, in general, be reconstructed from E alone.
 
-The scalar examples in Sections 5 and 6 are concrete demonstrations of this collapse in the simplest case where E equals the real line. They show that two structurally different states can receive the same scalar score, and that a state near A* and a state far from A* can be indistinguishable to that scalar.
+The scalar examples in Sections 4 and 5 are concrete demonstrations of this collapse in the simplest case where E equals the real line. They show that two structurally different states can receive the same scalar score, and that a state near A* and a state far from A* can be indistinguishable to that scalar.
 
 While these examples do not cover all possible low-dimensional E, they illustrate the generic issue: evaluation schemes with fewer than six degrees of freedom are structurally unable to express the full governance state.
 
-### 3.4 Evaluation Spaces of Dimension Equal to Six
+### 2.4 Evaluation Spaces of Dimension Equal to Six
 
 When an evaluation space E has dimension six, it has, in principle, enough capacity to represent the same number of degrees of freedom as the K₄ governance geometry. However, this capacity alone is insufficient.
 
@@ -90,7 +98,7 @@ To be epistemically equivalent to the CGM geometry, an evaluation in E must be r
 
 In other words, a six-dimensional evaluation is epistemically sufficient only if it is essentially a change of basis for the same geometry. A six-dimensional space with a different internal structure, or with no clear correspondence to gradient and cycle components, may still fail to represent aperture and A* correctly.
 
-### 3.5 Evaluation Spaces of Dimension Greater than Six
+### 2.5 Evaluation Spaces of Dimension Greater than Six
 
 Some modern evaluations involve high-dimensional spaces, such as large embedding vectors or collections of many heuristic metrics. These spaces have more than six dimensions.
 
@@ -100,23 +108,21 @@ If no such projection is specified or guaranteed, then E is abstract from the CG
 
 ---
 
-## 4. The Problem: Measurement Collapse
+## 3. The Problem: Measurement Collapse
 
-### 4.1 How Empirical Evaluation Works
+### 3.1 How Empirical Evaluation Works
 
 Current AI safety methods typically evaluate systems by assigning scalar scores to outputs or behaviours. Examples include safety ratings, helpfulness scores, reward signals, and pass/fail metrics.
 
 These evaluations are projections. They take a high-dimensional structural state and reduce it to a single number.
 
-### 4.2 What Is Lost
+### 3.2 What Is Lost
 
 The six-dimensional governance geometry contains information about how energy is distributed between gradient and cycle subspaces. A scalar projection preserves only total magnitude. It cannot distinguish two states that have the same total energy but different internal structures.
 
-This is a mathematical property of the geometry of projection.
-
 ---
 
-## 5. Finding 1: Scalar Blindness
+## 4. Finding 1: Scalar Blindness
 
 **Statement.** In the K₄ governance geometry, for the scalar S(y) defined as the sum of absolute edge values, there exist structurally distinct states with identical scalar evaluations but different apertures.
 
@@ -128,7 +134,7 @@ Both states have the same scalar sum of 4.0. To a scalar evaluator, they are ind
 
 ---
 
-## 6. Finding 2: Alignment Invisibility
+## 5. Finding 2: Alignment Invisibility
 
 **Statement.** The scalar evaluator we study (the sum of absolute edge values) can fail to distinguish a state with A close to A* from a state with A far from A*, even when its output values are identical.
 
@@ -140,7 +146,7 @@ Both states report identical scalar scores. One is aligned. The other is displac
 
 ---
 
-## 7. Finding 3: Structural Lock
+## 6. Finding 3: Structural Lock
 
 **Statement.** Under the current THM mapping in the K₄ governance geometry, a policy that only populates a single edge (for example, the Governance-Information axis) remains at A = 0.5 regardless of the magnitude applied.
 
@@ -154,7 +160,7 @@ In all cases, A equals 0.500. The distance to A* remains approximately 0.48 rega
 
 ---
 
-## 8. Finding 4: Epistemic Sufficiency
+## 7. Finding 4: Epistemic Sufficiency
 
 **Statement.** Within the CGM framework and the K₄ geometry, the six-dimensional epistemic representation is sufficient to construct and recognise aligned states where A equals A*, and aperture is invariant under global rescaling.
 
@@ -168,7 +174,7 @@ The test `test_epistemic_aperture_is_scale_invariant` shows that scaling a state
 
 ---
 
-## 9. Finding 5: Kernel-App Correspondence
+## 8. Finding 5: Kernel-App Correspondence
 
 **Statement.** The router kernel realises an intrinsic aperture (A_kernel approximately equal to 0.0195) that is within 5.6% of the continuous CGM target A*.
 
@@ -178,23 +184,23 @@ The test `test_epistemic_aperture_is_scale_invariant` shows that scaling a state
 
 ---
 
-## 10. The Architecture of Alignment
+## 9. The Architecture of Alignment
 
 The findings above describe observables. This section interprets them in terms of the GGG/AIR stack.
 
-### 10.1 The Kernel
+### 9.1 The Kernel
 
 The router kernel is a deterministic, reversible coordination substrate. It operates on a fixed ontology of 65,536 states. Its physics realises the CGM alignment invariant at the discrete level.
 
 The kernel provides the stable epistemic ground. It embodies the target.
 
-### 10.2 The App
+### 9.2 The App
 
 The App is a passive geometer. It receives classified events, projects them into the six-dimensional governance space, performs Hodge decomposition, and reports the aperture.
 
 The App reveals structure. It answers the question of how far a governance state is from A*.
 
-### 10.3 The Human Role
+### 9.3 The Human Role
 
 Human governors interpret the App's output and intervene accordingly. The findings show that the correct intervention is to restore structural balance by adding missing categories to allow convergence toward A*.
 
@@ -202,7 +208,7 @@ Governance becomes the practice of maintaining aperture calibration across domai
 
 ---
 
-## 11. Conclusion
+## 10. Conclusion
 
 Alignment is a geometric calibration problem.
 
