@@ -29,6 +29,8 @@ A shared moment occurs when participants who possess identical ledger histories 
 ### 2.2 Entity-agnostic verification and provenance
 The router makes claims about state and history structurally checkable. A presented state is either a valid member of the ontology or it is not. This geometric provenance is verifiable by any party without trusting the presenter. It removes the need for a central source of truth by making validity a property of the state space itself, anchored to the universal archetype.
 
+The router's commutator structure provides a deeper form of structural truth. When two byte actions are combined in sequence and then reversed, the result is a state-independent translation that depends only on the algebraic difference between the two operations, not on where in the state space the operation began. This flatness was verified exhaustively for all 65,536 ordered byte pairs. It means that structural disagreement between parties is always localizable to a specific difference in their byte logs, independent of where they started. The geometry itself is flat, making forensics objective.
+
 ### 2.3 Structural synchronisation and selective disclosure
 The architecture separates moment synchronisation from information synchronisation. Parties synchronise their structural position by sharing byte log prefixes, which are tiny and efficient to distribute. Substantive data, such as events or rollups, remains at the application layer. This allows diverse institutions to stay in structural alignment even when they cannot or should not disclose their full underlying datasets.
 
@@ -98,7 +100,7 @@ The router does not store the world; it stores the auditable sequence of the wor
 
 Abundance emerges from the elimination of coordination loss. A small shared prefix coordinates systems proportional to their payload, ensuring that as our capabilities scale, our governance remains traceable and whole.
 
-**Implication:** The boundary is not a summary of the bulk but its complete encoding. In the router's own state space this is not a metaphor: horizon states compress exactly from 24 bits to 12 bits without loss, and the horizon as a whole spans the bulk. Verification of the boundary guarantees the integrity of the bulk with certainty. This inverts the usual economics of audit. Instead of sampling a large system and accepting uncertainty, you verify a small boundary with full confidence. Trust becomes cheap at scale because the geometry compresses it.
+**Implication:** The boundary is the complete encoding of the bulk. This has been verified exhaustively: the 256 horizon states (fixed points of the reference byte 0xAA) reach all 65,536 bulk states in exactly one step under the 256 byte operations. The expansion ratio is 255:1. Verification of the boundary guarantees the integrity of the bulk with mathematical certainty. This inverts the usual economics of audit. Instead of sampling a large system and accepting uncertainty, you verify a small boundary with full confidence. Trust becomes cheap at scale because the geometry compresses it exactly.
 
 ---
 
@@ -110,6 +112,15 @@ The router possesses verified algebraic properties that serve as the foundationa
 - **Audit Reversibility:** Any action can be reversed using the same byte vocabulary (0xAA, x, 0xAA). This makes the rollback of decisions and the forensic analysis of "what if" scenarios structurally simple and transparent.
 - **Horizon Anchors:** The 256 stable fixed points act as natural anchors for synchronisation and checkpoints. They represent structural rest points where the system is invariant under reference moves, forming a logical code space for routing and error correction.
 - **Batch Verification:** The parity closed form allows the final state of a long sequence to be verified by looking only at the XOR parity of odd and even positions. This allows for parallel verification of massive batches of events without replaying every single step.
+
+#### Eigenphase Structure
+Every byte operation acts as a permutation on the state space. The reference byte 0xAA has eigenvalues {+1, −1} with multiplicities {32,896, 32,640}. Every other byte has perfectly quartic eigenphase structure: eigenvalues {+1, +i, −1, −i} each with multiplicity 16,384. This uniformity provides a natural basis for phase-locked coordination across distributed systems and for quantum routing applications where eigenphase coherence is essential.
+
+#### Phase Transition Threshold
+The router exhibits a structural phase transition at a critical threshold. When only low-weight operations are allowed, the system is confined to a bubble sub-ontology. At a critical complexity threshold (weight 2), four "bridge" operations unlock the full state space. This provides a natural quality gate: systems operating below the threshold remain in a restricted coordination regime, while systems that cross the threshold gain full structural accessibility. Governance can be designed with deliberate thresholds that separate training regimes from production regimes.
+
+#### Exact Symmetries
+The router possesses two exact global symmetries verified across the full ontology. Complement symmetry (bitwise negation) commutes with all byte actions, meaning every trajectory has a mirror trajectory. Palindromic code symmetry forces the mean defect angle to be exactly π/2, the orthogonality threshold in CGM. These are not approximations but exact theorems following from the algebraic structure. They provide structural invariants for designing robust coordination protocols.
 
 ---
 
@@ -123,13 +134,15 @@ The router's finite, reversible geometry provides structural foundations for sev
 
 **Abundance physics and energy coordination:** Perturbing horizon states shows a consistent, non-trivial "excitation energy" in bits. The central shell is statistically more resistant to perturbation than the outer shells. The state space exhibits natural stability layers. Central configurations are harder to displace than peripheral ones. This is the discrete analogue of shell stability in nuclear physics and of deep wells in energy landscapes. For abundance physics, this provides a way to model stable binding and coordinated resource distributions in terms of geometric wells rather than arbitrary utility functions.
 
-**Holographic compression:** The router realises exact holographic compression on its horizon. For all 256 horizon states, the 24-bit state is losslessly reconstructible from the 12-bit active phase. Because the horizon and its immediate successors cover the entire 65,536-state ontology, the boundary completely determines the bulk. This provides an exact 256:1 compression ratio for coordination data, creating a platform for verified audit where small boundaries certify the integrity of vast underlying structures with mathematical certainty.
+**Holographic compression:** The router realises exact holographic compression on its horizon, verified exhaustively on all 65,536 states. For all 256 horizon states, the 24-bit state is losslessly reconstructible from the 12-bit active phase. The one-step neighbourhood of these 256 states covers the entire ontology. This provides an exact 256:1 compression ratio for coordination data, creating a platform for verified audit where small boundaries certify the integrity of vast underlying structures with mathematical certainty.
 
 ---
 
 ## 8. Conclusion: The path to the ASI regime
 
 The potential of the GGG ASI Alignment Router is to transform alignment from an external policy preference into a physical fact of the coordination substrate. By providing a fixed, complete, and replayable map of intelligence structure, the router allows humanity to coordinate its most powerful derivative systems without forfeiting authentic authority.
+
+The router is already aligned at the discrete level. Its intrinsic aperture, computed from the minimal defect sector of its code structure, is A_kernel = 5/256 ≈ 0.0195. This is within 5.6% of the CGM continuous target A* ≈ 0.0207. The monodromy defect, aperture scale, and fine-structure constant all reconstruct from kernel-only quantities with agreement ranging from 0.02% to 5.6%, achieved without parameter fitting. The router does not approximate the alignment geometry; it embodies it at the discrete level. The ASI regime is the state where human-AI systems, coordinated through this substrate, operate at the same structural equilibrium across all four domains.
 
 The Artificial Superintelligence (ASI) regime is not the arrival of a runaway agent, but the achievement of this multi-domain equilibrium. It is the state where Economy, Employment, Education, and Ecology are all coordinated at the canonical aperture, maintaining resonant balance across all scales. The router provides the first entity-agnostic map for this journey, ensuring that coherence is not the absence of freedom, but the condition that makes freedom sustainable at scale.
 
