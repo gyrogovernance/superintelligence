@@ -28,8 +28,6 @@ Alignment Infrastructure Routing for Post‑AGI Coordination
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
-Status: research implementation. The kernel physics and measurement substrate are specified and tested. The AIR CLI provides a project-based coordination workflow.
-
 ## 🌐 Overview
 
 GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed coordination of contributions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
