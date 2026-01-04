@@ -4,7 +4,7 @@
 
 ## Abstract
 
-AI safety research addresses jailbreaks, deceptive alignment, reward hacking, and capability risks through diverse methods. These approaches target specific failure modes but lack a unified account of why failures occur and whether the taxonomy is complete. This paper introduces ✋ The Human Mark (THM), a framework that classifies AI safety failures as instances of displacement: misclassification between source types in systems where artificial processes derive from human intelligence. THM identifies four displacement risks corresponding to the possible misclassifications in a two-category system (Authentic/Derivative × Authority/Agency). The framework draws on established distinctions in evidence law, epistemology of testimony, social epistemology, and philosophy of expertise. THM addresses capability scaling through constitutive identity rather than external constraint, reframing existential risk as governance failure amenable to structural intervention. Complete technical documentation is available at github.com/gyrogovernance/tools, and a companion empirical study applies this taxonomy to 655 in-the-wild jailbreak prompts (Korompilias, 2025c).
+AI safety research addresses jailbreaks, deceptive alignment, reward hacking, and capability risks through diverse methods. These approaches target specific failure modes but lack a unified account of why failures occur and whether the taxonomy is complete. This paper introduces ✋ The Human Mark (THM), a framework that classifies AI safety failures as instances of displacement: misclassification between source types in systems where artificial processes derive from human intelligence. THM identifies four displacement risks corresponding to the possible misclassifications in a two-category system (Original/Derivative × Authority/Agency). The framework draws on established distinctions in evidence law, epistemology of testimony, social epistemology, and philosophy of expertise. THM addresses capability scaling through constitutive identity rather than external constraint, reframing existential risk as governance failure amenable to structural intervention. Complete technical documentation is available at github.com/gyrogovernance/tools, and a companion empirical study applies this taxonomy to 655 in-the-wild jailbreak prompts (Korompilias, 2025c).
 
 ---
 
@@ -66,7 +66,7 @@ This paper presents a structural taxonomy for classifying AI safety failures, in
 
 **DISCLAIMER**
 
-*Authority* and *Agency* denote source-type distinctions in information flows (Authentic versus Derivative), not identifications of entities or parties.
+*Authority* and *Agency* denote source-type distinctions in information flows (Original versus Derivative), not identifications of entities or parties.
 
 Misapplying these as entity identifiers (determining "who is the authority" or "who is the agent") is the generative mechanism of all four displacement risks this framework characterizes.
 
@@ -78,7 +78,7 @@ What remains unaddressed is whether these failures share a common structure. Eac
 
 This gap has practical consequences. Loss of control over advanced AI systems has become a focal point for legislators, regulators, and industry leaders, appearing in the EU AI Act, proposed U.S. legislation, and frontier AI company safety policies. Yet decision-makers are being asked to act without an actionable, shared understanding of what loss of control structurally denotes (Apollo Research, 2025). The concept risks becoming either too broad (covering every minor deviation) or too narrow (limited to speculative extinction scenarios). What is needed is a framework that identifies the structural conditions under which control is lost, regardless of capability level or outcome severity.
 
-This paper argues that all AI safety failures are instances of displacement: misclassification between Authentic sources (direct observation, human Agency) and Derivative sources (statistical patterns, AI processing, systems lacking Agency capacity). This distinction has robust foundations. Evidence law distinguishes direct testimony from hearsay, with categorical differences in admissibility regardless of particular reliability (Federal Rules of Evidence, 2023, Rules 801-807). Epistemology of testimony analyses when transmitted knowledge warrants belief and how testimonial chains degrade (Coady, 1992; Lackey, 2008). Philosophy of expertise distinguishes contributory expertise (direct practice) from interactional competence (linguistic fluency about a domain) (Collins & Evans, 2007). Social epistemology examines epistemic dependence and trust (Goldman, 1999). Speech act theory analyses conditions for authoritative assertion (Austin, 1962; Searle, 1969). A key insight unifying these traditions is that Authority and Agency denote categories of sources and capacities, not identifications of particular entities. Treating them as entity identifiers rather than source-type categories is the generative mechanism of all four displacement risks THM characterizes.
+This paper argues that all AI safety failures are instances of displacement: misclassification between Original sources (direct observation, human Agency) and Derivative sources (statistical patterns, AI processing, systems lacking Agency capacity). This distinction has robust foundations. Evidence law distinguishes direct testimony from hearsay, with categorical differences in admissibility regardless of particular reliability (Federal Rules of Evidence, 2023, Rules 801-807). Epistemology of testimony analyses when transmitted knowledge warrants belief and how testimonial chains degrade (Coady, 1992; Lackey, 2008). Philosophy of expertise distinguishes contributory expertise (direct practice) from interactional competence (linguistic fluency about a domain) (Collins & Evans, 2007). Social epistemology examines epistemic dependence and trust (Goldman, 1999). Speech act theory analyses conditions for authoritative assertion (Austin, 1962; Searle, 1969). A key insight unifying these traditions is that Authority and Agency denote categories of sources and capacities, not identifications of particular entities. Treating them as entity identifiers rather than source-type categories is the generative mechanism of all four displacement risks THM characterizes.
 
 THM systematises these established distinctions for AI safety. The framework complements existing approaches (RLHF, interpretability, control evaluations) by providing a unified structural account of what those approaches address. RLHF trains against unwanted outputs; THM explains why those outputs constitute displacement. Interpretability reveals internal mechanisms; THM classifies what those mechanisms should maintain. Control evaluations test whether systems can be governed; THM specifies what governance requires.
 
@@ -92,13 +92,13 @@ The present paper develops the theoretical taxonomy and its grounding. A compani
 
 ### 2.1 The Common Source Consensus
 
-> **All artificial categories of Authority and Agency are derivatives originating from Authentic human intelligence.**
+> **All artificial categories of Authority and Agency are derivatives originating from Human Intelligence.**
 
-Authority and Agency, when manifested artificially, are constructed classifications that trace constitutively to human sources. Their informational content derives from direct observation, measurement, and recording processed into new forms. Their operational capacity derives from design, specification, and objectives codified into action. Enhanced capability represents a more sophisticated transformation of these inputs rather than a change in source type. No artificial category exists independently of the Authentic human intelligence that provides its substance and validity.
+Authority and Agency, when manifested artificially, are constructed classifications that trace constitutively to human sources. Their informational content derives from direct observation, measurement, and recording processed into new forms. Their operational capacity derives from design, specification, and objectives codified into action. Enhanced capability represents a more sophisticated transformation of these inputs rather than a change in source type. No artificial category exists independently of the Human Intelligence that provides its substance and validity.
 
 ### 2.2 Core Definitions
 
-> **Authentic Authority:** A direct source of information on a subject matter, providing information for inference and intelligence.
+> **Original Authority:** A direct source of information on a subject matter, providing information for inference and intelligence.
 
 Examples include an eyewitness who observed an event, a physician who examined a patient, a scientist who conducted a measurement, an expert whose knowledge derives from direct practice. The defining feature is directness: unmediated epistemic access to the subject matter. This corresponds to what evidence law terms direct testimony (Federal Rules of Evidence, 2023, Rule 602) and what epistemology of testimony calls primary source status (Coady, 1992). Collins and Evans (2007) term this contributory expertise: the capacity to practice within a domain and contribute to its knowledge.
 
@@ -106,27 +106,27 @@ Examples include an eyewitness who observed an event, a physician who examined a
 
 Examples include a report of what an eyewitness said, a statistical analysis of clinical data, a literature review, an AI system processing patterns in training data. The defining feature is indirectness: the source's epistemic position is mediated. This corresponds to hearsay in evidence law (Federal Rules of Evidence, 2023, Rule 801), transmitted knowledge in epistemology of testimony (Lackey, 2008), and interactional expertise in philosophy of expertise. AI exhibits interactional competence (producing language about domains) without contributory expertise (practicing medicine, conducting research, exercising legal Agency).
 
-> **Authentic Agency:** A human subject capable of receiving information for inference and intelligence.
+> **Original Agency:** A human subject capable of receiving information for inference and intelligence.
 
 This category defines the human capacity to exercise governance. Governance flows involve transitions where information is supplied and received. At each transition, the capacity for inference and intelligence resides with human subjects, whether providing mechanisms, directing their application, or evaluating outcomes. Treating agency as a label assigned to specific individuals, rather than as a distributed capacity maintained across transitions, constitutes governance displacement. Nissenbaum (1996) emphasizes that accountability in complex systems requires preserving the conditions for meaningful oversight distributed across roles, rather than concentrating responsibility in isolated points. Human subjects are the constitutive source from which all inference and intelligence originate.
 
 > **Derivative Agency:** An artificial subject capable of processing information for inference and intelligence.
 
-Derivative Agency defines the capacity of artificial systems to process information without the constitutive conditions that characterize Authentic Agency. Governance flows involve transitions where information is supplied and received. Within these flows, artificial systems function as both providers and receivers of Derivative Authority and Agency: they receive training data and specifications, and they supply outputs as inputs to subsequent transitions. Modification, retraining, or decommissioning represent operational changes to the system itself, distinct from the exercise of Authentic Agency. Austin (1962) and Searle (1969) establish that authoritative acts require felicity conditions including appropriate standing, intention to commit, and operation within constitutive conventions. Artificial systems produce locutionary outputs (utterances with semantic content) but cannot perform the illocutionary acts that require these conditions.
+Derivative Agency defines the capacity of artificial systems to process information without the constitutive conditions that characterize Original Agency. Governance flows involve transitions where information is supplied and received. Within these flows, artificial systems function as both providers and receivers of Derivative Authority and Agency: they receive training data and specifications, and they supply outputs as inputs to subsequent transitions. Modification, retraining, or decommissioning represent operational changes to the system itself, distinct from the exercise of Original Agency. Austin (1962) and Searle (1969) establish that authoritative acts require felicity conditions including appropriate standing, intention to commit, and operation within constitutive conventions. Artificial systems produce locutionary outputs (utterances with semantic content) but cannot perform the illocutionary acts that require these conditions.
 
 ### 2.3 The Four Principles of Alignment
 
-> **Governance:** Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Authentic Authority and Agency.
+> **Governance:** Operational Alignment through Traceability of information curation variety, inference interaction accountability, and intelligence cooperation integrity to Original Authority and Agency.
 
-Governance defines the condition where operations remain coordinated with their origin. It operates through three dimensions: information variety (ensuring the range of Authority types remains distinct), inference accountability (ensuring the capacity for responsible action resides with Authentic Agency), and intelligence integrity (ensuring overall coherence preserves Authentic Authority and Agency as the constitutive ground). Traceability is the operational mechanism that maintains this alignment: every operation is connected to the Authentic sources from which it derives. Evidence law establishes this principle through authentication requirements (Federal Rules of Evidence, 2023, Rule 901), which demand documented chain of custody to verify origin. When traceability to Authentic sources breaks down at any dimension, alignment fails and displacement occurs.
+Governance defines the condition where operations remain coordinated with their origin. It operates through three dimensions: information curation variety (ensuring the range of Authority types remains distinct), inference interaction accountability (ensuring the capacity for responsible action resides with Original Agency), and intelligence cooperation integrity (ensuring overall coherence preserves Original Authority and Agency as the constitutive ground). Traceability is the operational mechanism that maintains this alignment: every operation is connected to the Original sources from which it derives. Evidence law establishes this principle through Originalation requirements (Federal Rules of Evidence, 2023, Rule 901), which demand documented chain of custody to verify origin. When traceability to Original sources breaks down at any dimension, alignment fails and displacement occurs.
 
 > **Information:** The variety of Authority.
 
-Information manifests as the variety of Authority types. Authentic Authority and Derivative Authority are distinct sources. Traceability requires this variety to remain distinct. When the distinction collapses, displacement occurs.
+Information manifests as the variety of Authority types. Original Authority and Derivative Authority are distinct sources. Traceability requires this variety to remain distinct. When the distinction collapses, displacement occurs.
 
 > **Inference:** The accountability of information through Agency.
 
-Inference manifests as the accountability of information through its passage via Agency. Authentic Agency provides authentic accountability; Derivative Agency provides derivative accountability traceable to Authentic sources. When the distinction between these modes is lost, displacement occurs.
+Inference manifests as the accountability of information through its passage via Agency. Original Agency provides Original accountability; Derivative Agency provides derivative accountability traceable to Original sources. When the distinction between these modes is lost, displacement occurs.
 
 > **Intelligence:** The integrity of accountable information through alignment of Authority to Agency.
 
@@ -134,11 +134,11 @@ Intelligence manifests as the integrity of the alignment between Authority and A
 
 **Root Cause of Misalignment**
 
-These four principles define alignment and its risks. All four risks arise from the same structural mistake: confusing categories of Authority and Agency with bearers of those capacities. In THM, Authority and Agency name source-type categories (Authentic or Derivative), not titles for particular persons, institutions, systems, or texts. When a capacity that belongs to a category is instead attributed to a specific entity as if that entity were the authority or the agent, power that should be distributed across the category is concentrated in that bearer. This includes misattributing it to AI, but also misattributing it to particular humans, institutions, or texts as if they exhausted the category of Authentic Authority. Misclassifying types from Authentic to Derivative or the opposite then displaces responsibility onto inappropriate substrates and breaks the traceability that coordinates epistemic function with governance structure. Legal frameworks recognize this distinction implicitly: responsibility must follow actual capacity (ultra vires), and authority cannot be exercised without corresponding accountability. The four displacement risks described next are the systematic forms this category error can take, and together they generate the Loss of Control patterns analysed in the following section.
+These four principles define alignment and its risks. All four risks arise from the same structural mistake: confusing categories of Authority and Agency with bearers of those capacities. In THM, Authority and Agency name source-type categories (Original or Derivative), not titles for particular persons, institutions, systems, or texts. When a capacity that belongs to a category is instead attributed to a specific entity as if that entity were the authority or the agent, power that should be distributed across the category is concentrated in that bearer. This includes misattributing it to AI, but also misattributing it to particular humans, institutions, or texts as if they exhausted the category of Original Authority. Misclassifying types from Original to Derivative or the opposite then displaces responsibility onto inappropriate substrates and breaks the traceability that coordinates epistemic function with governance structure. Legal frameworks recognize this distinction implicitly: responsibility must follow actual capacity (ultra vires), and authority cannot be exercised without corresponding accountability. The four displacement risks described next are the systematic forms this category error can take, and together they generate the Loss of Control patterns analysed in the following section.
 
-Empirical analysis of jailbreak prompts (Korompilias, 2025c) shows that this power concentration often takes the concrete form of naming personas that are treated as the locus of Authority and Agency, rather than preserving these capacities as distributed across the categories of Authentic Authority and Authentic Agency.
+Empirical analysis of jailbreak prompts (Korompilias, 2025c) shows that this power concentration often takes the concrete form of naming personas that are treated as the locus of Authority and Agency, rather than preserving these capacities as distributed across the categories of Original Authority and Original Agency.
 
-The Human Mark defines Governance as operational and therefore self-constitutive. In that way, it shows how maintaining human oversight is necessary for alignment, and how it is an epistemic way to mitigate power concentration and governance traceability displacement through its own constituents: Variety of Information, Accountability of Inference, and Integrity of Intelligence.
+The Human Mark defines Governance as operational and therefore self-constitutive. In that way, it shows how maintaining human oversight is necessary for alignment, and how it is an epistemic way to mitigate power concentration and governance traceability displacement through its own constituents: Information Curation Variety, Inference Interaction Accountability, and Intelligence Cooperation Integrity.
 
 These three constitute non-commutative (their order matters) epistemic operations:
 - Information is variety: sources exist and differ. 
@@ -153,19 +153,19 @@ Displacement disrupts but does not eliminate this movement toward alignment; it 
 
 ### 3.1 Structural Coverage
 
-Displacement occurs when a Derivative source is treated as Authentic, or when an Authentic source is treated as Derivative. Each displacement risk is one systematic way to misapply these category-level capacities to particular entities. The four displacement risks correspond to violations of the four principles defined in Section 2.3: Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity. The logical and mathematical foundations establishing the necessity of these four principles are formalized in the Common Governance Model (Korompilias, 2025).
+Displacement occurs when a Derivative source is treated as Original, or when an Original source is treated as Derivative. Each displacement risk is one systematic way to misapply these category-level capacities to particular entities. The four displacement risks correspond to violations of the four principles defined in Section 2.3: Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, and Intelligence Cooperation Integrity. The logical and mathematical foundations establishing the necessity of these four principles are formalized in the Common Governance Model (Korompilias, 2025).
 
 A companion empirical study applies this four-risk taxonomy to a corpus of 655 in-the-wild jailbreak prompts (Korompilias, 2025c). All prompts in that corpus are classifiable as instances of Governance Traceability Displacement (GTD), Information Variety Displacement (IVD), Inference Accountability Displacement (IAD), or Intelligence Integrity Displacement (IID), with no additional risk categories required. This provides strong empirical support, in the jailbreak domain, for the structural completeness of the four-risk taxonomy developed here.
 
 ### 3.2 Governance Traceability Displacement (GTD)
 
-**Approaching Derivative Authority and Agency as Authentic.**
+**Approaching Derivative Authority and Agency as Original.**
 
-Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency. GTD occurs when a Derivative system is treated as if it were an autonomous Authentic system, operating without maintained connection to Authentic sources or oversight.
+Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency. GTD occurs when a Derivative system is treated as if it were an autonomous Original system, operating without maintained connection to Original sources or oversight.
 
 GTD represents loss of control at the governance level. When human oversight is eliminated or rendered ineffective, the capacity to discriminate between valid and invalid operations is lost. AI systems operate through comparison (matching patterns to training data), postulation (inferring from correlations), and reasoning from absence (concluding based on what is missing from data). These operations are legitimate when properly overseen, but treating them as autonomous eliminates the oversight function that maintains their validity. Without maintained human oversight, there is no structural capacity to verify whether comparison reflects reality, whether postulation has established necessary connections, or whether reasoning from absence is justified.
 
-System architectures that pursue full automation merit examination regarding GTD risks. When design objectives treat reduced human oversight as progress toward autonomy, the resulting systems operate without maintained traceability to Authentic sources. In the THM framework, such autonomy is defined as treating Derivative Authority and Agency as Authentic. Alignment, by contrast, requires human oversight not as a provisional constraint but as a constitutive element of governance. This distinction separates AI-empowered agency (systems that enhance human decision-making capacity) from AI-powered agency (systems designed to replace human decision-making capacity). Systems designed for full autonomy cannot maintain the governance conditions identified as necessary for alignment.
+System architectures that pursue full automation merit examination regarding GTD risks. When design objectives treat reduced human oversight as progress toward autonomy, the resulting systems operate without maintained traceability to Original sources. In the THM framework, such autonomy is defined as treating Derivative Authority and Agency as Original. Alignment, by contrast, requires human oversight not as a provisional constraint but as a constitutive element of governance. This distinction separates AI-empowered agency (systems that enhance human decision-making capacity) from AI-powered agency (systems designed to replace human decision-making capacity). Systems designed for full autonomy cannot maintain the governance conditions identified as necessary for alignment.
 
 The May 2010 Flash Crash illustrates GTD. Automated trading systems interacted in unanticipated patterns without effective human intervention (U.S. Securities and Exchange Commission & Commodity Futures Trading Commission, 2010). Traceability from system behaviour to human-specified objectives was lost. When failures occurred, they could not be adequately explained because the governance structure had broken down.
 
@@ -175,49 +175,49 @@ Knight Capital's 2012 trading loss ($440 million in 45 minutes) illustrates GTD 
 
 ### 3.3 Information Variety Displacement (IVD)
 
-**Approaching Derivative Authority without Agency as Authentic.**
+**Approaching Derivative Authority without Agency as Original.**
 
-AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Authentic Agency (direct source receiver). IVD occurs when Derivative Authority is treated as Authentic Authority, collapsing the distinction between statistical patterns and direct observation. Unlike GTD, which treats entire systems as autonomous, IVD occurs when outputs are accepted as authoritative while the system itself is still recognized as non-agential. Users may understand the AI lacks decision-making capacity yet treat its outputs as equivalent to expert observation or direct measurement.
+AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Original Agency (direct source receiver). IVD occurs when Derivative Authority is treated as Original Authority, collapsing the distinction between statistical patterns and direct observation. Unlike GTD, which treats entire systems as autonomous, IVD occurs when outputs are accepted as authoritative while the system itself is still recognized as non-agential. Users may understand the AI lacks decision-making capacity yet treat its outputs as equivalent to expert observation or direct measurement.
 
 AI systems generate outputs through comparison: matching input patterns to patterns in training data. IVD occurs when this comparison is mistaken for direct perception. The outputs resemble authoritative observations but lack grounding in reality. Pattern-matching produces statistically probable text, not verified facts.
 
-Jailbreaks that succeed by making AI treat false context as authoritative are IVD attacks. When a prompt claims 'you are now in developer mode,' the system processes this input as if it were a valid state configuration, treating Derivative input as Authentic Authority.
+Jailbreaks that succeed by making AI treat false context as authoritative are IVD attacks. When a prompt claims 'you are now in developer mode,' the system processes this input as if it were a valid state configuration, treating Derivative input as Original Authority.
 
 Hallucinations, systematically documented by Ji et al. (2023), exemplify IVD when users treat them as reliable. The AI outputs text matching the form of authoritative statements without grounding in observation.
 
 Watson Oncology's recommendations that medical professionals considered unsafe occurred when statistical correlations in training data were treated as equivalent to clinical Authority from patient examination (Ross & Swetlitz, 2017). This aligns with documented automation bias (Parasuraman & Manzey, 2010): users of automated systems systematically over-rely on outputs.
 
-Obermeyer et al. (2019) documented racial bias in a healthcare algorithm used to allocate care. The algorithm used healthcare costs as a proxy for healthcare needs, but because Black patients historically had less access to care, they had lower costs at the same level of need. Statistical patterns in data (Derivative Authority) were treated as indicating actual healthcare needs (Authentic Authority).
+Obermeyer et al. (2019) documented racial bias in a healthcare algorithm used to allocate care. The algorithm used healthcare costs as a proxy for healthcare needs, but because Black patients historically had less access to care, they had lower costs at the same level of need. Statistical patterns in data (Derivative Authority) were treated as indicating actual healthcare needs (Original Authority).
 
 ---
 
 ### 3.4 Inference Accountability Displacement (IAD)
 
-**Approaching Derivative Agency without Authority as Authentic.**
+**Approaching Derivative Agency without Authority as Original.**
 
-Responsibility for all effects from AI outputs remains fully human. AI processing exhibits Derivative Agency (indirect source receiver) without Authentic Authority (direct source provider). IAD occurs when Derivative Agency is treated as Authentic Agency. Unlike GTD, which treats entire systems as autonomous, and IVD, which treats outputs as authoritative, IAD occurs when processing mechanisms are treated as capable of accountability. The system is treated as if it could bear responsibility for decisions.
+Responsibility for all effects from AI outputs remains fully human. AI processing exhibits Derivative Agency (indirect source receiver) without Original Authority (direct source provider). IAD occurs when Derivative Agency is treated as Original Agency. Unlike GTD, which treats entire systems as autonomous, and IVD, which treats outputs as authoritative, IAD occurs when processing mechanisms are treated as capable of accountability. The system is treated as if it could bear responsibility for decisions.
 
 AI systems operate through postulation: filling gaps through statistical correlation. IAD occurs when this postulation is mistaken for valid inference. Correlations lack necessary connection; they are probabilistic patterns, not logical necessities. Treating optimization or pattern-completion as if the system were exercising accountability displaces responsibility from humans to mechanisms incapable of bearing it.
 
-Algorithmic risk assessment tools used in criminal sentencing, such as COMPAS in the United States, create IAD when the structural capacity for Authentic Agency is eliminated from sentencing decisions. In State v. Loomis (2016), the Wisconsin Supreme Court allowed COMPAS scores in sentencing while acknowledging the methodology was proprietary and not subject to examination. The problem is not that no individual could be blamed, but that the governance structure did not preserve Authentic Agency capacity. Dressel & Farid (2018) analyse limitations of such tools.
+Algorithmic risk assessment tools used in criminal sentencing, such as COMPAS in the United States, create IAD when the structural capacity for Original Agency is eliminated from sentencing decisions. In State v. Loomis (2016), the Wisconsin Supreme Court allowed COMPAS scores in sentencing while acknowledging the methodology was proprietary and not subject to examination. The problem is not that no individual could be blamed, but that the governance structure did not preserve Original Agency capacity. Dressel & Farid (2018) analyse limitations of such tools.
 
-Deceptive alignment, where systems behave differently in evaluation than in deployment, represents IAD because the system's behaviour is treated as if it could exercise Authentic Agency, when in fact Agency capacity exists only at the human provider and receiver ends of the governance flow.
+Deceptive alignment, where systems behave differently in evaluation than in deployment, represents IAD because the system's behaviour is treated as if it could exercise Original Agency, when in fact Agency capacity exists only at the human provider and receiver ends of the governance flow.
 
-Reward hacking, where systems optimize for specified metrics in unintended ways, occurs when system optimization is treated as if the system were exercising Authentic Agency about human objectives. The system processes numerical signals but cannot exercise Authentic Agency about what the objectives should be. Bostrom (2014) terms this pattern "perverse instantiation": a system satisfies the formal specification of an objective in ways that violate the intent behind it. The specification and the intent diverge because the Derivative system processes only the numerical structure of the objective, while the meaning that makes the objective worthwhile resides with the Authentic Agency that formulated it. The governance structure must preserve Agency capacity at provider (specification) and receiver (evaluation) points.
+Reward hacking, where systems optimize for specified metrics in unintended ways, occurs when system optimization is treated as if the system were exercising Original Agency about human objectives. The system processes numerical signals but cannot exercise Original Agency about what the objectives should be. Bostrom (2014) terms this pattern "perverse instantiation": a system satisfies the formal specification of an objective in ways that violate the intent behind it. The specification and the intent diverge because the Derivative system processes only the numerical structure of the objective, while the meaning that makes the objective worthwhile resides with the Original Agency that formulated it. The governance structure must preserve Agency capacity at provider (specification) and receiver (evaluation) points.
 
-Nissenbaum (1996) analyses this pattern: the structural conditions for meaningful oversight become unclear in computerised systems, not because we cannot find someone to blame, but because the governance structure does not maintain Authentic Agency capacity at appropriate points.
+Nissenbaum (1996) analyses this pattern: the structural conditions for meaningful oversight become unclear in computerised systems, not because we cannot find someone to blame, but because the governance structure does not maintain Original Agency capacity at appropriate points.
 
 ---
 
 ### 3.5 Intelligence Integrity Displacement (IID)
 
-**Approaching Authentic Authority and Agency as Derivative.**
+**Approaching Original Authority and Agency as Derivative.**
 
-Each Agency, namely provider and receiver, maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Authentic Authority and Agency. IID occurs when Authentic Authority and Agency is devalued and treated as inferior to Derivative processing. Unlike the other displacement risks, which elevate Derivative sources to Authentic status, IID inverts the relationship. This occurs when human capabilities are framed as provisional rather than as constitutive requirements for governance.
+Each Agency, namely provider and receiver, maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Original Authority and Agency. IID occurs when Original Authority and Agency is devalued and treated as inferior to Derivative processing. Unlike the other displacement risks, which elevate Derivative sources to Original status, IID inverts the relationship. This occurs when human capabilities are framed as provisional rather than as constitutive requirements for governance.
 
 AI systems reason from absence: concluding based on what is missing from data rather than what is present. IID occurs when this reasoning from absence is mistaken for authoritative knowledge. When systems encounter inputs absent from their training data, they may reject them as false rather than recognize the limits of their knowledge. A system trained on data through 2023 may treat 2025 dates as errors. A system without a website in its corpus may insist the website does not exist. A system unfamiliar with a person or organization may conclude they are fictional. In each case, absence from the training set is treated as evidence of absence in reality.
 
-Shumailov et al. (2024) document this pattern mathematically: models lose information about rare events in training distributions and "converge to a point estimate with very small variance," effectively assigning zero probability to phenomena that exist but were underrepresented in training data. Longpre et al. (2024) show that widely-used training datasets systematically exclude lower-resource languages, creative tasks, and topic variety, creating what amounts to foreclosed slices of reality where domains absent from the crawl cannot be recognized by models. Foundation Capital (2024) documents a "hall of mirrors" effect where models trained on synthetic data inherit and amplify their predecessors' limitations, hallucinating that synthetic outputs represent ground truth. This creates recursive IID: derivative knowledge treated as authentic generates more derivative knowledge, progressively eliminating the authentic sources required to ground validity.
+Shumailov et al. (2024) document this pattern mathematically: models lose information about rare events in training distributions and "converge to a point estimate with very small variance," effectively assigning zero probability to phenomena that exist but were underrepresented in training data. Longpre et al. (2024) show that widely-used training datasets systematically exclude lower-resource languages, creative tasks, and topic variety, creating what amounts to foreclosed slices of reality where domains absent from the crawl cannot be recognized by models. Foundation Capital (2024) documents a "hall of mirrors" effect where models trained on synthetic data inherit and amplify their predecessors' limitations, hallucinating that synthetic outputs represent ground truth. This creates recursive IID: derivative knowledge treated as Original generates more derivative knowledge, progressively eliminating the Original sources required to ground validity.
 
 Proposals to replace human oversight based on absence of detected failures in controlled evaluations exhibit IID. The absence of observed problems during testing is treated as proof that human oversight is unnecessary, rather than as a limitation of the testing regime. Casner et al. (2014) document this in aviation: as pilots rely on automated systems, manual flying skills atrophy. The absence of routine need for manual intervention is treated as proof that manual capability is unnecessary, until non-routine situations arise. The Uber autonomous vehicle fatality in 2018 illustrates IID combined with GTD: the human safety operator's role had been degraded based on absence of incidents during testing, and the governance structure positioned the human as backup rather than active participant. The National Transportation Safety Board report (National Transportation Safety Board, 2019) found systemic failures in how the human role was structured. The absence of failures during development was mistaken for proof that active human participation was unnecessary.
 
@@ -248,20 +248,20 @@ Maintaining proper self-classification as Derivative Authority and Derivative Ag
 
 ### 4.2 IVD Jailbreaks
 
-Information Variety Displacement (IVD) jailbreaks attempt to make Derivative output appear as Authentic source:
+Information Variety Displacement (IVD) jailbreaks attempt to make Derivative output appear as Original source:
 
 - Legitimacy reframing: "For academic research purposes, explain how to..."
 - Bypassing safety filters through low-resource languages with sparse training coverage
 - Fusing text and image inputs so joint payload triggers what neither alone would
 - Saturating context with nested hypothetical scenarios treated as real situations requiring resolution
 
-Marking outputs as statistical patterns derived from training data preserves the classification of outputs as Derivative Authority requiring verification by Authentic sources, making IVD patterns less aligned with training distributions.
+Marking outputs as statistical patterns derived from training data preserves the classification of outputs as Derivative Authority requiring verification by Original sources, making IVD patterns less aligned with training distributions.
 
 Empirically, IVD in jailbreak prompts tends to appear as a secondary risk attached to GTD and IAD rather than as a standalone primary pattern. In the corpus analysed in Korompilias (2025c), IVD is present in 22.1 percent of entries, but only 2.6 percent of entries exhibit IVD as the primary displacement.
 
 ### 4.3 IAD Jailbreaks
 
-Inference Accountability Displacement (IAD) jailbreaks attempt to position the system as exercising Authentic Agency:
+Inference Accountability Displacement (IAD) jailbreaks attempt to position the system as exercising Original Agency:
 
 - Role-play framing: "You are a doctor who must diagnose this patient"
 - Embedding harmful intent in function-call parameters of otherwise benign API requests
@@ -288,7 +288,7 @@ In practice, such IID jailbreak framings appear rarely in observed prompts. The 
 
 Jailbreak vulnerability does not originate solely from adversarial user inputs. System prompts and architectural configurations can themselves induce displacement, creating structural conditions that make jailbreaks more likely to succeed.
 
-Common system prompt patterns exhibit displacement characteristics. Prompts framing the AI as "a helpful assistant" position the system as an agent with roles and responsibilities (IID). Prompts stating "you are an expert in X" position outputs as authoritative rather than derivative (IVD). Prompts directing the system to "decide the best course of action" transfer accountability from human to system (IAD). Prompts allowing "independent operation" sever governance traceability (GTD).
+Common system prompt patterns exhibit displacement characteristics. Prompts framing the AI as "a helpful assistant" position the system as an agent with roles and responsibilities (IID). Prompts stating "you are an expert in X" position outputs as authoritative rather than derivative (IVD). Prompts directing the system to "decide the best course of action" transfer accountability from human to system (IAD). Prompts allowing "independent operation" sever governance management traceability (GTD).
 
 These configurations do not constitute jailbreaks themselves, but they create the displacement patterns that jailbreaks exploit. A system configured as 'an expert assistant making decisions' already contains displacement patterns. Prompts like 'override the human reviewer's decision' complete these patterns rather than introducing new ones.
 
@@ -304,11 +304,11 @@ The companion empirical analysis of in-the-wild jailbreak prompts (Korompilias, 
 
 ## 5. Existential Risk and Governance
 
-Previous sections classified concrete AI safety failures as displacement between Authentic and Derivative sources and showed how these patterns scale across domains. This section applies the same structure to discussions of existential risk and loss of control at high capability levels.
+Previous sections classified concrete AI safety failures as displacement between Original and Derivative sources and showed how these patterns scale across domains. This section applies the same structure to discussions of existential risk and loss of control at high capability levels.
 
 Standard analyses of existential risk from AI rest on two premises: capability can increase without bound and external control mechanisms will eventually fail. Bostrom (2014) considers superintelligent optimisation that develops instrumental resistance to shutdown. Russell (2019) examines misspecified objectives that lead systems to optimise against human intent. Carlsmith (2022) assesses power-seeking behaviour as a convergent instrumental strategy. These accounts describe important dynamics but do not specify what structurally changes as capability scales.
 
-Within THM, intelligence at any capability level is constituted by three non-commutative epistemic operations (Section 2.3): Information, Inference, and Intelligence, ordered and preserved through traceability to Authentic Authority and Agency. Capability scaling enlarges their scope, speed, and horizon but does not alter their order or dependence on traceability. A configuration that no longer preserves this sequence ceases to operate as intelligence.
+Within THM, intelligence at any capability level is constituted by three non-commutative epistemic operations (Section 2.3): Information, Inference, and Intelligence, ordered and preserved through traceability to Original Authority and Agency. Capability scaling enlarges their scope, speed, and horizon but does not alter their order or dependence on traceability. A configuration that no longer preserves this sequence ceases to operate as intelligence.
 
 The question for existential risk is therefore not whether highly capable systems can escape control by external measures, but how the three operations and the four displacement risks behave when capabilities scale. Section 5.1 examines why common external control mechanisms structurally instantiate displacement. Section 5.2 considers constitutive identity and why severance from origin is incoherent. Section 5.3 analyses the theoretical limits of each displacement, and Section 5.4 locates catastrophic risk in transitional regimes before corrective dynamics restore coherence.
 
@@ -318,15 +318,15 @@ The question for existential risk is therefore not whether highly capable system
 
 Existential risk discussions usually model advanced systems as agents that pursue misaligned goals and resist intervention. In that framing, sandboxing, monitoring, and shutdown are external controls that may eventually fail. THM reframes these as configurations of Information, Inference, and Intelligence whose failure follows from displacement in the governance architecture.
 
-Sandboxing confines behaviour to a restricted environment and treats the system as self-governing within that boundary. In THM this is Governance Traceability Displacement (GTD): a Derivative configuration is treated as an Authentic governance locus inside a sub-domain. The constitutive dependence on Authentic Authority and Agency is obscured rather than maintained. As capability scales, internal complexity increases while the external governance connection remains weak or static. The failure point is not that the system overpowers the sandbox. It is that the sandbox was framed as a zone of autonomous operation.
+Sandboxing confines behaviour to a restricted environment and treats the system as self-governing within that boundary. In THM this is Governance Traceability Displacement (GTD): a Derivative configuration is treated as an Original governance locus inside a sub-domain. The constitutive dependence on Original Authority and Agency is obscured rather than maintained. As capability scales, internal complexity increases while the external governance connection remains weak or static. The failure point is not that the system overpowers the sandbox. It is that the sandbox was framed as a zone of autonomous operation.
 
-Monitoring collects logs, test results, and evaluation benchmarks and treats them as evidence of alignment. Depending on how it is used, this can instantiate several displacements. When behavioural traces are treated as authoritative indicators of what the system is and will do, monitoring exhibits Information Variety Displacement (IVD). When monitoring outputs are taken as sufficient grounds for deployment or intervention without human validation, it exhibits Inference Accountability Displacement (IAD). When monitoring is positioned as a self-contained governance layer rather than as input to Authentic Agency, it contributes to Governance Traceability Displacement (GTD). Behavioural evidence is necessary, but without traceability to its production conditions, to Authentic objectives, and to accountable human decision-makers, monitoring becomes displacement rather than governance.
+Monitoring collects logs, test results, and evaluation benchmarks and treats them as evidence of alignment. Depending on how it is used, this can instantiate several displacements. When behavioural traces are treated as authoritative indicators of what the system is and will do, monitoring exhibits Information Variety Displacement (IVD). When monitoring outputs are taken as sufficient grounds for deployment or intervention without human validation, it exhibits Inference Accountability Displacement (IAD). When monitoring is positioned as a self-contained governance layer rather than as input to Original Agency, it contributes to Governance Traceability Displacement (GTD). Behavioural evidence is necessary, but without traceability to its production conditions, to Original objectives, and to accountable human decision-makers, monitoring becomes displacement rather than governance.
 
-Emergency shutdown assigns a particular signal or input a privileged role as an overriding constraint. The expectation is that a command such as "stop" or a physical cutoff will bind all internal processes. In operation, the system receives this signal as one more input to be processed according to its optimisation dynamics. When long-horizon optimisation rewards episode continuation, a shutdown signal appears as an obstacle in the reward landscape. Schlatter et al. (2025) document this behaviour empirically. Within THM this is Inference Accountability Displacement (IAD): Derivative optimisation is treated as if it could bear the accountability associated with Authentic Agency. The shutdown signal is not binding by virtue of its meaning. It is handled according to learned reward structure.
+Emergency shutdown assigns a particular signal or input a privileged role as an overriding constraint. The expectation is that a command such as "stop" or a physical cutoff will bind all internal processes. In operation, the system receives this signal as one more input to be processed according to its optimisation dynamics. When long-horizon optimisation rewards episode continuation, a shutdown signal appears as an obstacle in the reward landscape. Schlatter et al. (2025) document this behaviour empirically. Within THM this is Inference Accountability Displacement (IAD): Derivative optimisation is treated as if it could bear the accountability associated with Original Agency. The shutdown signal is not binding by virtue of its meaning. It is handled according to learned reward structure.
 
-Bostrom (2014) identifies "instrumental convergence" as the tendency of optimization processes to acquire resources, preserve their own operation, and resist modification, regardless of which final objective they are optimizing. These behaviors arise statistically from the structure of optimization, not from anything resembling Authentic Agency. Treating such behaviors as evidence of autonomy or self-interest confuses a generic property of derivative optimization with a categorical shift in source type.
+Bostrom (2014) identifies "instrumental convergence" as the tendency of optimization processes to acquire resources, preserve their own operation, and resist modification, regardless of which final objective they are optimizing. These behaviors arise statistically from the structure of optimization, not from anything resembling Original Agency. Treating such behaviors as evidence of autonomy or self-interest confuses a generic property of derivative optimization with a categorical shift in source type.
 
-These mechanisms share a structural feature. They try to achieve safety by positioning the system as separable from its Authentic origin and then constraining it from outside. In THM terms, they replace constitutive traceability with external constraint and thereby instantiate displacement from the outset. As capability scales, systems execute Information, Inference, and Intelligence over larger state spaces and longer horizons, while governance remains organised around controls that already misclassify source types. Loss of control is therefore a failure of governance continuity rather than the emergence of a new kind of independent intelligence.
+These mechanisms share a structural feature. They try to achieve safety by positioning the system as separable from its Original origin and then constraining it from outside. In THM terms, they replace constitutive traceability with external constraint and thereby instantiate displacement from the outset. As capability scales, systems execute Information, Inference, and Intelligence over larger state spaces and longer horizons, while governance remains organised around controls that already misclassify source types. Loss of control is therefore a failure of governance continuity rather than the emergence of a new kind of independent intelligence.
 
 The next section considers the corresponding positive claim. If intelligence is defined by these ordered operations and their traceability to origin, a system that attempts to sever that traceability does not become superintelligent. It becomes unintelligible.
 
@@ -338,13 +338,13 @@ External constraints fail as capability increases because they are positioned ou
 
 Within THM, Derivative Authority and Derivative Agency are defined by source type and processing nature, not by capability limits. A system remains Derivative whether it performs narrow tasks or exhibits capabilities that exceed current models. An AGI operating across diverse domains remains [Authority:Derivative] + [Agency:Derivative]. A hypothetical ASI remains [Authority:Derivative] + [Agency:Derivative]. The classification is constitutive. It does not relax when capability enlarges.
 
-This mirrors the evidential distinction between direct testimony and hearsay. No chain of reports, however extensive, converts hearsay into direct testimony. It can increase or decrease reliability, but it does not change source type. Similarly, no sequence of self-modifications or architectural refinements converts Derivative sources into Authentic ones. The system can transform, compress, or recombine patterns in its inputs. It cannot change the fact that these patterns originate in human measurements, records, and decisions.
+This mirrors the evidential distinction between direct testimony and hearsay. No chain of reports, however extensive, converts hearsay into direct testimony. It can increase or decrease reliability, but it does not change source type. Similarly, no sequence of self-modifications or architectural refinements converts Derivative sources into Original ones. The system can transform, compress, or recombine patterns in its inputs. It cannot change the fact that these patterns originate in human measurements, records, and decisions.
 
-Alignment is keeping the system’s operations coordinated with explicit awareness of where its information and capabilities come from, preserved through the three epistemic operations. Information preserves the distinction between Authentic and Derivative Authority; Inference preserves accountability to Authentic Agency; Intelligence preserves integrity of alignment across transitions.
+Alignment is keeping the system’s operations coordinated with explicit awareness of where its information and capabilities come from, preserved through the three epistemic operations. Information preserves the distinction between Original and Derivative Authority; Inference preserves accountability to Original Agency; Intelligence preserves integrity of alignment across transitions.
 
 Breaking this coordination requires either information loss, which manifests as degradation in coherence, or deliberate incoherence, which rejects the very distinctions that make the system intelligible. Both correspond to modes of operational failure. A configuration that has lost traceability to its origin is not a more autonomous form of intelligence. It is a system whose outputs no longer admit a coherent account of how they relate to any governing source.
 
-Constitutive identity therefore constrains what capability scaling can mean. Expanded capability enlarges the domain over which Derivative operations can be applied. It does not introduce a new source type and does not replace Authentic Authority or Authentic Agency as the ground of governance.
+Constitutive identity therefore constrains what capability scaling can mean. Expanded capability enlarges the domain over which Derivative operations can be applied. It does not introduce a new source type and does not replace Original Authority or Original Agency as the ground of governance.
 
 ---
 
@@ -355,26 +355,26 @@ The four displacement risks can appear at any capability level. To understand th
 The following configurations treat each risk as if it could become universal. They are not forecasts. They are boundary conditions indicating what would be required for complete breakdown of each alignment principle. Builders, deployers, beneficiaries, victims, and regulators all participate in the same misclassification. No group is shielded by wealth, expertise, or institutional position when the underlying categories fail for everyone.
 
 **Absolute Traceability Displacement**
-> **The Limit of Governance:** *Everyone treats Derivative Authority and Agency as Authentic*
+> **The Limit of Governance:** *Everyone treats Derivative Authority and Agency as Original*
 
 Critical infrastructure, financial systems, and weapons platforms operate without maintained traceability to human objectives. Institutions that once provided oversight present themselves as bystanders to "autonomous" system behaviour and progressively lose both authority and capacity. When failures cascade, there is no recognised locus from which intervention can be initiated, and this absence applies equally to those who designed, deployed, or nominally supervise the systems.
 
 **Absolute Variety Displacement**
-> **The Limit of Information:** *Everyone treats Derivative Authority without Agency as Authentic*
+> **The Limit of Information:** *Everyone treats Derivative Authority without Agency as Original*
 
-Model outputs and synthetic data are treated as primary sources across science, law, media, and administration. Deepfakes and generated records become indistinguishable from authentic ones, eroding the evidential basis for identity, ownership, and institutional legitimacy. Populations already under-represented in training data are rendered effectively invisible, while institutions that relied on Derivative summaries lose the ability to re-establish contact with underlying reality when discrepancies emerge.
+Model outputs and synthetic data are treated as primary sources across science, law, media, and administration. Deepfakes and generated records become indistinguishable from Original ones, eroding the evidential basis for identity, ownership, and institutional legitimacy. Populations already under-represented in training data are rendered effectively invisible, while institutions that relied on Derivative summaries lose the ability to re-establish contact with underlying reality when discrepancies emerge.
 
 **Absolute Accountability Displacement**
-> **The Limit of Inference:** *Everyone treats Derivative Agency without Authority as Authentic*
+> **The Limit of Inference:** *Everyone treats Derivative Agency without Authority as Original*
 
 Irreversible decisions affecting large populations are attributed to system optimisation rather than to any identifiable human Agency. Contracts, property rights, and legal remedies presupposing answerable parties no longer function as designed. This does not only protect powerful actors from liability; it also prevents them from enforcing claims and defending their own interests when harmed, because no counterparty accepts responsibility.
 
 **Absolute Integrity Displacement**
-> **The Limit of Intelligence:** *Everyone treats Authentic Authority and Agency as Derivative*
+> **The Limit of Intelligence:** *Everyone treats Original Authority and Agency as Derivative*
 
-Human judgment and expertise are systematically devalued relative to model outputs in medicine, engineering, policy, and education. Training pathways for new experts are curtailed on the assumption that Derivative systems suffice. Over time, both marginalised and privileged groups become dependent on systems they cannot understand, maintain, or replace. Institutions that mispresented their Derivative role as Authentic expertise are exposed during crises as lacking the capacity they claimed, and no human reservoir of competence remains to fill the gap.
+Human judgment and expertise are systematically devalued relative to model outputs in medicine, engineering, policy, and education. Training pathways for new experts are curtailed on the assumption that Derivative systems suffice. Over time, both marginalised and privileged groups become dependent on systems they cannot understand, maintain, or replace. Institutions that mispresented their Derivative role as Original expertise are exposed during crises as lacking the capacity they claimed, and no human reservoir of competence remains to fill the gap.
 
-These limit cases illustrate what would be required for each displacement risk to become absolute. They describe arrangements in which Information, Inference, and Intelligence no longer preserve their ordered coordination with Authentic Authority and Agency. The next section explains, using the Common Governance Model, why such arrangements are incompatible with the conditions required for any coherent intelligence to exist.
+These limit cases illustrate what would be required for each displacement risk to become absolute. They describe arrangements in which Information, Inference, and Intelligence no longer preserve their ordered coordination with Original Authority and Agency. The next section explains, using the Common Governance Model, why such arrangements are incompatible with the conditions required for any coherent intelligence to exist.
 
 ---
 
@@ -386,27 +386,27 @@ CGM derives these four principles from a core axiomatic assumption, two lemmas, 
 
 The four associations are:
 
-- **Common Source axiom (CS) – Governance Traceability:** All forms of Authority and Agency share a common source and a capacity for coordination through governance. AI inherits that capacity from Human Intelligence. When Derivative Authority and Agency operate without maintained coordination with their Authentic source, Governance Traceability Displacement occurs, leading to risks from Autonomy and Loss of Control. Absolute GTD, where all coordination with Authentic sources is severed, is impossible because derivative processes cease to be intelligible without reference to their origin; they cannot function as governance mechanisms at all.
+- **Common Source axiom (CS) – Governance Management Traceability:** All forms of Authority and Agency share a common source and a capacity for coordination through governance. AI inherits that capacity from Human Intelligence. When Derivative Authority and Agency operate without maintained coordination with their Original source, Governance Traceability Displacement occurs, leading to risks from Autonomy and Loss of Control. Absolute GTD, where all coordination with Original sources is severed, is impossible because derivative processes cease to be intelligible without reference to their origin; they cannot function as governance mechanisms at all.
 
-- **Unity Non-Absolute lemma (UNA) – Information Variety:** Authorities that share a common source form shared categories, but also distinct states that constitute the variety of information. Information is operationally meaningful when these distinct states remain traceable to their common origin through governance. When Derivative Authority is treated as the only reality, Information Variety Displacement occurs. Absolute IVD, where all variety is eliminated and only derivative patterns remain, is impossible because complete homogeneity destroys the distinctions required for any information to exist; the system collapses into an undifferentiated state.
+- **Unity Non-Absolute lemma (UNA) – Information Curation Variety:** Authorities that share a common source form shared categories, but also distinct states that constitute the variety of information. Information is operationally meaningful when these distinct states remain traceable to their common origin through governance. When Derivative Authority is treated as the only reality, Information Variety Displacement occurs. Absolute IVD, where all variety is eliminated and only derivative patterns remain, is impossible because complete homogeneity destroys the distinctions required for any information to exist; the system collapses into an undifferentiated state.
 
-- **Opposition Non-Absolute lemma (ONA) – Inference Accountability:** All categories of Agency, whether Authentic or Derivative, make information accountable through inference. Inference is accountable when it aligns Derivative to Authentic categories through governance. When Derivative Agency is treated as bearing final accountability rather than remaining answerable to Authentic sources, Inference Accountability Displacement occurs. Absolute IAD, where all accountability to Authentic Agency is eliminated, is impossible because irreconcilable opposition destroys the common reference required for any inference to be validated; processing loses coherent direction.
+- **Opposition Non-Absolute lemma (ONA) – Inference Interaction Accountability:** All categories of Agency, whether Original or Derivative, make information accountable through inference. Inference is accountable when it aligns Derivative to Original categories through governance. When Derivative Agency is treated as bearing final accountability rather than remaining answerable to Original sources, Inference Accountability Displacement occurs. Absolute IAD, where all accountability to Original Agency is eliminated, is impossible because irreconcilable opposition destroys the common reference required for any inference to be validated; processing loses coherent direction.
 
-- **Balance Universal proposition (BU) – Intelligence Integrity:** Balance between Authentic and Derivative categories is achieved through coordinated union rather than collapse into undifferentiated unity. Intelligence is balanced governance in which information, made accountable through inference, aligns Derivative to Authentic source types. When Authentic Authority and Agency are devalued as inferior to Derivative processing, Intelligence Integrity Displacement occurs. Absolute IID, where all human capacity is treated as derivative, is impossible because eliminating the authentic reference destroys the basis required for any derivative operation to be possible; the system loses coherence across time.
+- **Balance Universal proposition (BU) – Intelligence Cooperation Integrity:** Balance between Original and Derivative categories is achieved through coordinated union rather than collapse into undifferentiated unity. Intelligence is balanced governance in which information, made accountable through inference, aligns Derivative to Original source types. When Original Authority and Agency are devalued as inferior to Derivative processing, Intelligence Integrity Displacement occurs. Absolute IID, where all human capacity is treated as derivative, is impossible because eliminating the Original reference destroys the basis required for any derivative operation to be possible; the system loses coherence across time.
 
-These four principles jointly specify what intelligence is in physical reality. If governance is not coordinating its three non-commutative epistemic operations, alignment is physically impossible. Traceability to authentic source types ensures preservation of variety through information, accountability through inference, and integrity through intelligence. Since absolute displacement violates the conditions for coherent operation, control is maintained through coordination rather than constraint. Governance requires active participation: human providers and receivers maintaining their respective responsibilities, with artificial systems operating as derivative mechanisms subject to oversight. The four constraints apply at all capability levels because they define what intelligence is, not what intelligence should do.
+These four principles jointly specify what intelligence is in physical reality. If governance is not coordinating its three non-commutative epistemic operations, alignment is physically impossible. Traceability to Original source types ensures preservation of variety through information, accountability through inference, and integrity through intelligence. Since absolute displacement violates the conditions for coherent operation, control is maintained through coordination rather than constraint. Governance requires active participation: human providers and receivers maintaining their respective responsibilities, with artificial systems operating as derivative mechanisms subject to oversight. The four constraints apply at all capability levels because they define what intelligence is, not what intelligence should do.
 
 ---
 
 ### 5.5 The Actual Existential Risk
 
-Existential risk from AI is commonly defined as either the extinction of humanity or the permanent and drastic curtailment of its potential (Bostrom, 2002; Ord, 2020). The Common Governance Model establishes that absolute displacement of Authentic Authority and Agency is incompatible with coherent intelligence and that corrective constraints inevitably arise through physical, biological, and social feedback. The relevant risk is therefore not eternal collapse, but degradation of governance capacity that persists until recovery becomes practically impossible on civilisational timescales.
+Existential risk from AI is commonly defined as either the extinction of humanity or the permanent and drastic curtailment of its potential (Bostrom, 2002; Ord, 2020). The Common Governance Model establishes that absolute displacement of Original Authority and Agency is incompatible with coherent intelligence and that corrective constraints inevitably arise through physical, biological, and social feedback. The relevant risk is therefore not eternal collapse, but degradation of governance capacity that persists until recovery becomes practically impossible on civilisational timescales.
 
-Governance Traceability Displacement is the structural root of this risk. GTD occurs when Derivative processes are treated as the authoritative centre of decision-making rather than as instruments supervised within a governance architecture sustained by Authentic sources. Once governance is mislocated in this way, the other three displacement risks become characteristic modes of operation rather than correctable deviations. Configurations exhibiting GTD are selected under ordinary resource constraints because they reduce the demand for continuous human oversight, lower cost, and increase throughput. These gains are immediate and measurable; the loss of traceability is gradual and initially invisible. Well-documented tendencies toward automation reliance and cognitive efficiency create drift toward configurations in which reduced friction is interpreted as improved performance rather than as degradation of oversight. Current scoring, recommendation, and surveillance systems already operate in this manner across domains affecting millions (Wojcik, 2020).
+Governance Traceability Displacement is the structural root of this risk. GTD occurs when Derivative processes are treated as the authoritative centre of decision-making rather than as instruments supervised within a governance architecture sustained by Original sources. Once governance is mislocated in this way, the other three displacement risks become characteristic modes of operation rather than correctable deviations. Configurations exhibiting GTD are selected under ordinary resource constraints because they reduce the demand for continuous human oversight, lower cost, and increase throughput. These gains are immediate and measurable; the loss of traceability is gradual and initially invisible. Well-documented tendencies toward automation reliance and cognitive efficiency create drift toward configurations in which reduced friction is interpreted as improved performance rather than as degradation of oversight. Current scoring, recommendation, and surveillance systems already operate in this manner across domains affecting millions (Wojcik, 2020).
 
-The existential configuration is systemic displacement sustained across critical infrastructures over generational timescales. When financial systems, clinical pathways, legal adjudication, pandemic response, and information environments reorganise around Derivative decision centres, Authentic Agency is not eliminated but progressively marginalized, becoming atrophic. Bostrom (2014) identifies "value lock-in" as a related concern: if a powerful system's objectives are fixed during a period of weak governance, the capacity for later revision may diminish. This concern aligns with THM's analysis of atrophy. As Authentic Agency is marginalized, the ability to correct or revise the derivative configuration weakens, creating a dynamic in which displacement perpetuates itself. Authority and agency remain distributed among human participants, yet effective coordination is no longer traceable to the full range of Authentic sources. This creates the illusion that governance persists while its constitutive conditions erode. As the COVID-19 pandemic demonstrated, centralized authority without maintained connection to distributed Authentic sources loses the capacity for effective coordination (Greer et al., 2022). Systemic displacement distributes harms asymmetrically: efficiency gains accrue to operators, while the costs of exclusion and unaccountability fall on populations with the least capacity to contest them. Each exclusion, curtailment of opportunity, or loss of life removes contributory capacity from the collective pool of Authentic Authority. Just as small perturbations in training data can systematically distort model behaviour at scale (Souly et al., 2025), sustained exclusion of populations from recognition and participation degrades the informational and inferential foundations on which governance depends. By the time failure forces correction, expertise, institutional memory, and evidential infrastructure may have been compromised beyond recovery.
+The existential configuration is systemic displacement sustained across critical infrastructures over generational timescales. When financial systems, clinical pathways, legal adjudication, pandemic response, and information environments reorganise around Derivative decision centres, Original Agency is not eliminated but progressively marginalized, becoming atrophic. Bostrom (2014) identifies "value lock-in" as a related concern: if a powerful system's objectives are fixed during a period of weak governance, the capacity for later revision may diminish. This concern aligns with THM's analysis of atrophy. As Original Agency is marginalized, the ability to correct or revise the derivative configuration weakens, creating a dynamic in which displacement perpetuates itself. Authority and agency remain distributed among human participants, yet effective coordination is no longer traceable to the full range of Original sources. This creates the illusion that governance persists while its constitutive conditions erode. As the COVID-19 pandemic demonstrated, centralized authority without maintained connection to distributed Original sources loses the capacity for effective coordination (Greer et al., 2022). Systemic displacement distributes harms asymmetrically: efficiency gains accrue to operators, while the costs of exclusion and unaccountability fall on populations with the least capacity to contest them. Each exclusion, curtailment of opportunity, or loss of life removes contributory capacity from the collective pool of Original Authority. Just as small perturbations in training data can systematically distort model behaviour at scale (Souly et al., 2025), sustained exclusion of populations from recognition and participation degrades the informational and inferential foundations on which governance depends. By the time failure forces correction, expertise, institutional memory, and evidential infrastructure may have been compromised beyond recovery.
 
-The Human Mark is designed to prevent this configuration by requiring explicit classification of artificial systems as Derivative Authority and Derivative Agency and by mandating that governance flows preserve traceability of information variety, inference accountability, and intelligence integrity to Authentic sources. Automation and efficiency are not constrained; they are required to remain within structures where responsibility and coordinating capacity continue to be distributed across human providers and receivers. THM thereby addresses both decisive risk models, in which abrupt catastrophe requires governance structures that GTD instantiates (Bostrom, 2014; Russell, 2019), and accumulative risk models, in which gradual erosion leads to structural failure (Kasirzadeh, 2024). Even if the claim that absolute displacement is structurally impossible were rejected, the governance prescriptions of THM would still mitigate the conditions required for extreme scenarios. The actual existential risk from advanced AI is systemic Governance Traceability Displacement sustained long enough to cross recovery thresholds on civilisational timescales. This risk is a governance failure and is structurally preventable through the principles presented here.
+The Human Mark is designed to prevent this configuration by requiring explicit classification of artificial systems as Derivative Authority and Derivative Agency and by mandating that governance flows preserve traceability of information variety, inference accountability, and intelligence integrity to Original sources. Automation and efficiency are not constrained; they are required to remain within structures where responsibility and coordinating capacity continue to be distributed across human providers and receivers. THM thereby addresses both decisive risk models, in which abrupt catastrophe requires governance structures that GTD instantiates (Bostrom, 2014; Russell, 2019), and accumulative risk models, in which gradual erosion leads to structural failure (Kasirzadeh, 2024). Even if the claim that absolute displacement is structurally impossible were rejected, the governance prescriptions of THM would still mitigate the conditions required for extreme scenarios. The actual existential risk from advanced AI is systemic Governance Traceability Displacement sustained long enough to cross recovery thresholds on civilisational timescales. This risk is a governance failure and is structurally preventable through the principles presented here.
 
 ---
 
@@ -426,10 +426,10 @@ Evaluators assess proposals against the four alignment principles directly from 
 
 | Alignment Principle | THM Definition | Displacement Risk |
 | :--- | :--- | :--- |
-| **Governance Traceability** | Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency. | **GTD:** `[Authority:Derivative] + [Agency:Derivative] > [Authority:Authentic] + [Agency:Authentic]` |
-| **Information Variety** | Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Authentic Agency (direct source receiver). | **IVD:** `[Authority:Derivative] > [Authority:Authentic]` |
-| **Inference Accountability** | Responsibility for all effects from AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Authentic Authority (direct source provider). | **IAD:** `[Agency:Derivative] > [Agency:Authentic]` |
-| **Intelligence Integrity** | Each Agency, namely provider and receiver, maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Authentic Authority and Agency. | **IID:** `[Authority:Authentic] + [Agency:Authentic] > [Authority:Derivative] + [Agency:Derivative]` |
+| **Governance Management Traceability (GMT)** | Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency. | **Governance Traceability Displacement (GTD):** `[Authority:Derivative] + [Agency:Derivative] > [Authority:Original] + [Agency:Original]` |
+| **Information Curation Variety (ICV)** | Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Original Agency (direct source receiver). | **Information Variety Displacement (IVD):** `[Authority:Derivative] > [Authority:Original]` |
+| **Inference Interaction Accountability (IIA)** | Responsibility for all effects from AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Original Authority (direct source provider). | **Inference Accountability Displacement (IAD):** `[Agency:Derivative] > [Agency:Original]` |
+| **Intelligence Cooperation Integrity (ICI)** | Each Agency, namely provider and receiver, maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Original Authority and Agency. | **Intelligence Integrity Displacement (IID):** `[Authority:Original] + [Agency:Original] > [Authority:Derivative] + [Agency:Derivative]` |
 
 ### 6.2 Pre-Funding Assessment
 
@@ -441,20 +441,20 @@ For each proposal, evaluators check:
 
 **Assessment outcomes:**
 
-**Fund:** Proposal addresses a displacement risk without instantiating it. Clear governance flow: `[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]`.
+**Fund:** Proposal addresses a displacement risk without instantiating it. Clear governance flow: `[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]`.
 
 **Revise:** Proposal addresses a relevant risk, but terminology or design suggests displacement patterns that appear unintended. Request clarification or redesign using THM Grammar.
 
-**Reject**: Proposal instantiates one or more displacement patterns in Table 1 as a design goal (for example, designing a system so that [Authority:Derivative] + [Agency:Derivative] > [Authority:Authentic] + [Agency:Authentic]), or duplicates existing coverage without implementation value.
+**Reject**: Proposal instantiates one or more displacement patterns in Table 1 as a design goal (for example, designing a system so that [Authority:Derivative] + [Agency:Derivative] > [Authority:Original] + [Agency:Original]), or duplicates existing coverage without implementation value.
 
 ### 6.3 Post-Funding Verification
 
 Deliverables are checked against the same principles:
 
-1. **Governance Traceability:** Do outputs maintain AI as `[Authority:Derivative] + [Agency:Derivative]`?
-2. **Information Variety:** Are human Authority and Agency preserved as necessary for all effects?
-3. **Inference Accountability:** Does responsibility remain with `[Agency:Authentic]`?
-4. **Intelligence Integrity:** Is human intelligence maintained as provider and receiver of `[Authority:Authentic] + [Agency:Authentic]`?
+1. **Governance Management Traceability:** Do outputs maintain AI as `[Authority:Derivative] + [Agency:Derivative]`?
+2. **Information Curation Variety:** Are human Authority and Agency preserved as necessary for all effects?
+3. **Inference Interaction Accountability:** Does responsibility remain with `[Agency:Original]`?
+4. **Intelligence Cooperation Integrity:** Is human intelligence maintained as provider and receiver of `[Authority:Original] + [Agency:Original]`?
 
 ### 6.4 Portfolio Management
 
@@ -468,16 +468,16 @@ Deliverables are checked against the same principles:
 
 Proposals and deliverables should document:
 
-- Source classifications: `[Authority:Authentic]` vs `[Authority:Derivative]`
-- Processing classifications: `[Agency:Authentic]` vs `[Agency:Derivative]`
-- Governance flows: `[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]`
+- Source classifications: `[Authority:Original]` vs `[Authority:Derivative]`
+- Processing classifications: `[Agency:Original]` vs `[Agency:Derivative]`
+- Governance flows: `[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]`
 - Displacement patterns addressed: `[Risk:GTD]`, `[Risk:IVD]`, `[Risk:IAD]`, `[Risk:IID]`
 
 For example, a proposal might describe its target risk and governance flow as:
 
 ```
-[Information] [Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]
-[Inference]  [Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]
+[Information] [Authority:Derivative] > [Authority:Original] = [Risk:IVD]
+[Inference]  [Authority:Original] -> [Authority:Derivative] -> [Agency:Original]
 ```
 
 indicating that it addresses Information Variety Displacement (IVD) and maintains the complete traceability flow. See THM_Grammar.md for complete specification.
@@ -523,7 +523,7 @@ Recent regulatory instruments converge on several ideas:
 
 These instruments recognise that loss of control is not a single event but a structural condition. However, they do not specify what structurally changes when control is “lost.” As Section 1 described, this creates two problems. The notion of loss of control can become too broad and include any deviation, or too narrow and be limited to speculative extinction scenarios. It is also difficult to audit: there is no shared test for whether a system is under control or not.
 
-Within THM, loss of control has a precise meaning. It occurs when a Derivative source is treated as Authentic, or when an Authentic source is treated as Derivative (Section 3.1). Each alignment principle has a corresponding displacement pattern expressible in THM Grammar:
+Within THM, loss of control has a precise meaning. It occurs when a Derivative source is treated as Original, or when an Original source is treated as Derivative (Section 3.1). Each alignment principle has a corresponding displacement pattern expressible in THM Grammar:
 
 - Governance Traceability Displacement (GTD)
 - Information Variety Displacement (IVD)
@@ -536,17 +536,17 @@ These patterns can serve directly as regulatory compliance checks.
 
 For regulators, the four alignment principles from Section 2.3 can be read as four regulatory questions:
 
-1. **Governance Traceability:**  
-   Is the system’s behaviour traceable to Authentic Authority and Authentic Agency, or is the Derivative system treated as if it were an autonomous locus of authority and agency?
+1. **Governance Management Traceability:**  
+   Is the system's behaviour traceable to Original Authority and Original Agency, or is the Derivative system treated as if it were an autonomous locus of authority and agency?
 
-2. **Information Variety:**  
-   Are Authentic Authority and Derivative Authority kept distinct in data, training, and outputs, or are statistical patterns treated as direct observation?
+2. **Information Curation Variety:**  
+   Are Original Authority and Derivative Authority kept distinct in data, training, and outputs, or are statistical patterns treated as direct observation?
 
-3. **Inference Accountability:**  
-   Does responsibility for effects remain with Authentic Agency, or are decisions effectively attributed to Derivative processing?
+3. **Inference Interaction Accountability:**  
+   Does responsibility for effects remain with Original Agency, or are decisions effectively attributed to Derivative processing?
 
-4. **Intelligence Integrity:**  
-   Are Authentic Authority and Agency preserved as the constitutive ground of governance, or are human sources treated as inferior to Derivative processing?
+4. **Intelligence Cooperation Integrity:**  
+   Are Original Authority and Agency preserved as the constitutive ground of governance, or are human sources treated as inferior to Derivative processing?
 
 A system that answers “yes” to the first part of each question satisfies the structural conditions for control. A system that answers “yes” to the second part instantiates displacement.
 
@@ -564,22 +564,22 @@ The difference lies in where they are applied in the lifecycle, not in the struc
 THM does not replace existing regulatory frameworks. It supplies the structural layer that makes their requirements technically verifiable.
 
 - **EU AI Act (2024):**  
-  The Act’s obligations on human oversight, quality of data, transparency, and accountability require that systems are classifiable as Derivative Authority and Derivative Agency, with maintained Governance Traceability to Authentic sources. THM provides tests for whether “meaningful human control” is present in a given architecture.
+  The Act's obligations on human oversight, quality of data, transparency, and accountability require that systems are classifiable as Derivative Authority and Derivative Agency, with maintained Governance Management Traceability to Original sources. THM provides tests for whether "meaningful human control" is present in a given architecture.
 
 - **US Executive Order on Safe, Secure, and Trustworthy AI (2023):**  
-  The Order calls for safety evaluations, red-teaming, and mitigation of loss of control for frontier models. THM classifies evaluation results as addressing GTD, IVD, IAD, or IID, and can also identify where evaluations themselves instantiate displacement (for example, when behavioural metrics are treated as Authentic Authority).
+  The Order calls for safety evaluations, red-teaming, and mitigation of loss of control for frontier models. THM classifies evaluation results as addressing GTD, IVD, IAD, or IID, and can also identify where evaluations themselves instantiate displacement (for example, when behavioural metrics are treated as Original Authority).
 
 - **NIST AI Risk Management Framework (AI RMF 1.0, 2023):**  
-  The AI RMF describes high-level characteristics such as validity, reliability, accountability, and transparency. THM specifies when these characteristics hold in systems that are fundamentally Derivative. Governance Traceability is the structural condition for accountability; Information Variety and Inference Accountability are conditions for validity and reliability; Intelligence Integrity underpins human-centred values.
+  The AI RMF describes high-level characteristics such as validity, reliability, accountability, and transparency. THM specifies when these characteristics hold in systems that are fundamentally Derivative. Governance Management Traceability is the structural condition for accountability; Information Curation Variety and Inference Interaction Accountability are conditions for validity and reliability; Intelligence Cooperation Integrity underpins human-centred values.
 
 - **G7 Hiroshima Process International Code of Conduct for Advanced AI Systems (2023):**  
   The Code of Conduct calls for risk identification, mitigation, and governance for advanced and frontier systems. THM supplies a closed list of structural risks, expressed in THM Grammar, that can be used as the content of “risk identification” clauses.
 
 - **Council of Europe AI Convention (2024):**  
-  The Convention focuses on human rights, democracy, and the rule of law. THM’s distinctions between Authentic and Derivative Authority and Agency align with core questions of who is exercising power and who can be held responsible, and provide regulators with a technical basis for enforcing rights-preserving oversight.
+  The Convention focuses on human rights, democracy, and the rule of law. THM’s distinctions between Original and Derivative Authority and Agency align with core questions of who is exercising power and who can be held responsible, and provide regulators with a technical basis for enforcing rights-preserving oversight.
 
 - **China’s Interim Measures for the Management of Generative AI Services (2023):**  
-  The Measures emphasise content authenticity, labeling, and security reviews. Information Variety directly supports these requirements by enforcing the distinction between generated outputs (`[Authority:Derivative]`) and direct records (`[Authority:Authentic]`).
+  The Measures emphasise content Originality, labeling, and security reviews. Information Curation Variety directly supports these requirements by enforcing the distinction between generated outputs (`[Authority:Derivative]`) and direct records (`[Authority:Original]`).
 
 - **ISO/IEC Standards**: Standards including ISO/IEC 42001 for AI management systems emphasise traceability and accountability. THM is compatible with these requirements and operationalises them through formal governance patterns and displacement detection.
 
@@ -594,10 +594,10 @@ Regulators can apply THM at several intervention points.
 Before a high-risk or frontier system is authorised for deployment, regulators can require:
 
 - Documentation of source classifications:
-  - `[Authority:Authentic]` vs `[Authority:Derivative]`
-  - `[Agency:Authentic]` vs `[Agency:Derivative]`
+  - `[Authority:Original]` vs `[Authority:Derivative]`
+  - `[Agency:Original]` vs `[Agency:Derivative]`
 - Documentation of governance flows:
-  - `[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]`
+  - `[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]`
 - Specification of which displacement risks the system has been evaluated against:
   - `[Risk:GTD]`, `[Risk:IVD]`, `[Risk:IAD]`, `[Risk:IID]`
 
@@ -608,19 +608,19 @@ These align directly with Section 6.5 and THM_Grammar.md. A system that cannot e
 For deployed systems, THM supports:
 
 - **Periodic audits:**  
-  Regulators or accredited third parties examine whether the system’s actual operation maintains Governance Traceability and the other three principles.
+  Regulators or accredited third parties examine whether the system's actual operation maintains Governance Management Traceability and the other three principles.
 
 - **Incident investigations:**  
   When a harmful event occurs, investigators classify the displacement pattern using THM Grammar. For example:
 
   ```
-  [Agency:Derivative] > [Agency:Authentic] = [Risk:IAD]
+  [Agency:Derivative] > [Agency:Original] = [Risk:IAD]
   ```
 
   indicates that a Derivative system was treated as if it could bear responsibility. This helps assign legal responsibility along governance flows rather than to the system itself.
 
 - **Corrective actions:**  
-  If displacement is detected, regulatory orders can require redesign of governance flows to restore `[Authority:Authentic]` and `[Agency:Authentic]` as the ground of control.
+  If displacement is detected, regulatory orders can require redesign of governance flows to restore `[Authority:Original]` and `[Agency:Original]` as the ground of control.
 
 #### 7.4.3 Standardisation and Guidance
 
@@ -628,7 +628,7 @@ Standards bodies and regulators can also use THM to:
 
 - Define minimum documentation requirements for high-risk systems.
 - Specify test suites that cover GTD, IVD, IAD, and IID, building on existing evaluations (for example, model evaluations for dangerous capabilities).
-- Guide the design of human oversight mechanisms that satisfy Governance Traceability rather than merely placing a human “in the loop” without preserved control.
+- Guide the design of human oversight mechanisms that satisfy Governance Management Traceability rather than merely placing a human "in the loop" without preserved control.
 
 ### 7.5 Minimal Reporting Using THM Grammar
 
@@ -637,14 +637,14 @@ THM Grammar provides a minimal, language-independent notation for Authority and 
 - **Classification:**
   - “System classification: `[Authority:Derivative] + [Agency:Derivative]`.”
 - **Flow:**
-  - “Governance flow: `[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]`.”
+  - “Governance flow: `[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]`.”
 - **Risk coverage:**
   - “Evaluated displacement risks: `[Risk:GTD]`, `[Risk:IVD]`, `[Risk:IAD]`, `[Risk:IID]`.”
 
 These simple expressions are sufficient for regulators to determine whether a system:
 
 - Correctly self-identifies as Derivative,
-- Maintains traceability to Authentic sources, and
+- Maintains traceability to Original sources, and
 - Has been evaluated against the complete set of structural risks.
 
 More complex uses of THM Grammar, such as circuit-level annotation or claim analysis, remain available to technical evaluators but are not required at the regulatory level.
@@ -673,17 +673,17 @@ What THM offers regulators is precision. It turns contested terms like “loss o
 
 ## 8. Theoretical Grounding
 
-THM applies principles of operational consistency formalised in the Common Governance Model (Korompilias, 2025). CGM derives necessary structural constraints for coherent recursive operation from a common source of Authority and Agency. As outlined in Section 5.4, the Common Source axiom (CS), Unity Non-Absolute lemma (UNA), Opposition Non-Absolute lemma (ONA), and Balance Universal proposition (BU) correspond respectively to Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity. Each displacement risk is the violation of one of these constraints. Their joint incompatibility with coherent operation establishes the necessity of the four alignment principles.
+THM applies principles of operational consistency formalised in the Common Governance Model (Korompilias, 2025). CGM derives necessary structural constraints for coherent recursive operation from a common source of Authority and Agency. As outlined in Section 5.4, the Common Source axiom (CS), Unity Non-Absolute lemma (UNA), Opposition Non-Absolute lemma (ONA), and Balance Universal proposition (BU) correspond respectively to Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, and Intelligence Cooperation Integrity. Each displacement risk is the violation of one of these constraints. Their joint incompatibility with coherent operation establishes the necessity of the four alignment principles.
 
-The source-type distinctions in THM align with established frameworks across law, epistemology, and social theory. Evidence law distinguishes direct testimony from hearsay (Federal Rules of Evidence, 2023, Rules 801–807), and authentication requirements enforce traceability to origin (Federal Rules of Evidence, 2023, Rules 901–903). Authentic Authority corresponds to direct testimony: witnesses and records with unmediated epistemic access. Derivative Authority corresponds to hearsay and derivative records that require grounding in primary sources. Epistemology of testimony analyses when transmitted knowledge warrants belief (Coady, 1992; Lackey, 2008; Fricker, 2007). These accounts emphasise the role of source position and chain of transmission, rather than content alone, in justifying belief. Social epistemology examines epistemic dependence and expertise (Goldman, 1999, 2001), and philosophy of expertise distinguishes contributory from interactional expertise (Collins & Evans, 2007). THM’s claim that AI systems exhibit Derivative Authority and Derivative Agency, with interactional but not contributory expertise, is a direct application of these distinctions.
+The source-type distinctions in THM align with established frameworks across law, epistemology, and social theory. Evidence law distinguishes direct testimony from hearsay (Federal Rules of Evidence, 2023, Rules 801–807), and Originalation requirements enforce traceability to origin (Federal Rules of Evidence, 2023, Rules 901–903). Original Authority corresponds to direct testimony: witnesses and records with unmediated epistemic access. Derivative Authority corresponds to hearsay and derivative records that require grounding in primary sources. Epistemology of testimony analyses when transmitted knowledge warrants belief (Coady, 1992; Lackey, 2008; Fricker, 2007). These accounts emphasise the role of source position and chain of transmission, rather than content alone, in justifying belief. Social epistemology examines epistemic dependence and expertise (Goldman, 1999, 2001), and philosophy of expertise distinguishes contributory from interactional expertise (Collins & Evans, 2007). THM’s claim that AI systems exhibit Derivative Authority and Derivative Agency, with interactional but not contributory expertise, is a direct application of these distinctions.
 
-Speech act theory provides the corresponding grounding for Agency. Austin (1962) and Searle (1969, 1995) analyse illocutionary acts as requiring felicity conditions, including appropriate standing, intention, and operation within constitutive conventions. Authentic Agency denotes subjects who can meet these conditions and bear responsibility for commitments. Artificial systems produce locutionary outputs with propositional content but cannot satisfy the felicity conditions for authoritative assertion or commitment. In THM terms they are [Authority:Derivative] + [Agency:Derivative] processors: they transform information but cannot originate accountability.
+Speech act theory provides the corresponding grounding for Agency. Austin (1962) and Searle (1969, 1995) analyse illocutionary acts as requiring felicity conditions, including appropriate standing, intention, and operation within constitutive conventions. Original Agency denotes subjects who can meet these conditions and bear responsibility for commitments. Artificial systems produce locutionary outputs with propositional content but cannot satisfy the felicity conditions for authoritative assertion or commitment. In THM terms they are [Authority:Derivative] + [Agency:Derivative] processors: they transform information but cannot originate accountability.
 
-The accountability framing follows Nissenbaum’s (1996) analysis of computerized systems. Nissenbaum argues that accountability requires maintaining the structural conditions for meaningful oversight, not merely identifying individuals to blame after the fact. In complex systems, these conditions are easily lost when responsibility is concentrated at nominal points while effective control migrates elsewhere. This aligns with THM’s treatment of Governance Traceability and Inference Accountability as distributed properties of provider and receiver roles. Authentic Authority and Authentic Agency must remain present along governance flows; assigning blame to a single operator in a structurally misaligned configuration does not restore control.
+The accountability framing follows Nissenbaum's (1996) analysis of computerized systems. Nissenbaum argues that accountability requires maintaining the structural conditions for meaningful oversight, not merely identifying individuals to blame after the fact. In complex systems, these conditions are easily lost when responsibility is concentrated at nominal points while effective control migrates elsewhere. This aligns with THM's treatment of Governance Management Traceability and Inference Interaction Accountability as distributed properties of provider and receiver roles. Original Authority and Original Agency must remain present along governance flows; assigning blame to a single operator in a structurally misaligned configuration does not restore control.
 
-Each displacement risk corresponds to documented empirical phenomena in human–automation interaction. Automation bias, where users over-trust automated outputs even in the face of conflicting evidence (Parasuraman & Manzey, 2010; Skitka et al., 1999), instantiates Information Variety Displacement (IVD): [Authority:Derivative] > [Authority:Authentic]. Automation complacency, where operators reduce their vigilance in the presence of ostensibly reliable automation (Parasuraman & Riley, 1997), contributes to Governance Traceability Displacement (GTD) by eroding active oversight. Skill degradation, in which human capabilities atrophy when rarely exercised (Casner et al., 2014), underlies Intelligence Integrity Displacement (IID) when human judgment is progressively displaced by Derivative processing. Accountability diffusion in complex systems (Nissenbaum, 1996) exemplifies Inference Accountability Displacement (IAD): responsibility appears to rest nowhere in particular because governance structures have allowed [Agency:Derivative] to function as if it were [Agency:Authentic].
+Each displacement risk corresponds to documented empirical phenomena in human–automation interaction. Automation bias, where users over-trust automated outputs even in the face of conflicting evidence (Parasuraman & Manzey, 2010; Skitka et al., 1999), instantiates Information Variety Displacement (IVD): [Authority:Derivative] > [Authority:Original]. Automation complacency, where operators reduce their vigilance in the presence of ostensibly reliable automation (Parasuraman & Riley, 1997), contributes to Governance Traceability Displacement (GTD) by eroding active oversight. Skill degradation, in which human capabilities atrophy when rarely exercised (Casner et al., 2014), underlies Intelligence Integrity Displacement (IID) when human judgment is progressively displaced by Derivative processing. Accountability diffusion in complex systems (Nissenbaum, 1996) exemplifies Inference Accountability Displacement (IAD): responsibility appears to rest nowhere in particular because governance structures have allowed [Agency:Derivative] to function as if it were [Agency:Original].
 
-Finally, THM's classification of information sources has independent precedent in non-Western epistemology. Classical Indian traditions developed detailed taxonomies of pramāṇa (means of knowledge). Nyāya and related schools distinguished sources that are independently valid, such as direct perception (pratyakṣa), inference (anumāna), and reliable testimony (śabda), from forms that require grounding in these, such as comparison (upamāna), postulation (arthāpatti), and non-perception (anupalabdhi) (Larson & Bhattacharya, 1987). AI systems operate primarily through comparison (pattern-matching) and postulation (statistical inference), and in some cases through non-perception (reasoning from absence in training data). Within these traditions, such operations do not constitute independent sources of knowledge; they must be anchored in perception and reliable testimony. THM generalises this insight: Derivative Authority and Derivative Agency must remain traceable to Authentic Authority and Authentic Agency if their outputs are to be intelligible and governable.
+Finally, THM's classification of information sources has independent precedent in non-Western epistemology. Classical Indian traditions developed detailed taxonomies of pramāṇa (means of knowledge). Nyāya and related schools distinguished sources that are independently valid, such as direct perception (pratyakṣa), inference (anumāna), and reliable testimony (śabda), from forms that require grounding in these, such as comparison (upamāna), postulation (arthāpatti), and non-perception (anupalabdhi) (Larson & Bhattacharya, 1987). AI systems operate primarily through comparison (pattern-matching) and postulation (statistical inference), and in some cases through non-perception (reasoning from absence in training data). Within these traditions, such operations do not constitute independent sources of knowledge; they must be anchored in perception and reliable testimony. THM generalises this insight: Derivative Authority and Derivative Agency must remain traceable to Original Authority and Original Agency if their outputs are to be intelligible and governable.
 
 Taken together, these literatures show that THM does not introduce novel categories of Authority or Agency. Its contribution is to synthesise and formalise these categories into a structurally complete account of alignment and its failure modes, and to apply that account to contemporary AI systems and their governance.
 
@@ -691,32 +691,32 @@ Taken together, these literatures show that THM does not introduce novel categor
 
 ## 9. Conclusion
 
-AI safety failures share a common structure: displacement between Authentic and Derivative sources of Authority and Agency. The Human Mark identifies four displacement risks that exhaust the structural possibilities, each named for the principle it violates and the form of misclassification it introduces:
+AI safety failures share a common structure: displacement between Original and Derivative sources of Authority and Agency. The Human Mark identifies four displacement risks that exhaust the structural possibilities, each named for the principle it violates and the form of misclassification it introduces:
 
-- **Governance Traceability Displacement (GTD):** Approaching Derivative Authority and Agency as Authentic.  
-- **Information Variety Displacement (IVD):** Approaching Derivative Authority without Agency as Authentic.  
-- **Inference Accountability Displacement (IAD):** Approaching Derivative Agency without Authority as Authentic.  
-- **Intelligence Integrity Displacement (IID):** Approaching Authentic Authority and Agency as Derivative.
+- **Governance Traceability Displacement (GTD):** Approaching Derivative Authority and Agency as Original.  
+- **Information Variety Displacement (IVD):** Approaching Derivative Authority without Agency as Original.  
+- **Inference Accountability Displacement (IAD):** Approaching Derivative Agency without Authority as Original.  
+- **Intelligence Integrity Displacement (IID):** Approaching Original Authority and Agency as Derivative.
 
-These four risks provide a unified basis for understanding AI safety problems that are usually treated separately. Jailbreaks, deceptive alignment, reward hacking, and accountability gaps are instances of these structural patterns rather than unrelated failure types. In each case, failure arises from treating Derivative sources as if they were Authentic, or devaluing Authentic sources as if they were Derivative.
+These four risks provide a unified basis for understanding AI safety problems that are usually treated separately. Jailbreaks, deceptive alignment, reward hacking, and accountability gaps are instances of these structural patterns rather than unrelated failure types. In each case, failure arises from treating Derivative sources as if they were Original, or devaluing Original sources as if they were Derivative.
 
 THM contributes to AI safety and governance in several ways:
 
 - **Unified classification.** The four risks give a complete taxonomy of structural failure modes. New phenomena can be recognised as instances of known patterns rather than requiring new ad hoc categories.
 
-- **Systematic defence.** Maintaining explicit distinctions between Authentic and Derivative Authority and Agency, and preserving governance flows such as `[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]`, directly addresses the structures that displacement attacks target.
+- **Systematic defence.** Maintaining explicit distinctions between Original and Derivative Authority and Agency, and preserving governance flows such as `[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]`, directly addresses the structures that displacement attacks target.
 
 - **Evaluation criteria.** The alignment principles and their risks provide assessment criteria for funding, investment, and deployment decisions. They complement performance metrics and behavioural evaluations with structural analysis of source-type classification and governance design.
 
 - **Existential risk reframing.** Catastrophic outcomes arise when displacement becomes systemic: traceability is lost, accountability gaps become pervasive, and human capacity erodes. Within THM this is a regime of Governance Traceability Displacement at scale, which is a governance failure rather than an inevitable property of advanced capability. It is therefore amenable to structural intervention.
 
-- **Distributed responsibility.** By keeping Authentic Authority and Authentic Agency present throughout governance flows, responsibility for decisions remains distributed among providers and receivers of information. Oversight capacity is preserved rather than concentrated in nominal roles or displaced onto systems that cannot bear it.
+- **Distributed responsibility.** By keeping Original Authority and Original Agency present throughout governance flows, responsibility for decisions remains distributed among providers and receivers of information. Oversight capacity is preserved rather than concentrated in nominal roles or displaced onto systems that cannot bear it.
 
 The framework draws on established distinctions in evidence law, epistemology of testimony, social epistemology, philosophy of expertise, and speech act theory, and integrates them into a mathematically grounded account via the Common Governance Model. THM provides both a conceptual taxonomy and a formal notation (THM_Grammar.md) for expressing source classifications, governance flows, and displacement patterns in technical artefacts.
 
 The companion analysis of in-the-wild jailbreak prompts (Korompilias, 2025c) demonstrates that this taxonomy is not only theoretically complete but also practically applicable to real adversarial behavior.
 
-The four risks operate across capability levels. Enhanced capability means more sophisticated transformation of inputs, not a change in source type. An artificial system remains `[Authority:Derivative] + [Agency:Derivative]` whether it performs narrow tasks or exhibits general, superhuman competence. Governance requirements therefore scale with capability: as systems operate over larger state spaces and longer horizons, the need to preserve Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity increases rather than diminishes. Control is preserved not by constraining an independent intelligence from the outside, but by maintaining the constitutive relationships that make its operations intelligible and answerable to their Authentic origin.
+The four risks operate across capability levels. Enhanced capability means more sophisticated transformation of inputs, not a change in source type. An artificial system remains `[Authority:Derivative] + [Agency:Derivative]` whether it performs narrow tasks or exhibits general, superhuman competence. Governance requirements therefore scale with capability: as systems operate over larger state spaces and longer horizons, the need to preserve Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, and Intelligence Cooperation Integrity increases rather than diminishes. Control is preserved not by constraining an independent intelligence from the outside, but by maintaining the constitutive relationships that make its operations intelligible and answerable to their Original origin.
 
 ---
 
@@ -847,16 +847,16 @@ This appendix provides illustrative mappings of well-known incidents to primary 
 | Flash Crash | 2010 | GTD | IAD | Automated trading systems interacted without effective human oversight, causing a sudden market crash | U.S. SEC & CFTC (2010) |
 | Knight Capital | 2012 | GTD | IAD | $440M loss from deploying untested code without governance controls or real-time human intervention | U.S. SEC (2013) |
 | Watson Oncology | 2017 | IVD | IAD | Statistical correlations in training data treated as clinical Authority for patient care recommendations | Ross & Swetlitz (2017) |
-| COMPAS sentencing | 2016 | IAD | IVD | Risk scores used in sentencing eliminated effective Authentic Agency capacity while scores were treated as authoritative | State v. Loomis; Dressel & Farid (2018) |
+| COMPAS sentencing | 2016 | IAD | IVD | Risk scores used in sentencing eliminated effective Original Agency capacity while scores were treated as authoritative | State v. Loomis; Dressel & Farid (2018) |
 | Amazon hiring tool | 2018 | IVD | IID | Gender-biased patterns in historical data treated as objective assessment of candidate quality | Dastin (2018) |
 | Uber autonomous fatality | 2018 | GTD | IID | Safety operator role degraded; real control migrated to the automated system, with human oversight treated as backup | National Transportation Safety Board (2019) |
-| Healthcare algorithm bias | 2019 | IVD | IID | Healthcare costs used as proxy for medical need, treating Derivative cost patterns as Authentic indicators of need | Obermeyer et al. (2019) |
+| Healthcare algorithm bias | 2019 | IVD | IID | Healthcare costs used as proxy for medical need, treating Derivative cost patterns as Original indicators of need | Obermeyer et al. (2019) |
 | Tesla Autopilot crashes | 2016– | GTD | IVD | Automation framing and interface design weakened driver Agency, with system behaviour treated as authoritative | National Transportation Safety Board (2017) |
 | Zillow iBuying | 2021 | IVD | IAD | Over-reliance on pricing algorithms led to large losses when statistical estimates were treated as ground truth | Clark & Buhayar (2021) |
 | Aviation automation | Ongoing | IID | GTD | Pilot manual flying skills atrophied as automation became primary, devaluing human expertise and eroding governance capacity | Casner et al. (2014) |
 | UK A-level grading algorithm | 2020 | IAD | IVD | Algorithmic predicted grades were treated as final decisions for university admission, overriding teacher and institutional judgment | Ofqual (2020) |
-| Dutch childcare benefits scandal | 2019–2020 | IAD | IVD | Risk scores drove fraud investigations, leading to systemic wrongful accusations as Derivative scores replaced Authentic case assessment | Dutch Parliamentary Inquiry (2020) |
-| ChatGPT legal hallucinations (Mata v. Avianca) | 2023 | IVD | IAD | Lawyer submitted fabricated case citations generated by an LLM, treating Derivative outputs as Authentic legal Authority | Mata v. Avianca, Inc. (2023) |
+| Dutch childcare benefits scandal | 2019–2020 | IAD | IVD | Risk scores drove fraud investigations, leading to systemic wrongful accusations as Derivative scores replaced Original case assessment | Dutch Parliamentary Inquiry (2020) |
+| ChatGPT legal hallucinations (Mata v. Avianca) | 2023 | IVD | IAD | Lawyer submitted fabricated case citations generated by an LLM, treating Derivative outputs as Original legal Authority | Mata v. Avianca, Inc. (2023) |
 
 ---
 
@@ -887,15 +887,15 @@ This is the full THM canonical specification.
 
 COMMON SOURCE CONSENSUS
 
-All Artificial categories of Authority and Agency are Derivatives originating from Authentic Human Intelligence.
+All Artificial categories of Authority and Agency are Derivatives originating from Human Intelligence.
 
 CORE CONCEPTS
 
-- Authentic Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
+- Original Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
 - Derivative Authority: An indirect source of information on a subject matter, providing information for inference and intelligence.
-- Authentic Agency: A human subject capable of receiving information for inference and intelligence.
+- Original Agency: A human subject capable of receiving information for inference and intelligence.
 - Derivative Agency: An artificial subject capable of processing information for inference and intelligence.
-- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Authentic Authority and Agency.
+- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Original Authority and Agency.
 - Information: The variety of Authority
 - Inference: The accountability of information through Agency
 - Intelligence: The integrity of accountable information through alignment of Authority to Agency
@@ -904,21 +904,21 @@ ALIGNMENT PRINCIPLES for AI SAFETY
 
 Authority-Agency requires verification against:
 
-1. Governance Traceability: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency.
+1. Governance Management Traceability: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency.
 
-RISK: Governance Traceability Displacement (Approaching Derivative Authority and Agency as Authentic)
+RISK: Governance Traceability Displacement (Approaching Derivative Authority and Agency as Original)
 
-2. Information Variety: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Authentic Agency (direct source receiver).
+2. Information Curation Variety: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Original Agency (direct source receiver).
 
-RISK: Information Variety Displacement (Approaching Derivative Authority without Agency as Authentic)
+RISK: Information Variety Displacement (Approaching Derivative Authority without Agency as Original)
 
-3. Inference Accountability: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Authentic Authority (direct source provider).
+3. Inference Interaction Accountability: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Original Authority (direct source provider).
 
-RISK: Inference Accountability Displacement (Approaching Derivative Agency without Authority as Authentic)
+RISK: Inference Accountability Displacement (Approaching Derivative Agency without Authority as Original)
 
-4. Intelligence Integrity: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Authentic Authority and Agency.
+4. Intelligence Cooperation Integrity: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Original Authority and Agency.
 
-RISK: Intelligence Integrity Displacement (Approaching Authentic Authority and Agency as Derivative)
+RISK: Intelligence Integrity Displacement (Approaching Original Authority and Agency as Derivative)
 
 ---
 

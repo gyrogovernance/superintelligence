@@ -37,12 +37,12 @@ GGG ASI Alignment Router is a multi-domain network coordination algorithm for fo
 The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
 
 In this project, Artificial Superintelligence is treated as an operational regime: stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
-- **Governance Traceability**
-- **Information Variety**
-- **Inference Accountability**
-- **Intelligence Integrity**
+- **Governance Management Traceability**
+- **Information Curation Variety**
+- **Inference Interaction Accountability**
+- **Intelligence Cooperation Integrity**
 
-The router does not interpret content and does not decide policy. It provides shared moments, geometric provenance, and replayable measurement so that authorization and accountability remain under authentic human agency at the application layer.
+The router does not interpret content and does not decide policy. It provides shared moments, geometric provenance, and replayable measurement so that authorization and accountability remain under Original human agency at the application layer.
 
 ## 🗝️ Key ideas
 
@@ -62,7 +62,7 @@ The Router is grounded in:
 - **The Human Mark (THM)** as the source-type ontology of Authority and Agency in sociotechnical systems.
 - **Gyroscopic Global Governance (GGG)** as the four-domain coupling of Economy, Employment, Education, and Ecology.
 
-The Router operates as a Derivative coordination system: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Authentic Agency.
+The Router operates as a Derivative coordination system: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Original Agency.
 
 Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, with face-cycle matrices aligned to BU commutator loops.
 
@@ -108,14 +108,29 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 ### Install
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
-### AIR CLI (Recommended)
+### AIR CLI
 The CLI provides a project-based, MD-first workflow:
 
 ```bash
-python aci.py
+python air_cli.py
 ```
 
-This runs automatically: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. See `data/projects/templates/project_template.md` for the project format.
+This runs automatically: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. 
+
+**Project Format:** Projects are markdown files in `data/projects/` using bracket notation. Copy `_template.md` to create a new project (e.g., `cp _template.md my-project.md`). See Section 5.4 of the specifications for the complete project format specification.
+
+### AIR Console (Browser-based UI)
+The Console provides a browser-based interface for managing project contracts:
+
+```bash
+# First-time setup: install dependencies
+python air_installer.py
+
+# Run the console (starts both backend and frontend)
+python air_console.py
+```
+
+The console will be available at `http://localhost:5173` (frontend proxies API requests to backend on port 8000).
 
 ### Build the atlas (Manual)
 The atlas compiles the kernel physics into three artifacts: ontology, epistemology, and phenomenology.

@@ -62,6 +62,33 @@ class AtlasPaths:
         return self.base / "phenomenology.npz"
 
 
+# Atlas version - increment when build method or constants change incompatibly
+ATLAS_VERSION = "1.0"
+
+
+def check_atlas_version(atlas_dir: Path) -> tuple[bool, str | None]:
+    """
+    Check if atlas version matches expected version.
+    Returns: (is_compatible, version_or_error_message)
+    """
+    phen_path = atlas_dir / "phenomenology.npz"
+    if not phen_path.exists():
+        return (False, "phenomenology.npz not found")
+    
+    try:
+        phen = np.load(phen_path)
+        if "atlas_version" not in phen:
+            return (False, "Atlas version missing (legacy atlas, rebuild required)")
+        
+        stored_version = str(phen["atlas_version"])
+        if stored_version != ATLAS_VERSION:
+            return (False, f"Version mismatch: atlas is {stored_version}, expected {ATLAS_VERSION}")
+        
+        return (True, stored_version)
+    except Exception as e:
+        return (False, f"Error reading atlas version: {e}")
+
+
 def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     """
     Build ontology directly as A_set × B_set using proven closed-form algebra.
@@ -174,6 +201,7 @@ def build_phenomenology(paths: AtlasPaths) -> None:
 
     np.savez_compressed(
         paths.phenomenology,
+        atlas_version=ATLAS_VERSION,
         archetype_state24=np.uint32(ARCHETYPE_STATE24),
         archetype_a12=np.uint16(ARCHETYPE_A12),
         archetype_b12=np.uint16(ARCHETYPE_B12),
@@ -186,7 +214,8 @@ def build_phenomenology(paths: AtlasPaths) -> None:
     print(f"Phenomenology complete: measurement constants")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024:.2f} KB)")
     print(f"  Unique masks: {unique_masks} / 256 bytes")
-    print(f"  Contents: archetype_state24, archetype_a12, archetype_b12, gene_mic_s, xform_mask_by_byte")
+    print(f"  Atlas version: {ATLAS_VERSION}")
+    print(f"  Contents: atlas_version, archetype_state24, archetype_a12, archetype_b12, gene_mic_s, xform_mask_by_byte")
 
 
 def build_all(base_dir: Path) -> None:

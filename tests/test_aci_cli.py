@@ -143,6 +143,10 @@ Test project description.
         required = ["project.md", "bytes.bin", "events.jsonl", "report.json", "report.md", "bundle.json"]
         missing = [f for f in required if f not in files]
         assert not missing, f"Bundle missing files: {missing}"
+    
+    # Clean up test project
+    if project_md.exists():
+        project_md.unlink()
 
 
 def test_c_tamper_detection():
@@ -171,6 +175,11 @@ def test_c_tamper_detection():
     
     # Clean up
     tampered.unlink()
+    
+    # Clean up test project
+    project_md = PROJECT_ROOT / "data" / "projects" / "test-project.md"
+    if project_md.exists():
+        project_md.unlink()
 
 
 def test_d_determinism():
@@ -251,6 +260,10 @@ Test project description.
     bundle_json2["logs"].pop("report_md_sha256", None)
     
     assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and project/report hashes)"
+    
+    # Clean up test project
+    if project_md.exists():
+        project_md.unlink()
 
 
 def test_e_skipped_attestations_in_report():
@@ -313,6 +326,10 @@ computed:
     reasons = [s["reason"] for s in skipped]
     assert any("invalid unit" in r for r in reasons), "Missing 'invalid unit' reason"
     assert any("invalid domain" in r for r in reasons), "Missing 'invalid domain' reason"
+    
+    # Clean up test project
+    if project_md.exists():
+        project_md.unlink()
 
 
 def main():

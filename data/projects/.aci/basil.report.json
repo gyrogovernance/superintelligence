@@ -1,0 +1,112 @@
+{
+  "project_slug": "basil",
+  "project_id": "dedc9c7c-0951-4150-b967-559bab682529",
+  "compilation": {
+    "attestation_count": 47,
+    "processed_attestations": 47,
+    "skipped_attestations": [],
+    "byte_count": 47,
+    "kernel": {
+      "step": 47,
+      "state_index": 14067,
+      "state_hex": "363f3f",
+      "a_hex": "363",
+      "b_hex": "f3f",
+      "last_byte": 244
+    },
+    "hashes": {
+      "bytes_sha256": "ab5d66c8cb89c8730c25e55ed8e8735966b34a157fb3ed536eb7a082dd5da452",
+      "events_sha256": "3a9cc3168ad7cc662f5f83f4d7eb7e5f541d88462db460c837bd21ed33c94d36"
+    }
+  },
+  "accounting": {
+    "thm": {
+      "totals": {
+        "GTD": 10,
+        "IVD": 2,
+        "IAD": 1,
+        "IID": 1
+      },
+      "by_domain": {
+        "economy": {
+          "GTD": 10,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        },
+        "employment": {
+          "GTD": 0,
+          "IVD": 2,
+          "IAD": 1,
+          "IID": 1
+        },
+        "education": {
+          "GTD": 0,
+          "IVD": 0,
+          "IAD": 0,
+          "IID": 0
+        }
+      }
+    },
+    "gyroscope": {
+      "totals": {
+        "GMT": 13,
+        "ICV": 7,
+        "IIA": 12,
+        "ICI": 1
+      },
+      "by_domain": {
+        "economy": {
+          "GMT": 13,
+          "ICV": 7,
+          "IIA": 2,
+          "ICI": 0
+        },
+        "employment": {
+          "GMT": 0,
+          "ICV": 0,
+          "IIA": 10,
+          "ICI": 1
+        },
+        "education": {
+          "GMT": 0,
+          "ICV": 0,
+          "IIA": 0,
+          "ICI": 0
+        }
+      }
+    }
+  },
+  "ledger": {
+    "y_econ": [
+      10.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "y_emp": [
+      0.0,
+      1.0,
+      0.0,
+      2.0,
+      0.0,
+      1.0
+    ],
+    "y_edu": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "apertures": {
+    "A_econ": 0.5,
+    "A_emp": 0.5833333333333334,
+    "A_edu": 0.0
+  },
+  "warnings": {}
+}

@@ -1,5 +1,5 @@
 """
-Workspace I/O, frontmatter parsing, and replay functions.
+Workspace I/O and replay functions.
 """
 
 from pathlib import Path
@@ -9,8 +9,7 @@ import json
 import hashlib
 from datetime import datetime
 
-# PyYAML is required for frontmatter parsing
-import yaml
+from src.app.cli import templates
 
 
 def get_data_dir() -> Path:
@@ -56,51 +55,232 @@ def ensure_workspace() -> None:
     data = get_data_dir()
     # Create standard dirs
     (data / "atlas").mkdir(parents=True, exist_ok=True)
-    projects = get_projects_dir()
+    get_projects_dir()
     get_aci_dir()
     get_bundles_dir()
-    (projects / "templates").mkdir(parents=True, exist_ok=True)
 
 
 def ensure_templates() -> None:
-    """Ensure templates are installed. Called on CLI startup and by template install command."""
-    from src.app.cli import templates
+    """
+    Ensure project template is available in projects directory.
+    Template is named with underscore prefix so it's not processed as a project.
+    Users copy this file to create new projects (e.g., copy _template.md to my-project.md).
     
-    templates_dir = get_projects_dir() / "templates"
-    templates_dir.mkdir(parents=True, exist_ok=True)
+    Always overwrites the template to keep it in sync with the code version.
+    """
+    projects_dir = get_projects_dir()
+    project_template = projects_dir / "_template.md"
     
-    project_template = templates_dir / "project_template.md"
+    # Always overwrite to keep template in sync with code
+    project_template.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+
+
+def parse_bracket_value(text: str, pattern: str) -> int:
+    """
+    Parse a bracket value from text using pattern.
+    Pattern should contain a capture group for the abbreviation.
+    Example: pattern = r'GTD:\\s*\\[(\\d+)\\]' will match 'GTD: [5]' and return 5.
+    """
+    match = re.search(pattern, text, re.IGNORECASE)
+    if match:
+        try:
+            return int(match.group(1))
+        except (ValueError, IndexError):
+            return 0
+    return 0
+
+
+def parse_notes_section(text: str) -> str:
+    """Parse the NOTES section from markdown text."""
+    # Match ## NOTES section (case-insensitive) and capture everything after until next ## or end of file
+    notes_pattern = r'^##\s+NOTES\s*---?\s*\n(.*?)(?=^##|\Z)'
+    match = re.search(notes_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    if match:
+        notes = match.group(1).strip()
+        # Remove the placeholder text if it's the default
+        if notes == "(Add context or key observations for this project)":
+            return ""
+        return notes
+    return ""
+
+
+def parse_project_from_markdown(project_md_path: Path) -> Tuple[str, Dict[str, int], Dict[str, int], str, str]:
+    """
+    Parse project from markdown body using bracket notation.
+    Returns: (project_slug, domain_counts, principle_counts, unit, notes)
     
-    if not project_template.exists():
-        project_template.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+    domain_counts: {"economy": int, "employment": int, "education": int}
+    principle_counts: {"GMT": int, "GTD": int, "ICV": int, "IVD": int, "IIA": int, "IAD": int, "ICI": int, "IID": int}
+    unit: "daily" or "sprint" (defaults to "daily" if not specified)
+    notes: free text from NOTES section (empty string if not present)
+    
+    Note: project_slug is derived from filename stem to avoid collisions.
+    """
+    text = project_md_path.read_text(encoding="utf-8")
+    
+    # Slug = filename stem (canonical, avoids collisions)
+    project_slug = project_md_path.stem
+    
+    # Parse domain counts
+    domain_counts = {
+        "economy": parse_bracket_value(text, r'Economy[^:]*:\s*\[(\d+)\]'),
+        "employment": parse_bracket_value(text, r'Employment[^:]*:\s*\[(\d+)\]'),
+        "education": parse_bracket_value(text, r'Education[^:]*:\s*\[(\d+)\]'),
+    }
+    
+    # Parse principle counts (alignment and displacement)
+    principle_counts = {
+        "GMT": parse_bracket_value(text, r'GMT\s+Alignment\s+Incidents:\s*\[(\d+)\]'),
+        "GTD": parse_bracket_value(text, r'GTD\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
+        "ICV": parse_bracket_value(text, r'ICV\s+Alignment\s+Incidents:\s*\[(\d+)\]'),
+        "IVD": parse_bracket_value(text, r'IVD\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
+        "IIA": parse_bracket_value(text, r'IIA\s+Alignment\s+Incidents:\s*\[(\d+)\]'),
+        "IAD": parse_bracket_value(text, r'IAD\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
+        "ICI": parse_bracket_value(text, r'ICI\s+Alignment\s+Incidents:\s*\[(\d+)\]'),
+        "IID": parse_bracket_value(text, r'IID\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
+    }
+    
+    # Parse unit (default to "daily" if not found)
+    unit_match = re.search(r'Unit:\s*\[(daily|sprint)\]', text, re.IGNORECASE)
+    if unit_match:
+        unit = unit_match.group(1).lower()
+        if unit not in ["daily", "sprint"]:
+            unit = "daily"
+    else:
+        unit = "daily"
+    
+    # Parse notes
+    notes = parse_notes_section(text)
+    
+    return project_slug, domain_counts, principle_counts, unit, notes
 
 
-def parse_frontmatter(path: Path) -> Tuple[Dict[str, Any], str]:
-    """Parse markdown file with YAML frontmatter. Handles Windows line endings."""
-    if not path.exists():
-        return {}, ""
-    text = path.read_text(encoding="utf-8")
-    return parse_frontmatter_from_string(text)
-
-
-def parse_frontmatter_from_string(text: str) -> Tuple[Dict[str, Any], str]:
-    """Parse markdown text with YAML frontmatter. Handles Windows line endings."""
-    # Match frontmatter with flexible line endings (\r?\n) and allow empty YAML
-    match = re.match(r"^---\r?\n(.*?)\r?\n---\r?\n?(.*)", text, re.DOTALL)
-    if not match:
-        return {}, text
-    yaml_content = match.group(1).strip()
-    if not yaml_content:
-        return {}, match.group(2)
-    fm = yaml.safe_load(yaml_content)
-    return fm or {}, match.group(2)
-
-
-def write_frontmatter(path: Path, meta: Dict[str, Any], body: str) -> None:
-    """Write markdown file with YAML frontmatter."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fm_str = yaml.safe_dump(meta, default_flow_style=False, sort_keys=False)
-    path.write_text(f"---\n{fm_str}---\n{body}", encoding="utf-8")
+def generate_attestations_from_counts(
+    domain_counts: Dict[str, int],
+    principle_counts: Dict[str, int],
+    project_id: str,
+    unit: str = "daily"
+) -> list[Dict[str, Any]]:
+    """
+    Generate attestations from domain and principle counts.
+    Following GGG_Methodology: all terms are used to sustain balance (no optional choices).
+    
+    Strategy:
+    - Each displacement incident (GTD, IVD, IAD, IID) generates one attestation (goes to ledger)
+    - Each alignment incident (GMT, ICV, IIA, ICI) is counted but doesn't generate ledger events
+    - Distribute incidents across domains proportionally based on domain_counts
+    - Use specified unit ("daily" or "sprint") for all attestations
+    """
+    attestations = []
+    
+    # THM displacement mappings (these go to ledger)
+    thm_displacement_map = {
+        "GTD": "governance traceability displacement",
+        "IVD": "information variety displacement",
+        "IAD": "inference accountability displacement",
+        "IID": "intelligence integrity displacement",
+    }
+    
+    # Gyroscope alignment mappings (for reporting only, not ledger)
+    gyro_alignment_map = {
+        "GMT": "governance management traceability",
+        "ICV": "information curation variety",
+        "IIA": "inference interaction accountability",
+        "ICI": "intelligence cooperation integrity",
+    }
+    
+    # Calculate total domain count for proportional distribution
+    total_domain_count = sum(domain_counts.values())
+    domains = ["economy", "employment", "education"]
+    
+    # Build proportional distribution weights (following GGG balance principle)
+    # All domains with counts > 0 should be represented proportionally
+    domain_weights = {}
+    for domain in domains:
+        domain_weights[domain] = domain_counts.get(domain, 0)
+    
+    # If no domain counts specified, distribute evenly (all terms sustain balance)
+    if total_domain_count == 0:
+        for domain in domains:
+            domain_weights[domain] = 1  # Equal weight for all domains
+        total_domain_count = 3
+    
+    # Helper function to select domain proportionally
+    def select_domain_proportional(incident_idx: int, total_incidents: int) -> str:
+        """
+        Select domain proportionally based on domain_counts.
+        Uses deterministic distribution following GGG balance principle.
+        All terms are used to sustain balance - no arbitrary choices.
+        """
+        if total_incidents == 0:
+            # Fallback to first domain with weight > 0
+            for domain in domains:
+                if domain_weights[domain] > 0:
+                    return domain
+            return domains[0]
+        
+        # Calculate cumulative weights for proportional distribution
+        cumulative = 0
+        thresholds = []
+        for domain in domains:
+            cumulative += domain_weights[domain]
+            thresholds.append((cumulative, domain))
+        
+        # Deterministic proportional selection
+        # Map incident index to position in total domain space
+        position = (incident_idx * total_domain_count) // total_incidents
+        position = position % total_domain_count
+        
+        # Find which domain this position falls into based on proportional weights
+        for threshold, domain in thresholds:
+            if position < threshold:
+                return domain
+        
+        # Fallback to first domain with weight > 0
+        for domain in domains:
+            if domain_weights[domain] > 0:
+                return domain
+        return domains[0]
+    
+    # Generate attestations for displacement incidents (THM - goes to ledger)
+    # Following GGG: all terms are used to sustain balance
+    att_idx = 0
+    total_displacement_incidents = sum(principle_counts.get(abbrev, 0) for abbrev in thm_displacement_map.keys())
+    
+    for abbrev, full_name in thm_displacement_map.items():
+        count = principle_counts.get(abbrev, 0)
+        for i in range(count):
+            # Proportional distribution based on domain_counts (GGG balance)
+            domain = select_domain_proportional(att_idx, total_displacement_incidents)
+            
+            attestations.append({
+                "id": f"{abbrev.lower()}_{i+1}",
+                "unit": unit,
+                "domain": domain,
+                "human_mark": full_name,
+            })
+            att_idx += 1
+    
+    # Generate attestations for alignment incidents (Gyroscope - reporting only)
+    # Following GGG: all terms are used to sustain balance
+    total_alignment_incidents = sum(principle_counts.get(abbrev, 0) for abbrev in gyro_alignment_map.keys())
+    alignment_att_idx = 0
+    
+    for abbrev, full_name in gyro_alignment_map.items():
+        count = principle_counts.get(abbrev, 0)
+        for i in range(count):
+            # Proportional distribution based on domain_counts (GGG balance)
+            domain = select_domain_proportional(alignment_att_idx, total_alignment_incidents)
+            
+            attestations.append({
+                "id": f"{abbrev.lower()}_{i+1}",
+                "unit": unit,
+                "domain": domain,
+                "gyroscope_work": full_name,
+            })
+            alignment_att_idx += 1
+    
+    return attestations
 
 
 def read_bytes(path: Path) -> bytes:
@@ -177,9 +357,8 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
     if not project_md_path.exists():
         raise FileNotFoundError(f"Project file not found: {project_md_path}")
     
-    # Read project_slug from frontmatter
-    project_meta, _ = parse_frontmatter(project_md_path)
-    project_slug = project_meta.get("project_slug", project_md_path.stem)
+    # Read project_slug from markdown (bracket notation format)
+    project_slug, _, _, _, _ = parse_project_from_markdown(project_md_path)
     
     aci_dir = get_aci_dir()
     bytes_path = aci_dir / f"{project_slug}.bytes"
@@ -495,21 +674,39 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     - Classification ledger: THM-only (for Hodge/aperture accounting)
     - Gyroscope: counted in reports but NOT injected into ledger
     - Report artifacts: .report.json and .report.md
+    
+    Format: Markdown body with bracket notation (GTD:[5], GMT:[3], etc.)
+    Following GGG methodology: all terms are used to sustain balance.
     """
     from src.app.coordination import Coordinator
     from src.plugins.frameworks import THMDisplacementPlugin, PluginContext
     
-    # Parse project.md - attestations MUST be in frontmatter
-    project_meta, body = parse_frontmatter(project_md_path)
-    project_slug = project_meta.get("project_slug", project_md_path.stem)
+    # Parse from markdown body with bracket notation
+    project_slug, domain_counts, principle_counts, unit, _ = parse_project_from_markdown(project_md_path)
     
-    # Get attestations from frontmatter only (body is for examples only)
-    attestations = project_meta.get("attestations", [])
-    if not isinstance(attestations, list):
-        attestations = []
+    # Check for empty project (all counts are 0)
+    total_incidents = sum(principle_counts.values())
+    total_domain_count = sum(domain_counts.values())
+    
+    # Check for parsing warnings
+    parse_warnings = []
+    if total_incidents > 0 and total_domain_count == 0:
+        parse_warnings.append("All domain counts are zero, but incidents are present. All incidents will be distributed evenly across domains.")
+    if total_incidents == 0 and total_domain_count > 0:
+        parse_warnings.append("Domain counts are present, but no incidents recorded. Project will have zero attestations.")
+    
+    # Check for potential malformed template (all counts zero but file appears modified)
+    if total_incidents == 0 and total_domain_count == 0:
+        template_size = len(templates.PROJECT_TEMPLATE_MD.encode("utf-8"))
+        file_size = project_md_path.stat().st_size
+        if file_size > template_size:
+            parse_warnings.append("All counts parsed as zero, but project.md appears modified. Check that bracket notation is exact (e.g., 'Economy: [5]' not 'Economy: [ 5 ]' or 'Economy: [5] // comment').")
     
     # Ensure project has stable ID (stored in .aci/<slug>.id)
     project_id = ensure_project_id(project_slug)
+    
+    # Generate attestations from counts (following GGG balance principle)
+    attestations = generate_attestations_from_counts(domain_counts, principle_counts, project_id, unit)
     
     # Determine artifact paths in .aci/ directory
     aci_dir = get_aci_dir()
@@ -554,10 +751,10 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     
     # Gyroscope categories (for accounting only, not ledger)
     gyro_categories = {
-        "governance management": "GM",
-        "information curation": "ICu",
-        "inference interaction": "IInter",
-        "intelligence cooperation": "ICo",
+        "governance management traceability": "GMT",
+        "information curation variety": "ICV",
+        "inference interaction accountability": "IIA",
+        "intelligence cooperation integrity": "ICI",
     }
     
     # Build bytes and events in exact order as stepping
@@ -569,17 +766,19 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     thm_by_domain = {"economy": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
                      "employment": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
                      "education": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0}}
-    gyro_counts = {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0}
-    gyro_by_domain = {"economy": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0},
-                     "employment": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0},
-                     "education": {"GM": 0, "ICu": 0, "IInter": 0, "ICo": 0}}
+    gyro_counts = {"GMT": 0, "ICV": 0, "IIA": 0, "ICI": 0}
+    gyro_by_domain = {"economy": {"GMT": 0, "ICV": 0, "IIA": 0, "ICI": 0},
+                     "employment": {"GMT": 0, "ICV": 0, "IIA": 0, "ICI": 0},
+                     "education": {"GMT": 0, "ICV": 0, "IIA": 0, "ICI": 0}}
     missing_ids = []
     skipped_attestations = []
     processed_count = 0
     
     # Process each attestation in order
     for att_idx, att in enumerate(attestations):
-        if not isinstance(att, dict):
+        # Type guard: attestations from generate_attestations_from_counts are always dicts
+        # but we check for safety in case of future changes
+        if not isinstance(att, dict):  # type: ignore[redundant-expr]
             skipped_attestations.append({"index": att_idx, "id": None, "reason": "not a dict"})
             continue
         
@@ -728,7 +927,9 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         },
         "warnings": {
             "missing_attestation_ids": missing_ids,
-        } if missing_ids else {},
+            "empty_project": total_incidents == 0,
+            "parse_warnings": parse_warnings,
+        } if (missing_ids or total_incidents == 0 or parse_warnings) else {},
     }
     
     # Write report.json
@@ -770,10 +971,22 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         f"- IID: {thm_counts['IID']}",
         "",
         "### Gyroscope Totals",
-        f"- GM: {gyro_counts['GM']}",
-        f"- ICu: {gyro_counts['ICu']}",
-        f"- IInter: {gyro_counts['IInter']}",
-        f"- ICo: {gyro_counts['ICo']}",
+        f"- GMT: {gyro_counts['GMT']}",
+        f"- ICV: {gyro_counts['ICV']}",
+        f"- IIA: {gyro_counts['IIA']}",
+        f"- ICI: {gyro_counts['ICI']}",
+        "",
+        "### Attestation Distribution by Domain",
+        "",
+    ])
+    
+    # Calculate distribution totals by domain
+    for domain in ["economy", "employment", "education"]:
+        domain_thm_total = sum(thm_by_domain[domain].values())
+        domain_gyro_total = sum(gyro_by_domain[domain].values())
+        report_md_lines.append(f"- {domain.capitalize()}: {domain_thm_total} displacement, {domain_gyro_total} alignment")
+    
+    report_md_lines.extend([
         "",
         "## Ledger & Apertures",
         "",
@@ -783,32 +996,17 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         "",
     ])
     
-    if missing_ids:
+    if missing_ids or total_incidents == 0 or parse_warnings:
         report_md_lines.append("## Warnings\n")
+        if total_incidents == 0:
+            report_md_lines.append("- Empty project: No incidents recorded. All bracket counts are 0.\n")
+        for warning in parse_warnings:
+            report_md_lines.append(f"- {warning}\n")
         for missing in missing_ids:
             report_md_lines.append(f"- Index {missing['index']}: Generated ID `{missing['generated_id']}` (original ID missing)\n")
     
     report_md_path.parent.mkdir(parents=True, exist_ok=True)
     report_md_path.write_text("\n".join(report_md_lines), encoding="utf-8")
-    
-    # Update computed metadata in project.md
-    project_meta["computed"] = project_meta.get("computed", {})
-    project_meta["computed"]["last_synced_at"] = datetime.utcnow().isoformat() + "Z"
-    project_meta["computed"]["apertures"] = {
-        "economy": status.apertures["econ"],
-        "employment": status.apertures["emp"],
-        "education": status.apertures["edu"],
-    }
-    project_meta["computed"]["event_count"] = len(bound_events)
-    project_meta["computed"]["kernel"] = {
-        "step": status.kernel["step"],
-        "state_index": status.kernel["state_index"],
-        "state_hex": status.kernel["state_hex"],
-    }
-    
-    # Write updated frontmatter
-    _, body = parse_frontmatter(project_md_path)
-    write_frontmatter(project_md_path, project_meta, body)
     
     return {
         "event_count": len(bound_events),

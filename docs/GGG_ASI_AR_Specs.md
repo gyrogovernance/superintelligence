@@ -29,10 +29,10 @@ Artificial Superintelligence (ASI) in this framework is a property of a human–
 
 The four principles are:
 
-*   **Governance Traceability:** Authority remains traceable to authentic human sources. Artificial systems contribute derivative coordination but do not originate governance.
-*   **Information Variety:** Diverse authentic sources remain distinguishable. Derivative summaries and aggregations must not collapse the variety into a uniform narrative.
-*   **Inference Accountability:** Responsibility for decisions remains with accountable human agency. Artificial inference serves as a mechanism within human accountability.
-*   **Intelligence Integrity:** Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them.
+*   **Governance Management Traceability:** Authority remains traceable to Original human sources. Artificial systems contribute derivative coordination but do not originate governance.
+*   **Information Curation Variety:** Diverse Original sources remain distinguishable. Derivative summaries and aggregations must not collapse the variety into a uniform narrative.
+*   **Inference Interaction Accountability:** Responsibility for decisions remains with accountable human agency. Artificial inference serves as a mechanism within human accountability.
+*   **Intelligence Cooperation Integrity:** Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them.
 
 The router is the substrate that makes coordination structurally reproducible. This reproducibility is the prerequisite for governance that can scale without collapsing into entity-based trust chains.
 
@@ -53,7 +53,7 @@ The second central primitive is geometric provenance. The kernel defines a finit
 
 The router makes claims about the origin of a state structurally checkable. If a presented state belongs to Ω, it is a valid transformation of the archetype under the kernel physics. If it does not belong to Ω, it is not a valid router state. 
 
-This creates a clear separation of layers. The kernel-native layer verifies ontology membership, deterministic replay, and divergence detection. Authorization and accountability remain application-layer responsibilities under authentic human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
+This creates a clear separation of layers. The kernel-native layer verifies ontology membership, deterministic replay, and divergence detection. Authorization and accountability remain application-layer responsibilities under Original human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
 
 ## 1.6 Why This Achieves ASI
 
@@ -361,7 +361,7 @@ The two-component structure and deterministic update rule are what allow shared 
 - disagreement is detectable
 - audit can be performed by replay
 
-The kernel itself does not assign authority. It supplies the common structural object on which authentic human agency can base accountable decisions.
+The kernel itself does not assign authority. It supplies the common structural object on which Original human agency can base accountable decisions.
 
 # 3. Ontology, Closure, and Verified Invariants
 
@@ -615,7 +615,7 @@ Application-layer diagnostics use additional governance data (events, domain led
 
 This section specifies how the router operates as a complete coordination system in practice. It defines the atlas artifacts that compile kernel physics, the runtime stepping and replay procedures, the governance measurement substrate built from domain ledgers and aperture, and the orchestration and connector surfaces through which events enter the system.
 
-This section does not embed policy decisions into kernel physics. Policy enters through application-layer event production and remains accountable to authentic human agency.
+This section does not embed policy decisions into kernel physics. Policy enters through application-layer event production and remains accountable to Original human agency.
 
 ## 4.1 Atlas Artifacts
 
@@ -744,7 +744,7 @@ Normative update rule:
 y_D[edge_id] = y_D[edge_id] + Δ
 ```
 
-The kernel does not interpret events. Events are application-layer records that remain accountable to authentic human agency under THM.
+The kernel does not interpret events. Events are application-layer records that remain accountable to Original human agency under THM.
 
 ### 4.4.3 Event binding to kernel moments
 
@@ -835,7 +835,7 @@ External systems (APIs, JSON inputs) MAY use adapter components that:
 - route to appropriate plugins
 - maintain provenance metadata
 
-Adapters are application-layer and remain accountable to authentic human agency.
+Adapters are application-layer and remain accountable to Original human agency.
 
 ## 4.7 Tetrahedral Geometry for Governance
 
@@ -950,7 +950,7 @@ The event log defines the governance record. The kernel state defines shared mom
 
 ### 4.10.3 Optional binding to shared moments
 
-Events may record `(step, state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under authentic human accountability.
+Events may record `(step, state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under Original human accountability.
 
 ## 4.11 Structural Displacement and Policy Modes
 
@@ -983,7 +983,7 @@ Operational modes for implementing these diagnoses are provided in Appendix D.
 
 # 5. Conformance Profiles
 
-This specification defines conformance as three profiles. Implementations MAY claim conformance to one or more profiles, provided they satisfy all requirements in the claimed profile.
+This specification defines conformance as four profiles. Implementations MAY claim conformance to one or more profiles, provided they satisfy all requirements in the claimed profile.
 
 ## 5.1 Profile K: Kernel Conformance
 
@@ -1071,6 +1071,112 @@ Connector surface:
 
 ---
 
+## 5.4 Profile P: Project Format Conformance
+
+This section specifies the AIR CLI project format. Projects are markdown files that use bracket notation to record alignment and displacement incidents.
+
+## 5.4.1 Project File Structure
+
+A conforming project file MUST:
+
+- Be a markdown file (`.md`) in the projects directory
+- Use bracket notation format (no YAML frontmatter)
+- Have a filename that serves as the project slug (used for artifact naming)
+- Include all required sections with bracket values
+
+## 5.4.2 Required Sections
+
+A conforming project file MUST include:
+
+**1. Title:**
+- First line MUST be an H1 heading: `# GyroGovernance Project Contract`
+
+**2. Domains Section:**
+- MUST include domain counts in bracket notation:
+  - `Economy (CGM operations): [N]`
+  - `Employment (Gyroscope work): [N]`
+  - `Education (THM capacities): [N]`
+- Where `N` is a non-negative integer
+
+**3. Common Source Consensus:**
+- MUST include the statement: "All Artificial categories of Authority and Agency are Derivatives originating from Human Intelligence."
+
+**4. Agents & Agencies:**
+- MUST include subsections for:
+  - Agents Attendance (list of people)
+  - Agencies Attestation (list of agencies)
+
+**5. Alignment & Displacement by Principle:**
+- MUST include all four principles with both alignment and displacement counts:
+  - Governance Management Traceability (GMT) / Governance Traceability Displacement (GTD)
+  - Information Curation Variety (ICV) / Information Variety Displacement (IVD)
+  - Inference Interaction Accountability (IIA) / Inference Accountability Displacement (IAD)
+  - Intelligence Cooperation Integrity (ICI) / Intelligence Integrity Displacement (IID)
+- Each principle MUST include:
+  - `[PRINCIPLE] Alignment Incidents: [N]`
+  - `[DISPLACEMENT] Displacement Incidents: [N]`
+- Where `N` is a non-negative integer
+
+## 5.4.3 Bracket Notation Format
+
+Bracket values MUST use the format: `[N]` where `N` is a non-negative integer.
+
+Examples:
+- `GMT Alignment Incidents: [5]`
+- `GTD Displacement Incidents: [3]`
+- `Economy (CGM operations): [10]`
+
+## 5.4.4 Project Slug Derivation
+
+The project slug MUST be derived from the filename stem (without extension). The slug is used for:
+- Artifact naming (`.bytes`, `.events.jsonl`, `.report.json`, `.report.md`, `.id`)
+- Bundle naming (`.zip` files)
+
+Implementations MUST NOT derive the slug from markdown content (e.g., H1 title) to avoid collisions.
+
+## 5.4.5 Attestation Generation
+
+From bracket counts, the system generates attestations following GGG methodology:
+
+- **All terms sustain balance:** All provided counts are used; no optional choices
+- **Proportional distribution:** Incidents are distributed across domains proportionally based on domain counts
+- **Displacement incidents (THM):** Generate ledger events (GTD, IVD, IAD, IID)
+- **Alignment incidents (Gyroscope):** Counted for reporting only; do NOT generate ledger events (GMT, ICV, IIA, ICI)
+- **Default unit:** All attestations use "daily" unit following GGG balance principle
+
+## 5.4.6 Empty Project Handling
+
+If all bracket counts are zero, the system:
+- Generates empty artifacts (no bytes, no events)
+- Computes apertures as 0.0
+- Emits a warning in reports: "Empty project: No incidents recorded. All bracket counts are 0."
+
+## 5.4.7 Template File
+
+A template file `_template.md` MUST be available in the projects directory. The template:
+- Is automatically created/updated on CLI startup
+- Uses underscore prefix to exclude it from project processing
+- Provides the canonical format with all required sections
+- Includes ASCII separators (`---`) for readability
+
+Users copy the template to create new projects:
+```bash
+cp _template.md my-project.md
+```
+
+Then edit `my-project.md` to fill in bracket values.
+
+## 5.4.8 Project Processing
+
+A conforming implementation MUST:
+- Parse bracket notation from markdown body (not frontmatter)
+- Generate attestations deterministically from counts
+- Distribute incidents proportionally across domains
+- Generate all required artifacts (bytes, events, reports, bundles)
+- Emit warnings for empty projects
+
+---
+
 # 6. Notes
 
 ## 6.1 Scope
@@ -1078,6 +1184,7 @@ Connector surface:
 This specification defines:
 - the kernel transition physics and its compiled atlas artifacts
 - the governance measurement substrate: domain ledgers, Hodge decomposition, and aperture
+- the AIR CLI project format: bracket notation markdown files for recording alignment and displacement incidents
 
 This specification does not define:
 - natural language processing or semantic interpretation

@@ -13,10 +13,7 @@ def cmd_sync_and_verify_all(args):
     """Default behavior: sync all projects and verify artifacts."""
     from src.router.atlas import build_all
     
-    # Print ASCII-safe banner
-    print("\nAIR")
-    print("Alignment Infrastructure Routing")
-    print("-----------------------------------")
+    # Print header
     print(ui.header("System Status"))
     
     # Ensure atlas exists (build if missing)
@@ -32,14 +29,32 @@ def cmd_sync_and_verify_all(args):
             ui.error(f"Atlas build failed: missing {still_missing}")
             return False
         ui.success("Atlas built")
+    else:
+        # Check atlas version if it exists
+        try:
+            from src.router.atlas import check_atlas_version
+            is_compatible, version_msg = check_atlas_version(atlas_dir)
+            if not is_compatible:
+                ui.warn(f"Atlas version issue: {version_msg}")
+                ui.warn("Consider rebuilding the atlas with: python -m src.router.atlas --out data/atlas")
+        except (ImportError, AttributeError):
+            # Version check not available (e.g., if atlas.py is incomplete)
+            pass
     
-    # Sync all projects
+    # Sync all projects (exclude template file)
     projects_dir = store.get_projects_dir()
-    project_files = sorted([f for f in projects_dir.glob("*.md") if f.name != "project_template.md"])
+    project_files = sorted([f for f in projects_dir.glob("*.md") if not f.name.startswith("_")])
     
     if not project_files:
         print()
         ui.success("System Synced and Verified")
+        print()
+        ui.warn("No project contracts found in data/projects/")
+        print()
+        print("To create a project:")
+        print("  1. Copy the template: cp data/projects/_template.md data/projects/my-project.md")
+        print("  2. Edit my-project.md and fill in the domain counts and incident counts")
+        print("  3. Run this command again to sync and verify")
         return True
     
     synced_count = 0
@@ -49,8 +64,8 @@ def cmd_sync_and_verify_all(args):
     print(f"\nSyncing {len(project_files)} project(s)...")
     
     for project_file in project_files:
-        project_meta, _ = store.parse_frontmatter(project_file)
-        project_slug = project_meta.get("project_slug", project_file.stem)
+        # Get project_slug from markdown (bracket notation format)
+        project_slug, _, _, _, _ = store.parse_project_from_markdown(project_file)
         
         try:
             store.sync_project(atlas_dir, project_file)
@@ -68,8 +83,8 @@ def cmd_sync_and_verify_all(args):
     verified_count = 0
     bundle_verified_count = 0
     for project_file in project_files:
-        project_meta, _ = store.parse_frontmatter(project_file)
-        project_slug = project_meta.get("project_slug", project_file.stem)
+        # Get project_slug from markdown (bracket notation format)
+        project_slug, _, _, _, _ = store.parse_project_from_markdown(project_file)
         
         try:
             # Try to replay project artifacts

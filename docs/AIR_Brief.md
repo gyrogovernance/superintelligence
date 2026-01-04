@@ -1,5 +1,5 @@
 # Alignment Infrastructure Routing - AIR Brief
-> Human Workforce Coordination for AI Safety
+> Trustworthy Distributed Human Workforce Coordination for AI Safety
 
 AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
 
@@ -56,9 +56,19 @@ Alignment Infrastructure Routing has three layers.
 
 ### 1. Router
 
-The Router is the coordination backbone. It is a deterministic kernel that turns a project's activity log into a sequence of shared coordination states.
+The Router is the coordination backbone. It is a deterministic kernel that turns a project's activity log into a **non-commutative sequence of shared coordination states**.
 
-A shared state is a reproducible reference point computed from the project log. All participants with the same log prefix compute the same state. This provides a stable way to say "This is the state of this work right now" and "Here is the sequence of steps that led here" without relying on personal trust or memory.
+A shared state (or "Moment") is a reproducible coordinate in the kernel's fixed state space. Because the kernel's transition logic is non-commutative, the **order of events matters**: two projects with the same total counts of deliverables but different execution sequences will follow different trajectories through the state space.
+
+This provides structural provenance. It proves not only *what* was done (the counts), but *how* the governance process unfolded over time. All participants with the same log prefix compute the exact same state, providing a stable, entity-agnostic reference for "This is where we stand structurally right now."
+
+**Moments as Genealogical Markers**
+
+A Moment is not merely a coordinate or timestamp. It is a genealogical marker that encodes the full structural lineage of governance operations. Two projects with identical incident counts but different execution sequences will have different Moments, because the Moment preserves the accumulated consequence of each decision in the order it was made. This genealogical encoding is what enables trajectory-based tuning: by examining the sequence of Moments, governance systems can determine not only where they are, but how they arrived there, and what structural correction is required to maintain balance.
+
+**Why Genealogical Encoding**
+
+The Router implements the same structural principle that makes genetic information trustworthy: the encoding of lineage into state. In biological systems, a gene expressed at different points in developmental history produces different outcomes, because the cellular context encodes the accumulated memory of prior states. Similarly, a governance event recorded at different points in a project's history produces different Moments, because the Moment encodes the accumulated memory of prior operations. This genealogical structure is not an arbitrary design choice. It is the minimal architecture that makes distributed coordination trustworthy without requiring centralised authority. A memory without lineage is a claim. A memory with lineage is evidence.
 
 ### 2. App
 
@@ -68,10 +78,10 @@ A contributor defines their task, performs the work, and submits the deliverable
 
 **Work classification:** The App uses the **Gyroscope Protocol**, which classifies all work into four categories:
 
-- Governance Management
-- Information Curation
-- Inference Interaction
-- Intelligence Cooperation
+- Governance Management Traceability
+- Information Curation Variety
+- Inference Interaction Accountability
+- Intelligence Cooperation Integrity
 
 ### 3. Plugins
 

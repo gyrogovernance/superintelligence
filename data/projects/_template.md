@@ -1,8 +1,4 @@
-"""
-Template for project files.
-"""
-
-PROJECT_TEMPLATE_MD = """# GyroGovernance Project Contract
+# GyroGovernance Project Contract
 
 ---
 ## Domains
@@ -96,4 +92,3 @@ IID Displacement Incidents: [0]
 ---
 
 (Add context or key observations for this project)
-"""

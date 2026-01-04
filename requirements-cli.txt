@@ -1,6 +1,6 @@
 # Minimal requirements for AIR CLI
 # For full project dependencies, see requirements.txt
 
-numpy>=2.0.0,<2.3.0
+numpy>=2.0.0
 pyyaml>=6.0
 

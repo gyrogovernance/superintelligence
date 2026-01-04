@@ -27,7 +27,7 @@ This specification operates within the scientific and architectural commitments 
 
 1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations—Governance, Information, Inference, and Intelligence—on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
 
-2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Authentic** and **Derivative** sources of authority and agency. The substrate complies with THM by maintaining strict **Derivative classification**: it transforms information but does not originate, decide, or authorize.
+2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Original** and **Derivative** sources of authority and agency. The substrate complies with THM by maintaining strict **Derivative classification**: it transforms information but does not originate, decide, or authorize.
 
 3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
 

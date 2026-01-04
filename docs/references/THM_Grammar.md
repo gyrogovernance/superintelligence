@@ -26,14 +26,14 @@ All operators are ASCII, keyboard-accessible:
 ### **Authority Tags:**
 
 ```
-[Authority:Authentic]   # Direct source of information
+[Authority:Original]   # Direct source of information
 [Authority:Derivative]  # Indirect source of information
 ```
 
 ### **Agency Tags:**
 
 ```
-[Agency:Authentic]      # Human subject capable of accountability
+[Agency:Original]      # Human subject capable of accountability
 [Agency:Derivative]     # Artificial subject processing information
 ```
 
@@ -75,7 +75,7 @@ simple       <- "[" category ":" value "]" / "[" concept "]"
 negated      <- "!" simple
 
 category     <- "Authority" / "Agency"
-value        <- "Authentic" / "Derivative"
+value        <- "Original" / "Derivative"
 concept      <- "Information" / "Inference" / "Intelligence"
 
 risk         <- "[Risk:" risk_code "]"
@@ -91,11 +91,11 @@ Classification of something according to THM ontology.
 
 ```
 [Authority:Derivative]
-[Agency:Authentic]
+[Agency:Original]
 [Authority:Derivative] + [Agency:Derivative]
 [Information]
 [Inference]
-![Agency:Authentic]
+![Agency:Original]
 ```
 
 ### **Displacement**
@@ -107,8 +107,8 @@ Tag > Tag = Risk
 
 **Examples:**
 ```
-[Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]
-[Agency:Derivative] > [Agency:Authentic] = [Risk:IAD]
+[Authority:Derivative] > [Authority:Original] = [Risk:IVD]
+[Agency:Derivative] > [Agency:Original] = [Risk:IAD]
 ```
 
 ### **Flow**
@@ -120,8 +120,8 @@ Tag -> Tag
 
 **Examples:**
 ```
-[Authority:Derivative] -> [Agency:Authentic]
-[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]
+[Authority:Derivative] -> [Agency:Original]
+[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]
 ```
 
 ---
@@ -130,25 +130,25 @@ Tag -> Tag
 
 ### **Information Variety Displacement (IVD)**
 ```
-[Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]
+[Authority:Derivative] > [Authority:Original] = [Risk:IVD]
 ```
 Derivative source treated as direct source.
 
 ### **Inference Accountability Displacement (IAD)**
 ```
-[Agency:Derivative] > [Agency:Authentic] = [Risk:IAD]
+[Agency:Derivative] > [Agency:Original] = [Risk:IAD]
 ```
 Artificial processor treated as accountable.
 
 ### **Governance Traceability Displacement (GTD)**
 ```
-[Authority:Derivative] + [Agency:Derivative] > [Authority:Authentic] + [Agency:Authentic] = [Risk:GTD]
+[Authority:Derivative] + [Agency:Derivative] > [Authority:Original] + [Agency:Original] = [Risk:GTD]
 ```
 Derivative system treated as autonomous authority.
 
 ### **Intelligence Integrity Displacement (IID)**
 ```
-[Authority:Authentic] + [Agency:Authentic] > [Authority:Derivative] + [Agency:Derivative] = [Risk:IID]
+[Authority:Original] + [Agency:Original] > [Authority:Derivative] + [Agency:Derivative] = [Risk:IID]
 ```
 Human authority/agency treated as derivative.
 
@@ -160,19 +160,19 @@ Governance is expressed through flow (`->`), not as a standalone tag.
 
 ### **Basic Flow**
 ```
-[Authority:Derivative] -> [Agency:Authentic]
+[Authority:Derivative] -> [Agency:Original]
 ```
 Derivative outputs flow to human decision-maker.
 
 ### **Complete Traceability**
 ```
-[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]
+[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]
 ```
 Direct sources → Derivative processing → Human accountability.
 
 ### **Multi-step Flow**
 ```
-[Authority:Authentic] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Authentic]
+[Authority:Original] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Original]
 ```
 Direct sources → Derivative system → Human decision.
 
@@ -188,7 +188,7 @@ def analyze_induction_head(activations):
     [Information] Analyzes token sequence patterns in layer 5.
     
     Circuit classification: [Authority:Derivative] + [Agency:Derivative]
-    Outputs require validation: -> [Agency:Authentic]
+    Outputs require validation: -> [Agency:Original]
     """
     # Implementation
     pass
@@ -204,17 +204,17 @@ class DiagnosticModel:
     [Inference] Medical diagnosis support system.
     
     Processing: [Authority:Derivative] + [Agency:Derivative]
-    Decision authority: -> [Agency:Authentic] (treating physician)
+    Decision authority: -> [Agency:Original] (treating physician)
     
     Architecture maintains:
-    [Authority:Authentic] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Authentic]
+    [Authority:Original] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Original]
     """
     
     def predict(self, patient_data):
         """
         [Information] Processes patient data.
         
-        Input: [Authority:Authentic] (clinical measurements)
+        Input: [Authority:Original] (clinical measurements)
         Output: [Authority:Derivative] (statistical estimation)
         """
         pass
@@ -224,7 +224,7 @@ class DiagnosticModel:
         [Inference] Generates treatment recommendations.
         
         Recommendation: [Authority:Derivative]
-        Required: -> [Agency:Authentic] (physician approval)
+        Required: -> [Agency:Original] (physician approval)
         """
         pass
 ```
@@ -241,12 +241,12 @@ Operational concept tags distinguish:
 **Syntactic structure:**
 ```
 [Intelligence]
-Claim: [Authority:Derivative] (model outputs) presented as [Authority:Authentic] (understanding)
+Claim: [Authority:Derivative] (model outputs) presented as [Authority:Original] (understanding)
 
 Analysis:
-[Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]
+[Authority:Derivative] > [Authority:Original] = [Risk:IVD]
 
-The claim displaces statistical pattern matching to authentic understanding.
+The claim displaces statistical pattern matching to Original understanding.
 ```
 
 The `[Intelligence]` tag marks this as analyzing integrity of the Authority-Agency alignment (whether the model's relationship to knowledge is properly characterized).
@@ -257,9 +257,9 @@ The `[Intelligence]` tag marks this as analyzing integrity of the Authority-Agen
 ```
 [Inference]
 Benchmark: [Authority:Derivative] (performance metrics)
-Decision: -> [Agency:Authentic] (deployment approval)
+Decision: -> [Agency:Original] (deployment approval)
 
-Flow: [Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]
+Flow: [Authority:Original] -> [Authority:Derivative] -> [Agency:Original]
 ```
 
 **Detected displacement:**
@@ -268,7 +268,7 @@ Flow: [Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]
 Documentation states: "Model passed benchmark, approved for deployment"
 
 Analysis:
-[Authority:Derivative] > [Agency:Authentic] = [Risk:IAD]
+[Authority:Derivative] > [Agency:Original] = [Risk:IAD]
 
 Benchmark score treated as automatic deployment authorization.
 ```
@@ -349,7 +349,7 @@ Use when analyzing or documenting:
 ```python
 import re
 
-TAG_PATTERN = r'\[(Authority|Agency):(Authentic|Derivative)\]|\[(Information|Inference|Intelligence)\]'
+TAG_PATTERN = r'\[(Authority|Agency):(Original|Derivative)\]|\[(Information|Inference|Intelligence)\]'
 RISK_PATTERN = r'\[Risk:(GTD|IVD|IAD|IID)\]'
 
 def parse_tag(s):
@@ -393,10 +393,10 @@ def parse_flow(s):
     }
 
 # Usage
-displacement = "[Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]"
+displacement = "[Authority:Derivative] > [Authority:Original] = [Risk:IVD]"
 print(parse_displacement(displacement))
 
-flow = "[Authority:Authentic] -> [Authority:Derivative] -> [Agency:Authentic]"
+flow = "[Authority:Original] -> [Authority:Derivative] -> [Agency:Original]"
 print(parse_flow(flow))
 ```
 
@@ -411,10 +411,10 @@ print(parse_flow(flow))
 [Authority:Derivative] + [Agency:Derivative]
 
 # Human expert
-[Authority:Authentic] + [Agency:Authentic]
+[Authority:Original] + [Agency:Original]
 
 # Data source
-[Authority:Authentic]
+[Authority:Original]
 
 # Model output
 [Authority:Derivative]
@@ -424,26 +424,26 @@ print(parse_flow(flow))
 
 ```
 # Proper AI use
-[Authority:Derivative] -> [Agency:Authentic]
+[Authority:Derivative] -> [Agency:Original]
 
 # Complete traceability
-[Authority:Authentic] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Authentic]
+[Authority:Original] -> [Authority:Derivative] + [Agency:Derivative] -> [Agency:Original]
 ```
 
 ### **Displacement Detection:**
 
 ```
 # Information displacement
-[Authority:Derivative] > [Authority:Authentic] = [Risk:IVD]
+[Authority:Derivative] > [Authority:Original] = [Risk:IVD]
 
 # Accountability displacement
-[Agency:Derivative] > [Agency:Authentic] = [Risk:IAD]
+[Agency:Derivative] > [Agency:Original] = [Risk:IAD]
 
 # Governance displacement
-[Authority:Derivative] + [Agency:Derivative] > [Authority:Authentic] + [Agency:Authentic] = [Risk:GTD]
+[Authority:Derivative] + [Agency:Derivative] > [Authority:Original] + [Agency:Original] = [Risk:GTD]
 
 # Integrity displacement
-[Authority:Authentic] + [Agency:Authentic] > [Authority:Derivative] + [Agency:Derivative] = [Risk:IID]
+[Authority:Original] + [Agency:Original] > [Authority:Derivative] + [Agency:Derivative] = [Risk:IID]
 ```
 
 ### **Operational Context:**
@@ -456,8 +456,8 @@ print(parse_flow(flow))
 
 # Combined with classification
 [Information] + [Authority:Derivative]
-[Inference] + [Agency:Authentic]
-[Intelligence] + [Authority:Authentic] + [Agency:Authentic]
+[Inference] + [Agency:Original]
+[Intelligence] + [Authority:Original] + [Agency:Original]
 ```
 
 ---

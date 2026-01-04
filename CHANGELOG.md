@@ -15,6 +15,29 @@
 
 ---
 
+## [v1.1-AIR] – 2026-01-03
+
+### Terminology Alignment and GGG Methodology Implementation
+
+**Terminology update:** Changed "Authentic" to "Original" throughout the codebase and documentation to reflect current terminology. All references to "Authentic Agency" and "Authentic Authority" now use "Original Agency" and "Original Authority".
+
+**GGG Methodology alignment:** Project format now follows GGG methodology principle that all terms sustain balance—no optional choices. All fundamental fields (domains, principles, alignment/displacement incidents) are required. The system uses all provided counts proportionally to maintain balance rather than allowing selective classification.
+
+**Project format simplification:** Removed YAML frontmatter dependency. Projects now use simple bracket notation in markdown body (e.g., `GTD:[5]`, `GMT:[3]`). Template located at `data/projects/_template.md` with ASCII separators for readability. Project slug derived from filename only to prevent collisions.
+
+
+---
+
+## [v1.1-AIR-Console] – 2026-01-04
+
+### AIR Console
+- Implemented browser-based AIR Governance Console as a thin view layer over existing AIR infrastructure
+- Provides unified interface for managing project contracts: editing domain counts, principle counts, and notes with real-time compilation
+- Displays balance metrics using canonical SI (Stability Index) and report data organized by GGG stage structure
+- Architecture maintains markdown-first approach: all edits persist to project markdown files with automatic sync
+
+---
+
 ## [v1.0-AIR] – 2026-01-01
 
 # v1.0 Release: Production-Ready Alignment Infrastructure Routing
@@ -64,54 +87,7 @@ All 135 tests pass, providing exhaustive verification of the kernel's structural
 - **The Human Mark (THM)** (`docs/references/THM.md`, `THM_Paper.md`, `THM_Grammar.md`): Source-type ontology and classification framework
 - **Gyroscopic Global Governance (GGG)** (`docs/references/GGG_Paper.md`): Four-domain coupling framework
 
-## Foundational Analysis: The Epistemic Necessity of AI Alignment
-
-This release includes a critical analysis demonstrating that **representative scalar evaluations cannot distinguish aligned from misaligned states** within the CGM governance geometry.
-
-**Key Findings:**
-1. **Scalar Blindness:** Explicit examples show that scalar scores (e.g., sum of absolute edge values) assign identical values to structurally different states with different apertures
-2. **Structural Lock:** Single-axis optimization policies remain permanently locked at A = 0.5, regardless of magnitude, under current THM mappings
-3. **Epistemic Sufficiency:** The six-dimensional K₄ governance geometry, together with aperture A, is sufficient to construct and recognize states with the target alignment value A* ≈ 0.0207
-
-This analysis establishes that **geometric structure is necessary** for alignment verification, and that the AIR architecture provides the required measurement substrate to address measurement collapse in AI alignment evaluation.
-
-## Production-Ready Features
-
-### Deterministic Coordination Kernel
-- 24-bit state with dual 12-bit components (Type A, Type B)
-- Byte-complete input alphabet (0-255) with injective mask expansion
-- Exact depth-two and depth-four algebraic identities
-- Reference operator (0xAA) with involution and separator properties
-- Horizon set (256 states) with complete boundary-to-bulk coverage
-
-### Governance Measurement Substrate
-- Three domain ledgers (Economy, Employment, Education) with K₄ tetrahedral geometry
-- Hodge decomposition into gradient and cycle components
-- Aperture computation (A = ||y_cycle||² / ||y||²) with target A* = 0.0207
-- Deterministic replay of ledgers and apertures from event logs
-- Event binding to kernel moments for audit-grade verification
-
-### Application Infrastructure
-- **Coordinator** orchestration layer with byte log and event log
-- **Plugin architecture** with explicit edge mapping policies
-- **Status reporting** with kernel signature, ledger state, and aperture metrics
-- **AIR CLI** for project-based coordination workflow with bundle generation and verification
-
-## Stability & Reproducibility
-
-- **Exhaustive verification:** All 16,777,216 state-byte transitions verified against compiled atlas
-- **Deterministic artifacts:** Ontology, epistemology, and phenomenology artifacts enable cross-platform identical results
-- **Replay integrity:** Full trajectory reconstruction from byte logs and event logs
-- **Bundle verification:** Tamper detection through signature validation and hash checking
-
-## Theoretical Foundation
-
-The router is grounded in:
-- **Common Governance Model (CGM)** as the constitutional structure of coherent recursive operation
-- **The Human Mark (THM)** as the source-type ontology of Authority and Agency
-- **Gyroscopic Global Governance (GGG)** as the four-domain coupling of Economy, Employment, Education, and Ecology
-
-The router operates as a **Derivative coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Authentic Agency.
+The router operates as a **Derivative coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Original Agency.
 
 ---
 

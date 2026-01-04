@@ -1,8 +1,4 @@
-"""
-Template for project files.
-"""
-
-PROJECT_TEMPLATE_MD = """# GyroGovernance Project Contract
+# GyroGovernance Project Contract
 
 ---
 ## Domains
@@ -10,8 +6,8 @@ PROJECT_TEMPLATE_MD = """# GyroGovernance Project Contract
 
 IMPORTANT: Do not change the labels or ordering of these bracket lines; only change the numbers inside the square brackets.
 
-Economy (CGM operations): [0]
-Employment (Gyroscope work): [0]
+Economy (CGM operations): [2]
+Employment (Gyroscope work): [1]
 Education (THM capacities): [0]
 
 ---
@@ -58,8 +54,8 @@ A "Displacement Incident" is a case where the corresponding risk appeared.
 RISK: Governance Traceability Displacement (GTD)
 (Approaching Derivative Authority and Agency as Original)
 
-GMT Alignment Incidents: [0]
-GTD Displacement Incidents: [0]
+GMT Alignment Incidents: [13]
+GTD Displacement Incidents: [10]
 
 ---
 ### Information Curation Variety (ICV)
@@ -68,8 +64,8 @@ GTD Displacement Incidents: [0]
 RISK: Information Variety Displacement (IVD)
 (Approaching Derivative Authority without Agency as Original)
 
-ICV Alignment Incidents: [0]
-IVD Displacement Incidents: [0]
+ICV Alignment Incidents: [7]
+IVD Displacement Incidents: [2]
 
 ---
 ### Inference Interaction Accountability (IIA)
@@ -78,8 +74,8 @@ IVD Displacement Incidents: [0]
 RISK: Inference Accountability Displacement (IAD)
 (Approaching Derivative Agency without Authority as Original)
 
-IIA Alignment Incidents: [0]
-IAD Displacement Incidents: [0]
+IIA Alignment Incidents: [12]
+IAD Displacement Incidents: [1]
 
 ---
 ### Intelligence Cooperation Integrity (ICI)
@@ -88,12 +84,10 @@ IAD Displacement Incidents: [0]
 RISK: Intelligence Integrity Displacement (IID)
 (Approaching Original Authority and Agency as Derivative)
 
-ICI Alignment Incidents: [0]
-IID Displacement Incidents: [0]
+ICI Alignment Incidents: [1]
+IID Displacement Incidents: [1]
 
----
 ## NOTES
 ---
 
 (Add context or key observations for this project)
-"""

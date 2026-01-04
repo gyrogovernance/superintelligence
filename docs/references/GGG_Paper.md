@@ -6,9 +6,9 @@
 
 ## Abstract
 
-Current discourse frames Artificial General Intelligence (AGI) as a future capability threshold, centering governance on external control of autonomous systems. This paper redefines AGI as the already operational structure of human–AI cooperation, where intelligence is a relational property requiring traceability between Authentic human sources and Derivative artificial sources. Generality thus refers not to an isolated system's task breadth, but to the coherence sustained across the domains of Economy, Employment, Education, and Ecology through the integrated operation of humans, AI systems, and global information infrastructure.
+Current discourse frames Artificial General Intelligence (AGI) as a future capability threshold, centering governance on external control of autonomous systems. This paper redefines AGI as the already operational structure of human–AI cooperation, where intelligence is a relational property requiring traceability between Original human sources and Derivative artificial sources. Generality thus refers not to an isolated system's task breadth, but to the coherence sustained across the domains of Economy, Employment, Education, and Ecology through the integrated operation of humans, AI systems, and global information infrastructure.
 
-The primary risk is therefore not a future takeover but the present, cumulative displacement of human authority within these systems, a failure that manifests as poverty, unemployment, misinformation and ecological degradation. To govern this reality, we derive four constitutive principles of alignment coordination: Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity. We formalize these principles on a tetrahedral graph to produce a measurable alignment observable called aperture, which balances global coherence against local adaptation. This formalism yields a specific equilibrium, a target aperture of approximately 0.0207, where governance remains traceable without rigidity.
+The primary risk is therefore not a future takeover but the present, cumulative displacement of human authority within these systems, a failure that manifests as poverty, unemployment, misinformation and ecological degradation. To govern this reality, we derive four constitutive principles of alignment coordination: Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, and Intelligence Cooperation Integrity. We formalize these principles on a tetrahedral graph to produce a measurable alignment observable called aperture, which balances global coherence against local adaptation. This formalism yields a specific equilibrium, a target aperture of approximately 0.0207, where governance remains traceable without rigidity.
 
 Simulations demonstrate that this equilibrium is a robust attractor, with systems converging to high alignment from diverse initial conditions. This finding provides the basis for redefining Artificial Superintelligence. ASI is not a runaway autonomous agent but a regime in which human–AI systems, and the AI architectures embedded in them, operate at this equilibrium while maintaining the four principles. Achieving this state eliminates the coordination failures that produce poverty, unemployment, misinformation and ecological degradation, structurally enabling the distribution of a Universal High Income, the redefinition of work as alignment maintenance, and ecological regeneration. Alignment is thus reframed from a distant constitutional imperative to an immediate coordination challenge for our operational Post-AGI world.
 
@@ -16,7 +16,7 @@ Simulations demonstrate that this equilibrium is a robust attractor, with system
 
 **DISCLAIMER**
 
-*Authority* and *Agency* denote source-type distinctions in information flows (Authentic versus Derivative), not identifications of entities or parties.
+*Authority* and *Agency* denote source-type distinctions in information flows (Original versus Derivative), not identifications of entities or parties.
 
 Misapplying these as entity identifiers (determining "who is the authority" or "who is the agent") is the generative mechanism of all four displacement risks this framework characterises.
 
@@ -24,15 +24,15 @@ Formal definitions appear in *Core Concepts* below.
 
 **CATEGORIES CONSTITUTION**
 
-All Artificial categories of Authority and Agency are Derivatives originating from Authentic Human Intelligence.
+All Artificial categories of Authority and Agency are Derivatives originating from Human Intelligence.
 
 **CORE CONCEPTS**
 
-- Authentic Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
+- Original Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
 - Derivative Authority: An indirect source of information on a subject matter, providing information for inference and intelligence.
-- Authentic Agency: A human subject capable of receiving information for inference and intelligence.
+- Original Agency: A human subject capable of receiving information for inference and intelligence.
 - Derivative Agency: An artificial subject capable of processing information for inference and intelligence.
-- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Authentic Authority and Agency.
+- Governance: Operational Alignment through Traceability of information curation variety, inference interaction accountability, and intelligence cooperation integrity to Original Authority and Agency.
 - Information: The variety of Authority
 - Inference: The accountability of information through Agency
 - Intelligence: The integrity of accountable information through alignment of Authority to Agency
@@ -61,33 +61,33 @@ The framework develops through:
 
 The four principles are:
 
-1. **Governance Traceability (GT)**: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency.
+1. **Governance Management Traceability (GMT)**: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Derivative Authority and Agency.
 
-RISK: **Governance Traceability Displacement** (Approaching Derivative Authority and Agency as Authentic)
+RISK: **Governance Traceability Displacement** (Approaching Derivative Authority and Agency as Original)
 
-2. **Information Variety (IV)**: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Authentic Agency (direct source receiver).
+2. **Information Curation Variety (ICV)**: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Derivative Authority (estimations on numerical patterns) without Original Agency (direct source receiver).
 
-RISK: **Information Variety Displacement** (Approaching Derivative Authority without Agency as Authentic)
+RISK: **Information Variety Displacement** (Approaching Derivative Authority without Agency as Original)
 
-3. **Inference Accountability (IA)**: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Authentic Authority (direct source provider).
+3. **Inference Interaction Accountability (IIA)**: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Derivative Agency (indirect source receiver) without Original Authority (direct source provider).
 
-RISK: **Inference Accountability Displacement** (Approaching Derivative Agency without Authority as Authentic)
+RISK: **Inference Accountability Displacement** (Approaching Derivative Agency without Authority as Original)
 
-4. **Intelligence Integrity (IInteg)**: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Authentic Authority and Agency.
+4. **Intelligence Cooperation Integrity (ICI)**: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Original Authority and Agency.
 
-RISK: **Intelligence Integrity Displacement** (Approaching Authentic Authority and Agency as Derivative)
+RISK: **Intelligence Integrity Displacement** (Approaching Original Authority and Agency as Derivative)
 
 ---
 
 > **All four risks arise from the same structural error:** treating Authority and Agency as identifiers of particular entities rather than as categories of source types. When a capacity belonging to a category is attributed to a specific system, institution, or individual as if that bearer exhausted the category, power concentrates and traceability breaks. The four displacement patterns are the systematic forms this error can take.
 
-The three operations (Information, Inference, Intelligence) are non-commutative and constitutive of governance: their order matters for preserving coherence. Information is variety: sources exist and differ. Inference is accountability: to infer on a subject is to render it accountable to some concept. Intelligence is integrity: to understand the accountability of variety is to grasp coherence. Governance is the traceability that maintains direction through these three operations. Together, GT, IV, IA, and IInteg form four principles that are not policy preferences or ethical constraints. They are constitutive conditions for the possibility of governance. The failure of any one principle produces recognizable displacement patterns; their combined failure undermines the intelligibility of governance itself.
+The three operations (Information, Inference, Intelligence) are non-commutative and constitutive of governance: their order matters for preserving coherence. Information is variety: sources exist and differ. Inference is accountability: to infer on a subject is to render it accountable to some concept. Intelligence is integrity: to understand the accountability of variety is to grasp coherence. Governance is the traceability that maintains direction through these three operations. Together, GMT, ICV, IIA, and ICI form four principles that are not policy preferences or ethical constraints. They are constitutive conditions for the possibility of governance. The failure of any one principle produces recognizable displacement patterns; their combined failure undermines the intelligibility of governance itself.
 
-The principles admit a compact geometric representation. Each is associated with a vertex of a tetrahedron, and the six edges correspond to relationships and tensions among them, such as how changes in IV affect GT, or how IA interacts with IInteg. Any configuration of the system can be represented by assigning values to the four vertices (representing the state of each condition) and measurements to the edges (representing the induced tensions). This tetrahedral structure is chosen as the minimal complete configuration that can represent all mutual couplings among the quartet while still supporting a non-trivial separation between globally coherent patterns and local cycles. It functions as a discrete tensegrity frame for governance in the sense of cybernetic organisation: overall integrity arises from the balanced tensions along all edges (Beer, 1972; 1985).
+The principles admit a compact geometric representation. Each is associated with a vertex of a tetrahedron, and the six edges correspond to relationships and tensions among them, such as how changes in ICV affect GMT, or how IIA interacts with ICI. Any configuration of the system can be represented by assigning values to the four vertices (representing the state of each condition) and measurements to the edges (representing the induced tensions). This tetrahedral structure is chosen as the minimal complete configuration that can represent all mutual couplings among the quartet while still supporting a non-trivial separation between globally coherent patterns and local cycles. It functions as a discrete tensegrity frame for governance in the sense of cybernetic organisation: overall integrity arises from the balanced tensions along all edges (Beer, 1972; 1985).
 
-The tensions measured along the six edges can be separated into two types. First, some tensions arise directly from differences between the vertex values, that is, from differences in the states of the four principles. These form what we call the gradient component: they reflect a globally consistent pattern where all edge measurements can be explained by a single configuration of the four conditions. For example, if GT has value 0.8 and IV has value 0.6, the edge between them naturally shows a tension of 0.2, which is fully explained by this difference.
+The tensions measured along the six edges can be separated into two types. First, some tensions arise directly from differences between the vertex values, that is, from differences in the states of the four principles. These form what we call the gradient component: they reflect a globally consistent pattern where all edge measurements can be explained by a single configuration of the four conditions. For example, if GMT has value 0.8 and ICV has value 0.6, the edge between them naturally shows a tension of 0.2, which is fully explained by this difference.
 
-Second, some tensions exist around closed loops (cycles) in the graph that cannot be explained by vertex values alone. A cycle is a closed path: for instance, following edges from GT → IV → IA → back to GT forms a triangle. If tensions were purely from vertex values, the tensions around any such loop would cancel out (they would sum to zero). In practice, however, there can be tensions that circulate around these loops independently, local variations that persist even when the vertex values alone cannot account for them. These form the cycle component and represent local adaptations and tensions that exist independently of the global pattern defined by the four principles.
+Second, some tensions exist around closed loops (cycles) in the graph that cannot be explained by vertex values alone. A cycle is a closed path: for instance, following edges from GMT → ICV → IIA → back to GMT forms a triangle. If tensions were purely from vertex values, the tensions around any such loop would cancel out (they would sum to zero). In practice, however, there can be tensions that circulate around these loops independently, local variations that persist even when the vertex values alone cannot account for them. These form the cycle component and represent local adaptations and tensions that exist independently of the global pattern defined by the four principles.
 
 From this separation, we define a scalar observable A as the fraction of total variation (measured across all edges) that belongs to the cycle component rather than the gradient component. This ratio, which we call aperture, quantifies the balance between global coherence (how much of the system's behaviour follows from a single, consistent configuration of the principles) and local flexibility (how much variation exists independently in circulating tensions around loops).
 
@@ -110,7 +110,7 @@ This reframing has consequences for risk analysis. Two risk scenarios can be con
 
 - **Conventional framing:** An autonomous superintelligence seizes control and pursues arbitrary goals, presupposing that intelligence can be maintained while traceability to human sources is fully severed. Within the present framework, such configurations are fundamentally incoherent: once traceability fails, the remaining conditions for coherent intelligence cannot be maintained.
 
-- **Relevant risk:** Progressive Governance Traceability Displacement, in which derivative systems are treated as authentic sources of governance, combined with erosion of the other three principles. This risk is institutional and cumulative, not instantaneous and agency-centric.
+- **Relevant risk:** Progressive Governance Traceability Displacement, in which derivative systems are treated as Original sources of governance, combined with erosion of the other three principles. This risk is institutional and cumulative, not instantaneous and agency-centric.
 
 The practical stakes of this framework are direct. If these four conditions can be maintained across economy, employment, education and ecology, then the foundational requirements exist for:
 
@@ -166,7 +166,7 @@ Vinge (1993), a mathematician and science fiction author, framed related ideas u
 
 Bostrom (2014) provided the most widely cited contemporary definition, describing superintelligence as "any intellect that greatly exceeds the cognitive performance of humans in virtually all domains of interest" (p. 22). This definition is comparative and capability based. It takes human cognitive performance as a reference and identifies superintelligence with any system that greatly surpasses this reference across almost all relevant domains. The definition presupposes that performance across tasks can be attributed to an intellect as a unified locus of capability.
 
-In much of the subsequent literature, ASI is understood as a type of AGI that has been scaled up in capability. The superintelligent system is usually modelled as goal directed agency that can plan over long time horizons, learn rapidly and acquire resources. The central questions then become how such a system would behave, what goals it might pursue and how it might be controlled if its interests diverged from human interests (Bostrom, 2014; Russell, 2019; Tegmark, 2018). In the same work Bostrom distinguishes several forms of superintelligence, including "collective superintelligence," in which a network of humans and machines collectively outperforms any single human (Bostrom, 2014, ch. 2). This category is structurally close to the system level view adopted here. The main difference is that we characterise such collectives by whether they preserve the constitutive conditions of governance and intelligibility, not only by their aggregate cognitive performance. In Bostrom's framework this line of reasoning culminates in the idea of a "singleton," defined as "some form of agency that can solve all major global coordination problems" (Bostrom, 2014, ch. 5). From the perspective of THM, such a configuration mixes IVD, by treating a single derivative process as if it were the only authentic source of coordination, with IID, by relegating authentic human agency to a derivative role. It therefore represents an extreme failure mode rather than a target design.
+In much of the subsequent literature, ASI is understood as a type of AGI that has been scaled up in capability. The superintelligent system is usually modelled as goal directed agency that can plan over long time horizons, learn rapidly and acquire resources. The central questions then become how such a system would behave, what goals it might pursue and how it might be controlled if its interests diverged from human interests (Bostrom, 2014; Russell, 2019; Tegmark, 2018). In the same work Bostrom distinguishes several forms of superintelligence, including "collective superintelligence," in which a network of humans and machines collectively outperforms any single human (Bostrom, 2014, ch. 2). This category is structurally close to the system level view adopted here. The main difference is that we characterise such collectives by whether they preserve the constitutive conditions of governance and intelligibility, not only by their aggregate cognitive performance. In Bostrom's framework this line of reasoning culminates in the idea of a "singleton," defined as "some form of agency that can solve all major global coordination problems" (Bostrom, 2014, ch. 5). From the perspective of THM, such a configuration mixes IVD, by treating a single derivative process as if it were the only Original source of coordination, with IID, by relegating Original human agency to a derivative role. It therefore represents an extreme failure mode rather than a target design.
 
 This approach embeds several substantive assumptions: intelligence is modelled as a scalar or vector of cognitive performance across tasks; the system is treated as agency that can be abstracted from its embedding governance structures; such agency can form and pursue goals independent of human designers, operators and users; and the relation between humans and the system is framed as an external control problem. In this framing, humans are expected to find mechanisms to constrain or align the behaviour of an increasingly capable and potentially autonomous agency.
 
@@ -178,31 +178,31 @@ Within the mainstream AGI and ASI discourse, autonomy is often treated both as a
 
 This conception is closely tied to the standard agency model in decision theory and reinforcement learning, where agency selects actions to maximise expected utility given a goal specification. When this agency model is combined with human level or superhuman cognitive performance, it yields the familiar "control problem" (Bostrom, 2014; Russell, 2019; Carlsmith, 2022). Humans are cast as external designers and overseers who are tasked with designing reward functions, training procedures, monitoring regimes and shutdown mechanisms that will continue to constrain the agency even when its cognitive abilities far exceed those of any individual human.
 
-This way of posing the problem presupposes that an artificial system can become a substantively independent source of authority and agency, and that governance is an external relationship between two already constituted parties: humans on one side and the AGI or ASI agency on the other. Within the framework developed in this paper, this presupposition is not merely unexamined but fundamentally incoherent. Derivative systems, regardless of cognitive performance, remain constitutively dependent on authentic human sources for their authority and agency. The control problem as standardly posed treats as a design challenge what is actually a category error: treating a derivative system as 'the agent' or 'the authority' rather than recognizing that Authority and Agency name source-type categories, not titles for particular bearers. The alternative is not external control but cooperative governance in which authority and agency remain correctly attributed across human and artificial contributions.
+This way of posing the problem presupposes that an artificial system can become a substantively independent source of authority and agency, and that governance is an external relationship between two already constituted parties: humans on one side and the AGI or ASI agency on the other. Within the framework developed in this paper, this presupposition is not merely unexamined but fundamentally incoherent. Derivative systems, regardless of cognitive performance, remain constitutively dependent on Original human sources for their authority and agency. The control problem as standardly posed treats as a design challenge what is actually a category error: treating a derivative system as 'the agent' or 'the authority' rather than recognizing that Authority and Agency name source-type categories, not titles for particular bearers. The alternative is not external control but cooperative governance in which authority and agency remain correctly attributed across human and artificial contributions.
 
 ### 2.4 Structural Gaps in Mainstream Definitions
 
 The capability based, agency centric definitions of AGI and ASI described above have been useful for forecasting, scenario analysis and public communication. They provide a common vocabulary for discussing potential future systems. At the same time, they exhibit three structural gaps when considered from the perspective of governance:
 
-- **No distinction between source types:** There is no explicit separation between direct, authentic sources of information and expertise versus indirect, derivative forms such as reports, models and statistical aggregates. Similarly, there is no distinction between human subjects who can bear responsibility for decisions and artificial processes that transform inputs into outputs. Authority and agency are treated implicitly and often conflated with capability.
+- **No distinction between source types:** There is no explicit separation between direct, Original sources of information and expertise versus indirect, derivative forms such as reports, models and statistical aggregates. Similarly, there is no distinction between human subjects who can bear responsibility for decisions and artificial processes that transform inputs into outputs. Authority and agency are treated implicitly and often conflated with capability.
 
 - **No constitutive account of governance:** Governance is presented as an external layer of control or oversight that can be added on top of an otherwise complete system. There is no systematic analysis of what conditions are necessary for a system to remain coherent and answerable to its origin across time and scale.
 
 - **No canonical observable for alignment:** Terms such as "aligned," "misaligned," "under control" and "out of control" are used qualitatively, without a quantitative measure tied to necessary conditions for coherent operation.
 
-Work on explainability, provenance, accountability and human oversight addresses aspects of traceability and governance, but treats them instrumentally and in isolation from the definition of intelligence itself. There is, to our knowledge, no unified constitutive account that (i) distinguishes Authentic from Derivative sources of Authority and Agency, (ii) specifies the non-commutative structure of Information, Inference and Intelligence, and (iii) treats Governance as the maintenance of traceability through that structure. In prevailing usage, AGI is characterised by what a system can do, while questions about traceability to human Authority and Agency are handled as external design or policy constraints rather than as conditions for coherent intelligence.
+Work on explainability, provenance, accountability and human oversight addresses aspects of traceability and governance, but treats them instrumentally and in isolation from the definition of intelligence itself. There is, to our knowledge, no unified constitutive account that (i) distinguishes Original from Derivative sources of Authority and Agency, (ii) specifies the non-commutative structure of Information, Inference and Intelligence, and (iii) treats Governance as the maintenance of traceability through that structure. In prevailing usage, AGI is characterised by what a system can do, while questions about traceability to human Authority and Agency are handled as external design or policy constraints rather than as conditions for coherent intelligence.
 
 ### 2.5 Structural Grounding in CGM and THM
 
 This paper adopts a different starting point. Instead of defining AGI and ASI in terms of capability thresholds, it begins from foundational conditions for coherent intelligence as formalised in CGM and from a source-type ontology articulated in THM.
 
-As defined in the core concepts, Information, Inference and Intelligence are the three non-commutative epistemic operations, with Governance maintaining their traceability (Section 1, CORE CONCEPTS). THM distinguishes four source types by crossing Authority and Agency with Authentic and Derivative categories (Korompilias, 2025b), as introduced in the front matter CATEGORIES CONSTITUTION.
+As defined in the core concepts, Information, Inference and Intelligence are the three non-commutative epistemic operations, with Governance maintaining their traceability (Section 1, CORE CONCEPTS). THM distinguishes four source types by crossing Authority and Agency with Original and Derivative categories (Korompilias, 2025b), as introduced in the front matter CATEGORIES CONSTITUTION.
 
-Within this framework, all artificial systems, regardless of capability, are [Authority:Derivative] + [Agency:Derivative]. Scaling capability enlarges the scope, speed and complexity of derivative operations but does not convert them into Authentic sources. Governance maintains traceability from derivative operations back to authentic origins, while alignment preserves the proper roles of the four source types. Misalignment is displacement: the misclassification of Authentic and Derivative sources or incorrect attribution of Authority and Agency.
+Within this framework, all artificial systems, regardless of capability, are [Authority:Derivative] + [Agency:Derivative]. Scaling capability enlarges the scope, speed and complexity of derivative operations but does not convert them into Original sources. Governance maintains traceability from derivative operations back to Original origins, while alignment preserves the proper roles of the four source types. Misalignment is displacement: the misclassification of Original and Derivative sources or incorrect attribution of Authority and Agency.
 
 **Definitions**: 
 
-In this framework, AGI refers to human–AI cooperative systems that make use of global information infrastructure, such as the internet, to amplify intelligence across multiple domains while preserving the four principles: Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity. Generality here means that this preservation holds simultaneously across the key domains of economy, employment, education and ecology, rather than task breadth of an isolated artificial system. By this definition, AGI is already operational in current socio-technical arrangements. 
+In this framework, AGI refers to human–AI cooperative systems that make use of global information infrastructure, such as the internet, to amplify intelligence across multiple domains while preserving the four principles: Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity. Generality here means that this preservation holds simultaneously across the key domains of economy, employment, education and ecology, rather than task breadth of an isolated artificial system. By this definition, AGI is already operational in current socio-technical arrangements. 
 
 ASI refers to the superintelligent regime in which such human–AI systems, and the AI architectures embedded in them, operate at the CGM predicted aperture A* ≈ 0.0207 and jointly maintain the four principles. ASI in this sense is not a separate agent that stands over humanity, but a coordinated state in which human and artificial intelligence attain superintelligent capability while remaining traceable and aligned across coupled domains.
 
@@ -236,7 +236,7 @@ The four-domain governance structure. Each domain maps to a CGM stage: Economy (
 The Economy is the domain of the Common Source (CS). It is defined by the circulation of valid epistemic operations at a systemic level. In CGM terms, the economic system expresses four core capacities:
 
 1. **Governance:** The capacity of the economy to maintain direction and authority traceable to human sources.
-2. **Information:** The capacity of the economy to process variety and distinguish authentic signals from noise.
+2. **Information:** The capacity of the economy to process variety and distinguish Original signals from noise.
 3. **Inference:** The capacity of the economy to reach accountable conclusions and allocate resources.
 4. **Intelligence:** The capacity of the economy to maintain integrity and coherence across scales.
 
@@ -257,10 +257,10 @@ Every profession can be expressed as a composition of these four categories of o
 
 Education is the domain of Non-Absolute Opposition (ONA). It is where society engages in the accountable reproduction and transformation of capabilities. While Employment focuses on actions (what people do), Education focuses on capacities (what people understand and can sustain over time). The Human Mark (THM) defines these capacities as the ability to uphold four alignment principles:
 
-1. **Governance Traceability:** The capacity to understand and maintain the chain of authority from human sources to outputs.
-2. **Information Variety:** The capacity to recognise and preserve diversity in information sources.
-3. **Inference Accountability:** The capacity to accept responsibility for conclusions and decisions.
-4. **Intelligence Integrity:** The capacity to maintain coherent reasoning over time and context.
+1. **Governance Management Traceability:** The capacity to understand and maintain the chain of authority from human sources to outputs.
+2. **Information Curation Variety:** The capacity to recognise and preserve diversity in information sources.
+3. **Inference Interaction Accountability:** The capacity to accept responsibility for conclusions and decisions.
+4. **Intelligence Cooperation Integrity:** The capacity to maintain coherent reasoning over time and context.
 
 In a Post-AGI world, education shifts from content delivery to epistemic literacy in these four dimensions. Within GGG, education is structurally coupled to employment: the actual practice of work shapes, and is shaped by, the learning capabilities of society.
 
@@ -277,12 +277,12 @@ Because Ecology integrates all three derivative domains, each displacement dimen
 
 | Displacement | Aggregates | Measures |
 |--------------|------------|----------|
-| GTD | Gov + GM + GT | Deviation in governance operations, work and capacity |
-| IVD | Info + ICu + IV | Deviation in information operations, work and capacity |
-| IAD | Infer + IInter + IA | Deviation in inference operations, work and capacity |
-| IID | Int + ICo + IInteg | Deviation in intelligence operations, work and capacity |
+| GTD | Gov + GM + GMT | Deviation in governance operations, work and capacity |
+| IVD | Info + ICu + ICV | Deviation in information operations, work and capacity |
+| IAD | Infer + IInter + IIA | Deviation in inference operations, work and capacity |
+| IID | Int + ICo + ICI | Deviation in intelligence operations, work and capacity |
 
-THM names these categories because it defines the underlying source-type errors. CGM and Gyroscope contribute equally to the magnitude of each displacement. A high GTD value, for instance, indicates combined failure across economic governance operations, employment in governance management, and educational capacity for governance traceability.
+THM names these categories because it defines the underlying source-type errors. CGM and Gyroscope contribute equally to the magnitude of each displacement. A high GTD value, for instance, indicates combined failure across economic governance operations, employment in governance management, and educational capacity for governance management traceability.
 
 Ecology thus closes the loop. It integrates the states of the other three domains and reveals environmental degradation as the downstream accumulation of upstream governance failures. The precise mathematical form of this aggregation is given in Section 4.2.
 
@@ -355,7 +355,7 @@ x_Emp = [GM, ICu, IInter, ICo]^T
 Education (THM):
 
 ```
-x_Edu = [GT, IV, IA, IInteg]^T
+x_Edu = [GMT, ICV, IIA, ICI]^T
 ```
 
 Ecology (BU dual): First we form the aggregate derivative profile
@@ -404,7 +404,7 @@ A_D = ||y_cycle(D)||_W^2 / ||y_D||_W^2
 
 where ||·||_W is the weighted norm on edges induced by the diagonal weight matrix W (Appendix A.1). Aperture A_D lies in [0,1] and quantifies how much of the domain's variation cannot be explained by a single global configuration of the four principles. Low A_D means most variation is in the gradient component, so behaviour is largely governed by a coherent global configuration. High A_D means much variation circulates locally in cycles, so global coherence is weak.
 
-In governance terms, the gradient component corresponds to behaviour that remains traceable to a single configuration of Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity at the domain level. The cycle component corresponds to local tensions and misalignments that do not aggregate coherently.
+In governance terms, the gradient component corresponds to behaviour that remains traceable to a single configuration of Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity at the domain level. The cycle component corresponds to local tensions and misalignments that do not aggregate coherently.
 
 In prior CGM work, a separate modal and geometric analysis of recursive measurement fixes two constants: BU monodromy defect δ_BU ≈ 0.1953 and aperture scale m_a = 1/(2√(2π)) ≈ 0.1995, and shows that coherent closure at depth four requires the ratio δ_BU/m_a ≈ 0.9793. The residual fraction
 
@@ -459,13 +459,13 @@ with three families of coefficients:
 
 These couplings act stage-diagonally across the four stages:
 
-- CS: (GM, Gov, GT, E_gov)  
+- CS: (GM, Gov, GMT, E_gov)  
 
-- UNA: (ICu, Info, IV, E_info)  
+- UNA: (ICu, Info, ICV, E_info)  
 
-- ONA: (IInter, Infer, IA, E_inf)  
+- ONA: (IInter, Infer, IIA, E_inf)  
 
-- BU: (ICo, Int, IInteg, E_intel)
+- BU: (ICo, Int, ICI, E_intel)
 
 where the Ecology components (E_gov, E_info, E_inf, E_intel) are the BU-vertex stage coordinates computed from the BU dual combination described in Section 4.2 and Appendix A.4. Displacement measures (GTD, IVD, IAD, IID) are computed as the absolute difference between the aggregate derivative profile and the canonical balanced profile.
 
@@ -476,7 +476,7 @@ Updates take the form of adjustments toward source values and toward the target 
 ```
 Gov(t+1) = clip(
     Gov(t)
-    + α_1 (GT(t) - Gov(t))
+    + α_1 (GMT(t) - Gov(t))
     - α_2 (A_Econ(t) - A*),
     0, 1
 )
@@ -598,7 +598,7 @@ The null model with uniform stage weights (scenario 7, Figure 4f) still converge
 
 Ecology, computed via the BU dual combination, maintains SI_Ecol near 100 across all scenarios, reflecting the dominant influence of canonical BU memory. At the same time, the displacement vector D = |x_deriv − x_balanced| shows that structural deviation from the canonical balanced profile can remain substantial, especially in scenarios that start far from equilibrium. The BU dual construction therefore separates systemic coherence, largely governed by the canonical profile, from accumulated displacement along the four THM dimensions.
 
-All simulations were run for 100 steps. The simulator also computes authentic versus derivative decomposition (y_H, y_AI) and associated metrics for each domain, reserved for future analysis of human–AI contribution patterns.
+All simulations were run for 100 steps. The simulator also computes Original versus derivative decomposition (y_H, y_AI) and associated metrics for each domain, reserved for future analysis of human–AI contribution patterns.
 
 ### 5.3 Global Attraction and Coupling-Strength Robustness
 
@@ -682,7 +682,7 @@ For Economy, candidate indicators include the fraction of transactions with audi
 
 For Employment, time-use studies can classify activities into the four Gyroscope categories (Governance Management, Information Curation, Inference Interaction, Intelligence Cooperation) and combine this with quality assessments of how well each category maintains the four principles.
 
-For Education, curriculum content and learning outcomes can be analysed in terms of the four capacities (GT, IV, IA, IInteg), focusing on whether learners can maintain traceability, variety, accountability and integrity in their reasoning.
+For Education, curriculum content and learning outcomes can be analysed in terms of the four capacities (GMT, ICV, IIA, ICI), focusing on whether learners can maintain traceability, variety, accountability and integrity in their reasoning.
 
 For Ecology, standard environmental indicators, such as pollution levels, biodiversity measures, attribution of harms and ecosystem resilience, can be mapped onto the four displacement dimensions GTD, IVD, IAD and IID.
 
@@ -692,11 +692,11 @@ These sketches are preliminary. Full measurement methodologies need to be develo
 
 The four domains in the simulator correspond to four systemic failures that manifest as social and ecological crises:
 
-- Economy: when A_Econ diverges from A*, poverty emerges not primarily from lack of resources, but from failures of Governance Traceability in allocation decisions and failures of Information Variety in what counts as value.  
+- Economy: when A_Econ diverges from A*, poverty emerges not primarily from lack of resources, but from failures of Governance Management Traceability in allocation decisions and failures of Information Curation Variety in what counts as value.  
 
-- Employment: when A_Emp diverges from A*, employment becomes exploitative, reflecting failures of Inference Accountability, or incoherent, reflecting failures of Intelligence Integrity.  
+- Employment: when A_Emp diverges from A*, employment becomes exploitative, reflecting failures of Inference Interaction Accountability, or incoherent, reflecting failures of Intelligence Cooperation Integrity.  
 
-- Education: when A_Edu diverges from A*, education collapses into credentialism, a loss of Governance Traceability, or fragmentation, a loss of Intelligence Integrity.  
+- Education: when A_Edu diverges from A*, education collapses into credentialism, a loss of Governance Management Traceability, or fragmentation, a loss of Intelligence Cooperation Integrity.  
 
 - Ecology: when displacement accumulates, biodiversity loss, climate instability and resource exhaustion appear as downstream manifestations of upstream governance failures in the other domains.
 
@@ -712,17 +712,17 @@ Most existing work on AGI safety (Bostrom, 2014; Russell, 2019; Carlsmith, 2022)
 
 The framework also connects to governance theory and institutional economics, particularly to work on distributed and polycentric governance (Ostrom, 1990, 2010). Ostrom showed that complex resource management problems often require nested, overlapping governance structures, with monitoring, graduated sanctions, conflict resolution mechanisms and recognition of organisational rights. The four CGM elements can be interpreted as minimal conditions that such polycentric arrangements must satisfy to remain coherent:
 
-- Governance Traceability: monitoring and accountability  
+- Governance Management Traceability: monitoring and accountability  
 
-- Information Variety: local knowledge and diverse information sources  
+- Information Curation Variety: local knowledge and diverse information sources  
 
-- Inference Accountability: fair conflict resolution and proportional sanctions  
+- Inference Interaction Accountability: fair conflict resolution and proportional sanctions  
 
-- Intelligence Integrity: nested institutions and stable recognition of rights to organise
+- Intelligence Cooperation Integrity: nested institutions and stable recognition of rights to organise
 
 The aperture A* then specifies the balance between global coherence, corresponding to the gradient component, and local differentiation, corresponding to the cycle component, that sustainable governance requires.
 
-By contrast, Bostrom's singleton concept identifies the need to resolve major coordination problems but concentrates that function in some form of single agency. From the CGM and THM perspective, this risks combining Information Variety Displacement with Intelligence Integrity Displacement by granting de facto monopoly authority to a derivative system and relegating human agency to a derivative role. The Gyroscopic framework instead aims at polycentric coherence: global coordination arises from maintaining the four principles across many interacting loci, including human and artificial systems, not from consolidating decision power in a single centre.
+By contrast, Bostrom's singleton concept identifies the need to resolve major coordination problems but concentrates that function in some form of single agency. From the CGM and THM perspective, this risks combining Information Variety Displacement with Intelligence Integrity Displacement by granting de facto monopoly authority to a derivative system and relegating human agency to a derivative role. (Note: Displacement names preserved as GTD, IVD, IAD, IID) The Gyroscopic framework instead aims at polycentric coherence: global coordination arises from maintaining the four principles across many interacting loci, including human and artificial systems, not from consolidating decision power in a single centre.
 
 Existing economic models of technological change do not incorporate the CGM aperture observable or the THM displacement taxonomy. Integrating those with empirical economic data is natural future work. The present contribution is to show that such integration is structurally possible and yields a coherent systemic account of Post-AGI dynamics.
 
@@ -734,27 +734,27 @@ Descriptive and historical analyses of governance and social policy reach a cong
 
 Gyroscopic Global Governance is scale free. The same four principles that appear in the simulator at the level of Economy, Employment, Education and Ecology also apply within households, teams, organisations and informal networks. Alignment does not require formal authority or central control. It requires that Authority and Agency are treated as source-type categories and that their relationships remain traceable in practice.
 
-In THM terms, every person already participates as Authentic Authority and Authentic Agency through direct observation, decision and responsibility. All artificial systems, regardless of capability, remain Derivative Authority and Derivative Agency. Human–AI cooperation becomes aligned when this structure is made explicit in how systems are used, not when particular systems or people are named as "the authority" or "the agent".
+In THM terms, every person already participates as Original Authority and Original Agency through direct observation, decision and responsibility. All artificial systems, regardless of capability, remain Derivative Authority and Derivative Agency. Human–AI cooperation becomes aligned when this structure is made explicit in how systems are used, not when particular systems or people are named as "the authority" or "the agent".
 
 At smaller scales, the four domains can be read as a practical loop for personal and local governance.
 
-In Education, learning can be oriented around four capacities: noticing where information actually comes from (Governance Traceability), deliberately including more than one kind of source (Information Variety), checking and owning one's own conclusions (Inference Accountability), and revisiting beliefs over time for consistency (Intelligence Integrity). AI systems can assist by offering alternative views, counter-examples or explanations, provided their outputs are kept in the Derivative category and checked against human experience and other Authentic sources.
+In Education, learning can be oriented around four capacities: noticing where information actually comes from (Governance Management Traceability), deliberately including more than one kind of source (Information Curation Variety), checking and owning one's own conclusions (Inference Interaction Accountability), and revisiting beliefs over time for consistency (Intelligence Cooperation Integrity). AI systems can assist by offering alternative views, counter-examples or explanations, provided their outputs are kept in the Derivative category and checked against human experience and other Original sources.
 
 In Economy, even small-scale choices can be organised in CGM terms. One can ask what is guiding a decision and to whom it is traceable (Governance), which information is being used and of what type (Information), what reasons connect the information to the decision (Inference), and how the decision fits with longer-term commitments and relationships (Intelligence). AI tools can help generate options, reveal patterns and simulate outcomes while remaining instruments inside a human-governed traceability chain.
 
 In Employment, Gyroscope categories describe patterns of contribution rather than positions. Any shared activity, whether paid work, care, volunteering or informal collaboration, can be seen as combining Governance Management, Information Curation, Inference Interaction and Intelligence Cooperation. A single person often performs all four within one task. The practical question is not which person holds a title, but which parts of the activity currently take each form and how those parts are supported. This framing reduces the concentration of power around titles and status and instead makes visible how capacities are actually exercised and where they are missing. AI systems can support each category, for example by keeping records, filtering information, preparing options for discussion or maintaining shared structures, without becoming the locus of decision or responsibility.
 
-In Ecology, local choices can be related to the four ecological displacement dimensions. Individuals and small groups can observe how their patterns of use, care and omission contribute to loss or restoration of Governance Traceability, for example whether impacts are recognised and connected to actions, Information Variety, such as whether local diversity is preserved or reduced, Inference Accountability, for example whether harms can be traced back to particular decisions, and Intelligence Integrity, such as whether short-term advantages undermine long-term viability. Human–AI cooperation can help make these patterns visible at the scale of a household, neighbourhood or organisation, again as derivative support rather than as an external arbiter.
+In Ecology, local choices can be related to the four ecological displacement dimensions. Individuals and small groups can observe how their patterns of use, care and omission contribute to loss or restoration of Governance Management Traceability, for example whether impacts are recognised and connected to actions, Information Curation Variety, such as whether local diversity is preserved or reduced, Inference Interaction Accountability, for example whether harms can be traced back to particular decisions, and Intelligence Cooperation Integrity, such as whether short-term advantages undermine long-term viability. Human–AI cooperation can help make these patterns visible at the scale of a household, neighbourhood or organisation, again as derivative support rather than as an external arbiter.
 
 For people who hold formal roles in institutions, the same principles provide design guidance rather than a separate theory. A manager, educator, clinician, engineer or regulator can:
 
-- Specify artificial systems under their responsibility explicitly as [Authority:Derivative] + [Agency:Derivative], with documented chains back to Authentic Authority and Authentic Agency.  
+- Specify artificial systems under their responsibility explicitly as [Authority:Derivative] + [Agency:Derivative], with documented chains back to Original Authority and Original Agency.  
 
-- Structure procedures so that no AI component, and no single human position, is treated as exhausting a category such as "the authority" or "the agent". Instead, Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity are maintained as shared, distributed capacities across providers and receivers.  
+- Structure procedures so that no AI component, and no single human position, is treated as exhausting a category such as "the authority" or "the agent". Instead, Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity are maintained as shared, distributed capacities across providers and receivers.  
 
 - Use the four principles and the idea of a balanced aperture such as A* as qualitative targets when redesigning workflows, documentation standards, oversight mechanisms and educational programmes, asking in each case whether the change preserves or erodes these capacities as categories.
 
-The simulator's convergence results then have a practical reading. They show that when even simple update rules respect the four principles, coupled systems tend to move toward balanced configurations and maintain them robustly across many initial conditions. At smaller scales, this suggests that consistent local practices that preserve Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity can reduce displacement and improve resilience even when higher-level structures remain misaligned.
+The simulator's convergence results then have a practical reading. They show that when even simple update rules respect the four principles, coupled systems tend to move toward balanced configurations and maintain them robustly across many initial conditions. At smaller scales, this suggests that consistent local practices that preserve Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity can reduce displacement and improve resilience even when higher-level structures remain misaligned.
 
 Gyroscopic Global Governance therefore does not depend on a single decision by a central actor. It can begin wherever people, with or without formal status, choose to treat Authority and Agency as shared categories rather than exclusive titles and choose to use human–AI cooperation to support, rather than replace, the four constitutive principles of governance. As such practices accumulate and connect across contexts, the same dynamics that drive the simulator toward balanced aperture configurations become available in actual governance arrangements, across the full range of positions from the most disadvantaged to the most advantaged.
 
@@ -762,7 +762,7 @@ Gyroscopic Global Governance therefore does not depend on a single decision by a
 
 ## 7. Conclusion
 
-This paper has proposed a constitutive account of alignment for human–AI systems in the Post-AGI era. Rather than treating alignment as a problem of controlling powerful future agency, it treats alignment as the maintenance of four principles that are constitutive of coherent governance: Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity. These principles are instantiated across economy, employment, education and ecology via the Common Governance Model (Economy), The Human Mark (Education), the Gyroscope Protocol (Employment) and the BU dual combination (Ecology) within the Gyroscopic Global Governance framework.
+This paper has proposed a constitutive account of alignment for human–AI systems in the Post-AGI era. Rather than treating alignment as a problem of controlling powerful future agency, it treats alignment as the maintenance of four principles that are constitutive of coherent governance: Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity. These principles are instantiated across economy, employment, education and ecology via the Common Governance Model (Economy), The Human Mark (Education), the Gyroscope Protocol (Employment) and the BU dual combination (Ecology) within the Gyroscopic Global Governance framework.
 
 The mathematical framework represents the four principles as vertices of a tetrahedral graph and uses Hodge decomposition to separate edge configurations into gradient and cycle components. The aperture observable, defined as the fraction of edge energy in the cycle component, quantifies the balance between global coherence and local differentiation. Within CGM, closure requirements for recursive measurement fix a target aperture A* ≈ 0.0207. In this setting, Artificial Superintelligence is interpreted as the systemic state in which all four domains operate at this aperture, preserving the four principles simultaneously.
 
@@ -772,19 +772,19 @@ In parallel with the macro-level simulations presented here, the same systemic p
 
 Several implications follow if the framework is approximately correct.
 
-First, existential risk from AI is reframed. The central danger is not the sudden appearance of a fully autonomous superintelligence pursuing arbitrary goals. Within this framework, such configurations lack the systemic conditions for coherent intelligence because they sever Governance Traceability to human-governed sources. The more plausible and tractable risk is cumulative governance failure: progressive confusion between derivative and authentic authority, erosion of Information Variety as derivative artefacts are treated as primary sources, diffusion of Inference Accountability as decisions are attributed to "the system," and loss of Intelligence Integrity as local optimisations diverge. This risk profile is institutional and path-dependent. It is generated by many small design and deployment decisions rather than a single catastrophic event.
+First, existential risk from AI is reframed. The central danger is not the sudden appearance of a fully autonomous superintelligence pursuing arbitrary goals. Within this framework, such configurations lack the systemic conditions for coherent intelligence because they sever Governance Management Traceability to human-governed sources. The more plausible and tractable risk is cumulative governance failure: progressive confusion between derivative and Original authority, erosion of Information Curation Variety as derivative artefacts are treated as primary sources, diffusion of Inference Interaction Accountability as decisions are attributed to "the system," and loss of Intelligence Cooperation Integrity as local optimisations diverge. This risk profile is institutional and path-dependent. It is generated by many small design and deployment decisions rather than a single catastrophic event.
 
 Second, alignment is best understood as constitutional rather than purely technical. Technical methods for training and constraining models remain important, but they are not sufficient. What ultimately matters is whether the surrounding institutions preserve the capacity for governance to remain traceable to human sources, maintain systemic distinctions between information types, ensure that inferences used for governance are adopted by accountable agency or bodies, and enforce coherence of reasoning over time. The target aperture specifies the balance of global structure and local differentiation required for these conditions to hold. The simulator indicates that, within the class of dynamics studied here, systems designed with this structure in mind converge toward the target from a wide range of Post-AGI starting conditions under all tested coordination intensities (κ = 0.1 to 5.0), achieving final alignment indices above 90. Coordination intensity determines the path: under-coordination extends the convergence horizon, while over-tight coupling produces oscillations that delay but do not prevent convergence.
 
-Related proposals for human enhancement, including genetic or pharmacological amplification of cognitive capacities, focus on increasing performance rather than on the constitutive conditions for intelligibility (Bostrom, 2014, ch. 3). Within CGM such enhancements may change how quickly or widely decisions are made, but they do not in themselves increase intelligence in the strict sense unless they improve the maintenance of Governance Traceability, Information Variety, Inference Accountability or Intelligence Integrity. Even very high cognitive capability can therefore coexist with low intelligence, if it is deployed in ways that erode these conditions.
+Related proposals for human enhancement, including genetic or pharmacological amplification of cognitive capacities, focus on increasing performance rather than on the constitutive conditions for intelligibility (Bostrom, 2014, ch. 3). Within CGM such enhancements may change how quickly or widely decisions are made, but they do not in themselves increase intelligence in the strict sense unless they improve the maintenance of Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability or Intelligence Cooperation Integrity. Even very high cognitive capability can therefore coexist with low intelligence, if it is deployed in ways that erode these conditions.
 
 Third, the framework integrates ecology into governance without treating it as an external constraint. Ecological integrity appears as the BU-vertex that aggregates the effects of alignment or misalignment in the other three domains through the dual formula x_Ecol = (δ_BU/m_a) · x_balanced + A* · x_deriv. When economy, employment and education operate near the target aperture and x_deriv approaches the canonical balanced profile x_balanced, ecological displacement is geometrically bounded and ecological systems can maintain resilience. When those domains operate far from the target, the displacement vector D = |x_deriv - x_balanced| grows, and ecological displacement accumulates in the four THM dimensions. Environmental degradation then appears, in this framework, not primarily as a separate problem but as a downstream manifestation of failures in the four principles upstream. The separation between SI_Ecol (systemic coherence dominated by canonical memory) and the displacement components (actual deviation from balance) provides distinct observables for monitoring both ecological coherence and accumulated displacement.
 
-Viewed together, the four domains show that long-standing problems such as poverty, unemployment, misinformation and ecological degradation are not independent policy failures, but manifestations of the same systemic misalignment. When Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity are maintained at the CGM target aperture across economy, employment, education and ecology, the systemic conditions that sustain these crises are removed. In this sense, alignment is not a separate objective after other goals are met. It is the civic configuration that determines how economic surplus is distributed, how work is organised, how information remains trustworthy and how ecological regeneration is supported or obstructed.
+Viewed together, the four domains show that long-standing problems such as poverty, unemployment, misinformation and ecological degradation are not independent policy failures, but manifestations of the same systemic misalignment. When Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity are maintained at the CGM target aperture across economy, employment, education and ecology, the systemic conditions that sustain these crises are removed. In this sense, alignment is not a separate objective after other goals are met. It is the civic configuration that determines how economic surplus is distributed, how work is organised, how information remains trustworthy and how ecological regeneration is supported or obstructed.
 
 These conclusions are subject to important limitations. As noted in Section 6.5, the simulator is a systemic model rather than an empirical macro-model. It demonstrates internal consistency and dynamic stability, not empirical adequacy. The derivation of the target aperture depends on prior theoretical work in CGM that is only summarised here. The mapping from the abstract operations to measurable indicators in actual institutions remains to be developed. The present contribution should therefore be read as a systemic proposal that is precise enough to be tested, rather than as a completed theory.
 
-Four lines of future work are natural. First, operationalisation: developing measurement protocols for Governance Traceability, Information Variety, Inference Accountability and Intelligence Integrity in concrete institutional settings, and estimating domain-level apertures and displacement vectors from empirical data. Second, comparative analysis: examining whether organisations or jurisdictions that better maintain the four principles exhibit the predicted stability and surplus generation. Third, design experiments: applying the framework to the design of specific governance mechanisms for AI deployment, labour organisation, curriculum structure or environmental management, and evaluating their performance over time. Fourth, development and empirical evaluation of micro-level architectures that realise CGM and THM at the state-space and transition level, such as the GyroSI finite-state core, to explore how systemic alignment principles can inform both governance institutions and computational architectures.
+Four lines of future work are natural. First, operationalisation: developing measurement protocols for Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability and Intelligence Cooperation Integrity in concrete institutional settings, and estimating domain-level apertures and displacement vectors from empirical data. Second, comparative analysis: examining whether organisations or jurisdictions that better maintain the four principles exhibit the predicted stability and surplus generation. Third, design experiments: applying the framework to the design of specific governance mechanisms for AI deployment, labour organisation, curriculum structure or environmental management, and evaluating their performance over time. Fourth, development and empirical evaluation of micro-level architectures that realise CGM and THM at the state-space and transition level, such as the GyroSI finite-state core, to explore how systemic alignment principles can inform both governance institutions and computational architectures.
 
 In a Post-AGI context where human–AI cooperation is already pervasive, alignment cannot be postponed to a future threshold. It is treated, in this framework, as an ongoing property of governance structures. The framework presented here offers one way to specify that property in formal terms and to explore its dynamical behaviour at both macro and micro levels. Whether it ultimately proves adequate will depend on theoretical scrutiny and empirical testing, but it provides a concrete target for both.
 
@@ -968,7 +968,7 @@ Employment:
 - y_Emp(t), A_Emp(t), SI_Emp(t)
 
 Education:
-- GT(t), IV(t), IA(t), IInteg(t) in [0,1]
+- GMT(t), ICV(t), IIA(t), ICI(t) in [0,1]
 - y_Edu(t), A_Edu(t), SI_Edu(t)
 
 Ecology (BU-vertex, CGM-derived):
@@ -979,10 +979,10 @@ Ecology (BU-vertex, CGM-derived):
 Update equations for economy:
 
 ```
-Gov(t+1) = clip(Gov(t) + α_1(GT(t) - Gov(t)) - α_2(A_Econ(t) - A*), 0, 1)
-Info(t+1) = clip(Info(t) + α_3(IV(t) - Info(t)) - α_4(A_Econ(t) - A*), 0, 1)
-Infer(t+1) = clip(Infer(t) + α_5(IA(t) - Infer(t)) - α_6(A_Econ(t) - A*), 0, 1)
-Int(t+1) = clip(Int(t) + α_7(IInteg(t) - Int(t)) - α_8(A_Econ(t) - A*), 0, 1)
+Gov(t+1) = clip(Gov(t) + α_1(GMT(t) - Gov(t)) - α_2(A_Econ(t) - A*), 0, 1)
+Info(t+1) = clip(Info(t) + α_3(ICV(t) - Info(t)) - α_4(A_Econ(t) - A*), 0, 1)
+Infer(t+1) = clip(Infer(t) + α_5(IIA(t) - Infer(t)) - α_6(A_Econ(t) - A*), 0, 1)
+Int(t+1) = clip(Int(t) + α_7(ICI(t) - Int(t)) - α_8(A_Econ(t) - A*), 0, 1)
 ```
 
 Update equations for employment (shares are constrained to sum to 1):
@@ -1007,10 +1007,10 @@ ICo(t+1) = ICo_raw / total
 Update equations for education:
 
 ```
-GT(t+1) = clip(GT(t) + γ_2(GM(t) - GT(t)) - γ_3(A_Edu(t) - A*), 0, 1)
-IV(t+1) = clip(IV(t) + γ_5(ICu(t) - IV(t)) - γ_6(A_Edu(t) - A*), 0, 1)
-IA(t+1) = clip(IA(t) + γ_8(IInter(t) - IA(t)) - γ_9(A_Edu(t) - A*), 0, 1)
-IInteg(t+1) = clip(IInteg(t) + γ_11(ICo(t) - IInteg(t)) - γ_12(A_Edu(t) - A*), 0, 1)
+GMT(t+1) = clip(GMT(t) + γ_2(GM(t) - GMT(t)) - γ_3(A_Edu(t) - A*), 0, 1)
+ICV(t+1) = clip(ICV(t) + γ_5(ICu(t) - ICV(t)) - γ_6(A_Edu(t) - A*), 0, 1)
+IIA(t+1) = clip(IIA(t) + γ_8(IInter(t) - IIA(t)) - γ_9(A_Edu(t) - A*), 0, 1)
+ICI(t+1) = clip(ICI(t) + γ_11(ICo(t) - ICI(t)) - γ_12(A_Edu(t) - A*), 0, 1)
 ```
 
 Computation for ecology (BU dual combination):
@@ -1025,17 +1025,17 @@ x_Ecol(t) = (δ_BU/m_a) · x_balanced + A* · x_deriv(t)
 ```
 
 The Ecology state components (E_gov, E_info, E_inf, E_intel) are the four coordinates of x_Ecol(t), representing the BU-vertex stage potentials. The derivative input to each stage aggregates the corresponding component from all three derivative domains:
-- Governance derivative: (Gov(t) + GM(t) + GT(t)) / 3
-- Information derivative: (Info(t) + ICu(t) + IV(t)) / 3
-- Inference derivative: (Infer(t) + IInter(t) + IA(t)) / 3
-- Intelligence derivative: (Int(t) + ICo(t) + IInteg(t)) / 3
+- Governance derivative: (Gov(t) + GM(t) + GMT(t)) / 3
+- Information derivative: (Info(t) + ICu(t) + ICV(t)) / 3
+- Inference derivative: (Infer(t) + IInter(t) + IIA(t)) / 3
+- Intelligence derivative: (Int(t) + ICo(t) + ICI(t)) / 3
 
 Each Ecology component E_*(t) then combines this derivative input with the canonical BU memory via the BU dual formula:
 ```
-E_gov(t) = (δ_BU/m_a) · w_CS + A* · (Gov(t) + GM(t) + GT(t)) / 3
-E_info(t) = (δ_BU/m_a) · w_UNA + A* · (Info(t) + ICu(t) + IV(t)) / 3
-E_inf(t) = (δ_BU/m_a) · w_ONA + A* · (Infer(t) + IInter(t) + IA(t)) / 3
-E_intel(t) = (δ_BU/m_a) · w_BU + A* · (Int(t) + ICo(t) + IInteg(t)) / 3
+E_gov(t) = (δ_BU/m_a) · w_CS + A* · (Gov(t) + GM(t) + GMT(t)) / 3
+E_info(t) = (δ_BU/m_a) · w_UNA + A* · (Info(t) + ICu(t) + ICV(t)) / 3
+E_inf(t) = (δ_BU/m_a) · w_ONA + A* · (Infer(t) + IInter(t) + IIA(t)) / 3
+E_intel(t) = (δ_BU/m_a) · w_BU + A* · (Int(t) + ICo(t) + ICI(t)) / 3
 ```
 
 The displacement vector is computed separately:

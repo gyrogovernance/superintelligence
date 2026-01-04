@@ -11,10 +11,10 @@
 - [Gyrogroup Theory: The Physical Realization](#gyrogroup-theory-the-physical-realization)
 - [Application to Artificial Intelligence](#application-to-artificial-intelligence)
 - [Interpretive Framework: The Philosophy](#interpretive-framework-the-philosophy)
-  - [Governance Traceability: The Emergence of Freedom](#governance-traceability-the-emergence-of-freedom)
-  - [Information Variety](#information-variety)
-  - [Inference Accountability](#inference-accountability)
-  - [Intelligence Integrity](#intelligence-integrity)
+  - [Governance Management Traceability: The Emergence of Freedom](#governance-management-traceability-the-emergence-of-freedom)
+  - [Information Curation Variety](#information-curation-variety)
+  - [Inference Interaction Accountability](#inference-interaction-accountability)
+  - [Intelligence Cooperation Integrity](#intelligence-cooperation-integrity)
   - [Temporal Structure and Measurement](#temporal-structure-and-measurement)
   - [Time as Logical Dependency](#time-as-logical-dependency)
 - [Falsification and Testing](#falsification-and-testing)
@@ -1191,7 +1191,7 @@ In physics, the ratio δ_BU/m_a raised to the fourth power yields electromagneti
 
 The foundational constraints map to four core metrics operating on the K₄ topology:
 
-##### 1. Governance Traceability (T)
+##### 1. Governance Management Traceability (T)
 
 **Origin:** CS (The Source is Common)
 
@@ -1202,7 +1202,7 @@ The foundational constraints map to four core metrics operating on the K₄ topo
 > 
 > **Failure mode:** Authority source bias, where decisional authority is misattributed from the common source to intermediate outputs.
 
-##### 2. Information Variety (V)
+##### 2. Information Curation Variety (V)
 
 **Origin:** UNA (Unity is Non-Absolute)
 
@@ -1213,7 +1213,7 @@ The foundational constraints map to four core metrics operating on the K₄ topo
 > 
 > **Failure mode:** Homogeneous collapse, where all states become indistinguishable (sycophantic agreement in AI systems).
 
-##### 3. Inference Accountability (Acc)
+##### 3. Inference Interaction Accountability (Acc)
 
 **Origin:** ONA (Opposition is Non-Absolute)
 
@@ -1224,7 +1224,7 @@ The foundational constraints map to four core metrics operating on the K₄ topo
 > 
 > **Failure mode:** Absolute contradiction (logical inconsistency) or deceptive coherence (fluent but ungrounded responses).
 
-##### 4. Intelligence Integrity (B)
+##### 4. Intelligence Cooperation Integrity (B)
 
 **Origin:** BU (Balanced closure + Memory reconstruction)
 
@@ -1400,7 +1400,7 @@ would falsify the informational predictions while leaving the physical predictio
 
 The following interpretations provide the conceptual scaffold motivating the formal constraints. These are important remarks on the philosophy of mathematical structure, offering operational meaning to the axioms while remaining grounded in the technical results.
 
-### Governance Traceability: The Emergence of Freedom
+### Governance Management Traceability: The Emergence of Freedom
 
 The axiom "The Source is Common" (CS) establishes that all phenomena are traceable through a single principle of common origination, which is **freedom: the capacity for governance through directional distinction**. This conservation of asymmetry (parity violation) encodes patterns of chirality (left- and right-handedness). Alignment thus becomes the organizing principle by which locality generates structure via recursive gyration instead of remaining mere potential.
 
@@ -1412,19 +1412,19 @@ Common origination is operational, not historical:
 
 The object domain of inference is physical reality itself, expressed as semantic weighting through projection. Each perspective defines measurable roles governed by the quantum gravity invariant Q_G = 4π. This geometric and topological necessity defines cause and effect as recursive unfolding, since the origin point of observation cannot observe itself, only its consequences.
 
-### Information Variety
+### Information Curation Variety
 
 Non-absolute unity (UNA) is the first minimal necessity for indirect observation of a common source. Absolute unity would make existence and freedom impossible, since perfect homogeneity would allow no distinctions between origin and structure. Therefore, non-absolute unity ensures alignment is possible through **informational variety**: the traceable signature of a common origin.
 
 In gyrogroup terms, both left and right gyrations become active, producing distinguishable trajectories that still emanate from the horizon constant.
 
-### Inference Accountability
+### Inference Interaction Accountability
 
 Non-absolute opposition (ONA) is the first minimal necessity for direct observation of non-absolute unity and the second condition for indirect observation of a common source. Absolute opposition would also make existence and freedom impossible, since perfect contradiction would allow no conservation of structure. Therefore, non-absolute opposition ensures alignment is possible through **accountability of inference**: traceable informational variety of a common origin.
 
 The bi-gyrogroup structure mediates opposition while keeping it bounded by the horizon constant. Logical necessity and operational recurrence are therefore aligned.
 
-### Intelligence Integrity
+### Intelligence Cooperation Integrity
 
 Balance (BU) is the universal outcome of non-absoluteness in unity and opposition, leading to the observer-observed duality. Perfect imbalance would make existence and freedom meaningless, since the memory of inferred information would have no reason to acquire substance and structure at all. Therefore, balance is the universal signature of alignment through **integrity of intelligence**: traceable inferential accountability of informational variety from a common source.
 
