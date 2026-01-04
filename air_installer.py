@@ -3,7 +3,7 @@
 AIR Console Installer - checks prerequisites and installs dependencies.
 
 Usage:
-    python install_console.py
+    python air_installer.py
 """
 
 import subprocess
@@ -196,11 +196,26 @@ def main():
         sys.exit(1)
     
     print()
+    
+    # Build atlas and initialize projects
+    print("Building atlas and initializing projects...")
+    try:
+        from src.app.cli.main import main as cli_main
+        cli_main()
+        print()
+        print("✓ Atlas built and projects initialized")
+    except Exception as e:
+        print()
+        print(f"⚠ Warning: Could not build atlas/projects automatically: {e}")
+        print("You can run this manually later with:")
+        print("  python air_cli.py")
+    
+    print()
     print("=" * 50)
     print("Installation complete!")
     print()
     print("Run the console with:")
-    print("  python run_console.py")
+    print("  python air_console.py")
     print()
 
 

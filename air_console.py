@@ -14,8 +14,9 @@ import signal
 import time
 import shutil
 import os
+import types
 from pathlib import Path
-from typing import List
+from typing import List, NoReturn
 
 # Get project root
 ROOT = Path(__file__).parent.absolute()
@@ -30,15 +31,25 @@ def cleanup():
     print("\nShutting down servers...")
     for proc in processes:
         if proc.poll() is None:  # Still running
-            proc.terminate()
             try:
-                proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                proc.kill()
+                if sys.platform == "win32":
+                    # On Windows, use kill() directly for more reliable shutdown
+                    proc.kill()
+                else:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=2)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+            except ProcessLookupError:
+                # Process already terminated
+                pass
+    # Give processes a moment to fully exit
+    time.sleep(0.5)
     print("Servers stopped.")
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig: int, frame: types.FrameType | None) -> NoReturn:
     """Handle Ctrl+C gracefully."""
     cleanup()
     sys.exit(0)
@@ -100,6 +111,11 @@ def run_frontend():
             "Please run 'python install_console.py' first."
         )
 
+    # On Windows, use creationflags to create a new process group for better cleanup
+    creation_flags = 0
+    if sys.platform == "win32":
+        creation_flags = subprocess.CREATE_NEW_PROCESS_GROUP
+
     return subprocess.Popen(
         [npm, "run", "dev"],
         cwd=UI_DIR,
@@ -107,6 +123,7 @@ def run_frontend():
         stderr=sys.stderr,
         shell=sys.platform == "win32",
         env=os.environ,  # Use environment with updated PATH
+        creationflags=creation_flags if sys.platform == "win32" else 0,
     )
 
 
@@ -142,20 +159,24 @@ def main():
         processes.append(frontend_proc)
 
         # Wait for either process to exit
-        while True:
-            if backend_proc.poll() is not None:
-                print("Backend server exited unexpectedly.")
-                break
-            if frontend_proc.poll() is not None:
-                print("Frontend server exited unexpectedly.")
-                break
-            time.sleep(1)
+        try:
+            while True:
+                if backend_proc.poll() is not None:
+                    print("Backend server exited unexpectedly.")
+                    break
+                if frontend_proc.poll() is not None:
+                    print("Frontend server exited unexpectedly.")
+                    break
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            # Signal handler will call cleanup()
+            pass
 
     except KeyboardInterrupt:
-        pass
+        # Fallback if signal handler didn't work
+        cleanup()
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
-    finally:
         cleanup()
 
 

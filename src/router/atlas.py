@@ -66,29 +66,6 @@ class AtlasPaths:
 ATLAS_VERSION = "1.0"
 
 
-def check_atlas_version(atlas_dir: Path) -> tuple[bool, str | None]:
-    """
-    Check if atlas version matches expected version.
-    Returns: (is_compatible, version_or_error_message)
-    """
-    phen_path = atlas_dir / "phenomenology.npz"
-    if not phen_path.exists():
-        return (False, "phenomenology.npz not found")
-    
-    try:
-        phen = np.load(phen_path)
-        if "atlas_version" not in phen:
-            return (False, "Atlas version missing (legacy atlas, rebuild required)")
-        
-        stored_version = str(phen["atlas_version"])
-        if stored_version != ATLAS_VERSION:
-            return (False, f"Version mismatch: atlas is {stored_version}, expected {ATLAS_VERSION}")
-        
-        return (True, stored_version)
-    except Exception as e:
-        return (False, f"Error reading atlas version: {e}")
-
-
 def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     """
     Build ontology directly as A_set × B_set using proven closed-form algebra.

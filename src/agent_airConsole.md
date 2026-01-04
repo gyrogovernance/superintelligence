@@ -72,7 +72,6 @@ The following modules are the source of truth. The console wraps them.
 **`src/router/atlas.py`** provides:
 
 - `build_all()` – builds ontology, epistemology, phenomenology.
-- `check_atlas_version()` – returns `(is_compatible, message)`.
 
 ### 2.4 Report Structure
 

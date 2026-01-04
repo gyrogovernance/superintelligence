@@ -9,7 +9,10 @@ const BASE = '/api';
 
 export async function listProjects(): Promise<ProjectListResponse> {
   const res = await fetch(`${BASE}/projects`);
-  if (!res.ok) throw new Error('Failed to list projects');
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to list projects: ${res.status} ${text}`);
+  }
   return res.json();
 }
 
@@ -64,7 +67,10 @@ export function bundleUrl(slug: string): string {
 
 export async function getGlossary(): Promise<Glossary> {
   const res = await fetch(`${BASE}/glossary`);
-  if (!res.ok) throw new Error('Failed to load glossary');
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to load glossary: ${res.status} ${text}`);
+  }
   return res.json();
 }
 

@@ -45,6 +45,12 @@ def atlas_dir() -> Path:
     return store.get_atlas_dir()
 
 
+# ---- Health Check ----
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok"}
+
+
 # ---- List Projects ----
 @app.get("/api/projects")
 def list_projects():

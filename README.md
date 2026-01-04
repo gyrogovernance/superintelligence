@@ -106,22 +106,11 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 ### Install
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
-### AIR CLI
-The CLI provides a project-based, MD-first workflow:
-
-```bash
-python air_cli.py
-```
-
-This runs automatically: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. 
-
-**Project Format:** Projects are markdown files in `data/projects/` using bracket notation. Copy `_template.md` to create a new project (e.g., `cp _template.md my-project.md`). See Section 5.4 of the specifications for the complete project format specification.
-
 ### AIR Console (Browser-based UI)
 The Console provides a browser-based interface for managing project contracts:
 
 ```bash
-# First-time setup: install dependencies
+# First-time setup: install dependencies and build atlas
 python air_installer.py
 
 # Run the console (starts both backend and frontend)
@@ -129,6 +118,21 @@ python air_console.py
 ```
 
 The console will be available at `http://localhost:5173` (frontend proxies API requests to backend on port 8000).
+
+The installer automatically builds the atlas and initializes the project structure, so you're ready to start creating projects immediately.
+
+**Project Format:** Projects are markdown files in `data/projects/` using bracket notation. Copy `_template.md` to create a new project (e.g., `cp _template.md my-project.md`). See Section 5.4 of the specifications for the complete project format specification.
+
+### AIR CLI (Optional)
+The CLI provides a command-line workflow for syncing and verifying projects:
+
+```bash
+python air_cli.py
+```
+
+This runs: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. 
+
+The CLI is optional if you're using the Console, but useful for batch operations, automation, or when working without a browser interface.
 
 ### Build the atlas (Manual)
 The atlas compiles the kernel physics into three artifacts: ontology, epistemology, and phenomenology.

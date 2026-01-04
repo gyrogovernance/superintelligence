@@ -40,6 +40,7 @@ venv.bak/
 .settings/
 *.sublime-project
 *.sublime-workspace
+*.interactive
 
 # Logs and temporary files
 logs/

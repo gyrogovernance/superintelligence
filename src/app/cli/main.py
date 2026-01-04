@@ -29,17 +29,6 @@ def cmd_sync_and_verify_all(args):
             ui.error(f"Atlas build failed: missing {still_missing}")
             return False
         ui.success("Atlas built")
-    else:
-        # Check atlas version if it exists
-        try:
-            from src.router.atlas import check_atlas_version
-            is_compatible, version_msg = check_atlas_version(atlas_dir)
-            if not is_compatible:
-                ui.warn(f"Atlas version issue: {version_msg}")
-                ui.warn("Consider rebuilding the atlas with: python -m src.router.atlas --out data/atlas")
-        except (ImportError, AttributeError):
-            # Version check not available (e.g., if atlas.py is incomplete)
-            pass
     
     # Sync all projects (exclude template file)
     projects_dir = store.get_projects_dir()
