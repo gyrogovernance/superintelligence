@@ -12,6 +12,7 @@ from pathlib import Path
 from pydantic import BaseModel
 import json
 import re
+from datetime import datetime
 
 from src.app.cli import store, templates
 from src.app.cli.schemas import A_STAR
@@ -112,10 +113,12 @@ def get_project(slug: str):
 
     # Read computed report
     report_path = aci_dir() / f"{slug}.report.json"
+    report = None
+    last_synced = None
     if report_path.exists():
         report = json.loads(report_path.read_text(encoding="utf-8"))
-    else:
-        report = None
+        mtime = report_path.stat().st_mtime
+        last_synced = datetime.fromtimestamp(mtime).isoformat()
 
     return {
         "editable": {
@@ -126,6 +129,7 @@ def get_project(slug: str):
             "notes": notes,
         },
         "report": report,
+        "last_synced": last_synced,
     }
 
 
@@ -203,7 +207,8 @@ def update_project(slug: str, req: UpdateProjectRequest):
         )
 
     # Update notes section
-    notes_pattern = r'(^##\s+NOTES\s*---?\s*\n)(.*?)(?=^##|\Z)'
+    # Template format: ## NOTES on one line, --- on the next line
+    notes_pattern = r'(^##\s+NOTES\s*\n---?\s*\n)(.*?)(?=^##|\Z)'
     
     if re.search(notes_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
         # Replace existing NOTES section

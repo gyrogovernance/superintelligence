@@ -69,7 +69,6 @@ On every run of `aci`:
 
 ## DON’T
 
-- Don’t reintroduce “moment.md” as a user artifact or workflow.
 - Don’t add interactive menus or multi-command CLI surfaces. Default run is the product.
 - Don’t add evaluation/scoring fields (0–1 ratings, approval, grades).
 - Don’t embed policy decisions (acceptance/payment) into the kernel or compiler.

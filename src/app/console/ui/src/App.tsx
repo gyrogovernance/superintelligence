@@ -13,9 +13,10 @@ import { initTheme, applyTheme, getStoredTheme } from './theme';
 import * as api from './api';
 
 import { Header } from './components/Header';
-import { BalancePanel } from './components/BalancePanel';
+import { WorkProfilePanel } from './components/WorkProfilePanel';
 import { ProjectSummaryCard } from './components/ProjectSummary';
 import { ReportPanel } from './components/ReportPanel';
+import { PortfolioView } from './components/PortfolioView';
 import { GlossaryModal } from './components/GlossaryModal';
 import { ConfirmModal } from './components/ConfirmModal';
 
@@ -28,6 +29,7 @@ export default function App() {
   const [status, setStatus] = useState<AppStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
+  const [viewMode, setViewMode] = useState<'project' | 'portfolio'>('project');
 
   // Modal state
   const [glossaryModal, setGlossaryModal] = useState<{
@@ -261,7 +263,41 @@ export default function App() {
           </div>
         )}
 
-        {!hasProject ? (
+        {/* View Mode Toggle */}
+        <div className="mb-6 flex gap-2">
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              viewMode === 'project'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            onClick={() => setViewMode('project')}
+          >
+            Project View
+          </button>
+          <button
+            type="button"
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              viewMode === 'portfolio'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            onClick={() => setViewMode('portfolio')}
+          >
+            Portfolio Dashboard
+          </button>
+        </div>
+
+        {viewMode === 'portfolio' ? (
+          <PortfolioView 
+            projects={projects} 
+            onSelectProject={(slug) => {
+              setSelectedSlug(slug);
+              setViewMode('project');
+            }} 
+          />
+        ) : !hasProject ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
               <span className="text-white text-4xl font-bold">🍃</span>
@@ -283,14 +319,16 @@ export default function App() {
               <ProjectSummaryCard
                 compilation={project.report.compilation}
                 accounting={project.report.accounting}
+                unit={editable?.unit || 'daily'}
+                lastSynced={project.last_synced}
+                onUnitChange={handleUnitChange}
               />
             )}
             <div className="grid gap-6 lg:grid-cols-5">
-              {/* Left Column - Balance */}
+              {/* Left Column - Work Profile */}
               <div className="lg:col-span-2">
-                <BalancePanel
-                  apertures={project.report?.apertures || null}
-                  aStar={glossary?.A_STAR || 0.0207}
+                <WorkProfilePanel
+                  accounting={project.report?.accounting || null}
                 />
               </div>
 

@@ -3,7 +3,7 @@
 Run AIR Console - starts both backend and frontend servers.
 
 Usage:
-    python run_console.py
+    python air_console.py
 
 Press Ctrl+C to stop both servers.
 """
@@ -89,6 +89,21 @@ def run_frontend():
             Path(os.environ.get("ProgramFiles", "")) / "nodejs" / "npm.cmd",
             Path(os.environ.get("ProgramFiles(x86)", "")) / "nodejs" / "npm.cmd",
         ]
+        # Check user AppData for nvm-windows or user installs
+        appdata = os.environ.get("APPDATA", "")
+        local_appdata = os.environ.get("LOCALAPPDATA", "")
+        if appdata:
+            common_npm_paths.extend([
+                Path(appdata) / "npm" / "npm.cmd",
+                Path(local_appdata) / "Programs" / "nodejs" / "npm.cmd",
+            ])
+        user_profile = os.environ.get("USERPROFILE", "")
+        if user_profile:
+            common_npm_paths.extend([
+                Path(user_profile) / "AppData" / "Roaming" / "npm" / "npm.cmd",
+                Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "npm.cmd",
+            ])
+        
         for path in common_npm_paths:
             if path.exists():
                 npm = str(path)
@@ -97,18 +112,20 @@ def run_frontend():
                 current_path = os.environ.get("PATH", "")
                 if npm_dir not in current_path:
                     os.environ["PATH"] = npm_dir + os.pathsep + current_path
+                # Re-check with shutil.which after PATH update
+                npm = shutil.which("npm") or npm
                 break
     
     if not npm:
         raise FileNotFoundError(
-            "npm not found. Please run 'python install_console.py' first."
+            "npm not found. Please run 'python air_installer.py' first."
         )
     
     # Check node_modules exists
     if not (UI_DIR / "node_modules").exists():
         raise FileNotFoundError(
             f"node_modules not found in {UI_DIR}. "
-            "Please run 'python install_console.py' first."
+            "Please run 'python air_installer.py' first."
         )
 
     # On Windows, use creationflags to create a new process group for better cleanup

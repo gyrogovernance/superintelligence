@@ -6,3 +6,12 @@ toys/training/knowledge/
 toys/training/Archive/
 memories/kernel/
 memories/models/
+src/app/console/ui/index.html
+src/app/console/ui/package-lock.json
+src/app/console/ui/package.json
+src/app/console/ui/postcss.config.js
+src/app/console/ui/tailwind.config.js
+src/app/console/ui/tsconfig.json
+src/app/console/ui/tsconfig.node.json
+src/app/console/ui/vite.config.ts
+src\app\console\ui\node_modules

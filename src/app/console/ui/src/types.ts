@@ -105,6 +105,7 @@ export interface Report {
 export interface ProjectResponse {
   editable: EditableState;
   report: Report | null;
+  last_synced: string | null;
 }
 
 export interface ProjectSummary {

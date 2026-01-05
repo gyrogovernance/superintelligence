@@ -7,8 +7,8 @@
 IMPORTANT: Do not change the labels or ordering of these bracket lines; only change the numbers inside the square brackets.
 
 Economy (CGM operations): [2]
-Employment (Gyroscope work): [1]
-Education (THM capacities): [0]
+Employment (Gyroscope work): [2]
+Education (THM capacities): [2]
 
 ---
 ## Unit Specification
@@ -54,8 +54,8 @@ A "Displacement Incident" is a case where the corresponding risk appeared.
 RISK: Governance Traceability Displacement (GTD)
 (Approaching Derivative Authority and Agency as Original)
 
-GMT Alignment Incidents: [13]
-GTD Displacement Incidents: [10]
+GMT Alignment Incidents: [12]
+GTD Displacement Incidents: [14]
 
 ---
 ### Information Curation Variety (ICV)
@@ -64,8 +64,8 @@ GTD Displacement Incidents: [10]
 RISK: Information Variety Displacement (IVD)
 (Approaching Derivative Authority without Agency as Original)
 
-ICV Alignment Incidents: [7]
-IVD Displacement Incidents: [2]
+ICV Alignment Incidents: [30]
+IVD Displacement Incidents: [1]
 
 ---
 ### Inference Interaction Accountability (IIA)
@@ -74,7 +74,7 @@ IVD Displacement Incidents: [2]
 RISK: Inference Accountability Displacement (IAD)
 (Approaching Derivative Agency without Authority as Original)
 
-IIA Alignment Incidents: [12]
+IIA Alignment Incidents: [30]
 IAD Displacement Incidents: [1]
 
 ---
@@ -84,8 +84,8 @@ IAD Displacement Incidents: [1]
 RISK: Intelligence Integrity Displacement (IID)
 (Approaching Original Authority and Agency as Derivative)
 
-ICI Alignment Incidents: [1]
-IID Displacement Incidents: [1]
+ICI Alignment Incidents: [140]
+IID Displacement Incidents: [0]
 
 ## NOTES
 ---

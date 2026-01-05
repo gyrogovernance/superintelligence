@@ -93,7 +93,8 @@ def parse_bracket_value(text: str, pattern: str) -> int:
 def parse_notes_section(text: str) -> str:
     """Parse the NOTES section from markdown text."""
     # Match ## NOTES section (case-insensitive) and capture everything after until next ## or end of file
-    notes_pattern = r'^##\s+NOTES\s*---?\s*\n(.*?)(?=^##|\Z)'
+    # Template format: ## NOTES on one line, --- on the next line
+    notes_pattern = r'^##\s+NOTES\s*\n---?\s*\n(.*?)(?=^##|\Z)'
     match = re.search(notes_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
     if match:
         notes = match.group(1).strip()

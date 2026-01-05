@@ -41,6 +41,21 @@ def check_node_npm():
             Path(os.environ.get("ProgramFiles", "")) / "nodejs" / "node.exe",
             Path(os.environ.get("ProgramFiles(x86)", "")) / "nodejs" / "node.exe",
         ]
+        # Check user AppData for nvm-windows or user installs
+        appdata = os.environ.get("APPDATA", "")
+        local_appdata = os.environ.get("LOCALAPPDATA", "")
+        if appdata:
+            common_node_paths.extend([
+                Path(appdata) / "npm" / "node.exe",
+                Path(local_appdata) / "Programs" / "nodejs" / "node.exe",
+            ])
+        user_profile = os.environ.get("USERPROFILE", "")
+        if user_profile:
+            common_node_paths.extend([
+                Path(user_profile) / "AppData" / "Roaming" / "npm" / "node.exe",
+                Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "node.exe",
+            ])
+        
         for path in common_node_paths:
             if path.exists():
                 node_path = str(path)
@@ -49,6 +64,8 @@ def check_node_npm():
                 current_path = os.environ.get("PATH", "")
                 if node_dir not in current_path:
                     os.environ["PATH"] = node_dir + os.pathsep + current_path
+                # Re-check with shutil.which after PATH update
+                node_path = shutil.which("node") or node_path
                 break
     
     if sys.platform == "win32" and not npm_path:
@@ -58,6 +75,21 @@ def check_node_npm():
             Path(os.environ.get("ProgramFiles", "")) / "nodejs" / "npm.cmd",
             Path(os.environ.get("ProgramFiles(x86)", "")) / "nodejs" / "npm.cmd",
         ]
+        # Check user AppData for nvm-windows or user installs
+        appdata = os.environ.get("APPDATA", "")
+        local_appdata = os.environ.get("LOCALAPPDATA", "")
+        if appdata:
+            common_npm_paths.extend([
+                Path(appdata) / "npm" / "npm.cmd",
+                Path(local_appdata) / "Programs" / "nodejs" / "npm.cmd",
+            ])
+        user_profile = os.environ.get("USERPROFILE", "")
+        if user_profile:
+            common_npm_paths.extend([
+                Path(user_profile) / "AppData" / "Roaming" / "npm" / "npm.cmd",
+                Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "npm.cmd",
+            ])
+        
         for path in common_npm_paths:
             if path.exists():
                 npm_path = str(path)
@@ -65,6 +97,8 @@ def check_node_npm():
                 current_path = os.environ.get("PATH", "")
                 if npm_dir not in current_path:
                     os.environ["PATH"] = npm_dir + os.pathsep + current_path
+                # Re-check with shutil.which after PATH update
+                npm_path = shutil.which("npm") or npm_path
                 break
     
     if not node_path:

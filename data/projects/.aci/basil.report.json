@@ -2,84 +2,84 @@
   "project_slug": "basil",
   "project_id": "dedc9c7c-0951-4150-b967-559bab682529",
   "compilation": {
-    "attestation_count": 47,
-    "processed_attestations": 47,
+    "attestation_count": 228,
+    "processed_attestations": 228,
     "skipped_attestations": [],
-    "byte_count": 47,
+    "byte_count": 228,
     "kernel": {
-      "step": 47,
-      "state_index": 14067,
-      "state_hex": "363f3f",
-      "a_hex": "363",
-      "b_hex": "f3f",
-      "last_byte": 244
+      "step": 228,
+      "state_index": 8751,
+      "state_hex": "2222f2",
+      "a_hex": "222",
+      "b_hex": "2f2",
+      "last_byte": 7
     },
     "hashes": {
-      "bytes_sha256": "ab5d66c8cb89c8730c25e55ed8e8735966b34a157fb3ed536eb7a082dd5da452",
-      "events_sha256": "3a9cc3168ad7cc662f5f83f4d7eb7e5f541d88462db460c837bd21ed33c94d36"
+      "bytes_sha256": "9f0e62a7472af52cf29bed57ca76df308941208c49221b9f18b95772d92ea1aa",
+      "events_sha256": "793394b050e777750307921a1a74748dedff482d4029971f46b12b373a79d441"
     }
   },
   "accounting": {
     "thm": {
       "totals": {
-        "GTD": 10,
-        "IVD": 2,
+        "GTD": 14,
+        "IVD": 1,
         "IAD": 1,
-        "IID": 1
+        "IID": 0
       },
       "by_domain": {
         "economy": {
-          "GTD": 10,
+          "GTD": 6,
           "IVD": 0,
           "IAD": 0,
           "IID": 0
         },
         "employment": {
-          "GTD": 0,
-          "IVD": 2,
-          "IAD": 1,
-          "IID": 1
-        },
-        "education": {
-          "GTD": 0,
+          "GTD": 5,
           "IVD": 0,
           "IAD": 0,
+          "IID": 0
+        },
+        "education": {
+          "GTD": 3,
+          "IVD": 1,
+          "IAD": 1,
           "IID": 0
         }
       }
     },
     "gyroscope": {
       "totals": {
-        "GMT": 13,
-        "ICV": 7,
-        "IIA": 12,
-        "ICI": 1
+        "GMT": 12,
+        "ICV": 30,
+        "IIA": 30,
+        "ICI": 140
       },
       "by_domain": {
         "economy": {
-          "GMT": 13,
-          "ICV": 7,
-          "IIA": 2,
+          "GMT": 12,
+          "ICV": 30,
+          "IIA": 29,
           "ICI": 0
         },
         "employment": {
           "GMT": 0,
           "ICV": 0,
-          "IIA": 10,
-          "ICI": 1
+          "IIA": 1,
+          "ICI": 70
         },
         "education": {
           "GMT": 0,
           "ICV": 0,
           "IIA": 0,
-          "ICI": 0
+          "ICI": 70
         }
       }
     }
   },
   "ledger": {
     "y_econ": [
-      10.0,
+      6.0,
       0.0,
       0.0,
       0.0,
@@ -87,26 +87,26 @@
       0.0
     ],
     "y_emp": [
+      5.0,
       0.0,
-      1.0,
       0.0,
-      2.0,
       0.0,
-      1.0
+      0.0,
+      0.0
     ],
     "y_edu": [
+      3.0,
+      1.0,
       0.0,
-      0.0,
-      0.0,
-      0.0,
+      1.0,
       0.0,
       0.0
     ]
   },
   "apertures": {
     "A_econ": 0.5,
-    "A_emp": 0.5833333333333334,
-    "A_edu": 0.0
+    "A_emp": 0.5,
+    "A_edu": 0.45454545454545453
   },
   "warnings": {}
 }

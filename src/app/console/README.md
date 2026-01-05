@@ -16,7 +16,7 @@ The console is a **thin view layer** over existing AIR logic:
 Install dependencies:
 
 ```bash
-python install_console.py
+python air_installer.py
 ```
 
 This checks prerequisites (Python, Node.js, npm) and installs frontend dependencies.
@@ -26,7 +26,7 @@ This checks prerequisites (Python, Node.js, npm) and installs frontend dependenc
 From the project root:
 
 ```bash
-python run_console.py
+python air_console.py
 ```
 
 This starts both the backend (port 8000) and frontend (port 5173) servers. Press Ctrl+C to stop both.
