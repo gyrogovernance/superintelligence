@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-AIR CLI test suite - project-only, non-interactive model.
-Tests the default behavior: sync all projects, verify, bundle.
+AIR CLI test suite - program-only, non-interactive model.
+Tests the default behavior: sync all programs, verify, bundle.
 """
 
 import subprocess
@@ -12,16 +12,16 @@ import json
 import zipfile
 import pytest
 
-PROJECT_ROOT = Path(__file__).parent.parent
+Program_ROOT = Path(__file__).parent.parent
 
 
 def run_aci(cwd=None) -> tuple[int, str, str]:
     """Run aci.py and return (exit_code, stdout, stderr)."""
     try:
         if cwd is None:
-            cwd = PROJECT_ROOT
+            cwd = Program_ROOT
         result = subprocess.run(
-            [sys.executable, str(PROJECT_ROOT / "aci.py")],
+            [sys.executable, str(Program_ROOT / "aci.py")],
             capture_output=True,
             text=True,
             timeout=60,
@@ -35,15 +35,15 @@ def run_aci(cwd=None) -> tuple[int, str, str]:
 
 
 def cleanup_data():
-    """Clean up test data (projects, bundles, reports) but preserve atlas."""
-    data_dir = PROJECT_ROOT / "data"
+    """Clean up test data (programs, bundles, reports) but preserve atlas."""
+    data_dir = Program_ROOT / "data"
     if not data_dir.exists():
         return
     
-    # Remove projects directory (but not atlas)
-    projects_dir = data_dir / "projects"
-    if projects_dir.exists():
-        shutil.rmtree(projects_dir)
+    # Remove programs directory (but not atlas)
+    programs_dir = data_dir / "programs"
+    if programs_dir.exists():
+        shutil.rmtree(programs_dir)
 
 
 def test_a_cold_start_builds_atlas_and_templates():
@@ -57,26 +57,26 @@ def test_a_cold_start_builds_atlas_and_templates():
     assert exit_code == 0, f"Exit code {exit_code}, stderr: {stderr}, stdout: {stdout[:500]}"
     
     # Check atlas files
-    atlas_dir = PROJECT_ROOT / "data" / "atlas"
+    atlas_dir = Program_ROOT / "data" / "atlas"
     required_files = ["ontology.npy", "epistemology.npy", "phenomenology.npz"]
     for f in required_files:
         assert (atlas_dir / f).exists(), f"Missing atlas file: {f}"
     
     # Check template
-    template = PROJECT_ROOT / "data" / "projects" / "templates" / "project_template.md"
-    assert template.exists(), "Missing project template"
+    template = Program_ROOT / "data" / "programs" / "templates" / "program_template.md"
+    assert template.exists(), "Missing program template"
 
 
-def test_b_compile_project_into_artifacts():
-    """Test B: Compile a project into .aci + bundle + report."""
-    # Create test project
-    projects_dir = PROJECT_ROOT / "data" / "projects"
-    projects_dir.mkdir(parents=True, exist_ok=True)
+def test_b_compile_program_into_artifacts():
+    """Test B: Compile a program into .aci + bundle + report."""
+    # Create test program
+    programs_dir = Program_ROOT / "data" / "programs"
+    programs_dir.mkdir(parents=True, exist_ok=True)
     
-    project_md = projects_dir / "test-project.md"
-    project_content = """---
-project_name: Test Project
-project_slug: test-project
+    program_md = programs_dir / "test-program.md"
+    program_content = """---
+program_name: Test Program
+program_slug: test-program
 sponsor: Test Lab
 created_at: 2025-01-01T00:00:00Z
 
@@ -108,11 +108,11 @@ computed:
 
 ---
 
-# Test Project
+# Test Program
 
-Test project description.
+Test program description.
 """
-    project_md.write_text(project_content, encoding="utf-8")
+    program_md.write_text(program_content, encoding="utf-8")
     
     # Run aci
     exit_code, stdout, stderr = run_aci()
@@ -122,31 +122,31 @@ Test project description.
     assert exit_code == 0, f"Exit code {exit_code}, stderr: {stderr}, stdout: {stdout[:500]}"
     
     # Check artifacts
-    aci_dir = PROJECT_ROOT / "data" / "projects" / ".aci"
+    aci_dir = Program_ROOT / "data" / "programs" / ".aci"
     required_artifacts = [
-        "test-project.bytes",
-        "test-project.events.jsonl",
-        "test-project.report.json",
-        "test-project.report.md",
+        "test-program.bytes",
+        "test-program.events.jsonl",
+        "test-program.report.json",
+        "test-program.report.md",
     ]
     
     for artifact in required_artifacts:
         assert (aci_dir / artifact).exists(), f"Missing artifact: {artifact}"
     
     # Check bundle
-    bundle = PROJECT_ROOT / "data" / "projects" / "bundles" / "test-project.zip"
+    bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
     assert bundle.exists(), "Missing bundle"
     
     # Verify bundle contents
     with zipfile.ZipFile(bundle, "r") as zf:
         files = zf.namelist()
-        required = ["project.md", "bytes.bin", "events.jsonl", "report.json", "report.md", "bundle.json"]
+        required = ["program.md", "bytes.bin", "events.jsonl", "report.json", "report.md", "bundle.json"]
         missing = [f for f in required if f not in files]
         assert not missing, f"Bundle missing files: {missing}"
     
-    # Clean up test project
-    if project_md.exists():
-        project_md.unlink()
+    # Clean up test program
+    if program_md.exists():
+        program_md.unlink()
 
 
 def test_c_tamper_detection():
@@ -154,12 +154,12 @@ def test_c_tamper_detection():
     from src.app.cli import store
     
     # Find bundle
-    bundle = PROJECT_ROOT / "data" / "projects" / "bundles" / "test-project.zip"
+    bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
     if not bundle.exists():
         pytest.skip("No bundle to tamper")
     
     # Create tampered bundle (corrupt bytes.bin)
-    tampered = PROJECT_ROOT / "data" / "projects" / "bundles" / "test-project-tampered.zip"
+    tampered = Program_ROOT / "data" / "programs" / "bundles" / "test-program-tampered.zip"
     with zipfile.ZipFile(bundle, "r") as src:
         with zipfile.ZipFile(tampered, "w", zipfile.ZIP_DEFLATED) as dst:
             for item in src.namelist():
@@ -170,30 +170,30 @@ def test_c_tamper_detection():
                 dst.writestr(item, data)
     
     # Test verify_bundle directly (CLI would overwrite, so we test the library function)
-    atlas_dir = PROJECT_ROOT / "data" / "atlas"
+    atlas_dir = Program_ROOT / "data" / "atlas"
     assert not store.verify_bundle(atlas_dir, tampered), "Tampered bundle should fail verification"
     
     # Clean up
     tampered.unlink()
     
-    # Clean up test project
-    project_md = PROJECT_ROOT / "data" / "projects" / "test-project.md"
-    if project_md.exists():
-        project_md.unlink()
+    # Clean up test program
+    program_md = Program_ROOT / "data" / "programs" / "test-program.md"
+    if program_md.exists():
+        program_md.unlink()
 
 
 def test_d_determinism():
     """Test D: Determinism."""
-    # Ensure test project exists (project_id will be auto-generated in .aci/ on first sync)
-    projects_dir = PROJECT_ROOT / "data" / "projects"
-    projects_dir.mkdir(parents=True, exist_ok=True)
+    # Ensure test program exists (program_id will be auto-generated in .aci/ on first sync)
+    programs_dir = Program_ROOT / "data" / "programs"
+    programs_dir.mkdir(parents=True, exist_ok=True)
     
-    project_md = projects_dir / "test-project.md"
-    if not project_md.exists():
-        # Create project (project_id will be auto-generated in .aci/ on first sync)
-        project_content = """---
-project_name: Test Project
-project_slug: test-project
+    program_md = programs_dir / "test-program.md"
+    if not program_md.exists():
+        # Create program (program_id will be auto-generated in .aci/ on first sync)
+        program_content = """---
+program_name: Test Program
+program_slug: test-program
 sponsor: Test Lab
 created_at: 2025-01-01T00:00:00Z
 
@@ -225,13 +225,13 @@ computed:
 
 ---
 
-# Test Project
+# Test Program
 
-Test project description.
+Test program description.
 """
-        project_md.write_text(project_content, encoding="utf-8")
+        program_md.write_text(program_content, encoding="utf-8")
     
-    bundle = PROJECT_ROOT / "data" / "projects" / "bundles" / "test-project.zip"
+    bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
     
     # Run first time and extract bundle.json
     exit_code1, _stdout1, _stderr1 = run_aci()
@@ -250,30 +250,30 @@ Test project description.
     # Remove non-deterministic fields for comparison
     bundle_json1.pop("generated_at", None)
     bundle_json2.pop("generated_at", None)
-    # project_md_sha256 changes because project.md is updated with last_synced_at on each run
-    bundle_json1["logs"].pop("project_md_sha256", None)
-    bundle_json2["logs"].pop("project_md_sha256", None)
+    # program_md_sha256 changes because program.md is updated with last_synced_at on each run
+    bundle_json1["logs"].pop("program_md_sha256", None)
+    bundle_json2["logs"].pop("program_md_sha256", None)
     # Report hashes are deterministic but derived from bytes/events, so remove for comparison
     bundle_json1["logs"].pop("report_json_sha256", None)
     bundle_json2["logs"].pop("report_json_sha256", None)
     bundle_json1["logs"].pop("report_md_sha256", None)
     bundle_json2["logs"].pop("report_md_sha256", None)
     
-    assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and project/report hashes)"
+    assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and program/report hashes)"
     
-    # Clean up test project
-    if project_md.exists():
-        project_md.unlink()
+    # Clean up test program
+    if program_md.exists():
+        program_md.unlink()
 
 
 def test_e_skipped_attestations_in_report():
     """Test E: Skipped attestations appear in report."""
-    # Create project with invalid attestation
-    projects_dir = PROJECT_ROOT / "data" / "projects"
-    project_md = projects_dir / "test-skip.md"
-    project_content = """---
-project_name: Test Skip
-project_slug: test-skip
+    # Create program with invalid attestation
+    programs_dir = Program_ROOT / "data" / "programs"
+    program_md = programs_dir / "test-skip.md"
+    program_content = """---
+program_name: Test Skip
+program_slug: test-skip
 sponsor: Test Lab
 created_at: 2025-01-01T00:00:00Z
 
@@ -304,15 +304,15 @@ computed:
 
 ---
 
-# Test Skip Project
+# Test Skip Program
 """
-    project_md.write_text(project_content, encoding="utf-8")
+    program_md.write_text(program_content, encoding="utf-8")
     
     # Run aci
     _exit_code, _stdout, _stderr = run_aci()
     
     # Check report
-    report_json = PROJECT_ROOT / "data" / "projects" / ".aci" / "test-skip.report.json"
+    report_json = Program_ROOT / "data" / "programs" / ".aci" / "test-skip.report.json"
     assert report_json.exists(), "Report not generated"
     
     report_data = json.loads(report_json.read_text())
@@ -327,22 +327,22 @@ computed:
     assert any("invalid unit" in r for r in reasons), "Missing 'invalid unit' reason"
     assert any("invalid domain" in r for r in reasons), "Missing 'invalid domain' reason"
     
-    # Clean up test project
-    if project_md.exists():
-        project_md.unlink()
+    # Clean up test program
+    if program_md.exists():
+        program_md.unlink()
 
 
 def main():
     """Run all tests."""
     print("\n" + "="*60)
-    print("AIR CLI Test Suite (Project-Only Model)")
+    print("AIR CLI Test Suite (Program-Only Model)")
     print("="*60)
     
     results = []
     
     tests = [
         ("Cold Start", test_a_cold_start_builds_atlas_and_templates),
-        ("Project Compilation", test_b_compile_project_into_artifacts),
+        ("Program Compilation", test_b_compile_program_into_artifacts),
         ("Tamper Detection", test_c_tamper_detection),
         ("Determinism", test_d_determinism),
         ("Skipped Attestations", test_e_skipped_attestations_in_report),

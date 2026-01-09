@@ -1,8 +1,8 @@
 """
-Template for project files.
+Template for program files.
 """
 
-PROJECT_TEMPLATE_MD = """# GyroGovernance Project Contract
+PROGRAM_TEMPLATE_MD = """# GyroGovernance Program Contract
 
 ---
 ## Domains
@@ -10,9 +10,11 @@ PROJECT_TEMPLATE_MD = """# GyroGovernance Project Contract
 
 IMPORTANT: Do not change the labels or ordering of these bracket lines; only change the numbers inside the square brackets.
 
-Economy (CGM operations): [0]
-Employment (Gyroscope work): [0]
-Education (THM capacities): [0]
+Domain counts declare how this Program's work is distributed across the three fundamental governance domains. These act as proportional weights for attributing incidents across domains. GGG recommends multi-domain coverage for complete governance loops.
+
+Economy (CGM operations): [1]
+Employment (Gyroscope work): [1]
+Education (THM capacities): [1]
 
 ---
 ## Unit Specification
@@ -23,6 +25,18 @@ IMPORTANT: Specify the time unit for incidents. Use "daily" for day-level tracki
 Unit: [daily]
 
 ---
+## PARTICIPANTS
+---
+
+### Agents
+
+(Names of people involved in this program)
+
+### Agencies
+
+(Names of agencies involved in this program)
+
+---
 ## COMMON SOURCE CONSENSUS
 ---
 
@@ -30,24 +44,12 @@ All Artificial categories of Authority and Agency are Derivatives
 originating from Human Intelligence.
 
 ---
-## AGENTS & AGENCIES
----
-
-### Agents Attendance
-
-(Names of people involved in this project)
-
-### Agencies Attestation
-
-(Names of agencies involved in this project)
-
----
 ## ALIGNMENT & DISPLACEMENT BY PRINCIPLE
 ---
 
 IMPORTANT: Do not change the labels or formatting of the incident count lines; only change the numbers inside the square brackets.
 
-For each principle below, record concrete moments from the project.
+For each principle below, record concrete moments from the program.
 An "Alignment Incident" is a case where the principle was upheld in practice.
 A "Displacement Incident" is a case where the corresponding risk appeared.
 
@@ -95,5 +97,19 @@ IID Displacement Incidents: [0]
 ## NOTES
 ---
 
-(Add context or key observations for this project)
+### GOV (Governance: GMT/GTD)
+
+(Notes about governance management traceability alignment and governance traceability displacement risk signatures)
+
+### INFO (Information: ICV/IVD)
+
+(Notes about information curation variety alignment and information variety displacement risk signatures)
+
+### INFER (Inference: IIA/IAD)
+
+(Notes about inference interaction accountability alignment and inference accountability displacement risk signatures)
+
+### INTEL (Intelligence: ICI/IID)
+
+(Notes about intelligence cooperation integrity alignment and intelligence integrity displacement risk signatures)
 """

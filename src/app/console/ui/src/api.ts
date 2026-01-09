@@ -1,68 +1,76 @@
 import type {
-  ProjectListResponse,
-  ProjectResponse,
+  ProgramListResponse,
+  ProgramResponse,
   EditableState,
   Glossary,
 } from './types';
 
 const BASE = '/api';
 
-export async function listProjects(): Promise<ProjectListResponse> {
-  const res = await fetch(`${BASE}/projects`);
+export async function listPrograms(): Promise<ProgramListResponse> {
+  const res = await fetch(`${BASE}/programs`);
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to list projects: ${res.status} ${text}`);
+    throw new Error(`Failed to list programs: ${res.status} ${text}`);
   }
   return res.json();
 }
 
-export async function getProject(slug: string): Promise<ProjectResponse> {
-  const res = await fetch(`${BASE}/projects/${slug}`);
-  if (!res.ok) throw new Error('Failed to load project');
+export async function getProgram(slug: string): Promise<ProgramResponse> {
+  const res = await fetch(`${BASE}/programs/${slug}`);
+  if (!res.ok) throw new Error('Failed to load program');
   return res.json();
 }
 
-export async function createProject(
+export async function createProgram(
   slug: string
-): Promise<{ status: string; slug: string; project_id: string }> {
-  const res = await fetch(`${BASE}/projects`, {
+): Promise<{ status: string; slug: string; program_id: string }> {
+  const res = await fetch(`${BASE}/programs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ slug }),
   });
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.detail || 'Failed to create project');
+    throw new Error(err.detail || 'Failed to create program');
   }
   return res.json();
 }
 
-export async function updateProject(
+export async function updateProgram(
   slug: string,
   data: {
     unit: string;
     domain_counts: EditableState['domain_counts'];
     principle_counts: EditableState['principle_counts'];
     notes: string;
+    agents: string;
+    agencies: string;
   }
-): Promise<ProjectResponse> {
-  const res = await fetch(`${BASE}/projects/${slug}`, {
+): Promise<ProgramResponse> {
+  const res = await fetch(`${BASE}/programs/${slug}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Failed to update project');
+  if (!res.ok) throw new Error('Failed to update program');
   return res.json();
 }
 
-export async function deleteProject(slug: string): Promise<{ status: string }> {
-  const res = await fetch(`${BASE}/projects/${slug}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete project');
+export async function deleteProgram(slug: string): Promise<{ status: string }> {
+  const res = await fetch(`${BASE}/programs/${slug}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete program');
   return res.json();
 }
 
 export function bundleUrl(slug: string): string {
-  return `${BASE}/projects/${slug}/bundle`;
+  return `${BASE}/programs/${slug}/bundle`;
+}
+
+export async function syncProgram(slug: string): Promise<ProgramResponse> {
+  const res = await fetch(`${BASE}/programs/${slug}/sync`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to sync program');
+  return res.json();
 }
 
 export async function getGlossary(): Promise<Glossary> {

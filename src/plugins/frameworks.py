@@ -53,30 +53,26 @@ class FrameworkPlugin:
 
 class THMDisplacementPlugin(FrameworkPlugin):
     """
-    Example: convert THM displacement signals into edge updates.
+    Convert THM displacement signals into edge updates.
+    
+    THM displacements (GTD, IVD, IAD, IID) are measurements of risk signatures.
+    Per GGG hierarchy: THM = Education domain (measurements/displacements).
+    
+    All events from this plugin are emitted to EDUCATION domain regardless of payload.
+    
     Payload example:
       {
-        "domain": "education",
         "GTD": +0.1,
         "IVD": -0.2,
         "IAD": +0.05,
         "IID": +0.0
       }
-
-    This is NOT claiming these are the correct mappings; it's a simple, explicit connector.
     """
     name = "thm_displacement"
 
-    _domain_map = {
-        "economy": Domain.ECONOMY,
-        "employment": Domain.EMPLOYMENT,
-        "education": Domain.EDUCATION,
-    }
-
     def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
-        dom = self._domain_map.get(str(payload.get("domain", "")).lower(), None)
-        if dom is None:
-            return []
+        # THM displacements always go to Education domain (measurements level)
+        dom = Domain.EDUCATION
 
         # Minimal, explicit edge choices:
         # - GTD affects Governance–Information coupling
@@ -117,27 +113,23 @@ class THMDisplacementPlugin(FrameworkPlugin):
 
 class GyroscopeWorkMixPlugin(FrameworkPlugin):
     """
-    Example: convert Gyroscope work-mix shifts into edge updates.
+    Convert Gyroscope work-mix shifts into edge updates.
+    
+    Gyroscope alignment work (GMT, ICV, IIA, ICI) represents active principles.
+    Per GGG hierarchy: Gyroscope = Employment domain (active work/principles).
+    
+    All events from this plugin are emitted to EMPLOYMENT domain regardless of payload.
+    
     Payload example:
       {
-        "domain": "employment",
         "GM": +0.1, "ICu": -0.1, "IInter": 0.0, "ICo": 0.0
       }
-
-    Again: explicit, editable policy mapping.
     """
     name = "gyroscope_workmix"
 
     def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
-        dom_str = str(payload.get("domain", "employment")).lower()
-        _domain_map = {
-            "economy": Domain.ECONOMY,
-            "employment": Domain.EMPLOYMENT,
-            "education": Domain.EDUCATION,
-        }
-        dom = _domain_map.get(dom_str, None)
-        if dom is None:
-            return []
+        # Gyroscope alignment work always goes to Employment domain (work level)
+        dom = Domain.EMPLOYMENT
 
         gm = float(payload.get("GM", 0.0))
         icu = float(payload.get("ICu", 0.0))

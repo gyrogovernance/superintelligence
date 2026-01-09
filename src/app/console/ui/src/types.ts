@@ -1,4 +1,4 @@
-// Matches store.parse_project_from_markdown output
+// Matches store.parse_program_from_markdown output
 export interface EditableState {
   slug: string;
   unit: 'daily' | 'sprint';
@@ -18,6 +18,8 @@ export interface EditableState {
     IID: number;
   };
   notes: string;
+  agents: string;
+  agencies: string;
 }
 
 // Type-safe keys for domains and principles
@@ -92,8 +94,8 @@ export interface ReportApertures {
 }
 
 export interface Report {
-  project_slug: string;
-  project_id: string;
+  program_slug: string;
+  program_id: string;
   compilation: ReportCompilation;
   accounting: ReportAccounting;
   ledger: ReportLedger;
@@ -102,19 +104,20 @@ export interface Report {
 }
 
 // API response shape
-export interface ProjectResponse {
+export interface ProgramResponse {
   editable: EditableState;
   report: Report | null;
   last_synced: string | null;
+  has_event_log?: boolean;  // True if domain_counts are derived from event log (real mode)
 }
 
-export interface ProjectSummary {
+export interface ProgramSummary {
   slug: string;
-  project_id: string | null;
+  program_id: string | null;
 }
 
-export interface ProjectListResponse {
-  projects: ProjectSummary[];
+export interface ProgramListResponse {
+  programs: ProgramSummary[];
 }
 
 // Glossary

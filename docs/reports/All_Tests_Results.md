@@ -9,7 +9,7 @@ plugins: anyio-4.10.0
 collected 135 items                                                                             
 
 tests/test_aci_cli.py::test_a_cold_start_builds_atlas_and_templates PASSED
-tests/test_aci_cli.py::test_b_compile_project_into_artifacts PASSED
+tests/test_aci_cli.py::test_b_compile_program_into_artifacts PASSED
 tests/test_aci_cli.py::test_c_tamper_detection PASSED
 tests/test_aci_cli.py::test_d_determinism PASSED
 tests/test_aci_cli.py::test_e_skipped_attestations_in_report PASSED
@@ -20,7 +20,7 @@ tests/test_app.py::TestCoordinator::test_coordinator_replay_determinism PASSED
 tests/test_app.py::TestCoordinator::test_event_binding_records_kernel_moment PASSED
 tests/test_app.py::TestCoordinator::test_coordinator_reset PASSED
 tests/test_app.py::TestCoordinator::test_coordinator_status_structure PASSED
-tests/test_app.py::TestHodgeProjections::test_projector_identities PASSED
+tests/test_app.py::TestHodgeProjections::test_programor_identities PASSED
 tests/test_app.py::TestHodgeProjections::test_cycle_component_in_kernel_of_B PASSED
 tests/test_app.py::TestHodgeProjections::test_cycle_basis_is_in_kernel_and_unit_norm PASSED      
 tests/test_measurement.py::TestMeasurementCollapse::test_scalar_collapse_loses_aperture_distinguishability

@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 
 from src.router.kernel import RouterKernel
 
-from .events import GovernanceEvent, Domain
+from .events import GovernanceEvent, Domain, EdgeID
 from .ledger import DomainLedgers
 
 
@@ -41,10 +41,30 @@ class Coordinator:
     # -------------------------
     # Kernel stepping (shared moment)
     # -------------------------
-    def step_byte(self, byte: int) -> None:
+    def step_byte(self, byte: int, emit_system_event: bool = True) -> None:
+        """
+        Step the kernel by one byte.
+        
+        Per GGG hierarchy: Kernel = Economy domain (structural substrate).
+        If emit_system_event is True, emits a small Economy domain event
+        representing the structural change.
+        """
         b = int(byte) & 0xFF
         self.kernel.step_byte(b)
         self.byte_log.append(b)
+        
+        # Emit Economy domain event for kernel structural activity
+        if emit_system_event:
+            # Small magnitude representing structural substrate evolution
+            # Using GOV_INFO edge as primary structural coupling
+            system_event = GovernanceEvent(
+                domain=Domain.ECONOMY,
+                edge_id=EdgeID.GOV_INFO,
+                magnitude=0.01,  # Small structural change per byte
+                confidence=1.0,
+                meta={"type": "kernel_step", "byte": b},
+            )
+            self.apply_event(system_event, bind_to_kernel_moment=True)
 
     def step_bytes(self, payload: bytes) -> None:
         for b in payload:
@@ -119,4 +139,35 @@ class Coordinator:
         self.ledgers = DomainLedgers()
         self.byte_log.clear()
         self.event_log.clear()
+
+    def derive_domain_counts(self) -> Dict[str, int]:
+        """
+        Derive domain_counts from the event log.
+        
+        Per GGG hierarchy:
+        - Economy = Kernel (structural substrate)
+        - Employment = Gyroscope (active work/principles)
+        - Education = THM (measurements/displacements)
+        
+        Returns dict with keys: "economy", "employment", "education"
+        """
+        counts = {
+            "economy": 0,
+            "employment": 0,
+            "education": 0,
+        }
+        
+        for log_entry in self.event_log:
+            event_dict = log_entry.get("event", {})
+            domain_int = event_dict.get("domain")
+            if domain_int is not None:
+                domain = Domain(domain_int)
+                if domain == Domain.ECONOMY:
+                    counts["economy"] += 1
+                elif domain == Domain.EMPLOYMENT:
+                    counts["employment"] += 1
+                elif domain == Domain.EDUCATION:
+                    counts["education"] += 1
+        
+        return counts
 

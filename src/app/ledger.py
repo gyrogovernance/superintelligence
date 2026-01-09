@@ -90,6 +90,17 @@ _INV_SQRT3 = 1.0 / np.sqrt(3.0)
 _CYCLE_BASIS_K4 *= _INV_SQRT3
 
 
+# Public API exports
+__all__ = [
+    "compute_aperture",
+    "DomainLedgers",
+    "get_cycle_basis",
+    "get_incidence_matrix",
+    "get_projections",
+    "hodge_decomposition",
+]
+
+
 def get_incidence_matrix() -> Mat46:
     """
     GGG exact K4 incidence matrix B (4x6).

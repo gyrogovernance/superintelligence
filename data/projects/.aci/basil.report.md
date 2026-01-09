@@ -1,17 +1,22 @@
-# Project Report: basil
+# Program Report: basil
 
-Project ID: dedc9c7c-0951-4150-b967-559bab682529
-Generated: 2026-01-04T22:54:16.810359Z
+Program ID: dedc9c7c-0951-4150-b967-559bab682529
+Generated: 2026-01-09T09:26:11.123395Z
+
+## Common Source Consensus
+
+All Artificial categories of Authority and Agency are Derivatives
+originating from Human Intelligence.
 
 ## Compilation
 
-- Total attestations: 228
-- Processed: 228
+- Total attestations: 235
+- Processed: 235
 - Skipped: 0
-- Bytes: 228
-- Kernel step: 228
-- Kernel state: 2222f2 (index 8751)
-- Last byte: 0x07
+- Bytes: 235
+- Kernel step: 235
+- Kernel state: 7a7767 (index 31350)
+- Last byte: 0x05
 
 ## Accounting
 
@@ -19,7 +24,7 @@ Generated: 2026-01-04T22:54:16.810359Z
 - GTD: 14
 - IVD: 1
 - IAD: 1
-- IID: 0
+- IID: 7
 
 ### Gyroscope Totals
 - GMT: 12
@@ -29,12 +34,12 @@ Generated: 2026-01-04T22:54:16.810359Z
 
 ### Attestation Distribution by Domain
 
-- Economy: 6 displacement, 71 alignment
-- Employment: 5 displacement, 71 alignment
-- Education: 5 displacement, 70 alignment
+- Economy: 10 displacement, 91 alignment
+- Employment: 7 displacement, 61 alignment
+- Education: 6 displacement, 60 alignment
 
 ## Ledger & Apertures
 
 - Economy aperture: 0.500000
-- Employment aperture: 0.500000
-- Education aperture: 0.454545
+- Employment aperture: 0.526316
+- Education aperture: 0.500000

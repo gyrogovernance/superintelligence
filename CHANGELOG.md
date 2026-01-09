@@ -5,13 +5,27 @@
 ┏━┓╻  ╻┏━╸┏┓╻┏┳┓┏━╸┏┓╻╺┳╸               
 ┣━┫┃  ┃┃╺┓┃┗┫┃┃┃┣╸ ┃┗┫ ┃                
 ╹ ╹┗━╸╹┗━┛╹ ╹╹ ╹┗━╸╹ ╹ ╹                
-┏━┓┏━┓╻ ╻╺┳╸╻┏┓╻┏━╸                     
-┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
-╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                     
 ╻┏┓╻┏━╸┏━┓┏━┓┏━┓╺┳╸┏━┓╻ ╻┏━╸╺┳╸╻ ╻┏━┓┏━╸
 ┃┃┗┫┣╸ ┣┳┛┣━┫┗━┓ ┃ ┣┳┛┃ ┃┃   ┃ ┃ ┃┣┳┛┣╸ 
-╹╹ ╹╹  ╹┗╸╹ ╹┗━┛ ╹ ╹┗╸┗━┛┗━╸ ╹ ┗━┛╹┗╸┗━╸                           
+╹╹ ╹╹  ╹┗╸╹ ╹┗━┛ ╹ ╹┗╸┗━┛┗━╸ ╹ ┗━┛╹┗╸┗━╸  
+┏━┓┏━┓╻ ╻╺┳╸╻┏┓╻┏━╸                     
+┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
+╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
+
+---
+
+## [v1.2-MomentsEconomy] – 2026-01-10
+
+### Moments Economy Foundation
+
+**Economic unit system:** Implemented base-60 MU (Moment-Unit) anchor with $60/minute valuation. UHI tiers defined as multipliers of base rate (1×, 2×, 3×, 60×).
+
+**Fiat capacity demonstration:** Added comprehensive tests demonstrating physics of abundance—system generates ~22 quadrillion micro-states/second. Millennium funding feasibility (1000 years) for global population uses <0.0001% of available capacity.
+
+**Surplus allocation:** Defined 12-division surplus structure across 3 domains (Economy, Employment, Education) × 4 Gyroscope capacities (GMT, ICV, IIA, ICI).
+
+**Documentation:** Added AIR_Moments_Economy_Specs.md with complete economic architecture specification and test suite in tests/test_moments.py.
 
 ---
 

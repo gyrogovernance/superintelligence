@@ -1,21 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { ProjectSummary, ReportAccounting, DomainKey } from '../types';
+import type { ProgramSummary, ReportAccounting, DomainKey } from '../types';
 import * as api from '../api';
 import { WorkProfilePanel } from './WorkProfilePanel';
 
 interface PortfolioViewProps {
-  projects: ProjectSummary[];
-  onSelectProject: (slug: string) => void;
+  programs: ProgramSummary[];
+  onSelectProgram: (slug: string) => void;
 }
 
-interface ProjectData {
+interface ProgramData {
   slug: string;
   accounting: ReportAccounting;
   unit: 'daily' | 'sprint';
   lastSynced: string | null;
+  domainCounts?: { economy: number; employment: number; education: number };
 }
 
-function aggregateAccounting(data: ProjectData[]): ReportAccounting {
+function aggregateAccounting(data: ProgramData[]): ReportAccounting {
   const aggregated: ReportAccounting = {
     gyroscope: {
       totals: { GMT: 0, ICV: 0, IIA: 0, ICI: 0 },
@@ -63,13 +64,14 @@ function aggregateAccounting(data: ProjectData[]): ReportAccounting {
   return aggregated;
 }
 
-export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps) {
-  const [projectData, setProjectData] = useState<ProjectData[]>([]);
+export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps) {
+  const [programData, setProgramData] = useState<ProgramData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [domainFilter, setDomainFilter] = useState<DomainKey | 'all'>('all');
   const [highDisplacementFilter, setHighDisplacementFilter] = useState(false);
+  const [multiDomainFilter, setMultiDomainFilter] = useState(false);
   const [sortColumn, setSortColumn] = useState<'slug' | 'unit' | 'incidents' | 'ratio' | 'value'>('slug');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -79,15 +81,16 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       setError(null);
       try {
         const reports = await Promise.all(
-          projects.map(async (p) => {
+          programs.map(async (p) => {
             try {
-              const project = await api.getProject(p.slug);
-              if (project.report?.accounting && project.editable) {
+              const program = await api.getProgram(p.slug);
+              if (program.report?.accounting && program.editable) {
                 return { 
                   slug: p.slug, 
-                  accounting: project.report.accounting,
-                  unit: project.editable.unit,
-                  lastSynced: project.last_synced,
+                  accounting: program.report.accounting,
+                  unit: program.editable.unit,
+                  lastSynced: program.last_synced,
+                  domainCounts: program.editable.domain_counts,
                 };
               }
               return null;
@@ -96,8 +99,8 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
             }
           })
         );
-        const validProjects = reports.filter((p): p is ProjectData => p !== null);
-        setProjectData(validProjects);
+        const validPrograms = reports.filter((p): p is ProgramData => p !== null);
+        setProgramData(validPrograms);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load portfolio data');
       } finally {
@@ -105,16 +108,16 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       }
     }
 
-    if (projects.length > 0) {
+    if (programs.length > 0) {
       loadAllReports();
     } else {
-      setProjectData([]);
+      setProgramData([]);
       setLoading(false);
     }
-  }, [projects]);
+  }, [programs]);
 
-  const filteredProjects = useMemo(() => {
-    let filtered = projectData;
+  const filteredPrograms = useMemo(() => {
+    let filtered = programData;
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -141,11 +144,19 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       });
     }
 
-    return filtered;
-  }, [projectData, searchQuery, domainFilter, highDisplacementFilter]);
+    if (multiDomainFilter) {
+      filtered = filtered.filter((p) => {
+        if (!p.domainCounts) return false;
+        // Multi-domain: all three domains must have count > 0
+        return p.domainCounts.economy > 0 && p.domainCounts.employment > 0 && p.domainCounts.education > 0;
+      });
+    }
 
-  const sortedProjects = useMemo(() => {
-    const sorted = [...filteredProjects].sort((a, b) => {
+    return filtered;
+  }, [programData, searchQuery, domainFilter, highDisplacementFilter, multiDomainFilter]);
+
+  const sortedPrograms = useMemo(() => {
+    const sorted = [...filteredPrograms].sort((a, b) => {
       let aVal: number | string = 0;
       let bVal: number | string = 0;
 
@@ -162,7 +173,8 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
         const totalDispA = dispA.GTD + dispA.IVD + dispA.IAD + dispA.IID;
         const totalA = totalAlignA + totalDispA;
         const rateA = a.unit === 'daily' ? 120 : 480;
-        const valA = totalA * rateA;
+        // Only alignment units are billable; displacement is risk coverage
+        const valA = totalAlignA * rateA;
         const ratioA = totalA > 0 ? (totalAlignA / totalA) * 100 : 0;
 
         const alignB = b.accounting.gyroscope.totals;
@@ -171,7 +183,8 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
         const totalDispB = dispB.GTD + dispB.IVD + dispB.IAD + dispB.IID;
         const totalB = totalAlignB + totalDispB;
         const rateB = b.unit === 'daily' ? 120 : 480;
-        const valB = totalB * rateB;
+        // Only alignment units are billable; displacement is risk coverage
+        const valB = totalAlignB * rateB;
         const ratioB = totalB > 0 ? (totalAlignB / totalB) * 100 : 0;
 
         if (sortColumn === 'incidents') {
@@ -193,7 +206,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       }
     });
     return sorted;
-  }, [filteredProjects, sortColumn, sortDirection]);
+  }, [filteredPrograms, sortColumn, sortDirection]);
 
   const handleSort = (column: typeof sortColumn) => {
     if (sortColumn === column) {
@@ -205,21 +218,19 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
   };
 
   const aggregated = useMemo(() => {
-    return aggregateAccounting(filteredProjects);
-  }, [filteredProjects]);
+    return aggregateAccounting(filteredPrograms);
+  }, [filteredPrograms]);
 
   const totalValue = useMemo(() => {
-    return filteredProjects.reduce((sum, p) => {
+    return filteredPrograms.reduce((sum, p) => {
       const align = p.accounting.gyroscope.totals;
-      const disp = p.accounting.thm.totals;
-      const totalIncidents = 
-        disp.GTD + disp.IVD + disp.IAD + disp.IID +
-        align.GMT + align.ICV + align.IIA + align.ICI;
+      const totalAlignment = align.GMT + align.ICV + align.IIA + align.ICI;
       
       const rate = p.unit === 'daily' ? 120 : 480;
-      return sum + (totalIncidents * rate);
+      // Only alignment units (principles) are billable; displacement is risk coverage
+      return sum + (totalAlignment * rate);
     }, 0);
-  }, [filteredProjects]);
+  }, [filteredPrograms]);
 
   if (loading) {
     return (
@@ -239,12 +250,12 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
     );
   }
 
-  if (projectData.length === 0) {
+  if (programData.length === 0) {
     return (
       <div className="card p-6">
         <h2 className="text-lg font-bold mb-4">Portfolio Dashboard</h2>
         <p className="text-gray-500 dark:text-gray-400">
-          No project reports available. Sync projects to see aggregated work profile.
+          No program reports available. Sync programs to see aggregated work profile.
         </p>
       </div>
     );
@@ -258,7 +269,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
   const alignmentRatio = totalIncidents > 0 ? (totalAlignment / totalIncidents) * 100 : 0;
 
   const exportJSON = () => {
-    const exportData = filteredProjects.map((p) => {
+    const exportData = filteredPrograms.map((p) => {
       const align = p.accounting.gyroscope.totals;
       const disp = p.accounting.thm.totals;
       const totalAlign = align.GMT + align.ICV + align.IIA + align.ICI;
@@ -297,14 +308,14 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
 
     const summary = {
       export_date: new Date().toISOString(),
-      total_projects: filteredProjects.length,
+      total_programs: filteredPrograms.length,
       portfolio_summary: {
         total_incidents: totalIncidents,
         alignment_ratio: alignmentRatio.toFixed(2),
         total_alignment: totalAlignment,
         total_displacement: totalDisplacement,
       },
-      projects: exportData,
+      programs: exportData,
     };
 
     const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
@@ -320,7 +331,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
 
   const exportCSV = () => {
     const headers = [
-      'Project Slug',
+      'Program Slug',
       'Unit',
       'Total Incidents',
       'Alignment Total',
@@ -334,7 +345,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       'Education Alignment', 'Education Displacement',
     ];
 
-    const rows = filteredProjects.map((p) => {
+    const rows = filteredPrograms.map((p) => {
       const align = p.accounting.gyroscope.totals;
       const disp = p.accounting.thm.totals;
       const totalAlign = align.GMT + align.ICV + align.IIA + align.ICI;
@@ -342,7 +353,8 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
       const total = totalAlign + totalDisp;
       const alignRatio = total > 0 ? (totalAlign / total) * 100 : 0;
       const rate = p.unit === 'daily' ? 120 : 480;
-      const estimatedValue = total * rate;
+      // Only alignment units are billable; displacement is risk coverage
+      const estimatedValue = totalAlign * rate;
 
       const econAlign = p.accounting.gyroscope.by_domain.economy.GMT + 
                         p.accounting.gyroscope.by_domain.economy.ICV +
@@ -431,14 +443,14 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Active Projects</div>
-            <div className="text-2xl font-bold">{filteredProjects.length}</div>
-            {filteredProjects.length !== projectData.length && (
-              <div className="text-xs text-gray-400">of {projectData.length}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Active Programs</div>
+            <div className="text-2xl font-bold">{filteredPrograms.length}</div>
+            {filteredPrograms.length !== programData.length && (
+              <div className="text-xs text-gray-400">of {programData.length}</div>
             )}
           </div>
           <div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">Total Units</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">Total Incidents</div>
             <div className="text-2xl font-bold">{totalIncidents}</div>
           </div>
           <div>
@@ -457,7 +469,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
-              placeholder="Search projects..."
+              placeholder="Search programs..."
               className="input flex-1"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -479,12 +491,21 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
                 onChange={(e) => setHighDisplacementFilter(e.target.checked)}
                 className="rounded text-indigo-600"
               />
-              <span className="text-sm">High Risk</span>
+              <span className="text-sm">High Displacement Ratio</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={multiDomainFilter}
+                onChange={(e) => setMultiDomainFilter(e.target.checked)}
+                className="rounded text-indigo-600"
+              />
+              <span className="text-sm">Multi-Domain Only</span>
             </label>
           </div>
-          {filteredProjects.length !== projectData.length && (
+          {filteredPrograms.length !== programData.length && (
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Showing {filteredProjects.length} of {projectData.length} projects
+              Showing {filteredPrograms.length} of {programData.length} programs
             </div>
           )}
         </div>
@@ -492,7 +513,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
 
       <WorkProfilePanel accounting={aggregated} />
 
-      {filteredProjects.length > 0 && (
+      {filteredPrograms.length > 0 && (
         <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -502,7 +523,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
                     className="px-6 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
                     onClick={() => handleSort('slug')}
                   >
-                    Project {sortColumn === 'slug' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Program {sortColumn === 'slug' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </th>
                   <th 
                     className="px-6 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none"
@@ -531,7 +552,7 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {sortedProjects.map((p) => {
+                {sortedPrograms.map((p) => {
                   const align = p.accounting.gyroscope.totals;
                   const disp = p.accounting.thm.totals;
                   const tAlign = align.GMT + align.ICV + align.IIA + align.ICI;
@@ -539,12 +560,13 @@ export function PortfolioView({ projects, onSelectProject }: PortfolioViewProps)
                   const total = tAlign + tDisp;
                   const ratio = total > 0 ? (tAlign / total) * 100 : 0;
                   const rate = p.unit === 'daily' ? 120 : 480;
-                  const val = total * rate;
+                  // Only alignment units are billable; displacement is risk coverage
+                  const val = tAlign * rate;
 
                   return (
                     <tr 
                       key={p.slug} 
-                      onClick={() => onSelectProject(p.slug)}
+                      onClick={() => onSelectProgram(p.slug)}
                       className="hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
                     >
                       <td className="px-6 py-3 font-medium text-indigo-600 dark:text-indigo-400">

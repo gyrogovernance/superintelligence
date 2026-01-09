@@ -12,7 +12,7 @@ import shutil
 import os
 from pathlib import Path
 
-# Get project root
+# Get program root
 ROOT = Path(__file__).parent.absolute()
 UI_DIR = ROOT / "src" / "app" / "console" / "ui"
 
@@ -231,16 +231,16 @@ def main():
     
     print()
     
-    # Build atlas and initialize projects
-    print("Building atlas and initializing projects...")
+    # Build atlas and initialize programs
+    print("Building atlas and initializing programs...")
     try:
         from src.app.cli.main import main as cli_main
         cli_main()
         print()
-        print("✓ Atlas built and projects initialized")
+        print("✓ Atlas built and programs initialized")
     except Exception as e:
         print()
-        print(f"⚠ Warning: Could not build atlas/projects automatically: {e}")
+        print(f"⚠ Warning: Could not build atlas/programs automatically: {e}")
         print("You can run this manually later with:")
         print("  python air_cli.py")
     

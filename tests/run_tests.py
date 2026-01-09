@@ -15,7 +15,7 @@ from pathlib import Path
 def main():
     """Run all tests with -m pytest, -v (verbose), and -s (no capture)."""
     script_dir = Path(__file__).parent
-    project_root = script_dir.parent
+    program_root = script_dir.parent
     
     cmd = [
         sys.executable,
@@ -35,7 +35,7 @@ def main():
     print(f"Running: {' '.join(cmd)}")
     print("-" * 10)
     
-    result = subprocess.run(cmd, cwd=project_root)
+    result = subprocess.run(cmd, cwd=program_root)
     sys.exit(result.returncode)
 
 if __name__ == "__main__":

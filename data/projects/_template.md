@@ -1,4 +1,4 @@
-# GyroGovernance Project Contract
+# GyroGovernance Program Contract
 
 ---
 ## Domains
@@ -31,11 +31,11 @@ originating from Human Intelligence.
 
 ### Agents Attendance
 
-(Names of people involved in this project)
+(Names of people involved in this program)
 
 ### Agencies Attestation
 
-(Names of agencies involved in this project)
+(Names of agencies involved in this program)
 
 ---
 ## ALIGNMENT & DISPLACEMENT BY PRINCIPLE
@@ -43,7 +43,7 @@ originating from Human Intelligence.
 
 IMPORTANT: Do not change the labels or formatting of the incident count lines; only change the numbers inside the square brackets.
 
-For each principle below, record concrete moments from the project.
+For each principle below, record concrete moments from the program.
 An "Alignment Incident" is a case where the principle was upheld in practice.
 A "Displacement Incident" is a case where the corresponding risk appeared.
 
@@ -91,4 +91,4 @@ IID Displacement Incidents: [0]
 ## NOTES
 ---
 
-(Add context or key observations for this project)
+(Add context or key observations for this program)

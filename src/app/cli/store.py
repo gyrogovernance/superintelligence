@@ -20,17 +20,17 @@ def get_data_dir() -> Path:
     return data_dir
 
 
-def get_projects_dir() -> Path:
-    """Returns data/projects/ directory."""
-    projects_dir = get_data_dir() / "projects"
-    if not projects_dir.exists():
-        projects_dir.mkdir(parents=True, exist_ok=True)
-    return projects_dir
+def get_programs_dir() -> Path:
+    """Returns data/projects/ directory (kept as projects for existing data compatibility)."""
+    programs_dir = get_data_dir() / "projects"
+    if not programs_dir.exists():
+        programs_dir.mkdir(parents=True, exist_ok=True)
+    return programs_dir
 
 
 def get_aci_dir() -> Path:
     """Returns data/projects/.aci/ directory for compiled artifacts."""
-    aci_dir = get_projects_dir() / ".aci"
+    aci_dir = get_programs_dir() / ".aci"
     if not aci_dir.exists():
         aci_dir.mkdir(parents=True, exist_ok=True)
     return aci_dir
@@ -38,7 +38,7 @@ def get_aci_dir() -> Path:
 
 def get_bundles_dir() -> Path:
     """Returns data/projects/bundles/ directory."""
-    bundles_dir = get_projects_dir() / "bundles"
+    bundles_dir = get_programs_dir() / "bundles"
     if not bundles_dir.exists():
         bundles_dir.mkdir(parents=True, exist_ok=True)
     return bundles_dir
@@ -55,24 +55,24 @@ def ensure_workspace() -> None:
     data = get_data_dir()
     # Create standard dirs
     (data / "atlas").mkdir(parents=True, exist_ok=True)
-    get_projects_dir()
+    get_programs_dir()
     get_aci_dir()
     get_bundles_dir()
 
 
 def ensure_templates() -> None:
     """
-    Ensure project template is available in projects directory.
-    Template is named with underscore prefix so it's not processed as a project.
-    Users copy this file to create new projects (e.g., copy _template.md to my-project.md).
+    Ensure program template is available in programs directory.
+    Template is named with underscore prefix so it's not processed as a program.
+    Users copy this file to create new programs (e.g., copy _template.md to my-program.md).
     
     Always overwrites the template to keep it in sync with the code version.
     """
-    projects_dir = get_projects_dir()
-    project_template = projects_dir / "_template.md"
+    programs_dir = get_programs_dir()
+    program_template = programs_dir / "_template.md"
     
     # Always overwrite to keep template in sync with code
-    project_template.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+    program_template.write_text(templates.PROGRAM_TEMPLATE_MD, encoding="utf-8")
 
 
 def parse_bracket_value(text: str, pattern: str) -> int:
@@ -99,28 +99,62 @@ def parse_notes_section(text: str) -> str:
     if match:
         notes = match.group(1).strip()
         # Remove the placeholder text if it's the default
-        if notes == "(Add context or key observations for this project)":
+        if notes == "(Add context or key observations for this program)":
             return ""
         return notes
     return ""
 
 
-def parse_project_from_markdown(project_md_path: Path) -> Tuple[str, Dict[str, int], Dict[str, int], str, str]:
+def parse_participants_section(text: str) -> Tuple[str, str]:
     """
-    Parse project from markdown body using bracket notation.
-    Returns: (project_slug, domain_counts, principle_counts, unit, notes)
+    Parse the PARTICIPANTS section from markdown text.
+    Returns: (agents, agencies)
+    Both are free text strings from their respective subsections.
+    """
+    # Match ### Agents subsection
+    agents_pattern = r'###\s+Agents\s*\n+(.*?)(?=###|^##|\Z)'
+    agents_match = re.search(agents_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    agents = ""
+    if agents_match:
+        agents = agents_match.group(1).strip()
+        # Remove placeholder text (check for exact match or if it's the only content)
+        placeholder = "(Names of people involved in this program)"
+        if agents == placeholder or agents.strip() == placeholder:
+            agents = ""
+    
+    # Match ### Agencies subsection
+    # Stop at --- separator, ## header, or end of file
+    agencies_pattern = r'###\s+Agencies\s*\n+(.*?)(?=^---|^##|\Z)'
+    agencies_match = re.search(agencies_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
+    agencies = ""
+    if agencies_match:
+        agencies = agencies_match.group(1).strip()
+        # Remove placeholder text (check for exact match or if it's the only content)
+        placeholder = "(Names of agencies involved in this program)"
+        if agencies == placeholder or agencies.strip() == placeholder:
+            agencies = ""
+    
+    return agents, agencies
+
+
+def parse_program_from_markdown(program_md_path: Path) -> Tuple[str, Dict[str, int], Dict[str, int], str, str, str, str]:
+    """
+    Parse program from markdown body using bracket notation.
+    Returns: (program_slug, domain_counts, principle_counts, unit, notes, agents, agencies)
     
     domain_counts: {"economy": int, "employment": int, "education": int}
     principle_counts: {"GMT": int, "GTD": int, "ICV": int, "IVD": int, "IIA": int, "IAD": int, "ICI": int, "IID": int}
     unit: "daily" or "sprint" (defaults to "daily" if not specified)
     notes: free text from NOTES section (empty string if not present)
+    agents: free text from PARTICIPANTS > Agents section (empty string if not present)
+    agencies: free text from PARTICIPANTS > Agencies section (empty string if not present)
     
-    Note: project_slug is derived from filename stem to avoid collisions.
+    Note: program_slug is derived from filename stem to avoid collisions.
     """
-    text = project_md_path.read_text(encoding="utf-8")
+    text = program_md_path.read_text(encoding="utf-8")
     
     # Slug = filename stem (canonical, avoids collisions)
-    project_slug = project_md_path.stem
+    program_slug = program_md_path.stem
     
     # Parse domain counts
     domain_counts = {
@@ -153,13 +187,16 @@ def parse_project_from_markdown(project_md_path: Path) -> Tuple[str, Dict[str, i
     # Parse notes
     notes = parse_notes_section(text)
     
-    return project_slug, domain_counts, principle_counts, unit, notes
+    # Parse participants
+    agents, agencies = parse_participants_section(text)
+    
+    return program_slug, domain_counts, principle_counts, unit, notes, agents, agencies
 
 
 def generate_attestations_from_counts(
     domain_counts: Dict[str, int],
     principle_counts: Dict[str, int],
-    project_id: str,
+    program_id: str,
     unit: str = "daily"
 ) -> list[Dict[str, Any]]:
     """
@@ -291,6 +328,44 @@ def read_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
 
+def derive_domain_counts_from_events(events_path: Path) -> Dict[str, int]:
+    """
+    Derive domain_counts from an events.jsonl file.
+    
+    Per GGG hierarchy:
+    - Economy = Kernel (structural substrate)
+    - Employment = Gyroscope (active work/principles)
+    - Education = THM (measurements/displacements)
+    
+    Returns dict with keys: "economy", "employment", "education"
+    If file doesn't exist or has no events, returns zeros.
+    """
+    from src.app.events import Domain
+    
+    counts = {
+        "economy": 0,
+        "employment": 0,
+        "education": 0,
+    }
+    
+    if not events_path.exists():
+        return counts
+    
+    for ev_dict in read_events(events_path):
+        event = ev_dict.get("event", {})
+        domain_int = event.get("domain")
+        if domain_int is not None:
+            domain = Domain(domain_int)
+            if domain == Domain.ECONOMY:
+                counts["economy"] += 1
+            elif domain == Domain.EMPLOYMENT:
+                counts["employment"] += 1
+            elif domain == Domain.EDUCATION:
+                counts["education"] += 1
+    
+    return counts
+
+
 def read_events(path: Path) -> list[dict[str, Any]]:
     """Read all events from JSONL file."""
     if not path.exists():
@@ -338,68 +413,68 @@ def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
     return status
 
 
-def replay_project(atlas_dir: Path, project_slug: str):
-    """Replay bytes + events to reconstruct state for a project from .aci/ artifacts."""
+def replay_program(atlas_dir: Path, program_slug: str):
+    """Replay bytes + events to reconstruct state for a program from .aci/ artifacts."""
     aci_dir = get_aci_dir()
-    bytes_path = aci_dir / f"{project_slug}.bytes"
-    events_path = aci_dir / f"{project_slug}.events.jsonl"
+    bytes_path = aci_dir / f"{program_slug}.bytes"
+    events_path = aci_dir / f"{program_slug}.events.jsonl"
     return replay_from_logs(atlas_dir, bytes_path, events_path)
 
 
-def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
+def bundle_program(atlas_dir: Path, program_md_path: Path) -> Path:
     """
-    Create a bundle for a project.
-    Takes the project markdown file path (filename can differ from project_slug).
+    Create a bundle for a program.
+    Takes the program markdown file path (filename can differ from program_slug).
     Returns path to the created bundle.
     """
     import zipfile
     from datetime import datetime
     
-    if not project_md_path.exists():
-        raise FileNotFoundError(f"Project file not found: {project_md_path}")
+    if not program_md_path.exists():
+        raise FileNotFoundError(f"Program file not found: {program_md_path}")
     
-    # Read project_slug from markdown (bracket notation format)
-    project_slug, _, _, _, _ = parse_project_from_markdown(project_md_path)
+    # Read program_slug from markdown (bracket notation format)
+    program_slug, _, _, _, _, _, _ = parse_program_from_markdown(program_md_path)
     
     aci_dir = get_aci_dir()
-    bytes_path = aci_dir / f"{project_slug}.bytes"
-    events_path = aci_dir / f"{project_slug}.events.jsonl"
-    report_json_path = aci_dir / f"{project_slug}.report.json"
-    report_md_path = aci_dir / f"{project_slug}.report.md"
-    id_path = aci_dir / f"{project_slug}.id"
+    bytes_path = aci_dir / f"{program_slug}.bytes"
+    events_path = aci_dir / f"{program_slug}.events.jsonl"
+    report_json_path = aci_dir / f"{program_slug}.report.json"
+    report_md_path = aci_dir / f"{program_slug}.report.md"
+    id_path = aci_dir / f"{program_slug}.id"
     
-    # Require compiled artifacts (must come from sync_project, not created here)
+    # Require compiled artifacts (must come from sync_program, not created here)
     if not bytes_path.exists():
         raise FileNotFoundError(f"Missing compiled bytes: {bytes_path}")
     if not events_path.exists():
         raise FileNotFoundError(f"Missing compiled events: {events_path}")
     if not id_path.exists():
-        raise FileNotFoundError(f"Missing project identity: {id_path}")
+        raise FileNotFoundError(f"Missing program identity: {id_path}")
     
     # Replay to get final state
-    status = replay_project(atlas_dir, project_slug)
+    status = replay_program(atlas_dir, program_slug)
     
-    # Require report artifacts (must come from sync_project, not created here)
+    # Require report artifacts (must come from sync_program, not created here)
     if not report_json_path.exists():
         raise FileNotFoundError(f"Missing compiled report.json: {report_json_path}")
     if not report_md_path.exists():
         raise FileNotFoundError(f"Missing compiled report.md: {report_md_path}")
     
-    # Read project_id value (for bundle manifest)
-    project_id_value = id_path.read_text(encoding="utf-8").strip()
+    # Read program_id value (for bundle manifest)
+    program_id_value = id_path.read_text(encoding="utf-8").strip()
     
     # Compute hashes
     bytes_hash = file_sha256(bytes_path)
     events_hash = file_sha256(events_path)
-    project_hash = file_sha256(project_md_path)
+    program_hash = file_sha256(program_md_path)
     report_json_hash = file_sha256(report_json_path)
     report_md_hash = file_sha256(report_md_path)
-    project_id_hash = file_sha256(id_path)
+    program_id_hash = file_sha256(id_path)
     
     # Build bundle.json
     bundle_data = {
-        "project_slug": project_slug,
-        "project_id": project_id_value,
+        "program_slug": program_slug,
+        "program_id": program_id_value,
         "byte_seed_version": "AIR_AR_BYTES_V1",
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "kernel": {
@@ -415,10 +490,10 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
             "event_count": status.kernel["event_log_len"],
             "bytes_sha256": bytes_hash,
             "events_sha256": events_hash,
-            "project_md_sha256": project_hash,
+            "program_md_sha256": program_hash,
             "report_json_sha256": report_json_hash,
             "report_md_sha256": report_md_hash,
-            "project_id_sha256": project_id_hash,
+            "program_id_sha256": program_id_hash,
         },
         "apertures": {
             "economy": status.apertures["econ"],
@@ -427,15 +502,15 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
         },
     }
     
-    # Bundle goes to bundles_dir/<project_slug>.zip
+    # Bundle goes to bundles_dir/<program_slug>.zip
     bundles_dir = get_bundles_dir()
     bundles_dir.mkdir(parents=True, exist_ok=True)
-    bundle_out = bundles_dir / f"{project_slug}.zip"
+    bundle_out = bundles_dir / f"{program_slug}.zip"
     
     # Create zip file
     with zipfile.ZipFile(bundle_out, "w", zipfile.ZIP_DEFLATED) as zf:
-        # Add project.md
-        zf.write(project_md_path, "project.md")
+        # Add program.md
+        zf.write(program_md_path, "program.md")
         
         # Add bytes and events files
         zf.write(bytes_path, "bytes.bin")
@@ -445,8 +520,8 @@ def bundle_project(atlas_dir: Path, project_md_path: Path) -> Path:
         zf.write(report_json_path, "report.json")
         zf.write(report_md_path, "report.md")
         
-        # Add project identity file
-        zf.write(id_path, "project.id")
+        # Add program identity file
+        zf.write(id_path, "program.id")
         
         # Add bundle.json
         zf.writestr("bundle.json", json.dumps(bundle_data, indent=2))
@@ -594,8 +669,8 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             # Verify hashes
             bytes_hash = file_sha256(bytes_file)
             events_hash = file_sha256(events_file)
-            project_md_file = tmp_path / "project.md"
-            project_hash = file_sha256(project_md_file) if project_md_file.exists() else ""
+            program_md_file = tmp_path / "program.md"
+            program_hash = file_sha256(program_md_file) if program_md_file.exists() else ""
             
             hashes_match = (
                 bytes_hash == bundle_data["logs"]["bytes_sha256"]
@@ -605,24 +680,24 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if not hashes_match:
                 return False
             
-            # Verify project.md hash if present in bundle
-            if "project_md_sha256" in bundle_data["logs"]:
-                if project_hash != bundle_data["logs"]["project_md_sha256"]:
+            # Verify program.md hash if present in bundle
+            if "program_md_sha256" in bundle_data["logs"]:
+                if program_hash != bundle_data["logs"]["program_md_sha256"]:
                     return False
             
-            # Verify project.id (required, must exist and match value)
-            project_id_file = tmp_path / "project.id"
-            if not project_id_file.exists():
+            # Verify program.id (required, must exist and match value)
+            program_id_file = tmp_path / "program.id"
+            if not program_id_file.exists():
                 return False
             
-            project_id_value = project_id_file.read_text(encoding="utf-8").strip()
-            if project_id_value != bundle_data.get("project_id", ""):
+            program_id_value = program_id_file.read_text(encoding="utf-8").strip()
+            if program_id_value != bundle_data.get("program_id", ""):
                 return False
             
-            # Verify project.id hash if present in bundle
-            if "project_id_sha256" in bundle_data["logs"]:
-                project_id_hash = file_sha256(project_id_file)
-                if project_id_hash != bundle_data["logs"]["project_id_sha256"]:
+            # Verify program.id hash if present in bundle
+            if "program_id_sha256" in bundle_data["logs"]:
+                program_id_hash = file_sha256(program_id_file)
+                if program_id_hash != bundle_data["logs"]["program_id_sha256"]:
                     return False
             
             return True
@@ -631,16 +706,16 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
         return False
 
 
-def ensure_project_id(project_slug: str) -> str:
+def ensure_program_id(program_slug: str) -> str:
     """
-    Ensure project has a stable project_id stored in .aci/<slug>.id
+    Ensure program has a stable program_id stored in .aci/<slug>.id
     If missing, generate one and persist it.
-    Returns the project_id.
+    Returns the program_id.
     """
     import uuid
     
     aci_dir = get_aci_dir()
-    id_path = aci_dir / f"{project_slug}.id"
+    id_path = aci_dir / f"{program_slug}.id"
     
     if id_path.exists():
         pid = id_path.read_text(encoding="utf-8").strip()
@@ -651,7 +726,7 @@ def ensure_project_id(project_slug: str) -> str:
                 return pid
             except ValueError:
                 raise ValueError(
-                    f"Invalid UUID in project identity file: {id_path}. "
+                    f"Invalid UUID in program identity file: {id_path}. "
                     "Delete the file to regenerate, or fix the UUID manually."
                 )
     
@@ -665,9 +740,9 @@ def ensure_project_id(project_slug: str) -> str:
     return new_id
 
 
-def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
+def sync_program(atlas_dir: Path, program_md_path: Path) -> Dict[str, Any]:
     """
-    Sync a project: parse attestations from project.md, compile kernel log and events.
+    Sync a program: parse attestations from program.md, compile kernel log and events.
     Returns summary dict with event_count, apertures, etc.
     
     Attestations are compiled into kernel facts which generate:
@@ -683,9 +758,9 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     from src.plugins.frameworks import THMDisplacementPlugin, PluginContext
     
     # Parse from markdown body with bracket notation
-    project_slug, domain_counts, principle_counts, unit, _ = parse_project_from_markdown(project_md_path)
+    program_slug, domain_counts, principle_counts, unit, _, agents, agencies = parse_program_from_markdown(program_md_path)
     
-    # Check for empty project (all counts are 0)
+    # Check for empty program (all counts are 0)
     total_incidents = sum(principle_counts.values())
     total_domain_count = sum(domain_counts.values())
     
@@ -694,38 +769,38 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     if total_incidents > 0 and total_domain_count == 0:
         parse_warnings.append("All domain counts are zero, but incidents are present. All incidents will be distributed evenly across domains.")
     if total_incidents == 0 and total_domain_count > 0:
-        parse_warnings.append("Domain counts are present, but no incidents recorded. Project will have zero attestations.")
+        parse_warnings.append("Domain counts are present, but no incidents recorded. Program will have zero attestations.")
     
     # Check for potential malformed template (all counts zero but file appears modified)
     if total_incidents == 0 and total_domain_count == 0:
-        template_size = len(templates.PROJECT_TEMPLATE_MD.encode("utf-8"))
-        file_size = project_md_path.stat().st_size
+        template_size = len(templates.PROGRAM_TEMPLATE_MD.encode("utf-8"))
+        file_size = program_md_path.stat().st_size
         if file_size > template_size:
-            parse_warnings.append("All counts parsed as zero, but project.md appears modified. Check that bracket notation is exact (e.g., 'Economy: [5]' not 'Economy: [ 5 ]' or 'Economy: [5] // comment').")
+            parse_warnings.append("All counts parsed as zero, but program.md appears modified. Check that bracket notation is exact (e.g., 'Economy: [5]' not 'Economy: [ 5 ]' or 'Economy: [5] // comment').")
     
-    # Ensure project has stable ID (stored in .aci/<slug>.id)
-    project_id = ensure_project_id(project_slug)
+    # Ensure program has stable ID (stored in .aci/<slug>.id)
+    program_id = ensure_program_id(program_slug)
     
     # Generate attestations from counts (following GGG balance principle)
-    attestations = generate_attestations_from_counts(domain_counts, principle_counts, project_id, unit)
+    attestations = generate_attestations_from_counts(domain_counts, principle_counts, program_id, unit)
     
     # Determine artifact paths in .aci/ directory
     aci_dir = get_aci_dir()
-    bytes_path = aci_dir / f"{project_slug}.bytes"
-    events_path = aci_dir / f"{project_slug}.events.jsonl"
-    report_json_path = aci_dir / f"{project_slug}.report.json"
-    report_md_path = aci_dir / f"{project_slug}.report.md"
+    bytes_path = aci_dir / f"{program_slug}.bytes"
+    events_path = aci_dir / f"{program_slug}.events.jsonl"
+    report_json_path = aci_dir / f"{program_slug}.report.json"
+    report_md_path = aci_dir / f"{program_slug}.report.md"
     
     # Initialize coordinator
     coord = Coordinator(atlas_dir)
     
     # Hash-based canonical bytes per attestation
-    def canonical_unit_bytes(project_id: str, att_id: str, att_idx: int, unit: str) -> bytes:
+    def canonical_unit_bytes(program_id: str, att_id: str, att_idx: int, unit: str) -> bytes:
         """
         Generate canonical bytes for an attestation using SHA-256 hash.
-        Seed format: AIR_AR_BYTES_V1|<project_id>|<attestation_id>|<attestation_index>|<unit>
+        Seed format: AIR_AR_BYTES_V1|<program_id>|<attestation_id>|<attestation_index>|<unit>
         """
-        seed = f"AIR_AR_BYTES_V1|{project_id}|{att_id}|{att_idx}|{unit}".encode("utf-8")
+        seed = f"AIR_AR_BYTES_V1|{program_id}|{att_id}|{att_idx}|{unit}".encode("utf-8")
         digest = hashlib.sha256(seed).digest()
         if unit == "daily":
             return digest[:1]
@@ -804,7 +879,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         processed_count += 1
         
         # Get canonical bytes for this attestation (hash-based)
-        unit_bytes = canonical_unit_bytes(project_id, att_id, att_idx, unit)
+        unit_bytes = canonical_unit_bytes(program_id, att_id, att_idx, unit)
         unit_wt = unit_weight(unit)  # Weight for accounting/ledger
         
         # Step kernel with these bytes in order
@@ -832,9 +907,9 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
                 thm_by_domain[domain][thm_abbrev] += unit_wt
                 
                 # Emit ledger event (THM-only) with weighted magnitude
-                payload = {"domain": domain}
-                payload[thm_abbrev] = float(unit_wt)
-                payload["confidence"] = 1.0
+                # Note: domain in payload is ignored - THM plugin always emits to EDUCATION domain
+                # This is kept for backward compatibility and accounting purposes
+                payload = {thm_abbrev: float(unit_wt), "confidence": 1.0}
                 
                 plugin = THMDisplacementPlugin()
                 ctx = PluginContext(meta=att_meta)
@@ -886,8 +961,8 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     
     # Generate report
     report_data = {
-        "project_slug": project_slug,
-        "project_id": project_id,
+        "program_slug": program_slug,
+        "program_id": program_id,
         "compilation": {
             "attestation_count": len(attestations),
             "processed_attestations": processed_count,
@@ -928,7 +1003,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         },
         "warnings": {
             "missing_attestation_ids": missing_ids,
-            "empty_project": total_incidents == 0,
+            "empty_program": total_incidents == 0,
             "parse_warnings": parse_warnings,
         } if (missing_ids or total_incidents == 0 or parse_warnings) else {},
     }
@@ -939,11 +1014,44 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     
     # Write report.md
     report_md_lines = [
-        f"# Project Report: {project_slug}",
+        f"# Program Report: {program_slug}",
         "",
-        f"Project ID: {project_id}",
+        f"Program ID: {program_id}",
         f"Generated: {datetime.utcnow().isoformat()}Z",
         "",
+    ]
+    
+    # Add participants section if present
+    if agents or agencies:
+        report_md_lines.extend([
+            "## Participants",
+            "",
+        ])
+        if agents:
+            report_md_lines.extend([
+                "### Agents",
+                "",
+                agents,
+                "",
+            ])
+        if agencies:
+            report_md_lines.extend([
+                "### Agencies",
+                "",
+                agencies,
+                "",
+            ])
+    
+    # Add common source consensus
+    report_md_lines.extend([
+        "## Common Source Consensus",
+        "",
+        "All Artificial categories of Authority and Agency are Derivatives",
+        "originating from Human Intelligence.",
+        "",
+    ])
+    
+    report_md_lines.extend([
         "## Compilation",
         "",
         f"- Total attestations: {len(attestations)}",
@@ -954,7 +1062,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
         f"- Kernel state: {status.kernel['state_hex']} (index {status.kernel['state_index']})",
         f"- Last byte: 0x{status.kernel['last_byte']:02x}",
         "",
-    ]
+    ])
     
     if skipped_attestations:
         report_md_lines.append("### Skipped Attestations\n")
@@ -1000,7 +1108,7 @@ def sync_project(atlas_dir: Path, project_md_path: Path) -> Dict[str, Any]:
     if missing_ids or total_incidents == 0 or parse_warnings:
         report_md_lines.append("## Warnings\n")
         if total_incidents == 0:
-            report_md_lines.append("- Empty project: No incidents recorded. All bracket counts are 0.\n")
+            report_md_lines.append("- Empty program: No incidents recorded. All bracket counts are 0.\n")
         for warning in parse_warnings:
             report_md_lines.append(f"- {warning}\n")
         for missing in missing_ids:

@@ -18,7 +18,7 @@ import types
 from pathlib import Path
 from typing import List, NoReturn
 
-# Get project root
+# Get program root
 ROOT = Path(__file__).parent.absolute()
 UI_DIR = ROOT / "src" / "app" / "console" / "ui"
 

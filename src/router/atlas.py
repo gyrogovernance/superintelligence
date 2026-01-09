@@ -31,9 +31,9 @@ except ImportError:
     # Fallback for direct execution
     import sys
     from pathlib import Path
-    # Add the project root to path
-    project_root = Path(__file__).parent.parent.parent
-    sys.path.insert(0, str(project_root))
+    # Add the program root to path
+    program_root = Path(__file__).parent.parent.parent
+    sys.path.insert(0, str(program_root))
 
     from src.router.constants import (
         ARCHETYPE_A12,

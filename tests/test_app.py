@@ -14,7 +14,7 @@ import pytest
 
 from src.app.coordination import Coordinator
 from src.app.events import Domain, EdgeID, GovernanceEvent
-from src.app.ledger import DomainLedgers
+from src.app.ledger import DomainLedgers, get_incidence_matrix, get_projections
 
 
 @pytest.fixture(scope="module")
@@ -48,7 +48,7 @@ class TestDomainLedgers:
         # Reconstruction
         assert np.allclose(y, y_grad + y_cycle, atol=1e-12)
 
-        # Orthogonality in the unweighted inner product (should hold for your projector)
+        # Orthogonality in the unweighted inner product (should hold for your programor)
         assert abs(float(y_grad @ y_cycle)) < 1e-10
 
     def test_aperture_scale_invariant(self):
@@ -167,12 +167,10 @@ class TestCoordinator:
 
 
 class TestHodgeProjections:
-    """Test Hodge projection matrix invariants (audit-grade)."""
+    """Test Hodge programion matrix invariants (audit-grade)."""
 
-    def test_projector_identities(self):
-        """Projectors must satisfy idempotence, symmetry, complementarity, and orthogonality."""
-        from src.app.ledger import get_projections
-
+    def test_programor_identities(self):
+        """Programors must satisfy idempotence, symmetry, complementarity, and orthogonality."""
         P_grad, P_cycle = get_projections()
         I = np.eye(6)
 
@@ -190,8 +188,6 @@ class TestHodgeProjections:
 
     def test_cycle_component_in_kernel_of_B(self):
         """Cycle component must be in ker(B) for any edge vector."""
-        from src.app.ledger import get_incidence_matrix, get_projections
-
         B = get_incidence_matrix()
         _, P_cycle = get_projections()
 

@@ -30,8 +30,8 @@ app.add_middleware(
 
 
 # Path helpers
-def projects_dir() -> Path:
-    return store.get_projects_dir()
+def programs_dir() -> Path:
+    return store.get_programs_dir()
 
 
 def aci_dir() -> Path:
@@ -52,29 +52,29 @@ def health_check():
     return {"status": "ok"}
 
 
-# ---- List Projects ----
-@app.get("/api/projects")
-def list_projects():
-    projects = []
-    for f in sorted(projects_dir().glob("*.md")):
+# ---- List Programs ----
+@app.get("/api/programs")
+def list_programs():
+    programs = []
+    for f in sorted(programs_dir().glob("*.md")):
         if f.name.startswith("_"):
             continue
         slug = f.stem
-        project_id = None
+        program_id = None
         id_path = aci_dir() / f"{slug}.id"
         if id_path.exists():
-            project_id = id_path.read_text(encoding="utf-8").strip()
-        projects.append({"slug": slug, "project_id": project_id})
-    return {"projects": projects}
+            program_id = id_path.read_text(encoding="utf-8").strip()
+        programs.append({"slug": slug, "program_id": program_id})
+    return {"programs": programs}
 
 
-# ---- Create Project ----
-class CreateProjectRequest(BaseModel):
+# ---- Create Program ----
+class CreateProgramRequest(BaseModel):
     slug: str
 
 
-@app.post("/api/projects")
-def create_project(req: CreateProjectRequest):
+@app.post("/api/programs")
+def create_program(req: CreateProgramRequest):
     slug = req.slug.strip().lower()
 
     # Validate slug
@@ -83,33 +83,46 @@ def create_project(req: CreateProjectRequest):
             400, "Invalid slug. Use lowercase letters, numbers, and hyphens."
         )
 
-    project_path = projects_dir() / f"{slug}.md"
-    if project_path.exists():
-        raise HTTPException(400, "Project already exists.")
+    program_path = programs_dir() / f"{slug}.md"
+    if program_path.exists():
+        raise HTTPException(400, "Program already exists.")
 
     # Write template
-    project_path.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+    program_path.write_text(templates.PROGRAM_TEMPLATE_MD, encoding="utf-8")
 
     # Generate ID
-    project_id = store.ensure_project_id(slug)
+    program_id = store.ensure_program_id(slug)
 
     # Sync to create initial artifacts
-    store.sync_project(atlas_dir(), project_path)
+    store.sync_program(atlas_dir(), program_path)
 
-    return {"status": "created", "slug": slug, "project_id": project_id}
+    return {"status": "created", "slug": slug, "program_id": program_id}
 
 
-# ---- Get Project ----
-@app.get("/api/projects/{slug}")
-def get_project(slug: str):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+# ---- Get Program ----
+@app.get("/api/programs/{slug}")
+def get_program(slug: str):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
 
     # Parse editable fields from markdown
-    parsed_slug, domain_counts, principle_counts, unit, notes = (
-        store.parse_project_from_markdown(project_path)
+    parsed_slug, domain_counts, principle_counts, unit, notes, agents, agencies = (
+        store.parse_program_from_markdown(program_path)
     )
+
+    # Check if we have event log (real mode) vs simulation mode
+    events_path = aci_dir() / f"{slug}.events.jsonl"
+    has_event_log = events_path.exists()
+    
+    # In real mode: derive domain_counts from event log
+    # In simulation mode: use markdown-parsed domain_counts
+    if has_event_log:
+        derived_counts = store.derive_domain_counts_from_events(events_path)
+        # Only use derived counts if we have events (non-zero)
+        total_derived = sum(derived_counts.values())
+        if total_derived > 0:
+            domain_counts = derived_counts
 
     # Read computed report
     report_path = aci_dir() / f"{slug}.report.json"
@@ -127,13 +140,16 @@ def get_project(slug: str):
             "domain_counts": domain_counts,
             "principle_counts": principle_counts,
             "notes": notes,
+            "agents": agents,
+            "agencies": agencies,
         },
         "report": report,
         "last_synced": last_synced,
+        "has_event_log": has_event_log,  # Flag for UI to show read-only mode
     }
 
 
-# ---- Update Project ----
+# ---- Update Program ----
 class DomainCounts(BaseModel):
     economy: int
     employment: int
@@ -151,20 +167,22 @@ class PrincipleCounts(BaseModel):
     IID: int
 
 
-class UpdateProjectRequest(BaseModel):
+class UpdateProgramRequest(BaseModel):
     unit: str
     domain_counts: DomainCounts
     principle_counts: PrincipleCounts
     notes: str
+    agents: str
+    agencies: str
 
 
-@app.put("/api/projects/{slug}")
-def update_project(slug: str, req: UpdateProjectRequest):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+@app.put("/api/programs/{slug}")
+def update_program(slug: str, req: UpdateProgramRequest):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
 
-    content = project_path.read_text(encoding="utf-8")
+    content = program_path.read_text(encoding="utf-8")
 
     # Update domain counts
     content = re.sub(
@@ -206,6 +224,28 @@ def update_project(slug: str, req: UpdateProjectRequest):
             flags=re.IGNORECASE,
         )
 
+    # Update participants (agents) section
+    agents_pattern = r'(###\s+Agents\s*\n+)(.*?)(?=###|^##|\Z)'
+    agents_content = req.agents if req.agents.strip() else "(Names of people involved in this program)"
+    if re.search(agents_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
+        content = re.sub(
+            agents_pattern,
+            rf'\g<1>{agents_content}\n\n',
+            content,
+            flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
+        )
+    
+    # Update participants (agencies) section
+    agencies_pattern = r'(###\s+Agencies\s*\n+)(.*?)(?=^##|\Z)'
+    agencies_content = req.agencies if req.agencies.strip() else "(Names of agencies involved in this program)"
+    if re.search(agencies_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
+        content = re.sub(
+            agencies_pattern,
+            rf'\g<1>{agencies_content}\n\n',
+            content,
+            flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
+        )
+
     # Update notes section
     # Template format: ## NOTES on one line, --- on the next line
     notes_pattern = r'(^##\s+NOTES\s*\n---?\s*\n)(.*?)(?=^##|\Z)'
@@ -216,7 +256,7 @@ def update_project(slug: str, req: UpdateProjectRequest):
             if req.notes.strip():
                 return match.group(1) + req.notes + "\n"
             else:
-                return match.group(1) + "(Add context or key observations for this project)\n"
+                return match.group(1) + "(Add context or key observations for this program)\n"
         content = re.sub(
             notes_pattern,
             replace_notes,
@@ -225,29 +265,43 @@ def update_project(slug: str, req: UpdateProjectRequest):
         )
     else:
         # Append NOTES section at the end
-        notes_content = req.notes if req.notes.strip() else "(Add context or key observations for this project)"
+        notes_content = req.notes if req.notes.strip() else "(Add context or key observations for this program)"
         notes_section = f"\n\n## NOTES\n---\n\n{notes_content}\n"
         content = content.rstrip() + notes_section
 
     # Write updated content
-    project_path.write_text(content, encoding="utf-8")
+    program_path.write_text(content, encoding="utf-8")
 
     # Sync immediately
-    store.sync_project(atlas_dir(), project_path)
+    store.sync_program(atlas_dir(), program_path)
 
     # Return updated state
-    return get_project(slug)
+    return get_program(slug)
 
 
-# ---- Delete Project ----
-@app.delete("/api/projects/{slug}")
-def delete_project(slug: str):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+# ---- Sync Program ----
+@app.post("/api/programs/{slug}/sync")
+def sync_program_endpoint(slug: str):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
+    
+    # Sync the program
+    store.sync_program(atlas_dir(), program_path)
+    
+    # Return updated state
+    return get_program(slug)
+
+
+# ---- Delete Program ----
+@app.delete("/api/programs/{slug}")
+def delete_program(slug: str):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
 
     # Remove markdown
-    project_path.unlink()
+    program_path.unlink()
 
     # Remove artifacts
     for ext in [".bytes", ".events.jsonl", ".report.json", ".report.md", ".id"]:
@@ -264,22 +318,22 @@ def delete_project(slug: str):
 
 
 # ---- Download Bundle ----
-@app.get("/api/projects/{slug}/bundle")
+@app.get("/api/programs/{slug}/bundle")
 def download_bundle(slug: str):
     # Ensure bundle exists by creating it
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
 
     # Create/update bundle
     try:
-        store.bundle_project(atlas_dir(), project_path)
+        store.bundle_program(atlas_dir(), program_path)
     except FileNotFoundError as e:
         raise HTTPException(404, str(e))
 
     bundle_path = bundles_dir() / f"{slug}.zip"
     if not bundle_path.exists():
-        raise HTTPException(404, "Bundle not found. Sync the project first.")
+        raise HTTPException(404, "Bundle not found. Sync the program first.")
     return FileResponse(
         bundle_path, filename=f"{slug}.zip", media_type="application/zip"
     )

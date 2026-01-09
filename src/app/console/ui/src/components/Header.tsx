@@ -1,53 +1,22 @@
-import { useState } from 'react';
-import type { Theme, ProjectSummary, AppStatus } from '../types';
+import type { Theme, AppStatus } from '../types';
 
 interface HeaderProps {
   theme: Theme;
   onThemeChange: (theme: Theme) => void;
-  projects: ProjectSummary[];
-  selectedSlug: string | null;
-  onSelectProject: (slug: string | null) => void;
-  onCreateProject: (slug: string) => void;
-  onDeleteProject: () => void;
-  unit: 'daily' | 'sprint';
-  onUnitChange: (unit: 'daily' | 'sprint') => void;
   status: AppStatus;
-  hasProject: boolean;
+  hasProgram: boolean;
+  viewMode: 'program' | 'portfolio' | 'settings';
+  onViewModeChange: (mode: 'program' | 'portfolio' | 'settings') => void;
 }
 
 export function Header({
   theme,
   onThemeChange,
-  projects,
-  selectedSlug,
-  onSelectProject,
-  onCreateProject,
-  onDeleteProject,
-  unit,
-  onUnitChange,
   status,
-  hasProject,
+  hasProgram,
+  viewMode,
+  onViewModeChange,
 }: HeaderProps) {
-  const [showCreateInput, setShowCreateInput] = useState(false);
-  const [newSlug, setNewSlug] = useState('');
-
-  const handleCreate = () => {
-    if (newSlug.trim()) {
-      onCreateProject(newSlug.trim().toLowerCase());
-      setNewSlug('');
-      setShowCreateInput(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleCreate();
-    } else if (e.key === 'Escape') {
-      setShowCreateInput(false);
-      setNewSlug('');
-    }
-  };
-
   const themeIcons = {
     light: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +45,7 @@ export function Header({
   return (
     <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
@@ -86,104 +55,9 @@ export function Header({
               <h1 className="text-xl font-bold">AIR Console</h1>
               <p className="text-xs text-gray-500 dark:text-gray-400">Governance Compiler</p>
             </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-            {/* Project Selector */}
-            <select
-              className="select min-w-[140px]"
-              value={selectedSlug || ''}
-              onChange={(e) => onSelectProject(e.target.value || null)}
-              aria-label="Select project"
-            >
-              <option value="">Select project...</option>
-              {projects.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.slug}
-                </option>
-              ))}
-            </select>
-
-            {/* Create Project */}
-            {showCreateInput ? (
-              <div className="flex items-center gap-1">
-                <input
-                  type="text"
-                  className="input w-32"
-                  placeholder="project-slug"
-                  value={newSlug}
-                  onChange={(e) => setNewSlug(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={handleCreate}
-                  disabled={!newSlug.trim()}
-                >
-                  Create
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => {
-                    setShowCreateInput(false);
-                    setNewSlug('');
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => setShowCreateInput(true)}
-              >
-                + New
-              </button>
-            )}
-
-            {/* Delete Project */}
-            {hasProject && (
-              <button
-                type="button"
-                className="btn btn-danger btn-sm"
-                onClick={onDeleteProject}
-                aria-label="Delete project"
-              >
-                Delete
-              </button>
-            )}
-
-            {/* Unit Toggle */}
-            {hasProject && (
-              <select
-                className="select"
-                value={unit}
-                onChange={(e) => onUnitChange(e.target.value as 'daily' | 'sprint')}
-                aria-label="Select time unit"
-              >
-                <option value="daily">Daily</option>
-                <option value="sprint">Sprint</option>
-              </select>
-            )}
-
-            {/* Theme Toggle */}
-            <button
-              type="button"
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              onClick={cycleTheme}
-              aria-label={`Theme: ${theme}`}
-              title={`Theme: ${theme}`}
-            >
-              {themeIcons[theme]}
-            </button>
-
-            {/* Status */}
-            <div className="flex items-center gap-1.5" aria-live="polite">
+            
+            {/* Status - moved to left side */}
+            <div className="flex items-center gap-1.5 ml-2" aria-live="polite">
               {status === 'loading' && (
                 <>
                   <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
@@ -196,7 +70,7 @@ export function Header({
                   <span className="text-xs text-gray-500">Saving...</span>
                 </>
               )}
-              {status === 'idle' && hasProject && (
+              {status === 'idle' && hasProgram && (
                 <>
                   <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   <span className="text-xs text-gray-500">Synced</span>
@@ -210,9 +84,34 @@ export function Header({
               )}
             </div>
           </div>
+
+          {/* Right side: View Mode Dropdown + Theme */}
+          <div className="flex items-center gap-3">
+            {/* View Mode Dropdown */}
+            <select
+              className="select min-w-[180px]"
+              value={viewMode}
+              onChange={(e) => onViewModeChange(e.target.value as 'program' | 'portfolio' | 'settings')}
+              aria-label="Select view mode"
+            >
+              <option value="program">Program View</option>
+              <option value="portfolio">Portfolio Dashboard</option>
+              {hasProgram && <option value="settings">Settings</option>}
+            </select>
+
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              onClick={cycleTheme}
+              aria-label={`Theme: ${theme}`}
+              title={`Theme: ${theme}`}
+            >
+              {themeIcons[theme]}
+            </button>
+          </div>
         </div>
       </div>
     </header>
   );
 }
-

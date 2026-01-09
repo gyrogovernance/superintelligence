@@ -5,9 +5,10 @@ interface StepperProps {
   min?: number;
   label: string;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 
-export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
+export function Stepper({ value, min = 0, label, onChange, disabled = false }: StepperProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(value.toString());
 
@@ -63,7 +64,7 @@ export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
           type="button"
           className="stepper-btn"
           onClick={handleDecrement}
-          disabled={value <= min}
+          disabled={disabled || value <= min}
           aria-label={`Decrease ${label}`}
         >
           -
@@ -75,7 +76,8 @@ export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
-          className="w-16 text-center text-xl font-semibold tabular-nums border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+          disabled={disabled}
+          className="w-16 text-center text-xl font-semibold tabular-nums border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
           autoFocus
           aria-label={label}
         />
@@ -83,6 +85,7 @@ export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
           type="button"
           className="stepper-btn"
           onClick={handleIncrement}
+          disabled={disabled}
           aria-label={`Increase ${label}`}
         >
           +
@@ -97,17 +100,21 @@ export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
         type="button"
         className="stepper-btn"
         onClick={handleDecrement}
-        disabled={value <= min}
+        disabled={disabled || value <= min}
         aria-label={`Decrease ${label}`}
       >
         -
       </button>
       <span
-        className="w-12 text-center text-xl font-semibold tabular-nums cursor-text hover:bg-gray-100 dark:hover:bg-gray-800 rounded px-1 transition-colors"
+        className={`w-12 text-center text-xl font-semibold tabular-nums rounded px-1 transition-colors ${
+          disabled 
+            ? 'opacity-50 cursor-not-allowed' 
+            : 'cursor-text hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
         onClick={handleDisplayClick}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
+        role={disabled ? undefined : "button"}
+        tabIndex={disabled ? undefined : 0}
+        onKeyDown={disabled ? undefined : (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             handleDisplayClick();
@@ -121,6 +128,7 @@ export function Stepper({ value, min = 0, label, onChange }: StepperProps) {
         type="button"
         className="stepper-btn"
         onClick={handleIncrement}
+        disabled={disabled}
         aria-label={`Increase ${label}`}
       >
         +

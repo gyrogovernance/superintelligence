@@ -1,6 +1,6 @@
 # AIR Governance Console
 
-A browser-based UI for managing AIR project contracts.
+A browser-based UI for managing AIR program contracts.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ This checks prerequisites (Python, Node.js, npm) and installs frontend dependenc
 
 ### Run Both Servers (Recommended)
 
-From the project root:
+From the program root:
 
 ```bash
 python air_console.py
@@ -54,17 +54,17 @@ The frontend dev server proxies `/api` requests to `http://localhost:8000`.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/projects` | List all projects |
-| POST | `/api/projects` | Create new project |
-| GET | `/api/projects/{slug}` | Get project details and report |
-| PUT | `/api/projects/{slug}` | Update project counts |
-| DELETE | `/api/projects/{slug}` | Delete project and artifacts |
-| GET | `/api/projects/{slug}/bundle` | Download verified bundle |
+| GET | `/api/programs` | List all programs |
+| POST | `/api/programs` | Create new program |
+| GET | `/api/programs/{slug}` | Get program details and report |
+| PUT | `/api/programs/{slug}` | Update program counts |
+| DELETE | `/api/programs/{slug}` | Delete program and artifacts |
+| GET | `/api/programs/{slug}/bundle` | Download verified bundle |
 | GET | `/api/glossary` | Get terminology glossary |
 
 ## Features
 
-- Create, edit, and delete AIR projects
+- Create, edit, and delete AIR programs
 - Automatic sync on edit (500ms debounce)
 - Domain distribution visualisation
 - Alignment/displacement incident counters
@@ -75,7 +75,7 @@ The frontend dev server proxies `/api` requests to `http://localhost:8000`.
 - Glossary modal for terminology
 - Responsive design
 
-## Project Structure
+## Program Structure
 
 ```
 src/app/console/

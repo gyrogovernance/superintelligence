@@ -1,7 +1,7 @@
 ```markdown
 # agent.md – AIR Governance Console
 
-This document specifies the AIR Governance Console, a browser-based UI for managing AIR project contracts. The console is a thin view layer over existing AIR logic. It does not reimplement any parsing, attestation, or computation.
+This document specifies the AIR Governance Console, a browser-based UI for managing AIR program contracts. The console is a thin view layer over existing AIR logic. It does not reimplement any parsing, attestation, or computation.
 
 ---
 
@@ -26,14 +26,14 @@ The following modules are the source of truth. The console wraps them.
 
 **`src/app/cli/store.py`** provides:
 
-- `get_projects_dir()` – returns `data/projects/` path.
-- `get_aci_dir()` – returns `data/projects/.aci/` path.
-- `get_bundles_dir()` – returns `data/projects/bundles/` path.
+- `get_programs_dir()` – returns `data/programs/` path.
+- `get_aci_dir()` – returns `data/programs/.aci/` path.
+- `get_bundles_dir()` – returns `data/programs/bundles/` path.
 - `get_atlas_dir()` – returns `data/atlas/` path.
-- `parse_project_from_markdown(path)` – returns `(slug, domain_counts, principle_counts, unit)`.
-- `ensure_project_id(slug)` – returns stable UUID, creates if missing.
-- `sync_project(atlas_dir, project_path)` – compiles attestations, writes `.bytes`, `.events.jsonl`, `.report.json`, `.report.md`.
-- `bundle_project(atlas_dir, project_path)` – creates verified `.zip` bundle.
+- `parse_program_from_markdown(path)` – returns `(slug, domain_counts, principle_counts, unit)`.
+- `ensure_program_id(slug)` – returns stable UUID, creates if missing.
+- `sync_program(atlas_dir, program_path)` – compiles attestations, writes `.bytes`, `.events.jsonl`, `.report.json`, `.report.md`.
+- `bundle_program(atlas_dir, program_path)` – creates verified `.zip` bundle.
 - `verify_bundle(atlas_dir, bundle_path)` – returns boolean.
 
 **`src/app/cli/templates.py`** provides:
@@ -75,12 +75,12 @@ The following modules are the source of truth. The console wraps them.
 
 ### 2.4 Report Structure
 
-`sync_project` writes `.aci/{slug}.report.json` with this structure:
+`sync_program` writes `.aci/{slug}.report.json` with this structure:
 
 ```python
 {
-    "project_slug": str,
-    "project_id": str,
+    "program_slug": str,
+    "program_id": str,
     "compilation": {
         "attestation_count": int,
         "processed_attestations": int,
@@ -194,8 +194,8 @@ from src.app.cli.schemas import A_STAR
 app = FastAPI()
 
 # Paths
-def projects_dir() -> Path:
-    return store.get_projects_dir()
+def programs_dir() -> Path:
+    return store.get_programs_dir()
 
 def aci_dir() -> Path:
     return store.get_aci_dir()
@@ -207,65 +207,65 @@ def atlas_dir() -> Path:
     return store.get_atlas_dir()
 ```
 
-### 4.2 List Projects
+### 4.2 List Programs
 
 ```python
-@app.get("/api/projects")
-def list_projects():
-    projects = []
-    for f in sorted(projects_dir().glob("*.md")):
+@app.get("/api/programs")
+def list_programs():
+    programs = []
+    for f in sorted(programs_dir().glob("*.md")):
         if f.name.startswith("_"):
             continue
         slug = f.stem
-        project_id = None
+        program_id = None
         id_path = aci_dir() / f"{slug}.id"
         if id_path.exists():
-            project_id = id_path.read_text(encoding="utf-8").strip()
-        projects.append({"slug": slug, "project_id": project_id})
-    return {"projects": projects}
+            program_id = id_path.read_text(encoding="utf-8").strip()
+        programs.append({"slug": slug, "program_id": program_id})
+    return {"programs": programs}
 ```
 
-### 4.3 Create Project
+### 4.3 Create Program
 
 ```python
-class CreateProjectRequest(BaseModel):
+class CreateProgramRequest(BaseModel):
     slug: str
 
-@app.post("/api/projects")
-def create_project(req: CreateProjectRequest):
+@app.post("/api/programs")
+def create_program(req: CreateProgramRequest):
     slug = req.slug.strip().lower()
     
     # Validate slug
     if not re.match(r'^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$', slug):
         raise HTTPException(400, "Invalid slug. Use lowercase letters, numbers, and hyphens.")
     
-    project_path = projects_dir() / f"{slug}.md"
-    if project_path.exists():
-        raise HTTPException(400, "Project already exists.")
+    program_path = programs_dir() / f"{slug}.md"
+    if program_path.exists():
+        raise HTTPException(400, "Program already exists.")
     
     # Write template
-    project_path.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
+    program_path.write_text(templates.PROJECT_TEMPLATE_MD, encoding="utf-8")
     
     # Generate ID
-    project_id = store.ensure_project_id(slug)
+    program_id = store.ensure_program_id(slug)
     
     # Sync to create initial artifacts
-    store.sync_project(atlas_dir(), project_path)
+    store.sync_program(atlas_dir(), program_path)
     
-    return {"status": "created", "slug": slug, "project_id": project_id}
+    return {"status": "created", "slug": slug, "program_id": program_id}
 ```
 
-### 4.4 Get Project
+### 4.4 Get Program
 
 ```python
-@app.get("/api/projects/{slug}")
-def get_project(slug: str):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+@app.get("/api/programs/{slug}")
+def get_program(slug: str):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
     
     # Parse editable fields from markdown
-    parsed_slug, domain_counts, principle_counts, unit = store.parse_project_from_markdown(project_path)
+    parsed_slug, domain_counts, principle_counts, unit = store.parse_program_from_markdown(program_path)
     
     # Read computed report
     report_path = aci_dir() / f"{slug}.report.json"
@@ -285,23 +285,23 @@ def get_project(slug: str):
     }
 ```
 
-### 4.5 Update Project
+### 4.5 Update Program
 
 The update endpoint writes to the markdown file using the same regex patterns as the parser.
 
 ```python
-class UpdateProjectRequest(BaseModel):
+class UpdateProgramRequest(BaseModel):
     unit: str
     domain_counts: dict
     principle_counts: dict
 
-@app.put("/api/projects/{slug}")
-def update_project(slug: str, req: UpdateProjectRequest):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+@app.put("/api/programs/{slug}")
+def update_program(slug: str, req: UpdateProgramRequest):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
     
-    content = project_path.read_text(encoding="utf-8")
+    content = program_path.read_text(encoding="utf-8")
     
     # Update domain counts
     content = re.sub(
@@ -342,26 +342,26 @@ def update_project(slug: str, req: UpdateProjectRequest):
         )
     
     # Write updated content
-    project_path.write_text(content, encoding="utf-8")
+    program_path.write_text(content, encoding="utf-8")
     
     # Sync immediately
-    store.sync_project(atlas_dir(), project_path)
+    store.sync_program(atlas_dir(), program_path)
     
     # Return updated state
-    return get_project(slug)
+    return get_program(slug)
 ```
 
-### 4.6 Delete Project
+### 4.6 Delete Program
 
 ```python
-@app.delete("/api/projects/{slug}")
-def delete_project(slug: str):
-    project_path = projects_dir() / f"{slug}.md"
-    if not project_path.exists():
-        raise HTTPException(404, "Project not found.")
+@app.delete("/api/programs/{slug}")
+def delete_program(slug: str):
+    program_path = programs_dir() / f"{slug}.md"
+    if not program_path.exists():
+        raise HTTPException(404, "Program not found.")
     
     # Remove markdown
-    project_path.unlink()
+    program_path.unlink()
     
     # Remove artifacts
     for ext in [".bytes", ".events.jsonl", ".report.json", ".report.md", ".id"]:
@@ -380,11 +380,11 @@ def delete_project(slug: str):
 ### 4.7 Download Bundle
 
 ```python
-@app.get("/api/projects/{slug}/bundle")
+@app.get("/api/programs/{slug}/bundle")
 def download_bundle(slug: str):
     bundle_path = bundles_dir() / f"{slug}.zip"
     if not bundle_path.exists():
-        raise HTTPException(404, "Bundle not found. Sync the project first.")
+        raise HTTPException(404, "Bundle not found. Sync the program first.")
     return FileResponse(bundle_path, filename=f"{slug}.zip", media_type="application/zip")
 ```
 
@@ -461,7 +461,7 @@ The frontend types must mirror the backend response shapes exactly.
 ```typescript
 // src/types.ts
 
-// Matches store.parse_project_from_markdown output
+// Matches store.parse_program_from_markdown output
 export interface EditableState {
   slug: string;
   unit: 'daily' | 'sprint';
@@ -550,8 +550,8 @@ export interface ReportApertures {
 }
 
 export interface Report {
-  project_slug: string;
-  project_id: string;
+  program_slug: string;
+  program_id: string;
   compilation: ReportCompilation;
   accounting: ReportAccounting;
   ledger: ReportLedger;
@@ -560,18 +560,18 @@ export interface Report {
 }
 
 // API response shape
-export interface ProjectResponse {
+export interface ProgramResponse {
   editable: EditableState;
   report: Report | null;
 }
 
-export interface ProjectSummary {
+export interface ProgramSummary {
   slug: string;
-  project_id: string | null;
+  program_id: string | null;
 }
 
-export interface ProjectListResponse {
-  projects: ProjectSummary[];
+export interface ProgramListResponse {
+  programs: ProgramSummary[];
 }
 
 // Glossary
@@ -597,64 +597,64 @@ export interface Glossary {
 // src/api.ts
 
 import type {
-  ProjectListResponse,
-  ProjectResponse,
+  ProgramListResponse,
+  ProgramResponse,
   EditableState,
   Glossary
 } from './types';
 
 const BASE = '/api';
 
-export async function listProjects(): Promise<ProjectListResponse> {
-  const res = await fetch(`${BASE}/projects`);
-  if (!res.ok) throw new Error('Failed to list projects');
+export async function listPrograms(): Promise<ProgramListResponse> {
+  const res = await fetch(`${BASE}/programs`);
+  if (!res.ok) throw new Error('Failed to list programs');
   return res.json();
 }
 
-export async function getProject(slug: string): Promise<ProjectResponse> {
-  const res = await fetch(`${BASE}/projects/${slug}`);
-  if (!res.ok) throw new Error('Failed to load project');
+export async function getProgram(slug: string): Promise<ProgramResponse> {
+  const res = await fetch(`${BASE}/programs/${slug}`);
+  if (!res.ok) throw new Error('Failed to load program');
   return res.json();
 }
 
-export async function createProject(slug: string): Promise<{ status: string; slug: string; project_id: string }> {
-  const res = await fetch(`${BASE}/projects`, {
+export async function createProgram(slug: string): Promise<{ status: string; slug: string; program_id: string }> {
+  const res = await fetch(`${BASE}/programs`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ slug })
   });
   if (!res.ok) {
     const err = await res.json();
-    throw new Error(err.detail || 'Failed to create project');
+    throw new Error(err.detail || 'Failed to create program');
   }
   return res.json();
 }
 
-export async function updateProject(
+export async function updateProgram(
   slug: string,
   data: {
     unit: string;
     domain_counts: EditableState['domain_counts'];
     principle_counts: EditableState['principle_counts'];
   }
-): Promise<ProjectResponse> {
-  const res = await fetch(`${BASE}/projects/${slug}`, {
+): Promise<ProgramResponse> {
+  const res = await fetch(`${BASE}/programs/${slug}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
-  if (!res.ok) throw new Error('Failed to update project');
+  if (!res.ok) throw new Error('Failed to update program');
   return res.json();
 }
 
-export async function deleteProject(slug: string): Promise<{ status: string }> {
-  const res = await fetch(`${BASE}/projects/${slug}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Failed to delete project');
+export async function deleteProgram(slug: string): Promise<{ status: string }> {
+  const res = await fetch(`${BASE}/programs/${slug}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete program');
   return res.json();
 }
 
 export function bundleUrl(slug: string): string {
-  return `${BASE}/projects/${slug}/bundle`;
+  return `${BASE}/programs/${slug}/bundle`;
 }
 
 export async function getGlossary(): Promise<Glossary> {
@@ -853,9 +853,9 @@ export function initTheme(): void {
 Responsibilities:
 
 - Initialise theme on mount.
-- Fetch project list and glossary on mount.
-- Manage selected project slug.
-- Fetch project data when slug changes.
+- Fetch program list and glossary on mount.
+- Manage selected program slug.
+- Fetch program data when slug changes.
 - Pass data and handlers to child components.
 - Handle debounced saves (500ms after last edit).
 
@@ -863,9 +863,9 @@ State:
 
 ```typescript
 interface AppState {
-  projects: ProjectSummary[];
+  programs: ProgramSummary[];
   selectedSlug: string | null;
-  project: ProjectResponse | null;
+  program: ProgramResponse | null;
   glossary: Glossary | null;
   status: 'idle' | 'loading' | 'saving' | 'error';
   error: string | null;
@@ -879,9 +879,9 @@ Contains:
 
 - Title: "AIR".
 - Theme toggle (three states: light, dark, system).
-- Project selector dropdown.
-- Create project button.
-- Delete project button.
+- Program selector dropdown.
+- Create program button.
+- Delete program button.
 - Unit toggle (Daily / Sprint).
 - Status indicator.
 
@@ -1116,7 +1116,7 @@ Output in `dist/`. Backend can serve as static files.
 
 The console is complete when:
 
-1. Users can create, edit, and delete projects from the UI.
+1. Users can create, edit, and delete programs from the UI.
 2. Edits to counts and unit save automatically and trigger sync.
 3. Balance gauges show percentage deviation from A* with correct colours.
 4. Kernel step and state are displayed from `report.compilation.kernel`.
@@ -1125,7 +1125,7 @@ The console is complete when:
 7. Glossary modal opens for any domain or principle.
 8. Light, dark, and system themes work.
 9. UI is accessible and responsive.
-10. Empty state prompts user to create a project.
+10. Empty state prompts user to create a program.
 11. Errors are handled gracefully.
-12. Existing CLI continues to work on project files.
+12. Existing CLI continues to work on program files.
 ```

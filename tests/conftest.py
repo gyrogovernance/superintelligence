@@ -19,8 +19,8 @@ def ensure_atlas_built():
     """
     from src.router.atlas import build_all
     
-    project_root = Path(__file__).parent.parent
-    atlas_dir = project_root / "data" / "atlas"
+    program_root = Path(__file__).parent.parent
+    atlas_dir = program_root / "data" / "atlas"
     
     required_files = ["ontology.npy", "epistemology.npy", "phenomenology.npz"]
     missing = [f for f in required_files if not (atlas_dir / f).exists()]

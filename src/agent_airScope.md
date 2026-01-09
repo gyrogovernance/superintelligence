@@ -1,7 +1,7 @@
 ## AIR Scope Brief for Assistants
 
 ### Purpose
-AIR is a **project-only, Markdown-first coordination compiler** for AI safety work accounting. It turns human project attestations into:
+AIR is a **program-only, Markdown-first coordination compiler** for AI safety work accounting. It turns human program attestations into:
 
 - deterministic **kernel bytes** (canonical time units),
 - deterministic **governance event logs** (THM → ledger),
@@ -15,9 +15,9 @@ The product goal is: **open AIR → auto-sync everything → verify everything �
 
 ## Core Concepts
 
-### Project file is the only human surface
-- Human users edit only: `data/projects/<project>.md`
-- All “moments” are **derived facts** from project attestations and kernel stepping.
+### Program file is the only human surface
+- Human users edit only: `data/programs/<program>.md`
+- All “moments” are **derived facts** from program attestations and kernel stepping.
 - No separate moment files or moment folders in the final model.
 
 ### Moment definition
@@ -39,14 +39,14 @@ On every run of `aci`:
 
 1) Ensure workspace + templates exist  
 2) Ensure atlas exists (build if missing)  
-3) Parse all project markdown files  
-4) Compile each project into:
+3) Parse all program markdown files  
+4) Compile each program into:
    - `.aci/<slug>.bytes`
    - `.aci/<slug>.events.jsonl`
    - `.aci/<slug>.report.json`
    - `.aci/<slug>.report.md`
 5) Create/update bundle:
-   - `data/projects/bundles/<slug>.zip`
+   - `data/programs/bundles/<slug>.zip`
 6) Verify bundles by replay + hashes  
 7) Print summary and exit with code:
    - `0` if all verified
@@ -62,7 +62,7 @@ On every run of `aci`:
 - Verify integrity by:
    - replay from bytes+events
    - compare signature + apertures
-   - compare artifact hashes (bytes/events/project/report)
+   - compare artifact hashes (bytes/events/program/report)
 - Keep outputs **audit-grade**: stable schemas, stable files, stable ordering.
 
 ---

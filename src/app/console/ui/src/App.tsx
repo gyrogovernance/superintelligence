@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type {
   Theme,
   AppStatus,
-  ProjectSummary,
-  ProjectResponse,
+  ProgramSummary,
+  ProgramResponse,
   EditableState,
   Glossary,
   DomainKey,
@@ -13,23 +13,25 @@ import { initTheme, applyTheme, getStoredTheme } from './theme';
 import * as api from './api';
 
 import { Header } from './components/Header';
+import { ProgramBar } from './components/ProgramBar';
 import { WorkProfilePanel } from './components/WorkProfilePanel';
-import { ProjectSummaryCard } from './components/ProjectSummary';
+import { ProgramSummaryCard } from './components/ProgramSummary';
 import { ReportPanel } from './components/ReportPanel';
 import { PortfolioView } from './components/PortfolioView';
+import { SettingsPanel } from './components/SettingsPanel';
 import { GlossaryModal } from './components/GlossaryModal';
 import { ConfirmModal } from './components/ConfirmModal';
 
 export default function App() {
   // State
-  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [programs, setPrograms] = useState<ProgramSummary[]>([]);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
-  const [project, setProject] = useState<ProjectResponse | null>(null);
+  const [program, setProgram] = useState<ProgramResponse | null>(null);
   const [glossary, setGlossary] = useState<Glossary | null>(null);
   const [status, setStatus] = useState<AppStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
-  const [viewMode, setViewMode] = useState<'project' | 'portfolio'>('project');
+  const [viewMode, setViewMode] = useState<'program' | 'portfolio' | 'settings'>('program');
 
   // Modal state
   const [glossaryModal, setGlossaryModal] = useState<{
@@ -51,16 +53,16 @@ export default function App() {
     initTheme();
   }, []);
 
-  // Load projects and glossary on mount
+  // Load programs and glossary on mount
   useEffect(() => {
     async function load() {
       setStatus('loading');
       try {
-        const [projectList, glossaryData] = await Promise.all([
-          api.listProjects(),
+        const [programList, glossaryData] = await Promise.all([
+          api.listPrograms(),
           api.getGlossary(),
         ]);
-        setProjects(projectList.projects);
+        setPrograms(programList.programs);
         setGlossary(glossaryData);
         setStatus('idle');
       } catch (err) {
@@ -71,29 +73,39 @@ export default function App() {
     load();
   }, []);
 
-  // Load project when selected
+  // Load program when selected
   useEffect(() => {
     if (!selectedSlug) {
-      setProject(null);
+      setProgram(null);
       setEditable(null);
       setNotes('');
       return;
     }
 
-    async function loadProject() {
+    async function loadProgram() {
       setStatus('loading');
       try {
-        const data = await api.getProject(selectedSlug!);
-        setProject(data);
-        setEditable(data.editable);
+        const data = await api.getProgram(selectedSlug!);
+        setProgram(data);
+        // Ensure agents and agencies are strings, not undefined
+        // Clean up placeholder text if it's in the values
+        const agentsValue = data.editable.agents || '';
+        const agenciesValue = data.editable.agencies || '';
+        const cleanedAgents = agentsValue === "(Names of people involved in this program)" ? '' : agentsValue;
+        const cleanedAgencies = agenciesValue === "(Names of agencies involved in this program)" ? '' : agenciesValue;
+        setEditable({
+          ...data.editable,
+          agents: cleanedAgents,
+          agencies: cleanedAgencies,
+        });
         setNotes(data.editable.notes || '');
         setStatus('idle');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load project');
+        setError(err instanceof Error ? err.message : 'Failed to load program');
         setStatus('error');
       }
     }
-    loadProject();
+    loadProgram();
   }, [selectedSlug]);
 
   // Theme handler
@@ -102,68 +114,71 @@ export default function App() {
     applyTheme(newTheme);
   }, []);
 
-  // Save project (debounced)
-  const saveProject = useCallback(async (data: EditableState & { notes?: string }) => {
-    if (!selectedSlug) return;
+  // Save program - no debounce, called directly
+  const saveProgram = useCallback(async (data: Partial<EditableState> & { notes?: string }) => {
+    if (!selectedSlug || !editable) return;
+
+    const payload = {
+      unit: data.unit ?? editable.unit,
+      domain_counts: data.domain_counts ?? editable.domain_counts,
+      principle_counts: data.principle_counts ?? editable.principle_counts,
+      notes: data.notes ?? notes,
+      agents: data.agents ?? editable.agents ?? '',
+      agencies: data.agencies ?? editable.agencies ?? '',
+    };
 
     setStatus('saving');
     try {
-      const updated = await api.updateProject(selectedSlug, {
-        unit: data.unit,
-        domain_counts: data.domain_counts,
-        principle_counts: data.principle_counts,
-        notes: data.notes ?? notes,
-      });
-      setProject(updated);
-      setEditable(updated.editable); // Keep editable in sync with backend
-      setNotes(updated.editable.notes || '');
+      const updated = await api.updateProgram(selectedSlug, payload);
+      setProgram(updated);
       setStatus('idle');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save');
       setStatus('error');
     }
-  }, [selectedSlug, notes]);
+  }, [selectedSlug, editable, notes]);
 
-  // Debounced save trigger
-  const triggerSave = useCallback((newEditable: EditableState) => {
+  // Debounced save for steppers
+  const debouncedSave = useCallback((newEditable: EditableState) => {
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current);
     }
     saveTimerRef.current = setTimeout(() => {
-      saveProject(newEditable);
+      saveProgram(newEditable);
     }, 500);
-  }, [saveProject]);
+  }, [saveProgram]);
 
   // Handlers
-  const handleCreateProject = useCallback(async (slug: string) => {
+  const handleCreateProgram = useCallback(async (slug: string) => {
     setStatus('loading');
     try {
-      const result = await api.createProject(slug);
-      const projectList = await api.listProjects();
-      setProjects(projectList.projects);
+      const result = await api.createProgram(slug);
+      const programList = await api.listPrograms();
+      setPrograms(programList.programs);
       setSelectedSlug(result.slug);
+      setViewMode('program');
       setStatus('idle');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create project');
+      setError(err instanceof Error ? err.message : 'Failed to create program');
       setStatus('error');
     }
   }, []);
 
-  const handleDeleteProject = useCallback(async () => {
+  const handleDeleteProgram = useCallback(async () => {
     if (!selectedSlug) return;
 
     setStatus('loading');
     setDeleteConfirm(false);
     try {
-      await api.deleteProject(selectedSlug);
-      const projectList = await api.listProjects();
-      setProjects(projectList.projects);
+      await api.deleteProgram(selectedSlug);
+      const programList = await api.listPrograms();
+      setPrograms(programList.programs);
       setSelectedSlug(null);
-      setProject(null);
+      setProgram(null);
       setEditable(null);
       setStatus('idle');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete project');
+      setError(err instanceof Error ? err.message : 'Failed to delete program');
       setStatus('error');
     }
   }, [selectedSlug]);
@@ -172,8 +187,8 @@ export default function App() {
     if (!editable) return;
     const newEditable = { ...editable, unit };
     setEditable(newEditable);
-    triggerSave(newEditable);
-  }, [editable, triggerSave]);
+    saveProgram({ unit });
+  }, [editable, saveProgram]);
 
   const handleDomainChange = useCallback((domain: DomainKey, value: number) => {
     if (!editable) return;
@@ -182,8 +197,8 @@ export default function App() {
       domain_counts: { ...editable.domain_counts, [domain]: value },
     };
     setEditable(newEditable);
-    triggerSave(newEditable);
-  }, [editable, triggerSave]);
+    debouncedSave(newEditable);
+  }, [editable, debouncedSave]);
 
   const handlePrincipleChange = useCallback((principle: PrincipleKey, value: number) => {
     if (!editable) return;
@@ -192,8 +207,8 @@ export default function App() {
       principle_counts: { ...editable.principle_counts, [principle]: value },
     };
     setEditable(newEditable);
-    triggerSave(newEditable);
-  }, [editable, triggerSave]);
+    debouncedSave(newEditable);
+  }, [editable, debouncedSave]);
 
   const handleDomainInfo = useCallback((domain: string) => {
     setGlossaryModal({ isOpen: true, type: 'domain', itemKey: domain });
@@ -208,11 +223,27 @@ export default function App() {
     });
   }, []);
 
+  // Text field handlers - save immediately on blur (no debounce needed, local state in ReportPanel handles typing)
   const handleNotesChange = useCallback((value: string) => {
     setNotes(value);
-    if (!editable || !selectedSlug) return;
-    triggerSave({ ...editable, notes: value });
-  }, [editable, selectedSlug, triggerSave]);
+    if (editable) {
+      saveProgram({ notes: value });
+    }
+  }, [editable, saveProgram]);
+
+  const handleAgentsChange = useCallback((value: string) => {
+    if (!editable) return;
+    const newEditable = { ...editable, agents: value };
+    setEditable(newEditable);
+    saveProgram({ agents: value });
+  }, [editable, saveProgram]);
+
+  const handleAgenciesChange = useCallback((value: string) => {
+    if (!editable) return;
+    const newEditable = { ...editable, agencies: value };
+    setEditable(newEditable);
+    saveProgram({ agencies: value });
+  }, [editable, saveProgram]);
 
   const handleDownloadBundle = useCallback(() => {
     if (selectedSlug) {
@@ -229,25 +260,20 @@ export default function App() {
     };
   }, []);
 
-  const hasProject = !!project && !!editable;
+  const hasProgram = !!program && !!editable;
 
   return (
     <div className="min-h-screen">
       <Header
         theme={theme}
         onThemeChange={handleThemeChange}
-        projects={projects}
-        selectedSlug={selectedSlug}
-        onSelectProject={setSelectedSlug}
-        onCreateProject={handleCreateProject}
-        onDeleteProject={() => setDeleteConfirm(true)}
-        unit={editable?.unit || 'daily'}
-        onUnitChange={handleUnitChange}
         status={status}
-        hasProject={hasProject}
+        hasProgram={hasProgram}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-3 py-3">
         {error && (
           <div className="mb-4 p-4 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800">
             <div className="flex items-center justify-between">
@@ -263,79 +289,85 @@ export default function App() {
           </div>
         )}
 
-        {/* View Mode Toggle */}
-        <div className="mb-6 flex gap-2">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'project'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-            onClick={() => setViewMode('project')}
-          >
-            Project View
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              viewMode === 'portfolio'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-            onClick={() => setViewMode('portfolio')}
-          >
-            Portfolio Dashboard
-          </button>
-        </div>
+        {/* Program Bar */}
+        <ProgramBar
+          programs={programs}
+          selectedSlug={selectedSlug}
+          onSelectProgram={setSelectedSlug}
+          onCreateProgram={handleCreateProgram}
+        />
 
         {viewMode === 'portfolio' ? (
           <PortfolioView 
-            projects={projects} 
-            onSelectProject={(slug) => {
+            programs={programs} 
+            onSelectProgram={(slug) => {
               setSelectedSlug(slug);
-              setViewMode('project');
+              setViewMode('program');
             }} 
           />
-        ) : !hasProject ? (
+        ) : viewMode === 'settings' ? (
+          <SettingsPanel
+            program={program}
+            selectedSlug={selectedSlug}
+            onProgramReload={async () => {
+              if (selectedSlug) {
+                const data = await api.getProgram(selectedSlug);
+                setProgram(data);
+                // Clean up placeholder text if it's in the values
+                const agentsValue = data.editable.agents || '';
+                const agenciesValue = data.editable.agencies || '';
+                const cleanedAgents = agentsValue === "(Names of people involved in this program)" ? '' : agentsValue;
+                const cleanedAgencies = agenciesValue === "(Names of agencies involved in this program)" ? '' : agenciesValue;
+                setEditable({
+                  ...data.editable,
+                  agents: cleanedAgents,
+                  agencies: cleanedAgencies,
+                });
+                setNotes(data.editable.notes || '');
+              }
+            }}
+            unit={editable?.unit || 'daily'}
+            onUnitChange={handleUnitChange}
+          />
+        ) : !hasProgram ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
               <span className="text-white text-4xl font-bold">🍃</span>
             </div>
             <h2 className="text-2xl font-bold mb-2">Welcome to AIR Console</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Select an existing project or create a new one to begin managing
+              Select an existing program or create a new one to begin managing
               AI governance contracts.
             </p>
-            {projects.length === 0 && status === 'idle' && (
+            {programs.length === 0 && status === 'idle' && (
               <p className="text-sm text-gray-400 dark:text-gray-500">
-                No projects found. Click "+ New" in the header to create your first project.
+                No programs found. Click "+ New" above to create your first program.
               </p>
             )}
           </div>
         ) : (
           <>
-            {project.report && (
-              <ProjectSummaryCard
-                compilation={project.report.compilation}
-                accounting={project.report.accounting}
+            {program.report && (
+              <ProgramSummaryCard
+                compilation={program.report.compilation}
+                accounting={program.report.accounting}
                 unit={editable?.unit || 'daily'}
-                lastSynced={project.last_synced}
-                onUnitChange={handleUnitChange}
+                lastSynced={program.last_synced}
+                domainCounts={editable?.domain_counts}
               />
             )}
             <div className="grid gap-6 lg:grid-cols-5">
               {/* Left Column - Work Profile */}
               <div className="lg:col-span-2">
                 <WorkProfilePanel
-                  accounting={project.report?.accounting || null}
+                  accounting={program.report?.accounting || null}
                 />
               </div>
 
               {/* Right Column - Report */}
               <div className="lg:col-span-3">
                 <ReportPanel
-                  report={project.report}
+                  report={program.report}
                   onDownloadBundle={handleDownloadBundle}
                   notes={notes}
                   onNotesChange={handleNotesChange}
@@ -344,6 +376,9 @@ export default function App() {
                   onPrincipleChange={handlePrincipleChange}
                   onDomainInfo={handleDomainInfo}
                   onPrincipleInfo={handlePrincipleInfo}
+                  onAgentsChange={handleAgentsChange}
+                  onAgenciesChange={handleAgenciesChange}
+                  hasEventLog={program.has_event_log ?? false}
                 />
               </div>
             </div>
@@ -362,11 +397,11 @@ export default function App() {
 
       <ConfirmModal
         isOpen={deleteConfirm}
-        title="Delete Project"
-        message={`Are you sure you want to delete "${selectedSlug}"? This will remove the project file and all compiled artifacts. This action cannot be undone.`}
+        title="Delete Program"
+        message={`Are you sure you want to delete "${selectedSlug}"? This will remove the program file and all compiled artifacts. This action cannot be undone.`}
         confirmLabel="Delete"
         variant="danger"
-        onConfirm={handleDeleteProject}
+        onConfirm={handleDeleteProgram}
         onCancel={() => setDeleteConfirm(false)}
       />
     </div>
