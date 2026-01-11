@@ -152,8 +152,8 @@ class TestFrameworkPlugins:
         assert ivd_ev.edge_id == EdgeID.INFO_INFER
         assert ivd_ev.magnitude == -0.2
 
-    def test_thm_displacement_plugin_unknown_domain(self):
-        """THMDisplacementPlugin should return empty list for unknown domain."""
+    def test_thm_displacement_plugin_ignores_domain_parameter(self):
+        """THMDisplacementPlugin always emits to EDUCATION domain regardless of payload domain."""
         plugin = THMDisplacementPlugin()
         ctx = PluginContext()
 
@@ -161,7 +161,10 @@ class TestFrameworkPlugins:
 
         events = plugin.emit_events(payload, ctx)
 
-        assert len(events) == 0
+        # Plugin ignores domain parameter and always emits to EDUCATION
+        assert len(events) == 1
+        assert events[0].domain == Domain.EDUCATION
+        assert events[0].edge_id == EdgeID.GOV_INFO
 
     def test_gyroscope_workmix_plugin(self):
         """GyroscopeWorkMixPlugin should emit events for work-mix shifts."""

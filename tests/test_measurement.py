@@ -142,8 +142,8 @@ class TestMeasurementCollapse:
         
         for mag in magnitudes:
             ledgers = DomainLedgers()
-            self._apply_thm_payload(ledgers, {"GTD": mag})
-            A = ledgers.aperture(Domain.ECONOMY)
+            self._apply_thm_payload(ledgers, {"GTD": mag}, domain_str="education")
+            A = ledgers.aperture(Domain.EDUCATION)
             single_axis_apertures.append(A)
 
         # --- PART 2: The Solution (Multi-Axis Freedom) ---

@@ -146,5 +146,5 @@ last_test_run.txt
 # Atlas build artifacts (generated, not source)
 # data/atlas/  # Keeping atlas as it's not big
 
-# Project data (user-generated project contracts)
-data/projects/
+# Program data (user-generated program contracts)
+data/programs/

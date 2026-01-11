@@ -15,6 +15,14 @@
 
 ---
 
+## [v1.2.1-MomentsEconomy] – 2026-01-10
+
+Revisions & Tests:
+docs\AIR_Moments_Economy_Specs.md
+tests\test_substrate.py
+
+---
+
 ## [v1.2-MomentsEconomy] – 2026-01-10
 
 ### Moments Economy Foundation

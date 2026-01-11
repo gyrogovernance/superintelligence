@@ -21,15 +21,15 @@ def get_data_dir() -> Path:
 
 
 def get_programs_dir() -> Path:
-    """Returns data/projects/ directory (kept as projects for existing data compatibility)."""
-    programs_dir = get_data_dir() / "projects"
+    """Returns data/programs/ directory."""
+    programs_dir = get_data_dir() / "programs"
     if not programs_dir.exists():
         programs_dir.mkdir(parents=True, exist_ok=True)
     return programs_dir
 
 
 def get_aci_dir() -> Path:
-    """Returns data/projects/.aci/ directory for compiled artifacts."""
+    """Returns data/programs/.aci/ directory for compiled artifacts."""
     aci_dir = get_programs_dir() / ".aci"
     if not aci_dir.exists():
         aci_dir.mkdir(parents=True, exist_ok=True)
@@ -37,7 +37,7 @@ def get_aci_dir() -> Path:
 
 
 def get_bundles_dir() -> Path:
-    """Returns data/projects/bundles/ directory."""
+    """Returns data/programs/bundles/ directory."""
     bundles_dir = get_programs_dir() / "bundles"
     if not bundles_dir.exists():
         bundles_dir.mkdir(parents=True, exist_ok=True)

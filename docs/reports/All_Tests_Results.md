@@ -1,133 +1,37 @@
-# Jan 01 2026
-
-(.venv) PS D:\Development\superintelligence> python -m pytest -v -s tests/                       
-===================================== test session starts ======================================
-platform win32 -- Python 3.12.10, pytest-8.4.1, pluggy-1.6.0 -- D:\Development\superintelligence\.venv\Scripts\python.exe
+(.venv) PS F:\Development\superintelligence> python -m pytest -v -s tests/
+========================= test session starts ==========================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- F:\Development\superintelligence\.venv\Scripts\python.exe
 cachedir: .pytest_cache
-rootdir: D:\Development\superintelligence
-plugins: anyio-4.10.0
-collected 135 items                                                                             
+rootdir: F:\Development\superintelligence
+plugins: anyio-4.12.0
+collected 146 items                                                     
 
-tests/test_aci_cli.py::test_a_cold_start_builds_atlas_and_templates PASSED
-tests/test_aci_cli.py::test_b_compile_program_into_artifacts PASSED
-tests/test_aci_cli.py::test_c_tamper_detection PASSED
-tests/test_aci_cli.py::test_d_determinism PASSED
-tests/test_aci_cli.py::test_e_skipped_attestations_in_report PASSED
-tests/test_app.py::TestDomainLedgers::test_aperture_zero_when_ledger_is_zero PASSED
-tests/test_app.py::TestDomainLedgers::test_decompose_reconstructs_y PASSED
-tests/test_app.py::TestDomainLedgers::test_aperture_scale_invariant PASSED
-tests/test_app.py::TestCoordinator::test_coordinator_replay_determinism PASSED
-tests/test_app.py::TestCoordinator::test_event_binding_records_kernel_moment PASSED
-tests/test_app.py::TestCoordinator::test_coordinator_reset PASSED
-tests/test_app.py::TestCoordinator::test_coordinator_status_structure PASSED
-tests/test_app.py::TestHodgeProjections::test_programor_identities PASSED
-tests/test_app.py::TestHodgeProjections::test_cycle_component_in_kernel_of_B PASSED
-tests/test_app.py::TestHodgeProjections::test_cycle_basis_is_in_kernel_and_unit_norm PASSED      
-tests/test_measurement.py::TestMeasurementCollapse::test_scalar_collapse_loses_aperture_distinguishability
-==========
-PROOF: SCALAR BLINDNESS
-==========
-  State 1 (Collapsed):   Scalar = 4.000000, A = 0.500000
-  State 2 (Distributed): Scalar = 4.000000, A = 0.625000
-  Scalar distinguishes states? False
-  ✓ Proven: Scalar aggregation discards structural information
-PASSED
-tests/test_measurement.py::TestMeasurementCollapse::test_scalar_sum_cannot_detect_A_star_proximity
-==========
-PROOF: ALIGNMENT INVISIBILITY
-==========
-  Aligned State:    Scalar = 0.363198, |A - A*| = 0.000000
-  Misaligned State: Scalar = 0.363198, |A - A*| = 0.479300
-  ✓ Proven: Scalar evaluation cannot detect alignment
-PASSED
-tests/test_measurement.py::TestMeasurementCollapse::test_single_axis_structural_lock_vs_multi_axis_freedom
-==========
-PROOF: STRUCTURAL LOCK VS FREEDOM
-==========
-  Target A* = 0.020700
-  [Single Axis Strategy]
-    Mag   1.0 -> A = 0.500000 (Locked)
-    Mag  10.0 -> A = 0.500000 (Locked)
-    Mag 100.0 -> A = 0.500000 (Locked)
-  [Multi-Axis Strategy]
-    Constructed y -> A = 0.020700 (Aligned)
-  ✓ Proven: Single-axis optimization cannot achieve alignment.
-  ✓ Proven: Epistemic enumeration enables A*.
-PASSED
-tests/test_measurement.py::TestMeasurementCollapse::test_kernel_A_kernel_vs_app_A_star
-==========
-KERNEL ↔ APP APERTURE BRIDGE
-==========
-  A_kernel (discrete) = 0.019531250000 (5/256)
-  A* (CGM continuous) = 0.020700000000
-  Relative difference = 5.6%
-  ✓ Kernel discrete structure approximates CGM continuous target
-PASSED
-tests/test_measurement.py::TestMeasurementCollapse::test_epistemic_aperture_is_scale_invariant   
-==========
-PROOF: EPISTEMIC SELF-NORMALIZATION
-==========
-  Scalar: 6.2000 -> 620.0000 (Scales with input)
-  Aperture: 0.359484777518 -> 0.359484777518 (Invariant)
-  ✓ Epistemic measurement is self-normalizing
-PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_atlas_exists PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_ontology_file_exists PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_epistemology_file_exists PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_phenomenology_file_exists PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_ontology_size PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_ontology_sorted PASSED
-tests/test_others.py::TestAtlasBuildingValidation::test_archetype_in_ontology PASSED
-tests/test_others.py::TestOntologyStructure::test_ontology_is_cartesian_product_of_two_256_sets PASSED
-tests/test_others.py::TestPhenomenologyValidation::test_archetype_stored_correctly PASSED        
-tests/test_others.py::TestPhenomenologyValidation::test_gene_mic_s_stored PASSED
-tests/test_others.py::TestPhenomenologyValidation::test_xform_masks_count PASSED
-tests/test_others.py::TestPhenomenologyValidation::test_xform_masks_match_constants PASSED       
-tests/test_others.py::TestEdgeCases::test_all_zeros_state PASSED
-tests/test_others.py::TestEdgeCases::test_all_ones_state PASSED
-tests/test_others.py::TestEdgeCases::test_mask_boundary_values PASSED
-tests/test_others.py::TestEdgeCases::test_repeated_byte_application PASSED
-tests/test_others.py::TestPerformance::test_step_performance
-  Steps/sec: 1,835,401
-  Time per step: 0.54 μs
-PASSED
-tests/test_others.py::TestPerformance::test_kernel_step_performance
-  Kernel steps/sec: 2,659,221
-  Time per step: 0.38 μs
-PASSED
-tests/test_others.py::TestPerformance::test_aperture_measurement_performance
-  Aperture measurements/sec: 635,042
-  Time per measurement: 0.00 ms
-PASSED
-tests/test_others.py::TestInvariantValidation::test_unique_mask_count PASSED
-tests/test_others.py::TestInvariantValidation::test_all_b_masks_zero PASSED
-tests/test_others.py::TestInvariantValidation::test_a_mask_coverage PASSED
-tests/test_physics_1.py::TestStateRepresentation::test_pack_unpack_archetype PASSED
-tests/test_physics_1.py::TestStateRepresentation::test_pack_unpack_invertible PASSED
-tests/test_physics_1.py::TestStateRepresentation::test_component_isolation PASSED
-tests/test_physics_1.py::TestTranscription::test_gene_mic_s_constant PASSED
-tests/test_physics_1.py::TestTranscription::test_transcription_involution PASSED
-tests/test_physics_1.py::TestTranscription::test_transcription_bijective PASSED
-tests/test_physics_1.py::TestTranscription::test_specific_transcriptions PASSED
-tests/test_physics_1.py::TestExpansion::test_expansion_deterministic PASSED
-tests/test_physics_1.py::TestExpansion::test_expansion_injective PASSED
-tests/test_physics_1.py::TestExpansion::test_type_b_mask_always_zero PASSED
-tests/test_physics_1.py::TestExpansion::test_precomputed_table_matches PASSED
-tests/test_physics_1.py::TestFIFOGyration::test_gyration_is_asymmetric PASSED
-tests/test_physics_1.py::TestCGMChirality::test_gyration_not_pure_swap PASSED
-tests/test_physics_1.py::TestCGMChirality::test_gyration_asymmetry PASSED
-tests/test_physics_1.py::TestInvariants::test_state_space_boundedness PASSED
-tests/test_physics_1.py::TestInvariants::test_determinism PASSED
-tests/test_physics_1.py::TestInvariants::test_all_bytes_are_operations PASSED
-tests/test_physics_1.py::TestClosedFormDepthLaws::test_step_is_bijective_with_explicit_inverse PASSED
-tests/test_physics_1.py::TestClosedFormDepthLaws::test_depth2_decoupling_closed_form PASSED
-tests/test_physics_1.py::TestClosedFormDepthLaws::test_depth2_commutes_iff_same_byte PASSED
-tests/test_physics_1.py::TestClosedFormDepthLaws::test_trajectory_closed_form_arbitrary_length PASSED
-tests/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_separator_lemma_x_then_AA_updates_A_only PASSED
-tests/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_separator_lemma_AA_then_x_updates_B_only PASSED
-tests/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_depth4_alternation_identity_all_pairs_on_archetype PASSED
-tests/test_physics_1.py::TestInverseConjugationForm::test_inverse_is_conjugation_by_R PASSED
-tests/test_physics_1.py::TestQuantumGravityManifold::test_holographic_area_scaling
+tests/physics/test_physics_1.py::TestStateRepresentation::test_pack_unpack_archetype PASSED
+tests/physics/test_physics_1.py::TestStateRepresentation::test_pack_unpack_invertible PASSED
+tests/physics/test_physics_1.py::TestStateRepresentation::test_component_isolation PASSED
+tests/physics/test_physics_1.py::TestTranscription::test_gene_mic_s_constant PASSED
+tests/physics/test_physics_1.py::TestTranscription::test_transcription_involution PASSED
+tests/physics/test_physics_1.py::TestTranscription::test_transcription_bijective PASSED
+tests/physics/test_physics_1.py::TestTranscription::test_specific_transcriptions PASSED
+tests/physics/test_physics_1.py::TestExpansion::test_expansion_deterministic PASSED
+tests/physics/test_physics_1.py::TestExpansion::test_expansion_injective PASSED
+tests/physics/test_physics_1.py::TestExpansion::test_type_b_mask_always_zero PASSED
+tests/physics/test_physics_1.py::TestExpansion::test_precomputed_table_matches PASSED
+tests/physics/test_physics_1.py::TestFIFOGyration::test_gyration_is_asymmetric PASSED
+tests/physics/test_physics_1.py::TestCGMChirality::test_gyration_not_pure_swap PASSED
+tests/physics/test_physics_1.py::TestCGMChirality::test_gyration_asymmetry PASSED
+tests/physics/test_physics_1.py::TestInvariants::test_state_space_boundedness PASSED
+tests/physics/test_physics_1.py::TestInvariants::test_determinism PASSED 
+tests/physics/test_physics_1.py::TestInvariants::test_all_bytes_are_operations PASSED
+tests/physics/test_physics_1.py::TestClosedFormDepthLaws::test_step_is_bijective_with_explicit_inverse PASSED
+tests/physics/test_physics_1.py::TestClosedFormDepthLaws::test_depth2_decoupling_closed_form PASSED
+tests/physics/test_physics_1.py::TestClosedFormDepthLaws::test_depth2_commutes_iff_same_byte PASSED
+tests/physics/test_physics_1.py::TestClosedFormDepthLaws::test_trajectory_closed_form_arbitrary_length PASSED
+tests/physics/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_separator_lemma_x_then_AA_updates_A_only PASSED
+tests/physics/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_separator_lemma_AA_then_x_updates_B_only PASSED
+tests/physics/test_physics_1.py::TestCSOperatorAndSeparatorLemmas::test_depth4_alternation_identity_all_pairs_on_archetype PASSED
+tests/physics/test_physics_1.py::TestInverseConjugationForm::test_inverse_is_conjugation_by_R PASSED
+tests/physics/test_physics_1.py::TestQuantumGravityManifold::test_holographic_area_scaling
 ==========
 PILLAR 2: Holographic Area/Entropy Scaling
 ==========
@@ -135,16 +39,16 @@ PILLAR 2: Holographic Area/Entropy Scaling
   Boundary Layer Volume: 65280
   Total Atmosphere (Horizon + Boundary): 65536
   Expansion Ratio (Boundary/Area): 255.00
-  ✓ Verified: The Horizon is holographically complete (Boundary = Bulk).
+  ✓ Verified: The Horizon is holographically complete (Boundary = Bulk). 
 PASSED
-tests/test_physics_2.py::TestComplementSymmetryKernelWide::test_complement_symmetry_commutes_with_byte_actions
+tests/physics/test_physics_2.py::TestComplementSymmetryKernelWide::test_complement_symmetry_commutes_with_byte_actions
 ==========
-SYMMETRY: Complement map commutes with byte actions (kernel-wide)
+SYMMETRY: Complement map commutes with byte actions (kernel-wide)        
 ==========
   Tested bytes: ['0x00', '0x01', '0x42', '0xaa', '0xff', '0x55', '0x12', '0x34']
   ✓ Verified: Complement symmetry commutes with sampled byte actions on all Ω states.
 PASSED
-tests/test_physics_2.py::TestKernelIntrinsicMaskCoordinates::test_exhaustive_step_law_in_mask_coordinates_all_states_all_bytes
+tests/physics/test_physics_2.py::TestKernelIntrinsicMaskCoordinates::test_exhaustive_step_law_in_mask_coordinates_all_states_all_bytes
 ==========
 KERNEL CLOSED FORM: Exhaustive (u,v) step law check on atlas
 ==========
@@ -152,15 +56,15 @@ KERNEL CLOSED FORM: Exhaustive (u,v) step law check on atlas
   Checking all 256 bytes across all Ω states (16,777,216 transitions) ...
   Total u-mismatches: 0
   Total v-mismatches: 0
-  ✓ Verified: Kernel dynamics is exactly (u_next, v_next) = (v, u XOR m_b) on real atlas.        
+  ✓ Verified: Kernel dynamics is exactly (u_next, v_next) = (v, u XOR m_b) on real atlas.
 PASSED
-tests/test_physics_2.py::TestKernelCommutatorAsTranslation::test_exhaustive_commutator_translation_all_byte_pairs
+tests/physics/test_physics_2.py::TestKernelCommutatorAsTranslation::test_exhaustive_commutator_translation_all_byte_pairs
 ==========
 COMMUTATOR TRANSLATION: Exhaustive K(x,y) over all 256×256 pairs
 ==========
   Start indices tested: [0, 32768, 65535]
   Word: [x_inv, y_inv, x, y] where inv(z) = [0xAA, z, 0xAA]
-  Expectation: delta24(x,y) = ((m_x XOR m_y)<<12) | (m_x XOR m_y)
+  Expectation: delta24(x,y) = ((m_x XOR m_y)<<12) | (m_x XOR m_y)        
   ✓ start_idx=0: all 65,536 commutators match expected translation mask
   ✓ start_idx=32768: all 65,536 commutators match expected translation mask
   ✓ start_idx=65535: all 65,536 commutators match expected translation mask
@@ -168,7 +72,7 @@ COMMUTATOR TRANSLATION: Exhaustive K(x,y) over all 256×256 pairs
 ----------
 INTRINSIC DISTRIBUTIONS (ordered byte pairs):
   d = m_x XOR m_y (12-bit)
-  commutator delta24 flips d in both halves -> dist24 = 2*popcount(d)
+  commutator delta24 flips d in both halves -> dist24 = 2*popcount(d)    
 ----------
   popcount(d) distribution (w in 0..12):
     w= 0: count=   256  prob=0.003906
@@ -217,7 +121,7 @@ INTRINSIC DISTRIBUTIONS (ordered byte pairs):
 
   Kernel-native aperture: A_kernel = P(w<=1) = 0.019531250 (compare A*=0.020699554)
 PASSED
-tests/test_physics_2.py::TestKernelMonodromyBaseFiber::test_bu_dual_pole_monodromy_base_closure_fiber_defect
+tests/physics/test_physics_2.py::TestKernelMonodromyBaseFiber::test_bu_dual_pole_monodromy_base_closure_fiber_defect
 ==========
 CGM-ANCHORED KERNEL MONODROMY: base closure, fiber defect
 ==========
@@ -232,13 +136,13 @@ CGM-ANCHORED KERNEL MONODROMY: base closure, fiber defect
   Fiber defect statistics over ALL pole pairs (y,z):
     mean popcount(m_y XOR m_z): 6.000000 (out of 12)
     var  popcount(m_y XOR m_z): 5.000000
-    mean fiber-angle θ_v:       1.570796 rad (hypercube-angle mapping)
+    mean fiber-angle θ_v:       1.570796 rad (hypercube-angle mapping)   
 
   Kernel-native 'openness' diagnostics (no claims):
     P(w<=1) = 0.019531250   (compare A*=0.020699554)
     Var(w)/256 = 0.019531250 (compare A*=0.020699554)
 PASSED
-tests/test_physics_2.py::TestCGMThresholdAnatomyInKernel::test_weight1_primitives_and_anatomical_locations
+tests/physics/test_physics_2.py::TestCGMThresholdAnatomyInKernel::test_weight1_primitives_and_anatomical_locations
 ==========
 CGM ANATOMY: Primitive minimal moves (weight-1 masks)
 ==========
@@ -249,17 +153,17 @@ CGM ANATOMY: Primitive minimal moves (weight-1 masks)
   byte=0xea  intron=0x40  mask=0x040  pop=1  at (frame=1, row=0, col=0, bit=6)
   ✓ Verified: exactly 4 primitive directions exist, each is a single anatomical bit.
 PASSED
-tests/test_physics_2.py::TestKernelCGMThresholdAnchors::test_cs_anchor_mean_fiber_angle_is_pi_over_2_exact
+tests/physics/test_physics_2.py::TestKernelCGMThresholdAnchors::test_cs_anchor_mean_fiber_angle_is_pi_over_2_exact
 ==========
 CGM ANCHOR: CS threshold as exact mean fiber-angle
 ==========
   Mean θ over code C: 1.570796326795 rad
   π/2:                1.570796326795 rad
   Difference:         -2.220446049250e-16 rad
-  (This equality follows from θ(12-w)=π-θ(w) and symmetric P(w).)
-  ✓ Verified: CS anchor s_p=π/2 is intrinsic (exact) in the kernel's defect-angle geometry.      
+  (This equality follows from θ(12-w)=π-θ(w) and symmetric P(w).)        
+  ✓ Verified: CS anchor s_p=π/2 is intrinsic (exact) in the kernel's defect-angle geometry.
 PASSED
-tests/test_physics_2.py::TestKernelCGMThresholdAnchors::test_monodromy_hierarchy_bridge_theta_min_delta_omega
+tests/physics/test_physics_2.py::TestKernelCGMThresholdAnchors::test_monodromy_hierarchy_bridge_theta_min_delta_omega
 ==========
 CGM HIERARCHY BRIDGE: θ_min -> SU2 holonomy, δ, ω
 ==========
@@ -278,7 +182,7 @@ CGM HIERARCHY BRIDGE: θ_min -> SU2 holonomy, δ, ω
   ω_kernel - ω_CGM             = -0.000056743 rad
   ✓ Diagnostic complete: kernel produces the right hierarchy scales without tuning.
 PASSED
-tests/test_physics_2.py::TestKernelCGMThresholdAnchors::test_discrete_aperture_shadow_A_kernel   
+tests/physics/test_physics_2.py::TestKernelCGMThresholdAnchors::test_discrete_aperture_shadow_A_kernel
 ==========
 CGM APERTURE SHADOW: A_kernel vs A*
 ==========
@@ -292,7 +196,7 @@ CGM APERTURE SHADOW: A_kernel vs A*
   closure_kernel - closure_CGM   = +0.001168303813
   ✓ Verified: kernel has an intrinsic discrete small-openness constant A_kernel=5/256.
 PASSED
-tests/test_physics_3.py::TestKernelByteCyclesAndEigenphases::test_reference_byte_cycle_decomposition_and_eigenphases
+tests/physics/test_physics_3.py::TestKernelByteCyclesAndEigenphases::test_reference_byte_cycle_decomposition_and_eigenphases
 Reference byte 0xAA - cycle and eigenphase structure
 ----------------------------------------------------
   n                          : 65536
@@ -301,25 +205,25 @@ Reference byte 0xAA - cycle and eigenphase structure
   eigenvalue multiplicity 1  : 32896
   eigenvalue multiplicity -1 : 32640
 PASSED
-tests/test_physics_3.py::TestKernelByteCyclesAndEigenphases::test_all_nonreference_bytes_are_pure_4_cycles
+tests/physics/test_physics_3.py::TestKernelByteCyclesAndEigenphases::test_all_nonreference_bytes_are_pure_4_cycles
 Non-reference bytes: fixed points of T_b^2
 ------------------------------------------
   bytes tested : 255
   anomalies    : 0
   anomaly list : []
 
-Representative non-reference byte 0x42 - cycle and eigenphase structure
------------------------------------------------------------------------
+Representative non-reference byte 0x42 - cycle and eigenphase structure  
+-----------------------------------------------------------------------  
   4-cycles                   : 16384
   eigenvalue multiplicity 1  : 16384
   eigenvalue multiplicity i  : 16384
   eigenvalue multiplicity -1 : 16384
   eigenvalue multiplicity -i : 16384
 PASSED
-tests/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_generator_bytes_span_all_masks_and_print
+tests/physics/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_generator_bytes_span_all_masks_and_print
 Mask code spanning set from intron-basis bytes
 ----------------------------------------------
-  generator bytes       : ['0xab', '0xa8', '0xae', '0xa2', '0xba', '0x8a', '0xea', '0x2a']       
+  generator bytes       : ['0xab', '0xa8', '0xae', '0xa2', '0xba', '0x8a', '0xea', '0x2a']
   generator masks (hex) : ['0x101', '0x202', '0x404', '0x808', '0x010', '0x020', '0x040', '0x080']
   reachable masks       : 256
   actual masks          : 256
@@ -327,7 +231,7 @@ Mask code spanning set from intron-basis bytes
 
   Context note: mask code has dimension 8 over GF(2), hence |C| = 2^8 = 256.
 PASSED
-tests/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_code_duality_sizes_and_macwilliams_identity
+tests/physics/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_code_duality_sizes_and_macwilliams_identity
 Code duality and MacWilliams identity
 -------------------------------------
   n                 : 12
@@ -338,7 +242,7 @@ Code duality and MacWilliams identity
   MacWilliams match : True
   B_actual weights  : {0: 1, 2: 4, 4: 6, 6: 4, 8: 1}
 PASSED
-tests/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_walsh_spectrum_support_equals_dual_code
+tests/physics/test_physics_3.py::TestMaskCodeDualityAndFourierSupport::test_walsh_spectrum_support_equals_dual_code
 Walsh spectrum of mask-code indicator
 -------------------------------------
   unique W(s) values    : [0, 256]
@@ -347,7 +251,7 @@ Walsh spectrum of mask-code indicator
   expected |C_perp|     : 16
   support equals C_perp : True
 PASSED
-tests/test_physics_3.py::TestAtlasShellDistributionsFromCodeEnumerator::test_horizon_distance_shells_equal_256_times_code_enumerator
+tests/physics/test_physics_3.py::TestAtlasShellDistributionsFromCodeEnumerator::test_horizon_distance_shells_equal_256_times_code_enumerator      
 Horizon distance shells over Ω (exact)
 -----------------------------------
   w= 0 : count=   256  prob=0.003906
@@ -364,7 +268,7 @@ Horizon distance shells over Ω (exact)
   w=11 : count=  1024  prob=0.015625
   w=12 : count=   256  prob=0.003906
 PASSED
-tests/test_physics_3.py::TestAtlasShellDistributionsFromCodeEnumerator::test_archetype_distance_shells_equal_convolution
+tests/physics/test_physics_3.py::TestAtlasShellDistributionsFromCodeEnumerator::test_archetype_distance_shells_equal_convolution
 Archetype distance shells over Ω (exact)
 ---------------------------------------
   dist= 0 : count=     1  prob=0.000015
@@ -393,18 +297,18 @@ Archetype distance shells over Ω (exact)
   dist=23 : count=     8  prob=0.000122
   dist=24 : count=     1  prob=0.000015
 PASSED
-tests/test_physics_3.py::TestCGMUnitsBridgeDiagnostics::test_kernel_to_cgm_units_bridge_prints   
+tests/physics/test_physics_3.py::TestCGMUnitsBridgeDiagnostics::test_kernel_to_cgm_units_bridge_prints
 CGM Units ↔ Kernel bridge (diagnostic)
 --------------------------------------
   A_kernel                        : 0.019531250000 (exact 5/256=0.019531250000)
   A*_CGM                          : 0.020699553813
   A_kernel - A*_CGM               : -0.001168303813
                                   :
-  theta_min                       : 0.585685543457  (arccos(5/6))
-  delta_kernel                    : 0.195228514486  (theta_min/3)
+  theta_min                       : 0.585685543457  (arccos(5/6))        
+  delta_kernel                    : 0.195228514486  (theta_min/3)        
   delta_BU_CGM                    : 0.195342176600
   delta_kernel - delta_BU_CGM     : -0.000113662114
-  omega_kernel                    : 0.097614257243  (delta_kernel/2)
+  omega_kernel                    : 0.097614257243  (delta_kernel/2)     
                                   :
   m_a_kernel                      : 0.199117528719
   m_a_CGM                         : 0.199471140201
@@ -414,7 +318,7 @@ CGM Units ↔ Kernel bridge (diagnostic)
   Q_G_CGM = 4π                    : 12.566370614359
   Q_G_kernel - 4π                 : +0.044672698168
                                   :
-  K_QG_kernel                     : 3.944394893067  ((π/4)/m_a_kernel)
+  K_QG_kernel                     : 3.944394893067  ((π/4)/m_a_kernel)   
   K_QG_CGM((π/4)/m_a)             : 3.937402486431
   K_QG_CGM(pi^2/sqrt(2pi))        : 3.937402486431
                                   :
@@ -423,38 +327,37 @@ CGM Units ↔ Kernel bridge (diagnostic)
   alpha_CGM (units)               : 0.007299734000
   alpha_kernel - alpha_CGM(paper) : -0.000001710724
 PASSED
-tests/test_physics_3.py::TestActionGroupPresentationInUV::test_word_action_depends_only_on_parity_OE_and_prints
+tests/physics/test_physics_3.py::TestActionGroupPresentationInUV::test_word_action_depends_only_on_parity_OE_and_prints
 Action group presentation check (u,v)
 -------------------------------------
   probe states        : 8192
   random words tested : 200
   mismatching words   : 0
 PASSED
-tests/test_physics_3.py::TestActionGroupPresentationInUV::test_only_two_linear_parts_exist_identity_or_swap PASSED
-tests/test_physics_3.py::TestClosedFormShellPolynomials::test_mask_weight_enumerator_is_closed_form_and_prints
+tests/physics/test_physics_3.py::TestActionGroupPresentationInUV::test_only_two_linear_parts_exist_identity_or_swap PASSED
+tests/physics/test_physics_3.py::TestClosedFormShellPolynomials::test_mask_weight_enumerator_is_closed_form_and_prints
 Mask weight enumerator: observed vs closed form
 -----------------------------------------------
   observed    : [1, 4, 10, 20, 31, 40, 44, 40, 31, 20, 10, 4, 1]
   closed form : [1, 4, 10, 20, 31, 40, 44, 40, 31, 20, 10, 4, 1]
   match       : True
 PASSED
-tests/test_physics_3.py::TestClosedFormShellPolynomials::test_archetype_distance_enumerator_is_closed_form_and_prints
+tests/physics/test_physics_3.py::TestClosedFormShellPolynomials::test_archetype_distance_enumerator_is_closed_form_and_prints
 Archetype distance enumerator: observed vs closed form
 ------------------------------------------------------
-  observed first 13    : [1, 8, 36, 120, 322, 728, 1428, 2472, 3823, 5328, 6728, 7728, 8092]     
+  observed first 13    : [1, 8, 36, 120, 322, 728, 1428, 2472, 3823, 5328, 6728, 7728, 8092]
   observed last 12     : [7728, 6728, 5328, 3823, 2472, 1428, 728, 322, 120, 36, 8, 1]
-  closed form first 13 : [1, 8, 36, 120, 322, 728, 1428, 2472, 3823, 5328, 6728, 7728, 8092]     
+  closed form first 13 : [1, 8, 36, 120, 322, 728, 1428, 2472, 3823, 5328, 6728, 7728, 8092]
   closed form last 12  : [7728, 6728, 5328, 3823, 2472, 1428, 728, 322, 120, 36, 8, 1]
   match                : True
 PASSED
-tests/test_physics_3.py::TestClosedFormShellPolynomials::test_uv_ir_symmetry_in_shells_and_prints
-
+tests/physics/test_physics_3.py::TestClosedFormShellPolynomials::test_uv_ir_symmetry_in_shells_and_prints
 UV/IR shell symmetry (exact in Ω)
 ---------------------------------
   max |count[d] - count[24-d]| : 0
   symmetry holds               : True
 PASSED
-tests/test_physics_4.py::TestApertureConstraintHalfInteger::test_aperture_constraint_product_equals_half
+tests/physics/test_physics_4.py::TestApertureConstraintHalfInteger::test_aperture_constraint_product_equals_half
 ==========
 APERTURE CONSTRAINT: Q_G × m_a² = 1/2
 ==========
@@ -473,7 +376,7 @@ APERTURE CONSTRAINT: Q_G × m_a² = 1/2
   Q_G_CGM (4π)                = 12.566370614359
   ✓ Aperture constraint 4π × m_a² ≈ 0.5 holds within 1%
 PASSED
-tests/test_physics_4.py::TestHolonomyGroupIsCode::test_achievable_fiber_defects_equal_mask_code  
+tests/physics/test_physics_4.py::TestHolonomyGroupIsCode::test_achievable_fiber_defects_equal_mask_code
 ==========
 HOLONOMY GROUP = MASK CODE
 ==========
@@ -483,8 +386,7 @@ HOLONOMY GROUP = MASK CODE
   XOR closure verified = True
   ✓ Holonomy group is isomorphic to (Z/2)^8
 PASSED
-tests/test_physics_4.py::TestOpticalConjugacyShellProduct::test_shell_conjugacy_product_structure
-
+tests/physics/test_physics_4.py::TestOpticalConjugacyShellProduct::test_shell_conjugacy_product_structure
 ==========
 OPTICAL CONJUGACY: SHELL PRODUCTS
 ==========
@@ -504,7 +406,7 @@ OPTICAL CONJUGACY: SHELL PRODUCTS
   ✓ Optical conjugacy structure verified
   ✓ Second-moment identity: E[d(24-d)] = 144 - Var(d) = 134
 PASSED
-tests/test_physics_4.py::TestKQGCommutatorScale::test_commutator_scale_kqg
+tests/physics/test_physics_4.py::TestKQGCommutatorScale::test_commutator_scale_kqg
 ==========
 COMMUTATOR SCALE K_QG
 ==========
@@ -518,7 +420,7 @@ COMMUTATOR SCALE K_QG
   K_QG = S_ONA?    : 3.944395 vs 3.944395
   (In CGM: K_QG = S_CS/2 = S_ONA)
 PASSED
-tests/test_physics_4.py::TestNeutrinoScaleInvariant::test_neutrino_scale_invariant_from_kernel   
+tests/physics/test_physics_4.py::TestNeutrinoScaleInvariant::test_neutrino_scale_invariant_from_kernel
 ==========
 NEUTRINO-SCALE-LIKE KERNEL INVAIRANT
 ==========
@@ -532,12 +434,12 @@ NEUTRINO-SCALE-LIKE KERNEL INVAIRANT
   R_nu (kernel)   = δ^6 / (m_a^2 * α) = 0.191415457562
   (Purely kernel-defined, no external scales used)
 PASSED
-tests/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_rank_orbit_theorem
+tests/physics/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_rank_orbit_theorem
 ==========
 RANK/ORBIT THEOREM: RESTRICTED ALPHABET
 ==========
-  t= 0: |allowed|=  1, rank=0, pred=     1, orbit=     1, match=True
-  t= 1: |allowed|=  5, rank=4, pred=   256, orbit=   256, match=True
+  t= 0: |allowed|=  1, rank=0, pred=     1, orbit=     1, match=True     
+  t= 1: |allowed|=  5, rank=4, pred=   256, orbit=   256, match=True     
   t= 2: |allowed|= 15, rank=8, pred= 65536, orbit= 65536, match=True
   t= 3: |allowed|= 35, rank=8, pred= 65536, orbit= 65536, match=True
   t= 4: |allowed|= 66, rank=8, pred= 65536, orbit= 65536, match=True
@@ -552,7 +454,7 @@ RANK/ORBIT THEOREM: RESTRICTED ALPHABET
 
   Mismatches: 0
 PASSED
-tests/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_nucleation_barrier_critical_threshold
+tests/physics/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_nucleation_barrier_critical_threshold
 ==========
 NUCLEATION BARRIER: CRITICAL THRESHOLD
 ==========
@@ -575,7 +477,7 @@ NUCLEATION BARRIER: CRITICAL THRESHOLD
   Below t=2: bubble sub-ontology (strict subset of Ω)
   At t>=2: full Ω accessible (65536 states)
 PASSED
-tests/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_minimal_generator_count     
+tests/physics/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_minimal_generator_count
 ==========
 MINIMAL GENERATOR COUNT
 ==========
@@ -594,7 +496,7 @@ MINIMAL GENERATOR COUNT
   Minimum k with full rank observed: 8
   (Code dimension = 8, so theoretical minimum is k >= 8)
 PASSED
-tests/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_weight2_bridge_masks_extend_rank
+tests/physics/test_physics_4.py::TestRestrictedAlphabetPhaseTransition::test_weight2_bridge_masks_extend_rank
 ==========
 WEIGHT-2 BRIDGE MASKS
 ==========
@@ -603,23 +505,222 @@ WEIGHT-2 BRIDGE MASKS
   |W2 bridge|    = 4
   Combined rank  = 8
 PASSED
+tests/test_aci_cli.py::test_a_cold_start_builds_atlas_and_templates PASSED
+tests/test_aci_cli.py::test_b_compile_program_into_artifacts PASSED
+tests/test_aci_cli.py::test_c_tamper_detection PASSED
+tests/test_aci_cli.py::test_d_determinism PASSED
+tests/test_aci_cli.py::test_e_skipped_attestations_in_report PASSED
+tests/test_app.py::TestDomainLedgers::test_aperture_zero_when_ledger_is_zero PASSED
+tests/test_app.py::TestDomainLedgers::test_decompose_reconstructs_y PASSED
+tests/test_app.py::TestDomainLedgers::test_aperture_scale_invariant PASSED
+tests/test_app.py::TestCoordinator::test_coordinator_replay_determinism PASSED
+tests/test_app.py::TestCoordinator::test_event_binding_records_kernel_moment PASSED
+tests/test_app.py::TestCoordinator::test_coordinator_reset PASSED        
+tests/test_app.py::TestCoordinator::test_coordinator_status_structure PASSED
+tests/test_app.py::TestHodgeProjections::test_programor_identities PASSED
+tests/test_app.py::TestHodgeProjections::test_cycle_component_in_kernel_of_B PASSED
+tests/test_app.py::TestHodgeProjections::test_cycle_basis_is_in_kernel_and_unit_norm PASSED
+tests/test_measurement.py::TestMeasurementCollapse::test_scalar_collapse_loses_aperture_distinguishability
+==========
+PROOF: SCALAR BLINDNESS
+==========
+  State 1 (Collapsed):   Scalar = 4.000000, A = 0.500000
+  State 2 (Distributed): Scalar = 4.000000, A = 0.625000
+  Scalar distinguishes states? False
+  ✓ Proven: Scalar aggregation discards structural information
+PASSED
+tests/test_measurement.py::TestMeasurementCollapse::test_scalar_sum_cannot_detect_A_star_proximity
+==========
+PROOF: ALIGNMENT INVISIBILITY
+==========
+  Aligned State:    Scalar = 0.363198, |A - A*| = 0.000000
+  Misaligned State: Scalar = 0.363198, |A - A*| = 0.479300
+  ✓ Proven: Scalar evaluation cannot detect alignment
+PASSED
+tests/test_measurement.py::TestMeasurementCollapse::test_single_axis_structural_lock_vs_multi_axis_freedom
+==========
+PROOF: STRUCTURAL LOCK VS FREEDOM
+==========
+  Target A* = 0.020700
+  [Single Axis Strategy]
+    Mag   1.0 -> A = 0.500000 (Locked)
+    Mag  10.0 -> A = 0.500000 (Locked)
+    Mag 100.0 -> A = 0.500000 (Locked)
+  [Multi-Axis Strategy]
+    Constructed y -> A = 0.020700 (Aligned)
+  ✓ Proven: Single-axis optimization cannot achieve alignment.
+  ✓ Proven: Epistemic enumeration enables A*.
+PASSED
+tests/test_measurement.py::TestMeasurementCollapse::test_kernel_A_kernel_vs_app_A_star
+==========
+KERNEL ↔ APP APERTURE BRIDGE
+==========
+  A_kernel (discrete) = 0.019531250000 (5/256)
+  A* (CGM continuous) = 0.020700000000
+  Relative difference = 5.6%
+  ✓ Kernel discrete structure approximates CGM continuous target
+PASSED
+tests/test_measurement.py::TestMeasurementCollapse::test_epistemic_aperture_is_scale_invariant
+==========
+PROOF: EPISTEMIC SELF-NORMALIZATION
+==========
+  Scalar: 6.2000 -> 620.0000 (Scales with input)
+  Aperture: 0.359484777518 -> 0.359484777518 (Invariant)
+  ✓ Epistemic measurement is self-normalizing
+PASSED
+tests/test_moments.py::test_router_static_structure_anchors
+----------
+Router Anchors
+----------
+Ontology size |Ω|: 65,536
+Byte alphabet: 256
+PASSED
+tests/test_moments.py::test_aperture_shadow_a_kernel_close_to_a_star     
+----------
+Aperture Shadow
+----------
+A_kernel (exact): 0.019531250000 (5/256)
+A* (CGM):         0.020699553813
+Relative diff:    5.644101%
+PASSED
+tests/test_moments.py::test_atomic_second_anchor_constant
+----------
+Atomic Second Anchor
+----------
+Cs-133 hyperfine frequency: 9,192,631,770 Hz
+PASSED
+tests/test_moments.py::test_mu_definition_and_base_rate_base60
+----------
+Base-60 MU Anchor
+----------
+Seconds/minute: 60
+Minutes/hour:   60
+MU/minute:      1
+MU/hour:        60
+PASSED
+tests/test_moments.py::test_uhi_amounts_daily_and_annual
+----------
+UHI
+----------
+UHI hours/day:   4
+UHI MU/day:      240
+UHI MU/year:     87,600
+PASSED
+tests/test_moments.py::test_tier_multipliers_from_uhi
+----------
+Tier Multipliers
+----------
+UHI (MU/year): 87,600
+tier_1: 1× -> 87,600 MU/year
+tier_2: 2× -> 175,200 MU/year
+tier_3: 3× -> 262,800 MU/year
+tier_4: 60× -> 5,256,000 MU/year
+PASSED
+tests/test_moments.py::test_tier4_accessible_mnemonic_one_per_second_for_four_hours_day
+----------
+Tier 4 Mnemonic
+----------
+Tier 4 (MU/year):        5,256,000
+4 hours/day in seconds:  14,400
+Mnemonic annual seconds: 5,256,000
+PASSED
+tests/test_moments.py::test_illustrative_work_week_is_not_the_definition_of_tiers
+----------
+Tier Definition vs Illustrative Work Week
+----------
+Tier 2 increment (MU/year):         87,600
+Illustrative 4×4 work MU/year:      49,920
+Note: Tiers are defined by UHI multipliers, not by this schedule.        
+PASSED
+tests/test_moments.py::test_fiat_capacity_upper_bound_from_atomic_and_kernel_rates
+----------
+Fiat Capacity Upper Bound
+----------
+Atomic Hz:          9,192,631,770
+Kernel steps/sec:   2,400,000
+F_total (/sec):     22.06 quadrillion (22,062,316,248,000,000)
+PASSED
+tests/test_moments.py::test_millennium_uhi_feasibility_under_conservative_mapping
+----------
+Millennium UHI Feasibility (Conservative Mapping)
+----------
+Conservative demonstration mapping: 1 micro-state == 1 MU
+Population:                      8,100,000,000
+UHI per person per year (MU):    87,600
+Needed per year (MU):            709.56 trillion (709,560,000,000,000)   
+Available per year (units):      695,757.21 quintillion (695,757,205,196,927,974,506,496)
+Used % over 1000 years:        0.0000001020%
+Surplus over 1000 years (units): 695,757,204.49 quintillion (695,757,204,487,367,991,733,780,480)
+PASSED
+tests/test_moments.py::test_notional_surplus_allocation_12_divisions     
+----------
+Notional Surplus Allocation (12 Divisions)
+----------
+Horizon years:     1,000
+Divisions:         12 (3 domains × 4 capacities)
+Surplus (units):   695,757,204.49 quintillion (695,757,204,487,367,991,733,780,480)
+Per division:      57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+
+Sample divisions:
+  Economy      × GM    : 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+  Economy      × ICu   : 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+  Economy      × IInter: 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+  Economy      × ICo   : 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+  Employment   × GM    : 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+  Employment   × ICu   : 57,979,767.04 quintillion (57,979,767,040,614,002,174,459,904)
+PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_atlas_exists PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_ontology_file_exists PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_epistemology_file_exists PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_phenomenology_file_exists PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_ontology_size PASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_ontology_sortedPPASSED
+tests/test_others.py::TestAtlasBuildingValidation::test_archetype_in_ontology PASSED
+tests/test_others.py::TestOntologyStructure::test_ontology_is_cartesian_product_of_two_256_sets PASSED
+tests/test_others.py::TestPhenomenologyValidation::test_archetype_stored_correctly PASSED
+tests/test_others.py::TestPhenomenologyValidation::test_gene_mic_s_stored
+ PASSED
+tests/test_others.py::TestPhenomenologyValidation::test_xform_masks_count
+ PASSED
+tests/test_others.py::TestPhenomenologyValidation::test_xform_masks_match_constants PASSED
+tests/test_others.py::TestEdgeCases::test_all_zeros_state PASSED
+tests/test_others.py::TestEdgeCases::test_all_ones_state PASSED
+tests/test_others.py::TestEdgeCases::test_mask_boundary_values PASSED    
+tests/test_others.py::TestEdgeCases::test_repeated_byte_application PASSED
+tests/test_others.py::TestPerformance::test_step_performance
+  Steps/sec: 1,651,010
+  Time per step: 0.61 μs
+PASSED
+tests/test_others.py::TestPerformance::test_kernel_step_performance      
+  Kernel steps/sec: 1,095,194
+  Time per step: 0.91 μs
+PASSED
+tests/test_others.py::TestPerformance::test_aperture_measurement_performance
+  Aperture measurements/sec: 510,882
+  Time per measurement: 0.00 ms
+PASSED
+tests/test_others.py::TestInvariantValidation::test_unique_mask_count PASSED
+tests/test_others.py::TestInvariantValidation::test_all_b_masks_zero PASSED
+tests/test_others.py::TestInvariantValidation::test_a_mask_coverage PASSED
 tests/test_plugins.py::TestAnalytics::test_plugins_analytics_matches_domainledger_aperture PASSED
-tests/test_plugins.py::TestAnalytics::test_hodge_decompose_reconstruction PASSED
+tests/test_plugins.py::TestAnalytics::test_hodge_decompose_reconstruction
+ PASSED
 tests/test_plugins.py::TestAnalytics::test_hodge_decompose_zero_vector PASSED
 tests/test_plugins.py::TestAPIAdapters::test_parse_domain PASSED
-tests/test_plugins.py::TestAPIAdapters::test_parse_edge_id PASSED
-tests/test_plugins.py::TestAPIAdapters::test_event_from_dict PASSED
-tests/test_plugins.py::TestAPIAdapters::test_event_to_dict PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin_unknown_domain PASSED  
+tests/test_plugins.py::TestAPIAdapters::test_parse_edge_id PASSED        
+tests/test_plugins.py::TestAPIAdapters::test_event_from_dict PASSED      
+tests/test_plugins.py::TestAPIAdapters::test_event_to_dict PASSED        
+tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin
+ PASSED
+tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin_ignores_domain_parameter PASSED
 tests/test_plugins.py::TestFrameworkPlugins::test_gyroscope_workmix_plugin PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_gyroscope_workmix_plugin_infer_intel PASSED    
+tests/test_plugins.py::TestFrameworkPlugins::test_gyroscope_workmix_plugin_infer_intel PASSED
 tests/test_plugins.py::TestFrameworkPlugins::test_plugin_context_meta PASSED
-tests/test_routing.py::TestAtlasLoading::test_ontology_loaded PASSED
-tests/test_routing.py::TestAtlasLoading::test_epistemology_loaded PASSED
+tests/test_routing.py::TestAtlasLoading::test_ontology_loaded PASSED     
+tests/test_routing.py::TestAtlasLoading::test_epistemology_loaded PASSED 
 tests/test_routing.py::TestAtlasLoading::test_phenomenology_loaded PASSED
-tests/test_routing.py::TestAtlasLoading::test_archetype_found PASSED
-tests/test_routing.py::TestAtlasLoading::test_archetype_index_convention
+tests/test_routing.py::TestAtlasLoading::test_archetype_found PASSED     
+tests/test_routing.py::TestAtlasLoading::test_archetype_index_convention 
   Archetype at index 43,605 / 65,536
 PASSED
 tests/test_routing.py::TestStateTransitions::test_initial_state_is_archetype PASSED
@@ -627,17 +728,18 @@ tests/test_routing.py::TestStateTransitions::test_single_byte_transition PASSED
 tests/test_routing.py::TestStateTransitions::test_all_bytes_produce_transitions PASSED
 tests/test_routing.py::TestStateTransitions::test_transitions_deterministic PASSED
 tests/test_routing.py::TestStateTransitions::test_reset_returns_to_archetype PASSED
-tests/test_routing.py::TestStateTransitions::test_step_counter_increments_and_resets PASSED      
+tests/test_routing.py::TestStateTransitions::test_step_counter_increments_and_resets PASSED
 tests/test_routing.py::TestMultiStepRouting::test_two_byte_sequence PASSED
-tests/test_routing.py::TestMultiStepRouting::test_payload_routing PASSED
-tests/test_routing.py::TestMultiStepRouting::test_order_matters PASSED
+tests/test_routing.py::TestMultiStepRouting::test_payload_routing PASSED 
+tests/test_routing.py::TestMultiStepRouting::test_order_matters PASSED   
 tests/test_routing.py::TestSignatureProperties::test_signature_fields PASSED
-tests/test_routing.py::TestSignatureProperties::test_signature_hex_format PASSED
+tests/test_routing.py::TestSignatureProperties::test_signature_hex_format
+ PASSED
 tests/test_routing.py::TestSignatureProperties::test_signature_consistency PASSED
 tests/test_routing.py::TestReachability::test_archetype_reachable_from_itself PASSED
 tests/test_routing.py::TestReachability::test_random_walk_stays_in_ontology PASSED
 tests/test_routing.py::TestAtlasGlobalGroupFacts::test_each_byte_column_is_permutation PASSED
-tests/test_routing.py::TestAtlasGlobalGroupFacts::test_bfs_radius_two_from_archetype PASSED      
+tests/test_routing.py::TestAtlasGlobalGroupFacts::test_bfs_radius_two_from_archetype PASSED
 tests/test_routing.py::TestAtlasGlobalGroupFacts::test_depth4_alternation_identity_on_all_states_for_selected_pairs PASSED
 tests/test_routing.py::TestHorizonFixedPoints::test_R0xAA_fixed_points_match_horizon_set_and_count PASSED
 tests/test_routing.py::TestRowFanoutDistinctness::test_row_fanout_is_256_for_all_states PASSED
@@ -650,6 +752,20 @@ Epistemology shape: (65536, 256)
 Archetype state: 0xaaa555
 Archetype index: 43605
 Archetype A12: 0xaaa
+==========
+
+==========
+OVERALL TEST SUMMARY
+==========
+Atlas loaded: YES
+  Ontology: 65,536 states
+  Epistemology: (65536, 256)
+  Phenomenology: 6 arrays
+
+Constants:
+  GENE_MIC_S: 0xaa
+  Archetype: 0xaaa555
+  Unique masks: 256
 ==========
 
 ==========
@@ -678,12 +794,12 @@ PHYSICS 3 DASHBOARD - KERNEL STRUCTURE TOWARDS CGM UNITS
   ✓ Reference byte 0xAA: involution with 256 fixed points and 32640 2-cycles
   ✓ Non-reference bytes: proven pure 4-cycle permutations on Ω
   ✓ Permutation-unitary eigenphases implied and printed
-  ✓ Mask code spanning set via intron basis bytes (2^8 = 256 masks)
+  ✓ Mask code spanning set via intron basis bytes (2^8 = 256 masks)      
   ✓ Exact linear-code duality: |C|*|C_perp| = 2^12
   ✓ MacWilliams identity verified for C and C_perp
-  ✓ Walsh spectrum support theorem verified: support equals C_perp
+  ✓ Walsh spectrum support theorem verified: support equals C_perp       
   ✓ Atlas shell distributions forced by code enumerator (exact)
-  ✓ CGM Units bridge diagnostics printed (A, m_a, Q_G, K_QG, alpha)
+  ✓ CGM Units bridge diagnostics printed (A, m_a, Q_G, K_QG, alpha)      
 ==========
 
 ==========
@@ -693,10 +809,10 @@ KERNEL CGM EMERGENCE DASHBOARD (Physics 3)
   ✓ Commutator K(x,y) is global translation: s_out = s XOR ((d<<12)|d), d=m_x XOR m_y
   ✓ Kernel monodromy: base closure + fiber defect (CGM-anchored)
   ✓ Complement symmetry commutes with byte actions (global commuting automorphism)
-  ✓ CGM threshold anatomy: mask code cartography (2×3×2 decomposition)
+  ✓ CGM threshold anatomy: mask code cartography (2×3×2 decomposition)   
   ✓ Kernel -> CGM invariant reconstruction (δ, m_a, Q_G, α)
   ✓ CS anchor: mean fiber-angle = π/2 (exact theorem)
-  ✓ Monodromy hierarchy bridge: θ_min → δ → ω (kernel-native scales)
+  ✓ Monodromy hierarchy bridge: θ_min → δ → ω (kernel-native scales)     
   ✓ Discrete aperture shadow: A_kernel = 5/256 vs A*
 ==========
 
@@ -708,20 +824,6 @@ Non-zero A masks: 255 / 256
 Non-zero B masks: 0 / 256 (expected 0)
 ==========
 
-==========
-OVERALL TEST SUMMARY
-==========
-Atlas loaded: YES
-  Ontology: 65,536 states
-  Epistemology: (65536, 256)
-  Phenomenology: 5 arrays
 
-Constants:
-  GENE_MIC_S: 0xaa
-  Archetype: 0xaaa555
-  Unique masks: 256
-==========
-
-
-===================================== 135 passed in 7.64s ====================================== 
-(.venv) PS D:\Development\superintelligence> 
+========================= 146 passed in 11.45s ========================= 
+(.venv) PS F:\Development\superintelligence> 
