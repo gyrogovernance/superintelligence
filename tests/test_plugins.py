@@ -9,7 +9,7 @@ Tests the plugin system:
 
 import numpy as np
 
-from src.app.events import Domain, EdgeID, GovernanceEvent
+from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
 from src.app.ledger import DomainLedgers
 from src.plugins.analytics import hodge_decompose
 from src.plugins.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id
@@ -26,12 +26,14 @@ class TestAnalytics:
     def test_plugins_analytics_matches_domainledger_aperture(self):
         """hodge_decompose should match DomainLedgers.aperture for same vector."""
         ledgers = DomainLedgers()
-        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.GOV_INTEL, magnitude=1.25))
-        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFER_INTEL, magnitude=-0.75))
+        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.GOV_INTEL, magnitude_micro=int(round(1.25 * MICRO)), confidence_micro=MICRO))
+        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFER_INTEL, magnitude_micro=int(round(-0.75 * MICRO)), confidence_micro=MICRO))
 
         y = ledgers.get(Domain.EDUCATION)
         a_led = ledgers.aperture(Domain.EDUCATION)
-        a_ana = hodge_decompose(y).aperture
+        # Convert int64 array to float64 for analytics plugin (it expects float64)
+        y_float = y.astype(np.float64)
+        a_ana = hodge_decompose(y_float).aperture
 
         assert abs(a_led - a_ana) < 1e-12
 
@@ -96,8 +98,9 @@ class TestAPIAdapters:
 
         assert ev.domain == Domain.ECONOMY
         assert ev.edge_id == EdgeID.GOV_INFO
-        assert ev.magnitude == 1.5
-        assert ev.confidence == 0.8
+        # event_from_dict converts legacy float format to micro-units
+        assert ev.magnitude_micro == int(round(1.5 * MICRO))
+        assert ev.confidence_micro == int(round(0.8 * MICRO))
         assert ev.meta == {"test": "value"}
 
     def test_event_to_dict(self):
@@ -105,8 +108,8 @@ class TestAPIAdapters:
         ev = GovernanceEvent(
             domain=Domain.EMPLOYMENT,
             edge_id=EdgeID.INFO_INFER,
-            magnitude=-0.5,
-            confidence=0.9,
+            magnitude_micro=int(round(-0.5 * MICRO)),
+            confidence_micro=int(round(0.9 * MICRO)),
             meta={"key": "value"},
         )
 
@@ -114,8 +117,8 @@ class TestAPIAdapters:
 
         assert d["domain"] == 1
         assert d["edge_id"] == 3
-        assert d["magnitude"] == -0.5
-        assert d["confidence"] == 0.9
+        assert d["magnitude_micro"] == int(round(-0.5 * MICRO))
+        assert d["confidence_micro"] == int(round(0.9 * MICRO))
         assert d["meta"] == {"key": "value"}
 
 
@@ -144,13 +147,13 @@ class TestFrameworkPlugins:
         assert gtd_ev is not None
         assert gtd_ev.domain == Domain.EDUCATION
         assert gtd_ev.edge_id == EdgeID.GOV_INFO
-        assert gtd_ev.magnitude == 0.1
+        assert abs(gtd_ev.magnitude_micro - int(round(0.1 * MICRO))) < 10  # Allow for rounding differences
 
         # Check IVD -> INFO_INFER
         ivd_ev = next((e for e in events if e.meta.get("signal") == "IVD"), None)
         assert ivd_ev is not None
         assert ivd_ev.edge_id == EdgeID.INFO_INFER
-        assert ivd_ev.magnitude == -0.2
+        assert abs(ivd_ev.magnitude_micro - int(round(-0.2 * MICRO))) < 10  # Allow for rounding differences
 
     def test_thm_displacement_plugin_ignores_domain_parameter(self):
         """THMDisplacementPlugin always emits to EDUCATION domain regardless of payload domain."""
@@ -186,7 +189,7 @@ class TestFrameworkPlugins:
         ev = events[0]
         assert ev.domain == Domain.EMPLOYMENT
         assert ev.edge_id == EdgeID.GOV_INFO
-        assert ev.magnitude == 0.2  # 0.1 - (-0.1)
+        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.1 - (-0.1), allow for rounding
         assert ev.meta["metric"] == "GM-ICu"
 
     def test_gyroscope_workmix_plugin_infer_intel(self):
@@ -208,7 +211,7 @@ class TestFrameworkPlugins:
 
         ev = events[0]
         assert ev.edge_id == EdgeID.INFER_INTEL
-        assert abs(ev.magnitude - 0.2) < 1e-10  # 0.3 - 0.1 (floating-point precision)
+        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.3 - 0.1, allow for rounding
         assert ev.meta["metric"] == "IInter-ICo"
 
     def test_plugin_context_meta(self):

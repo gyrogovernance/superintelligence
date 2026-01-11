@@ -1,398 +1,605 @@
-# tests/test_ecology_capacity_ledger.py
+# tests/test_substrate.py
 """
-Ecology Capacity Ledger Experiments
+Transparent, Accountable, Resilient Fiat Substrate
+===================================================
 
-These tests explore how to:
-- realise atomic abundance as a concrete MU capacity envelope
-- define replayable "capacity windows" anchored by kernel states
-- allocate MU to identity-anchored genealogies inside that envelope
-- maintain a simple global ecology capacity ledger that is replayable
+This module tests an end-to-end fiat substrate built on top of the CGM-derived
+router kernel. It treats the kernel as a physical coordination device and
+verifies that:
 
-They DO NOT change kernel physics or core app modules.
-They are exploratory design tests in the spirit of test_substrate.py.
+- Atomic and kernel throughput define an abundant MU capacity envelope.
+- Capacity is partitioned into replayable Shells (time-bounded windows).
+- MU Grants are anchored to identities via kernel states.
+- Archives aggregate Shells deterministically across long horizons.
+- Integrity and tampering are detectable via kernel algebra (parity law, dual code).
+- Meta-routing commits multiple programme ledgers to a compact root.
+- State components can be isolated (identity vs balance) and rolled back.
+
+No physics proofs are repeated here; those live in test_physics_*.py.
+This file focuses on substrate-level correctness and robustness.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
-import hashlib
+from typing import List, Tuple
+import random
+
 import numpy as np
 import pytest
 
 from src.router.kernel import RouterKernel
+from src.router.constants import (
+    mask12_for_byte,
+    dot12,
+    C_PERP_12,
+)
+from src.app.coordination import Coordinator, CAPACITY_PER_YEAR_MU
 
 ATLAS_DIR = Path(__file__).parent.parent / "data" / "atlas"
 
 
 # ---------------------------------------------------------------------------
-# 0. Physical and economic constants (copied from existing reports/tests)
+# 0. Pytest fixture: atlas directory
 # ---------------------------------------------------------------------------
 
-# Atomic + kernel throughput as in test_moments.py (F_total ≈ 22.06e15 / sec)
-F_TOTAL_PER_SEC = 22_062_316_248_000_000  # structural micro-state references per second
+@pytest.fixture(scope="session")
+def atlas_dir() -> Path:
+    """Provide atlas directory path; fail fast if missing."""
+    assert ATLAS_DIR.exists(), f"Atlas not found at {ATLAS_DIR}"
+    return ATLAS_DIR
 
-SECONDS_PER_YEAR = 365 * 24 * 60 * 60  # 31,536,000
+
+# ---------------------------------------------------------------------------
+# 1. Physical and economic constants (from Moments Economy)
+# ---------------------------------------------------------------------------
+
+# World population (approximate, for scaling checks)
 WORLD_POP = 8_100_000_000
-UHI_PER_YEAR_MU = 87_600  # from Moments spec: 4 hours/day at 60 MU/hour
 
-# Conservative mapping: 1 structural micro-state reference == 1 MU
-# (this is intentionally conservative; real mapping could be much looser)
-CAPACITY_PER_YEAR_MU = F_TOTAL_PER_SEC * SECONDS_PER_YEAR
+# Unconditional High Income: 4 hours/day at 60 MU/hour = 240 MU/day
+UHI_PER_YEAR_MU = 87_600
+
+# CAPACITY_PER_YEAR_MU imported from src.app.coordination
 
 
 # ---------------------------------------------------------------------------
-# Helper functions
+# 2. Test helpers (using runtime implementations)
 # ---------------------------------------------------------------------------
 
 def route_bytes(payload: bytes) -> str:
-    """Route a payload through a fresh kernel and return state hex."""
+    """
+    Route a payload through a fresh kernel and return state_hex (3 bytes).
+
+    This is the canonical way to derive a compact structural commitment
+    from arbitrary bytes.
+    """
     k = RouterKernel(ATLAS_DIR)
-    k.step_payload(payload)
-    return k.signature().state_hex
-
-
-def identity_commitment(name: str) -> str:
-    """
-    Compute a stable identity anchor:
-    - hash the name
-    - route the hash through the kernel
-    - use the resulting state_hex as the identity commitment
-    """
-    seed = f"identity:{name}".encode()
-    h = hashlib.sha256(seed).digest()
-    return route_bytes(h)
-
-
-@dataclass(frozen=True)
-class AllocationEvent:
-    """
-    A single allocation of MU to an identity within a capacity window.
-    """
-    identity: str           # human-readable id
-    identity_commit: str    # 3-byte state_hex commitment
-    mu_allocated: int       # MU allocated in this window
-
-
-@dataclass(frozen=True)
-class CapacityWindow:
-    """
-    A capacity window in the ecology substrate.
-
-    header: arbitrary contextual header (e.g. "year:2026", "epoch:1")
-    window_state: kernel state_hex after routing header || allocation receipts
-    total_capacity_MU: MU capacity available in this window (from physics)
-    used_capacity_MU: sum of MU allocations in this window
-    free_capacity_MU: remaining MU capacity
-    """
-    header: bytes
-    window_state: str
-    total_capacity_MU: int
-    used_capacity_MU: int
-    free_capacity_MU: int
-
-
-def build_capacity_window(
-    header: bytes,
-    alloc_events: List[AllocationEvent],
-    total_capacity_MU: int,
-) -> CapacityWindow:
-    """
-    Construct a capacity window:
-    - encode header + receipts into a payload
-    - route through kernel to obtain a window_state commitment
-    - compute used and free capacity
-    """
-    # Encode receipts deterministically: sort by identity_commit for canonical ordering
-    receipts = []
-    for ev in sorted(alloc_events, key=lambda e: e.identity_commit):
-        # Each receipt is (identity_commit || mu_allocated as 8 bytes big-endian)
-        mu_bytes = ev.mu_allocated.to_bytes(8, "big", signed=False)
-        receipts.append(bytes.fromhex(ev.identity_commit) + mu_bytes)
-    payload = header + b"".join(receipts)
-
-    window_state = route_bytes(payload)
-    used = sum(ev.mu_allocated for ev in alloc_events)
-    free = total_capacity_MU - used
-
-    return CapacityWindow(
-        header=header,
-        window_state=window_state,
-        total_capacity_MU=total_capacity_MU,
-        used_capacity_MU=used,
-        free_capacity_MU=free,
-    )
-
-
-def replay_capacity_window(
-    header: bytes,
-    alloc_events: List[AllocationEvent],
-    total_capacity_MU: int,
-) -> CapacityWindow:
-    """
-    Replay function: same as build_capacity_window, provided to emphasise
-    determinism in tests.
-    """
-    return build_capacity_window(header, alloc_events, total_capacity_MU)
+    sig = k.route_from_archetype(payload)
+    return sig.state_hex
 
 
 # ---------------------------------------------------------------------------
-# 1. Test: Physical capacity vs global UHI for one year
+# 4. Capacity envelope for UHI over realistic horizons
 # ---------------------------------------------------------------------------
 
-def test_01_global_uhi_vs_physical_capacity_one_year():
+def test_01_capacity_envelope_for_uhi():
     """
-    Check that one year of UHI for the full world population fits comfortably
-    inside the conservative capacity mapping.
+    One year and one millennium of UHI for the world fit comfortably
+    inside the conservative MU capacity envelope.
 
-    This is a one-year analogue of the Millennium feasibility test.
+    This shows that at planetary and millennial scales, capacity is solely
+    a governance question, not a physical shortage.
     """
+    print("\n=== CAPACITY ENVELOPE VS UHI ===")
+
     total_uhi_year = WORLD_POP * UHI_PER_YEAR_MU
-    usage_fraction = total_uhi_year / CAPACITY_PER_YEAR_MU
+    usage_fraction_year = total_uhi_year / CAPACITY_PER_YEAR_MU
 
-    print("\n=== GLOBAL UHI VS PHYSICAL CAPACITY (one year) ===")
-    print(f"F_total_per_sec      : {F_TOTAL_PER_SEC:>20,d}")
-    print(f"Seconds/year         : {SECONDS_PER_YEAR:>20,d}")
-    print(f"Capacity/year (MU)   : {CAPACITY_PER_YEAR_MU:>20,d}")
-    print(f"Total UHI/year (MU)  : {total_uhi_year:>20,d}")
-    print(f"Usage fraction       : {usage_fraction:.12e}")
+    years = 1000
+    total_uhi_mill = total_uhi_year * years
+    capacity_mill = CAPACITY_PER_YEAR_MU * years
+    usage_fraction_mill = total_uhi_mill / capacity_mill
 
-    # We expect this to be extremely small; assert < 1e-6 conservatively
-    assert usage_fraction < 1e-6
+    print(f"Capacity/year (MU): {CAPACITY_PER_YEAR_MU:,}")
+    print(f"UHI/year (MU):      {total_uhi_year:,}")
+    print(f"Usage/year:         {usage_fraction_year:.12e}")
+    print(f"Capacity/{years}y (MU): {capacity_mill:,}")
+    print(f"UHI/{years}y (MU):      {total_uhi_mill:,}")
+    print(f"Usage/{years}y:         {usage_fraction_mill:.12e}")
+
+    # Conservative safety margins
+    assert usage_fraction_year < 1e-6
+    assert usage_fraction_mill < 1e-3
 
 
 # ---------------------------------------------------------------------------
-# 2. Test: One ecology capacity window with identity-anchored allocations
+# 5. Shell and Archive integrity (transparency + accountability)
 # ---------------------------------------------------------------------------
 
-def test_02_single_capacity_window_with_identity_allocations():
+def test_02_shell_and_archive_integrity():
     """
-    Build a single capacity window (e.g. a year) with a handful of identities.
-    Allocate MU (e.g. UHI + tier increments) and ensure:
-    - sum of allocations <= physical capacity
-    - window_state is deterministically reproducible
-    - identity commitments are distinct and stable
+    Verify Shell and Archive behavior:
+
+    - Shell is within capacity and deterministically replayable.
+    - Archive built from multiple Shells is deterministic.
+    - Tampering with Grants changes Shell seal and Archive totals.
+    - Duplicate Grants for an identity in a Shell are detectable (application rule).
     """
-    print("\n=== SINGLE ECOLOGY CAPACITY WINDOW ===")
+    print("\n=== SHELL AND ARCHIVE INTEGRITY ===")
 
     header = b"ecology:year:2026"
-    total_capacity_MU = CAPACITY_PER_YEAR_MU  # could be scaled down in practice
+    capacity = CAPACITY_PER_YEAR_MU
 
-    # Define a small set of identities and allocations (UHI + tiers)
-    identities = ["alice", "bob", "carol", "dave"]
-    tiers = {
-        "alice": UHI_PER_YEAR_MU * 3,   # e.g. Tier 3
-        "bob":   UHI_PER_YEAR_MU * 2,   # Tier 2
-        "carol": UHI_PER_YEAR_MU * 1,   # Tier 1
-        "dave":  UHI_PER_YEAR_MU * 1,   # Tier 1
-    }
+    # Use Coordinator for shell creation
+    coord1 = Coordinator(ATLAS_DIR)
+    coord1.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord1.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    shell = coord1.close_shell(header, capacity)
+    
+    assert shell.used_capacity_MU <= shell.total_capacity_MU
+    
+    # Replay: create same shell with another Coordinator
+    coord2 = Coordinator(ATLAS_DIR)
+    coord2.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord2.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    shell2 = coord2.close_shell(header, capacity)
+    
+    assert shell2.seal == shell.seal
+    assert shell2.used_capacity_MU == shell.used_capacity_MU
 
-    events: List[AllocationEvent] = []
-    for name in identities:
-        commit = identity_commitment(name)
-        mu = tiers[name]
-        events.append(
-            AllocationEvent(
-                identity=name,
-                identity_commit=commit,
-                mu_allocated=mu,
-            )
-        )
+    # Archive determinism across shells
+    coord3 = Coordinator(ATLAS_DIR)
+    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord3.close_shell(b"ecology:year:2026", capacity)
+    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord3.close_shell(b"ecology:year:2027", capacity)
+    status1 = coord3.fiat_status()
+    
+    coord4 = Coordinator(ATLAS_DIR)
+    coord4.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord4.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord4.close_shell(b"ecology:year:2026", capacity)
+    coord4.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord4.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord4.close_shell(b"ecology:year:2027", capacity)
+    status2 = coord4.fiat_status()
+    
+    assert status1["per_identity_totals"] == status2["per_identity_totals"]
+    assert status1["used_capacity_MU"] == status2["used_capacity_MU"]
 
-    # Build window
-    win = build_capacity_window(header, events, total_capacity_MU)
+    print(f"Shell seal: {shell.seal}")
+    print(f"Archive per-identity MU: {status1['per_identity_totals']}")
 
-    print(f"Header              : {header}")
-    print(f"Window state        : {win.window_state}")
-    print(f"Total capacity (MU) : {win.total_capacity_MU}")
-    print(f"Used capacity (MU)  : {win.used_capacity_MU}")
-    print(f"Free capacity (MU)  : {win.free_capacity_MU}")
+    # Tampering: inflate alice's grant
+    coord_tampered = Coordinator(ATLAS_DIR)
+    coord_tampered.add_grant("alice", UHI_PER_YEAR_MU * 30)
+    coord_tampered.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    shell_tampered = coord_tampered.close_shell(header, capacity)
+    status_tampered = coord_tampered.fiat_status()
 
-    # Check: all identity commitments distinct
-    commits = [e.identity_commit for e in events]
-    assert len(set(commits)) == len(commits)
+    assert shell_tampered.seal != shell.seal
+    assert status_tampered["per_identity_totals"]["alice"] != status1["per_identity_totals"]["alice"]
 
-    # Check: allocations fit within capacity
-    assert win.used_capacity_MU <= win.total_capacity_MU
+    # Duplicate grant detection (application-level rule)
+    coord_dup = Coordinator(ATLAS_DIR)
+    coord_dup.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord_dup.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    try:
+        coord_dup.add_grant("alice", UHI_PER_YEAR_MU)
+        assert False, "Expected ValueError for duplicate grant"
+    except ValueError:
+        pass  # Expected
 
-    # Check: replay is deterministic
-    win2 = replay_capacity_window(header, events, total_capacity_MU)
-    assert win2.window_state == win.window_state
-    assert win2.used_capacity_MU == win.used_capacity_MU
-    assert win2.free_capacity_MU == win.free_capacity_MU
-
-    print("✓ single capacity window is deterministic and within physical envelope")
+    print("OK: shell/archive deterministic, tamper-evident, and duplicate-detectable")
 
 
 # ---------------------------------------------------------------------------
-# 3. Test: Global ecology capacity ledger over multiple windows
+# 6. Horizon structure and identity paths (CS + reachability)
 # ---------------------------------------------------------------------------
 
-@dataclass
-class EcologyCapacityLedger:
+def test_03_horizon_structure_and_coverage(atlas_dir: Path):
     """
-    Minimal ecology capacity ledger:
-    - records per-identity MU allocations over multiple windows
-    - tracks used vs total capacity over all windows
-    - is replayable from (header, alloc_events) logs
+    The horizon (fixed points of 0xAA) is a 256-state boundary with:
+
+    - Symmetric coordinates A = B XOR 0xFFF.
+    - 1-step fanout over all 256 bytes reaching the entire 65,536 bulk.
+
+    Each horizon state is a "root identity anchor" from which trajectories
+    can cover all accessible Router states.
     """
-    per_identity_MU: Dict[str, int]
-    total_capacity_MU: int
-    used_capacity_MU: int
-    free_capacity_MU: int
+    print("\n=== HORIZON STRUCTURE AND COVERAGE ===")
+    from src.router.constants import unpack_state, LAYER_MASK_12
+
+    epi = np.load(atlas_dir / "epistemology.npy", mmap_mode="r").astype(np.int64)
+    ont = np.load(atlas_dir / "ontology.npy")
+
+    idxs = np.arange(epi.shape[0], dtype=np.int64)
+    horizon_idxs = idxs[epi[:, 0xAA] == idxs]
+    assert len(horizon_idxs) == 256
+
+    # 1-step reachability over all bytes from each horizon state
+    reachable = set()
+    for h in horizon_idxs:
+        reachable.update(map(int, epi[int(h), :]))
+    assert len(reachable) == 65_536
+
+    # Symmetry A = B XOR 0xFFF and unique A per horizon state
+    a_values = []
+    for h_idx in horizon_idxs:
+        s = int(ont[h_idx])
+        a, b = unpack_state(s)
+        assert a == (b ^ LAYER_MASK_12)
+        a_values.append(a)
+    assert len(set(a_values)) == 256
+
+    print(f"Horizon states: {len(horizon_idxs)}")
+    print(f"Reachable (1-step): {len(reachable)}")
+    print("OK: 256 horizon anchors cover the 65,536-state bulk in 1 step")
 
 
-def build_ecology_ledger(
-    windows: List[Tuple[bytes, List[AllocationEvent]]],
-    capacity_per_window_MU: int,
-) -> EcologyCapacityLedger:
+def test_04_trajectory_identity_scaling():
     """
-    Aggregate a set of capacity windows into a global ledger.
+    Identity as (horizon, path):
+
+    - 256 choices of horizon state.
+    - 256^n distinct paths of length n from that horizon.
+
+    For n=4 bytes, 256^(n+1) > 10^12, enough to assign unique identity
+    paths to every human while leaving immense headroom.
     """
-    per_identity: Dict[str, int] = {}
-    used_total = 0
-    total_capacity = 0
+    print("\n=== TRAJECTORY IDENTITY SCALING ===")
 
-    for header, events in windows:
-        win = build_capacity_window(header, events, capacity_per_window_MU)
-        total_capacity += win.total_capacity_MU
-        used_total += win.used_capacity_MU
-        for ev in events:
-            per_identity[ev.identity] = per_identity.get(ev.identity, 0) + ev.mu_allocated
+    target_identities = 10_000_000_000  # 10 billion
+    for n in [1, 2, 3, 4]:
+        count = 256 ** (n + 1)
+        print(f"n={n}: 256^(n+1) = {count:,}")
+    assert 256 ** 5 >= target_identities
+    print("OK: n=4 path length suffices for global identity labelling")
 
-    free_total = total_capacity - used_total
-    return EcologyCapacityLedger(
-        per_identity_MU=per_identity,
-        total_capacity_MU=total_capacity,
-        used_capacity_MU=used_total,
-        free_capacity_MU=free_total,
+
+# ---------------------------------------------------------------------------
+# 7. Parity commitment and tamper detection (trajectory-level integrity)
+# ---------------------------------------------------------------------------
+
+def test_05_parity_commitment_and_reconstruction(atlas_dir: Path):
+    """
+    The kernel trajectory closed form:
+
+      - O = XOR of masks at odd positions
+      - E = XOR of masks at even positions
+      - parity = length mod 2
+
+    reconstructs the final state exactly for any length trajectory.
+    """
+    print("\n=== PARITY COMMITMENT AND RECONSTRUCTION ===")
+    from src.router.constants import ARCHETYPE_A12, ARCHETYPE_B12, pack_state
+
+    k = RouterKernel(atlas_dir)
+    rng = np.random.default_rng(7)
+    word = rng.integers(0, 256, size=4096, dtype=np.uint16).tolist()
+
+    # Actual final state
+    k.reset()
+    for b in word:
+        k.step_byte(int(b))
+    s_actual = int(k.ontology[k.state_index])
+
+    # Closed form in (u, v)
+    u0 = v0 = 0
+    O = E = 0
+    for i, b in enumerate(word):
+        m = mask12_for_byte(int(b))
+        if i % 2 == 0:
+            O ^= m
+        else:
+            E ^= m
+    n = len(word)
+    if n % 2 == 0:
+        u_n, v_n = u0 ^ O, v0 ^ E
+    else:
+        u_n, v_n = v0 ^ E, u0 ^ O
+
+    a_n = (u_n ^ ARCHETYPE_A12) & 0xFFF
+    b_n = (v_n ^ ARCHETYPE_B12) & 0xFFF
+    s_expected = pack_state(a_n, b_n)
+
+    assert s_expected == s_actual
+    print(f"Trajectory length: {len(word)} bytes")
+    print("Compressed to: (O, E, parity) = 25 bits")
+    print("OK: closed-form parity commitment reconstructs final state exactly")
+
+
+def test_06_trajectory_tamper_detection():
+    """
+    The parity commitment (O, E, parity) is sensitive to tampering:
+    changing any byte in a trajectory almost always changes the commitment.
+
+    This provides a cheap integrity check over arbitrary-length histories.
+    """
+    print("\n=== TRAJECTORY TAMPER DETECTION ===")
+
+    random.seed(777)
+    trajectory = [random.randint(0, 255) for _ in range(100)]
+
+    def commitment(traj: List[int]) -> Tuple[int, int, int]:
+        O = E = 0
+        for i, b in enumerate(traj):
+            m = mask12_for_byte(b)
+            if i % 2 == 0:
+                O ^= m
+            else:
+                E ^= m
+        return (O, E, len(traj) % 2)
+
+    original = commitment(trajectory)
+    tamper_detected = 0
+    for pos in range(len(trajectory)):
+        tampered = trajectory.copy()
+        tampered[pos] = (tampered[pos] + 1) % 256
+        if tampered[pos] == trajectory[pos]:
+            tampered[pos] = (tampered[pos] + 1) % 256
+        if commitment(tampered) != original:
+            tamper_detected += 1
+
+    print(f"Trajectory length: {len(trajectory)}")
+    print(f"Tampers detected: {tamper_detected}/{len(trajectory)}")
+    assert tamper_detected >= len(trajectory) - 5
+    print("OK: parity commitment reliably detects tampering")
+
+
+# ---------------------------------------------------------------------------
+# 8. Dual code integrity check (mask-level error detection)
+# ---------------------------------------------------------------------------
+
+def test_07_dual_code_integrity():
+    """
+    Dual code C_perp (16 elements) is orthogonal to all 256 mask codewords.
+
+    We use it to detect corrupted 12-bit patterns:
+    - All valid mask patterns have zero syndrome.
+    - Random non-mask patterns almost always produce non-zero syndrome.
+    """
+    print("\n=== DUAL CODE INTEGRITY CHECK ===")
+
+    # Collect mask code C
+    masks = set(mask12_for_byte(b) for b in range(256))
+
+    # Use imported C_PERP_12
+    assert len(C_PERP_12) == 16
+
+    # Check that all masks have zero syndrome
+    for m in masks:
+        syndromes = [dot12(m, v) for v in C_PERP_12]
+        assert all(s == 0 for s in syndromes)
+
+    # Sample random non-mask values and check they are detected
+    trials = 1000
+    detected = 0
+    for _ in range(trials):
+        m = random.randint(0, (1 << 12) - 1)
+        if m in masks:
+            continue
+        syndromes = [dot12(m, v) for v in C_PERP_12]
+        if any(s == 1 for s in syndromes):
+            detected += 1
+
+    print(f"Dual code size: {len(C_PERP_12)} elements")
+    print(f"Random corrupted patterns detected: {detected}/{trials}")
+    assert detected >= trials * 0.9
+    print("OK: dual code reliably detects corrupted 12-bit patterns")
+
+
+# ---------------------------------------------------------------------------
+# 9. Meta-routing: global aggregation and dispute localization
+# ---------------------------------------------------------------------------
+
+def test_08_meta_routing(atlas_dir: Path):
+    """
+    Meta-routing aggregates multiple programme bundles into a single root seal:
+
+    - First pass: each programme bundle -> leaf seal (kernel state_hex).
+    - Second pass: list of leaf seals -> meta-root seal.
+
+    Properties:
+    - Deterministic.
+    - Permutation-invariant (set-style by construction).
+    - Any tamper in an individual bundle changes its leaf seal and the meta-root,
+      and can be localized by comparing leaf seals.
+    """
+    print("\n=== META ROUTING (AGGREGATION + DISPUTE LOCALIZATION) ===")
+
+    def seal_payload(payload: bytes) -> bytes:
+        k = RouterKernel(atlas_dir)
+        k.step_payload(payload)
+        return bytes.fromhex(k.signature().state_hex)
+
+    def meta_root(seals: List[bytes]) -> str:
+        k = RouterKernel(atlas_dir)
+        for s in seals:
+            k.step_payload(s)
+        return k.signature().state_hex
+
+    bundles = [
+        b"program:A|bytes:abc|events:123",
+        b"program:B|bytes:def|events:456",
+        b"program:C|bytes:ghi|events:789",
+    ]
+    seals = [seal_payload(b) for b in bundles]
+
+    # Determinism
+    root1 = meta_root(seals)
+    root2 = meta_root(seals)
+    assert root1 == root2
+
+    # Set-style aggregation: permutation does not change root
+    root_swapped = meta_root([seals[1], seals[0], seals[2]])
+    assert root_swapped == root1
+
+    # Tamper with one bundle
+    tampered = bundles.copy()
+    tampered[1] = b"program:B|bytes:def|events:TAMPERED"
+    tampered_seals = [seal_payload(b) for b in tampered]
+    root_tampered = meta_root(tampered_seals)
+    assert root_tampered != root1
+
+    diffs = [i for i, (a, b) in enumerate(zip(seals, tampered_seals)) if a != b]
+    assert diffs == [1]
+
+    print(f"Meta-root: {root1}")
+    print(f"Permutation-invariant: {root_swapped == root1}")
+    print(f"Tamper localized to leaf index: {diffs[0]}")
+    print("OK: meta-routing supports global aggregation with localizable disputes")
+
+
+# ---------------------------------------------------------------------------
+# 10. Component isolation and rollback (BU-Ingress flavor)
+# ---------------------------------------------------------------------------
+
+def test_09_component_isolation_and_rollback():
+    """
+    Using separator lemmas and conjugation by reference byte (0xAA), demonstrate:
+
+    - A-component can encode an identity that remains invariant under balance updates.
+    - B-component can encode a balance updated by controlled operations.
+    - A simple rollback sequence returns the state to its original value.
+
+    This is the discrete analogue of BU-Ingress: a balanced state preserves enough
+    structure to reconstruct (or undo) prior transitions.
+    """
+    print("\n=== COMPONENT ISOLATION AND ROLLBACK ===")
+    from src.router.constants import (
+        step_state_by_byte,
+        pack_state,
+        unpack_state,
+        XFORM_MASK_BY_BYTE,
+        LAYER_MASK_12,
     )
 
+    random.seed(12345)
+    ref_byte = 0xAA  # reference involution
 
-def test_03_global_ecology_capacity_ledger_replay():
-    """
-    Build a small sequence of capacity windows (e.g. 3 years),
-    each with a simple allocation pattern. Verify that:
-    - the global ledger is within the cumulative physical envelope
-    - replay from the same (header, events) pairs reproduces the same ledger
-    """
-    print("\n=== GLOBAL ECOLOGY CAPACITY LEDGER OVER MULTIPLE WINDOWS ===")
+    # Step 1: initialize identity in A via x then AA (A-only update)
+    identity_byte = 0x42
+    a_init, b_init = 0x555, 0x000
+    s0 = pack_state(a_init, b_init)
+    s1 = step_state_by_byte(s0, identity_byte)
+    s2 = step_state_by_byte(s1, ref_byte)
 
-    capacity_per_window_MU = CAPACITY_PER_YEAR_MU  # one-year windows
-    headers = [b"ecology:year:2026", b"ecology:year:2027", b"ecology:year:2028"]
+    a_after_id, b_after_id = unpack_state(s2)
+    m_id = (int(XFORM_MASK_BY_BYTE[identity_byte]) >> 12) & LAYER_MASK_12
+    assert a_after_id == (a_init ^ m_id)
+    assert b_after_id == b_init
 
-    identities = ["alice", "bob", "carol"]
-    # Simple fixed pattern: alice Tier 3, bob Tier 2, carol Tier 1 each year
-    tiers = {
-        "alice": UHI_PER_YEAR_MU * 3,
-        "bob":   UHI_PER_YEAR_MU * 2,
-        "carol": UHI_PER_YEAR_MU * 1,
-    }
+    # Step 2: perform balance operations via AA then y (B-only update)
+    balance_ops = [0x10, 0x20, 0x30]
+    s_curr = s2
+    for b_byte in balance_ops:
+        s_curr = step_state_by_byte(s_curr, ref_byte)
+        s_curr = step_state_by_byte(s_curr, b_byte)
 
-    windows: List[Tuple[bytes, List[AllocationEvent]]] = []
-    for hdr in headers:
-        evs: List[AllocationEvent] = []
-        for name in identities:
-            commit = identity_commitment(name)
-            mu = tiers[name]
-            evs.append(
-                AllocationEvent(
-                    identity=name,
-                    identity_commit=commit,
-                    mu_allocated=mu,
-                )
-            )
-        windows.append((hdr, evs))
+    a_final, b_final = unpack_state(s_curr)
+    assert a_final == a_after_id  # identity unchanged
 
-    ledger = build_ecology_ledger(windows, capacity_per_window_MU)
+    # Compute expected B
+    b_expected = b_after_id
+    for b_byte in balance_ops:
+        m_b = (int(XFORM_MASK_BY_BYTE[b_byte]) >> 12) & LAYER_MASK_12
+        b_expected ^= m_b
+    assert b_final == b_expected
 
-    print(f"Total capacity (MU) : {ledger.total_capacity_MU}")
-    print(f"Used capacity (MU)  : {ledger.used_capacity_MU}")
-    print(f"Free capacity (MU)  : {ledger.free_capacity_MU}")
-    print(f"Per-identity MU     : {ledger.per_identity_MU}")
+    print(f"Identity (A): {a_init:03x} -> {a_final:03x} (stable)")
+    print(f"Balance  (B): {b_init:03x} -> {b_final:03x} (updated)")
 
-    # Check: allocations fit within capacity
-    assert ledger.used_capacity_MU <= ledger.total_capacity_MU
+    # Step 3: rollback using conjugation
+    # Forward: s_curr = T_last_b(T_AA(s_prev))
+    # Inverse: s_prev = T_AA^(-1)(T_last_b^(-1)(s_curr))
+    # Since T_AA is involution: T_AA^(-1) = T_AA = R
+    # And T_last_b^(-1) = R T_last_b R
+    # So: s_prev = R (R T_last_b R)(s_curr) = R^2 T_last_b R(s_curr) = T_last_b R(s_curr)
+    last_b = balance_ops[-1]
 
-    # Expected per-identity totals across 3 windows
-    assert ledger.per_identity_MU["alice"] == UHI_PER_YEAR_MU * 3 * len(headers)
-    assert ledger.per_identity_MU["bob"]   == UHI_PER_YEAR_MU * 2 * len(headers)
-    assert ledger.per_identity_MU["carol"] == UHI_PER_YEAR_MU * 1 * len(headers)
+    # Compute s_prev (state before last balance op)
+    s_prev = s2
+    for b_byte in balance_ops[:-1]:
+        s_prev = step_state_by_byte(s_prev, ref_byte)
+        s_prev = step_state_by_byte(s_prev, b_byte)
 
-    # Replay: rebuild from same windows and compare
-    ledger2 = build_ecology_ledger(windows, capacity_per_window_MU)
-    assert ledger2.total_capacity_MU == ledger.total_capacity_MU
-    assert ledger2.used_capacity_MU == ledger.used_capacity_MU
-    assert ledger2.free_capacity_MU == ledger.free_capacity_MU
-    assert ledger2.per_identity_MU == ledger.per_identity_MU
+    # Apply inverse: T_last_b^(-1) T_AA^(-1) = (R T_last_b R) R = T_last_b R
+    s_rollback = step_state_by_byte(s_curr, ref_byte)  # R
+    s_rollback = step_state_by_byte(s_rollback, last_b)  # T_last_b
 
-    print("✓ global ecology capacity ledger is deterministic and within envelope")
+    assert s_rollback == s_prev
+
+    print("OK: component isolation holds and simple rollback recovers prior state")
 
 
 # ---------------------------------------------------------------------------
-# 4. Test: Tampering with allocations is visible under replay
+# 11. Rollback tests (runtime features)
 # ---------------------------------------------------------------------------
 
-def test_04_tampering_in_capacity_window_is_detectable():
+def test_10_shell_rollback(atlas_dir: Path):
     """
-    Show that if someone tampers with an allocation amount for an identity
-    in a logged window, replay will detect it via:
-    - change in used_capacity_MU
-    - change in per_identity_MU totals
-    - (optionally) different window_state, if header+receipts are re-encoded
+    Test shell rollback: create shells, rollback last one, verify totals revert.
     """
-    print("\n=== TAMPERING IN CAPACITY WINDOW ===")
+    print("\n=== SHELL ROLLBACK TEST ===")
+    
+    coord = Coordinator(atlas_dir)
+    
+    # Create two shells
+    coord.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord.close_shell(b"ecology:year:2026", CAPACITY_PER_YEAR_MU)
+    
+    coord.add_grant("alice", UHI_PER_YEAR_MU * 4)
+    coord.add_grant("charlie", UHI_PER_YEAR_MU * 1)
+    coord.close_shell(b"ecology:year:2027", CAPACITY_PER_YEAR_MU)
+    
+    # Capture totals after both shells
+    status_before = coord.fiat_status()
+    assert status_before["shell_count"] == 2
+    assert status_before["used_capacity_MU"] == (UHI_PER_YEAR_MU * 3 + UHI_PER_YEAR_MU * 2 + UHI_PER_YEAR_MU * 4 + UHI_PER_YEAR_MU * 1)
+    
+    # Rollback last shell
+    coord.rollback_last_shell()
+    
+    # Verify totals reverted
+    status_after = coord.fiat_status()
+    assert status_after["shell_count"] == 1
+    assert status_after["used_capacity_MU"] == (UHI_PER_YEAR_MU * 3 + UHI_PER_YEAR_MU * 2)
+    assert status_after["per_identity_totals"]["alice"] == UHI_PER_YEAR_MU * 3
+    assert "charlie" not in status_after["per_identity_totals"]
+    
+    print("OK: shell rollback reverts totals correctly")
 
-    header = b"ecology:year:2026"
-    capacity_MU = CAPACITY_PER_YEAR_MU
 
-    names = ["alice", "bob"]
-    tiers = {
-        "alice": UHI_PER_YEAR_MU * 2,
-        "bob":   UHI_PER_YEAR_MU * 1,
-    }
-
-    evs: List[AllocationEvent] = []
-    for name in names:
-        commit = identity_commitment(name)
-        evs.append(
-            AllocationEvent(
-                identity=name,
-                identity_commit=commit,
-                mu_allocated=tiers[name],
-            )
-        )
-
-    # Original window and ledger
-    win_orig = build_capacity_window(header, evs, capacity_MU)
-    ledger_orig = build_ecology_ledger([(header, evs)], capacity_MU)
-
-    # Tamper: change alice's allocation without changing header/identity names
-    evs_tampered = evs.copy()
-    evs_tampered[0] = AllocationEvent(
-        identity="alice",
-        identity_commit=evs[0].identity_commit,
-        mu_allocated=tiers["alice"] * 10,  # inflated
-    )
-
-    win_tampered = build_capacity_window(header, evs_tampered, capacity_MU)
-    ledger_tampered = build_ecology_ledger([(header, evs_tampered)], capacity_MU)
-
-    print(f"Original used (MU)   : {win_orig.used_capacity_MU}")
-    print(f"Tampered used (MU)   : {win_tampered.used_capacity_MU}")
-    print(f"Original per-id MU   : {ledger_orig.per_identity_MU}")
-    print(f"Tampered per-id MU   : {ledger_tampered.per_identity_MU}")
-    print(f"Original window state: {win_orig.window_state}")
-    print(f"Tampered window state: {win_tampered.window_state}")
-
-    # Detect tampering:
-    assert win_tampered.used_capacity_MU != win_orig.used_capacity_MU
-    assert ledger_tampered.per_identity_MU["alice"] != ledger_orig.per_identity_MU["alice"]
-    # Encoding difference usually changes window_state as well
-    assert win_tampered.window_state != win_orig.window_state
-
-    print("✓ tampering in capacity window is visible under replay")
+def test_11_kernel_rollback(atlas_dir: Path):
+    """
+    Test kernel rollback: step bytes, rollback, verify return to archetype.
+    """
+    print("\n=== KERNEL ROLLBACK TEST ===")
+    
+    coord = Coordinator(atlas_dir)
+    
+    # Step a known payload
+    payload = b"test payload for rollback"
+    coord.step_bytes(payload)
+    
+    assert coord.kernel.step == len(payload)
+    assert len(coord.byte_log) == len(payload)
+    
+    # Rollback all bytes
+    coord.rollback_kernel_steps(len(payload))
+    
+    # Verify returned to archetype
+    sig_after = coord.kernel.signature()
+    assert coord.kernel.step == 0
+    assert len(coord.byte_log) == 0
+    assert sig_after.state_index == coord.kernel.archetype_index
+    
+    print("OK: kernel rollback returns to archetype and clears byte_log")
 
 
 if __name__ == "__main__":

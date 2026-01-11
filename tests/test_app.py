@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 from src.app.coordination import Coordinator
-from src.app.events import Domain, EdgeID, GovernanceEvent
+from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
 from src.app.ledger import DomainLedgers, get_incidence_matrix, get_projections
 
 
@@ -40,7 +40,7 @@ class TestDomainLedgers:
 
         # Put a nontrivial vector into Economy ledger via events
         for e, v in enumerate([1.0, -2.0, 0.5, 3.0, -1.5, 2.5]):
-            ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID(e), magnitude=v))
+            ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID(e), magnitude_micro=int(round(v * MICRO)), confidence_micro=MICRO))
 
         y = ledgers.get(Domain.ECONOMY)
         y_grad, y_cycle = ledgers.decompose(Domain.ECONOMY)
@@ -56,16 +56,16 @@ class TestDomainLedgers:
         ledgers = DomainLedgers()
 
         # Build a nonzero y
-        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0))
-        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude=2.0))
+        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
+        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=MICRO))
 
         a1 = ledgers.aperture(Domain.ECONOMY)
 
         # Scale y by 7 via replaying same events * 7 times
         ledgers2 = DomainLedgers()
         for _ in range(7):
-            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0))
-            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude=2.0))
+            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
+            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=MICRO))
 
         a2 = ledgers2.aperture(Domain.ECONOMY)
 
@@ -85,9 +85,9 @@ class TestCoordinator:
         c2.step_bytes(payload)
 
         evs = [
-            GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0, confidence=0.8),
-            GovernanceEvent(domain=Domain.EMPLOYMENT, edge_id=EdgeID.INFER_INTEL, magnitude=-0.5, confidence=1.0),
-            GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFO_INFER, magnitude=2.0, confidence=0.6),
+            GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=int(round(0.8 * MICRO))),
+            GovernanceEvent(domain=Domain.EMPLOYMENT, edge_id=EdgeID.INFER_INTEL, magnitude_micro=int(round(-0.5 * MICRO)), confidence_micro=MICRO),
+            GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=int(round(0.6 * MICRO))),
         ]
 
         for ev in evs:
@@ -113,7 +113,7 @@ class TestCoordinator:
         c = Coordinator(atlas_dir)
         c.step_bytes(b"\x12\x34")  # advance kernel
 
-        ev = GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0)
+        ev = GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO)
         c.apply_event(ev, bind_to_kernel_moment=True)
 
         last = c.event_log[-1]["event"]
@@ -125,7 +125,7 @@ class TestCoordinator:
         """Reset should restore initial state and clear logs."""
         c = Coordinator(atlas_dir)
         c.step_bytes(b"test")
-        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0))
+        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
 
         assert len(c.byte_log) > 0
         assert len(c.event_log) > 0
@@ -142,7 +142,7 @@ class TestCoordinator:
         """get_status() should return properly structured CoordinationStatus."""
         c = Coordinator(atlas_dir)
         c.step_bytes(b"test")
-        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude=1.0))
+        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
 
         status = c.get_status()
 

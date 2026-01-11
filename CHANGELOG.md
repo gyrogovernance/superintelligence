@@ -15,11 +15,28 @@
 
 ---
 
-## [v1.2.1-MomentsEconomy] – 2026-01-10
+## [v1.2.1-MomentsEconomy] – 2026-01-11
 
-Revisions & Tests:
-docs\AIR_Moments_Economy_Specs.md
-tests\test_substrate.py
+### Moments Economy Implementation
+
+- Implemented the full Moments Economy runtime: Coordinator spine (RouterKernel, DomainLedgers and fiat substrate), ecology capacity ledger (Identity identifiers and anchors, Grants, Shells, Archives), and the THM and Gyroscope framework plugins.
+- Introduced collision resistant identity identifiers (SHA-256) combined with kernel anchors as phase space bindings, and updated Grant and Shell receipts to use these pairs.
+
+### Fiat Substrate and Bundling
+
+- Completed fiat substrate operations: Shell closing, archive aggregation, shell rollback, kernel rollback and meta-root computation for sets of Shells.
+- Extended the AIR CLI to compile ecology artefacts (grants.jsonl, shells.jsonl, archive.json) and bundle them together with bytes, events and reports into verifiable programme bundles.
+
+### Security and Numerical Model
+
+- Added Ed25519 bundle signing and verification to provide accountable programme attestations on top of structural replay.
+- Migrated governance events and ledgers to fixed point integer micro-units, ensuring deterministic replay and cross platform consistency for aperture and ledger values.
+- Clarified algebraic integrity tools (parity commitment and dual code syndromes) as fast diagnostics for accidental corruption rather than as cryptographic security mechanisms.
+
+### Documentation and Tests
+
+- Refined AIR_Moments_Economy_Specs.md with the Local, Published, Verified pattern, updated identity anchor and ecology ledger definitions, and added a formal Abundance Security and Resilience Margin section aligned with the test numerics.
+- Expanded and consolidated the automated test suite across physics, substrate and Moments layers, including atlas invariants, shell and archive integrity, meta-routing, capacity envelope, millennium UHI feasibility, resilience margin and adversarial threshold. All tests pass.
 
 ---
 

@@ -24,6 +24,8 @@ The capacity of the Moments Economy derives from the physical definition of the 
 
 In the Moments Economy, the unit of account is the Moment. A Moment denotes a reproducible configuration of Router state together with the governance events bound to it. The Moment-Unit (MU) quantifies these configurations against time. This creates a monetary system whose capacity derives from physical constants and geometric invariants rather than from lending, debt creation, or privileged access to issuance.
 
+Because the physically attainable capacity envelope exceeds any plausible civilisational demand by many orders of magnitude, the Moments Economy treats security as preservation of structural coherence rather than preservation of a scarce stock. The question is not whether there is enough capacity to fund unconditional income and long term projects, but whether genealogies and allocations remain intelligible and accountable. Abundance at the level of physics turns many traditional monetary risks into questions of measurement, provenance, and governance rather than questions of survival.
+
 The document addresses system designers, implementers, and policymakers. It maintains consistency with the underlying physics, minimises arbitrary design choices, and remains explicit about the normative anchors required for human-scale accounting. Where detailed mathematical derivations or proofs are required, the document references the appropriate foundational papers rather than reproducing them in full.
 
 ### 1.1 What Makes This Economy Different
@@ -34,7 +36,7 @@ The Moments Economy operates on different principles. Value is not a claim on fu
 
 ### 1.2 Structure of the Document
 
-The specification proceeds through foundations, architecture, units, distributions, coordination, and stability. Section 2 establishes the epistemic categories that distinguish human from artificial sources of authority and agency. Section 3 develops the geometric foundations from CGM through to the Router realisation. Section 4 maps this geometry to the implemented software components. Sections 5 through 7 define the economic units, the unconditional baseline income, and the participation tiers. Sections 8 and 9 describe coordination levels and genealogical assets, including the ecology ledger derivation. Section 10 addresses alignment and economic stability. Section 11 demonstrates capacity and abundance. Sections 12 and 13 cover value theory and practical considerations. Section 14 specifies transition paths and institutional infrastructure.
+The specification proceeds through foundations, architecture, units, distributions, coordination, and stability. Section 2 establishes the epistemic categories that distinguish human from artificial sources of authority and agency. Section 3 develops the geometric foundations from CGM through to the Router realisation. Section 4 maps this geometry to the implemented software components. Sections 5 through 7 define the economic units, the unconditional baseline income, and the participation tiers. Sections 8 and 9 describe coordination levels and genealogical assets, including the ecology capacity ledger. Section 10 addresses alignment and economic stability. Section 11 demonstrates capacity and abundance. Sections 12 and 13 cover value theory and practical considerations. Section 14 specifies transition paths and institutional infrastructure.
 
 ---
 
@@ -86,9 +88,37 @@ The structure has three dimensions with six degrees of freedom. These dimensions
 
 Any configuration of a governance system can be represented as a vector in this six-dimensional edge space. The vector encodes the tensions, alignments, and couplings among the four operations. Different configurations correspond to different ways of organising governance, and not all configurations are equally stable.
 
-### 3.2 Aperture: Gradient-Cycle Decomposition and Alignment Target
+### 3.2 Balance in Discrete Form: Horizon, Closure, Memory
 
-Every governance configuration is a six-dimensional edge vector on K₄. Hodge decomposition splits it uniquely into a gradient component (globally coherent tensions) and a cycle component (non-integrable local circulation). Aperture A is the exact ratio of cycle energy to total energy. CGM proves that stable recursive measurement requires A ≈ 0.0207 (A*), where 97.93 % of energy is gradient and 2.07 % is cycle. Scalar evaluations collapse this geometry into a single number and accordingly cannot distinguish states near A* from states far from A*. Single-axis optimisation is geometrically locked at A = 0.5 and can never reach A*. The Moments Economy uses the full six-dimensional epistemic representation; alignment is a structural configuration to be maintained, not a scalar to be maximised.
+The Moments Economy uses the Common Governance Model (CGM) primarily through the
+discrete Router kernel's verified operational properties. These properties are
+the discrete implementation of the CGM constraints (CS, UNA/ONA, BU-Egress,
+BU-Ingress) as a coordination substrate.
+
+The Router kernel exhibits four kernel-native balance primitives that are used
+directly in the fiat substrate:
+
+1. **Horizon and reachability (CS / common source):** The reference byte `0xAA`
+   defines a 256-state horizon set (fixed points). From this horizon, the full
+   65,536-state ontology is reachable in one step under the 256 byte actions.
+   This provides a concrete common-source boundary for coordination.
+
+2. **Contingent order-sensitivity (UNA/ONA):** At depth two, byte actions are
+   non-commutative in general; order matters for trajectories. This supplies the
+   necessary variety for distinguishable histories.
+
+3. **Depth-four closure (BU-Egress):** Alternating depth-four words close in the
+   kernel. This provides a discrete closure mechanism enabling stable loops in
+   coordination procedures.
+
+4. **Replay and rollback (BU-Ingress / memory reconstruction):** The kernel is
+   reversible and replayable. Given the same inputs, all parties reconstruct the
+   same states; inverse stepping enables rollback. This is the discrete
+   realisation of "balance implies memory".
+
+These kernel-native balance primitives are the mathematical basis on which the
+Moments Economy fiat substrate is built (Sections 9 and 11). They provide
+structural truth by replay, not by institutional assertion.
 
 ### 3.3 The Four Domains
 
@@ -100,7 +130,7 @@ Employment is the domain of non-absolute unity. It represents the variety of wor
 
 Education is the domain of non-absolute opposition. It is where society engages in the accountable reproduction and transformation of capacities. The Human Mark provides the framework here, defining the four alignment capacities (GMT, ICV, IIA, ICI) and the four displacement risks (GTD, IVD, IAD, IID) that education must address.
 
-Ecology is the domain of universal balance. It functions as the structural closure of the governance system. The distinct operations of economy, employment, and education accumulate into a single material reality in the ecological domain. Ecological integrity measures how well the combined state of the three derivative domains preserves the conditions for continued governance.
+Ecology is the domain of universal balance. In the Moments Economy, it functions as the monetary circulation layer, realised as a capacity ledger that records the distribution of Moment-Units (MU) within a physically derived capacity envelope. Ecological integrity measures how well monetary circulation preserves the conditions for continued governance.
 
 ### 3.4 The Router Realisation
 
@@ -111,6 +141,11 @@ The Router accepts bytes as input. Each byte undergoes transcription (XOR with 0
 Physics tests on the compiled Router atlas verify that its internal structure matches CGM predictions. The kernel's intrinsic aperture A_kernel equals 5/256, approximately 0.01953. This is within 5.6 percent of the continuous CGM target A*. The same discrete geometry reconstructs the BU monodromy defect δ_BU to 0.06 percent accuracy, the aperture scale m_a to 0.2 percent accuracy, the quantum gravity constant Q_G = 4π to 0.35 percent accuracy, and the fine-structure constant α to 0.02 percent accuracy at the sixth significant digit.
 
 These agreements are achieved without free parameters. The kernel's combinatorial structure produces CGM invariants through its code geometry, symmetries, and holographic scaling. This justifies treating the Router as a faithful discrete embodiment of alignment geometry.
+
+In addition, the kernel admits an exact closed-form trajectory representation
+based on XOR parity classes (odd/even mask sums plus a parity bit), and a dual
+code used for syndrome-style corruption detection of 12-bit patterns. These
+properties are used directly in the fiat substrate (Section 9).
 
 ### 3.5 Shared Moments
 
@@ -142,13 +177,41 @@ The RouterKernel loads these artefacts and provides deterministic stepping by by
 
 The kernel physics is simple and portable. It uses only fixed-width bit operations: XOR, shifts, and masking. The reference implementation achieves over one million steps per second on commodity hardware.
 
-### 4.2 Governance Geometry Layer
+### 4.2 Fiat Substrate Layer (Grants, Shells, Archives, Meta-Routing)
 
-The DomainLedgers component maintains three ledgers corresponding to economy, employment, and education. Each ledger is a six-dimensional vector in the K₄ edge space. Updates occur through governance events that specify a domain, an edge identifier, a magnitude, and a confidence.
+The Moments Economy fiat layer is implemented as a minimal, replayable capacity
+ledger built on top of the Router kernel. It introduces four application-layer
+objects:
 
-The Hodge decomposition uses exact closed-form projections. For K₄ with unit weights, the gradient projection equals one-quarter of the product of the transposed incidence matrix with itself. The cycle projection is the identity minus this gradient projection. These forms are exact rational matrices that produce identical results across all platforms and numerical libraries.
+- **Identity Anchor:** a pair consisting of an identity identifier and a kernel anchor. The identifier is obtained by hashing an identity string with a cryptographic hash function, providing collision resistance at civilisational scale. The anchor is a 3-byte kernel `state_hex` derived deterministically from the hash by routing through the Router. The identifier binds the name to a stable key, the anchor locates that key in the kernel phase space.
 
-Aperture is computed as the squared norm of the cycle component divided by the squared norm of the full vector. When the vector is zero, aperture is defined as zero. The computation is scale-invariant: multiplying all ledger entries by any positive constant leaves aperture unchanged.
+- **Grant:** a single MU allocation to an identity in a given time window.
+
+- **Shell:** a time-bounded capacity window that commits a set of Grants to a
+  kernel `seal`. A Shell records total/used/free MU and is replayable by any
+  party given its published Grants.
+
+- **Archive:** an aggregation over multiple Shells that accumulates per-identity
+  MU totals and global capacity usage over long horizons.
+
+In addition, the fiat layer supports:
+
+- **Parity commitment for histories:** the kernel admits a closed-form
+  trajectory compression into `(O, E, parity)` (odd/even mask XORs and a parity
+  bit). This provides a compact algebraic commitment to arbitrary-length
+  histories.
+
+- **Dual-code syndrome checks:** the 12-bit mask structure admits a 16-element
+  dual code used as a syndrome mechanism to detect corrupted 12-bit patterns.
+
+- **Meta-routing:** programme-level artifacts can be routed to leaf seals and
+  aggregated into a compact meta-root seal; disputes localize by comparing leaf
+  seals.
+
+These objects and checks are verified in the substrate test suite and provide
+transparent, accountable, resilient fiat accounting without requiring external
+consensus mechanisms for validity. Policy (who may issue Grants, eligibility,
+tiers) remains a governance layer above these structural primitives.
 
 ### 4.3 Event Layer
 
@@ -280,37 +343,92 @@ Programmes may maintain their own kernel instances and logs. They also maintain 
 
 In AIR projects and programmes, the terms "agents" and "agencies" appear as routing fields for distributions. They identify recipients at the application layer. These fields do not affect the kernel state, the ledgers, or the aperture measurements. Structural observables depend on the sequence of governance events, not on the names attached to them.
 
+### 8.4 Local, Published, Verified
+
+The Moments Economy employs a threefold pattern for the distribution and verification of genealogies and capacity ledgers: Local, Published, and Verified.
+
+- **Local:** Each individual, project, or programme maintains its own kernel instance and audit logs. The Local state is the primary record of that actor's participation and decisions.
+- **Published:** Selected genealogies and ecology capacity ledgers are exported as signed bundles and made available through shared storage or institutional publication channels. Publication makes claims inspectable beyond the originating actor.
+- **Verified:** Independent parties replay Published bundles against the atlas, recompute kernel states, ledgers, apertures, and ecology seals, and compare results with the claimed values. Verification can occur redundantly across many nodes without central coordination.
+
+This pattern removes reliance on a single central ledger. Instead, truth emerges from the agreement of independently replayed computations. When Local, Published, and Verified views coincide, programmes gain structural legitimacy without requiring any particular institution to serve as ultimate arbiter.
+
 ---
 
 ## 9. Domains, Ledgers, and Genealogies
 
-### 9.1 Ecology Ledger: BU Closure and Monetary Circulation
+### 9.1 Ecology Capacity Ledger: Shells, Grants, Archives, and Replay
 
-In Gyroscopic Global Governance, ecology is the BU stage. It is the closure layer that integrates the three derivative domains into a single coherent profile. In the Moments Economy, this closure layer is the monetary circulation layer.
+In the Moments Economy, ecology is the closure layer for monetary circulation.
+It is realised concretely as a capacity ledger that records the distribution of
+Moment-Units (MU) inside a physically derived capacity envelope.
 
-The ecology ledger is derived deterministically at every shared moment from the three canonical ledgers using the BU dual formula. It is not updated directly by events.
+This ecology capacity ledger is defined by four replayable primitives:
 
-Let x_Econ, x_Emp, x_Edu be the vertex profiles recovered from y_Econ, y_Emp, y_Edu using the exact K₄ pseudoinverse L_dag (defined in the implementation).
+#### 1) Identity Anchors
 
-The derivative aggregate profile is  
-x_deriv = (x_Econ + x_Emp + x_Edu) / 3
+Each identity has a **pair**: an identity identifier and a kernel anchor.
 
-The canonical balanced profile x_balanced is the normalised CGM stage weights [w_CS, w_UNA, w_ONA, w_BU].
+- The identity identifier is a collision-resistant cryptographic hash of an identity string, for example a person's registry entry, institutional identifier, or other agreed label. This identifier is stable over time and unique at civilisational scale.
+- The kernel anchor is a 3-byte `state_hex` derived deterministically by routing the hash bytes through the Router from the archetype.
 
-The ecology vertex profile is the BU dual combination:  
-x_Ecol = (δ_BU / m_a) · x_balanced + A* · x_deriv
+Together, the identifier and anchor bind identity strings to kernel phase space in a reproducible way. The identifier provides the key for accounting, the anchor provides structural coordinates.
 
-The ecology edge ledger is constructed to enforce exact aperture A*:  
-y_Ecol = construct_edge_vector_with_aperture(x_Ecol, target_aperture = A*)
+#### 2) Grants
 
-The displacement vector is  
-D = |x_deriv − x_balanced|
+A **Grant** is a single MU allocation to an identity within a specific time window. It records:
 
-with components ordered (GTD, IVD, IAD, IID).
+- `identity` (a human readable label)
+- `identity_id` (the cryptographic hash identifying that identity)
+- `anchor` (the 3-byte kernel anchor associated with the identity)
+- `mu_allocated` (an integer MU amount allocated in the Shell)
 
-The ecology ledger y_Ecol is the circulating monetary medium. Because its aperture is constrained to A* by construction, it defines the stable fiat regime. The three canonical ledgers measure activity; the ecology ledger defines what circulates coherently.
+Grants are the atomic accounting events of the ecology capacity ledger. At Shell closing time, each Grant is encoded into a canonical receipt that combines the identity identifier, the anchor, and the MU amount. The set of receipts determines the Shell seal.
 
-Coordinator status reports MUST include y_Ecol, A_Ecol = A*, and the displacement vector D.
+#### 3) Shells (Capacity Windows)
+
+A **Shell** is a time-bounded capacity window (for example, a year). A Shell is
+defined by:
+
+- `header` (e.g. `b"ecology:year:2026"`)
+- `total_capacity_MU` (from atomic time × kernel throughput × horizon duration)
+- `used_capacity_MU = Σ mu_allocated`
+- `free_capacity_MU = total_capacity_MU − used_capacity_MU`
+- `seal`: a kernel commitment computed by routing:
+
+  `header || receipts`
+
+  where each receipt is:
+
+  `identity_id || anchor || mu_allocated_as_8_bytes`
+
+and receipts are sorted by `identity_id` for canonical set semantics. The same multiset of Grants yields the same `seal` regardless of ordering in the implementation.
+
+A Shell is transparent and replayable: any party can reconstruct its `seal`,
+`used_capacity_MU`, and `free_capacity_MU` from the published Grants.
+
+#### 4) Archives (Long-Horizon Aggregation)
+
+An **Archive** aggregates multiple Shells over long horizons. It accumulates:
+
+- per-identity totals: `per_identity_MU`
+- global totals: `total_capacity_MU`, `used_capacity_MU`, `free_capacity_MU`
+
+Archives are replayable: given the list of Shell headers and their Grants, any
+party can reproduce the same Archive totals.
+
+#### Integrity properties
+
+The ecology capacity ledger is resilient to edge cases:
+
+- Any change in a Grant changes the Shell `seal` and changes Archive totals.
+- Duplicate Grants for the same identity inside a Shell are detectable as an
+  application-layer rule (one Grant per identity per Shell).
+- Deterministic replay provides audit-grade verification without relying on
+  asserted authority.
+
+This ecology capacity ledger is the fiat circulation substrate used by the
+Moments Economy.
 
 ### 9.2 Domain Mappings
 
@@ -336,7 +454,7 @@ Employment genealogies record how alignment work has been organised. They track 
 
 Educational genealogies record how capacities for GMT, ICV, IIA, and ICI have been built, maintained, and transmitted across individuals and institutions. They also record displacement incidents and remediation efforts.
 
-Ecological genealogies record how the combined state of the three derivative domains has affected ecological integrity and displacement over time.
+Ecological genealogies record how monetary circulation (Shells, Grants, Archives) has evolved over time, including capacity usage, distribution patterns, and integrity verification.
 
 ### 9.5 Genealogies as Assets
 
@@ -346,31 +464,34 @@ A genealogy that demonstrates convergence to A* over extended periods, with low 
 
 ---
 
-## 10. Alignment and Economic Stability
+## 10. Integrity and Economic Stability (Fiat Substrate)
 
-The CGM aperture target A* ≈ 0.0207 plays a dual role in the Moments Economy. Geometrically, it specifies the balance between gradient coherence and cycle differentiation. Economically, it distinguishes regimes in which coordination losses are low and surplus can be reliably generated and distributed.
+Economic stability in the Moments Economy is defined operationally as the ability
+to distribute MU at civilisational scale while preserving replayable audit and
+preventing silent corruption of records.
 
-### 10.1 High-Alignment Regime
+The fiat substrate provides three stability mechanisms:
 
-Projects and programmes whose domain-level apertures converge toward and remain close to A* operate in a high-alignment regime. In this regime, coordination overhead is reduced. Friction, waste, and miscommunication across the epistemic operations diminish. Domain interactions between economy, employment, education, and ecology remain coherent over long horizons.
+1. **Capacity-bounded issuance:** Every Shell contains an explicit
+   `total_capacity_MU` derived from physical capacity. All Grants must fit inside
+   this bound (`used_capacity_MU ≤ total_capacity_MU`).
 
-Surplus capacity in the high-alignment regime is effectively available for UHI and for additional structural development. The economy generates more value than it consumes in coordination costs, and the excess can be distributed or invested.
+2. **Replayable audit (structural truth):** Shells and Archives can be rebuilt
+   from published inputs. If two parties claim the same Shell but produce
+   different `seal` values, at least one claim is false. This localizes disputes
+   to specific Grants, headers, or inputs.
 
-### 10.2 Displacement and Coordination Cost
+3. **Intrinsic integrity checks:** The kernel's algebra provides:
+   - parity-based commitments for long trajectories, and
+   - dual-code syndrome detection for corrupted 12-bit patterns.
 
-Persistent deviations from A* correspond to structural misalignment. The four displacement risks (GTD, IVD, IAD, IID) manifest concretely as coordination failures: decisions that cannot be traced, information that cannot be verified, accountability that cannot be located, coherence that cannot be maintained.
+Together these mechanisms ensure that the monetary record is transparent,
+accountable, and resilient: it can be verified independently without requiring a
+central narrative authority.
 
-These failures have economic costs. Resources are wasted on redundant verification. Decisions must be revisited because they were made on unreliable foundations. Trust breaks down and must be rebuilt through costly mechanisms. The same structural capacity envelope supports less actual activity because more is consumed by friction.
-
-Within the Moments Economy, convergence toward A* is both a governance objective and an economic objective. The two are not separate concerns but the same concern viewed from different angles.
-
-### 10.3 Network Dynamics
-
-Actors maintaining alignment find coordination with each other low-cost. Their apertures are compatible. Their genealogies are verifiable. Their events compose cleanly. They can share moments and build on each other's histories without extensive reconciliation.
-
-Actors diverging from alignment face increasing coordination costs. Their apertures diverge from partners. Their histories require translation or cannot be verified. They must expend resources on trust-building that aligned actors avoid.
-
-Over time, the network of participants, projects, and programmes exhibits selection pressure toward A*. Aligned configurations attract coordination. Misaligned configurations shed it. This selection is a structural consequence of the geometry rather than an externally enforced rule.
+Policy decisions (tier eligibility, institutional governance, dispute procedure)
+remain above the fiat substrate and must be recorded as replayable Grants and
+Shells in order to be auditable.
 
 ---
 
@@ -399,6 +520,16 @@ Section 11 quantifies capacity headroom under conservative assumptions. Operatio
 For planning and governance, the surplus may be notionally partitioned across domains and capacities. Twelve divisions (three domains multiplied by four Gyroscope capacities) provide a natural structure for balanced development.
 
 This is a planning representation. It does not imply the creation of twelve separate currencies or ledgers. It provides a framework for ensuring that surplus allocation maintains balance across the coupled domains rather than concentrating in any single area.
+
+### 11.4 Abundance Security and Resilience Margin
+
+The capacity envelope established in this section is not merely an argument that "there is enough". It defines a quantitative **resilience margin**: the fraction of total capacity that remains unused even after supporting generous unconditional distributions at global scale over long horizons.
+
+Let C denote the physically derived annual capacity in MU and D denote the annual MU required to fund UHI for the global population. Under the conservative mapping of one structural micro state reference to one MU, the reference implementation yields a ratio D/C of approximately 10^-9, corresponding to a resilience margin R = 1 - D/C ≈ 0.9999999990, which is about 99.9999998980 per cent. Over a millennium, the cumulative requirement remains of the same negligible order of magnitude relative to cumulative capacity.
+
+This implies two security properties. First, no plausible pattern of honest participation can exhaust the capacity envelope. Legitimate expansion of activity cannot threaten the substrate. Secondly, even extreme patterns of misallocation or over issuance remain confined to vanishingly small fractions of available capacity. Under the calibration used in the reference tests, an adversary would need to succeed in issuing on the order of ten million times the entire global population's UHI requirement for a thousand years, concentrated into a single year, in order to consume just one per cent of annual capacity. This is operationally unattainable.
+
+In conventional debt based systems, security is often framed as the defence of a scarce monetary stock. In the Moments Economy, security is instead the preservation of coherent genealogies within an abundant canvas. The limiting factor is not the quantity of MU that can be issued, but the quality of the histories and registries that determine who is entitled to receive them. The resilience margin ensures that recovering from misallocation or fraud is a matter of recalibrating genealogies and registries, not of "finding the money" to make victims whole.
 
 ---
 
@@ -431,6 +562,8 @@ Competition and conflict remain possible. Actors may still compete for positions
 ### 13.1 Registries and Wallets
 
 The Moments Economy uses registries and optional digital wallets for routing distributions. Banks and other institutions act as coordination and verification platforms rather than as holders of scarce reserves.
+
+Registries and wallets in this setting operate in the Local, Published, Verified pattern. Local instances maintain their own view of entitlements and balances. Published artefacts expose these views as signed bundles containing byte logs, event logs, and ecology capacity ledgers. Verified nodes replay the bundles against the atlas and check signatures, hashes, and seals. Correctness is established not by trusting the registry as an institution, but by verifying that its published artefacts remain consistent under replay.
 
 ### 13.2 Prices and Inflation
 
@@ -467,7 +600,9 @@ Identity and eligibility management are explicit governance functions. A registr
 
 Public institutions, including central banks, may operate registries and settlement programmes. Their role is verification and operationalisation, not credit creation.
 
-A conforming public programme MUST publish its byte log, event log, and derived ecology outputs (y_Ecol, D).
+A conforming public programme MUST publish its byte log, event log, and ecology capacity ledger (Shells, Grants, Archives).
+
+Public settlement programmes are expected to publish signed bundles that bind their registry decisions to concrete genealogies and Shells. These bundles must be sufficient for any independent party to reconstruct the implied distributions and to verify that they remain within the declared capacity windows. In this way, eligibility and issuance decisions remain human governance matters, while the verification of those decisions remains a purely structural computation.
 
 ### 14.3 Tier Governance as Auditable Distribution Channels
 
@@ -488,9 +623,9 @@ Minimum interoperability requires:
 
 - identical atlas version  
 - exchange of byte logs and event logs in canonical formats  
-- shared domain/edge identifiers and ecology derivation rules
+- shared domain/edge identifiers and ecology capacity ledger formats
 
-The interoperability bundle (byte log, event log, final signature, derived ecology outputs) is sufficient for independent verification.
+The interoperability bundle (byte log, event log, final signature, ecology capacity ledger) is sufficient for independent verification.
 
 ### 14.5 Transition Path
 
@@ -515,3 +650,5 @@ History in the Moments Economy is a physical object. Different orderings of even
 The network of individuals, projects, and programmes forms through shared structural physics rather than through imposed consensus. Actors who maintain alignment find coordination with each other low-cost. Those who diverge face increasing friction. Over time, this creates selection pressure toward the aperture target.
 
 The surplus is not extra money. It is the structural headroom for civilisation to grow in complexity without collapsing. The question for economic policy shifts from what we can afford to what is worth doing.
+
+The abundance of structural capacity introduces a new security regime. In debt based systems, adversarial behaviour threatens the scarcity of money itself. In the Moments Economy, adversarial behaviour threatens only the integrity of particular genealogies and registries, because the capacity substrate remains overwhelmingly under utilised even under pessimistic assumptions. Recovery from error or fraud becomes a matter of reassigning genealogical credit and restoring correct entitlements, not of repairing a depleted treasury. This abundance based security shifts attention from defending a fragile stock to maintaining clear, replayable histories that keep human authority and agency intelligible at every scale.

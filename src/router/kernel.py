@@ -16,7 +16,10 @@ from numpy.typing import NDArray
 from .constants import (
     ARCHETYPE_STATE24,
     GENE_MIC_S,
+    LAYER_MASK_12,
+    pack_state,
     unpack_state,
+    mask12_for_byte,
 )
 
 
@@ -88,3 +91,67 @@ class RouterKernel:
             a_hex=f"{a:03x}",
             b_hex=f"{b:03x}",
         )
+
+    def route_from_archetype(self, payload: bytes) -> Signature:
+        """
+        Temporarily reset to archetype, step through payload, and return final signature.
+        
+        This method temporarily modifies kernel state (resets, steps payload), then
+        restores the original state. The kernel's current state is unchanged after
+        this method returns.
+        """
+        saved_state_index = self.state_index
+        saved_last_byte = self.last_byte
+        saved_step = self.step
+        
+        try:
+            self.reset()
+            for b in payload:
+                self.step_byte(b)
+            return self.signature()
+        finally:
+            self.state_index = saved_state_index
+            self.last_byte = saved_last_byte
+            self.step = saved_step
+
+    def step_byte_inverse(self, byte: int) -> None:
+        """
+        Inverse step: compute predecessor state from current state and byte.
+        
+        Given current state (A', B') and byte b:
+        - m = mask12_for_byte(b)
+        - predecessor: B = A' ^ 0xFFF, A = (B' ^ m) ^ 0xFFF
+        - pack predecessor state24
+        - find its ontology index with np.searchsorted
+        - set state_index to that index
+        - decrement step
+        
+        This implements BU-Ingress in discrete form.
+        """
+        current_state = int(self.ontology[self.state_index])
+        a_prime, b_prime = unpack_state(current_state)
+        
+        m = mask12_for_byte(int(byte) & 0xFF)
+        
+        # Compute predecessor state
+        b_pred = (a_prime ^ LAYER_MASK_12) & LAYER_MASK_12
+        a_pred = ((b_prime ^ m) ^ LAYER_MASK_12) & LAYER_MASK_12
+        state24_pred = pack_state(a_pred, b_pred)
+        
+        # Find predecessor state index in ontology
+        idx = int(np.searchsorted(self.ontology, state24_pred))
+        if idx >= len(self.ontology) or int(self.ontology[idx]) != state24_pred:
+            raise ValueError(f"Predecessor state {state24_pred:06x} not found in ontology")
+        self.state_index = idx
+        
+        self.last_byte = GENE_MIC_S
+        self.step = max(0, self.step - 1)
+
+    def step_payload_inverse(self, payload: bytes) -> None:
+        """
+        Apply inverse steps for payload bytes in reverse order.
+        
+        This enables "audit rollback" and "undo last operation".
+        """
+        for b in reversed(payload):
+            self.step_byte_inverse(b)

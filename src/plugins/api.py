@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from src.app.events import Domain, EdgeID, GovernanceEvent
+from src.app.events import Domain, EdgeID, GovernanceEvent, Grant, Shell, Archive
 
 
 def parse_domain(value: Any) -> Optional[Domain]:
@@ -49,13 +49,24 @@ def parse_edge_id(value: Any) -> Optional[EdgeID]:
 
 
 def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
+    from src.app.events import MICRO
+    
     dom = parse_domain(d.get("domain"))
     edge = parse_edge_id(d.get("edge_id"))
     if dom is None or edge is None:
         raise ValueError(f"Invalid event dict: domain={d.get('domain')}, edge_id={d.get('edge_id')}")
 
-    magnitude = float(d.get("magnitude", 0.0))
-    confidence = float(d.get("confidence", 1.0))
+    # Support both old format (magnitude/confidence as floats) and new format (magnitude_micro/confidence_micro as ints)
+    if "magnitude_micro" in d:
+        magnitude_micro = int(d.get("magnitude_micro", 0))
+        confidence_micro = int(d.get("confidence_micro", MICRO))
+    else:
+        # Legacy format: convert float to micro-units
+        magnitude = float(d.get("magnitude", 0.0))
+        confidence = float(d.get("confidence", 1.0))
+        magnitude_micro = int(round(magnitude * MICRO))
+        confidence_micro = int(round(confidence * MICRO))
+    
     meta = dict(d.get("meta", {}))
 
     # Optional kernel binding fields
@@ -66,8 +77,8 @@ def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
     return GovernanceEvent(
         domain=dom,
         edge_id=edge,
-        magnitude=magnitude,
-        confidence=confidence,
+        magnitude_micro=magnitude_micro,
+        confidence_micro=confidence_micro,
         meta=meta,
         kernel_step=int(kernel_step) if kernel_step is not None else None,
         kernel_state_index=int(kernel_state_index) if kernel_state_index is not None else None,
@@ -77,4 +88,52 @@ def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
 
 def event_to_dict(ev: GovernanceEvent) -> Dict[str, Any]:
     return ev.as_dict()
+
+
+def grant_from_dict(d: Dict[str, Any]) -> Grant:
+    """
+    Parse a Grant from a dictionary.
+    
+    Required keys: identity, identity_id, anchor, mu_allocated
+    """
+    identity = str(d.get("identity", ""))
+    identity_id = str(d.get("identity_id", ""))
+    anchor = str(d.get("anchor", ""))
+    mu_allocated = int(d.get("mu_allocated", 0))
+    
+    if not identity or not identity_id or not anchor:
+        raise ValueError(f"Invalid grant dict: missing identity, identity_id, or anchor")
+    
+    if len(identity_id) != 64:
+        raise ValueError(f"identity_id must be 64 hex chars (SHA-256), got {len(identity_id)}")
+    
+    if len(anchor) != 6:
+        raise ValueError(f"anchor must be 6 hex chars (24-bit state_hex), got {len(anchor)}")
+    
+    try:
+        int(identity_id, 16)  # Validate hex
+    except ValueError:
+        raise ValueError(f"identity_id must be valid hex, got {identity_id}")
+    
+    try:
+        int(anchor, 16)  # Validate hex
+    except ValueError:
+        raise ValueError(f"anchor must be valid hex, got {anchor}")
+    
+    return Grant(identity=identity, identity_id=identity_id, anchor=anchor, mu_allocated=mu_allocated)
+
+
+def grant_to_dict(g: Grant) -> Dict[str, Any]:
+    """Serialize a Grant to a dictionary."""
+    return g.as_dict()
+
+
+def shell_to_dict(shell: Shell) -> Dict[str, Any]:
+    """Serialize a Shell to a dictionary."""
+    return shell.as_dict()
+
+
+def archive_to_dict(archive: Archive) -> Dict[str, Any]:
+    """Serialize an Archive to a dictionary."""
+    return archive.as_dict()
 

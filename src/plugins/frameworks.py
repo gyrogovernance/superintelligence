@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from src.app.events import Domain, EdgeID, GovernanceEvent
+from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
 
 
 @dataclass(frozen=True)
@@ -96,6 +96,10 @@ class THMDisplacementPlugin(FrameworkPlugin):
                     signal_confidence_key = f"{key}_confidence"
                     confidence = float(payload.get(signal_confidence_key, payload.get("confidence", 1.0)))
                     
+                    # Convert to micro-units
+                    magnitude_micro = int(round(val * MICRO))
+                    confidence_micro = int(round(confidence * MICRO))
+                    
                     meta_dict = {"plugin": self.name, "signal": key}
                     if ctx.meta:
                         meta_dict.update(ctx.meta)
@@ -103,8 +107,8 @@ class THMDisplacementPlugin(FrameworkPlugin):
                         GovernanceEvent(
                             domain=dom,
                             edge_id=edge,
-                            magnitude=val,
-                            confidence=confidence,
+                            magnitude_micro=magnitude_micro,
+                            confidence_micro=confidence_micro,
                             meta=meta_dict,
                         )
                     )
@@ -150,12 +154,16 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             meta_dict = {"plugin": self.name, "metric": "GM-ICu"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
+            # Convert to micro-units
+            magnitude_micro = int(round(delta_gm_vs_icu * MICRO))
+            confidence_micro = int(round(confidence * MICRO))
+            
             events.append(
                 GovernanceEvent(
                     domain=dom,
                     edge_id=EdgeID.GOV_INFO,
-                    magnitude=delta_gm_vs_icu,
-                    confidence=confidence,
+                    magnitude_micro=magnitude_micro,
+                    confidence_micro=confidence_micro,
                     meta=meta_dict,
                 )
             )
@@ -172,12 +180,16 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             meta_dict = {"plugin": self.name, "metric": "IInter-ICo"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
+            # Convert to micro-units
+            magnitude_micro = int(round(delta_iinter_vs_ico * MICRO))
+            confidence_micro = int(round(confidence * MICRO))
+            
             events.append(
                 GovernanceEvent(
                     domain=dom,
                     edge_id=EdgeID.INFER_INTEL,
-                    magnitude=delta_iinter_vs_ico,
-                    confidence=confidence,
+                    magnitude_micro=magnitude_micro,
+                    confidence_micro=confidence_micro,
                     meta=meta_dict,
                 )
             )

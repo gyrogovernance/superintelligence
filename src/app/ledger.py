@@ -31,7 +31,8 @@ from numpy.typing import NDArray
 from .events import Domain, GovernanceEvent
 
 
-EdgeVec = NDArray[np.float64]
+EdgeVec = NDArray[np.int64]  # Ledger vectors use integer micro-units
+EdgeVecFloat = NDArray[np.float64]  # For intermediate float computations
 Mat46 = NDArray[np.float64]
 Mat44 = NDArray[np.float64]
 Mat66 = NDArray[np.float64]
@@ -130,28 +131,33 @@ def get_cycle_basis() -> NDArray[np.float64]:
     return _CYCLE_BASIS_K4.copy()
 
 
-def hodge_decomposition(y: EdgeVec, P_grad: Mat66, P_cycle: Mat66) -> Tuple[EdgeVec, EdgeVec]:
+def hodge_decomposition(y: EdgeVec, P_grad: Mat66, P_cycle: Mat66) -> Tuple[EdgeVecFloat, EdgeVecFloat]:
     """
     GGG simulator-export exact Hodge decomposition:
       y = y_grad + y_cycle
     
     where y_grad ∈ Im(B^T) and y_cycle ∈ ker(B), orthogonal w.r.t. standard inner product.
+    
+    Input y is integer micro-units, output is float (projection matrices are float constants).
     """
-    y = np.asarray(y, dtype=np.float64).reshape(6)
-    y_grad = P_grad @ y
-    y_cycle = P_cycle @ y
+    y_float = np.asarray(y, dtype=np.float64).reshape(6)
+    y_grad = P_grad @ y_float
+    y_cycle = P_cycle @ y_float
     return y_grad, y_cycle
 
 
-def compute_aperture(y: EdgeVec, y_cycle: EdgeVec) -> float:
+def compute_aperture(y: EdgeVec, y_cycle: EdgeVecFloat) -> float:
     """
     GGG simulator-export exact unweighted aperture:
       A = ||y_cycle||^2 / ||y||^2
         = (y_cycle^T y_cycle) / (y^T y)
+    
+    Input y is integer micro-units, y_cycle is float from Hodge decomposition.
+    Final ratio is float (exact representation not needed for final output).
     """
-    y = np.asarray(y, dtype=np.float64).reshape(6)
+    y_float = np.asarray(y, dtype=np.float64).reshape(6)
     y_cycle = np.asarray(y_cycle, dtype=np.float64).reshape(6)
-    y_norm_sq = float(y @ y)
+    y_norm_sq = float(y_float @ y_float)
     if y_norm_sq == 0.0:
         return 0.0
     y_cycle_norm_sq = float(y_cycle @ y_cycle)
@@ -161,8 +167,8 @@ def compute_aperture(y: EdgeVec, y_cycle: EdgeVec) -> float:
 def construct_edge_vector_with_aperture(
     x: NDArray[np.float64],
     target_aperture: Optional[float] = None,
-    cycle_basis_vector: Optional[EdgeVec] = None,
-) -> EdgeVec:
+    cycle_basis_vector: Optional[EdgeVecFloat] = None,
+) -> EdgeVecFloat:
     """
     GGG exact construction with W=I:
       y_grad0 = B^T x
@@ -178,7 +184,7 @@ def construct_edge_vector_with_aperture(
     G = float(y_grad0 @ y_grad0)
 
     if target_aperture is None or target_aperture == 0:
-        return y_grad0
+        return y_grad0.astype(np.float64)
 
     A = float(target_aperture)
     if not (0.0 < A < 1.0):
@@ -225,17 +231,17 @@ class LedgerSnapshot:
 class DomainLedgers:
     """
     Holds three ledgers:
-      y_Econ, y_Emp, y_Edu  (each length-6 float vector)
+      y_Econ, y_Emp, y_Edu  (each length-6 integer vector in micro-units)
 
     Computes unweighted Hodge projections (W=I) according to GGG simulator export.
-    Confidence is encoded in GovernanceEvent.signed_value().
+    Confidence is encoded in GovernanceEvent.signed_value_micro().
     """
 
     def __init__(self) -> None:
         self._y: Dict[Domain, EdgeVec] = {
-            Domain.ECONOMY: np.zeros(6, dtype=np.float64),
-            Domain.EMPLOYMENT: np.zeros(6, dtype=np.float64),
-            Domain.EDUCATION: np.zeros(6, dtype=np.float64),
+            Domain.ECONOMY: np.zeros(6, dtype=np.int64),
+            Domain.EMPLOYMENT: np.zeros(6, dtype=np.int64),
+            Domain.EDUCATION: np.zeros(6, dtype=np.int64),
         }
 
         # GGG exact projection matrices (constants, no computation)
@@ -255,7 +261,7 @@ class DomainLedgers:
         """
         d = ev.domain
         e = int(ev.edge_id)
-        self._y[d][e] += ev.signed_value()
+        self._y[d][e] += ev.signed_value_micro()
         self.event_count += 1
 
     def aperture(self, domain: Domain) -> float:
@@ -270,10 +276,11 @@ class DomainLedgers:
         _, y_cycle = hodge_decomposition(y, self._P_grad, self._P_cycle)
         return compute_aperture(y, y_cycle)
 
-    def decompose(self, domain: Domain) -> Tuple[EdgeVec, EdgeVec]:
+    def decompose(self, domain: Domain) -> Tuple[EdgeVecFloat, EdgeVecFloat]:
         """
         Return (y_grad, y_cycle) using unweighted Hodge decomposition.
         Follows GGG simulator export exactly.
+        Returns float arrays (projection matrices are float constants).
         """
         y = self._y[domain]
         return hodge_decomposition(y, self._P_grad, self._P_cycle)

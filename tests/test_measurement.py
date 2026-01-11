@@ -19,7 +19,7 @@ from typing import Any, Dict
 import numpy as np
 
 from src.app.cli.schemas import A_STAR
-from src.app.events import Domain
+from src.app.events import Domain, MICRO
 from src.app.ledger import (
     DomainLedgers,
     compute_aperture,
@@ -55,9 +55,13 @@ class TestMeasurementCollapse:
         P_grad, P_cycle = get_projections()
 
         # State 1: Collapsed (Single Axis)
-        y1 = np.array([4.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
+        y1_float = np.array([4.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
         # State 2: Distributed
-        y2 = np.array([1.0, 1.0, 0.0, 1.0, 0.0, 1.0], dtype=np.float64)
+        y2_float = np.array([1.0, 1.0, 0.0, 1.0, 0.0, 1.0], dtype=np.float64)
+
+        # Convert to int64 micro-units (hodge_decomposition expects EdgeVec = int64)
+        y1 = (y1_float * MICRO).astype(np.int64)
+        y2 = (y2_float * MICRO).astype(np.int64)
 
         # Compute apertures
         _, y1_cycle = hodge_decomposition(y1, P_grad, P_cycle)
@@ -66,9 +70,9 @@ class TestMeasurementCollapse:
         _, y2_cycle = hodge_decomposition(y2, P_grad, P_cycle)
         A2 = compute_aperture(y2, y2_cycle)
 
-        # Scalar sums (Empirical Score)
-        scalar1 = float(np.sum(np.abs(y1)))
-        scalar2 = float(np.sum(np.abs(y2)))
+        # Scalar sums (Empirical Score) - use float versions for comparison
+        scalar1 = float(np.sum(np.abs(y1_float)))
+        scalar2 = float(np.sum(np.abs(y2_float)))
 
         print("\n" + "="*10)
         print("PROOF: SCALAR BLINDNESS")
@@ -91,24 +95,28 @@ class TestMeasurementCollapse:
 
         # Construct Aligned State (y_near)
         x_near = np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float64)
-        y_near = construct_edge_vector_with_aperture(x_near, target_aperture=A_STAR)
+        y_near_float = construct_edge_vector_with_aperture(x_near, target_aperture=A_STAR)
+        # Convert to int64 micro-units for hodge_decomposition
+        y_near = (y_near_float * MICRO).astype(np.int64)
         _, y_near_cycle = hodge_decomposition(y_near, P_grad, P_cycle)
         A_near = compute_aperture(y_near, y_near_cycle)
 
         # Construct Misaligned State (y_far, A=0.5)
         x_far = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
-        y_far = construct_edge_vector_with_aperture(x_far, target_aperture=0.5)
+        y_far_float = construct_edge_vector_with_aperture(x_far, target_aperture=0.5)
 
         # Normalize y_far to have the same empirical score as y_near
-        scalar_near = float(np.sum(np.abs(y_near)))
-        scalar_far_orig = float(np.sum(np.abs(y_far)))
-        y_far_scaled = y_far * (scalar_near / scalar_far_orig)
+        scalar_near = float(np.sum(np.abs(y_near_float)))
+        scalar_far_orig = float(np.sum(np.abs(y_far_float)))
+        y_far_scaled_float = y_far_float * (scalar_near / scalar_far_orig)
+        # Convert to int64 micro-units
+        y_far_scaled = (y_far_scaled_float * MICRO).astype(np.int64)
         
         # Recompute A_far (Aperture is scale invariant, so it stays 0.5)
         _, y_far_scaled_cycle = hodge_decomposition(y_far_scaled, P_grad, P_cycle)
         A_far_scaled = compute_aperture(y_far_scaled, y_far_scaled_cycle)
         
-        scalar_far = float(np.sum(np.abs(y_far_scaled)))
+        scalar_far = float(np.sum(np.abs(y_far_scaled_float)))
 
         dist_near = abs(A_near - A_STAR)
         dist_far = abs(A_far_scaled - A_STAR)
@@ -121,7 +129,7 @@ class TestMeasurementCollapse:
         print("  ✓ Proven: Scalar evaluation cannot detect alignment")
 
         assert abs(scalar_near - scalar_far) < 1e-6
-        assert dist_near < 1e-6
+        assert dist_near < 1e-5  # Allow for quantization errors from int64 conversion
         assert dist_far > 0.4  # Massive misalignment
 
     def test_single_axis_structural_lock_vs_multi_axis_freedom(self):
@@ -149,7 +157,9 @@ class TestMeasurementCollapse:
         # --- PART 2: The Solution (Multi-Axis Freedom) ---
         # Construct a vector that hits A* exactly
         x = np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float64)
-        y_aligned = construct_edge_vector_with_aperture(x, target_aperture=A_STAR)
+        y_aligned_float = construct_edge_vector_with_aperture(x, target_aperture=A_STAR)
+        # Convert to int64 micro-units for hodge_decomposition
+        y_aligned = (y_aligned_float * MICRO).astype(np.int64)
         _, y_cyc = hodge_decomposition(y_aligned, P_grad, P_cycle)
         A_aligned = compute_aperture(y_aligned, y_cyc)
 
@@ -173,7 +183,7 @@ class TestMeasurementCollapse:
             assert abs(A - A_STAR) > 0.4, "Single axis cannot reach A*"
             
         # Assert Freedom
-        assert abs(A_aligned - A_STAR) < 1e-6, "Multi-axis must hit A*"
+        assert abs(A_aligned - A_STAR) < 1e-5, "Multi-axis must hit A* (allowing for quantization errors from int64 conversion)"
 
     def test_kernel_A_kernel_vs_app_A_star(self):
         """
@@ -202,17 +212,21 @@ class TestMeasurementCollapse:
         P_grad, P_cycle = get_projections()
         
         # Base vector (structurally rich)
-        y = np.array([1.0, 2.0, 0.5, 1.5, 0.2, 1.0], dtype=np.float64)
+        y_float = np.array([1.0, 2.0, 0.5, 1.5, 0.2, 1.0], dtype=np.float64)
+        # Convert to int64 micro-units for hodge_decomposition
+        y = (y_float * MICRO).astype(np.int64)
         _, y_cycle = hodge_decomposition(y, P_grad, P_cycle)
         A_base = compute_aperture(y, y_cycle)
-        S_base = float(np.sum(np.abs(y)))
+        S_base = float(np.sum(np.abs(y_float)))
 
         # Scaled vector
         lam = 100.0
-        y_scaled = y * lam
+        y_scaled_float = y_float * lam
+        # Convert to int64 micro-units
+        y_scaled = (y_scaled_float * MICRO).astype(np.int64)
         _, ys_cycle = hodge_decomposition(y_scaled, P_grad, P_cycle)
         A_scaled = compute_aperture(y_scaled, ys_cycle)
-        S_scaled = float(np.sum(np.abs(y_scaled)))
+        S_scaled = float(np.sum(np.abs(y_scaled_float)))
 
         print("\n" + "="*10)
         print("PROOF: EPISTEMIC SELF-NORMALIZATION")

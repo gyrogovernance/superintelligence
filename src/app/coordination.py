@@ -12,13 +12,20 @@ Responsibilities:
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
+
+try:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey  # type: ignore
+except ImportError:
+    Ed25519PrivateKey = None  # type: ignore
+    Ed25519PublicKey = None  # type: ignore
 
 from src.router.kernel import RouterKernel
 
-from .events import GovernanceEvent, Domain, EdgeID
+from .events import GovernanceEvent, Domain, EdgeID, Grant, Shell, MICRO
 from .ledger import DomainLedgers
 
 
@@ -27,16 +34,50 @@ class CoordinationStatus:
     kernel: Dict[str, Any]
     ledgers: Dict[str, Any]
     apertures: Dict[str, float]
+    fiat: Dict[str, Any] | None = None
+
+
+# Fiat substrate capacity constants (system policy)
+F_TOTAL_PER_SEC: int = 22_062_316_248_000_000
+SECONDS_PER_YEAR: int = 365 * 24 * 60 * 60
+CAPACITY_PER_YEAR_MU: int = F_TOTAL_PER_SEC * SECONDS_PER_YEAR
+
+
+def capacity_for_window(duration_seconds: int | float, fraction: float = 1.0) -> int:
+    """
+    Derive capacity for a time window from physics (atomic second × kernel throughput × duration).
+    
+    Args:
+        duration_seconds: duration of the window in seconds
+        fraction: optional fraction of total capacity to use (default 1.0 for full capacity)
+        
+    Returns:
+        Capacity in MU for the given window
+        
+    Formula: capacity = F_TOTAL_PER_SEC × duration_seconds × fraction
+    """
+    return int(F_TOTAL_PER_SEC * float(duration_seconds) * fraction)
 
 
 class Coordinator:
     def __init__(self, atlas_dir: Path) -> None:
+        self.atlas_dir = atlas_dir
         self.kernel = RouterKernel(atlas_dir)
         self.ledgers = DomainLedgers()
 
         # Audit logs (kept simple; you can persist externally)
         self.byte_log: List[int] = []
         self.event_log: List[Dict[str, Any]] = []
+
+        # Fiat substrate state
+        self.sealer = RouterKernel(atlas_dir)
+        self.fiat_grants_current: Dict[str, Grant] = {}  # key = identity_id
+        self.fiat_shell_log: List[Shell] = []
+        self.fiat_shell_grants_log: List[Tuple[Shell, List[Grant]]] = []
+        self.fiat_archive_totals: Dict[str, int] = {}  # key = identity_id (collision-resistant)
+        self.fiat_identity_id_to_identity: Dict[str, str] = {}  # identity_id -> last seen identity label (for reporting)
+        self.fiat_used_total: int = 0
+        self.fiat_capacity_total: int = 0
 
     # -------------------------
     # Kernel stepping (shared moment)
@@ -60,8 +101,8 @@ class Coordinator:
             system_event = GovernanceEvent(
                 domain=Domain.ECONOMY,
                 edge_id=EdgeID.GOV_INFO,
-                magnitude=0.01,  # Small structural change per byte
-                confidence=1.0,
+                magnitude_micro=int(0.01 * MICRO),  # Small structural change per byte
+                confidence_micro=MICRO,
                 meta={"type": "kernel_step", "byte": b},
             )
             self.apply_event(system_event, bind_to_kernel_moment=True)
@@ -82,8 +123,8 @@ class Coordinator:
             ev = GovernanceEvent(
                 domain=ev.domain,
                 edge_id=ev.edge_id,
-                magnitude=ev.magnitude,
-                confidence=ev.confidence,
+                magnitude_micro=ev.magnitude_micro,
+                confidence_micro=ev.confidence_micro,
                 meta=dict(ev.meta),  # Copy dict to preserve audit trail immutability
                 kernel_step=self.kernel.step,
                 kernel_state_index=self.kernel.state_index,
@@ -132,13 +173,276 @@ class Coordinator:
             "event_count": self.ledgers.event_count,
         }
 
-        return CoordinationStatus(kernel=kernel_info, ledgers=ledgers, apertures=apertures)
+        fiat_info = self.fiat_status()
+
+        return CoordinationStatus(kernel=kernel_info, ledgers=ledgers, apertures=apertures, fiat=fiat_info)
+
+    def anchor_identity(self, name: str) -> Tuple[str, str]:
+        """
+        Compute identity_id and anchor for an identity name.
+        
+        Returns:
+            (identity_id, anchor) tuple where:
+            - identity_id: SHA-256 hex of identity seed (64 hex chars, collision-resistant)
+            - anchor: Router state_hex (6 hex chars, structural coordinate)
+        
+        The identity_id provides collision resistance (256 bits).
+        The anchor provides structural meaning in kernel phase space.
+        """
+        seed = f"identity:{name}".encode("utf-8")
+        h = hashlib.sha256(seed).digest()
+        identity_id = h.hex()  # Full 256-bit hash (64 hex chars)
+        sig = self.sealer.route_from_archetype(h)
+        anchor = sig.state_hex  # Structural coordinate (6 hex chars)
+        return identity_id, anchor
+
+    def add_grant(self, identity: str, mu_allocated: int, header: bytes | str | None = None) -> None:
+        """
+        Add a grant to the current shell.
+        
+        Args:
+            identity: human-readable label
+            mu_allocated: MU allocated to this identity
+            header: optional header (unused for grant, kept for API compatibility)
+        
+        Raises:
+            ValueError: if mu_allocated < 0 or identity already has a grant
+        """
+        if mu_allocated < 0:
+            raise ValueError(f"mu_allocated must be non-negative, got {mu_allocated}")
+        
+        identity_id, anchor = self.anchor_identity(identity)
+        if identity_id in self.fiat_grants_current:
+            raise ValueError(f"Identity already has a grant in current shell")
+        
+        grant = Grant(identity=identity, identity_id=identity_id, anchor=anchor, mu_allocated=mu_allocated)
+        self.fiat_grants_current[identity_id] = grant
+
+    def close_shell(self, header: bytes | str, total_capacity_MU: int) -> Shell:
+        """
+        Close the current shell by building receipts and sealing.
+        
+        Args:
+            header: contextual label (e.g. b"ecology:year:2026")
+            total_capacity_MU: total MU capacity for this shell
+        
+        Returns:
+            Shell object with seal and capacity metrics
+        
+        Raises:
+            ValueError: if used capacity exceeds total capacity
+        """
+        if isinstance(header, bytes):
+            header_str = header.decode("utf-8", errors="replace")
+            header_bytes = header
+        else:
+            header_str = str(header)
+            header_bytes = header_str.encode("utf-8")
+        
+        # Build receipts by sorting grants by identity_id (canonical ordering)
+        # Receipt = identity_id (32 bytes) || anchor (3 bytes) || mu (8 bytes)
+        grants_list = list(self.fiat_grants_current.values())
+        receipts: List[bytes] = []
+        for g in sorted(grants_list, key=lambda gg: gg.identity_id):
+            mu_bytes = g.mu_allocated.to_bytes(8, "big", signed=False)
+            receipt = bytes.fromhex(g.identity_id) + bytes.fromhex(g.anchor) + mu_bytes
+            receipts.append(receipt)
+        
+        # Route header || receipts through sealer
+        payload = header_bytes + b"".join(receipts)
+        sig = self.sealer.route_from_archetype(payload)
+        seal = sig.state_hex
+        
+        # Compute used/free capacity
+        used = sum(g.mu_allocated for g in grants_list)
+        free = total_capacity_MU - used
+        
+        if used > total_capacity_MU:
+            raise ValueError(f"Used capacity {used} exceeds total capacity {total_capacity_MU}")
+        
+        # Create shell
+        shell = Shell(
+            header=header_str,
+            seal=seal,
+            total_capacity_MU=total_capacity_MU,
+            used_capacity_MU=used,
+            free_capacity_MU=free,
+        )
+        
+        # Update state
+        self.fiat_shell_log.append(shell)
+        self.fiat_shell_grants_log.append((shell, grants_list))
+        self.fiat_capacity_total += total_capacity_MU
+        self.fiat_used_total += used
+        for g in grants_list:
+            self.fiat_archive_totals[g.identity_id] = self.fiat_archive_totals.get(g.identity_id, 0) + g.mu_allocated
+            self.fiat_identity_id_to_identity[g.identity_id] = g.identity
+        
+        # Clear current grants
+        self.fiat_grants_current.clear()
+        
+        return shell
+
+    def fiat_status(self) -> Dict[str, Any]:
+        """
+        Return fiat substrate status.
+        
+        Returns dict with:
+        - current_shell_header: header of last shell (if any)
+        - pending_grants_count: number of grants in current shell
+        - last_shell_seal: seal of last shell (if any)
+        - total_capacity_MU: sum of all shell capacities
+        - used_capacity_MU: sum of all used capacities
+        - free_capacity_MU: remaining capacity
+        - shell_count: number of closed shells
+        - per_identity_totals: per-identity MU totals (maybe truncated)
+        - meta_root: optional meta-root from shell seals
+        """
+        # Derive per-identity totals from identity_id totals (for reporting)
+        per_identity_totals: Dict[str, int] = {}
+        for identity_id, total in self.fiat_archive_totals.items():
+            identity = self.fiat_identity_id_to_identity.get(identity_id, identity_id)
+            per_identity_totals[identity] = per_identity_totals.get(identity, 0) + total
+        
+        status: Dict[str, Any] = {
+            "pending_grants_count": len(self.fiat_grants_current),
+            "total_capacity_MU": self.fiat_capacity_total,
+            "used_capacity_MU": self.fiat_used_total,
+            "free_capacity_MU": self.fiat_capacity_total - self.fiat_used_total,
+            "shell_count": len(self.fiat_shell_log),
+            "per_anchor_totals": dict(self.fiat_archive_totals),
+            "per_identity_totals": per_identity_totals,
+        }
+        
+        if self.fiat_shell_log:
+            last_shell = self.fiat_shell_log[-1]
+            status["current_shell_header"] = last_shell.header
+            status["last_shell_seal"] = last_shell.seal
+            seals = [shell.seal for shell in self.fiat_shell_log]
+            status["meta_root"] = self.meta_root_from_shell_seals(seals)
+        else:
+            status["current_shell_header"] = None
+            status["last_shell_seal"] = None
+            status["meta_root"] = None
+        
+        return status
+
+    def meta_root_from_shell_seals(self, seals: List[str]) -> str:
+        """
+        Compute meta-root from list of shell seals.
+        
+        Args:
+            seals: list of seal hex strings
+        
+        Returns:
+            meta-root state_hex (canonical ordering: seals are sorted)
+        """
+        seals_sorted = sorted(seals)
+        seal_bytes = [bytes.fromhex(s) for s in seals_sorted]
+        sig = self.sealer.route_from_archetype(b"".join(seal_bytes))
+        return sig.state_hex
+
+    def rollback_last_shell(self) -> None:
+        """
+        Rollback the last shell: remove it and reverse archive totals.
+        """
+        if not self.fiat_shell_grants_log:
+            raise ValueError("No shells to rollback")
+        
+        shell, grants = self.fiat_shell_grants_log.pop()
+        
+        # Remove from visible log too (keep both in sync)
+        assert self.fiat_shell_log and self.fiat_shell_log[-1].seal == shell.seal
+        self.fiat_shell_log.pop()
+        
+        self.fiat_capacity_total -= shell.total_capacity_MU
+        self.fiat_used_total -= shell.used_capacity_MU
+        
+        for g in grants:
+            prev = self.fiat_archive_totals.get(g.identity_id, 0)
+            new = prev - g.mu_allocated
+            if new <= 0:
+                self.fiat_archive_totals.pop(g.identity_id, None)
+                self.fiat_identity_id_to_identity.pop(g.identity_id, None)
+            else:
+                self.fiat_archive_totals[g.identity_id] = new
+
+    def rollback_kernel_steps(self, n: int) -> None:
+        """
+        Rollback n kernel steps using inverse stepping.
+        
+        Args:
+            n: number of steps to rollback
+        """
+        from src.router.constants import GENE_MIC_S
+        
+        n = min(n, self.kernel.step)
+        for _ in range(n):
+            if not self.byte_log:
+                break
+            b = self.byte_log.pop()
+            self.kernel.step_byte_inverse(b)
+        self.kernel.last_byte = self.byte_log[-1] if self.byte_log else GENE_MIC_S
+        assert self.kernel.step == len(self.byte_log)
+
+    def sign_bundle(self, bundle_json_bytes: bytes, private_key: Any) -> bytes:
+        """
+        Sign bundle JSON bytes using Ed25519.
+        
+        Args:
+            bundle_json_bytes: JSON bytes of bundle (without signature fields)
+            private_key: Ed25519PrivateKey instance
+            
+        Returns:
+            Signature bytes
+        """
+        if Ed25519PrivateKey is None:
+            raise ImportError("cryptography package required for bundle signing")
+        if not isinstance(private_key, Ed25519PrivateKey):
+            raise TypeError(f"private_key must be Ed25519PrivateKey, got {type(private_key)}")
+        
+        digest = hashlib.sha256(bundle_json_bytes).digest()
+        return private_key.sign(digest)
+
+    def verify_bundle_signature(self, bundle_json_bytes: bytes, signature: bytes, public_key: Any) -> bool:
+        """
+        Verify bundle JSON bytes signature using Ed25519.
+        
+        Args:
+            bundle_json_bytes: JSON bytes of bundle (without signature fields)
+            signature: Signature bytes
+            public_key: Ed25519PublicKey instance
+            
+        Returns:
+            True if signature is valid, False otherwise
+        """
+        if Ed25519PublicKey is None:
+            raise ImportError("cryptography package required for bundle signature verification")
+        if not isinstance(public_key, Ed25519PublicKey):
+            raise TypeError(f"public_key must be Ed25519PublicKey, got {type(public_key)}")
+        
+        try:
+            digest = hashlib.sha256(bundle_json_bytes).digest()
+            public_key.verify(signature, digest)
+            return True
+        except Exception:
+            return False
 
     def reset(self) -> None:
         self.kernel.reset()
         self.ledgers = DomainLedgers()
         self.byte_log.clear()
         self.event_log.clear()
+        
+        # Reset fiat substrate
+        self.sealer = RouterKernel(self.atlas_dir)
+        self.fiat_grants_current.clear()
+        self.fiat_shell_log.clear()
+        self.fiat_shell_grants_log.clear()
+        self.fiat_archive_totals.clear()
+        self.fiat_identity_id_to_identity.clear()
+        self.fiat_used_total = 0
+        self.fiat_capacity_total = 0
 
     def derive_domain_counts(self) -> Dict[str, int]:
         """

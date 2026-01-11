@@ -1,5 +1,6 @@
 # Safe cache cleanup script for Router development
 # This removes only cache/temp files, not source code
+# Run with: .\cleanup_cache.ps1
 
 Write-Host "Cleaning development caches..." -ForegroundColor Yellow
 

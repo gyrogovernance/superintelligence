@@ -10,6 +10,8 @@ Defines:
 
 from __future__ import annotations
 
+from typing import Iterable, Union
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -138,3 +140,129 @@ def component_density(component12: int) -> float:
     Returns popcount(component12) / 12.0.
     """
     return popcount(component12) / 12.0
+
+
+def mask12_for_byte(byte: int) -> int:
+    """
+    Extract the 12-bit Type-A mask for a given byte from the precomputed table.
+    
+    Used for parity-law and code-based integrity checks.
+    """
+    mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
+    return (mask24 >> 12) & LAYER_MASK_12
+
+
+def dot12(a: int, b: int) -> int:
+    """GF(2) inner product on 12-bit vectors."""
+    return (popcount((a & LAYER_MASK_12) & (b & LAYER_MASK_12))) & 1
+
+
+def _compute_c_perp() -> tuple[int, ...]:
+    """
+    Compute dual code C_perp: all 12-bit vectors orthogonal to all mask codewords.
+    
+    C_perp = {v: v · c = 0 for all c in C}
+    where C is the set of mask12 values from XFORM_MASK_BY_BYTE.
+    """
+    masks = set(mask12_for_byte(b) for b in range(256))
+    c_perp = tuple(s for s in range(1 << 12) if all(dot12(s, c) == 0 for c in masks))
+    return c_perp
+
+
+C_PERP_12: tuple[int, ...] = _compute_c_perp()
+assert len(C_PERP_12) == 16, f"Expected |C_PERP_12|=16, got {len(C_PERP_12)}"
+
+
+ByteItem = Union[int, bytes, bytearray, memoryview]
+
+
+def trajectory_parity_commitment(items: Iterable[ByteItem]) -> tuple[int, int, int]:
+    """
+    Fast algebraic integrity check for trajectory histories.
+    
+    This detects most accidental corruptions (bit-rot, transmission errors).
+    It is NOT cryptographically secure. For adversarial integrity, use
+    SHA-256 hashes and signature verification.
+    
+    Args:
+        items: iterable of bytes (as int 0-255) or byte-like sequences (bytes, bytearray, memoryview)
+        
+    Returns:
+        (O, E, parity) where:
+        - O = XOR of masks at even-indexed positions
+        - E = XOR of masks at odd-indexed positions  
+        - parity = len(trajectory) % 2
+    """
+    O = E = 0
+    idx = 0
+    
+    for item in items:
+        if isinstance(item, (bytes, bytearray, memoryview)):
+            for b in item:
+                m = mask12_for_byte(b)
+                if idx % 2 == 0:
+                    O ^= m
+                else:
+                    E ^= m
+                idx += 1
+        else:
+            m = mask12_for_byte(int(item) & 0xFF)
+            if idx % 2 == 0:
+                O ^= m
+            else:
+                E ^= m
+            idx += 1
+    
+    return (O, E, idx % 2)
+
+
+def trajectory_commitment_bytes(O: int, E: int, parity: int) -> bytes:
+    """
+    Encode parity commitment (O, E, parity) as compact 5-byte representation.
+    
+    Format: O (2 bytes big-endian) || E (2 bytes big-endian) || parity (1 byte)
+    """
+    return (O & 0xFFF).to_bytes(2, "big") + (E & 0xFFF).to_bytes(2, "big") + bytes([parity & 1])
+
+
+def syndrome_is_valid_mask(m12: int) -> bool:
+    """
+    Fast algebraic integrity check: check if m12 is a valid mask (zero syndrome with respect to C_perp).
+    
+    This detects most accidental corruptions (bit-rot, transmission errors).
+    It is NOT cryptographically secure. For adversarial integrity, use
+    SHA-256 hashes and signature verification.
+    
+    Returns True if all dot products with C_perp elements are zero.
+    """
+    return all(dot12(m12, v) == 0 for v in C_PERP_12)
+
+
+def syndrome_detects_corruption(m12: int) -> bool:
+    """
+    Fast algebraic integrity check: check if m12 is corrupted (non-zero syndrome with respect to C_perp).
+    
+    This detects most accidental corruptions (bit-rot, transmission errors).
+    It is NOT cryptographically secure. For adversarial integrity, use
+    SHA-256 hashes and signature verification.
+    
+    Returns True if any dot product with C_perp elements is one.
+    """
+    return any(dot12(m12, v) == 1 for v in C_PERP_12)
+
+
+def mask12_syndrome(m12: int) -> int:
+    """
+    Fast algebraic integrity check: compute 16-bit syndrome bitmap for m12 with respect to C_perp.
+    
+    This detects most accidental corruptions (bit-rot, transmission errors).
+    It is NOT cryptographically secure. For adversarial integrity, use
+    SHA-256 hashes and signature verification.
+    
+    Returns integer with bit i set if dot12(m12, C_PERP_12[i]) == 1.
+    """
+    syndrome = 0
+    for i, v in enumerate(C_PERP_12):
+        if dot12(m12, v) == 1:
+            syndrome |= (1 << i)
+    return syndrome

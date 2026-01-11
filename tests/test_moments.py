@@ -483,6 +483,85 @@ def test_millennium_uhi_feasibility_under_conservative_mapping():
     assert horizon.used_percent < 1e-4  # < 0.0001% is a very conservative bound
 
 
+def test_resilience_margin_and_adversarial_threshold():
+    """
+    Resilience margin demonstration:
+    
+    R = (Available capacity − Legitimate demand) / Available capacity
+    
+    For the Moments Economy over any plausible horizon, R ≈ 0.9999999.
+    
+    This means the system can absorb orders-of-magnitude increases in demand—
+    including adversarial demand—without approaching capacity limits.
+    
+    Adversarial threshold: The fraction of capacity that would need to be
+    fraudulently claimed to cause any meaningful constraint.
+    
+    An adversary would need to successfully issue approximately 10 million times
+    the entire global population's UHI for 1,000 years to consume just 1% of
+    annual capacity. This is operationally impossible: there are not enough
+    identities, not enough compute to generate them, and no registry would accept
+    them.
+    """
+    population = 8_100_000_000
+    horizon_years = 1_000
+    
+    uhi_mu_year = compute_uhi_mu_per_year()
+    cap_per_sec = fiat_capacity_microstates_per_sec()
+    cap_per_year = cap_per_sec * SECONDS_PER_YEAR
+    
+    horizon = FundingHorizon(
+        years=horizon_years,
+        population=population,
+        uhi_mu_per_person_per_year=uhi_mu_year,
+        available_units_per_year=cap_per_year,
+        mapping_note="Conservative demonstration mapping: 1 micro-state == 1 MU",
+    )
+    
+    # Resilience margin: R = (Available - Needed) / Available
+    legitimate_demand_per_year = horizon.needed_units_per_year
+    available_capacity_per_year = cap_per_year
+    
+    resilience_margin = (available_capacity_per_year - legitimate_demand_per_year) / available_capacity_per_year
+    
+    # Adversarial threshold: What multiple of legitimate demand consumes 1% of annual capacity?
+    # We want: adversarial_demand = 0.01 * available_capacity_per_year
+    # adversarial_demand = multiplier * legitimate_demand_per_year
+    # Therefore: multiplier = 0.01 * available_capacity_per_year / legitimate_demand_per_year
+    target_usage_fraction = 0.01  # 1%
+    adversarial_multiplier = (target_usage_fraction * available_capacity_per_year) / legitimate_demand_per_year
+    
+    # Adversarial demand over the horizon to consume 1% of annual capacity
+    adversarial_demand_per_year = target_usage_fraction * available_capacity_per_year
+    
+    print("\n----------")
+    print("Resilience Margin and Adversarial Threshold")
+    print("----------")
+    print(f"Available capacity per year:       {format_large_number(available_capacity_per_year)}")
+    print(f"Legitimate demand per year:        {format_large_number(legitimate_demand_per_year)}")
+    print(f"Resilience margin R:               {format_float(resilience_margin, 10)}")
+    print(f"Resilience margin %:               {format_pct(resilience_margin * 100.0, 10)}")
+    print(f"\nAdversarial threshold (1% of annual capacity):")
+    print(f"  Target usage:                    {format_pct(target_usage_fraction * 100.0, 2)}")
+    print(f"  Adversarial demand per year:     {format_large_number(adversarial_demand_per_year)}")
+    print(f"  Multiple of legitimate demand:   {format_float(adversarial_multiplier, 2)}")
+    print(f"  As integer multiple:             {format_int(int(round(adversarial_multiplier)))}×")
+    print(f"\nInterpretation:")
+    print(f"  An adversary would need to successfully issue approximately")
+    print(f"  {format_int(int(round(adversarial_multiplier / 1_000_000)))} million times the entire")
+    print(f"  global population's UHI for {format_int(horizon_years)} years to consume")
+    print(f"  just {format_pct(target_usage_fraction * 100.0, 0)} of annual capacity.")
+    print(f"  This is operationally impossible.")
+    
+    # Resilience margin should be very close to 1.0 (approximately 0.9999999)
+    assert resilience_margin > 0.999999  # At least 99.9999%
+    assert resilience_margin < 1.0
+    
+    # Adversarial multiplier should be on the order of 10 million
+    assert adversarial_multiplier > 1_000_000  # At least 1 million times
+    assert adversarial_multiplier < 100_000_000  # Less than 100 million times
+
+
 def test_notional_surplus_allocation_12_divisions():
     """
     Notional surplus allocation across 12 structural divisions:

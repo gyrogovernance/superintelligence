@@ -9,6 +9,8 @@ import json
 import hashlib
 from datetime import datetime
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+
 from src.app.cli import templates
 
 
@@ -352,8 +354,8 @@ def derive_domain_counts_from_events(events_path: Path) -> Dict[str, int]:
         return counts
     
     for ev_dict in read_events(events_path):
-        event = ev_dict.get("event", {})
-        domain_int = event.get("domain")
+        # Events are stored as GovernanceEvent.as_dict(), not wrapped
+        domain_int = ev_dict.get("domain")
         if domain_int is not None:
             domain = Domain(domain_int)
             if domain == Domain.ECONOMY:
@@ -390,7 +392,6 @@ def file_sha256(path: Path) -> str:
 def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
     """Replay bytes + events from given file paths to reconstruct state."""
     from src.app.coordination import Coordinator
-    from src.app.events import GovernanceEvent, Domain, EdgeID
 
     coord = Coordinator(atlas_dir)
     
@@ -399,14 +400,9 @@ def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
         coord.step_byte(b)
 
     # Replay events
+    from src.plugins.api import event_from_dict
     for ev_dict in read_events(events_path):
-        ev = GovernanceEvent(
-            domain=Domain(ev_dict["domain"]),
-            edge_id=EdgeID(ev_dict["edge_id"]),
-            magnitude=ev_dict["magnitude"],
-            confidence=ev_dict.get("confidence", 1.0),
-            meta=ev_dict.get("meta", {}),
-        )
+        ev = event_from_dict(ev_dict)
         coord.apply_event(ev, bind_to_kernel_moment=False)
 
     status = coord.get_status()
@@ -421,11 +417,16 @@ def replay_program(atlas_dir: Path, program_slug: str):
     return replay_from_logs(atlas_dir, bytes_path, events_path)
 
 
-def bundle_program(atlas_dir: Path, program_md_path: Path) -> Path:
+def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = None) -> Path:
     """
     Create a bundle for a program.
     Takes the program markdown file path (filename can differ from program_slug).
     Returns path to the created bundle.
+    
+    Args:
+        atlas_dir: Atlas directory path
+        program_md_path: Program markdown file path
+        private_key: Optional Ed25519PrivateKey for signing the bundle (for accountability)
     """
     import zipfile
     from datetime import datetime
@@ -471,6 +472,32 @@ def bundle_program(atlas_dir: Path, program_md_path: Path) -> Path:
     report_md_hash = file_sha256(report_md_path)
     program_id_hash = file_sha256(id_path)
     
+    # Compute ecology hashes (if files exist)
+    grants_path = aci_dir / f"{program_slug}.grants.jsonl"
+    shells_path = aci_dir / f"{program_slug}.shells.jsonl"
+    archive_path = aci_dir / f"{program_slug}.archive.json"
+    grants_hash = file_sha256(grants_path) if grants_path.exists() else ""
+    shells_hash = file_sha256(shells_path) if shells_path.exists() else ""
+    archive_hash = file_sha256(archive_path) if archive_path.exists() else ""
+    
+    # Get meta_root from shells if they exist
+    meta_root = ""
+    if shells_path.exists():
+        try:
+            from src.app.coordination import Coordinator
+            coord_temp = Coordinator(atlas_dir)
+            shells_data = []
+            with open(shells_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        shells_data.append(json.loads(line))
+            if shells_data:
+                seals = [s["seal"] for s in shells_data]
+                meta_root = coord_temp.meta_root_from_shell_seals(seals)
+        except Exception:
+            pass
+    
     # Build bundle.json
     bundle_data = {
         "program_slug": program_slug,
@@ -502,6 +529,34 @@ def bundle_program(atlas_dir: Path, program_md_path: Path) -> Path:
         },
     }
     
+    # Add ecology section if files exist
+    if grants_hash or shells_hash or archive_hash:
+        bundle_data["ecology"] = {
+            "grants_sha256": grants_hash,
+            "shells_sha256": shells_hash,
+            "archive_sha256": archive_hash,
+            "meta_root": meta_root,
+        }
+    
+    # Serialize bundle_data to JSON bytes (without signature fields)
+    bundle_json_bytes = json.dumps(bundle_data, indent=2).encode("utf-8")
+    
+    # Sign bundle if private_key is provided
+    if private_key is not None:
+        from src.app.coordination import Coordinator
+        coord = Coordinator(atlas_dir)
+        signature = coord.sign_bundle(bundle_json_bytes, private_key)
+        signature_hex = signature.hex()
+        
+        # Get public key for storage
+        public_key = private_key.public_key()
+        public_key_bytes = public_key.public_bytes_raw()
+        public_key_hex = public_key_bytes.hex()
+        
+        # Add signature fields to bundle_data
+        bundle_data["signer_public_key"] = public_key_hex
+        bundle_data["signature"] = signature_hex
+    
     # Bundle goes to bundles_dir/<program_slug>.zip
     bundles_dir = get_bundles_dir()
     bundles_dir.mkdir(parents=True, exist_ok=True)
@@ -523,7 +578,15 @@ def bundle_program(atlas_dir: Path, program_md_path: Path) -> Path:
         # Add program identity file
         zf.write(id_path, "program.id")
         
-        # Add bundle.json
+        # Add ecology files if they exist
+        if grants_path.exists():
+            zf.write(grants_path, "grants.jsonl")
+        if shells_path.exists():
+            zf.write(shells_path, "shells.jsonl")
+        if archive_path.exists():
+            zf.write(archive_path, "archive.json")
+        
+        # Add bundle.json (with signature fields if signed)
         zf.writestr("bundle.json", json.dumps(bundle_data, indent=2))
     
     return bundle_out
@@ -699,6 +762,87 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
                 program_id_hash = file_sha256(program_id_file)
                 if program_id_hash != bundle_data["logs"]["program_id_sha256"]:
                     return False
+            
+            # Verify signature if present
+            if "signature" in bundle_data and "signer_public_key" in bundle_data:
+                from src.app.coordination import Coordinator
+                
+                # Extract signature fields
+                signature_hex = bundle_data.pop("signature")
+                public_key_hex = bundle_data.pop("signer_public_key")
+                
+                # Reconstruct bundle_data without signature fields
+                bundle_json_bytes = json.dumps(bundle_data, indent=2).encode("utf-8")
+                
+                # Reconstruct public key
+                public_key_bytes = bytes.fromhex(public_key_hex)
+                public_key = Ed25519PublicKey.from_public_bytes(public_key_bytes)
+                
+                # Reconstruct signature
+                signature = bytes.fromhex(signature_hex)
+                
+                # Verify signature
+                coord = Coordinator(atlas_dir)
+                if not coord.verify_bundle_signature(bundle_json_bytes, signature, public_key):
+                    return False
+                
+                # Restore signature fields (for backwards compatibility if needed)
+                bundle_data["signer_public_key"] = public_key_hex
+                bundle_data["signature"] = signature_hex
+            
+            # Verify ecology artifacts if present
+            if "ecology" in bundle_data:
+                ecology_data = bundle_data["ecology"]
+                
+                # Check ecology files exist if hashes are present
+                grants_file = tmp_path / "grants.jsonl"
+                shells_file = tmp_path / "shells.jsonl"
+                archive_file = tmp_path / "archive.json"
+                
+                if "grants_sha256" in ecology_data and ecology_data["grants_sha256"]:
+                    if not grants_file.exists():
+                        return False
+                    grants_hash = file_sha256(grants_file)
+                    if grants_hash != ecology_data["grants_sha256"]:
+                        return False
+                
+                if "shells_sha256" in ecology_data and ecology_data["shells_sha256"]:
+                    if not shells_file.exists():
+                        return False
+                    shells_hash = file_sha256(shells_file)
+                    if shells_hash != ecology_data["shells_sha256"]:
+                        return False
+                
+                if "archive_sha256" in ecology_data and ecology_data["archive_sha256"]:
+                    if not archive_file.exists():
+                        return False
+                    archive_hash = file_sha256(archive_file)
+                    if archive_hash != ecology_data["archive_sha256"]:
+                        return False
+                
+                # Replay ecology ledger if files exist
+                if grants_file.exists() and shells_file.exists() and archive_file.exists():
+                    from src.app.coordination import Coordinator
+                    from src.app.events import Shell
+                    
+                    coord_eco = Coordinator(atlas_dir)
+                    
+                    # Read shells and verify seals
+                    with open(shells_file, "r", encoding="utf-8") as f:
+                        shells_replayed = []
+                        for line in f:
+                            line = line.strip()
+                            if not line:
+                                continue
+                            shell_dict = json.loads(line)
+                            shells_replayed.append(Shell(**shell_dict))
+                    
+                    # Verify meta_root if present
+                    if "meta_root" in ecology_data and ecology_data["meta_root"]:
+                        seals = [s.seal for s in shells_replayed]
+                        expected_meta_root = coord_eco.meta_root_from_shell_seals(seals)
+                        if expected_meta_root != ecology_data["meta_root"]:
+                            return False
             
             return True
             
@@ -1011,6 +1155,37 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> Dict[str, Any]:
     # Write report.json
     report_json_path.parent.mkdir(parents=True, exist_ok=True)
     report_json_path.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    
+    # Write ecology artifacts (grants, shells, archive)
+    grants_path = aci_dir / f"{program_slug}.grants.jsonl"
+    shells_path = aci_dir / f"{program_slug}.shells.jsonl"
+    archive_path = aci_dir / f"{program_slug}.archive.json"
+    
+    # Write grants.jsonl (one JSON object per Grant from all shells)
+    grants_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(grants_path, "w", encoding="utf-8") as f:
+        for shell, grants_list in coord.fiat_shell_grants_log:
+            for grant in grants_list:
+                grant_dict = grant.as_dict()
+                grant_dict["shell_header"] = shell.header
+                f.write(json.dumps(grant_dict) + "\n")
+    
+    # Write shells.jsonl (one JSON object per Shell)
+    shells_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(shells_path, "w", encoding="utf-8") as f:
+        for shell in coord.fiat_shell_log:
+            f.write(json.dumps(shell.as_dict()) + "\n")
+    
+    # Write archive.json (Archive summary)
+    from src.app.events import Archive
+    archive = Archive(
+        per_identity_MU=coord.fiat_status()["per_identity_totals"],
+        total_capacity_MU=coord.fiat_capacity_total,
+        used_capacity_MU=coord.fiat_used_total,
+        free_capacity_MU=coord.fiat_capacity_total - coord.fiat_used_total,
+    )
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    archive_path.write_text(json.dumps(archive.as_dict(), indent=2), encoding="utf-8")
     
     # Write report.md
     report_md_lines = [
