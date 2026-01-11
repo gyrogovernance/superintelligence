@@ -10,6 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 from pydantic import BaseModel
+from typing import Dict, Any
 import json
 import re
 from datetime import datetime
@@ -46,6 +47,131 @@ def atlas_dir() -> Path:
     return store.get_atlas_dir()
 
 
+# Governance helpers
+def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
+    """
+    Get bundle status for a program.
+    Returns: (status, signed, signer_fingerprint)
+    status: "Local" | "Published" | "Verified"
+    signed: True if bundle has valid signature
+    signer_fingerprint: First/last 8 hex chars of public key, or None
+    """
+    bundle_path = bundles_dir() / f"{slug}.zip"
+    report_path = aci_dir() / f"{slug}.report.json"
+    
+    # Check if report exists (Local status minimum)
+    if not report_path.exists():
+        return ("Local", False, None)
+    
+    # Report exists but no bundle yet
+    if not bundle_path.exists():
+        return ("Local", False, None)
+    
+    # Check signature in bundle
+    signed = False
+    signer_fingerprint = None
+    
+    try:
+        import zipfile
+        with zipfile.ZipFile(bundle_path, "r") as zf:
+            if "bundle.json" in zf.namelist():
+                bundle_data = json.loads(zf.read("bundle.json").decode("utf-8"))
+                if "signer_public_key" in bundle_data and "signature" in bundle_data:
+                    signed = True
+                    public_key_hex = bundle_data["signer_public_key"]
+                    if len(public_key_hex) >= 16:
+                        signer_fingerprint = f"{public_key_hex[:8]}...{public_key_hex[-8:]}"
+    except Exception:
+        pass
+    
+    # Check if bundle is verified (try verification)
+    verified = False
+    try:
+        verified = store.verify_bundle(atlas_dir(), bundle_path)
+    except Exception:
+        pass
+    
+    if verified:
+        return ("Verified", signed, signer_fingerprint)
+    else:
+        return ("Published", signed, signer_fingerprint)
+
+
+def get_sign_bundle_on_sync() -> bool:
+    """Get 'sign bundle on sync' setting from config file."""
+    config_path = aci_dir() / ".config.json"
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            return config.get("sign_bundle_on_sync", False)
+        except Exception:
+            return False
+    return False
+
+
+def set_sign_bundle_on_sync(value: bool) -> None:
+    """Set 'sign bundle on sync' setting in config file."""
+    config_path = aci_dir() / ".config.json"
+    config = {}
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    config["sign_bundle_on_sync"] = value
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text(json.dumps(config, indent=2), encoding="utf-8")
+
+
+def _has_private_key() -> bool:
+    """Check if a signing key exists in config."""
+    config_path = aci_dir() / ".config.json"
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            return "signing_key_pem" in config
+        except Exception:
+            return False
+    return False
+
+
+def get_ecology_data(slug: str) -> tuple[Dict[str, Any] | None, list[Dict[str, Any]]]:
+    """
+    Get ecology data for a program.
+    Returns: (archive_data, shells_list)
+    archive_data: Archive summary dict or None if no archive
+    shells_list: List of Shell dicts (empty if no shells)
+    """
+    archive_path = aci_dir() / f"{slug}.archive.json"
+    shells_path = aci_dir() / f"{slug}.shells.jsonl"
+    
+    archive_data = None
+    if archive_path.exists():
+        try:
+            archive_data = json.loads(archive_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    
+    shells_list = []
+    if shells_path.exists():
+        try:
+            with open(shells_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        shells_list.append(json.loads(line))
+        except Exception:
+            pass
+    
+    return archive_data, shells_list
+
+
+def _get_annual_capacity() -> int:
+    """Get annual capacity in MU from physics constants."""
+    from src.app.coordination import capacity_for_window, SECONDS_PER_YEAR
+    return capacity_for_window(SECONDS_PER_YEAR)
+
+
 # ---- Health Check ----
 @app.get("/api/health")
 def health_check():
@@ -64,7 +190,17 @@ def list_programs():
         id_path = aci_dir() / f"{slug}.id"
         if id_path.exists():
             program_id = id_path.read_text(encoding="utf-8").strip()
-        programs.append({"slug": slug, "program_id": program_id})
+        
+        # Get governance flags
+        status, signed, _ = get_bundle_status(slug)
+        verified = (status == "Verified")
+        
+        programs.append({
+            "slug": slug,
+            "program_id": program_id,
+            "signed": signed,
+            "verified": verified,
+        })
     return {"programs": programs}
 
 
@@ -113,16 +249,13 @@ def get_program(slug: str):
 
     # Check if we have event log (real mode) vs simulation mode
     events_path = aci_dir() / f"{slug}.events.jsonl"
-    has_event_log = events_path.exists()
-    
-    # In real mode: derive domain_counts from event log
-    # In simulation mode: use markdown-parsed domain_counts
-    if has_event_log:
+    has_event_log = False
+    if events_path.exists():
         derived_counts = store.derive_domain_counts_from_events(events_path)
-        # Only use derived counts if we have events (non-zero)
         total_derived = sum(derived_counts.values())
         if total_derived > 0:
             domain_counts = derived_counts
+            has_event_log = True
 
     # Read computed report
     report_path = aci_dir() / f"{slug}.report.json"
@@ -132,6 +265,22 @@ def get_program(slug: str):
         report = json.loads(report_path.read_text(encoding="utf-8"))
         mtime = report_path.stat().st_mtime
         last_synced = datetime.fromtimestamp(mtime).isoformat()
+
+    # Get governance status
+    bundle_status, signed, signer_fingerprint = get_bundle_status(slug)
+    verified = (bundle_status == "Verified")
+
+    # Get ecology data
+    archive_data, shells_list = get_ecology_data(slug)
+    
+    ecology = None
+    if archive_data:
+        ecology = {
+            "total_capacity_MU": archive_data.get("total_capacity_MU", 0),
+            "used_capacity_MU": archive_data.get("used_capacity_MU", 0),
+            "free_capacity_MU": archive_data.get("free_capacity_MU", 0),
+            "shells": shells_list,
+        }
 
     return {
         "editable": {
@@ -146,6 +295,13 @@ def get_program(slug: str):
         "report": report,
         "last_synced": last_synced,
         "has_event_log": has_event_log,  # Flag for UI to show read-only mode
+        "governance": {
+            "status": bundle_status,
+            "signed": signed,
+            "signer_fingerprint": signer_fingerprint,
+            "verified": verified,
+        },
+        "ecology": ecology,
     }
 
 
@@ -289,6 +445,30 @@ def sync_program_endpoint(slug: str):
     # Sync the program
     store.sync_program(atlas_dir(), program_path)
     
+    # Sign bundle if enabled
+    if get_sign_bundle_on_sync():
+        from cryptography.hazmat.primitives import serialization
+        
+        # Try to load private key from config
+        private_key = None
+        config_path = aci_dir() / ".config.json"
+        if config_path.exists():
+            try:
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if "signing_key_pem" in config:
+                    key_bytes = config["signing_key_pem"].encode("utf-8")
+                    private_key = serialization.load_pem_private_key(
+                        key_bytes, password=None
+                    )
+            except Exception:
+                pass
+        
+        # Bundle will be signed if key is available
+        try:
+            store.bundle_program(atlas_dir(), program_path, private_key)
+        except Exception:
+            pass
+    
     # Return updated state
     return get_program(slug)
 
@@ -304,7 +484,10 @@ def delete_program(slug: str):
     program_path.unlink()
 
     # Remove artifacts
-    for ext in [".bytes", ".events.jsonl", ".report.json", ".report.md", ".id"]:
+    for ext in [
+        ".bytes", ".events.jsonl", ".report.json", ".report.md", ".id",
+        ".grants.jsonl", ".shells.jsonl", ".archive.json",
+    ]:
         artifact = aci_dir() / f"{slug}{ext}"
         if artifact.exists():
             artifact.unlink()
@@ -325,9 +508,25 @@ def download_bundle(slug: str):
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
 
-    # Create/update bundle
+    # Create/update bundle (with signing if enabled)
+    private_key = None
+    if get_sign_bundle_on_sync():
+        from cryptography.hazmat.primitives import serialization
+        
+        config_path = aci_dir() / ".config.json"
+        if config_path.exists():
+            try:
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if "signing_key_pem" in config:
+                    key_bytes = config["signing_key_pem"].encode("utf-8")
+                    private_key = serialization.load_pem_private_key(
+                        key_bytes, password=None
+                    )
+            except Exception:
+                pass
+    
     try:
-        store.bundle_program(atlas_dir(), program_path)
+        store.bundle_program(atlas_dir(), program_path, private_key)
     except FileNotFoundError as e:
         raise HTTPException(404, str(e))
 
@@ -337,6 +536,55 @@ def download_bundle(slug: str):
     return FileResponse(
         bundle_path, filename=f"{slug}.zip", media_type="application/zip"
     )
+
+
+# ---- Verify Bundle ----
+@app.post("/api/programs/{slug}/verify")
+def verify_bundle_endpoint(slug: str):
+    """Verify the latest bundle for a program."""
+    bundle_path = bundles_dir() / f"{slug}.zip"
+    if not bundle_path.exists():
+        raise HTTPException(404, "Bundle not found. Export a bundle first.")
+    
+    try:
+        verified = store.verify_bundle(atlas_dir(), bundle_path)
+        if verified:
+            return {"status": "Verified", "verified": True}
+        else:
+            return {"status": "Verification failed", "verified": False}
+    except Exception as e:
+        raise HTTPException(500, f"Verification error: {str(e)}")
+
+
+# ---- Get/Set Sign Bundle on Sync ----
+@app.get("/api/config/sign-bundle-on-sync")
+def get_sign_bundle_on_sync_endpoint():
+    """Get 'sign bundle on sync' setting and key status."""
+    return {
+        "sign_bundle_on_sync": get_sign_bundle_on_sync(),
+        "has_signing_key": _has_private_key()
+    }
+
+
+class SignBundleOnSyncRequest(BaseModel):
+    sign_bundle_on_sync: bool
+
+
+@app.put("/api/config/sign-bundle-on-sync")
+def set_sign_bundle_on_sync_endpoint(req: SignBundleOnSyncRequest):
+    """Set 'sign bundle on sync' setting."""
+    set_sign_bundle_on_sync(req.sign_bundle_on_sync)
+    return {
+        "sign_bundle_on_sync": get_sign_bundle_on_sync(),
+        "has_signing_key": _has_private_key()
+    }
+
+
+# ---- Get Annual Capacity ----
+@app.get("/api/capacity/annual")
+def get_annual_capacity_endpoint():
+    """Get annual capacity in MU from physics constants."""
+    return {"annual_capacity_MU": _get_annual_capacity()}
 
 
 # ---- Glossary ----

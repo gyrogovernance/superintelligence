@@ -354,6 +354,8 @@ export default function App() {
                 unit={editable?.unit || 'daily'}
                 lastSynced={program.last_synced}
                 domainCounts={editable?.domain_counts}
+                governance={program.governance}
+                hasEventLog={program.has_event_log}
               />
             )}
             <div className="grid gap-6 lg:grid-cols-5">

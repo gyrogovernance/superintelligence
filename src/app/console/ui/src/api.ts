@@ -82,3 +82,24 @@ export async function getGlossary(): Promise<Glossary> {
   return res.json();
 }
 
+export async function verifyBundle(slug: string): Promise<{ status: string; verified: boolean }> {
+  const res = await fetch(`${BASE}/programs/${slug}/verify`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to verify bundle');
+  return res.json();
+}
+
+export async function getSignBundleOnSync(): Promise<{ sign_bundle_on_sync: boolean; has_signing_key: boolean }> {
+  const res = await fetch(`${BASE}/config/sign-bundle-on-sync`);
+  if (!res.ok) throw new Error('Failed to get sign bundle on sync setting');
+  return res.json();
+}
+
+export async function setSignBundleOnSync(signBundleOnSync: boolean): Promise<{ sign_bundle_on_sync: boolean; has_signing_key: boolean }> {
+  const res = await fetch(`${BASE}/config/sign-bundle-on-sync`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sign_bundle_on_sync: signBundleOnSync }),
+  });
+  if (!res.ok) throw new Error('Failed to set sign bundle on sync setting');
+  return res.json();
+}

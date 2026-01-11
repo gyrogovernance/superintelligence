@@ -103,17 +103,45 @@ export interface Report {
   warnings: Record<string, unknown>;
 }
 
+// Governance status
+export interface GovernanceStatus {
+  status: 'Local' | 'Published' | 'Verified';
+  signed: boolean;
+  signer_fingerprint: string | null;
+  verified: boolean;
+}
+
+// Ecology capacity
+export interface Shell {
+  header: string;
+  seal: string;
+  total_capacity_MU: number;
+  used_capacity_MU: number;
+  free_capacity_MU: number;
+}
+
+export interface EcologyData {
+  total_capacity_MU: number;
+  used_capacity_MU: number;
+  free_capacity_MU: number;
+  shells: Shell[];
+}
+
 // API response shape
 export interface ProgramResponse {
   editable: EditableState;
   report: Report | null;
   last_synced: string | null;
   has_event_log?: boolean;  // True if domain_counts are derived from event log (real mode)
+  governance?: GovernanceStatus;
+  ecology?: EcologyData;
 }
 
 export interface ProgramSummary {
   slug: string;
   program_id: string | null;
+  signed?: boolean;
+  verified?: boolean;
 }
 
 export interface ProgramListResponse {

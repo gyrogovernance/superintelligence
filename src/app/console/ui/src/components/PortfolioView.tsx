@@ -14,6 +14,14 @@ interface ProgramData {
   unit: 'daily' | 'sprint';
   lastSynced: string | null;
   domainCounts?: { economy: number; employment: number; education: number };
+  signed?: boolean;
+  verified?: boolean;
+  hasEventLog?: boolean;
+  ecology?: {
+    total_capacity_MU: number;
+    used_capacity_MU: number;
+    free_capacity_MU: number;
+  };
 }
 
 function aggregateAccounting(data: ProgramData[]): ReportAccounting {
@@ -72,8 +80,27 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
   const [domainFilter, setDomainFilter] = useState<DomainKey | 'all'>('all');
   const [highDisplacementFilter, setHighDisplacementFilter] = useState(false);
   const [multiDomainFilter, setMultiDomainFilter] = useState(false);
+  const [onlyVerifiedFilter, setOnlyVerifiedFilter] = useState(false);
+  const [onlySignedFilter, setOnlySignedFilter] = useState(false);
+  const [onlyRealModeFilter, setOnlyRealModeFilter] = useState(false);
   const [sortColumn, setSortColumn] = useState<'slug' | 'unit' | 'incidents' | 'ratio' | 'value'>('slug');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [annualCapacity, setAnnualCapacity] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function loadAnnualCapacity() {
+      try {
+        const res = await fetch('/api/capacity/annual');
+        if (res.ok) {
+          const data = await res.json();
+          setAnnualCapacity(data.annual_capacity_MU);
+        }
+      } catch {
+        // Ignore errors, annual capacity is optional
+      }
+    }
+    loadAnnualCapacity();
+  }, []);
 
   useEffect(() => {
     async function loadAllReports() {
@@ -91,6 +118,14 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
                   unit: program.editable.unit,
                   lastSynced: program.last_synced,
                   domainCounts: program.editable.domain_counts,
+                  signed: program.governance?.signed || false,
+                  verified: program.governance?.verified || false,
+                  hasEventLog: program.has_event_log || false,
+                  ecology: program.ecology ? {
+                    total_capacity_MU: program.ecology.total_capacity_MU,
+                    used_capacity_MU: program.ecology.used_capacity_MU,
+                    free_capacity_MU: program.ecology.free_capacity_MU,
+                  } : undefined,
                 };
               }
               return null;
@@ -152,8 +187,20 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
       });
     }
 
+    if (onlyVerifiedFilter) {
+      filtered = filtered.filter((p) => p.verified === true);
+    }
+
+    if (onlySignedFilter) {
+      filtered = filtered.filter((p) => p.signed === true);
+    }
+
+    if (onlyRealModeFilter) {
+      filtered = filtered.filter((p) => p.hasEventLog === true);
+    }
+
     return filtered;
-  }, [programData, searchQuery, domainFilter, highDisplacementFilter, multiDomainFilter]);
+  }, [programData, searchQuery, domainFilter, highDisplacementFilter, multiDomainFilter, onlyVerifiedFilter, onlySignedFilter, onlyRealModeFilter]);
 
   const sortedPrograms = useMemo(() => {
     const sorted = [...filteredPrograms].sort((a, b) => {
@@ -231,6 +278,18 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
       return sum + (totalAlignment * rate);
     }, 0);
   }, [filteredPrograms]);
+
+  const portfolioEcology = useMemo(() => {
+    const usedCapacity = filteredPrograms.reduce((sum, p) => {
+      return sum + (p.ecology?.used_capacity_MU || 0);
+    }, 0);
+    return {
+      used_capacity_MU: usedCapacity,
+      annual_share_percent: annualCapacity && annualCapacity > 0 
+        ? (usedCapacity / annualCapacity) * 100 
+        : null,
+    };
+  }, [filteredPrograms, annualCapacity]);
 
   if (loading) {
     return (
@@ -422,6 +481,9 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
             <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Estimated Value: <span className="font-mono font-bold text-gray-900 dark:text-white">£{totalValue.toLocaleString()}</span>
             </div>
+            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              Alignment units are counted as work outputs for budgeting. Displacement units are risk coverage, not billable work.
+            </div>
           </div>
           <div className="flex gap-2">
             <button
@@ -465,6 +527,28 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
           </div>
         </div>
 
+        {portfolioEcology.used_capacity_MU > 0 && (
+          <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 mb-6">
+            <div className="font-medium text-sm text-indigo-900 dark:text-indigo-100 mb-2">
+              Portfolio Ecology Capacity
+            </div>
+            <div className="text-xs text-indigo-700 dark:text-indigo-300 space-y-1">
+              <div>
+                Total used capacity: <span className="font-mono font-semibold">{portfolioEcology.used_capacity_MU.toLocaleString()} MU</span>
+              </div>
+              {portfolioEcology.annual_share_percent !== null && (
+                <div>
+                  Portfolio currently uses{' '}
+                  <span className="font-mono font-semibold">
+                    {portfolioEcology.annual_share_percent.toExponential(2)}%
+                  </span>{' '}
+                  of annual capacity
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row gap-3">
             <input
@@ -501,6 +585,33 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
                 className="rounded text-indigo-600"
               />
               <span className="text-sm">Multi-Domain Only</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={onlyVerifiedFilter}
+                onChange={(e) => setOnlyVerifiedFilter(e.target.checked)}
+                className="rounded text-indigo-600"
+              />
+              <span className="text-sm">Only Verified</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={onlySignedFilter}
+                onChange={(e) => setOnlySignedFilter(e.target.checked)}
+                className="rounded text-indigo-600"
+              />
+              <span className="text-sm">Only Signed</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={onlyRealModeFilter}
+                onChange={(e) => setOnlyRealModeFilter(e.target.checked)}
+                className="rounded text-indigo-600"
+              />
+              <span className="text-sm">Real Mode Only</span>
             </label>
           </div>
           {filteredPrograms.length !== programData.length && (
@@ -549,6 +660,8 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
                   >
                     Est. Value {sortColumn === 'value' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </th>
+                  <th className="px-6 py-3 text-center">Signed</th>
+                  <th className="px-6 py-3 text-center">Verified</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -585,6 +698,20 @@ export function PortfolioView({ programs, onSelectProgram }: PortfolioViewProps)
                       </td>
                       <td className="px-6 py-3 text-right font-mono text-gray-600 dark:text-gray-300">
                         £{val.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        {p.signed ? (
+                          <span className="badge bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">Yes</span>
+                        ) : (
+                          <span className="text-gray-400">No</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        {p.verified ? (
+                          <span className="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Yes</span>
+                        ) : (
+                          <span className="text-gray-400">No</span>
+                        )}
                       </td>
                     </tr>
                   );

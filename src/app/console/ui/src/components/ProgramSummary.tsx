@@ -1,4 +1,4 @@
-import type { ReportCompilation, ReportAccounting, EditableState } from '../types';
+import type { ReportCompilation, ReportAccounting, EditableState, GovernanceStatus } from '../types';
 
 interface ProgramSummaryProps {
   compilation: ReportCompilation | null;
@@ -6,9 +6,11 @@ interface ProgramSummaryProps {
   unit: EditableState['unit'];
   lastSynced: string | null;
   domainCounts?: EditableState['domain_counts'];
+  governance?: GovernanceStatus;
+  hasEventLog?: boolean;
 }
 
-export function ProgramSummaryCard({ compilation, accounting, unit, lastSynced, domainCounts }: ProgramSummaryProps) {
+export function ProgramSummaryCard({ compilation, accounting, unit, lastSynced, domainCounts, governance, hasEventLog }: ProgramSummaryProps) {
   if (!compilation || !accounting) {
     return null;
   }
@@ -44,16 +46,42 @@ export function ProgramSummaryCard({ compilation, accounting, unit, lastSynced, 
         <div>
           <h2 className="text-lg font-bold">Program Status</h2>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className={`badge ${unit === 'daily' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'}`}>
-              {unit === 'daily' ? 'Daily Prize Track' : 'Sprint Stipend Track'}
-            </span>
-            {unit === 'daily' && isSprintQualified && (
-              <span className="badge bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                Sprint Qualified
+            {/* 1. Governance Status (Most Important) */}
+            {governance?.status === 'Verified' && (
+              <span className="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800">
+                Verified
               </span>
             )}
+            {governance?.status === 'Published' && (
+              <span className="badge bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                Published
+              </span>
+            )}
+            {governance?.status === 'Local' && (
+              <span className="badge bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 border border-gray-200 dark:border-gray-800">
+                Local
+              </span>
+            )}
+            
+            {/* 2. Operation Mode */}
+            {hasEventLog !== undefined && (
+              <span className={`badge border ${
+                hasEventLog 
+                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-200 border-indigo-200 dark:border-indigo-800'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+              }`}>
+                {hasEventLog ? 'Real Mode' : 'Simulation Mode'}
+              </span>
+            )}
+
+            {/* 3. Track Info */}
+            <span className={`badge ${unit === 'daily' ? 'bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300' : 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'}`}>
+              {unit === 'daily' ? 'Daily Prize' : 'Sprint Stipend'}
+            </span>
+
+            {/* 4. Warnings */}
             {hasDomainImbalance && (
-              <span className="badge bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+              <span className="badge bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
                 Domain Imbalance
               </span>
             )}
@@ -63,6 +91,9 @@ export function ProgramSummaryCard({ compilation, accounting, unit, lastSynced, 
            <div className="text-xs text-gray-500 dark:text-gray-400">Estimated Value</div>
            <div className="text-2xl font-bold font-mono">£{estimatedValue.toLocaleString()}</div>
            <div className="text-xs text-gray-400">@ £{UNIT_RATE}/{unit} unit</div>
+           <div className="text-xs text-gray-400 mt-1 max-w-[200px] ml-auto">
+             Alignment units are counted as work outputs for budgeting. Displacement units are risk coverage, not billable work.
+           </div>
            {lastSynced && (
              <div className="mt-2 text-xs text-gray-400">
                Last synced: {new Date(lastSynced).toLocaleDateString()}
