@@ -50,6 +50,9 @@ The architecture integrates four specifications. Each is referenced where releva
 **GGG ASI Alignment Router:** Deterministic coordination kernel providing shared moments, provenance, and replay.  
 [Document: Kernel Specifications](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md)
 
+**GGG ASI Alignment Router Implications:** Exploratory document on the broader potential of the Router across governance, AI alignment, and coordination.  
+[Document: Router Implications](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Implications.md)
+
 **Alignment Infrastructure Routing (AIR):** Application layer for project coordination and distribution routing.  
 [Document: AIR Brief](https://github.com/gyrogovernance/tools/blob/main/docs/AIR_Brief.md)
 
