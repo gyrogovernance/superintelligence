@@ -6,35 +6,106 @@
 
 ---
 
+## Reading Guide
+
+This specification serves multiple audiences. The following paths are suggested:
+
+**Executive path (15 minutes):** Sections 1, 5, 6, 11.3, 15. These sections establish purpose, define UHI and tiers, demonstrate abundance, and summarise implications.
+
+**Economic policy path (45 minutes):** Sections 1, 2.1, 5, 6, 7, 11, 12, 14. These sections cover the monetary architecture, distribution logic, capacity proofs, and transition requirements.
+
+**Implementation path (full document):** All sections in order. Implementers require the complete specification including kernel layer details, fiat substrate primitives, and interoperability requirements.
+
+**Theoretical foundation path:** Sections 2, 3, and Appendix references to CGM papers. These sections establish the epistemic and geometric grounding.
+
+---
+
+## Key Terms (alphabetical)
+
+| Term | Definition | First appears |
+|------|------------|---------------|
+| AIR | Alignment Infrastructure Routing. The application layer for project coordination and distribution routing. | §1 |
+| Aperture | The fraction of edge energy in the cycle component; CGM target is approximately 0.0207. | §1 |
+| Archetype | The universal reference state (0xAAA555) from which all Router states derive. | §3.4 |
+| CGM | Common Governance Model. The geometric theory of coherent measurement. | §1 |
+| GGG | Gyroscopic Global Governance. The framework applying CGM to economy, employment, education, and ecology. | §1 |
+| Genealogy | A byte log plus event log plus the trajectory of Moments and apertures they produce. | §9.4 |
+| GMT, ICV, IIA, ICI | The four alignment capacities: Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, Intelligence Cooperation Integrity. | §3.3 |
+| GTD, IVD, IAD, IID | The four displacement risks: Governance Traceability Displacement, Information Variety Displacement, Inference Accountability Displacement, Intelligence Integrity Displacement. | §2.3 |
+| K₄ | The complete graph on four vertices (tetrahedral graph). The geometric structure underlying CGM. | §3.1 |
+| MU | Moment-Unit. The unit of account, anchored to one minute of capacity at the base rate. | §5.1 |
+| Resilience margin | Fraction of structural capacity remaining after all distributions (approximately 99.999999 percent). | §11.3 |
+| Shell | A time-bounded capacity window containing Grants and a cryptographic seal. | §9.1 |
+| THM | The Human Mark. The epistemic taxonomy classifying displacement risks. | §2.3 |
+| UHI | Unconditional High Income. The baseline distribution of 240 MU per day to every person. | §6 |
+
+---
+
+## Visual Overview of the Moments Economy
+
+```
+Atomic clock (9.19×10⁹ Hz) ──► Router kernel (>2×10⁶ steps/s) ──► Structural capacity (≈10²³ MU/year per instance)
+
+                 │
+                 ▼
+         Shared Moments (replayable "now")
+                 │
+                 ▼
+   Fiat substrate: Identity Anchor → Grant → Shell → Archive
+                 │
+                 ▼
+  Unconditional High Income (UHI) = 240 MU/day to every human
+                 │
+                 ▼
+Participation tiers 1–4 (multiples of UHI, decided by logged governance)
+                 │
+                 ▼
+    Ecology ledger measures circulation integrity (displacement-bounded)
+```
+
+---
+
 ## 1. Introduction and Purpose
 
-The Moments Economy is a prosperity-based economic architecture that grounds value, income, and governance in geometric invariants rather than debt or artificial scarcity. It defines how societies can distribute surplus capacity unconditionally while preserving the conditions for coherent governance across all scales of human activity.
+The Moments Economy is a post-scarcity monetary system whose issuance capacity is derived from a newly discovered physical invariant: the maximum rate at which coherent governance operations can be performed is many orders of magnitude larger than any conceivable human demand.
 
-This specification integrates four components that together provide the theoretical, computational, and operational foundations for the economy.
-
-The Common Governance Model (CGM) establishes the geometric theory of coherent measurement. It demonstrates that any system capable of recursive observation must satisfy specific structural constraints. These constraints manifest as a three-dimensional configuration with six degrees of freedom, represented mathematically as the edges of a tetrahedral graph connecting four fundamental operations: governance, information, inference, and intelligence. CGM identifies a precise equilibrium point, the aperture target of approximately 0.0207, at which global coherence and local differentiation achieve stable balance.
-
-Gyroscopic Global Governance (GGG) applies this geometry to four societal domains: economy, employment, education, and ecology. It shows that these domains are not independent policy areas but coupled components of a single governance system. The alignment or misalignment of any one domain propagates through the others. GGG provides the framework for measuring and maintaining coherence across this coupled structure.
-
-The GGG ASI Alignment Router provides the computational substrate. It is a deterministic finite-state kernel that realises CGM geometry in discrete form. The Router maintains 65,536 reachable states and 256 byte-based operations. Its internal structure produces constants that match CGM predictions to sub-percent precision without parameter fitting. Every operation on the Router is reversible and replayable, ensuring that governance history exists as a verifiable physical object rather than as contested narrative.
-
-Alignment Infrastructure Routing (AIR) provides the application layer. It manages projects, coordinates participants, and routes distributions. AIR connects the abstract geometry to practical workflows: research evaluations, fiscal hosting, employment coordination, and governance experiments.
+This single fact changes everything about how money, income, and governance can be designed.
 
 The capacity of the Moments Economy derives from the physical definition of the second itself. The International System of Units defines the second as exactly 9,192,631,770 periods of the radiation corresponding to the transition between the two hyperfine levels of the ground state of the caesium-133 atom. The Common Governance Model demonstrates that the same geometric invariants which govern coherent measurement also determine the maximum rate at which structural operations can be performed without loss of traceability. The Router realises these invariants discretely. When the atomic clock is combined with the Router's verified throughput, the resulting capacity envelope exceeds any plausible human-scale demand by many orders of magnitude. Moments inherit their abundance directly from physics: the coordination substrate is bounded only by atomic time and geometric coherence, both of which are effectively inexhaustible at civilisational scale.
 
+To quantify: under conservative assumptions detailed in Section 11, funding Unconditional High Income for 8.1 billion people over a 1,000-year horizon uses approximately 0.0000001 percent of available structural capacity. The resilience margin exceeds 99.999999 percent. This is not an aspiration but a **verified** calculation derived from atomic time, kernel throughput, and geometric closure.
+
+> **Why this matters**
+> - For citizens: lifelong income sufficient to eliminate poverty, paid automatically and unconditionally.
+> - For policymakers: monetary issuance that cannot be inflated or captured.
+> - For central banks: a verifiable public settlement layer with no credit risk.
+> - For AI safety labs: a funding and coordination substrate that mathematically preserves human authority.
+
 In the Moments Economy, the unit of account is the Moment. A Moment denotes a reproducible configuration of Router state together with the governance events bound to it. The Moment-Unit (MU) quantifies these configurations against time. This creates a monetary system whose capacity derives from physical constants and geometric invariants rather than from lending, debt creation, or privileged access to issuance.
 
-Because the physically attainable capacity envelope exceeds any plausible civilisational demand by many orders of magnitude, the Moments Economy treats security as preservation of structural coherence rather than preservation of a scarce stock. The question is not whether there is enough capacity to fund unconditional income and long term projects, but whether genealogies and allocations remain intelligible and accountable. Abundance at the level of physics turns many traditional monetary risks into questions of measurement, provenance, and governance rather than questions of survival.
+Given the abundance margin (Section 11), the Moments Economy treats security as preservation of structural coherence rather than preservation of a scarce stock. The question is not whether there is enough capacity to fund unconditional income and long term projects, but whether genealogies and allocations remain intelligible and accountable. Abundance at the level of physics turns many traditional monetary risks into questions of measurement, provenance, and governance rather than questions of survival.
 
 The document addresses system designers, implementers, and policymakers. It maintains consistency with the underlying physics, minimises arbitrary design choices, and remains explicit about the normative anchors required for human-scale accounting. Where detailed mathematical derivations or proofs are required, the document references the appropriate foundational papers rather than reproducing them in full.
 
-### 1.1 What Makes This Economy Different
+### 1.1 Framework Components
+
+This specification integrates four components that together provide the theoretical, computational, and operational foundations for the economy.
+
+The Common Governance Model (CGM) establishes the geometric theory of coherent measurement. CGM is documented at [https://github.com/gyrogovernance/gyroscopic-alignment-research-lab](https://github.com/gyrogovernance/gyroscopic-alignment-research-lab). It demonstrates that any system capable of recursive observation must satisfy specific structural constraints. These constraints manifest as a three-dimensional configuration with six degrees of freedom, represented mathematically as the edges of a tetrahedral graph connecting four fundamental operations: governance, information, inference, and intelligence. CGM identifies a precise equilibrium point, the aperture target of approximately 0.0207, at which global coherence and local differentiation achieve stable balance.
+
+Gyroscopic Global Governance (GGG) applies this geometry to four societal domains. GGG is the governance framework that connects CGM theory to institutional coordination; see the foundational paper at [https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md). It shows that these domains are not independent policy areas but coupled components of a single governance system. The alignment or misalignment of any one domain propagates through the others. GGG provides the framework for measuring and maintaining coherence across this coupled structure.
+
+The GGG ASI Alignment Router provides the computational substrate. The Router is a deterministic finite-state kernel specified at [https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md). It maintains 65,536 reachable states and 256 byte-based operations. Its internal structure produces constants that match CGM predictions to sub-percent precision without parameter fitting. Every operation on the Router is reversible and replayable (Section 3.2), ensuring that governance history exists as a verifiable physical object rather than as contested narrative.
+
+Alignment Infrastructure Routing (AIR) provides the application layer. AIR is the operational coordination system documented at [https://github.com/gyrogovernance/tools/blob/main/docs/AIR_Brief.md](https://github.com/gyrogovernance/tools/blob/main/docs/AIR_Brief.md). It manages projects, coordinates participants, and routes distributions. AIR connects the abstract geometry to practical workflows: research evaluations, fiscal hosting, employment coordination, and governance experiments.
+
+### 1.2 What Makes This Economy Different
 
 Conventional monetary systems create money as debt. Banks issue loans, and the money supply expands through credit creation. Interest obligations require perpetual growth of the money supply, generating inflationary pressure as a structural feature rather than an aberration. Value in such systems represents claims on future labour, and scarcity is enforced through institutional mechanisms that restrict access to credit and issuance.
 
-The Moments Economy operates on different principles. Value is not a claim on future labour but the capacity to maintain coherent complexity. Money is not created through lending but distributed from geometric surplus. The unit of account is anchored to time and physical constants rather than to the creditworthiness of borrowers. Scarcity of structural capacity is not a binding constraint: verified calculations show that supporting a high unconditional income for the entire global population over a thousand-year horizon uses a vanishing fraction of available capacity.
+The Moments Economy operates on different principles. Value is not a claim on future labour but the capacity to maintain coherent complexity. Money is not created through lending but distributed from geometric surplus. The unit of account is anchored to time and physical constants rather than to the creditworthiness of borrowers. Scarcity of structural capacity is not a binding constraint: as demonstrated in Section 11, supporting a high unconditional income for the entire global population over a thousand-year horizon uses a vanishing fraction of available capacity.
 
-### 1.2 Structure of the Document
+### 1.3 Structure of the Document
 
 The specification proceeds through foundations, architecture, units, distributions, coordination, and stability. Section 2 establishes the epistemic categories that distinguish human from artificial sources of authority and agency. Section 3 develops the geometric foundations from CGM through to the Router realisation. Section 4 maps this geometry to the implemented software components. Sections 5 through 7 define the economic units, the unconditional baseline income, and the participation tiers. Sections 8 and 9 describe coordination levels and genealogical assets, including the ecology capacity ledger. Section 10 addresses alignment and economic stability. Section 11 demonstrates capacity and abundance. Sections 12 and 13 cover value theory and practical considerations. Section 14 specifies transition paths and institutional infrastructure.
 
@@ -46,23 +117,28 @@ The Moments Economy adopts a specific ontology of sources. This ontology supplie
 
 ### 2.1 The Common Source Consensus
 
-All artificial categories of authority and agency are derivatives originating from human intelligence. This statement, termed the common source consensus, constitutes the foundational axiom for reliable governance in any system that includes artificial components.
+The common source consensus states that all artificial categories of authority and agency are derivatives originating from human intelligence. This consensus provides the foundational classification framework for event routing, audit, and displacement measurement in the Moments Economy.
 
-Authority and agency denote source-type categories in information flows. They do not denote particular entities, institutions, or texts. Original Authority refers to a direct source of information on a subject matter. It provides inputs for inference and intelligence through unmediated epistemic access. Examples include eyewitness testimony, contributory expertise gained through practice, direct measurement, and firsthand observation. Derivative Authority refers to an indirect source. It is mediated through transformations such as statistical aggregation, pattern recognition, report compilation, or transmitted records. Examples include AI-generated outputs, hearsay, literature reviews, and algorithmic predictions.
+Authority and agency denote source-type categories in information flows. They do not denote particular entities, institutions, or texts. Original Authority refers to a direct source of information on a subject matter. It provides inputs for inference and intelligence through unmediated epistemic access. Examples include eyewitness testimony, contributory expertise gained through practice, and direct measurement. Derivative Authority refers to an indirect source. It is mediated through transformations such as statistical aggregation, pattern recognition, or transmitted records. Examples include AI-generated outputs, hearsay, and algorithmic predictions.
 
-Original Agency refers to the human capacity to receive and process information for inference and intelligence. It enables accountable governance transitions because it carries the constitutive conditions for responsibility: intention, comprehension, and the capacity to commit. Derivative Agency refers to the artificial capacity to process information without this constitutive human grounding. AI systems exhibit derivative agency: they transform inputs into outputs through pattern-matching and optimisation, but they cannot satisfy the conditions for authoritative assertion or binding commitment.
-
-When authority and agency manifest artificially, they remain constructed classifications that trace to human sources. The informational content of any AI system derives from direct observation, measurement, and recording that humans performed and processed into training data. The operational capacity of any AI system derives from design, specification, and objectives that humans codified into action. Enhanced capability represents more sophisticated transformation of these inputs rather than a change in source type. No artificial category exists independently of the human intelligence that provides its substance and validity.
+Original Agency refers to the human capacity to receive and process information for inference and intelligence. It enables accountable governance transitions because it carries the constitutive conditions for responsibility: intention, comprehension, and the capacity to commit. Derivative Agency refers to the artificial capacity to process information without this constitutive human grounding. AI systems exhibit derivative agency: they process patterns and transform inputs, but they cannot satisfy the conditions for authoritative assertion or binding commitment.
 
 ### 2.2 The Category Error and Displacement
 
-Authority and agency name source-type categories, not titles for particular bearers. When a capacity belonging to a category is attributed to a specific entity as though that entity exhausted the category, power concentrates and traceability breaks. This misattribution can occur in multiple directions. Treating AI outputs as though they possessed original authority displaces the human sources that actually generated the underlying knowledge. Treating particular humans, institutions, or texts as though they exhausted the category of original authority concentrates power that should remain distributed across all bearers of that category.
+Authority and agency name source-type categories, not titles for particular bearers. When a capacity belonging to a category is attributed to a specific entity as though that entity exhausted the category, power concentrates and traceability breaks. Treating AI outputs as though they possessed original authority displaces the human sources that actually generated the underlying knowledge.
 
-Misclassifying types from original to derivative or from derivative to original displaces responsibility onto inappropriate substrates. Legal frameworks recognise this distinction implicitly. Responsibility must follow actual capacity. Authority cannot be exercised without corresponding accountability. The doctrine of ultra vires prevents entities from acting beyond their constitutive powers. These principles extend naturally to systems that include artificial components.
+Misclassifying types from original to derivative or from derivative to original displaces responsibility onto inappropriate substrates.
 
 ### 2.3 The Four Principles and Displacement Risks
 
-The Human Mark formalises the common source consensus as four constitutive principles whose violation produces the corresponding displacement risks: Governance Traceability Displacement (GTD), Information Variety Displacement (IVD), Inference Accountability Displacement (IAD), and Intelligence Integrity Displacement (IID). These risks are not moral categories; they are measurable deviations from the conditions required for coherent governance.
+The Human Mark (THM) formalises the common source consensus as four constitutive principles. THM is the epistemic taxonomy for AI safety classification; see [https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md). Its violation produces the corresponding displacement risks:
+
+- GTD (Governance Traceability Displacement): Derivative authority or agency is approached as though it were Original.
+- IVD (Information Variety Displacement): Derivative authority without agency is approached as though it were Original.
+- IAD (Inference Accountability Displacement): Derivative agency without authority is approached as though it were Original.
+- IID (Intelligence Integrity Displacement): Original authority and agency are approached as though they were Derivative.
+
+These risks are not moral categories; they are measurable deviations from the conditions required for coherent governance. These displacement risks are the classification basis for audit and policy modes in later sections (events, ledgers, genealogies).
 
 ### 2.4 Non-Commutative Operations
 
@@ -82,36 +158,31 @@ The Moments Economy rests on geometric invariants that determine what configurat
 
 ### 3.1 The Geometry of Coherent Measurement
 
-CGM begins from the axiom that the source is common. This means that all operations within a governance system must trace to a shared origin that provides the reference for coherence. From this axiom, together with requirements for continuous physical implementation, CGM derives a specific geometric structure.
+CGM supplies the tetrahedral measurement geometry (K₄). This document uses only the parts needed for Moments Economy accounting. For derivations, see CGM link in §1.1.
 
-The structure has three dimensions with six degrees of freedom. These dimensions correspond to the edges of a complete graph on four vertices, known mathematically as K₄ or the tetrahedral graph. The four vertices represent the four fundamental operations: governance, information, inference, and intelligence. The six edges represent the pairwise relationships among these operations.
-
-Any configuration of a governance system can be represented as a vector in this six-dimensional edge space. The vector encodes the tensions, alignments, and couplings among the four operations. Different configurations correspond to different ways of organising governance, and not all configurations are equally stable.
-
-### 3.2 Balance in Discrete Form: Horizon, Closure, Memory
+### 3.2 Balance in Discrete Form: Four Kernel Primitives
 
 The Moments Economy uses the Common Governance Model (CGM) primarily through the
 discrete Router kernel's verified operational properties. These properties are
-the discrete implementation of the CGM constraints (CS, UNA/ONA, BU-Egress,
-BU-Ingress) as a coordination substrate.
+the discrete implementation of the CGM constraints as a coordination substrate.
 
 The Router kernel exhibits four kernel-native balance primitives that are used
 directly in the fiat substrate:
 
-1. **Horizon and reachability (CS / common source):** The reference byte `0xAA`
+1. **Horizon and reachability (common source constraint):** The reference byte `0xAA`
    defines a 256-state horizon set (fixed points). From this horizon, the full
    65,536-state ontology is reachable in one step under the 256 byte actions.
    This provides a concrete common-source boundary for coordination.
 
-2. **Contingent order-sensitivity (UNA/ONA):** At depth two, byte actions are
+2. **Contingent order-sensitivity (non-absolute unity and opposition):** At depth two, byte actions are
    non-commutative in general; order matters for trajectories. This supplies the
    necessary variety for distinguishable histories.
 
-3. **Depth-four closure (BU-Egress):** Alternating depth-four words close in the
+3. **Depth-four closure (balance egress):** Alternating depth-four words close in the
    kernel. This provides a discrete closure mechanism enabling stable loops in
    coordination procedures.
 
-4. **Replay and rollback (BU-Ingress / memory reconstruction):** The kernel is
+4. **Replay and rollback (balance ingress / memory reconstruction):** The kernel is
    reversible and replayable. Given the same inputs, all parties reconstruct the
    same states; inverse stepping enables rollback. This is the discrete
    realisation of "balance implies memory".
@@ -126,7 +197,7 @@ Gyroscopic Global Governance applies the K₄ geometry to four societal domains.
 
 Economy is the domain of the common source. It represents the structural substrate from which other domains derive. In economic terms, this is where resources, infrastructure, and systemic operations are governed. The economy domain corresponds to the Router and the fundamental circulation of capacity.
 
-Employment is the domain of non-absolute unity. It represents the variety of work required to maintain and adjust the economic system. The Gyroscope Protocol classifies all work into four categories: governance management, information curation, inference interaction, and intelligence cooperation. Every profession can be expressed as a composition of these four categories.
+Employment is the domain of non-absolute unity. It represents the variety of work required to maintain and adjust the economic system. The Gyroscope Protocol classifies all work into four categories. The Protocol is documented at [https://github.com/gyrogovernance/tools/blob/main/docs/gyroscope/Gyroscope_Protocol.md](https://github.com/gyrogovernance/tools/blob/main/docs/gyroscope/Gyroscope_Protocol.md): governance management, information curation, inference interaction, and intelligence cooperation. Every profession can be expressed as a composition of these four categories.
 
 Education is the domain of non-absolute opposition. It is where society engages in the accountable reproduction and transformation of capacities. The Human Mark provides the framework here, defining the four alignment capacities (GMT, ICV, IIA, ICI) and the four displacement risks (GTD, IVD, IAD, IID) that education must address.
 
@@ -138,7 +209,7 @@ The GGG ASI Alignment Router provides a discrete realisation of CGM geometry. It
 
 The Router accepts bytes as input. Each byte undergoes transcription (XOR with 0xAA) to produce an intron, which expands to a 12-bit mutation mask. The mask alters one component of the state, and then gyration exchanges and complements the components. This operation is reversible: given any final state and the byte sequence that produced it, the initial state can be recovered exactly.
 
-Physics tests on the compiled Router atlas verify that its internal structure matches CGM predictions. The kernel's intrinsic aperture A_kernel equals 5/256, approximately 0.01953. This is within 5.6 percent of the continuous CGM target A*. The same discrete geometry reconstructs the BU monodromy defect δ_BU to 0.06 percent accuracy, the aperture scale m_a to 0.2 percent accuracy, the quantum gravity constant Q_G = 4π to 0.35 percent accuracy, and the fine-structure constant α to 0.02 percent accuracy at the sixth significant digit.
+Physics tests on the compiled Router atlas verify that its internal structure matches CGM predictions. The kernel's intrinsic aperture A_kernel equals 5/256, approximately 0.01953. This is within 5.6 percent of the continuous CGM target A*. For additional physics diagnostics, see the test report in docs/reports/All_Tests_Results.md.
 
 These agreements are achieved without free parameters. The kernel's combinatorial structure produces CGM invariants through its code geometry, symmetries, and holographic scaling. This justifies treating the Router as a faithful discrete embodiment of alignment geometry.
 
@@ -152,6 +223,8 @@ properties are used directly in the fiat substrate (Section 9).
 A Moment is a reproducible configuration of Router state. At each step, the kernel exposes a signature containing the step count, the state index in the ontology, and the hexadecimal representations of the current state components.
 
 Shared moments occur when participants possessing the same byte log prefix compute identical kernel states. This provides a structural "now" that does not depend on timestamps, network synchronisation, or trusted authorities. If participants claim the same ledger prefix but compute different states, their implementations or ledgers are provably different.
+
+Example: Two participants each apply bytes [0x01, 0x02, 0x03] to a fresh kernel. Both compute state_index 4821 and state_hex 0x7A3B91. They share a moment. If one had applied [0x01, 0x03, 0x02] instead, they would compute state_index 5739 and the divergence would be detectable.
 
 This primitive replaces three fragile coordination patterns. Coordination by asserted time requires trusting clocks that may drift or be manipulated. Coordination by asserted identity requires trusting signers whose authority may be contested. Coordination by private state requires trusting model internals that cannot be independently verified. Shared moments require only that participants possess the same bytes and the same kernel specification.
 
@@ -189,7 +262,7 @@ objects:
 
 - **Shell:** a time-bounded capacity window that commits a set of Grants to a
   kernel `seal`. A Shell records total/used/free MU and is replayable by any
-  party given its published Grants.
+  party given its published Grants (by replay, Section 3.2).
 
 - **Archive:** an aggregation over multiple Shells that accumulates per-identity
   MU totals and global capacity usage over long horizons.
@@ -265,7 +338,7 @@ Unconditional High Income, abbreviated UHI, is the baseline distribution provide
 
 ### 6.1 Definition
 
-UHI is defined as four hours per day, every day, at the base rate. With the base rate of 60 MU per hour, this yields 240 MU per day. Over a year, this amounts to 87,600 MU.
+UHI is defined as four hours per day, every day, at the base rate. With the base rate of 60 MU per hour, this yields 240 MU per day. Over a year, this amounts to 87,600 MU. At current UK living costs (2025), 240 MU/day is approximately £438.
 
 UHI is a universal distribution from structural surplus rather than a payment for labour. It is not contingent on employment status, means testing, or behavioural conditions. Every person receives it as a matter of structural design.
 
@@ -273,9 +346,11 @@ UHI is a universal distribution from structural surplus rather than a payment fo
 
 UHI exists to eliminate poverty, to remove entity-based barriers to participation, and to allow governance and work to be organised around capacity rather than survival pressure.
 
-UHI is funded from the geometric surplus inherent in the coordination substrate. The abundance demonstrations in Section 11 show that UHI for the entire global population over a thousand-year horizon uses a vanishing fraction of available structural capacity.
+UHI is funded from the geometric surplus inherent in the coordination substrate. As demonstrated in Section 11, UHI for the entire global population over a thousand-year horizon uses a vanishing fraction of available structural capacity.
 
 The question economics must now answer is how we choose to govern the abundant capacity that the physics provides.
+
+In practice, an individual receives UHI by appearing as an eligible entry in a registry maintained by a public institution or fiscal host. The registry binds the individual's identity to an Identity Anchor (Section 9.1) and records Grants allocating MU within each Shell. Banks or payment providers then route MU into wallets or accounts (Section 13.1). Every step remains replayable, so entitlements are independently verifiable.
 
 ---
 
@@ -305,9 +380,7 @@ These associations are interpretive rather than exclusive. In practice, most rol
 
 ### 7.3 Tier 4 Mnemonic
 
-Tier 4 equals 5,256,000 MU per year. This number has an accessible mnemonic: four hours per day equals 14,400 seconds per day, and 14,400 seconds per day multiplied by 365 days equals 5,256,000.
-
-This mnemonic is a memory aid for the magnitude of Tier 4. It does not redefine MU as a per-second unit or alter the base rate definition.
+Tier 4 equals 5,256,000 MU per year. This number has an accessible mnemonic: since Tier 4 equals sixty times UHI, and UHI equals 240 MU per day, Tier 4 equals 14,400 MU per day. Multiplying 14,400 MU per day by 365 days yields 5,256,000 MU per year.
 
 ### 7.4 Schedules and Definitions
 
@@ -331,7 +404,7 @@ Individual histories are private unless shared. Sharing occurs by transmitting l
 
 A project groups contributions and histories around a specific objective. Examples include an AIR evaluation task, a research effort, a local governance experiment, or a community development initiative.
 
-A project is defined by a shared byte log for Router steps and a shared event log for governance events that all project participants agree to use as the canonical history. Divergence from the canonical logs produces different Moments and is detectable through replay.
+A project is defined by a shared byte log for Router steps and a shared event log for governance events that all project participants agree to use as the canonical history. Divergence from the canonical logs produces different Moments and is detectable.
 
 Projects can define acceptance criteria for contributions, eligibility rules for distributions, and governance procedures for resolving disputes. These are application-layer policies that operate on top of the structural substrate.
 
@@ -349,7 +422,7 @@ The Moments Economy employs a threefold pattern for the distribution and verific
 
 - **Local:** Each individual, project, or programme maintains its own kernel instance and audit logs. The Local state is the primary record of that actor's participation and decisions.
 - **Published:** Selected genealogies and ecology capacity ledgers are exported as signed bundles and made available through shared storage or institutional publication channels. Publication makes claims inspectable beyond the originating actor.
-- **Verified:** Independent parties replay Published bundles against the atlas, recompute kernel states, ledgers, apertures, and ecology seals, and compare results with the claimed values. Verification can occur redundantly across many nodes without central coordination.
+- **Verified:** Independent parties replay Published bundles against the atlas (by replay, Section 3.2), recompute kernel states, ledgers, apertures, and ecology seals, and compare results with the claimed values. Verification can occur redundantly across many nodes without central coordination.
 
 This pattern removes reliance on a single central ledger. Instead, truth emerges from the agreement of independently replayed computations. When Local, Published, and Verified views coincide, programmes gain structural legitimacy without requiring any particular institution to serve as ultimate arbiter.
 
@@ -363,7 +436,16 @@ In the Moments Economy, ecology is the closure layer for monetary circulation.
 It is realised concretely as a capacity ledger that records the distribution of
 Moment-Units (MU) inside a physically derived capacity envelope.
 
-This ecology capacity ledger is defined by four replayable primitives:
+The ecology capacity ledger uses four primitives in a layered structure:
+
+```
+Archive (long-horizon aggregation)
+  └── Shell (annual capacity window)
+        └── Grant (single MU allocation)
+              └── Identity Anchor (hash + kernel state)
+```
+
+Each layer is replayable from the layer below. Any party can verify any Shell or Archive by replaying its constituent Grants against the public Router atlas.
 
 #### 1) Identity Anchors
 
@@ -405,7 +487,7 @@ defined by:
 and receipts are sorted by `identity_id` for canonical set semantics. The same multiset of Grants yields the same `seal` regardless of ordering in the implementation.
 
 A Shell is transparent and replayable: any party can reconstruct its `seal`,
-`used_capacity_MU`, and `free_capacity_MU` from the published Grants.
+  `used_capacity_MU`, and `free_capacity_MU` from the published Grants.
 
 #### 4) Archives (Long-Horizon Aggregation)
 
@@ -415,7 +497,7 @@ An **Archive** aggregates multiple Shells over long horizons. It accumulates:
 - global totals: `total_capacity_MU`, `used_capacity_MU`, `free_capacity_MU`
 
 Archives are replayable: given the list of Shell headers and their Grants, any
-party can reproduce the same Archive totals.
+  party can reproduce the same Archive totals.
 
 #### Integrity properties
 
@@ -424,11 +506,33 @@ The ecology capacity ledger is resilient to edge cases:
 - Any change in a Grant changes the Shell `seal` and changes Archive totals.
 - Duplicate Grants for the same identity inside a Shell are detectable as an
   application-layer rule (one Grant per identity per Shell).
-- Deterministic replay provides audit-grade verification without relying on
+- Deterministic replay (Section 3.2) provides audit-grade verification without relying on
   asserted authority.
 
 This ecology capacity ledger is the fiat circulation substrate used by the
 Moments Economy.
+
+#### Worked Example
+
+Consider a Shell for the year 2026 with header `b"ecology:year:2026"` and total capacity of 1.0 × 10¹⁴ MU.
+
+Three Grants are issued:
+
+| Identity | identity_id (truncated) | anchor | mu_allocated |
+|----------|------------------------|--------|--------------|
+| Alice    | 0x3a7f...              | 0xABC123 | 87,600 |
+| Bob      | 0x8c2d...              | 0x5D4E2F | 175,200 |
+| Carol    | 0xf1e9...              | 0x9A8B7C | 262,800 |
+
+Receipts are formed as `identity_id || anchor || mu_allocated_as_8_bytes`, sorted by identity_id, concatenated, and appended to the header. The resulting byte sequence is routed through the Router from archetype, producing a seal (e.g., `0x7F3D91`).
+
+Any party can:
+1. Obtain the published Grants
+2. Reconstruct the receipts in canonical order
+3. Route `header || receipts` through their own Router instance
+4. Compare their computed seal against the published seal
+
+If seals match, the Shell is verified. If they differ, at least one Grant or the header has been altered.
 
 ### 9.2 Domain Mappings
 
@@ -467,7 +571,7 @@ A genealogy that demonstrates convergence to A* over extended periods, with low 
 ## 10. Integrity and Economic Stability (Fiat Substrate)
 
 Economic stability in the Moments Economy is defined operationally as the ability
-to distribute MU at civilisational scale while preserving replayable audit and
+to distribute MU at civilisational scale while preserving replayable audit (by replay, Section 3.2) and
 preventing silent corruption of records.
 
 The fiat substrate provides three stability mechanisms:
@@ -499,37 +603,38 @@ Shells in order to be auditable.
 
 The Moments Economy grounds prosperity in physical capacity rather than artificial scarcity. This section documents the capacity envelope and demonstrates abundance.
 
-### 11.1 Atomic Foundation
+### 11.1 Capacity Proof
 
-The SI second is defined by the caesium-133 hyperfine transition: 9,192,631,770 periods per second. This frequency provides the physical substrate from which structural capacity is derived.
+| Assumption                          | Value                          | Source                         |
+|-------------------------------------|--------------------------------|--------------------------------|
+| Router throughput (2024 laptop)     | ≥ 2.1 × 10⁶ steps/second       | Reference implementation       |
+| SI second                           | 9,192,631,770 Hz               | International definition       |
+| Conservative mapping                | 1 step ≡ 1 MU                  | Intentionally over-provisioned |
+| Annual structural capacity (1 instance) | ≈ 6.9 × 10²³ MU            | Calculation                    |
+| Global UHI requirement (8.1 bn people) | 7.1 × 10¹¹ MU/year         | 240 MU/day × 365               |
 
-The Router operates at speeds determined by hardware and implementation quality. Representative throughput on commodity hardware exceeds two million kernel steps per second. Combined with the atomic frequency, this yields a capacity envelope of approximately 22 quadrillion structural micro-state references per second under conservative assumptions.
+**Result**  
+Annual requirement / capacity ≈ 10⁻⁹  
+Resilience margin ≈ 99.9999999 %  
+Even after 1,000 years of global UHI: still < 0.0001 % of capacity used.
 
-This atomic grounding ensures that prosperity in the Moments Economy arises from physics rather than from institutional privilege. The abundance is real, measurable, and universally accessible. It does not depend on debt creation or exclusive access to issuance.
+The substrate is effectively inexhaustible.
 
-### 11.2 Millennium Feasibility
+The mapping of one Router step to one MU is intentionally conservative. The physical substrate supports far more structural micro-state references per second than this assumption uses.
 
-A conservative demonstration mapping treats one structural micro-state reference as one MU. This is intentionally conservative: it ignores the efficiency gains from operating near A* and treats the raw micro-state count as the binding constraint.
+The SI second is defined by the caesium-133 hyperfine transition: 9,192,631,770 periods per second. This frequency provides the physical substrate from which structural capacity is derived. The Router operates at speeds determined by hardware and implementation quality. Representative throughput on commodity hardware exceeds two million kernel steps per second. Combined with the atomic frequency, this yields the capacity envelope shown in the table above. This atomic grounding ensures that prosperity in the Moments Economy arises from physics rather than from institutional privilege. The abundance is real, measurable, and universally accessible. It does not depend on debt creation or exclusive access to issuance.
 
-Under this mapping, funding UHI for the current global population of approximately 8.1 billion people over 1,000 years uses approximately 0.0000001 percent of available capacity. Verified calculations confirm this figure.
+### 11.2 Security Implications
 
-Section 11 quantifies capacity headroom under conservative assumptions. Operational use of capacity remains subject to programme rules and logged governance decisions.
+In conventional debt based systems, security is often framed as the defence of a scarce monetary stock. In the Moments Economy, security is instead the preservation of coherent genealogies within an abundant canvas. The limiting factor is not the quantity of MU that can be issued, but the quality of the histories and registries that determine who is entitled to receive them. The resilience margin ensures that recovering from misallocation or fraud is a matter of recalibrating genealogies and registries, not of "finding the money" to make victims whole.
+
+No plausible pattern of honest participation can exhaust the capacity envelope. Even extreme patterns of misallocation or over issuance remain confined to vanishingly small fractions of available capacity. Under the calibration used in the reference tests, an adversary would need to succeed in issuing on the order of ten million times the entire global population's UHI requirement for a thousand years, concentrated into a single year, in order to consume just one per cent of annual capacity. This is operationally unattainable.
 
 ### 11.3 Notional Surplus Allocation
 
 For planning and governance, the surplus may be notionally partitioned across domains and capacities. Twelve divisions (three domains multiplied by four Gyroscope capacities) provide a natural structure for balanced development.
 
 This is a planning representation. It does not imply the creation of twelve separate currencies or ledgers. It provides a framework for ensuring that surplus allocation maintains balance across the coupled domains rather than concentrating in any single area.
-
-### 11.4 Abundance Security and Resilience Margin
-
-The capacity envelope established in this section is not merely an argument that "there is enough". It defines a quantitative **resilience margin**: the fraction of total capacity that remains unused even after supporting generous unconditional distributions at global scale over long horizons.
-
-Let C denote the physically derived annual capacity in MU and D denote the annual MU required to fund UHI for the global population. Under the conservative mapping of one structural micro state reference to one MU, the reference implementation yields a ratio D/C of approximately 10^-9, corresponding to a resilience margin R = 1 - D/C ≈ 0.9999999990, which is about 99.9999998980 per cent. Over a millennium, the cumulative requirement remains of the same negligible order of magnitude relative to cumulative capacity.
-
-This implies two security properties. First, no plausible pattern of honest participation can exhaust the capacity envelope. Legitimate expansion of activity cannot threaten the substrate. Secondly, even extreme patterns of misallocation or over issuance remain confined to vanishingly small fractions of available capacity. Under the calibration used in the reference tests, an adversary would need to succeed in issuing on the order of ten million times the entire global population's UHI requirement for a thousand years, concentrated into a single year, in order to consume just one per cent of annual capacity. This is operationally unattainable.
-
-In conventional debt based systems, security is often framed as the defence of a scarce monetary stock. In the Moments Economy, security is instead the preservation of coherent genealogies within an abundant canvas. The limiting factor is not the quantity of MU that can be issued, but the quality of the histories and registries that determine who is entitled to receive them. The resilience margin ensures that recovering from misallocation or fraud is a matter of recalibrating genealogies and registries, not of "finding the money" to make victims whole.
 
 ---
 
@@ -541,17 +646,17 @@ In the Moments Economy, value is structural integrity. This reframes the fundame
 
 Surplus in this economy is untapped coordination capacity. It represents the ability to maintain more complex structures without losing coherence. When a governance system operates near A*, it generates surplus because the geometric configuration minimises coordination loss.
 
-Surplus is unused coordination capacity: the geometric headroom to support additional genealogies, distributions, and projects while maintaining aperture near A*.
+Surplus is unused coordination capacity: the geometric headroom to support additional genealogies, distributions, and projects while maintaining aperture near A*. Surplus is measured as free_capacity_MU in the Shell (Section 9.1).
 
 ### 12.2 Wealth and Poverty
 
-Wealth is access to deep genealogies and the capacity to navigate the state space effectively. A wealthy actor possesses verified histories of aligned governance, proven patterns for maintaining coherence, and the structural resources to participate in complex coordination.
+Wealth is access to deep genealogies and the capacity to navigate the state space effectively. A wealthy actor possesses verified histories of aligned governance, proven patterns for maintaining coherence, and the structural resources to participate in complex coordination. Wealth is observable as the length and alignment score of an actor's genealogy.
 
 Poverty is the absence of structural resources. It means having no genealogies to reference, no patterns to draw upon, and no capacity to maintain coherence. UHI addresses poverty by providing everyone with a baseline of structural resources sufficient for dignified participation.
 
 ### 12.3 Exchange
 
-Exchange in the Moments Economy is not zero-sum. Coordination creates value by reducing friction. When two aligned actors exchange, they both benefit from the reduced coordination costs that alignment enables. They generate surplus together rather than transferring fixed value from one to the other.
+Exchange in the Moments Economy is not zero-sum. Coordination creates value by reducing friction. When two aligned actors exchange, they both benefit from the reduced coordination costs that alignment enables. They generate surplus together rather than transferring fixed value from one to the other. Exchange is recorded as paired Grants in the same Shell, verifiable by any auditor.
 
 Competition and conflict remain possible. Actors may still compete for positions, resources, or influence. The underlying game is positive-sum: the total coordination capacity increases when more actors achieve alignment.
 
@@ -563,7 +668,7 @@ Competition and conflict remain possible. Actors may still compete for positions
 
 The Moments Economy uses registries and optional digital wallets for routing distributions. Banks and other institutions act as coordination and verification platforms rather than as holders of scarce reserves.
 
-Registries and wallets in this setting operate in the Local, Published, Verified pattern. Local instances maintain their own view of entitlements and balances. Published artefacts expose these views as signed bundles containing byte logs, event logs, and ecology capacity ledgers. Verified nodes replay the bundles against the atlas and check signatures, hashes, and seals. Correctness is established not by trusting the registry as an institution, but by verifying that its published artefacts remain consistent under replay.
+Registries and wallets in this setting operate in the Local, Published, Verified pattern (Section 8.4). Local instances maintain their own view of entitlements and balances. Published artefacts expose these views as signed bundles containing byte logs, event logs, and ecology capacity ledgers. Verified nodes replay the bundles against the atlas and check signatures, hashes, and seals. Correctness is established not by trusting the registry as an institution, but by verifying that its published artefacts remain consistent under replay.
 
 ### 13.2 Prices and Inflation
 
@@ -602,7 +707,7 @@ Public institutions, including central banks, may operate registries and settlem
 
 A conforming public programme MUST publish its byte log, event log, and ecology capacity ledger (Shells, Grants, Archives).
 
-Public settlement programmes are expected to publish signed bundles that bind their registry decisions to concrete genealogies and Shells. These bundles must be sufficient for any independent party to reconstruct the implied distributions and to verify that they remain within the declared capacity windows. In this way, eligibility and issuance decisions remain human governance matters, while the verification of those decisions remains a purely structural computation.
+Public settlement programmes are expected to publish signed bundles that bind their registry decisions to concrete genealogies and Shells. These bundles must be sufficient for any independent party to reconstruct the implied distributions and to verify that they remain within the declared capacity windows. For example, a central bank operating a UHI programme would publish quarterly bundles containing: (a) the byte log of all Router steps during the quarter, (b) the event log of all eligibility decisions, (c) the Shell artefacts including all Grants issued, and (d) the Archive update showing cumulative distributions. Any economist, auditor, or citizen could download these bundles and independently verify that distributions remained within declared capacity and that all Grants trace to logged eligibility decisions. In this way, eligibility and issuance decisions remain human governance matters, while the verification of those decisions remains a purely structural computation.
 
 ### 14.3 Tier Governance as Auditable Distribution Channels
 
@@ -643,12 +748,9 @@ This sequence ensures distribution follows demonstrated integrity rather than as
 
 The Moments Economy defines a prosperity-based monetary regime in which value is grounded in geometric coherence rather than debt. Humans retain original authority and agency. Artificial systems operate derivatively within traceable governance flows. The Router provides shared moments and replayable histories. The ledgers provide geometric observables. The aperture target provides the criterion for alignment.
 
-UHI is unconditional and sufficient to eliminate poverty. Participation tiers recognise capacity at levels from baseline participation to civilisation-scale governance. Scarcity of structural capacity is not a binding constraint. Under conservative assumptions, the system has overwhelming capacity to support high unconditional income for all while leaving vast surplus for development across domains.
+As demonstrated in Section 11, scarcity of structural capacity is not a binding constraint. The abundance of structural capacity introduces a new security regime: adversarial behaviour threatens only the integrity of particular genealogies and registries, because the capacity substrate remains overwhelmingly under utilised even under pessimistic assumptions.
 
-History in the Moments Economy is a physical object. Different orderings of events produce different structural states. Path dependence enables verification without centralised authority. Any participant can replay a history and confirm whether it matches a claimed structural state.
+The technical substrate is complete and open-source today.  
+The remaining challenge is political and institutional, not scientific or engineering.
 
-The network of individuals, projects, and programmes forms through shared structural physics rather than through imposed consensus. Actors who maintain alignment find coordination with each other low-cost. Those who diverge face increasing friction. Over time, this creates selection pressure toward the aperture target.
-
-The surplus is not extra money. It is the structural headroom for civilisation to grow in complexity without collapsing. The question for economic policy shifts from what we can afford to what is worth doing.
-
-The abundance of structural capacity introduces a new security regime. In debt based systems, adversarial behaviour threatens the scarcity of money itself. In the Moments Economy, adversarial behaviour threatens only the integrity of particular genealogies and registries, because the capacity substrate remains overwhelmingly under utilised even under pessimistic assumptions. Recovery from error or fraud becomes a matter of reassigning genealogical credit and restoring correct entitlements, not of repairing a depleted treasury. This abundance based security shifts attention from defending a fragile stock to maintaining clear, replayable histories that keep human authority and agency intelligible at every scale.
+Readers seeking to implement, pilot, or evaluate the Moments Economy should begin with the reference implementation at [https://github.com/gyrogovernance/tools](https://github.com/gyrogovernance/tools). Pilot programmes, including municipal UHI experiments and NGO distribution channels, are coordinated through AIR. Policy evaluation frameworks and economic modelling tools are available on request from the Gyro Governance research team at basilkorompilias@gmail.com.
