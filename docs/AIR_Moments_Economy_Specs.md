@@ -8,7 +8,7 @@
 
 The Moments Economy establishes a monetary system based on the physical capacity of the atomic standard rather than on debt. In this architecture, money represents a claim on the inherent capacity of the world to distinguish and record distinct events. Issuance is therefore constrained not by institutional policy but by the volume of the physical container defined by the atomic standard.
 
-The capacity for this money is determined by the atomic frequency of the caesium-133 atom. This frequency establishes the granularity of physical reality at the atomic scale. It dictates exactly how many distinct states can theoretically fit into the one-second causal cone. We call this total capacity the Common Source Moment.
+The capacity for this money is determined by the atomic frequency of the caesium-133 atom. It is used because it is the most widely accepted, reproducible and internationally audited physical reference for fine-grained measurement, independent of any institution’s monetary policy. The Common Source Moment is the total number of distinct, verifiable coordination states available when this physical resolution is coarse-grained by the finite state space of the Router. We call this total capacity the Common Source Moment. This is a fixed total, not a renewable quantity.
 
 When we compare this total capacity to the actual scale of human coordination, we find a massive surplus. The depth of the Common Source Moment contains many orders of magnitude more possible events than the global economy can generate or meaningfully govern. This abundance allows us to fund substantial unconditional distributions without taxation or the need for perpetual growth.
 
@@ -108,14 +108,14 @@ Participation tiers provide distributions above the UHI baseline. They recognise
 
 The economic capacity of the system is the Common Source Moment. Since value in this economy represents verified coordination, the money supply is bounded by the volume of the physical container defined by the atomic standard.
 
-This capacity is calculated as the **Phase Space Volume** of a single second (the Common Source Moment).
+This capacity is calculated as the **phase space volume of the atomic-second light-sphere** (the Common Source Moment). This is a **one-time structural ceiling**, not a rate.
 
 **1. The Temporal Resolution (f_Cs)**
 The International System of Units (SI) defines the second via the caesium-133 hyperfine transition. This sets the fundamental temporal resolution of the system:
 `f_Cs = 9,192,631,770 Hz`
 
 **2. The Physical Container (N_phys)**
-The causal container of one second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. At the resolution of the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:
+The causal container corresponding to the atomic second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. This volume determines the **total capacity**; it does not regenerate with each passing second. At the resolution of the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:
 `N_phys = V / λ³ = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`
 Note that the speed of light cancels out; this is a purely geometric and frequency-based invariant (verified in `test_physical_microcell_count_closed_form_and_c_cancellation`).
 
@@ -393,7 +393,7 @@ This appendix provides the detailed calculation supporting the capacity claims i
 | Atomic Reference (f_Cs) | 9,192,631,770 Hz | Caesium-133 hyperfine transition |
 | Router Ontology (|Ω|) | 65,536 | Verified in `test_moments_2.py` |
 | N_phys (microcells) | 3.254 × 10³⁰ | Derived (4/3)π f_Cs³ |
-| CSM (total capacity) | 4.965 × 10²⁵ MU | N_phys / |Ω| (fixed total) |
+| CSM (one-time total capacity) | 4.965 × 10²⁵ MU | N_phys / |Ω| (fixed pool, not a rate) |
 
 ### B.2 Coverage Proof
 
