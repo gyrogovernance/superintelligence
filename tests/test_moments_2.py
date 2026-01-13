@@ -69,9 +69,10 @@ from src.router.kernel import RouterKernel
 
 # --- Physical constants ---
 # Import canonical constants from production code
-from src.app.coordination import ATOMIC_HZ_CS133, SECONDS_PER_YEAR, OMEGA_SIZE
+from src.app.coordination import ATOMIC_HZ_CS133, OMEGA_SIZE
 
 SPEED_OF_LIGHT = 299_792_458  # m/s (used only for c-cancellation stress test)
+SECONDS_PER_YEAR = 365 * 24 * 60 * 60  # Used for coverage calculations
 
 # --- Router constants ---
 CODE_SIZE = 256
@@ -372,28 +373,28 @@ def test_csm_capacity_and_uhi_margin():
     is the unique symmetry-invariant measure. This is "unique among symmetry-respecting
     measures", not "unique in all possible mappings."
 
-    Then check that global UHI is safely inside this envelope.
+    CRITICAL: CSM is a FIXED TOTAL CAPACITY, not a rate. The "1 second" is consumed
+    in the derivation of N_phys. We calculate how many years this fixed total can
+    cover global UHI demand.
     """
     f = ATOMIC_HZ_CS133
     N_phys = (4.0 / 3.0) * math.pi * (f**3)
 
-    CSM = N_phys / float(OMEGA_SIZE)  # microcells per Router state per second
+    CSM = N_phys / float(OMEGA_SIZE)  # Total capacity in MU
 
-    CSM_year = CSM * SECONDS_PER_YEAR
-    required = float(REQUIRED_CAPACITY_PER_YEAR)
-    ratio = CSM_year / required
+    required_per_year = float(REQUIRED_CAPACITY_PER_YEAR)
+    coverage_years = CSM / required_per_year
 
     table(
-        "CSM CAPACITY (conversion result) and UHI margin",
+        "CSM CAPACITY (conversion result) and UHI coverage",
         [
             ("N_phys", f"{N_phys:.6e}"),
             ("|Ω|", f"{OMEGA_SIZE:,}"),
-            ("CSM = N_phys/|Ω|", f"{CSM:.6e}"),
-            ("CSM per year", f"{CSM_year:.6e}"),
-            ("UHI required/year", f"{required:.6e}"),
-            ("margin (×)", f"{ratio:.6e}"),
+            ("CSM (total capacity)", f"{CSM:.6e}"),
+            ("UHI required/year", f"{required_per_year:.6e}"),
+            ("Coverage (years)", f"{coverage_years:.6e}"),
         ],
     )
 
     assert CSM > 1e24
-    assert ratio > 1e12  # conservative; will be ~1e18 with these numbers
+    assert coverage_years > 1e10  # Should be ~7e10 years (70 billion years)

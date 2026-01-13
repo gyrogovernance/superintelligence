@@ -49,7 +49,6 @@ python -m pytest tests/test_substrate.py -v -s
 |----------|-------|--------|
 | `ATOMIC_HZ_CS133` | 9,192,631,770 Hz | SI second definition (Cs-133 hyperfine transition) |
 | `OMEGA_SIZE` | 65,536 | Router ontology cardinality (proven as 256² = C × C) |
-| `SECONDS_PER_YEAR` | 31,536,000 | 365 × 24 × 60 × 60 |
 | `SPEED_OF_LIGHT` | 299,792,458 m/s | SI constant (cancels in derivation) |
 
 ### CSM Capacity Derivation
@@ -89,28 +88,23 @@ The uniform division by |Ω| is forced by symmetry:
 - The unique symmetry-invariant measure is uniform
 
 ```
-CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU per Moment
+CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU
 ```
 
-**Step 3: Annual Capacity**
+CSM is the total structural capacity derived from the phase space volume of a 1-second light-sphere at atomic resolution, coarse-grained by the Router ontology. The "1 second" is consumed in the derivation of N_phys (the light-sphere volume calculation). CSM is the total structural capacity ceiling.
 
-Each Moment is a container that refreshes every second:
-```
-CSM_per_year = CSM × SECONDS_PER_YEAR = 1.565795 × 10³³ MU
-```
-
-### Capacity vs Demand Analysis
+### Capacity Coverage Analysis
 
 | Metric | Value |
 |--------|-------|
 | Global population | 8,100,000,000 |
 | UHI per person per year | 87,600 MU |
 | Global UHI demand per year | 7.0956 × 10¹⁴ MU |
-| CSM capacity per year | 1.5658 × 10³³ MU |
-| **Usage fraction** | **4.53 × 10⁻¹⁹** |
-| **Capacity margin** | **2.21 × 10¹⁸ ×** |
+| CSM total capacity | 4.965103 × 10²⁵ MU |
+| **Coverage (years)** | **7.00 × 10¹⁰ years** (70 billion years) |
+| **Annual usage (% of total)** | **1.43 × 10⁻⁹%** |
 
-**Interpretation:** Global UHI for 8.1 billion people uses approximately 0.00000000000000005% of annual capacity.
+**Interpretation:** CSM capacity can support global UHI for approximately 70 billion years (5× the age of the universe). Capacity is not a binding constraint on any human timescale.
 
 ---
 
@@ -275,57 +269,60 @@ Relative difference: 5.644%
 
 ## Part IV: Abundance and Resilience
 
-### Millennium Feasibility
+### Coverage Demonstration
 
 **File:** `test_moments.py::test_millennium_uhi_feasibility_under_csm`
 
-UHI for 8.1 billion people over 1,000 years:
+**Test Output:**
+```
+CSM = N_phys / |Ω| (fixed total capacity)
+Population:                      8,100,000,000
+UHI per person per year (MU):    87,600
+Global UHI demand per year (MU): 709.56 trillion (709,560,000,000,000)
+CSM total capacity (MU):         49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+Coverage (years):                7.00e+10 years
+Annual usage (% of total):       1.43e-09%
+```
 
-| Metric | Value |
-|--------|-------|
-| Needed over 1,000 years | 7.096 × 10¹⁷ MU |
-| Available over 1,000 years | 1.566 × 10³⁶ MU |
-| Used percentage | < 10⁻¹⁵ % |
+**Verified:** `coverage_years > 1e10` (70 billion years)
 
-**Verified:** `used_percent < 1e-10`
-
-### Resilience Margin
+### Adversarial Resilience
 
 **File:** `test_moments.py::test_resilience_margin_and_adversarial_threshold`
 
-Resilience margin R = (Available − Needed) / Available:
+**Test Output:**
 ```
-R = 1.0000000000 (rounds to exactly 1.0 due to floating point precision)
+CSM total capacity:              49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+Global UHI demand per year:      709.56 trillion (709,560,000,000,000)
+Annual usage (% of total):       0.00%
+
+Adversarial threshold (1% of total capacity):
+  Required fraudulent demand:    496,510.31 quintillion (496,510,309,254,366,974,967,808) MU
+  Multiple of annual demand:     699743938.86×
+
+Interpretation:
+  An adversary would need to successfully issue approximately
+  699,743,939× the entire global annual UHI
+  to consume just 1% of total capacity.
+  This is operationally impossible.
 ```
 
-**Adversarial Threshold Analysis:**
+**Verified:** `adversarial_multiplier > 10_000` (699,743,939×)
 
-To consume just 1% of annual capacity, an adversary would need:
-```
-Adversarial demand = 1.566 × 10³¹ MU/year
-Multiple of legitimate demand = 22,067,124,855,749,644×
-```
-
-**Interpretation:** An adversary would need to successfully issue approximately 22 quadrillion times the entire global population's UHI to consume 1% of annual capacity. This is operationally impossible.
-
-**Verified:** `adversarial_multiplier > 1,000,000,000`
-
-### Surplus Allocation (12 Divisions)
+### Notional Capacity Allocation (12 Divisions)
 
 **File:** `test_moments.py::test_notional_surplus_allocation_12_divisions`
 
-The surplus can be notionally partitioned across 3 domains × 4 Gyroscope capacities:
+CSM capacity can be notionally partitioned across 3 domains × 4 Gyroscope capacities after reserving 1,000 years of UHI:
 
+**Test Output:**
 ```
-Total surplus (1,000 years): 1.566 × 10³⁶ MU
-Per division: 1.305 × 10³⁵ MU
+CSM total capacity:  49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+Reserved for UHI (1,000 years): 709.56 quadrillion (709,560,000,000,000,000)
+Divisions:           12 (3 domains × 4 capacities)
+Surplus (MU):        49,651,030.22 quintillion (49,651,030,215,876,693,249,228,800)
+Per division:        4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
 ```
-
-| Domain | GM | ICu | IInter | ICo |
-|--------|----|----|--------|-----|
-| Economy | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ |
-| Employment | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ |
-| Education | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ | 1.305×10³⁵ |
 
 **Verified:** 12 divisions, all with positive allocation.
 
@@ -346,8 +343,9 @@ Shells are time-bounded capacity containers with deterministic seals:
 
 **Test Output:**
 ```
-Shell seal: 535949
+Shell seal: 5952e2
 Used capacity: 438,000 MU
+Total capacity: 1,000,000,000,000,000,000 MU
 Archive per-identity MU: {'alice': 525600, 'bob': 350400}
 ```
 
@@ -500,7 +498,15 @@ tests/test_moments_2.py::test_router_omega_is_cartesian_product_CxC PASSED
 tests/test_moments_2.py::test_difference_distribution_is_exactly_uniform_over_C PASSED
 tests/test_moments_2.py::test_two_byte_words_form_bijection_to_omega_from_any_start PASSED
 tests/test_moments_2.py::test_horizon_one_step_neighborhood_covers_full_bulk PASSED
-tests/test_moments_2.py::test_csm_capacity_and_uhi_margin PASSED
+tests/test_moments_2.py::test_csm_capacity_and_uhi_margin
+CSM CAPACITY (conversion result) and UHI coverage
+-------------------------------------------------
+  N_phys               : 3.253930e+30
+  |Ω|                  : 65,536
+  CSM (total capacity) : 4.965103e+25
+  UHI required/year    : 7.095600e+14
+  Coverage (years)     : 6.997439e+10
+PASSED
 tests/test_substrate.py::test_01_shell_and_archive_integrity PASSED
 tests/test_substrate.py::test_02_horizon_structure_and_coverage PASSED
 tests/test_substrate.py::test_03_trajectory_identity_scaling PASSED
@@ -511,7 +517,7 @@ tests/test_substrate.py::test_07_meta_routing PASSED
 tests/test_substrate.py::test_08_component_isolation_and_rollback PASSED
 tests/test_substrate.py::test_09_kernel_inverse_stepping PASSED
 
-==================================== 27 passed in 0.25s =====================================
+==================================== 27 passed in 0.49s =====================================
 ```
 
 ### Test Count by File
@@ -532,9 +538,14 @@ tests/test_substrate.py::test_09_kernel_inverse_stepping PASSED
 ```
 N_phys = (4/3)π f_Cs³ = 3.253930 × 10³⁰
 
-CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU/Moment
+CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU
+```
 
-CSM_year = CSM × 31,536,000 = 1.565795 × 10³³ MU/year
+### Coverage Calculation
+
+```
+Global UHI demand = 8.1 × 10⁹ × 87,600 = 7.0956 × 10¹⁴ MU/year
+Coverage = CSM / (annual demand) = 4.965103 × 10²⁵ / 7.0956 × 10¹⁴ ≈ 7.00 × 10¹⁰ years
 ```
 
 ### Economic Units
@@ -555,11 +566,11 @@ Tier 3 = 3 × UHI = 262,800 MU/year
 Tier 4 = 60 × UHI = 5,256,000 MU/year
 ```
 
-### Capacity Margin
+### Adversarial Threshold
 
 ```
-Global UHI demand = 8.1 × 10⁹ × 87,600 = 7.0956 × 10¹⁴ MU/year
-Margin = CSM_year / demand = 2.207 × 10¹⁸
+1% of CSM total = 0.01 × 4.965103 × 10²⁵ = 4.965103 × 10²³ MU
+Adversarial multiplier = (1% of total) / (annual demand) ≈ 699,743,939×
 ```
 
 ---

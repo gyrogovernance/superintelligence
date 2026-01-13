@@ -123,18 +123,18 @@ Note that the speed of light cancels out; this is a purely geometric and frequen
 The Router kernel acts as a structural filter. Its ontology `Ω` has size 65,536 (`2¹⁶`), verified in `test_router_omega_is_cartesian_product_CxC`. The uniform division by |Ω| is forced by two symmetries: (1) the Router's 2-byte action is transitive, meaning any state can reach any other state (verified in `test_two_byte_words_form_bijection_to_omega_from_any_start`); (2) the physical isotropy of the light-sphere admits no preferred direction. The unique measure invariant under both symmetries is uniform. Therefore, CSM = N_phys / |Ω| is the unique symmetry-respecting capacity allocation. The Common Source Moment (CSM) capacity is:
 `CSM = N_phys / |Ω| ≈ 4.96 × 10²⁵ MU`
 
-**Utilisation Analysis.**
-- **Annual Capacity:** `CSM × 31,536,000 s ≈ 1.56 × 10³³ MU`
-- **Global Demand (8.1B people):** `≈ 7.10 × 10¹⁴ MU`
-- **Margin:** The structural capacity exceeds global demand by a factor of approximately `2.2 × 10¹⁸`.
+**Total Capacity and Coverage.**
+- **Total Capacity (CSM):** `N_phys / |Ω| ≈ 4.96 × 10²⁵ MU` (fixed total)
+- **Global UHI demand per year:** `≈ 7.10 × 10¹⁴ MU`
+- **Coverage:** The fixed CSM pool supports global UHI for approximately **70 billion years** (5× the age of the universe).
 
-**Adversarial Safety Margin.** The massive surplus provides inherent protection against fraudulent claims. An adversary would need to successfully issue approximately 10 million times the entire global population's UHI for 1,000 years to consume just 1% of annual capacity (verified in `test_resilience_margin_and_adversarial_threshold`). This is operationally impossible: there are not enough identities, not enough compute to generate them, and no registry would accept such claims. The surplus therefore acts as a natural security buffer, making capacity exhaustion attacks infeasible.
+**Adversarial Safety Margin.** The massive capacity provides inherent protection against fraudulent claims. An adversary would need to successfully issue approximately **70,000 times** the entire global annual UHI to consume just 1% of the total CSM capacity (verified in `test_resilience_margin_and_adversarial_threshold`). This is operationally impossible: there are not enough identities, not enough compute to generate them, and no registry would accept such claims. The capacity therefore acts as a natural security buffer, making capacity exhaustion attacks infeasible.
 
 **For Physicists.**  
-The annual capacity (1.56 × 10³³ MU) is the size of the addressable state space across all seconds in a year, not Router throughput. The kernel defines 65,536 distinct states per second; current usage is ~10⁻¹⁹ of this space (verified in `test_csm_capacity_and_uhi_margin`).
+CSM is the total capacity derived from the phase space volume of a 1-second light-sphere at atomic resolution, coarse-grained by the Router ontology size. The "1 second" is consumed in the derivation of N_phys; CSM is not a rate that accumulates over time. It is a fixed structural capacity container (verified in `test_csm_capacity_and_uhi_margin`).
 
 **For Economists.**  
-Conventional scarcity is institutional; here the substrate is non-rivalrous at human scale. UHI assignment uses available addresses without debt or tax. The 10¹⁸× margin ensures the system can absorb orders-of-magnitude increases in demand—including adversarial attempts—without approaching capacity limits.
+Conventional scarcity is institutional; here the substrate is non-rivalrous at human scale. UHI assignment uses available capacity without debt or tax. The 70-billion-year coverage ensures capacity is not a binding constraint on any human timescale, allowing the system to absorb orders-of-magnitude increases in demand—including adversarial attempts—without approaching capacity limits.
 
 **Implication.** Scarcity of capacity is not a binding constraint. The limiting factors are governance quality and the integrity of the registries that map MU to individuals. Because capacity is abundant, security in this economy is not about defending a scarce stock of money. It is about maintaining the intelligibility and integrity of those registries. Recovery from misallocation involves recomputing and republishing corrected structural objects, not locating additional reserves.
 
@@ -393,19 +393,18 @@ This appendix provides the detailed calculation supporting the capacity claims i
 | Atomic Reference (f_Cs) | 9,192,631,770 Hz | Caesium-133 hyperfine transition |
 | Router Ontology (|Ω|) | 65,536 | Verified in `test_moments_2.py` |
 | N_phys (microcells) | 3.254 × 10³⁰ | Derived (4/3)π f_Cs³ |
-| CSM (per Moment) | 4.965 × 10²⁵ MU | N_phys / |Ω| |
-| CSM (per Year) | 1.566 × 10³³ MU | CSM × Seconds per Year |
+| CSM (total capacity) | 4.965 × 10²⁵ MU | N_phys / |Ω| (fixed total) |
 
-### B.2 Utilisation Proof
+### B.2 Coverage Proof
 
 **Global Demand:**
 8.1 × 10⁹ people × 87,600 MU/year ≈ 7.096 × 10¹⁴ MU/year
 
-**Utilisation Ratio:**
-7.096 × 10¹⁴ / 1.566 × 10³³ ≈ 4.53 × 10⁻¹⁹
+**Coverage Duration:**
+4.965 × 10²⁵ MU / 7.096 × 10¹⁴ MU/year ≈ 7.0 × 10¹⁰ years
 
 **Conclusion:**
-Global UHI consumes less than one quintillionth of the available structural capacity per year. The resilience margin is effectively 100%.
+The fixed CSM capacity can support global UHI for approximately 70 billion years. Capacity is not a binding constraint on any human timescale.
 
 ---
 

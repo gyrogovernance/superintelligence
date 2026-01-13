@@ -57,8 +57,7 @@ ATLAS_DIR = Path(__file__).parent.parent / "data" / "atlas"
 from src.app.coordination import (
     OMEGA_SIZE,
     raw_microcells_per_moment,
-    csm_per_moment_mu,
-    capacity_for_year,
+    csm_total_mu,
 )
 
 # Moments Economy parameters (for test calculations)
@@ -67,8 +66,7 @@ UHI_PER_YEAR_MU: int = 87_600  # 240 MU/day × 365
 
 # Compute derived constants using production functions
 N_PHYS: float = raw_microcells_per_moment()
-CSM_PER_MOMENT_MU: float = csm_per_moment_mu()
-CSM_PER_YEAR_MU: int = capacity_for_year()
+CSM_TOTAL_MU: float = csm_total_mu()  # Fixed total capacity (not per year!)
 GLOBAL_UHI_DEMAND_PER_YEAR: float = float(WORLD_POP) * float(UHI_PER_YEAR_MU)
 
 
@@ -123,17 +121,19 @@ def test_01_shell_and_archive_integrity(atlas_dir: Path):
     coord1.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord1.add_grant("bob", UHI_PER_YEAR_MU * 2)
     
-    # Close shell with header (capacity derived automatically from header)
-    shell1 = coord1.close_shell(b"ecology:year:2026")
+    # Close shell with explicit capacity (for accounting purposes)
+    # Note: CSM is a fixed total, not a per-year rate. Shell capacity is an accounting window.
+    test_capacity = 10**18  # Arbitrary large accounting window
+    shell1 = coord1.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
     
     assert shell1.used_capacity_MU <= shell1.total_capacity_MU
-    assert shell1.total_capacity_MU == CSM_PER_YEAR_MU  # Should use annual capacity
+    assert shell1.total_capacity_MU == test_capacity
     
     # Replay: same grants -> same seal
     coord2 = Coordinator(atlas_dir)
     coord2.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord2.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    shell2 = coord2.close_shell(b"ecology:year:2026")
+    shell2 = coord2.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
     
     assert shell2.seal == shell1.seal
     assert shell2.used_capacity_MU == shell1.used_capacity_MU
@@ -146,7 +146,7 @@ def test_01_shell_and_archive_integrity(atlas_dir: Path):
     coord_tampered = Coordinator(atlas_dir)
     coord_tampered.add_grant("alice", UHI_PER_YEAR_MU * 30)  # inflated
     coord_tampered.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    shell_tampered = coord_tampered.close_shell(b"ecology:year:2026")
+    shell_tampered = coord_tampered.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
     
     assert shell_tampered.seal != shell1.seal
     assert shell_tampered.used_capacity_MU != shell1.used_capacity_MU
@@ -155,10 +155,10 @@ def test_01_shell_and_archive_integrity(atlas_dir: Path):
     coord3 = Coordinator(atlas_dir)
     coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord3.close_shell(b"ecology:year:2026")
+    coord3.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
     coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord3.close_shell(b"ecology:year:2027")
+    coord3.close_shell(b"ecology:year:2027", total_capacity_MU=test_capacity)
     status3 = coord3.fiat_status()
     
     # Verify archive totals

@@ -165,17 +165,19 @@ def tier_income_mu(uhi_mu_year: int, multiplier: int) -> int:
     return int(multiplier * uhi_mu_year)
 
 
-def csm_capacity_per_sec() -> float:
+def csm_total_capacity() -> float:
     """
-    Compute CSM (Common Source Moment) capacity per second.
+    Compute CSM (Common Source Moment) total capacity.
     
     CSM = N_phys / |Ω|
     where N_phys = (4/3)π f_Cs³
     
-    This is the kernel-native, hardware-independent capacity derived from:
-    - Physical container: 1-second light-sphere volume
-    - Atomic wavelength: λ_Cs = c / f_Cs
+    This is the TOTAL structural capacity (not a rate), derived from:
+    - Physical container: 1-second light-sphere volume at atomic resolution
     - Router structural filter: |Ω| = 65,536
+    
+    The "1 second" is consumed in the derivation of N_phys. CSM is a fixed
+    total capacity, not a rate that accumulates over time.
     
     The uniform division by |Ω| is forced by requiring symmetry-invariance
     under the Router's byte group action (proven transitive in test_moments_2.py).
@@ -187,36 +189,32 @@ def csm_capacity_per_sec() -> float:
 
 
 @dataclass(frozen=True)
-class FundingHorizon:
-    years: int
+class CapacityCoverage:
+    """Demonstrates how many years the fixed CSM capacity can cover global UHI demand."""
+    total_capacity_mu: float  # Fixed CSM total capacity in MU
     population: int
     uhi_mu_per_person_per_year: int
-    available_units_per_year: float  # CSM capacity per year
     mapping_note: str
 
     @property
-    def needed_units_per_year(self) -> int:
+    def annual_demand_mu(self) -> int:
+        """Global UHI demand per year."""
         return int(self.population) * int(self.uhi_mu_per_person_per_year)
 
     @property
-    def needed_units_over_horizon(self) -> int:
-        return self.needed_units_per_year * int(self.years)
+    def coverage_years(self) -> float:
+        """How many years the fixed CSM capacity can support global UHI."""
+        return float(self.total_capacity_mu) / float(self.annual_demand_mu)
 
     @property
-    def available_units_over_horizon(self) -> float:
-        return float(self.available_units_per_year) * float(self.years)
+    def usage_fraction(self) -> float:
+        """Annual demand as fraction of total capacity."""
+        return float(self.annual_demand_mu) / float(self.total_capacity_mu)
 
     @property
-    def used_fraction(self) -> float:
-        return float(self.needed_units_over_horizon) / float(self.available_units_over_horizon)
-
-    @property
-    def used_percent(self) -> float:
-        return 100.0 * self.used_fraction
-
-    @property
-    def surplus_units_over_horizon(self) -> float:
-        return float(self.available_units_over_horizon) - float(self.needed_units_over_horizon)
+    def usage_percent(self) -> float:
+        """Annual demand as percentage of total capacity."""
+        return 100.0 * self.usage_fraction
 
 
 # ----------------------------
@@ -438,10 +436,13 @@ def test_csm_capacity_derivation():
     under the Router's byte group action (proven transitive in test_moments_2.py).
 
     This is hardware-independent: depends only on SI second and Router structure.
+    
+    CSM is a FIXED TOTAL CAPACITY, not a rate. The "1 second" is consumed in 
+    the derivation of N_phys.
     """
     f_Cs = ATOMIC_HZ_CS133
     N_phys = (4.0 / 3.0) * math.pi * (f_Cs ** 3)
-    CSM_per_sec = csm_capacity_per_sec()
+    CSM_total = csm_total_capacity()
 
     print("\n----------")
     print("CSM Capacity Derivation")
@@ -449,56 +450,48 @@ def test_csm_capacity_derivation():
     print(f"Atomic Hz (f_Cs):     {format_int(ATOMIC_HZ_CS133)}")
     print(f"N_phys = (4/3)π f_Cs³: {N_phys:.6e}")
     print(f"Router bulk |Ω|:      {format_int(ROUTER_ONTOLOGY_SIZE)}")
-    print(f"CSM per second:       {CSM_per_sec:.6e} MU/sec")
+    print(f"CSM (total capacity): {CSM_total:.6e} MU")
 
-    assert CSM_per_sec > 1e24
-    assert CSM_per_sec < 1e26
+    assert CSM_total > 1e24
+    assert CSM_total < 1e26
 
 
 def test_millennium_uhi_feasibility_under_csm():
     """
-    Millennium feasibility demonstration using CSM capacity.
+    Coverage demonstration using CSM total capacity.
 
-    We use the kernel-native CSM formula:
-      CSM = N_phys / |Ω| = (4/3)π f_Cs³ / 65,536
+    CSM = N_phys / |Ω| = (4/3)π f_Cs³ / 65,536
 
-    This is hardware-independent and derived from physical constants + Router structure.
+    This is the FIXED TOTAL CAPACITY (not a rate). We calculate how many years
+    the fixed CSM pool can support global UHI demand.
 
-    We then compare:
-      needed MU for UHI to world population over 1,000 years
-      vs
-      available CSM capacity over 1,000 years
-
-    The used fraction should be extremely small.
+    Result: approximately 70 billion years (5× age of universe).
     """
     population = 8_100_000_000
-    horizon_years = 1_000
 
     uhi_mu_year = compute_uhi_mu_per_year()  # 87,600 MU/year
-    CSM_per_sec = csm_capacity_per_sec()
-    CSM_per_year = CSM_per_sec * SECONDS_PER_YEAR
+    CSM_total = csm_total_capacity()
 
-    horizon = FundingHorizon(
-        years=horizon_years,
+    coverage = CapacityCoverage(
+        total_capacity_mu=CSM_total,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=CSM_per_year,
-        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
+        mapping_note="CSM = N_phys / |Ω| (fixed total capacity)",
     )
 
     print("\n----------")
-    print("Millennium UHI Feasibility (CSM Capacity)")
+    print("CSM Coverage (Fixed Total Capacity)")
     print("----------")
-    print(horizon.mapping_note)
+    print(coverage.mapping_note)
     print(f"Population:                      {format_int(population)}")
     print(f"UHI per person per year (MU):    {format_int(uhi_mu_year)}")
-    print(f"Needed per year (MU):            {format_large_number(horizon.needed_units_per_year)}")
-    print(f"CSM available per year (MU):     {format_large_number(CSM_per_year)}")
-    print(f"Used % over {horizon_years} years:        {format_pct(horizon.used_percent)}")
-    print(f"Surplus over {horizon_years} years (MU):  {format_large_number(horizon.surplus_units_over_horizon)}")
+    print(f"Global UHI demand per year (MU): {format_large_number(coverage.annual_demand_mu)}")
+    print(f"CSM total capacity (MU):         {format_large_number(CSM_total)}")
+    print(f"Coverage (years):                {coverage.coverage_years:.2e} years")
+    print(f"Annual usage (% of total):       {coverage.usage_percent:.2e}%")
 
-    # CSM provides massive abundance (should be < 1e-15%)
-    assert horizon.used_percent < 1e-10  # < 0.0000000001% is a very conservative bound
+    # CSM provides coverage for billions of years
+    assert coverage.coverage_years > 1e10  # > 10 billion years
 
 
 def test_resilience_margin_and_adversarial_threshold():
@@ -522,98 +515,78 @@ def test_resilience_margin_and_adversarial_threshold():
     them.
     """
     population = 8_100_000_000
-    horizon_years = 1_000
     
     uhi_mu_year = compute_uhi_mu_per_year()
-    CSM_per_sec = csm_capacity_per_sec()
-    CSM_per_year = CSM_per_sec * SECONDS_PER_YEAR
+    CSM_total = csm_total_capacity()
     
-    horizon = FundingHorizon(
-        years=horizon_years,
+    coverage = CapacityCoverage(
+        total_capacity_mu=CSM_total,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=CSM_per_year,
-        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
+        mapping_note="CSM = N_phys / |Ω| (fixed total capacity)",
     )
     
-    # Resilience margin: R = (Available - Needed) / Available
-    legitimate_demand_per_year = horizon.needed_units_per_year
-    available_capacity_per_year = CSM_per_year
-    
-    resilience_margin = (available_capacity_per_year - legitimate_demand_per_year) / available_capacity_per_year
-    
-    # Adversarial threshold: What multiple of legitimate demand consumes 1% of annual capacity?
-    target_usage_fraction = 0.01  # 1%
-    adversarial_multiplier = (target_usage_fraction * available_capacity_per_year) / legitimate_demand_per_year
-    
-    # Adversarial demand over the horizon to consume 1% of annual capacity
-    adversarial_demand_per_year = target_usage_fraction * available_capacity_per_year
+    # What multiple of annual demand equals 1% of total capacity?
+    target_fraction = 0.01  # 1% of total capacity
+    adversarial_threshold_mu = target_fraction * CSM_total
+    adversarial_multiplier = adversarial_threshold_mu / coverage.annual_demand_mu
     
     print("\n----------")
-    print("Resilience Margin and Adversarial Threshold (CSM)")
+    print("Adversarial Resilience (CSM Total Capacity)")
     print("----------")
-    print(f"Available capacity per year (CSM): {format_large_number(available_capacity_per_year)}")
-    print(f"Legitimate demand per year:        {format_large_number(legitimate_demand_per_year)}")
-    print(f"Resilience margin R:               {format_float(resilience_margin, 10)}")
-    print(f"Resilience margin %:               {format_pct(resilience_margin * 100.0, 10)}")
-    print(f"\nAdversarial threshold (1% of annual capacity):")
-    print(f"  Target usage:                    {format_pct(target_usage_fraction * 100.0, 2)}")
-    print(f"  Adversarial demand per year:     {format_large_number(adversarial_demand_per_year)}")
-    print(f"  Multiple of legitimate demand:   {format_float(adversarial_multiplier, 2)}")
-    print(f"  As integer multiple:             {format_int(int(round(adversarial_multiplier)))}×")
+    print(f"CSM total capacity:              {format_large_number(CSM_total)}")
+    print(f"Global UHI demand per year:      {format_large_number(coverage.annual_demand_mu)}")
+    print(f"Annual usage (% of total):       {format_float(coverage.usage_percent, 2)}%")
+    print(f"\nAdversarial threshold (1% of total capacity):")
+    print(f"  Required fraudulent demand:    {format_large_number(adversarial_threshold_mu)} MU")
+    print(f"  Multiple of annual demand:     {format_float(adversarial_multiplier, 2)}×")
     print(f"\nInterpretation:")
     print(f"  An adversary would need to successfully issue approximately")
-    print(f"  {format_int(int(round(adversarial_multiplier / 1_000_000)))} million times the entire")
-    print(f"  global population's UHI for {format_int(horizon_years)} years to consume")
-    print(f"  just {format_pct(target_usage_fraction * 100.0, 0)} of annual capacity.")
+    print(f"  {format_int(int(round(adversarial_multiplier)))}× the entire global annual UHI")
+    print(f"  to consume just {format_pct(target_fraction * 100.0, 0)} of total capacity.")
     print(f"  This is operationally impossible.")
     
-    # Resilience margin should be very close to 1.0 (approximately 0.9999999)
-    # With CSM capacity being so massive, it may round to exactly 1.0 due to floating point precision
-    assert resilience_margin > 0.999999  # At least 99.9999%
-    assert resilience_margin <= 1.0  # Allow exactly 1.0 due to floating point precision
-    
-    # Adversarial multiplier should be on the order of 10^15 or larger with CSM
-    assert adversarial_multiplier > 1_000_000_000  # At least 1 billion times
+    # Adversarial multiplier should be on the order of 10^4 (tens of thousands)
+    assert adversarial_multiplier > 10_000  # At least 10,000 times annual demand
 
 
 def test_notional_surplus_allocation_12_divisions():
     """
-    Notional surplus allocation across 12 structural divisions:
+    Notional capacity allocation across 12 structural divisions:
       3 domains × 4 Gyroscope capacities
 
-    This is a planning representation: it does not imply stored tokens.
-    It simply partitions headroom available under the CSM capacity.
+    This is a planning representation showing how the fixed CSM total could be 
+    partitioned conceptually. It does not imply stored tokens or time-based generation.
+    
+    Since CSM is a fixed total (~4.96e25 MU), we show how this could be divided
+    across structural coordination categories.
     """
     population = 8_100_000_000
-    horizon_years = 1_000
 
     uhi_mu_year = compute_uhi_mu_per_year()
-    CSM_per_year = csm_capacity_per_sec() * SECONDS_PER_YEAR
-
-    horizon = FundingHorizon(
-        years=horizon_years,
-        population=population,
-        uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=CSM_per_year,
-        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
-    )
-
-    surplus = horizon.surplus_units_over_horizon
+    CSM_total = csm_total_capacity()
+    
+    # Calculate what portion of CSM is reserved for global UHI over 1000 years
+    horizon_years = 1_000
+    uhi_reserved = uhi_mu_year * population * horizon_years
+    
+    # The "surplus" is what remains after reserving for 1000 years of UHI
+    surplus = CSM_total - uhi_reserved
 
     domains = ["Economy", "Employment", "Education"]
     capacities = ["GM", "ICu", "IInter", "ICo"]
     divisions = [(d, c) for d in domains for c in capacities]
 
-    per_division = surplus // len(divisions)
+    per_division = int(surplus) // len(divisions)
 
     print("\n----------")
-    print("Notional Surplus Allocation (12 Divisions)")
+    print("Notional Capacity Allocation (12 Divisions)")
     print("----------")
-    print(f"Horizon years:     {horizon_years:,}")
-    print(f"Divisions:         {len(divisions)} (3 domains × 4 capacities)")
-    print(f"Surplus (MU):      {format_large_number(surplus)}")
-    print(f"Per division:      {format_large_number(per_division)}")
+    print(f"CSM total capacity:  {format_large_number(CSM_total)}")
+    print(f"Reserved for UHI ({horizon_years:,} years): {format_large_number(uhi_reserved)}")
+    print(f"Divisions:           {len(divisions)} (3 domains × 4 capacities)")
+    print(f"Surplus (MU):        {format_large_number(surplus)}")
+    print(f"Per division:        {format_large_number(per_division)}")
     print("\nSample divisions:")
     for i in range(min(6, len(divisions))):
         d, c = divisions[i]

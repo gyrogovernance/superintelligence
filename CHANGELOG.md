@@ -15,30 +15,36 @@
 
 ---
 
-## [v1.2.2-MomentsEconomy] – 2026-01-12
+## [v1.2.2-MomentsEconomy] – 2026-01-12 / 2026-01-14 (CORRECTED)
 
-**Capacity Standard Revision:**
-- Replaced throughput-based capacity model with CSM (Common Source Moment) derivation from first principles
-- CSM formula: `[(4/3)π f_Cs³] / |Ω|` (light-sphere volume / atomic cell volume / Router states)
-- Capacity is now a container refreshed per second, not a rate (MU/sec)
-- Annual capacity: ~1.56 × 10³³ MU with 10¹⁸× margin over global UHI demand
+**CRITICAL CORRECTION (2026-01-14):**
+- Fixed fundamental conceptual error: CSM is a **fixed total capacity**, NOT a rate
+- CSM = 4.96 × 10²⁵ MU is the total structural capacity (the "1 second" is consumed in N_phys derivation)
+- Removed incorrect "capacity × time" calculations throughout codebase
+- Correct coverage: CSM supports global UHI for ~70 billion years (5× age of universe)
+
+**Capacity Standard (Corrected):**
+- CSM formula: `[(4/3)π f_Cs³] / |Ω|` = 4.96 × 10²⁵ MU (fixed total)
+- Where: N_phys = (4/3)π f_Cs³ (light-sphere volume at atomic resolution)
+- And: |Ω| = 65,536 (Router ontology size)
+- Coverage: CSM / (global annual UHI demand) ≈ 70 billion years
 
 **Implementation:**
-- Integrated CSM capacity functions into `src/app/coordination.py`
-- Removed legacy throughput constants (`F_TOTAL_PER_SEC`, old `capacity_for_window`)
-- Added `capacity_for_header()` to derive capacity from shell headers (e.g., "ecology:year:2026")
-- Updated `close_shell()` to optionally derive capacity from header automatically
+- Renamed `csm_per_moment_mu()` → `csm_total_mu()` in `src/app/coordination.py`
+- Deleted incorrect functions: `capacity_for_seconds()`, `capacity_for_year()`, `capacity_for_header()`
+- Updated `close_shell()` to require explicit `total_capacity_MU` parameter (accounting window, not physics-derived)
+- Removed `SECONDS_PER_YEAR` constant from production code
 
 **Documentation:**
-- Updated `docs/AIR_Moments_Economy_Specs.md` with CSM derivation and clarifications
-- Added adversarial safety margin explanation (10 million × global UHI for 1000 years = 1% capacity)
-- Removed "work in progress" disclaimer and corrected utilization figures (10⁻¹⁹)
+- Corrected `docs/AIR_Moments_Economy_Specs.md`: removed "annual capacity" concept, added 70-billion-year coverage
+- Corrected `docs/notes/N_12.md`: clarified CSM vs MU distinction, fixed numerical summary
+- Updated Appendix B: changed "Utilisation Proof" to "Coverage Proof"
 
 **Tests:**
-- Updated `tests/test_moments_2.py` and `tests/test_substrate.py` to import constants from production code
-- `test_substrate.py` now uses canonical `Coordinator` implementation instead of inline test code
-- Unified test suite: running `python tests/test_substrate.py` executes all three test files
-- Full test report: `docs/reports/Moments_Tests_Report.md` (27 tests, all passing)
+- Fixed all test files to use correct CSM model (fixed total, not rate)
+- Renamed `FundingHorizon` → `CapacityCoverage` dataclass
+- Tests now verify 70-billion-year coverage instead of incorrect "annual capacity"
+- All 27 tests passing with corrected model
 
 ---
 
