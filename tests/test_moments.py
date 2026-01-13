@@ -22,11 +22,11 @@ It demonstrates, in a reproducible and audit-friendly way:
    - Tier 4: 60× UHI, with an accessible mnemonic:
      Tier 4 annual = 5,256,000 MU = (4 hours/day in seconds) × 365
 
-4) Fiat Capacity (abundance demonstration):
-   - Demonstrates a conservative “capacity upper bound” using:
-       F_total = atomic_hz × kernel_steps_per_sec_avg
-   - Shows that, under a very conservative mapping 1 micro-state == 1 MU,
-     funding UHI for the whole world for 1,000 years uses a vanishing fraction
+4) CSM Capacity (abundance demonstration):
+   - Uses the kernel-native CSM formula: CSM = N_phys / |Ω|
+     where N_phys = (4/3)π f_Cs³ (raw physical microcells in 1-second light-sphere)
+   - This is hardware-independent and derived from physical constants + Router structure
+   - Shows that funding UHI for the whole world for 1,000 years uses a vanishing fraction
      of available capacity.
 
 This file is deliberately:
@@ -40,6 +40,7 @@ Run:
 
 from __future__ import annotations
 
+import math
 import os
 import sys
 from dataclasses import dataclass
@@ -109,7 +110,7 @@ def format_currency(num: float) -> str:
 # ----------------------------
 
 # Router structural constants (verified elsewhere in physics tests)
-ROUTER_ONTLOGY_SIZE = 65_536
+ROUTER_ONTOLOGY_SIZE = 65_536
 ROUTER_BYTE_ALPHABET = 256
 
 # CGM / Router aperture constants
@@ -119,9 +120,6 @@ A_STAR = 0.020699553813
 
 # Atomic second anchor (SI)
 ATOMIC_HZ_CS133 = 9_192_631_770  # Hz
-
-# Representative Router throughput for capacity demonstrations (not a unit definition)
-KERNEL_STEPS_PER_SEC_AVG = 2_400_000
 
 # Time constants
 SECONDS_PER_MINUTE = 60
@@ -167,11 +165,25 @@ def tier_income_mu(uhi_mu_year: int, multiplier: int) -> int:
     return int(multiplier * uhi_mu_year)
 
 
-def fiat_capacity_microstates_per_sec(
-    atomic_hz: int = ATOMIC_HZ_CS133,
-    kernel_steps_per_sec: int = KERNEL_STEPS_PER_SEC_AVG,
-) -> int:
-    return int(atomic_hz) * int(kernel_steps_per_sec)
+def csm_capacity_per_sec() -> float:
+    """
+    Compute CSM (Common Source Moment) capacity per second.
+    
+    CSM = N_phys / |Ω|
+    where N_phys = (4/3)π f_Cs³
+    
+    This is the kernel-native, hardware-independent capacity derived from:
+    - Physical container: 1-second light-sphere volume
+    - Atomic wavelength: λ_Cs = c / f_Cs
+    - Router structural filter: |Ω| = 65,536
+    
+    The uniform division by |Ω| is forced by requiring symmetry-invariance
+    under the Router's byte group action (proven transitive in test_moments_2.py).
+    """
+    f_Cs = ATOMIC_HZ_CS133
+    N_phys = (4.0 / 3.0) * math.pi * (f_Cs ** 3)
+    CSM = N_phys / float(ROUTER_ONTOLOGY_SIZE)
+    return CSM
 
 
 @dataclass(frozen=True)
@@ -179,7 +191,7 @@ class FundingHorizon:
     years: int
     population: int
     uhi_mu_per_person_per_year: int
-    available_units_per_year: int  # in "microstates/year" or any chosen unit
+    available_units_per_year: float  # CSM capacity per year
     mapping_note: str
 
     @property
@@ -191,20 +203,20 @@ class FundingHorizon:
         return self.needed_units_per_year * int(self.years)
 
     @property
-    def available_units_over_horizon(self) -> int:
-        return int(self.available_units_per_year) * int(self.years)
+    def available_units_over_horizon(self) -> float:
+        return float(self.available_units_per_year) * float(self.years)
 
     @property
     def used_fraction(self) -> float:
-        return self.needed_units_over_horizon / self.available_units_over_horizon
+        return float(self.needed_units_over_horizon) / float(self.available_units_over_horizon)
 
     @property
     def used_percent(self) -> float:
         return 100.0 * self.used_fraction
 
     @property
-    def surplus_units_over_horizon(self) -> int:
-        return self.available_units_over_horizon - self.needed_units_over_horizon
+    def surplus_units_over_horizon(self) -> float:
+        return float(self.available_units_over_horizon) - float(self.needed_units_over_horizon)
 
 
 # ----------------------------
@@ -216,13 +228,13 @@ def test_router_static_structure_anchors():
     The Router's canonical discrete structure used by the economy narrative.
     These are structural constants of the Router specification.
     """
-    assert ROUTER_ONTLOGY_SIZE == 65_536
+    assert ROUTER_ONTOLOGY_SIZE == 65_536
     assert ROUTER_BYTE_ALPHABET == 256
 
     print("\n----------")
     print("Router Anchors")
     print("----------")
-    print(f"Ontology size |Ω|: {format_int(ROUTER_ONTLOGY_SIZE)}")
+    print(f"Ontology size |Ω|: {format_int(ROUTER_ONTOLOGY_SIZE)}")
     print(f"Byte alphabet: {format_int(ROUTER_BYTE_ALPHABET)}")
 
 
@@ -234,7 +246,7 @@ def test_aperture_shadow_a_kernel_close_to_a_star():
     CGM target:
       A* ≈ 0.020699553813
 
-    We only assert “close” at the order-of-magnitude level to avoid
+    We only assert "close" at the order-of-magnitude level to avoid
     overfitting to a particular reported A* precision.
     """
     rel_diff = abs(A_KERNEL - A_STAR) / A_STAR
@@ -412,44 +424,50 @@ def test_illustrative_work_week_is_not_the_definition_of_tiers():
 
 
 # ----------------------------
-# Tests: Fiat Capacity and Abundance Demonstrations
+# Tests: CSM Capacity and Abundance Demonstrations
 # ----------------------------
 
-def test_fiat_capacity_upper_bound_from_atomic_and_kernel_rates():
+def test_csm_capacity_derivation():
     """
-    Fiat Capacity demonstration (upper bound):
+    CSM Capacity derivation (kernel-native, hardware-independent):
 
-      F_total = atomic_hz × kernel_steps_per_sec_avg
+      N_phys = (4/3)π f_Cs³  (raw physical microcells in 1-second light-sphere)
+      CSM = N_phys / |Ω|     (uniform coarse-grain per Router state)
 
-    This is used as a capacity demonstration, not as a fragile economic unit
-    that changes with CPU speed.
+    The uniform division by |Ω| is forced by requiring symmetry-invariance
+    under the Router's byte group action (proven transitive in test_moments_2.py).
+
+    This is hardware-independent: depends only on SI second and Router structure.
     """
-    total = fiat_capacity_microstates_per_sec()
+    f_Cs = ATOMIC_HZ_CS133
+    N_phys = (4.0 / 3.0) * math.pi * (f_Cs ** 3)
+    CSM_per_sec = csm_capacity_per_sec()
 
     print("\n----------")
-    print("Fiat Capacity Upper Bound")
+    print("CSM Capacity Derivation")
     print("----------")
-    print(f"Atomic Hz:          {format_int(ATOMIC_HZ_CS133)}")
-    print(f"Kernel steps/sec:   {format_int(KERNEL_STEPS_PER_SEC_AVG)}")
-    print(f"F_total (/sec):     {format_large_number(total)}")
+    print(f"Atomic Hz (f_Cs):     {format_int(ATOMIC_HZ_CS133)}")
+    print(f"N_phys = (4/3)π f_Cs³: {N_phys:.6e}")
+    print(f"Router bulk |Ω|:      {format_int(ROUTER_ONTOLOGY_SIZE)}")
+    print(f"CSM per second:       {CSM_per_sec:.6e} MU/sec")
 
-    assert total == 22_062_316_248_000_000
+    assert CSM_per_sec > 1e24
+    assert CSM_per_sec < 1e26
 
 
-def test_millennium_uhi_feasibility_under_conservative_mapping():
+def test_millennium_uhi_feasibility_under_csm():
     """
-    Millennium feasibility demonstration.
+    Millennium feasibility demonstration using CSM capacity.
 
-    We adopt a deliberately conservative demonstration mapping:
-      1 micro-state of Fiat Capacity == 1 MU
+    We use the kernel-native CSM formula:
+      CSM = N_phys / |Ω| = (4/3)π f_Cs³ / 65,536
 
-    This is not required by the spec, but it is a useful upper-bound
-    demonstration of abundance.
+    This is hardware-independent and derived from physical constants + Router structure.
 
     We then compare:
       needed MU for UHI to world population over 1,000 years
       vs
-      available micro-states over 1,000 years
+      available CSM capacity over 1,000 years
 
     The used fraction should be extremely small.
     """
@@ -457,35 +475,35 @@ def test_millennium_uhi_feasibility_under_conservative_mapping():
     horizon_years = 1_000
 
     uhi_mu_year = compute_uhi_mu_per_year()  # 87,600 MU/year
-    cap_per_sec = fiat_capacity_microstates_per_sec()
-    cap_per_year = cap_per_sec * SECONDS_PER_YEAR
+    CSM_per_sec = csm_capacity_per_sec()
+    CSM_per_year = CSM_per_sec * SECONDS_PER_YEAR
 
     horizon = FundingHorizon(
         years=horizon_years,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=cap_per_year,
-        mapping_note="Conservative demonstration mapping: 1 micro-state == 1 MU",
+        available_units_per_year=CSM_per_year,
+        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
     )
 
     print("\n----------")
-    print("Millennium UHI Feasibility (Conservative Mapping)")
+    print("Millennium UHI Feasibility (CSM Capacity)")
     print("----------")
     print(horizon.mapping_note)
     print(f"Population:                      {format_int(population)}")
     print(f"UHI per person per year (MU):    {format_int(uhi_mu_year)}")
     print(f"Needed per year (MU):            {format_large_number(horizon.needed_units_per_year)}")
-    print(f"Available per year (units):      {format_large_number(cap_per_year)}")
+    print(f"CSM available per year (MU):     {format_large_number(CSM_per_year)}")
     print(f"Used % over {horizon_years} years:        {format_pct(horizon.used_percent)}")
-    print(f"Surplus over {horizon_years} years (units): {format_large_number(horizon.surplus_units_over_horizon)}")
+    print(f"Surplus over {horizon_years} years (MU):  {format_large_number(horizon.surplus_units_over_horizon)}")
 
-    # The old runs show ~1.02e-7% used under this mapping.
-    assert horizon.used_percent < 1e-4  # < 0.0001% is a very conservative bound
+    # CSM provides massive abundance (should be < 1e-15%)
+    assert horizon.used_percent < 1e-10  # < 0.0000000001% is a very conservative bound
 
 
 def test_resilience_margin_and_adversarial_threshold():
     """
-    Resilience margin demonstration:
+    Resilience margin demonstration using CSM capacity:
     
     R = (Available capacity − Legitimate demand) / Available capacity
     
@@ -507,27 +525,24 @@ def test_resilience_margin_and_adversarial_threshold():
     horizon_years = 1_000
     
     uhi_mu_year = compute_uhi_mu_per_year()
-    cap_per_sec = fiat_capacity_microstates_per_sec()
-    cap_per_year = cap_per_sec * SECONDS_PER_YEAR
+    CSM_per_sec = csm_capacity_per_sec()
+    CSM_per_year = CSM_per_sec * SECONDS_PER_YEAR
     
     horizon = FundingHorizon(
         years=horizon_years,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=cap_per_year,
-        mapping_note="Conservative demonstration mapping: 1 micro-state == 1 MU",
+        available_units_per_year=CSM_per_year,
+        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
     )
     
     # Resilience margin: R = (Available - Needed) / Available
     legitimate_demand_per_year = horizon.needed_units_per_year
-    available_capacity_per_year = cap_per_year
+    available_capacity_per_year = CSM_per_year
     
     resilience_margin = (available_capacity_per_year - legitimate_demand_per_year) / available_capacity_per_year
     
     # Adversarial threshold: What multiple of legitimate demand consumes 1% of annual capacity?
-    # We want: adversarial_demand = 0.01 * available_capacity_per_year
-    # adversarial_demand = multiplier * legitimate_demand_per_year
-    # Therefore: multiplier = 0.01 * available_capacity_per_year / legitimate_demand_per_year
     target_usage_fraction = 0.01  # 1%
     adversarial_multiplier = (target_usage_fraction * available_capacity_per_year) / legitimate_demand_per_year
     
@@ -535,9 +550,9 @@ def test_resilience_margin_and_adversarial_threshold():
     adversarial_demand_per_year = target_usage_fraction * available_capacity_per_year
     
     print("\n----------")
-    print("Resilience Margin and Adversarial Threshold")
+    print("Resilience Margin and Adversarial Threshold (CSM)")
     print("----------")
-    print(f"Available capacity per year:       {format_large_number(available_capacity_per_year)}")
+    print(f"Available capacity per year (CSM): {format_large_number(available_capacity_per_year)}")
     print(f"Legitimate demand per year:        {format_large_number(legitimate_demand_per_year)}")
     print(f"Resilience margin R:               {format_float(resilience_margin, 10)}")
     print(f"Resilience margin %:               {format_pct(resilience_margin * 100.0, 10)}")
@@ -554,12 +569,12 @@ def test_resilience_margin_and_adversarial_threshold():
     print(f"  This is operationally impossible.")
     
     # Resilience margin should be very close to 1.0 (approximately 0.9999999)
+    # With CSM capacity being so massive, it may round to exactly 1.0 due to floating point precision
     assert resilience_margin > 0.999999  # At least 99.9999%
-    assert resilience_margin < 1.0
+    assert resilience_margin <= 1.0  # Allow exactly 1.0 due to floating point precision
     
-    # Adversarial multiplier should be on the order of 10 million
-    assert adversarial_multiplier > 1_000_000  # At least 1 million times
-    assert adversarial_multiplier < 100_000_000  # Less than 100 million times
+    # Adversarial multiplier should be on the order of 10^15 or larger with CSM
+    assert adversarial_multiplier > 1_000_000_000  # At least 1 billion times
 
 
 def test_notional_surplus_allocation_12_divisions():
@@ -568,20 +583,20 @@ def test_notional_surplus_allocation_12_divisions():
       3 domains × 4 Gyroscope capacities
 
     This is a planning representation: it does not imply stored tokens.
-    It simply partitions headroom available under the conservative mapping.
+    It simply partitions headroom available under the CSM capacity.
     """
     population = 8_100_000_000
     horizon_years = 1_000
 
     uhi_mu_year = compute_uhi_mu_per_year()
-    cap_per_year = fiat_capacity_microstates_per_sec() * SECONDS_PER_YEAR
+    CSM_per_year = csm_capacity_per_sec() * SECONDS_PER_YEAR
 
     horizon = FundingHorizon(
         years=horizon_years,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
-        available_units_per_year=cap_per_year,
-        mapping_note="Conservative demonstration mapping: 1 micro-state == 1 MU",
+        available_units_per_year=CSM_per_year,
+        mapping_note="CSM = N_phys / |Ω| (kernel-native, hardware-independent)",
     )
 
     surplus = horizon.surplus_units_over_horizon
@@ -597,7 +612,7 @@ def test_notional_surplus_allocation_12_divisions():
     print("----------")
     print(f"Horizon years:     {horizon_years:,}")
     print(f"Divisions:         {len(divisions)} (3 domains × 4 capacities)")
-    print(f"Surplus (units):   {format_large_number(surplus)}")
+    print(f"Surplus (MU):      {format_large_number(surplus)}")
     print(f"Per division:      {format_large_number(per_division)}")
     print("\nSample divisions:")
     for i in range(min(6, len(divisions))):

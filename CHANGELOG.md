@@ -15,6 +15,33 @@
 
 ---
 
+## [v1.2.2-MomentsEconomy] – 2026-01-12
+
+**Capacity Standard Revision:**
+- Replaced throughput-based capacity model with CSM (Common Source Moment) derivation from first principles
+- CSM formula: `[(4/3)π f_Cs³] / |Ω|` (light-sphere volume / atomic cell volume / Router states)
+- Capacity is now a container refreshed per second, not a rate (MU/sec)
+- Annual capacity: ~1.56 × 10³³ MU with 10¹⁸× margin over global UHI demand
+
+**Implementation:**
+- Integrated CSM capacity functions into `src/app/coordination.py`
+- Removed legacy throughput constants (`F_TOTAL_PER_SEC`, old `capacity_for_window`)
+- Added `capacity_for_header()` to derive capacity from shell headers (e.g., "ecology:year:2026")
+- Updated `close_shell()` to optionally derive capacity from header automatically
+
+**Documentation:**
+- Updated `docs/AIR_Moments_Economy_Specs.md` with CSM derivation and clarifications
+- Added adversarial safety margin explanation (10 million × global UHI for 1000 years = 1% capacity)
+- Removed "work in progress" disclaimer and corrected utilization figures (10⁻¹⁹)
+
+**Tests:**
+- Updated `tests/test_moments_2.py` and `tests/test_substrate.py` to import constants from production code
+- `test_substrate.py` now uses canonical `Coordinator` implementation instead of inline test code
+- Unified test suite: running `python tests/test_substrate.py` executes all three test files
+- Full test report: `docs/reports/Moments_Tests_Report.md` (27 tests, all passing)
+
+---
+
 ## [v1.2.1-MomentsEconomy] – 2026-01-12
 
 Revisiting equations for the Moments Economy. 

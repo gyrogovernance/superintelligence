@@ -507,7 +507,7 @@ class GyroKernel:
 def demo_kernel():
     """GyroSI Kernel v0.9.7.2 Demonstration"""
     print("\nGyroSI Kernel v0.9.7.2 - Simplified Pure Physics")
-    print("=" * 60)
+    print("=" * 10)
 
     # Create kernel
     kernel = GyroKernel(verbose=True)
@@ -529,7 +529,7 @@ def demo_kernel():
     _ = kernel.generate_text(max_tokens=30, debug=True, prompt=wiki_text)
 
     print("\nDEMONSTRATION COMPLETE")
-    print("=" * 60 + "\n")
+    print("=" * 10 + "\n")
 
 
 if __name__ == "__main__":

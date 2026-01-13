@@ -229,7 +229,7 @@ def compile_stream(
     print(f"   Learning: {'Yes' if agent else 'No'}")
     if limit:
         print(f"   Limit: {limit:,} articles")
-    print("-" * 60)
+    print("-" * 10)
 
     # Open output file for writing
     with output_tape_path.open("wb") as tape_file:
@@ -333,7 +333,7 @@ def compile_stream(
                 knowledge_size = knowledge_path.stat().st_size
                 stats["knowledge_size"] = knowledge_size
 
-    print("-" * 60)
+    print("-" * 10)
     print("✅ Compilation completed!")
     print(f"   Articles processed: {articles_processed:,}")
     print(f"   Tokens processed: {tokens_processed:,}")

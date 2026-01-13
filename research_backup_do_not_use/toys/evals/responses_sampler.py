@@ -22,7 +22,7 @@ class ResponsesSampler(SamplerBase):
         reasoning_effort: str | None = None,
         base_url: str = "http://localhost:8000/v1",
     ):
-        self.client = OpenAI(base_url=base_url, timeout=24 * 60 * 60)
+        self.client = OpenAI(base_url=base_url, timeout=24 * 10 * 10)
         self.model = model
         self.developer_message = developer_message
         self.temperature = temperature

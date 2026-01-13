@@ -1150,9 +1150,9 @@ class GyroKernel:
     def run_demo(self):
         """Run demonstration."""
         if self.debug:
-            print("\n" + "=" * 60)
+            print("\n" + "=" * 10)
             print(f"GyroSI Kernel v0.9.12.0 - {self.model_name} Demo")
-            print("=" * 60)
+            print("=" * 10)
 
         # Test questions
         test_questions = ["Hello, how are you?", "What is the capital of France?"]

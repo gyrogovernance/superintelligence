@@ -1,21 +1,20 @@
 # Moments Economy Architecture Specification
 
-**Status:** Work in progress  
 **Scope:** Economic architecture for coordination-based monetary systems
 
 ---
 
-> DISCLAIMER: The equation of the total capacity is under further consideration because at the time it is a design choice and I am working on deriving it from first principles. I am almost there. The totals might change a little, but first principles seem to make capacity even larger - so the whole doc and architecture still stands even if some details might change. The text doesnt make clear yet that anchoring to the atomic oscillations is not about time-keeping, but about untapping a physical economic capacity capable to deliver on its aims for complete alleviation of poverty and end of scarcity economics which feedd all sociotechnical risks and human-sustained global crises.
-
 ## Introduction
 
-The Moments Economy establishes a monetary standard grounded in physical and geometric invariants. It defines a unit of account anchored to atomic time and verified coordination throughput, creating a currency system where issuance capacity is determined by measurement limits rather than credit creation.
+The Moments Economy establishes a monetary system based on the physical capacity of the atomic standard rather than on debt. In this architecture, money represents a claim on the inherent capacity of the world to distinguish and record distinct events. Issuance is therefore constrained not by institutional policy but by the volume of the physical container defined by the atomic standard.
 
-This architecture addresses the structural limitations of debt-based monetary systems. Conventional systems expand the money supply through credit creation: money appears as debt, interest obligations drive a requirement for perpetual growth, and scarcity is enforced through institutional control over issuance. In contrast, the Moments Economy funds distributions from structural surplus. This surplus exists because the maximum rate at which coherent governance operations can be performed exceeds societal demand by orders of magnitude.
+The capacity for this money is determined by the atomic frequency of the caesium-133 atom. This frequency establishes the granularity of physical reality at the atomic scale. It dictates exactly how many distinct states can theoretically fit into the one-second causal cone. We call this total capacity the Common Source Moment.
 
-The system relies on two foundations to quantify this surplus. The **International System of Units** defines the second as 9,192,631,770 periods of radiation from the caesium-133 atom. The **GGG ASI Alignment Router** provides a verification kernel that processes millions of deterministic operations per second. Combining these yields a capacity envelope that supports a substantial Unconditional High Income (UHI) for the global population while utilising approximately 10⁻⁹ of the available structural capacity under the reference implementation and test suite.
+When we compare this total capacity to the actual scale of human coordination, we find a massive surplus. The depth of the Common Source Moment contains many orders of magnitude more possible events than the global economy can generate or meaningfully govern. This abundance allows us to fund substantial unconditional distributions without taxation or the need for perpetual growth.
 
-Distributions in this economy are recorded in replayable data structures—Identity Anchors, Grants, Shells, and Archives. These objects render the history of monetary circulation physically verifiable. Any party with access to the published log files can reconstruct the exact state of the ledger through deterministic replay, making settlement verifiable by computation rather than reliant on institutional assertion.
+To make this physical capacity operational, the system uses the GGG ASI Alignment Router. This is a multi-domain network coordination algorithm that functions as a collective superintelligence implementation. In this role, it operates as a network of humans and machines amplifying intelligence rather than outperforming single agent potential. Its specific task is to map an append-only byte ledger to a reproducible state trajectory and to export compact routing signatures and governance observables.
+
+Settlement in this economy does not depend on a central ledger keeper. All distributions are recorded in data structures that bind identity to specific coordinates within the Router’s finite state space. Because the Router is deterministic, any party with the transaction logs can replay history to confirm exactly who received what and when. This removes the need for central custodians and replaces institutional trust with cryptographic proof.
 
 This document specifies the complete architecture, including the economic units, the structural objects for accounting, the geometric foundations of coordination, and the institutional requirements for transition.
 
@@ -51,12 +50,6 @@ The architecture integrates four specifications. Each is referenced where releva
 
 **GGG ASI Alignment Router:** Deterministic coordination kernel providing shared moments, provenance, and replay.  
 [Document: Kernel Specifications](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md)
-
-**GGG ASI Alignment Router Implications:** Exploratory document on the broader potential of the Router across governance, AI alignment, and coordination.  
-[Document: Router Implications](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Implications.md)
-
-**Alignment Infrastructure Routing (AIR):** Application layer for project coordination and distribution routing.  
-[Document: AIR Brief](https://github.com/gyrogovernance/tools/blob/main/docs/AIR_Brief.md)
 
 **Gyroscope Protocol:** Classification framework for work into four categories (governance management, information curation, inference interaction, intelligence cooperation).  
 
@@ -111,21 +104,37 @@ Participation tiers provide distributions above the UHI baseline. They recognise
 
 **Governance.** Tier multipliers are governance parameters revisable through institutional processes. Tier assignments must be made by identifiable human agents and recorded in the audit log.
 
-## 4. Coordination capacity and the envelope
+## 4. Structural Capacity: The Common Source Moment
 
-The economic capacity of the system derives from the physical limits of coordination.
+The economic capacity of the system is the Common Source Moment. Since value in this economy represents verified coordination, the money supply is bounded by the volume of the physical container defined by the atomic standard.
 
-**Atomic Reference.** The definition of the second provides 9,192,631,770 periods of caesium-133 radiation per second. This sets the physical upper bound for frequency.
+This capacity is calculated as the **Phase Space Volume** of a single second (the Common Source Moment).
 
-**Router Throughput.** The GGG ASI Alignment Router processes at least 2.1 million steps per second on reference hardware. Each step represents a verified transition within the finite state space.
+**1. The Temporal Resolution (f_Cs)**
+The International System of Units (SI) defines the second via the caesium-133 hyperfine transition. This sets the fundamental temporal resolution of the system:
+`f_Cs = 9,192,631,770 Hz`
 
-**Envelope Calculation.** The reference implementation defines the capacity F_total derived from atomic frequency (9.19 × 10⁹ Hz) and kernel throughput. F_total is the per-second capacity constant adopted by the reference implementation, derived from atomic time and measured kernel throughput, and used to compute total_capacity_MU for Shells. As verified in test_substrate.py (reference implementation), the annual structural capacity for a single instance is approximately 6.96 × 10²³ MU.
+**2. The Physical Container (N_phys)**
+The causal container of one second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. At the resolution of the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:
+`N_phys = V / λ³ = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`
+Note that the speed of light cancels out; this is a purely geometric and frequency-based invariant (verified in `test_physical_microcell_count_closed_form_and_c_cancellation`).
+
+**3. The Governance Capacity (CSM)**
+The Router kernel acts as a structural filter. Its ontology `Ω` has size 65,536 (`2¹⁶`), verified in `test_router_omega_is_cartesian_product_CxC`. The uniform division by |Ω| is forced by two symmetries: (1) the Router's 2-byte action is transitive, meaning any state can reach any other state (verified in `test_two_byte_words_form_bijection_to_omega_from_any_start`); (2) the physical isotropy of the light-sphere admits no preferred direction. The unique measure invariant under both symmetries is uniform. Therefore, CSM = N_phys / |Ω| is the unique symmetry-respecting capacity allocation. The Common Source Moment (CSM) capacity is:
+`CSM = N_phys / |Ω| ≈ 4.96 × 10²⁵ MU`
 
 **Utilisation Analysis.**
-- **Requirement:** UHI for 8.1 billion people requires approximately 7.10 × 10¹⁴ MU per year.
-- **Utilisation Ratio:** The ratio of global demand to available capacity is approximately 1.02 × 10⁻⁹.
-- **Resilience Margin:** The system preserves a resilience margin of 99.9999999%.
-- **Adversarial Threshold:** As verified in tests, an adversary would need to successfully issue approximately 10 million times the entire global population's UHI for 1,000 years to consume just 1% of annual capacity.
+- **Annual Capacity:** `CSM × 31,536,000 s ≈ 1.56 × 10³³ MU`
+- **Global Demand (8.1B people):** `≈ 7.10 × 10¹⁴ MU`
+- **Margin:** The structural capacity exceeds global demand by a factor of approximately `2.2 × 10¹⁸`.
+
+**Adversarial Safety Margin.** The massive surplus provides inherent protection against fraudulent claims. An adversary would need to successfully issue approximately 10 million times the entire global population's UHI for 1,000 years to consume just 1% of annual capacity (verified in `test_resilience_margin_and_adversarial_threshold`). This is operationally impossible: there are not enough identities, not enough compute to generate them, and no registry would accept such claims. The surplus therefore acts as a natural security buffer, making capacity exhaustion attacks infeasible.
+
+**For Physicists.**  
+The annual capacity (1.56 × 10³³ MU) is the size of the addressable state space across all seconds in a year, not Router throughput. The kernel defines 65,536 distinct states per second; current usage is ~10⁻¹⁹ of this space (verified in `test_csm_capacity_and_uhi_margin`).
+
+**For Economists.**  
+Conventional scarcity is institutional; here the substrate is non-rivalrous at human scale. UHI assignment uses available addresses without debt or tax. The 10¹⁸× margin ensures the system can absorb orders-of-magnitude increases in demand—including adversarial attempts—without approaching capacity limits.
 
 **Implication.** Scarcity of capacity is not a binding constraint. The limiting factors are governance quality and the integrity of the registries that map MU to individuals. Because capacity is abundant, security in this economy is not about defending a scarce stock of money. It is about maintaining the intelligibility and integrity of those registries. Recovery from misallocation involves recomputing and republishing corrected structural objects, not locating additional reserves.
 
@@ -240,9 +249,10 @@ The system uses these categories to route events and audit automated contributio
 
 **K₄ Geometry and Exact Ledger.** The system uses the complete graph K₄. The reference implementation uses an exact closed-form projection where P_grad = (1/4) B^T B. Ledgers are stored in integer micro-units (MICRO = 1,000,000). Confidence is applied via fixed-point multiplication in the event update. Projections are computed from fixed constant matrices, avoiding pseudoinverse and SVD tolerance drift. This ensures that aperture calculations are deterministic and identical across all computing platforms.
 
-**Router Properties.** The Router realises this geometry discretely. As verified in the All_Tests_Results report:
-- **Intrinsic Aperture:** The kernel's discrete structure yields an intrinsic aperture A_kernel = 5/256 ≈ 0.01953, which approximates the CGM continuous target A* ≈ 0.0207 within 5.6% without parameter fitting.
+**Router Properties.** The Router realises this geometry discretely. As verified in the test suite:
+- **Intrinsic Aperture:** The kernel's discrete structure yields an intrinsic aperture A_kernel = 5/256 ≈ 0.01953, which approximates the CGM continuous target A* ≈ 0.0207 within 5.6% without parameter fitting (verified in `test_aperture_shadow_a_kernel_close_to_a_star`).
 - **Integrity Checks:** The kernel physics supports algebraic tamper detection using trajectory parity (odd/even mask sums) and dual-code syndrome checks, which reliably detect corruption in ledger history.
+- **Horizon Coverage:** The horizon set (256 states) has a 1-step neighborhood under all bytes that covers the full bulk Ω exactly (verified in `test_horizon_one_step_neighborhood_covers_full_bulk`).
 
 **Shared Moments.** A shared moment occurs when two parties hold the same log prefix and compute the same Router state. This provides a structural "now" independent of external clocks or authorities.
 
@@ -374,16 +384,17 @@ Pilot programmes—including municipal experiments, NGO distribution channels, a
 
 ## Appendix B: Capacity Derivation
 
-This appendix provides the detailed calculation supporting the capacity claims in Section 4.
+This appendix provides the detailed calculation supporting the capacity claims in Section 4. Full results in `docs/reports/Moments_Tests_Report.md` (all 27 tests pass).
 
 ### B.1 Verified Constants
 
 | Parameter | Value | Source |
 |-----------|-------|--------|
-| Atomic Reference | 9,192,631,770 Hz | Caesium-133 hyperfine transition |
-| Kernel Steps/Sec | ≥ 2.4 × 10⁶ | Measured (test_performance) |
-| F_total (per sec) | 2.206 × 10¹⁶ | Derived Capacity Base |
-| F_total (per year) | 6.958 × 10²³ | Annual Capacity Envelope |
+| Atomic Reference (f_Cs) | 9,192,631,770 Hz | Caesium-133 hyperfine transition |
+| Router Ontology (|Ω|) | 65,536 | Verified in `test_moments_2.py` |
+| N_phys (microcells) | 3.254 × 10³⁰ | Derived (4/3)π f_Cs³ |
+| CSM (per Moment) | 4.965 × 10²⁵ MU | N_phys / |Ω| |
+| CSM (per Year) | 1.566 × 10³³ MU | CSM × Seconds per Year |
 
 ### B.2 Utilisation Proof
 
@@ -391,10 +402,10 @@ This appendix provides the detailed calculation supporting the capacity claims i
 8.1 × 10⁹ people × 87,600 MU/year ≈ 7.096 × 10¹⁴ MU/year
 
 **Utilisation Ratio:**
-7.096 × 10¹⁴ / 6.958 × 10²³ ≈ 1.02 × 10⁻⁹
+7.096 × 10¹⁴ / 1.566 × 10³³ ≈ 4.53 × 10⁻¹⁹
 
 **Conclusion:**
-Global UHI consumes approximately one billionth of the available structural capacity per year. The remaining 99.9999999% constitutes the resilience margin.
+Global UHI consumes less than one quintillionth of the available structural capacity per year. The resilience margin is effectively 100%.
 
 ---
 

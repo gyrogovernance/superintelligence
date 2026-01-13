@@ -13,6 +13,8 @@ Responsibilities:
 from __future__ import annotations
 
 import hashlib
+import math
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
@@ -37,26 +39,91 @@ class CoordinationStatus:
     fiat: Dict[str, Any] | None = None
 
 
-# Fiat substrate capacity constants (system policy)
-F_TOTAL_PER_SEC: int = 22_062_316_248_000_000
+# CSM (Common Source Moment) capacity constants
+# These are the canonical capacity standard derived from physics + Router structure
+# Proven in tests/test_moments_2.py
+
+# SI second definition: caesium-133 hyperfine transition frequency
+ATOMIC_HZ_CS133: int = 9_192_631_770
+
+# Router ontology size (proven as C × C where |C| = 256)
+OMEGA_SIZE: int = 65_536
+
+# Seconds per year (365-day convention)
 SECONDS_PER_YEAR: int = 365 * 24 * 60 * 60
-CAPACITY_PER_YEAR_MU: int = F_TOTAL_PER_SEC * SECONDS_PER_YEAR
 
 
-def capacity_for_window(duration_seconds: int | float, fraction: float = 1.0) -> int:
+def raw_microcells_per_moment() -> float:
     """
-    Derive capacity for a time window from physics (atomic second × kernel throughput × duration).
+    N_phys = (4/3)π f_Cs³
+    
+    Raw physical microcells in 1-second light-sphere volume at atomic wavelength resolution.
+    The speed of light cancels exactly (proven in test_moments_2.py).
+    """
+    f = ATOMIC_HZ_CS133
+    return (4.0 / 3.0) * math.pi * (f ** 3)
+
+
+def csm_per_moment_mu() -> float:
+    """
+    CSM = N_phys / |Ω|
+    
+    Common Source Moment capacity per second in MU.
+    The uniform division by |Ω| is forced by symmetry: the Router's transitive group action
+    plus physical isotropy of the light-sphere require uniform coarse-graining.
+    This is the unique symmetry-invariant measure (proven in test_moments_2.py).
+    """
+    return raw_microcells_per_moment() / float(OMEGA_SIZE)
+
+
+def capacity_for_seconds(seconds: int) -> int:
+    """
+    Capacity for a window of length 'seconds', measured in MU.
     
     Args:
-        duration_seconds: duration of the window in seconds
-        fraction: optional fraction of total capacity to use (default 1.0 for full capacity)
+        seconds: duration of the window in seconds
         
     Returns:
         Capacity in MU for the given window
         
-    Formula: capacity = F_TOTAL_PER_SEC × duration_seconds × fraction
+    Formula: capacity = CSM × seconds
     """
-    return int(F_TOTAL_PER_SEC * float(duration_seconds) * fraction)
+    if seconds < 0:
+        raise ValueError("seconds must be non-negative")
+    return int(csm_per_moment_mu() * float(seconds))
+
+
+def capacity_for_year() -> int:
+    """Annual capacity in MU (CSM × seconds per year)."""
+    return capacity_for_seconds(SECONDS_PER_YEAR)
+
+
+# Header pattern for ecology year shells
+_HEADER_YEAR_RE = re.compile(r"^ecology:year:(\d{4})$")
+
+
+def capacity_for_header(header: str) -> int:
+    """
+    Canonical header→capacity mapping.
+    
+    Args:
+        header: shell header string (e.g. "ecology:year:2026")
+        
+    Returns:
+        Capacity in MU for the header
+        
+    Currently supports:
+    - "ecology:year:YYYY" -> annual capacity
+    
+    Raises:
+        ValueError: if header format is not recognized
+    """
+    h = header.strip()
+    if _HEADER_YEAR_RE.match(h):
+        return capacity_for_year()
+    raise ValueError(f"Unrecognized ecology header for capacity mapping: {header!r}")
+
+
 
 
 class Coordinator:
@@ -218,19 +285,21 @@ class Coordinator:
         grant = Grant(identity=identity, identity_id=identity_id, anchor=anchor, mu_allocated=mu_allocated)
         self.fiat_grants_current[identity_id] = grant
 
-    def close_shell(self, header: bytes | str, total_capacity_MU: int) -> Shell:
+    def close_shell(self, header: bytes | str, total_capacity_MU: int | None = None) -> Shell:
         """
         Close the current shell by building receipts and sealing.
         
         Args:
             header: contextual label (e.g. b"ecology:year:2026")
-            total_capacity_MU: total MU capacity for this shell
+            total_capacity_MU: total MU capacity for this shell. If None, derives from header
+                              using CSM capacity standard (e.g. "ecology:year:2026" -> annual capacity)
         
         Returns:
             Shell object with seal and capacity metrics
         
         Raises:
-            ValueError: if used capacity exceeds total capacity
+            ValueError: if used capacity exceeds total capacity, or if header format is unrecognized
+                       when total_capacity_MU is None
         """
         if isinstance(header, bytes):
             header_str = header.decode("utf-8", errors="replace")
@@ -238,6 +307,10 @@ class Coordinator:
         else:
             header_str = str(header)
             header_bytes = header_str.encode("utf-8")
+        
+        # Derive capacity from header if not provided
+        if total_capacity_MU is None:
+            total_capacity_MU = capacity_for_header(header_str)
         
         # Build receipts by sorting grants by identity_id (canonical ordering)
         # Receipt = identity_id (32 bytes) || anchor (3 bytes) || mu (8 bytes)

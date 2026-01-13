@@ -168,8 +168,8 @@ def get_ecology_data(slug: str) -> tuple[Dict[str, Any] | None, list[Dict[str, A
 
 def _get_annual_capacity() -> int:
     """Get annual capacity in MU from physics constants."""
-    from src.app.coordination import capacity_for_window, SECONDS_PER_YEAR
-    return capacity_for_window(SECONDS_PER_YEAR)
+    from src.app.coordination import capacity_for_year
+    return capacity_for_year()
 
 
 # ---- Health Check ----

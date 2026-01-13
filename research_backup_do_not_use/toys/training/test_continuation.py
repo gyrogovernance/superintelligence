@@ -98,7 +98,7 @@ def main() -> int:
     print(f"   Knowledge store: {knowledge_path}")
     print(f"   Seed: '{seed[:50]}...'")
     print(f"   Max tokens: {max_new_tokens}")
-    print("-" * 60)
+    print("-" * 10)
 
     # Check if article exists
     if not article_path.exists():
@@ -161,9 +161,9 @@ def main() -> int:
             generated_text = response_bytes.decode("utf-8", errors="ignore")
 
         # Print results
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 10)
         print("📋 RESULTS")
-        print("=" * 60)
+        print("=" * 10)
         print(f"Seed: '{seed}'")
         print(f"Generated continuation: '{generated_text}'")
 

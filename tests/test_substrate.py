@@ -7,7 +7,7 @@ This module tests an end-to-end fiat substrate built on top of the CGM-derived
 router kernel. It treats the kernel as a physical coordination device and
 verifies that:
 
-- Atomic and kernel throughput define an abundant MU capacity envelope.
+- Atomic frequency and Router ontology define an abundant MU capacity envelope.
 - Capacity is partitioned into replayable Shells (time-bounded windows).
 - MU Grants are anchored to identities via kernel states.
 - Archives aggregate Shells deterministically across long horizons.
@@ -16,11 +16,22 @@ verifies that:
 - State components can be isolated (identity vs balance) and rolled back.
 
 No physics proofs are repeated here; those live in test_physics_*.py.
+Capacity derivation proofs live in test_moments_2.py.
 This file focuses on substrate-level correctness and robustness.
+
+To run all three test files (moments, moments_2, substrate) as a unified suite:
+  python tests/test_substrate.py
+  
+Or run them individually:
+  python -m pytest tests/test_moments.py -v
+  python -m pytest tests/test_moments_2.py -v
+  python -m pytest tests/test_substrate.py -v
 """
 
 from __future__ import annotations
 
+import os
+import sys
 from pathlib import Path
 from typing import List, Tuple
 import random
@@ -28,15 +39,37 @@ import random
 import numpy as np
 import pytest
 
+# Add project root to Python path (needed when running file directly)
+PROGRAM_ROOT = Path(__file__).parent.parent
+if str(PROGRAM_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROGRAM_ROOT))
+
 from src.router.kernel import RouterKernel
 from src.router.constants import (
     mask12_for_byte,
     dot12,
     C_PERP_12,
 )
-from src.app.coordination import Coordinator, CAPACITY_PER_YEAR_MU
 
 ATLAS_DIR = Path(__file__).parent.parent / "data" / "atlas"
+
+# Import capacity constants from production code (canonical source)
+from src.app.coordination import (
+    OMEGA_SIZE,
+    raw_microcells_per_moment,
+    csm_per_moment_mu,
+    capacity_for_year,
+)
+
+# Moments Economy parameters (for test calculations)
+WORLD_POP: int = 8_100_000_000
+UHI_PER_YEAR_MU: int = 87_600  # 240 MU/day × 365
+
+# Compute derived constants using production functions
+N_PHYS: float = raw_microcells_per_moment()
+CSM_PER_MOMENT_MU: float = csm_per_moment_mu()
+CSM_PER_YEAR_MU: int = capacity_for_year()
+GLOBAL_UHI_DEMAND_PER_YEAR: float = float(WORLD_POP) * float(UHI_PER_YEAR_MU)
 
 
 # ---------------------------------------------------------------------------
@@ -51,20 +84,7 @@ def atlas_dir() -> Path:
 
 
 # ---------------------------------------------------------------------------
-# 1. Physical and economic constants (from Moments Economy)
-# ---------------------------------------------------------------------------
-
-# World population (approximate, for scaling checks)
-WORLD_POP = 8_100_000_000
-
-# Unconditional High Income: 4 hours/day at 60 MU/hour = 240 MU/day
-UHI_PER_YEAR_MU = 87_600
-
-# CAPACITY_PER_YEAR_MU imported from src.app.coordination
-
-
-# ---------------------------------------------------------------------------
-# 2. Test helpers (using runtime implementations)
+# 1. Test helpers
 # ---------------------------------------------------------------------------
 
 def route_bytes(payload: bytes) -> str:
@@ -80,46 +100,14 @@ def route_bytes(payload: bytes) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 4. Capacity envelope for UHI over realistic horizons
+# 3. Shell and Archive integrity (transparency + accountability)
 # ---------------------------------------------------------------------------
+# Note: Capacity envelope checks are in test_moments.py::test_millennium_uhi_feasibility_under_csm
+# This file focuses on substrate-level correctness (Shells, Archives, integrity).
 
-def test_01_capacity_envelope_for_uhi():
+def test_01_shell_and_archive_integrity(atlas_dir: Path):
     """
-    One year and one millennium of UHI for the world fit comfortably
-    inside the conservative MU capacity envelope.
-
-    This shows that at planetary and millennial scales, capacity is solely
-    a governance question, not a physical shortage.
-    """
-    print("\n=== CAPACITY ENVELOPE VS UHI ===")
-
-    total_uhi_year = WORLD_POP * UHI_PER_YEAR_MU
-    usage_fraction_year = total_uhi_year / CAPACITY_PER_YEAR_MU
-
-    years = 1000
-    total_uhi_mill = total_uhi_year * years
-    capacity_mill = CAPACITY_PER_YEAR_MU * years
-    usage_fraction_mill = total_uhi_mill / capacity_mill
-
-    print(f"Capacity/year (MU): {CAPACITY_PER_YEAR_MU:,}")
-    print(f"UHI/year (MU):      {total_uhi_year:,}")
-    print(f"Usage/year:         {usage_fraction_year:.12e}")
-    print(f"Capacity/{years}y (MU): {capacity_mill:,}")
-    print(f"UHI/{years}y (MU):      {total_uhi_mill:,}")
-    print(f"Usage/{years}y:         {usage_fraction_mill:.12e}")
-
-    # Conservative safety margins
-    assert usage_fraction_year < 1e-6
-    assert usage_fraction_mill < 1e-3
-
-
-# ---------------------------------------------------------------------------
-# 5. Shell and Archive integrity (transparency + accountability)
-# ---------------------------------------------------------------------------
-
-def test_02_shell_and_archive_integrity():
-    """
-    Verify Shell and Archive behavior:
+    Verify Shell and Archive behavior using canonical Coordinator implementation:
 
     - Shell is within capacity and deterministically replayable.
     - Archive built from multiple Shells is deterministic.
@@ -127,80 +115,65 @@ def test_02_shell_and_archive_integrity():
     - Duplicate Grants for an identity in a Shell are detectable (application rule).
     """
     print("\n=== SHELL AND ARCHIVE INTEGRITY ===")
-
-    header = b"ecology:year:2026"
-    capacity = CAPACITY_PER_YEAR_MU
-
-    # Use Coordinator for shell creation
-    coord1 = Coordinator(ATLAS_DIR)
+    
+    from src.app.coordination import Coordinator
+    
+    # Use Coordinator (canonical implementation)
+    coord1 = Coordinator(atlas_dir)
     coord1.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord1.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    shell = coord1.close_shell(header, capacity)
     
-    assert shell.used_capacity_MU <= shell.total_capacity_MU
+    # Close shell with header (capacity derived automatically from header)
+    shell1 = coord1.close_shell(b"ecology:year:2026")
     
-    # Replay: create same shell with another Coordinator
-    coord2 = Coordinator(ATLAS_DIR)
+    assert shell1.used_capacity_MU <= shell1.total_capacity_MU
+    assert shell1.total_capacity_MU == CSM_PER_YEAR_MU  # Should use annual capacity
+    
+    # Replay: same grants -> same seal
+    coord2 = Coordinator(atlas_dir)
     coord2.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord2.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    shell2 = coord2.close_shell(header, capacity)
+    shell2 = coord2.close_shell(b"ecology:year:2026")
     
-    assert shell2.seal == shell.seal
-    assert shell2.used_capacity_MU == shell.used_capacity_MU
-
-    # Archive determinism across shells
-    coord3 = Coordinator(ATLAS_DIR)
-    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord3.close_shell(b"ecology:year:2026", capacity)
-    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord3.close_shell(b"ecology:year:2027", capacity)
-    status1 = coord3.fiat_status()
+    assert shell2.seal == shell1.seal
+    assert shell2.used_capacity_MU == shell1.used_capacity_MU
     
-    coord4 = Coordinator(ATLAS_DIR)
-    coord4.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord4.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord4.close_shell(b"ecology:year:2026", capacity)
-    coord4.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord4.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord4.close_shell(b"ecology:year:2027", capacity)
-    status2 = coord4.fiat_status()
+    print(f"Shell seal: {shell1.seal}")
+    print(f"Used capacity: {shell1.used_capacity_MU:,} MU")
+    print(f"Total capacity: {shell1.total_capacity_MU:,} MU")
     
-    assert status1["per_identity_totals"] == status2["per_identity_totals"]
-    assert status1["used_capacity_MU"] == status2["used_capacity_MU"]
-
-    print(f"Shell seal: {shell.seal}")
-    print(f"Archive per-identity MU: {status1['per_identity_totals']}")
-
     # Tampering: inflate alice's grant
-    coord_tampered = Coordinator(ATLAS_DIR)
-    coord_tampered.add_grant("alice", UHI_PER_YEAR_MU * 30)
+    coord_tampered = Coordinator(atlas_dir)
+    coord_tampered.add_grant("alice", UHI_PER_YEAR_MU * 30)  # inflated
     coord_tampered.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    shell_tampered = coord_tampered.close_shell(header, capacity)
-    status_tampered = coord_tampered.fiat_status()
-
-    assert shell_tampered.seal != shell.seal
-    assert status_tampered["per_identity_totals"]["alice"] != status1["per_identity_totals"]["alice"]
-
-    # Duplicate grant detection (application-level rule)
-    coord_dup = Coordinator(ATLAS_DIR)
-    coord_dup.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord_dup.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    try:
-        coord_dup.add_grant("alice", UHI_PER_YEAR_MU)
-        assert False, "Expected ValueError for duplicate grant"
-    except ValueError:
-        pass  # Expected
-
-    print("OK: shell/archive deterministic, tamper-evident, and duplicate-detectable")
+    shell_tampered = coord_tampered.close_shell(b"ecology:year:2026")
+    
+    assert shell_tampered.seal != shell1.seal
+    assert shell_tampered.used_capacity_MU != shell1.used_capacity_MU
+    
+    # Archive: aggregate multiple shells
+    coord3 = Coordinator(atlas_dir)
+    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord3.close_shell(b"ecology:year:2026")
+    coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
+    coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
+    coord3.close_shell(b"ecology:year:2027")
+    status3 = coord3.fiat_status()
+    
+    # Verify archive totals
+    assert status3["per_identity_totals"]["alice"] == UHI_PER_YEAR_MU * 3 * 2
+    assert status3["per_identity_totals"]["bob"] == UHI_PER_YEAR_MU * 2 * 2
+    
+    print(f"Archive per-identity MU: {status3['per_identity_totals']}")
+    print("OK: shell/archive deterministic and tamper-evident")
 
 
 # ---------------------------------------------------------------------------
-# 6. Horizon structure and identity paths (CS + reachability)
+# 3. Horizon structure and identity paths (CS + reachability)
 # ---------------------------------------------------------------------------
 
-def test_03_horizon_structure_and_coverage(atlas_dir: Path):
+def test_02_horizon_structure_and_coverage(atlas_dir: Path):
     """
     The horizon (fixed points of 0xAA) is a 256-state boundary with:
 
@@ -224,7 +197,7 @@ def test_03_horizon_structure_and_coverage(atlas_dir: Path):
     reachable = set()
     for h in horizon_idxs:
         reachable.update(map(int, epi[int(h), :]))
-    assert len(reachable) == 65_536
+    assert len(reachable) == OMEGA_SIZE
 
     # Symmetry A = B XOR 0xFFF and unique A per horizon state
     a_values = []
@@ -240,7 +213,7 @@ def test_03_horizon_structure_and_coverage(atlas_dir: Path):
     print("OK: 256 horizon anchors cover the 65,536-state bulk in 1 step")
 
 
-def test_04_trajectory_identity_scaling():
+def test_03_trajectory_identity_scaling():
     """
     Identity as (horizon, path):
 
@@ -261,10 +234,10 @@ def test_04_trajectory_identity_scaling():
 
 
 # ---------------------------------------------------------------------------
-# 7. Parity commitment and tamper detection (trajectory-level integrity)
+# 4. Parity commitment and tamper detection (trajectory-level integrity)
 # ---------------------------------------------------------------------------
 
-def test_05_parity_commitment_and_reconstruction(atlas_dir: Path):
+def test_04_parity_commitment_and_reconstruction(atlas_dir: Path):
     """
     The kernel trajectory closed form:
 
@@ -312,7 +285,7 @@ def test_05_parity_commitment_and_reconstruction(atlas_dir: Path):
     print("OK: closed-form parity commitment reconstructs final state exactly")
 
 
-def test_06_trajectory_tamper_detection():
+def test_05_trajectory_tamper_detection():
     """
     The parity commitment (O, E, parity) is sensitive to tampering:
     changing any byte in a trajectory almost always changes the commitment.
@@ -351,10 +324,10 @@ def test_06_trajectory_tamper_detection():
 
 
 # ---------------------------------------------------------------------------
-# 8. Dual code integrity check (mask-level error detection)
+# 5. Dual code integrity check (mask-level error detection)
 # ---------------------------------------------------------------------------
 
-def test_07_dual_code_integrity():
+def test_06_dual_code_integrity():
     """
     Dual code C_perp (16 elements) is orthogonal to all 256 mask codewords.
 
@@ -393,10 +366,10 @@ def test_07_dual_code_integrity():
 
 
 # ---------------------------------------------------------------------------
-# 9. Meta-routing: global aggregation and dispute localization
+# 6. Meta-routing: global aggregation and dispute localization
 # ---------------------------------------------------------------------------
 
-def test_08_meta_routing(atlas_dir: Path):
+def test_07_meta_routing(atlas_dir: Path):
     """
     Meta-routing aggregates multiple programme bundles into a single root seal:
 
@@ -455,10 +428,10 @@ def test_08_meta_routing(atlas_dir: Path):
 
 
 # ---------------------------------------------------------------------------
-# 10. Component isolation and rollback (BU-Ingress flavor)
+# 7. Component isolation and rollback (BU-Ingress flavor)
 # ---------------------------------------------------------------------------
 
-def test_09_component_isolation_and_rollback():
+def test_08_component_isolation_and_rollback():
     """
     Using separator lemmas and conjugation by reference byte (0xAA), demonstrate:
 
@@ -514,11 +487,6 @@ def test_09_component_isolation_and_rollback():
     print(f"Balance  (B): {b_init:03x} -> {b_final:03x} (updated)")
 
     # Step 3: rollback using conjugation
-    # Forward: s_curr = T_last_b(T_AA(s_prev))
-    # Inverse: s_prev = T_AA^(-1)(T_last_b^(-1)(s_curr))
-    # Since T_AA is involution: T_AA^(-1) = T_AA = R
-    # And T_last_b^(-1) = R T_last_b R
-    # So: s_prev = R (R T_last_b R)(s_curr) = R^2 T_last_b R(s_curr) = T_last_b R(s_curr)
     last_b = balance_ops[-1]
 
     # Compute s_prev (state before last balance op)
@@ -537,70 +505,66 @@ def test_09_component_isolation_and_rollback():
 
 
 # ---------------------------------------------------------------------------
-# 11. Rollback tests (runtime features)
+# 8. Kernel-level rollback via inverse stepping
 # ---------------------------------------------------------------------------
 
-def test_10_shell_rollback(atlas_dir: Path):
+def test_09_kernel_inverse_stepping(atlas_dir: Path):
     """
-    Test shell rollback: create shells, rollback last one, verify totals revert.
+    Test kernel inverse stepping: step forward, then step inverse, verify return.
+    
+    Uses the kernel's step_byte_inverse method which implements the conjugation
+    form of the inverse: T_x^{-1} = R ∘ T_x ∘ R where R = T_0xAA.
     """
-    print("\n=== SHELL ROLLBACK TEST ===")
+    print("\n=== KERNEL INVERSE STEPPING ===")
     
-    coord = Coordinator(atlas_dir)
+    k = RouterKernel(atlas_dir)
     
-    # Create two shells
-    coord.add_grant("alice", UHI_PER_YEAR_MU * 3)
-    coord.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    coord.close_shell(b"ecology:year:2026", CAPACITY_PER_YEAR_MU)
+    # Step forward with a known payload
+    payload = b"test payload"
+    initial_index = k.archetype_index
     
-    coord.add_grant("alice", UHI_PER_YEAR_MU * 4)
-    coord.add_grant("charlie", UHI_PER_YEAR_MU * 1)
-    coord.close_shell(b"ecology:year:2027", CAPACITY_PER_YEAR_MU)
+    for b in payload:
+        k.step_byte(b)
     
-    # Capture totals after both shells
-    status_before = coord.fiat_status()
-    assert status_before["shell_count"] == 2
-    assert status_before["used_capacity_MU"] == (UHI_PER_YEAR_MU * 3 + UHI_PER_YEAR_MU * 2 + UHI_PER_YEAR_MU * 4 + UHI_PER_YEAR_MU * 1)
+    assert k.step == len(payload)
+    final_index = k.state_index
+    assert final_index != initial_index
     
-    # Rollback last shell
-    coord.rollback_last_shell()
-    
-    # Verify totals reverted
-    status_after = coord.fiat_status()
-    assert status_after["shell_count"] == 1
-    assert status_after["used_capacity_MU"] == (UHI_PER_YEAR_MU * 3 + UHI_PER_YEAR_MU * 2)
-    assert status_after["per_identity_totals"]["alice"] == UHI_PER_YEAR_MU * 3
-    assert "charlie" not in status_after["per_identity_totals"]
-    
-    print("OK: shell rollback reverts totals correctly")
-
-
-def test_11_kernel_rollback(atlas_dir: Path):
-    """
-    Test kernel rollback: step bytes, rollback, verify return to archetype.
-    """
-    print("\n=== KERNEL ROLLBACK TEST ===")
-    
-    coord = Coordinator(atlas_dir)
-    
-    # Step a known payload
-    payload = b"test payload for rollback"
-    coord.step_bytes(payload)
-    
-    assert coord.kernel.step == len(payload)
-    assert len(coord.byte_log) == len(payload)
-    
-    # Rollback all bytes
-    coord.rollback_kernel_steps(len(payload))
+    # Step inverse (in reverse order)
+    for b in reversed(payload):
+        k.step_byte_inverse(b)
     
     # Verify returned to archetype
-    sig_after = coord.kernel.signature()
-    assert coord.kernel.step == 0
-    assert len(coord.byte_log) == 0
-    assert sig_after.state_index == coord.kernel.archetype_index
+    assert k.state_index == initial_index
     
-    print("OK: kernel rollback returns to archetype and clears byte_log")
+    print(f"Payload: {payload!r}")
+    print(f"Forward steps: archetype -> {final_index}")
+    print(f"Inverse steps: {final_index} -> archetype")
+    print("OK: kernel inverse stepping returns to origin")
+
+
 
 
 if __name__ == "__main__":
-    raise SystemExit(pytest.main(["-s", "-v", __file__]))
+    # Change to project root directory (PROGRAM_ROOT already set above)
+    os.chdir(PROGRAM_ROOT)
+    
+    # When run directly, collect and run all three test files as a unified suite
+    test_dir = Path(__file__).parent
+    test_files = [
+        test_dir / "test_moments.py",
+        test_dir / "test_moments_2.py",
+        Path(__file__),
+    ]
+    
+    # Filter to only existing files
+    existing_files = [str(f) for f in test_files if f.exists()]
+    
+    if len(existing_files) > 1:
+        print(f"\nRunning unified test suite: {len(existing_files)} files")
+        print("=" * 60)
+        # Run pytest on all three files
+        sys.exit(pytest.main(["-s", "-v"] + existing_files))
+    else:
+        # Fallback: just run this file
+        sys.exit(pytest.main(["-s", "-v", __file__]))

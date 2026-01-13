@@ -304,7 +304,7 @@ def demo_session(intron_sequence: List[int], anchor: Optional[int] = None) -> No
     anchor = int(anchor)
     
     print("GyroLog Session Demo")
-    print("=" * 60)
+    print("=" * 10)
     print(f"Anchor: 0x{anchor:012x}")
     print(f"Canonical introns: LI=0x{gyrolog.canonical_introns.li:02x}, "
           f"FG=0x{gyrolog.canonical_introns.fg:02x}, BG=0x{gyrolog.canonical_introns.bg:02x}")
@@ -345,7 +345,7 @@ def run_validation_suite() -> None:
     gyrolog = GyroLog()
     
     print("GyroLog Validation Suite")
-    print("=" * 60)
+    print("=" * 10)
     
     # Test 1: Commutator defect analysis
     defect_counts = gyrolog.verify_commutator()
@@ -410,7 +410,7 @@ if __name__ == "__main__":
     # Run validation tests
     run_validation_suite()
     
-    print("\n" + "=" * 60)
+    print("\n" + "=" * 10)
     
     # Demo with sample intron sequence
     sample_introns = [0x42, 0x24, 0x18, 0x81, 0x66, 0xAA]
