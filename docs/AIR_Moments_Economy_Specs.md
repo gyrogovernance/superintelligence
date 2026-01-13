@@ -5,6 +5,8 @@
 
 ---
 
+> DISCLAIMER: The equation of the total capacity is under further consideration because at the time it is a design choice and I am working on deriving it from first principles. I am almost there. The totals might change a little, but first principles seem to make capacity even larger - so the whole doc and architecture still stands even if some details might change. The text doesnt make clear yet that anchoring to the atomic oscillations is not about time-keeping, but about untapping a physical economic capacity capable to deliver on its aims for complete alleviation of poverty and end of scarcity economics which feedd all sociotechnical risks and human-sustained global crises.
+
 ## Introduction
 
 The Moments Economy establishes a monetary standard grounded in physical and geometric invariants. It defines a unit of account anchored to atomic time and verified coordination throughput, creating a currency system where issuance capacity is determined by measurement limits rather than credit creation.

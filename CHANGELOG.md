@@ -17,6 +17,8 @@
 
 ## [v1.2.1-MomentsEconomy] – 2026-01-12
 
+Revisiting equations for the Moments Economy. 
+
 ---
 
 ## [v1.2.1-MomentsEconomy] – 2026-01-11
