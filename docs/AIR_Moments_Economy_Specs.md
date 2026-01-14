@@ -3,27 +3,30 @@
 **Scope:** Economic architecture for coordination-based monetary systems
 
 ---
-
 ## Introduction
 
-The Moments Economy establishes a monetary system based on the physical capacity of the atomic standard rather than on debt. In this architecture, money represents a claim on the inherent capacity of the world to distinguish and record distinct events. Issuance is therefore constrained not by institutional policy but by the volume of the physical container defined by the atomic standard.
+The Moments Economy establishes a monetary system grounded in physical capacity rather than debt. Money in this architecture represents verified coordination that maintains good governance (alignment work). Issuance is therefore constrained not by institutional policy but by the volume and properties of the physical container defined by the atomic standard.
 
-The capacity for this money is determined by the atomic frequency of the caesium-133 atom. It is used because it is the most widely accepted, reproducible and internationally audited physical reference for fine-grained measurement, independent of any institution’s monetary policy. The Common Source Moment is the total number of distinct, verifiable coordination states available when this physical resolution is coarse-grained by the finite state space of the Router. We call this total capacity the Common Source Moment. This is a fixed total, not a renewable quantity.
+The system operationalises and routes alignment work through a holographic encoding algorithm that provides an efficient and distributable mechanism for global governance coordination. The GGG ASI Alignment Router is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). Its kernel outputs are compact routing signatures and governance observables that any party can verify through replay. The Router performs structural transformations rather than interpreting empirical meaning. This ensures results are reproducible, comparable and auditable while keeping decision-making traceable to human agency.
 
-When we compare this total capacity to the actual scale of human coordination, we find a massive surplus. The depth of the Common Source Moment contains many orders of magnitude more possible events than the global economy can generate or meaningfully govern. This abundance allows us to fund substantial unconditional distributions without taxation or the need for perpetual growth.
+Settlement in this economy does not depend on a central ledger keeper. All distributions are recorded in data structures that bind identity to specific coordinates within the Router's finite state space. Because the Router is deterministic, any party with the transaction logs can replay history to confirm exactly who received what and when. This removes the need for central custodians and replaces institutional trust with cryptographic proof.
 
-To make this physical capacity operational, the system uses the GGG ASI Alignment Router. This is a multi-domain network coordination algorithm that functions as a collective superintelligence implementation. In this role, it operates as a network of humans and machines amplifying intelligence rather than outperforming single agent potential. Its specific task is to map an append-only byte ledger to a reproducible state trajectory and to export compact routing signatures and governance observables.
+The physical anchor for the system is the caesium-133 hyperfine transition frequency. This frequency is used because it is the most widely accepted, reproducible and internationally audited physical reference for measurement, independent of any institution's monetary policy. When this atomic resolution is coarse-grained by the Router's holographic state space, the result is a fixed total of distinct, verifiable coordination states. This total is called the Common Source Moment (CSM).
 
-Settlement in this economy does not depend on a central ledger keeper. All distributions are recorded in data structures that bind identity to specific coordinates within the Router’s finite state space. Because the Router is deterministic, any party with the transaction logs can replay history to confirm exactly who received what and when. This removes the need for central custodians and replaces institutional trust with cryptographic proof.
+The Common Source Moment constitutes the total volume available for these operations. This single capacity supports both the distribution of an Unconditional High Income and the governance of additional tiered distributions that recognise wider scope and higher responsibility. It also supports the preservation of complete governance records. These records include provenance, commitments, consultation, and disputes. Because the capacity is large, settlement does not require compressing or discarding coordination detail, and multiple independent parties can maintain complete records for verification. This supports uses beyond monetary distribution, including scientific research verification, AI model auditing, supply chain traceability, and personal consent tracking.
 
 This document specifies the complete architecture, including the economic units, the structural objects for accounting, the geometric foundations of coordination, and the institutional requirements for transition.
 
 ### Why this matters
 
-- **For individuals:** A stable, unconditional income sufficient to eliminate monetary poverty, funded without taxation or debt.
-- **For policymakers:** Monetary issuance limits derived from physical and geometric assumptions that can be inspected and debated.
-- **For institutions:** A settlement layer where distributions are replayable artefacts rather than narrative claims.
-- **For AI safety:** A coordination substrate that preserves human authority and traceability in systems where artificial agents participate.
+- **For individuals:** A guaranteed baseline income with additional tiered distributions that recognise wider scope and higher responsibility, delivered through verifiable records rather than debt-based issuance.
+- **For policymakers:** Issuance limits derived from explicit physical and geometric assumptions, with parameters that can be inspected, tested, and revised through governance rather than opaque monetary policy.
+- **For institutions:** A settlement and audit method where distributions and eligibility decisions are replayable records, reducing reliance on custodians and retrospective narrative dispute.
+- **For AI safety:** A coordination substrate that preserves human authority, traceability, and accountability in systems where artificial agents contribute to decisions and record-keeping.
+
+### Scope of the Router
+
+The GGG ASI Alignment Router is used in this document as the settlement and verification layer for the Moments Economy. However, the Router also serves as the coordination backbone for the Alignment Infrastructure Routing (AIR) framework, where it provides coordination states and deterministic replay for grant distribution, work receipts, and project coordination. These uses are independent. Institutions may adopt AIR for coordination without committing to the Moments Economy. The economic architecture described here specifies how the Router can additionally serve as a monetary settlement layer when the conditions for the turning point (Section 16) are met.
 
 ### Document structure
 
@@ -79,7 +82,7 @@ Unconditional High Income (UHI) is the baseline distribution provided to every p
 - Daily: 240 MU
 - Annual: 87,600 MU
 
-**Funding.** UHI is funded directly from the structural surplus of the coordination substrate. The capacity analysis in Section 4 demonstrates that the structural envelope supports this distribution for the entire global population with a resilience margin exceeding 99.999999 percent.
+**Funding.** UHI is issued within the Common Source Moment capacity envelope. Section 4 shows that the envelope supports this distribution for the entire global population with a resilience margin exceeding 99.999999 percent.
 
 **Mechanism.** Individuals receive UHI through public registries maintained by recognised institutions or fiscal hosts. These registries bind the individual's identity to a structural anchor (an Identity Anchor) and issue Grants within time-bounded Shells. Payment providers then route these Grants into bank accounts or digital wallets. Every step produces a verifiable audit trail that can be independently replayed.
 
@@ -104,39 +107,57 @@ Participation tiers provide distributions above the UHI baseline. They recognise
 
 **Governance.** Tier multipliers are governance parameters revisable through institutional processes. Tier assignments must be made by identifiable human agents and recorded in the audit log.
 
-## 4. Structural Capacity: The Common Source Moment
+---
 
-The economic capacity of the system is the Common Source Moment. Since value in this economy represents verified coordination, the money supply is bounded by the volume of the physical container defined by the atomic standard.
+## 4. Coordination Capacity: The Common Source Moment
 
-This capacity is calculated as the **phase space volume of the atomic-second light-sphere** (the Common Source Moment). This is a **one-time structural ceiling**, not a rate.
+The system capacity is the Common Source Moment (CSM). It is calculated as the phase space volume of the atomic-second light-sphere, coarse-grained by the Router's finite state space. This is a one-time total, not a renewable rate.
 
-**1. The Temporal Resolution (f_Cs)**
-The International System of Units (SI) defines the second via the caesium-133 hyperfine transition. This sets the fundamental temporal resolution of the system:
+### 4.1 Capacity Derivation
+
+**1. The Atomic Standard (f_Cs)**  
+The International System of Units (SI) defines the atomic-second via the caesium-133 hyperfine transition. This sets the fundamental frequency reference for the system:  
 `f_Cs = 9,192,631,770 Hz`
 
-**2. The Physical Container (N_phys)**
-The causal container corresponding to the atomic second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. This volume determines the **total capacity**; it does not regenerate with each passing second. At the resolution of the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:
-`N_phys = V / λ³ = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`
-Note that the speed of light cancels out; this is a purely geometric and frequency-based invariant (verified in `test_physical_microcell_count_closed_form_and_c_cancellation`).
+**2. The Physical Volume (N_phys)**  
+The causal container corresponding to the atomic-second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. This volume determines the total capacity; it does not regenerate with each passing second. At the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:  
+`N_phys = V / λ³ = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`  
+The speed of light cancels out in this equation, creating a purely geometric and frequency-based invariant (verified in `test_physical_microcell_count_closed_form_and_c_cancellation`).
 
-**3. The Governance Capacity (CSM)**
-The Router kernel acts as a structural filter. Its ontology `Ω` has size 65,536 (`2¹⁶`), verified in `test_router_omega_is_cartesian_product_CxC`. The uniform division by |Ω| is forced by two symmetries: (1) the Router's 2-byte action is transitive, meaning any state can reach any other state (verified in `test_two_byte_words_form_bijection_to_omega_from_any_start`); (2) the physical isotropy of the light-sphere admits no preferred direction. The unique measure invariant under both symmetries is uniform. Therefore, CSM = N_phys / |Ω| is the unique symmetry-respecting capacity allocation. The Common Source Moment (CSM) capacity is:
-`CSM = N_phys / |Ω| ≈ 4.96 × 10²⁵ MU`
+**3. The Common Source Moment (CSM)**  
+The Router kernel has ontology size |Ω| = 65,536 (`2¹⁶`). The uniform division CSM = N_phys / |Ω| is forced by symmetry: the Router's 2-byte action is transitive (verified in `test_two_byte_words_form_bijection_to_omega_from_any_start`), and physical isotropy admits no preferred direction. The Common Source Moment is:  
+`CSM ≈ 4.96 × 10²⁵ MU`
 
-**Total Capacity and Coverage.**
-- **Total Capacity (CSM):** `N_phys / |Ω| ≈ 4.96 × 10²⁵ MU` (fixed total)
-- **Global UHI demand per year:** `≈ 7.10 × 10¹⁴ MU`
-- **Coverage:** The fixed CSM pool supports global UHI for approximately **70 billion years** (5× the age of the universe).
+**Capacity Functionality**
 
-**Adversarial Safety Margin.** The massive capacity provides inherent protection against fraudulent claims. An adversary would need to successfully issue approximately **70,000 times** the entire global annual UHI to consume just 1% of the total CSM capacity (verified in `test_resilience_margin_and_adversarial_threshold`). This is operationally impossible: there are not enough identities, not enough compute to generate them, and no registry would accept such claims. The capacity therefore acts as a natural security buffer, making capacity exhaustion attacks infeasible.
+This capacity serves two distinct purposes:
 
-**For Physicists.**  
-CSM is the total capacity derived from the phase space volume of a 1-second light-sphere at atomic resolution, coarse-grained by the Router ontology size. The "1 second" is consumed in the derivation of N_phys; CSM is not a rate that accumulates over time. It is a fixed structural capacity container (verified in `test_csm_capacity_and_uhi_margin`).
+**A. Monetary Distribution**  
+- Global UHI demand per year: `≈ 7.10 × 10¹⁴ MU`  
+- Coverage: The CSM pool supports global UHI for approximately 70 billion years.  
+- Tier distributions: Under realistic tier participation scenarios (where most of the population receives baseline UHI, with smaller percentages at higher tiers), the weighted annual demand ranges from approximately 1.1× to 1.5× the baseline UHI demand. Even with generous tier participation (0.5% at Tier 4), the CSM capacity provides coverage exceeding 47.8 billion years (verified in `test_realistic_tier_distribution_capacity_under_csm`).  
+- Adversarial safety: An adversary would need to issue approximately 70,000 times the annual global UHI to consume 1% of total capacity (verified in `test_resilience_margin_and_adversarial_threshold`). This is operationally impossible.
 
-**For Economists.**  
-Conventional scarcity is institutional; here the substrate is non-rivalrous at human scale. UHI assignment uses available capacity without debt or tax. The 70-billion-year coverage ensures capacity is not a binding constraint on any human timescale, allowing the system to absorb orders-of-magnitude increases in demand—including adversarial attempts—without approaching capacity limits.
+**B. Coordination Records**  
+The capacity also supports complete coordination records. These records track:
 
-**Implication.** Scarcity of capacity is not a binding constraint. The limiting factors are governance quality and the integrity of the registries that map MU to individuals. Because capacity is abundant, security in this economy is not about defending a scarce stock of money. It is about maintaining the intelligibility and integrity of those registries. Recovery from misallocation involves recomputing and republishing corrected structural objects, not locating additional reserves.
+- **Provenance:** Dependencies between documents, data, models, and decisions. Example: a scientific paper's byte log records which sources were consulted and in what order. Replay verifies the claim.
+- **Commitments:** Claims that a dataset is valid, a model is safe, or a guideline is in force. These are bound to Router moments, making them verifiable and disputable.
+- **Consultation:** What humans and machines actually used when making decisions. Example: a regulator's decision byte log shows which expert reports were routed through the kernel. Independent parties can replay to confirm.
+- **Disputes:** Where institutions diverge. Because disagreement localises to specific byte log differences, disputes are resolvable by comparing logs rather than by adjudicating narratives.
+
+In practice these records are maintained as append-only byte logs and event logs bound to Router moments, with external artefacts referenced by identifiers rather than embedded.
+
+The depth of the capacity allows these records to remain complete rather than aggregated. This enables:
+
+- **Complete genealogies:** No summarisation. Every decision retains its full provenance chain.
+- **Independent redundancy:** Multiple institutions maintain their own complete records. No central custodian is required.
+- **Fine granularity:** Every consultation event, every micro-decision, and every version is recorded without approaching saturation.
+
+This dual function is what makes the Moments Economy secure. Monetary distributions are traceable because the coordination records are complete. Recovery from fraud involves replaying logs and republishing corrected Shells, not defending a scarce stock of money.
+
+**Implication**  
+Capacity scarcity is not a constraint. The limiting factors are governance quality and registry integrity: how genealogies are constructed, how events are classified, and how institutions publish sufficient information for independent verification.
 
 ---
 
@@ -152,7 +173,7 @@ The architecture organises activity into four coupled domains derived from the G
 
 **Education.** The domain of capacity building. It encompasses the development of alignment capacities (GMT, ICV, IIA, ICI) and the detection of displacement risks.
 
-**Ecology.** The domain of circulation and balance. In this architecture, ecology functions as the monetary layer: the ecology capacity ledger records the distribution of MU within the structural envelope and tracks the integrity of circulation. Unlike the other three domains, ecology is implemented via Shells and Archives rather than as a K₄ edge ledger.
+**Ecology.** The domain of circulation and balance. In GGG, ecology integrates the accumulated effects of the other three domains. In this architecture, ecology domain accounting is tracked via Shells and Archives that record the distribution of MU within the structural envelope and monitor the integrity of circulation. Unlike the other three domains, ecology is not maintained as a K₄ edge ledger but as aggregated capacity containers.
 
 These domains map to the vertices of the K₄ graph described in Part III.
 
@@ -292,7 +313,7 @@ Interoperability is defined by the ability to replay. Systems are interoperable 
 
 **Standards.** Conforming systems MUST:
 - Use the shared Router atlas (ontology and epistemology).
-- Format byte logs and event logs canonically.
+- Format byte logs and event logs canonically, as specified by the Router runtime and project format specifications (see `GGG_ASI_AR_Specs.md`).
 - Use consistent identifiers for domains and edges.
 - Support the standard format for Grants, Shells, and Archives.
 

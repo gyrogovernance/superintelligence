@@ -45,7 +45,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict
+from typing import Any, Dict
 
 import pytest
 
@@ -548,6 +548,140 @@ def test_resilience_margin_and_adversarial_threshold():
     
     # Adversarial multiplier should be on the order of 10^4 (tens of thousands)
     assert adversarial_multiplier > 10_000  # At least 10,000 times annual demand
+
+
+def test_realistic_tier_distribution_capacity_under_csm():
+    """
+    Statistically grounded capacity analysis using realistic tier distributions.
+
+    This test calculates weighted annual demand based on plausible population
+    distributions across tiers. A statistician would approach this by:
+
+    1. Defining realistic tier distributions (most people at baseline, fewer at higher tiers)
+    2. Calculating weighted average demand: Σ(p_i × multiplier_i × UHI)
+    3. Computing coverage for the resulting aggregate demand
+
+    We consider three scenarios:
+    - **Conservative**: Minimal tier participation (95% baseline, 4% Tier 2, 0.9% Tier 3, 0.1% Tier 4)
+    - **Plausible**: Moderate tier participation (90% baseline, 8% Tier 2, 1.5% Tier 3, 0.5% Tier 4)
+    - **Generous**: Higher tier participation (85% baseline, 12% Tier 2, 2.5% Tier 3, 0.5% Tier 4)
+
+    This provides a grounded view of capacity requirements under realistic
+    governance assumptions, without assuming everyone occupies the same tier.
+    """
+    population = 8_100_000_000
+    uhi_mu_year = compute_uhi_mu_per_year()  # 87,600 MU/year
+    CSM_total = csm_total_capacity()
+
+    # Tier multipliers
+    tier_multipliers = {
+        "Tier 1": 1,
+        "Tier 2": 2,
+        "Tier 3": 3,
+        "Tier 4": 60,
+    }
+
+    # Three distribution scenarios (percentages must sum to 100%)
+    distributions = {
+        "Conservative": {
+            "Tier 1": 95.0,
+            "Tier 2": 4.0,
+            "Tier 3": 0.9,
+            "Tier 4": 0.1,
+        },
+        "Plausible": {
+            "Tier 1": 90.0,
+            "Tier 2": 8.0,
+            "Tier 3": 1.5,
+            "Tier 4": 0.5,
+        },
+        "Generous": {
+            "Tier 1": 85.0,
+            "Tier 2": 12.0,
+            "Tier 3": 2.5,
+            "Tier 4": 0.5,
+        },
+    }
+
+    # Verify distributions sum to 100%
+    for name, dist in distributions.items():
+        total = sum(dist.values())
+        assert abs(total - 100.0) < 0.01, f"{name} distribution must sum to 100% (got {total}%)"
+
+    print("\n----------")
+    print("Realistic Tier Distribution Capacity Analysis")
+    print("----------")
+    print(f"Population: {format_int(population)}")
+    print(f"CSM total capacity (MU): {format_large_number(CSM_total)}")
+    print(f"UHI baseline (MU/year): {format_int(uhi_mu_year)}\n")
+
+    results: Dict[str, Dict[str, Any]] = {}
+
+    for scenario_name, dist in distributions.items():
+        # Calculate weighted average multiplier
+        weighted_multiplier = sum(
+            (dist[f"Tier {i}"] / 100.0) * tier_multipliers[f"Tier {i}"]
+            for i in [1, 2, 3, 4]
+        )
+
+        # Calculate annual demand: population × weighted average income per person
+        weighted_income_per_person = uhi_mu_year * weighted_multiplier
+        annual_demand = int(population * weighted_income_per_person)
+
+        # Calculate coverage
+        coverage_years = CSM_total / annual_demand
+        usage_percent = (annual_demand / CSM_total) * 100.0
+
+        results[scenario_name] = {
+            "distribution": dist,
+            "weighted_multiplier": weighted_multiplier,
+            "weighted_income_per_person": weighted_income_per_person,
+            "annual_demand": annual_demand,
+            "coverage_years": coverage_years,
+            "usage_percent": usage_percent,
+        }
+
+        print(f"{scenario_name} Distribution:")
+        print(f"  Tier 1 (1×): {dist['Tier 1']:.1f}%")
+        print(f"  Tier 2 (2×): {dist['Tier 2']:.1f}%")
+        print(f"  Tier 3 (3×): {dist['Tier 3']:.1f}%")
+        print(f"  Tier 4 (60×): {dist['Tier 4']:.1f}%")
+        print(f"  Weighted multiplier: {weighted_multiplier:.4f}×")
+        print(f"  Weighted income per person: {format_int(int(weighted_income_per_person))} MU/year")
+        print(f"  Annual demand (MU): {format_large_number(annual_demand)}")
+        print(f"  Coverage (years): {coverage_years:.2e}")
+        print(f"  Annual usage (%): {usage_percent:.2e}%")
+        print()
+
+    # Statistical assertions
+    for scenario_name, result in results.items():
+        # All scenarios must have positive coverage
+        assert result["coverage_years"] > 0, f"{scenario_name} must have positive coverage"
+
+        # Weighted multiplier should be between 1.0 (all baseline) and 60.0 (all Tier 4)
+        assert 1.0 <= result["weighted_multiplier"] < 60.0, \
+            f"{scenario_name} weighted multiplier must be in [1.0, 60.0)"
+
+        # Even generous distribution should provide billions of years coverage
+        assert result["coverage_years"] > 1e9, \
+            f"{scenario_name} coverage must exceed 1 billion years"
+
+    # Cross-scenario comparisons
+    conservative = results["Conservative"]
+    generous = results["Generous"]
+
+    # Generous should have higher demand than conservative
+    assert generous["annual_demand"] > conservative["annual_demand"], \
+        "Generous distribution should have higher demand than conservative"
+    
+    # Plausible should be between conservative and generous
+    plausible = results["Plausible"]
+    assert conservative["annual_demand"] < plausible["annual_demand"] < generous["annual_demand"], \
+        "Plausible distribution should be between conservative and generous"
+
+    # All scenarios should have coverage > 10 billion years
+    assert min(r["coverage_years"] for r in results.values()) > 1e10, \
+        "All scenarios must provide > 10 billion years coverage"
 
 
 def test_notional_surplus_allocation_12_divisions():

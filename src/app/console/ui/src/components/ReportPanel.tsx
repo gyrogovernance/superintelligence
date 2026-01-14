@@ -14,6 +14,7 @@ interface ReportPanelProps {
   onPrincipleInfo: (principle: string) => void;
   onAgentsChange: (value: string) => void;
   onAgenciesChange: (value: string) => void;
+  hasEventLog?: boolean;
 }
 
 const STAGES = [

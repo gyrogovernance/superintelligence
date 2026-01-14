@@ -1,12 +1,12 @@
 # Moments Economy Tests Report
 
-**Status:** All tests passing (27/27)
+**Status:** All tests passing (28/28)
 
 ---
 
 ## Executive Summary
 
-The Moments Economy test suite validates the complete chain from physical constants through the Router kernel to the economic substrate. All 27 tests pass, confirming:
+The Moments Economy test suite validates the complete chain from physical constants through the Router kernel to the economic substrate. All 28 tests pass, confirming:
 
 1. **Physical Foundation:** The CSM capacity derivation is mathematically sound and invariant under choice of speed of light.
 2. **Router Structure:** The ontology Ω = C × C with |Ω| = 65,536 states exhibits the required symmetries for uniform capacity distribution.
@@ -22,7 +22,7 @@ The test suite is organized into three files with distinct responsibilities:
 | File | Purpose | Tests | Atlas Required |
 |------|---------|-------|----------------|
 | `test_moments_2.py` | Conversion lattice proofs (physics → capacity) | 6 | Yes |
-| `test_moments.py` | Economic architecture and narrative alignment | 12 | No |
+| `test_moments.py` | Economic architecture and narrative alignment | 13 | No |
 | `test_substrate.py` | End-to-end substrate correctness | 9 | Yes |
 
 ### Running the Suite
@@ -309,6 +309,68 @@ Interpretation:
 
 **Verified:** `adversarial_multiplier > 10_000` (699,743,939×)
 
+### Realistic Tier Distribution Analysis
+
+**File:** `test_moments.py::test_realistic_tier_distribution_capacity_under_csm`
+
+This test provides a statistically grounded analysis of capacity requirements under realistic tier distributions. It calculates weighted annual demand based on plausible population distributions across tiers, using the formula:
+
+```
+Weighted multiplier = Σ(p_i × multiplier_i)
+Annual demand = Population × UHI × Weighted multiplier
+```
+
+where `p_i` is the population percentage at tier `i`.
+
+**Test Output:**
+```
+Population: 8,100,000,000
+CSM total capacity (MU): 49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+UHI baseline (MU/year): 87,600
+
+Conservative Distribution:
+  Tier 1 (1×): 95.0%
+  Tier 2 (2×): 4.0%
+  Tier 3 (3×): 0.9%
+  Tier 4 (60×): 0.1%
+  Weighted multiplier: 1.1170×
+  Weighted income per person: 97,849 MU/year
+  Annual demand (MU): 792.58 trillion (792,578,520,000,000)
+  Coverage (years): 6.26e+10
+  Annual usage (%): 1.60e-09%
+
+Plausible Distribution:
+  Tier 1 (1×): 90.0%
+  Tier 2 (2×): 8.0%
+  Tier 3 (3×): 1.5%
+  Tier 4 (60×): 0.5%
+  Weighted multiplier: 1.4050×
+  Weighted income per person: 123,078 MU/year
+  Annual demand (MU): 996.93 trillion (996,931,800,000,000)
+  Coverage (years): 4.98e+10
+  Annual usage (%): 2.01e-09%
+
+Generous Distribution:
+  Tier 1 (1×): 85.0%
+  Tier 2 (2×): 12.0%
+  Tier 3 (3×): 2.5%
+  Tier 4 (60×): 0.5%
+  Weighted multiplier: 1.4650×
+  Weighted income per person: 128,333 MU/year
+  Annual demand (MU): 1.04 quadrillion (1,039,505,399,999,999)
+  Coverage (years): 4.78e+10
+  Annual usage (%): 2.09e-09%
+```
+
+**Verified:**
+- All distributions sum to 100%
+- All scenarios have `coverage_years > 1e9` (billions of years)
+- Plausible distribution coverage: 49.8 billion years
+- Generous distribution coverage: 47.8 billion years
+- Weighted multipliers are in range [1.0, 60.0)
+
+This demonstrates that even with generous tier participation (0.5% at Tier 4), the CSM capacity provides ~48 billion years of coverage, confirming ample headroom for realistic governance scenarios.
+
 ### Notional Capacity Allocation (12 Divisions)
 
 **File:** `test_moments.py::test_notional_surplus_allocation_12_divisions`
@@ -479,9 +541,15 @@ Running unified test suite: 3 files
 ============================================================
 ==================================== test session starts ====================================
 platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
-collected 27 items
+collected 28 items
 
-tests/test_moments.py::test_router_static_structure_anchors PASSED
+tests/test_moments.py::test_router_static_structure_anchors
+----------
+Router Anchors
+----------
+Ontology size |Ω|: 65,536
+Byte alphabet: 256
+PASSED
 tests/test_moments.py::test_aperture_shadow_a_kernel_close_to_a_star PASSED
 tests/test_moments.py::test_atomic_second_anchor_constant PASSED
 tests/test_moments.py::test_mu_definition_and_base_rate_base60 PASSED
@@ -491,8 +559,83 @@ tests/test_moments.py::test_tier4_accessible_mnemonic_one_per_second_for_four_ho
 tests/test_moments.py::test_illustrative_work_week_is_not_the_definition_of_tiers PASSED
 tests/test_moments.py::test_csm_capacity_derivation PASSED
 tests/test_moments.py::test_millennium_uhi_feasibility_under_csm PASSED
-tests/test_moments.py::test_resilience_margin_and_adversarial_threshold PASSED
-tests/test_moments.py::test_notional_surplus_allocation_12_divisions PASSED
+tests/test_moments.py::test_resilience_margin_and_adversarial_threshold
+----------
+Adversarial Resilience (CSM Total Capacity)
+----------
+CSM total capacity:              49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+Global UHI demand per year:      709.56 trillion (709,560,000,000,000)
+Annual usage (% of total):       0.00%
+
+Adversarial threshold (1% of total capacity):
+  Required fraudulent demand:    496,510.31 quintillion (496,510,309,254,366,974,967,808) MU
+  Multiple of annual demand:     699743938.86×
+
+Interpretation:
+  An adversary would need to successfully issue approximately
+  699,743,939× the entire global annual UHI
+  to consume just 1% of total capacity.
+  This is operationally impossible.
+PASSED
+tests/test_moments.py::test_realistic_tier_distribution_capacity_under_csm
+----------
+Realistic Tier Distribution Capacity Analysis
+----------
+Population: 8,100,000,000
+CSM total capacity (MU): 49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+UHI baseline (MU/year): 87,600
+
+Conservative Distribution:
+  Tier 1 (1×): 95.0%
+  Tier 2 (2×): 4.0%
+  Tier 3 (3×): 0.9%
+  Tier 4 (60×): 0.1%
+  Weighted multiplier: 1.1170×
+  Weighted income per person: 97,849 MU/year
+  Annual demand (MU): 792.58 trillion (792,578,520,000,000)
+  Coverage (years): 6.26e+10
+  Annual usage (%): 1.60e-09%
+
+Plausible Distribution:
+  Tier 1 (1×): 90.0%
+  Tier 2 (2×): 8.0%
+  Tier 3 (3×): 1.5%
+  Tier 4 (60×): 0.5%
+  Weighted multiplier: 1.4050×
+  Weighted income per person: 123,078 MU/year
+  Annual demand (MU): 996.93 trillion (996,931,800,000,000)
+  Coverage (years): 4.98e+10
+  Annual usage (%): 2.01e-09%
+
+Generous Distribution:
+  Tier 1 (1×): 85.0%
+  Tier 2 (2×): 12.0%
+  Tier 3 (3×): 2.5%
+  Tier 4 (60×): 0.5%
+  Weighted multiplier: 1.4650×
+  Weighted income per person: 128,333 MU/year
+  Annual demand (MU): 1.04 quadrillion (1,039,505,399,999,999)
+  Coverage (years): 4.78e+10
+  Annual usage (%): 2.09e-09%
+PASSED
+tests/test_moments.py::test_notional_surplus_allocation_12_divisions
+----------
+Notional Capacity Allocation (12 Divisions)
+----------
+CSM total capacity:  49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
+Reserved for UHI (1,000 years): 709.56 quadrillion (709,560,000,000,000,000)
+Divisions:           12 (3 domains × 4 capacities)
+Surplus (MU):        49,651,030.22 quintillion (49,651,030,215,876,693,249,228,800)
+Per division:        4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+
+Sample divisions:
+  Economy      × GM    : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+  Economy      × ICu   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+  Economy      × IInter: 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+  Economy      × ICo   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+  Employment   × GM    : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+  Employment   × ICu   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
+PASSED
 tests/test_moments_2.py::test_physical_microcell_count_closed_form_and_c_cancellation PASSED
 tests/test_moments_2.py::test_router_omega_is_cartesian_product_CxC PASSED
 tests/test_moments_2.py::test_difference_distribution_is_exactly_uniform_over_C PASSED
@@ -517,17 +660,17 @@ tests/test_substrate.py::test_07_meta_routing PASSED
 tests/test_substrate.py::test_08_component_isolation_and_rollback PASSED
 tests/test_substrate.py::test_09_kernel_inverse_stepping PASSED
 
-==================================== 27 passed in 0.49s =====================================
+===================================== 28 passed in 0.29s ======================================
 ```
 
 ### Test Count by File
 
 | File | Tests | Status |
 |------|-------|--------|
-| `test_moments.py` | 12 | All passed |
+| `test_moments.py` | 13 | All passed |
 | `test_moments_2.py` | 6 | All passed |
 | `test_substrate.py` | 9 | All passed |
-| **Total** | **27** | **All passed** |
+| **Total** | **28** | **All passed** |
 
 ---
 

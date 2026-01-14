@@ -66,6 +66,24 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 
 ---
 
+## 💰 Moments Economy
+
+The Moments Economy is a monetary system built on the Router's physical capacity rather than debt. It demonstrates how the Router's deterministic coordination substrate can support economic architecture with structural abundance.
+
+**Core Principle:** Money represents a claim on the inherent capacity of the world to distinguish and record distinct events. Issuance is constrained by the physical capacity of the atomic standard (caesium-133 frequency), not by institutional policy.
+
+**The Common Source Moment (CSM):** The total structural capacity derived from the phase space volume of the atomic-second light-sphere, coarse-grained by the Router's finite state space. This yields approximately **4.96 × 10²⁵ MU** (Moment-Units) as a fixed total capacity—sufficient to support global Unconditional High Income for approximately **70 billion years**.
+
+**Key Features:**
+- **Unconditional High Income (UHI):** Baseline distribution of 87,600 MU per person per year (4 hours/day at base rate)
+- **Structural Abundance:** Capacity exceeds global demand by orders of magnitude, providing inherent protection against exhaustion attacks
+- **Replayable Settlement:** All distributions are recorded as deterministic Router state trajectories, verifiable by any party
+- **No Central Custodian:** Cryptographic proof replaces institutional trust
+
+The Moments Economy shows how the Router's physics-based coordination can support post-scarcity economic architecture while maintaining full auditability and human authority. See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md) for complete details.
+
+---
+
 ## 📚 Documentation
 
 ### Getting Started
@@ -76,9 +94,14 @@ Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, wi
 - 🔮 [**Router Implications & Potential**](docs/GGG_ASI_AR_Implications.md) - Use cases and deployment scenarios
 - 🧬 [**Substrate: Physical Memory Specification**](docs/GGG_ASI_AR_Substrate_Specs.md) - Future development: physical memory architecture
 
+### Economic Architecture
+- 💰 [**Moments Economy Architecture Specification**](docs/AIR_Moments_Economy_Specs.md) - Monetary system based on physical capacity of the atomic standard
+- 📊 [**Moments Economy Tests Report**](docs/reports/Moments_Tests_Report.md) - Verified capacity derivation and economic parameter validation
+
 ### Test Reports
 - 📊 [**Physics Tests Report**](docs/reports/Physics_Tests_Report.md) - Verified structural properties and CGM-linked invariants
 - 📊 [**Alignment Measurement Report**](docs/reports/Alignment_Measurement_Report.md) - Governance measurement substrate verification
+- 📊 [**Moments Economy Tests Report**](docs/reports/Moments_Tests_Report.md) - Verified capacity derivation and economic parameter validation
 - 📊 [**All Tests Results**](docs/reports/All_Tests_Results.md) - Comprehensive test suite results
 - 📊 [**Other Tests Report**](docs/reports/Other_Tests_Report.md) - Additional test coverage and validation
 

@@ -75,6 +75,10 @@ The frontend dev server proxies `/api` requests to `http://localhost:8000`.
 - Glossary modal for terminology
 - Responsive design
 
+## Related Documentation
+
+- **Moments Economy Specification**: `docs/AIR_Moments_Economy_Specs.md` - Complete architecture specification for the monetary system based on physical capacity of the atomic standard
+
 ## Program Structure
 
 ```
