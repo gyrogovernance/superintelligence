@@ -30,11 +30,11 @@ Alignment Infrastructure Routing for Post‑AGI Coordination
 
 ## 🌐 Overview
 
-GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed coordination of contributions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+GGG ASI Alignment Router is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). It is designed for focused and well-distributed coordination of contributions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
-The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory and exports a compact routing signature and governance observables.
+The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space and exports a compact routing signature and canonical governance observables.
 
-In this project, Artificial Superintelligence is treated as an operational regime: stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
+In this project, Collective Artificial Superintelligence is treated as an operational global governance regime of stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
 - **Governance Management Traceability**
 - **Information Curation Variety**
 - **Inference Interaction Accountability**
@@ -44,17 +44,29 @@ The router does not interpret content and does not decide policy. It provides sh
 
 ## 🗝️ Key ideas
 
-- **Shared moments:** Participants who share the same archetype and the same ledger prefix compute the same kernel state at the same step. Coordination is grounded in reproducible computation rather than asserted metadata (timestamps, approvals, identity claims) or private model state.
+- **Shared moments:** If two parties have the same starting reference and the same log of actions, they compute the same Router state. This gives a shared “now” based on replay, not on timestamps, approvals, or trusting a central authority.
 
-- **Geometric provenance:** Valid states lie in a finite ontology Ω compiled into an atlas. Membership and replay are structurally checkable from artifacts.
+- **Verifiable provenance:** Router states are drawn from a fixed, fully enumerated set. Anyone can check that a claimed state is valid and reproduce it from the published log.
 
-- **Governance measurement substrate:** Application-layer GovernanceEvents update per-domain K4 edge ledgers. Hodge decomposition splits each ledger into gradient and cycle components, and aperture is computed as the cycle-energy fraction. This yields a replayable coordination metric independent of model internals.
+- **Governance measurement:** Governance actions are recorded as structured events that update domain metrics. The metrics produce a stable, replayable signal of coordination quality that does not depend on model internals.
+
+---
+
+![Moments Economy Cover Image](/assets/moments_cover.png)
+
+## 💰 Moments Economy
+
+Moments Economy is a monetary architecture where money represents verified coordination grounded in physical capacity rather than debt. A fixed total coordination volume, the Common Source Moment (CSM), is derived once from the caesium-133 atomic standard and the Router's finite state space.
+
+CSM is large enough to support a global Unconditional High Income (UHI), realistic tiered distributions, and complete governance records for many billions of years, far beyond any human planning horizon. Within this finite capacity, all settlements become replayable, cryptographically verifiable histories rather than updates on a central ledger or trust in institutional custodians.
+
+See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md) for complete details.
 
 ---
 
 ## 🌐 Theoretical Foundation
 
-The Router is grounded in:
+The Router and Moments Economy are grounded in:
 
 - **Common Governance Model (CGM)** as the constitutional structure of coherent recursive operation.
 - **The Human Mark (THM)** as the source-type ontology of Authority and Agency in sociotechnical systems.
@@ -63,24 +75,6 @@ The Router is grounded in:
 The Router operates as a Derivative coordination system: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Original Agency.
 
 Mathematical formalism uses Hodge decomposition over K4 tetrahedral geometry, with face-cycle matrices aligned to BU commutator loops.
-
----
-
-## 💰 Moments Economy
-
-The Moments Economy is a monetary system built on the Router's physical capacity rather than debt. It demonstrates how the Router's deterministic coordination substrate can support economic architecture with structural abundance.
-
-**Core Principle:** Money represents a claim on the inherent capacity of the world to distinguish and record distinct events. Issuance is constrained by the physical capacity of the atomic standard (caesium-133 frequency), not by institutional policy.
-
-**The Common Source Moment (CSM):** The total structural capacity derived from the phase space volume of the atomic-second light-sphere, coarse-grained by the Router's finite state space. This yields approximately **4.96 × 10²⁵ MU** (Moment-Units) as a fixed total capacity—sufficient to support global Unconditional High Income for approximately **70 billion years**.
-
-**Key Features:**
-- **Unconditional High Income (UHI):** Baseline distribution of 87,600 MU per person per year (4 hours/day at base rate)
-- **Structural Abundance:** Capacity exceeds global demand by orders of magnitude, providing inherent protection against exhaustion attacks
-- **Replayable Settlement:** All distributions are recorded as deterministic Router state trajectories, verifiable by any party
-- **No Central Custodian:** Cryptographic proof replaces institutional trust
-
-The Moments Economy shows how the Router's physics-based coordination can support post-scarcity economic architecture while maintaining full auditability and human authority. See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md) for complete details.
 
 ---
 
@@ -96,7 +90,6 @@ The Moments Economy shows how the Router's physics-based coordination can suppor
 
 ### Economic Architecture
 - 💰 [**Moments Economy Architecture Specification**](docs/AIR_Moments_Economy_Specs.md) - Monetary system based on physical capacity of the atomic standard
-- 📊 [**Moments Economy Tests Report**](docs/reports/Moments_Tests_Report.md) - Verified capacity derivation and economic parameter validation
 
 ### Test Reports
 - 📊 [**Physics Tests Report**](docs/reports/Physics_Tests_Report.md) - Verified structural properties and CGM-linked invariants

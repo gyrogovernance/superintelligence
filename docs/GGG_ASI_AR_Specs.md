@@ -17,11 +17,11 @@ The GGG ASI Alignment Router represents a different paradigm. It treats intellig
 
 ## 1.2 What the Router Is
 
-The GGG ASI Alignment Router is a multi-domain network coordination algorithm for focused and well-distributed interventions. As a collective superintelligence implementation, it is a network of humans and machines (Superintelligence, Bostrom 2014) amplifying rather than outperforming single-agent potential, while preserving the constitutive conditions of governance and intelligibility (Gyroscopic Global Governance, Korompilias 2025).
+The GGG ASI Alignment Router is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
-The algorithm is a deterministic finite-state coordination kernel. It maps a byte sequence to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte in an append-only ledger. This process results in a deterministic state at each step and a compact routing signature.
+Operationally, the Router is a deterministic finite-state coordination kernel. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte. This process yields a deterministic state at each step together with a compact routing signature and canonical governance observables that any party can recompute.
 
-The kernel is designed to support governance-grade coordination across the GGG domains: Economy, Employment, Education, and Ecology. It does not interpret the meaning of the input bytes. Instead, it performs structural transformations that make the results reproducible, comparable, and auditable.
+The kernel is designed to support governance-grade coordination across the GGG domains of Economy, Employment, Education, and Ecology. It does not interpret the empirical meaning of the input bytes. Instead, it performs structural transformations that make results reproducible, comparable, and auditable, while keeping authorization and accountability under Original human agency at the application layer.
 
 ## 1.3 ASI Definition in This System
 

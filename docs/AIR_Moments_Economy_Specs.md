@@ -1,8 +1,7 @@
 # Moments Economy Architecture Specification
 
-**Scope:** Economic architecture for coordination-based monetary systems
+![Moments Economy Cover Image](/assets/moments_cover.png)
 
----
 ## Introduction
 
 The Moments Economy establishes a monetary system grounded in physical capacity rather than debt. Money in this architecture represents verified coordination that maintains good governance (alignment work). Issuance is therefore constrained not by institutional policy but by the volume and properties of the physical container defined by the atomic standard.
