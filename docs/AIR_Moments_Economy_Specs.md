@@ -121,7 +121,7 @@ The system capacity is the Common Source Moment (CSM). It is calculated as the p
 The International System of Units (SI) defines the atomic-second via the caesium-133 hyperfine transition. This sets the fundamental frequency reference for the system:  
 `f_Cs = 9,192,631,770 Hz`
 
-We use this constant because atomic timekeeping is the most precise, globally audited method humans have for synchronising physical processes. In metrology it quantifies how finely distinct events in a shared causal region can be distinguished and coordinated. The Moments Economy treats that same limit as a finite pool of distinguishable coordination states; alignment work is the verified occupation and transformation of those states.
+We use this constant because atomic timekeeping is the most precise, globally audited method humans have for synchronising physical processes. In metrology it quantifies how finely distinct events in a shared causal region can be distinguished and coordinated. The Moments Economy treats that same limit as a finite pool of distinguishable coordination states, where alignment work is the verified occupation and transformation of those states.
 
 **2. The Physical Volume (N_phys)**  
 The causal container corresponding to the atomic-second is a light-sphere with volume `V = (4/3)π(c × 1s)³`. This volume determines the total capacity; it does not regenerate with each passing second. At the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:  
