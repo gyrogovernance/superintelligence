@@ -72,7 +72,7 @@ from src.router.kernel import RouterKernel
 from src.app.coordination import ATOMIC_HZ_CS133, OMEGA_SIZE
 
 SPEED_OF_LIGHT = 299_792_458  # m/s (used only for c-cancellation stress test)
-SECONDS_PER_YEAR = 365 * 24 * 60 * 60  # Used for coverage calculations
+SECONDS_PER_YEAR = 365 * 24 * 10 * 10  # Used for coverage calculations
 
 # --- Router constants ---
 CODE_SIZE = 256

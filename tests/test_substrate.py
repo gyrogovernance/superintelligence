@@ -562,7 +562,7 @@ if __name__ == "__main__":
     
     if len(existing_files) > 1:
         print(f"\nRunning unified test suite: {len(existing_files)} files")
-        print("=" * 60)
+        print("=" * 10)
         # Run pytest on all three files
         sys.exit(pytest.main(["-s", "-v"] + existing_files))
     else:

@@ -15,7 +15,23 @@
 
 ---
 
-## [v1.2.2-MomentsEconomy] – 2026-01-12 / 2026-01-14 (CORRECTED)
+## [v1.2.2-Holography] – 2026-01-15 / 2026-01-16
+
+### Added
+- Added `docs\GGG_ASI_AR_Holography.md` to formalize the Router as a holographic algorithm (boundary, bulk, K4 structure, quotient dynamics, erasure geometry, and cross-domain coherence).
+- Added `docs\reports\Holography_Tests_Report.md` summarizing verified holography results across the three holography test suites.
+
+### Updated
+- Updated `tests\test_holography.py` with decisive holography theorems, including explicit bulk reconstruction from (horizon, byte), Walsh translation of the horizon set, K4 vertex subcode tower, signed cycle coherence, and explicit parity-check recovery for vertex charge (q0=0x033, q1=0x0F0).
+- Updated `tests\test_holography_2.py` with subregion duality wedge tiling, cross-domain meta-projector on 18D space, erasure reconstruction thresholds on the 2×3×2 anatomy, decoding ambiguity witness, provenance degeneracy measurement, quotient dynamics verification, and Hilbert-lift entropy checks.
+- Updated `tests\test_holography_3.py` with frame0 projection uniformity (4-to-1), exhaustive size-4 erasure taxonomy, the information-set threshold result (minimum 8 observed bits), and boundary stabilizer coset reconstruction (ker(chi) structure).
+
+### Verified
+- Ran `pytest` across `tests/test_holography.py`, `tests/test_holography_2.py`, and `tests/test_holography_3.py` with all holography tests passing (16/16).
+
+---
+
+## [v1.2.2-MomentsEconomy] – 2026-01-12 / 2026-01-14 
 
 **CRITICAL CORRECTION (2026-01-14):**
 - Fixed fundamental conceptual error: CSM is a **fixed total capacity**, NOT a rate
@@ -23,7 +39,7 @@
 - Removed incorrect "capacity × time" calculations throughout codebase
 - Correct coverage: CSM supports global UHI for ~70 billion years (5× age of universe)
 
-**Capacity Standard (Corrected):**
+**Capacity Standard:**
 - CSM formula: `[(4/3)π f_Cs³] / |Ω|` = 4.96 × 10²⁵ MU (fixed total)
 - Where: N_phys = (4/3)π f_Cs³ (light-sphere volume at atomic resolution)
 - And: |Ω| = 65,536 (Router ontology size)
