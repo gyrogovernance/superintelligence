@@ -13,6 +13,13 @@
 ╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
 
+
+---
+## [v1.2.2-SDK] – 2026-01-17
+
+### Added
+- Added `docs\GGG_ASI_AR_SDK_Network.md` - Multi-Agent Holographic Networks specification for distributed coordination and experimentation. The document provides a structured guide for researchers and developers to understand, experiment with, and extend the system, presenting the architecture as a coherent stack grounded in mathematical physics with all components mapped to canonical models derived from the CGM constraint set.
+
 ---
 
 ## [v1.2.2-Holography] – 2026-01-15 / 2026-01-16
