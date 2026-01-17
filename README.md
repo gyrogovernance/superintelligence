@@ -30,7 +30,7 @@ Alignment Infrastructure Routing for Post‑AGI Coordination
 
 ## 🌐 Overview
 
-GGG ASI Alignment Router is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). It is designed for focused and well-distributed coordination of contributions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
+GGG ASI Alignment Router is a holographic algorithm for multi-domain network coordination that establishes the structural conditions for a collective superintelligence governance regime of humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). It is designed for focused and well-distributed coordination of contributions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
 The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space and exports a compact routing signature and canonical governance observables.
 
