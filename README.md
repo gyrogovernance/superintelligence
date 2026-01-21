@@ -186,6 +186,7 @@ Transformers learn routing and partitioning implicitly through high-dimensional 
 - 🧬 [**Substrate: Physical Memory Specification**](docs/GGG_ASI_AR_Substrate_Specs.md) - Future development: physical memory architecture
 - 🌐 [**Holographic Algorithm Formalization**](docs/GGG_ASI_AR_Holography.md) - Holographic architecture and boundary-to-bulk scaling
 - 🔗 [**SDK: Multi-Agent Holographic Networks**](docs/GGG_ASI_AR_SDK_Network.md) - Distributed coordination and experimentation specification
+- 🌐 [**SDK: The Holographic Web**](docs/GGG_ASI_AR_SDK_Holographic_Web.md) - Internet coordination architecture specification
 
 ### Economic Architecture
 - 💰 [**Moments Economy Architecture Specification**](docs/AIR_Moments_Economy_Specs.md) - Monetary system based on physical capacity of the atomic standard
