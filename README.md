@@ -208,6 +208,15 @@ Transformers learn routing and partitioning implicitly through high-dimensional 
 
 ---
 
+## 🤝 Collaboration
+
+If you're evaluating this work for research, policy, or implementation:
+- Open an issue to discuss
+- Email: basilkorompilias@gmail.com
+- I'm actively seeking collaborators and roles in AI governance/safety
+
+---
+
 ## Repository Structure
 
 - `src/router/` kernel physics, atlas builder, kernel runtime

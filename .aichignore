@@ -68,12 +68,52 @@ scripts/migrate_*.py
 .pytest_cache/
 .coverage
 .ruff_cache
+.ruff.toml
 .cursorignore
 typings/
 mypy.ini
 mypy_output.txt
 pyright_output.txt
 htmlcov/
+
+# Ignore JavaScript/TypeScript dependencies and build artifacts
+**/node_modules/
+node_modules/
+package-lock.json
+.package-lock.json
+yarn.lock
+pnpm-lock.yaml
+*.map
+.vite/
+.vite-temp/
+*.tsbuildinfo
+
+# Ignore generated TypeScript declaration files in node_modules
+node_modules/**/*.d.ts
+node_modules/**/*.d.cts
+node_modules/**/*.d.mts
+**/node_modules/**/*.d.ts
+**/node_modules/**/*.d.cts
+**/node_modules/**/*.d.mts
+
+# Ignore additional common files
+*.lock
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+coverage/
+.nyc_output/
+.eslintcache
+.stylelintcache
+
+# Ignore data files that are large or generated
+data/**/*.npy
+data/**/*.npz
+data/**/*.zip
+data/**/*.bytes
+data/**/*.jsonl
+data/**/*.id
 
 # Project-specific exclusions
 # Exclude all contents of research/ directory but keep the folder itself
