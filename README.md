@@ -96,31 +96,7 @@ See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Sp
 
 ---
 
-## 🌐 Theoretical Foundation
 
-The Router and Moments Economy are grounded in three foundational frameworks:
-
-| Framework | Acronym | Role |
-|-----------|---------|------|
-| **Common Governance Model** | CGM | Constitutional structure of coherent recursive operation |
-| **The Human Mark** | THM | Source-type ontology of Authority and Agency in sociotechnical systems |
-| **Gyroscopic Global Governance** | GGG | Four-domain coupling of Economy, Employment, Education, and Ecology |
-
-The Router operates as a **Derivative coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Original Agency.
-
-**Mathematical Formalism:** Hodge decomposition over K₄ tetrahedral geometry, with face-cycle matrices aligned to BU commutator loops. The K₄ structure appears at every level of the architecture: as the quotient dynamics of the kernel, as the graph structure of the governance ledgers, as the frame for the four constitutional capacities, and as the template for the four application domains.
-
-### How This Relates to Modern AI Stacks
-
-Transformers learn routing and partitioning implicitly through high-dimensional optimisation. The router provides a fixed finite routing geometry with verifiable invariants. The SDK invites experiments that treat existing models as oracles, enabling research into whether learned structures align with the kernel's intrinsic geometry.
-
-### Non-Goals
-
-- The router does not interpret semantics.
-- The router does not replace cryptographic signatures.
-- The kernel is deterministic and reversible; security is handled at the application layer.
-
----
 
 ## 📚 Documentation
 
@@ -272,7 +248,7 @@ MIT Licence - see [LICENSE](LICENSE) for details.
 ## 📖 Citation
 
 ```bibtex
-@software{GGG_ASI_AR_2025,
+@software{GGG_ASI_AR_2026,
   author = {Basil Korompilias},
   title = {GGG ASI Alignment Router},
   year = {2025},
