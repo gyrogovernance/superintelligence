@@ -34,54 +34,9 @@ GGG ASI Alignment Router is a holographic algorithm for multi-domain network coo
 
 The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space and exports a compact routing signature and canonical governance observables.
 
-In this project, Collective Artificial Superintelligence is treated as an operational global governance regime of stable coordination across heterogeneous human and machine capabilities that maintains four constitutive governance principles across economy, employment, education, and ecology:
-- **Governance Management Traceability**
-- **Information Curation Variety**
-- **Inference Interaction Accountability**
-- **Intelligence Cooperation Integrity**
-
 The router does not interpret content and does not decide policy. It provides shared moments, geometric provenance, and replayable measurement so that authorization and accountability remain under Original human agency at the application layer.
 
 > **Why This Matters:** Modern AI scales by approximation. This kernel scales by geometry. We replace learned routing with exact physics.
-
----
-
-## ✅ Verified Facts
-
-| Property | Value |
-|----------|-------|
-| Ontology size | 65,536 states |
-| Horizon size | 256 states |
-| Wedge tiling | 4 × 16,384, disjoint |
-| Kernel intrinsic aperture | 5/256 ≈ 0.01953 |
-| Atlas size | 64.25 MB |
-| Holographic dictionary | Verified for all 65,536 states ([Report](docs/reports/Holography_Tests_Report.md)) |
-| Test status | 100% pass rate ([All Tests](docs/reports/All_Tests_Results.md)) |
-
----
-
-## 🏗️ Architecture
-
-The Router operates in three layers:
-
-```
-┌─────────────────────────────────────────┐
-│  Kernel Physics                         │
-│  (Atlas, state stepping, 24-bit state) │
-└─────────────────────────────────────────┘
-              |
-              |
-┌─────────────────────────────────────────┐
-│  Coordination & Logs                    │
-│  (Shared moments, replay, byte ledger)  │
-└─────────────────────────────────────────┘
-              |
-              |
-┌─────────────────────────────────────────┐
-│  Governance Measurement                 │
-│  (Domain ledgers, aperture metrics)     │
-└─────────────────────────────────────────┘
-```
 
 ---
 
