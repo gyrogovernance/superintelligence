@@ -15,6 +15,13 @@
 
 ---
 
+## [v1.2.2-Logistics] – 2026-01-26
+
+### Added
+- Added `docs\AIR_Logistics.md` - Alignment Infrastructure Routing (AIR) Logistics Framework that provides protocols, ontologies, and routing mechanisms for tracking and verifying coordination across human and artificial agents, treating governance as a logistics discipline with visible and accountable movement of information, authority, and decisions.
+
+---
+
 ## [v1.2.2-SDK] – 2026-01-20
 
 ### Added

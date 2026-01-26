@@ -32,9 +32,13 @@ Alignment Infrastructure Routing for Post‑AGI Coordination
 
 GGG ASI Alignment Router is a holographic algorithm for multi-domain network coordination that establishes the structural conditions for a collective superintelligence governance regime of humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). It is designed for focused and well-distributed coordination of contributions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
-The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space and exports a compact routing signature and canonical governance observables.
+Artificial intelligence systems act as logistical networks that route information, authority, and decisions. When this routing is invisible, governance becomes unverifiable. The GGG ASI Alignment Router makes these logistics visible and auditable by providing a deterministic substrate for tracking how governance events move through human and AI systems.
 
-The router does not interpret content and does not decide policy. It provides shared moments, geometric provenance, and replayable measurement so that authorization and accountability remain under Original human agency at the application layer.
+The Router is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon the Common Governance Model (theoretical foundation), The Human Mark (classification of human and artificial sources), and the Gyroscope Protocol (work classification). Alignment Infrastructure Routing (AIR) uses this Router as its backbone for coordinating human safety work and funding flows across projects. Together these components amplify human agency rather than replacing it, providing the coordination infrastructure for AI governance at scale.
+
+The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps a sequence of governance events (recorded as bytes) to a reproducible trajectory through a closed space of 65,536 coordination states. Given the same starting point and the same event sequence, any implementation computes the same trajectory. This enables independent verification without relying on trusted intermediaries.
+
+The Router does not interpret content and does not decide policy. It provides shared coordination states, verifiable provenance, and replayable measurement. Authorisation and accountability remain with human agents at the application layer, classified as Original Agency under The Human Mark.
 
 > **Why This Matters:** Modern AI scales by approximation. This kernel scales by geometry. We replace learned routing with exact physics.
 
@@ -42,45 +46,39 @@ The router does not interpret content and does not decide policy. It provides sh
 
 ## 🗝️ Key Ideas
 
-- **Shared moments:** Shared moments replace timestamps. If two parties have the same starting reference and the same log of actions, they compute the same Router state. This gives a shared "now" based on replay, not on approvals or trusting a central authority.
+- **Shared moments:** If two parties have the same starting reference and the same log of governance events, they compute the same Router state. This provides a shared coordination point based on replay, not on timestamps or trusted authorities.
 
-- **Verifiable provenance:** Geometric provenance replaces asserted validity. Router states are drawn from a fixed, fully enumerated set. Anyone can check that a claimed state is valid and reproduce it from the published log.
+- **Verifiable provenance:** Router states belong to a fixed, fully enumerated set. Anyone can verify that a claimed state is valid by replaying the published event log. Provenance becomes computational, not testimonial.
 
-- **Governance measurement:** Governance actions are recorded as structured events that update domain metrics. The metrics produce a stable, replayable signal of coordination quality that does not depend on model internals.
+- **Governance measurement:** Governance events update domain ledgers across Economy, Employment, and Education. From these ledgers, the system computes aperture, a metric indicating whether coordination is balanced or degraded. This measurement is stable, replayable, and independent of model internals.
 
 ---
 
-## 🔮 Holographic Computation
+## 🔮 Holographic Architecture
 
-The Router kernel exhibits verified holographic properties that enable a new paradigm of distributed coordination. The 65,536-state ontology is structured as a discrete manifold with a 256-state boundary (the horizon) that encodes the entire bulk through exact mathematical relationships.
+The Router's 65,536-state space has a specific geometry: a 256-state boundary (the horizon) that encodes the entire bulk through exact mathematical relationships. This is not a design choice but a consequence of the kernel physics.
 
-**Four core properties** (verified by tests; see [Holography Tests Report](docs/reports/Holography_Tests_Report.md)):
-- **Holographic Dictionary:** Every bulk state reconstructs from boundary + byte
-- **Wedge Tiling:** Four disjoint wedges (16,384 states each) tile the ontology
-- **Endogenous Generalisation:** Geometry determines history equivalence classes
-- **Entanglement Structure:** Classical analogs of quantum coordination protocols
+**Practical implications:**
 
-### 📖 The Holographic Dictionary
+- **Compression without loss:** Any coordination state can be represented as a boundary anchor plus a single byte. Verification of the 256 boundary states guarantees the integrity of the full state space.
 
-Every state in the bulk can be uniquely reconstructed from a boundary anchor plus a single byte. This is not compression in the conventional sense but a theorem about the intrinsic structure of the state space. The boundary literally contains the bulk. This property is verified exhaustively for all 65,536 states.
+- **Partition structure:** The state space partitions into four disjoint regions of 16,384 states each, generated by four vertex classes on the horizon. Each region corresponds to one vertex of the K₄ tetrahedral geometry. This partition provides natural boundaries for organising distributed coordination.
 
-### 🔷 Wedge Tiling and Causal Structure
+- **History equivalence:** Many different event sequences lead to the same final state. The geometry determines which micro-histories are equivalent at the macro level, without requiring learning or training.
 
-The horizon partitions into four vertex classes, each generating a disjoint wedge of 16,384 states in the bulk. These four wedges tile the entire ontology without overlap. This subregion duality provides a natural causal structure: states within the same wedge are causally connected, while states in different wedges are causally separated.
+These properties enable a new approach to multi-agent coordination. The [SDK Network Specification](docs/GGG_ASI_AR_SDK_Network.md) provides the framework for distributed experiments, treating existing AI models as oracles that can be tested against the kernel's geometry. The [Holographic Web Specification](docs/GGG_ASI_AR_SDK_Holographic_Web.md) extends these ideas to internet coordination architecture.
 
-### 🔄 Endogenous Generalisation
+See the [Holographic Algorithm Formalization](docs/GGG_ASI_AR_Holography.md) and [Holography Tests Report](docs/reports/Holography_Tests_Report.md) for complete details.
 
-The kernel's dynamics create built-in equivalence classes over histories. Many different byte sequences lead to the same final state (an average of 64 histories per state for typical sequence lengths). This provenance degeneracy is not a limitation but a feature: the geometry itself determines which micro-histories are equivalent at the macro level, without any learning or training.
+---
 
-### ⚛️ Entanglement Structure
+## 🚛 Alignment Infrastructure Routing (AIR)
 
-The state space supports classical analogs of quantum coordination protocols. Separable subsets exhibit zero entropy, while bijection subsets achieve maximal entropy (8 bits). State teleportation achieves 100 percent fidelity through shared structural moments. These properties are verified in the holography test suite.
+AIR applies the Router to two related coordination challenges.
 
-### 🔬 Research Implications
+**Workforce coordination for AI safety:** AIR helps AI safety labs, fiscal hosts, and individual contributors turn distributed work into paid, verifiable contributions. It provides structured workflows for safety work (evaluations, red-teaming, interpretability studies, documentation), a shared classification language using the Gyroscope Protocol and The Human Mark, and attested work receipts that enable sponsors to verify what was done without relying on informal narratives. See the [AIR Brief](docs/AIR_Brief.md) for the operating model and program structure.
 
-> **Active Research Invitation:** These holographic properties suggest that the high-dimensional, continuous representations used in modern artificial intelligence may be approximations of the low-dimensional, exact geometry provided by the kernel. One concrete research direction is to test whether model behaviour clusters by wedge and coset. The [SDK Specification](docs/GGG_ASI_AR_SDK_Network.md) provides the framework for multi-agent experiments that treat existing models as oracles.
-
-See the [Holographic Algorithm Formalization](docs/GGG_ASI_AR_Holography.md) for the complete mathematical treatment.
+**Governance logistics:** The movement of information and authority through decision systems is a logistics problem requiring the same rigour as physical supply chains. AIR provides genealogies (complete, replayable coordination histories), classification protocols that distinguish human from artificial sources, and coherence metrics that measure governance quality over time. This infrastructure supports verifiable compliance with standards such as ISO 42001 and the EU AI Act. See the [AIR Logistics Framework](docs/AIR_Logistics.md) for the complete specification.
 
 ---
 
@@ -110,6 +108,7 @@ See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Sp
 
 ### Getting Started
 - 📋 [**Alignment Infrastructure Routing (AIR) Brief**](docs/AIR_Brief.md) - Overview of AIR, workforce coordination, and operating model
+- 🚛 [**AIR Logistics Framework**](docs/AIR_Logistics.md) - Complete logistics framework for governance as a coordination discipline
 
 ### Technical Specifications
 - 📖 [**GGG ASI Alignment Router: Kernel Specifications**](docs/GGG_ASI_AR_Specs.md) - Complete technical specification for implementation
@@ -177,8 +176,6 @@ python air_console.py
 The console will be available at `http://localhost:5173` (frontend proxies API requests to backend on port 8000).
 
 The installer automatically builds the atlas and initialises the project structure, so you are ready to start creating projects immediately.
-
-**Project Format:** Projects are markdown files in `data/projects/` using bracket notation. Copy `_template.md` to create a new project (e.g., `cp _template.md my-project.md`). See Section 5.4 of the specifications for the complete project format specification.
 
 See the [Console README](src/app/console/README.md) for detailed architecture, API endpoints, and development information.
 
@@ -251,7 +248,7 @@ MIT Licence - see [LICENSE](LICENSE) for details.
 @software{GGG_ASI_AR_2026,
   author = {Basil Korompilias},
   title = {GGG ASI Alignment Router},
-  year = {2025},
+  year = {2026},
   url = {https://github.com/gyrogovernance/superintelligence},
   note = {Deterministic routing kernel for Post-AGI coordination through physics-based state transitions and canonical observables}
 }
