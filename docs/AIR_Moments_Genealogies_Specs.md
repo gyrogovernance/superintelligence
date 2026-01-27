@@ -41,7 +41,7 @@ When authority ceases to be traceable, when processed outputs are treated as ori
 
 A central distinction is that between human and artificial sources. Human access to a situation, whether through direct observation or through expertise, is an original source of authority. Human capacity to reason, commit, and accept responsibility is original agency. Outputs of artificial systems, however capable, are derivative. They depend on human sources for validity and on human agents for accountability. The system treats this distinction as a basic condition for coherent governance.
 
-Current AI safety practice often evaluates systems through single scores and similar scalar measures. These methods are tuned to outcomes, such as pass rates on tests or average helpfulness ratings, but do not capture how authority, information, and responsibility move through a process. A system can appear satisfactory on such measures while still failing to maintain the balance between global coherence and local differentiation that governance requires. The Alignment Measurement Report explains this limitation and shows how the underlying geometry is measured in the full specification.
+Current AI safety practice often evaluates systems through single scores and similar scalar measures. These methods are tuned to outcomes, such as pass rates on tests or average helpfulness ratings, but do not capture how authority, information, and responsibility move through a process. A system can appear satisfactory on such measures while still failing to maintain the balance between global coherence and local differentiation that governance requires. The [Alignment Measurement Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Alignment_Measurement_Report.md) explains this limitation and shows how the underlying geometry is measured in the full specification.
 
 The Router provides a shared reference for this balance. It gives every participating system the same way to record and replay coordination. The genealogies provide the evidence that the four conditions are being maintained. Once that evidence is widespread and trusted, the regime can be said to have reached its turning point.
 
@@ -77,7 +77,7 @@ People adopt AIR because it solves problems they already have:
 
 Coordination through shared Router states replaces reliance on timestamps, external time sources, and opaque internal state. Parties coordinate by sharing genealogy prefixes and computing identical states. Agreement is verified by replay and comparison, using a public specification. A presented state either belongs to the Router’s known space or it does not. Any party with the specification can determine validity.
 
-The Router state remains small and fixed in size. The cost of stepping from one state to another does not grow with the number of participants or the volume of activity. A single implementation serves local tasks and global distributions alike. The Router Kernel Specification describes this property in detail.
+The Router state remains small and fixed in size. The cost of stepping from one state to another does not grow with the number of participants or the volume of activity. A single implementation serves local tasks and global distributions alike. The [Router Kernel Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Specs.md) describes this property in detail.
 
 The GGG Console is a reference implementation that demonstrates how identity, economic distribution, AI coordination, and governance operate on the shared Router substrate. It provides concrete patterns for institutions that wish to integrate AIR into existing applications.
 
@@ -153,7 +153,7 @@ Once the transition is complete, several changes follow:
 
 **Coordination across borders becomes straightforward.** The Router state is the same regardless of jurisdiction. Parties in different countries share the same reference and can verify each other’s histories without intermediaries.
 
-**AI systems become auditable participants.** Every action an AI system takes within the genealogical record advances the Router state and is therefore traceable. The distinction between human decisions and machine outputs remains visible. This supports long‑term alignment by keeping human judgement connected to increasingly capable AI behaviour. The Router Kernel Specification and the Holographic Web describe how AI systems interact with this coordination layer.
+**AI systems become auditable participants.** Every action an AI system takes within the genealogical record advances the Router state and is therefore traceable. The distinction between human decisions and machine outputs remains visible. This supports long‑term alignment by keeping human judgement connected to increasingly capable AI behaviour. The [Router Kernel Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Specs.md) and the [Holographic Web](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Holography.md) describe how AI systems interact with this coordination layer.
 
 ---
 
@@ -183,7 +183,7 @@ In all contexts:
 
 All core specifications and reference implementations of the Router, AIR, and the Moments Economy are published openly. No single institution needs to be trusted as a central ledger‑keeper. Any party can implement the Router, verify genealogies, and participate in the system on equal technical footing.
 
-Verification scales because of the Router’s design. A small family of reference states encodes the full space of possible states. Verifying this boundary set guarantees the integrity of the whole coordination space. This replaces broad sampling and partial audit with a compact, complete check. The Router Kernel Specification and the Holographic Web describe this property in detail.
+Verification scales because of the Router’s design. A small family of reference states encodes the full space of possible states. Verifying this boundary set guarantees the integrity of the whole coordination space. This replaces broad sampling and partial audit with a compact, complete check. The [Router Kernel Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Specs.md) and the [Holographic Web](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Holography.md) describe this property in detail.
 
 Openness is integral to the design. A coordination substrate that depended on a single operator would reintroduce the opacity and gatekeeping that the system is intended to remove.
 
@@ -193,13 +193,13 @@ Openness is integral to the design. A coordination substrate that depended on a 
 
 The following documents are referenced throughout this orientation and provide the technical foundations:
 
-- **Router Kernel Specification:** Defines the finite state space, transition rules, and verified properties, including the scaling of verification.
-- **Common Governance Model:** Provides the theoretical foundation for the four governance capacities and the balance that coherent systems maintain.
-- **AIR Brief:** Introduces the coordination workflow, work classification, funding tiers, and progression from short contributions to longer engagements.
-- **AIR Logistics:** Formalises genealogies, audit procedures, and integration with existing standards such as ISO 42001.
-- **Moments Economy Specification:** Defines the Moment‑Unit, the physical capacity derivation, and the economic architecture including all four tiers.
-- **Holographic Web:** Describes how Router‑based coordination could underpin a new internet architecture, including the replacement of sessions and cookies with genealogies.
-- **SDK for Multi‑Agent Networks:** Provides guidance for developers building on the Router, including experiment designs for testing alignment hypotheses.
+- [**Router Kernel Specification**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Specs.md): Defines the finite state space, transition rules, and verified properties, including the scaling of verification.
+- [**Common Governance Model**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/references/CGM_Paper.md): Provides the theoretical foundation for the four governance capacities and the balance that coherent systems maintain.
+- [**AIR Brief**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/AIR_Brief.md): Introduces the coordination workflow, work classification, funding tiers, and progression from short contributions to longer engagements.
+- [**AIR Logistics**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/AIR_Logistics.md): Formalises genealogies, audit procedures, and integration with existing standards such as ISO 42001.
+- [**Moments Economy Specification**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/AIR_Moments_Economy_Specs.md): Defines the Moment‑Unit, the physical capacity derivation, and the economic architecture including all four tiers.
+- [**Holographic Web**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_Holography.md): Describes how Router‑based coordination could underpin a new internet architecture, including the replacement of sessions and cookies with genealogies.
+- [**SDK for Multi‑Agent Networks**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/GGG_ASI_AR_SDK_Network.md): Provides guidance for developers building on the Router, including experiment designs for testing alignment hypotheses.
 
 ---
 
