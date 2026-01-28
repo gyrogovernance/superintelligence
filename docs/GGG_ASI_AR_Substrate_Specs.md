@@ -12,7 +12,7 @@
 
 ### 1.1 Context and Position in Architecture
 
-This document defines the specifications of the **GGG ASI AR Substrate**, a governed physical memory layer that enables **persistent, path-dependent, and auditable context state** for superintelligence systems. The substrate is **not** a model, agent, or computation engine. It is a **molecular infrastructure** that provides foundational **memory dynamics** for alignment-aware architectures like GyroSI, where symbolic operations are physically grounded.
+This document defines the specifications of the **GGG ASI AR Substrate**, a governed physical memory layer that enables **persistent, path-dependent, and auditable context state** for superintelligence systems. The substrate is **not** a model, agent, or computation engine. It is a **molecular infrastructure** that provides foundational **memory dynamics** for alignment-aware architectures like GyroASI, where symbolic operations are physically grounded.
 
 The substrate is implemented as a **photochromic molecular gel** enclosed in optically addressable tanks and controlled by the **GGG ASI AR Engine**. It stores information in the form of physical phase states which evolve under defined optical operations with structural constraints, long-term retention, and closure behaviors that are **derived directly from the Common Governance Model (CGM)**.
 

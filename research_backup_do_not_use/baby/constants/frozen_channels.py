@@ -1,6 +1,6 @@
 """FROZEN channel definitions - Single source of truth for all channel mappings.
 
-This module defines the immutable channel structure used throughout GyroSI:
+This module defines the immutable channel structure used throughout GyroASI:
 - Global channel (all 48 bits)
 - 8 Layer×Frame slabs (6 bits each: 3 rows × 2 cols at fixed layer, frame)
 - Priority ordering for recovery ladder
@@ -35,7 +35,7 @@ NUM_COLS = 2
 
 
 class FROZEN_CHANNELS:
-    """Immutable channel definitions for GyroSI physics."""
+    """Immutable channel definitions for GyroASI physics."""
 
     # Constants from module level
     TOTAL_BITS = TOTAL_BITS

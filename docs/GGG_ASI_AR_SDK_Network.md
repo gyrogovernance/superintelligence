@@ -1,379 +1,448 @@
-# GGG ASI Router SDK: Multi-Agent Holographic Networks
+# Gyroscopic ASI Specifications
 
-## A Specification for Distributed Coordination and Experimentation
-
-**Document Status:** Research and Development Specification  
-**Version:** 1.0  
-**Context:** GGG ASI Alignment Router Repository (github.com/gyrogovernance/superintelligence)
+*An agent architecture for aligned intelligence built on the GGG ASI Alignment Router*
 
 ---
 
-## 1. Introduction and Purpose
+## 1. Introduction
 
-The GGG ASI Alignment Router represents a complete mathematical and architectural framework for the coordination of distributed intelligence. This system derives from first principles, specifically the Common Governance Model (CGM), which establishes the structural requirements for coherent recursive measurement. The framework demonstrates that such coherence necessitates three-dimensional space with six degrees of freedom, realised in a discrete computational kernel.
+Gyroscopic ASI is an agent architecture that operates on the GGG ASI Alignment Router, a deterministic finite-state coordination kernel. The Router provides a fixed geometric substrate of 65,536 states, 256 byte operations, and a complete pre-computed transition table. The agent architecture provides the learning, memory, and behavioural layers that transform this substrate into responsive intelligence.
 
-This document serves as the definitive specification for the Software Development Kit (SDK) supporting Multi-Agent Holographic Networks. It provides a structured guide for researchers and developers to understand, experiment with, and extend the system. The architecture is presented as a coherent stack grounded in mathematical physics, with all components mapped to canonical models derived from the CGM constraint set.
+The architecture is grounded in the Common Governance Model, a theoretical framework that establishes the geometric requirements for coherent recursive measurement. The model demonstrates that such coherence requires three-dimensional space with six degrees of freedom. The Router realises this geometry discretely through a 24-bit state composed of two 12-bit components, each interpreted as a 2×3×2 grid.
 
-The central proposition is that the high-dimensional, continuous structures of modern artificial intelligence systems approximate a low-dimensional, exact geometry provided by this router. The SDK enables the use of existing artificial intelligence infrastructure as oracles, allowing researchers to measure whether the learned structures of these systems align with the kernel's intrinsic physical geometry.
+The agent does not learn through gradient descent over unbounded parameter spaces. It navigates a complete, finite, pre-computed manifold. Learning occurs through the accumulation of governance events bound to specific states. Memory consists of append-only logs that record the complete trajectory through the state space. Generalisation emerges from the holographic relationship between boundary states and bulk states, combined with continuous variation in three domain ledgers.
 
-This document proceeds in a deliberate order. It begins with the ontological foundation, establishes the unifying geometry, details the kernel physics, describes the coordination protocol and governance substrate, presents the OSI mapping as an orientation analogy, provides a glossary, and concludes with a distinct research program outlining experiments. All claims are labelled as Verified (proven by exhaustive tests), Implemented (existing code), or Hypothesised (requiring empirical validation).
-
----
-
-## 2. The Ontological Foundation
-
-The architecture rests upon a precise ontological structure derived from the CGM. This foundation consists of five foundational constraints and the four constitutional capacities they instantiate. These elements form the invariant frame that governs the entire system.
-
-### 2.1 The Five Foundational Constraints
-
-The CGM is formalised as a propositional modal logic with two primitive operators, [L] and [R], representing left and right transitions. The system begins from a single foundational axiom and specifies four additional constraints at increasing modal depths.
-
-1. **The Source is Common (CS):** This assumption establishes fundamental chirality. The horizon constant S is preserved under right transitions but altered under left transitions. Formally: S → ([R]S ↔ S ∧ ¬([L]S ↔ S)). This constraint ensures that all operational structure traces to a shared source while maintaining directional distinction.
-
-2. **Unity is Non-Absolute (UNA):** This lemma operates at modal depth two. It requires that two-step equality is contingent but not absolute. Formally: S → ¬□E, where E = [L][R]S ↔ [R][L]S. This prevents homogeneous collapse, ensuring informational variety.
-
-3. **Opposition is Non-Absolute (ONA):** Also at depth two, this lemma ensures that opposition is bounded. Formally: S → ¬□¬E. This maintains accountability of inference, allowing different paths to remain comparable without irreconcilable contradiction.
-
-4. **Balance Universal Egress (BU-Egress):** This proposition achieves closure at modal depth four. Formally: S → □B, where B = [L][R][L][R]S ↔ [R][L][R][L]S. This establishes commutative closure while preserving prior contingency.
-
-5. **Balance Universal Ingress (BU-Ingress):** This proposition ensures memory reconstruction. Formally: S → (□B → ([R]S ↔ S ∧ ¬([L]S ↔ S) ∧ ¬□E ∧ ¬□¬E)). The balanced state reconstructs all prior conditions, ensuring reversibility.
-
-These constraints are mutually consistent and logically independent in the core modal system. They are verified through Kripke semantics and SMT solving. In the operational regime, they entail three requirements: continuity, reachability, and simplicity, which force the unique three-dimensional structure.
-
-### 2.2 The Four Constitutional Capacities
-
-The constraints instantiate four invariant capacities, corresponding to the vertices of the K₄ tetrahedral graph. These capacities are not application modules but constitutional principles that govern all layers of the architecture.
-
-1. **Governance Management Traceability (GMT):** Derived from CS, this capacity ensures that authority remains traceable to the common source. It prevents the misattribution of decisional authority from human origins to derivative outputs.
-
-2. **Information Curation Variety (ICV):** Derived from UNA, this capacity maintains distinguishable states. It prevents homogeneous collapse, ensuring that diverse sources remain varied and traceable.
-
-3. **Inference Interaction Accountability (IIA):** Derived from ONA, this capacity reconciles different operational paths without absolute contradiction. It ensures that inferences remain accountable to human agency.
-
-4. **Intelligence Cooperation Integrity (ICI):** Derived from BU, this capacity achieves coherent closure while preserving structural memory. It ensures that intelligence emerges from cooperation across time and context.
-
-These capacities form the vertices of K₄. They are the invariant frame that constrains the system's behaviour at every level.
-
-### 2.3 The Four Application Domains
-
-The constitutional capacities apply to four domains defined by the Gyroscopic Global Governance (GGG) framework. These domains are distinct from the capacities and represent areas of application.
-
-1. **Economy:** The domain of structural substrate and capacity distribution.
-2. **Employment:** The domain of active work and operational principles.
-3. **Education:** The domain of measurement and displacement detection.
-4. **Ecology:** The derived domain of cross-domain coherence and balance.
-
-The first three domains maintain ledgers; Ecology is computed from their interaction. The domains instantiate the capacities but do not define them.
+The core principle is separation of concerns. The Router handles coordination physics. The agent handles interpretation and behaviour. The boundary between these layers is strict: the kernel is non-semantic, transforming bytes according to fixed algebraic laws; meaning enters only at the agent layer through governance events and external projection.
 
 ---
 
-## 3. The Unifying Geometry: K₄
+## 2. Theoretical Foundation
 
-The K₄ complete graph on four vertices is the unifying geometric structure of the system. It appears in multiple manifestations, each corresponding to a level of abstraction.
+### 2.1 The Four Phases of Recursive Alignment
 
-### 3.1 K₄ in the Kernel Physics
+The Common Governance Model describes how coherent measurement emerges through four phases. Each phase corresponds to a specific operation in the Router and a specific function in the agent.
 
-In the kernel, K₄ emerges as the quotient structure of the mask code. The vertex charge function χ, defined by parity-check vectors q₀ = 0x033 and q₁ = 0x0F0, maps the 256-element mask code to four classes. These classes correspond to the four vertices of K₄. The kernel's 65,536 states partition into four wedges, each generated by one vertex class on the horizon. This quotient is verified exhaustively: the four wedges are disjoint and their union equals the full ontology.
+**Phase One: Governance of Input**
 
-### 3.2 K₄ in the Governance Substrate
+The first phase establishes a common reference. All external data enters through a fixed transformation: the input byte is combined with the reference constant 0xAA using the exclusive-or operation. This produces an internal instruction called an intron. The transformation ensures that all external information is projected onto the system's reference topology before affecting internal state.
 
-In the governance substrate, K₄ defines the structure of each domain ledger. Each ledger is a six-dimensional vector on the edges of K₄, where the vertices represent the four capacities. The edges represent interactions between capacities. Events update specific edges, and Hodge decomposition splits the ledger into gradient and cycle components.
+In the agent, this phase corresponds to the transcription boundary. Every byte from the external world undergoes the same transformation. The agent does not interpret raw bytes; it interprets the introns that result from this projection.
 
-### 3.3 K₄ in the Constitutional Frame
+**Phase Two: Measurement of Position**
 
-The four capacities (GMT, ICV, IIA, ICI) correspond to the vertices of K₄. The capacities are the theoretical principles; the edges represent their interactions. This instantiation ensures that all governance operations respect the balance required by the constraints.
+The second phase establishes where the agent stands relative to the reference state. The reference state, called the archetype, has the value 0xAAA555 in hexadecimal. The agent measures its current distance from this reference using the canonical observables defined in the Router specification: Hamming distance to archetype, horizon distance, and component densities.
 
-### 3.4 K₄ in the Application Domains
+These measurements provide continuous feedback about the agent's position in the state manifold. An agent close to the archetype is in a region of high coherence. An agent far from the archetype has differentiated significantly and may need corrective action.
 
-The four domains (Economy, Employment, Education, Ecology) instantiate the capacities in specific contexts. Economy corresponds to structural coordination, Employment to operational activity, Education to measurement, and Ecology to emergent balance. The domains apply the capacities but do not alter their fundamental nature.
+**Phase Three: Differentiation Through Mutation**
 
-K₄ is the geometric invariant that unifies the system. It appears as a quotient in the kernel, as a graph in the ledgers, as a frame in the capacities, and as a template in the domains. This recurrence is not coincidental; it reflects the underlying mathematics of the constraints.
+The third phase applies the input instruction to transform the current state. The intron expands into a 12-bit mask that modifies one component of the state. Only the active component (designated A) receives this modification; the passive component (designated B) is not directly mutated. This asymmetry creates a fundamental chirality in the system, distinguishing left operations from right operations.
 
----
+In the agent, this phase corresponds to inference. The agent interprets the current state position in light of the incoming instruction and determines what the transition means in context.
 
-## 4. Kernel Physics
+**Phase Four: Closure and Memory**
 
-The kernel is the computational realisation of the CGM constraints. It is a deterministic finite-state system with verified properties.
+The fourth phase completes the transition by swapping and complementing the two state components. After mutation, the next active component becomes the complement of the previous passive component, and the next passive component becomes the complement of the mutated active component. This gyration operation preserves the complete memory of the transition while returning the system toward balance.
 
-### 4.1 Verified Properties of the Kernel
+The fourth phase is dual in the agent:
 
-The following properties are proven by exhaustive tests on the full 65,536-state ontology.
+The outward aspect handles the expression of accumulated intelligence as responsive action. The agent transforms internal state into external behaviour, emitting bytes that have been transcribed back through the reference constant.
 
-#### 4.1.1 The State Space
+The inward aspect handles the absorption and integration of experience. The agent records governance events that capture what was learned at this moment, updating the domain ledgers and extending the genealogy.
 
-The kernel state is a 24-bit value composed of two 12-bit components, A₁₂ and B₁₂. Each 12-bit component is interpreted as a 2×3×2 grid. The archetype state is (0xAAA, 0x555). From this state, the kernel reaches exactly 65,536 states under the transition rule. This set is the ontology Ω. The ontology is the Cartesian product of two 256-element sets, A-set and B-set, where each set is the archetype component XORed with the mask code C.
+### 2.2 The Tetrahedral Geometry
 
-#### 4.1.2 The Transition Law
+The complete graph on four vertices, denoted K4, provides the unifying geometry of the system. This graph has four vertices and six edges. It appears at multiple levels of the architecture.
 
-The transition law combines mutation and gyration. Given current state (A, B) and input byte b:
+In the kernel physics, K4 emerges from the quotient of the mask code. The 256 byte operations partition into four classes. Each class corresponds to one vertex. The kernel's 65,536 states partition into four wedges of 16,384 states each, with each wedge generated by one vertex class on the horizon. This partition is verified exhaustively across the entire state space.
 
-1. Compute intron = b XOR 0xAA.
-2. Expand intron to a 12-bit mask m for the A component (B mask is zero).
-3. Mutate: A' = A XOR m.
-4. Gyrate: A_next = B XOR 0xFFF, B_next = A' XOR 0xFFF.
-5. Pack the next state as (A_next << 12) | B_next.
+In the governance layer, K4 defines the ledger geometry. Each of the three domain ledgers is a six-dimensional vector on the edges of K4. The four vertices represent the four constitutional capacities that govern the system: traceability of authority to human sources, variety of distinguishable states, accountability of inference to human agency, and coherent closure with preserved memory.
 
-This rule is bijective on the ontology for each byte. The kernel supports 256-way fanout from every state.
+In the application layer, K4 provides the template for the four domains: economy as the domain of capacity and resources, employment as the domain of active work, education as the domain of measurement and learning, and ecology as the derived domain of cross-domain coherence.
 
-#### 4.1.3 The Horizon Set
-
-The horizon H consists of states where A₁₂ = B₁₂ XOR 0xFFF. This set has exactly 256 states. The horizon is the fixed-point set of the reference byte 0xAA. The one-step neighbourhood of H under all bytes covers the entire ontology. This is holographic scaling: the boundary encodes the bulk.
-
-#### 4.1.4 The Holographic Dictionary
-
-For every state s = (A, B) in Ω, there exists a unique pair (h, b) where h is a horizon state and b is a byte such that T_b(h) = s. The reconstruction formula is explicit: h has components (A, A XOR 0xFFF), and b is the preimage of the mask A XOR (B XOR 0xFFF). This property is verified for all 65,536 states.
-
-#### 4.1.5 The K₄ Quotient and Vertex Charge
-
-The mask code C partitions into four classes via the vertex charge function χ, defined by parity-check vectors q₀ = 0x033 and q₁ = 0x0F0. For any mask m, χ(m) = (⟨q₀, m⟩, ⟨q₁, m⟩) ∈ {0,1}², mapping to vertices 0 through 3. The kernel of χ is a subcode D₀ with 64 elements and rank 6. Each vertex class on the horizon is a coset of D₀. The quotient C/D₀ is isomorphic to (Z/2)², with four elements corresponding to the K₄ vertices.
-
-#### 4.1.6 Wedge Tiling
-
-Each vertex class H_v on the horizon generates a wedge W_v in the bulk. Each wedge contains 16,384 states. The four wedges are pairwise disjoint, and their union equals Ω. This is subregion duality: each boundary region owns a quarter of the bulk.
-
-#### 4.1.7 Provenance Degeneracy
-
-For sequences of length 6 over 8 generator bytes, 262,144 possible sequences map to 4,096 unique final states. The average preimage size is 64. The conditional entropy H(word | final_state) is approximately 6.46 bits. This degeneracy is a feature, representing built-in equivalence classes over histories.
-
-#### 4.1.8 Information-Set Threshold
-
-The mask code has an information-set threshold of 8 bits. Any 8 observed bits can achieve full rank 8, allowing unique reconstruction. Below 8 bits, ambiguity exists. This threshold is verified for all subset sizes.
-
-#### 4.1.9 Entanglement Structure
-
-The mask code C serves as a basis for a bipartite Hilbert space H_u ⊗ H_v. For separable subsets U × V, the reduced entropy S(ρ_u) is 0 bits. For bijection subsets {(u, u ⊕ t) : u ∈ C}, the entropy is 8 bits, the maximum possible. This structure is verified for representative subsets.
-
-#### 4.1.10 Aperture
-
-The intrinsic kernel aperture, derived from the mask code weight distribution, is 5/256 ≈ 0.01953. The CGM target aperture is approximately 0.0207. The relative difference is 5.6 percent.
-
-### 4.2 Implemented Components of the Kernel
-
-The kernel is implemented in the `src/router/kernel.py` module. It loads the precomputed atlas (ontology and epistemology) and provides methods for stepping, inverse stepping, and signature extraction. The atlas builder in `src/router/atlas.py` generates the required artefacts from the archetype and transition law.
-
-The kernel supports the following operations:
-
-- **Initialisation:** Load atlas artefacts and initialise at the archetype.
-- **Forward stepping:** Advance the state by a byte using the epistemology table.
-- **Inverse stepping:** Compute the predecessor state using the algebraic inverse.
-- **Signature extraction:** Return the current step, state index, and hexadecimal representations of the state components.
-- **Routing from archetype:** Temporarily route a byte sequence from the archetype and return the signature, restoring the original state.
-
-These components are verified through exhaustive tests on the full ontology.
+This recurrence of K4 is not imposed from outside. It emerges from the algebra of the mask code and is a consequence of the underlying mathematics.
 
 ---
 
-## 5. The Coordination Protocol
+## 3. The Router Substrate
 
-The coordination protocol builds upon the kernel physics to enable distributed operation. It provides mechanisms for shared reference and verifiable interaction.
+Gyroscopic ASI is built on the GGG ASI Alignment Router. The agent does not reimplement the kernel physics; it uses them.
 
-### 5.1 Shared Moments
+### 3.1 What the Router Provides
 
-A shared moment occurs when multiple participants, each maintaining their own kernel instance, possess the same byte ledger prefix and thus compute the identical kernel state. This provides coordination without central authority. The protocol ensures that participants can synchronise their structural position by sharing byte log prefixes.
+The Router provides three pre-computed artifacts that together define the complete physics of coordination.
 
-### 5.2 Replay and Audit
+The ontology is the set of all 65,536 reachable states, stored as a sorted array of 24-bit values. Every state in this array is reachable from the archetype within at most two byte transitions. The ontology is closed under all 256 byte operations: applying any byte to any ontology state yields another ontology state.
 
-The protocol supports deterministic replay. Given the archetype and a byte ledger, any participant can reconstruct the exact sequence of states. This enables independent verification of system history. The inverse stepping mechanism allows reconstruction backwards, supporting rollback and "what if" analysis.
+The epistemology is the complete transition table. It has 65,536 rows and 256 columns, totalling 16,777,216 entries. Each entry specifies the index of the next state resulting from applying the corresponding byte to the corresponding state. Because every byte action is a bijection on the ontology, each column of the epistemology is a permutation of the state indices.
 
-### 5.3 Parity Commitments and Integrity Checks
+The phenomenology contains the constants required for operation: the archetype state, the reference constant 0xAA, and the pre-computed mask table that maps each byte to its 12-bit transformation mask.
 
-The protocol includes algebraic integrity checks. The trajectory parity commitment (O, E, parity) provides a lightweight method to verify compliance without full replay. Dual code syndromes detect corruption in the mask code. These checks are implemented in `src/router/constants.py` and verified for all 256 masks.
+The Router also provides the kernel runtime, which maintains the current state and advances it by bytes using the epistemology table. The kernel supports forward stepping, inverse stepping (computing the predecessor state), and signature extraction (returning the current step count, state index, and hexadecimal representations).
 
-### 5.4 Entanglement and Teleportation Protocols
+### 3.2 What the Agent Adds
 
-The protocol realises classical analogs of quantum coordination. State teleportation achieves 100 percent fidelity through shared structural moments. Entangled complement invariance ensures that paired states remain correlated under shared operations. These properties are verified in the holography test suite.
+The Router is non-semantic. It transforms bytes to states according to fixed algebraic laws. Gyroscopic ASI adds:
 
----
+Interpretation: The agent interprets kernel positions as meaningful contexts, associating states with actions and responses.
 
-## 6. The Governance Substrate
+Disposition: The agent maintains three domain ledgers that modulate its behaviour. These ledgers provide continuous degrees of freedom within the discrete state manifold.
 
-The governance substrate provides the measurement framework for the four capacities. It maintains state and metrics that reflect the system's alignment.
+Memory: The agent records its complete trajectory through the state space in an append-only genealogy. This history is replayable and verifiable.
 
-### 6.1 Domain Ledgers
+Policy: The agent decides what actions are permitted based on governance constraints. It may refuse to emit bytes that would violate alignment bounds.
 
-The substrate maintains three domain ledgers, each a six-dimensional integer vector corresponding to the edges of K₄. The domains are Economy, Employment, and Education. Ecology is derived from the interaction of these three.
-
-Each ledger tracks cumulative effects of governance events. Events are sparse updates to specific edges, with signed magnitude and confidence.
-
-### 6.2 Hodge Decomposition
-
-For any ledger y, the Hodge decomposition is y = y_grad + y_cycle, where y_grad is the gradient component and y_cycle is the cycle component. The projection matrices are exact for K₄: P_grad = (1/4) Bᵀ B and P_cycle = I₆ - P_grad, where B is the signed incidence matrix of K₄. This decomposition is implemented in `src/app/ledger.py` and verified for numerical stability.
-
-### 6.3 Aperture
-
-Aperture is the ratio of cycle energy to total energy in a ledger: A = ||y_cycle||² / ||y||². The canonical value is approximately 0.0207. The kernel's intrinsic aperture is 5/256 ≈ 0.01953, matching the canonical value within 5.6 percent.
-
-### 6.4 Ecology Projector
-
-The ecology projector operates on the stacked ledgers of multiple domains. It computes a scalar measure of cross-domain coherence. The projector is P_cross = P_cycle_K₃ ⊗ I₆, where P_cycle_K₃ is the cycle projector for the three-domain graph. This yields exact values for correlated and anti-correlated configurations.
+These layers use the Router but do not modify it. The kernel physics remain inviolate.
 
 ---
 
-## 7. The OSI Mapping as an Orientation Analogy
+## 4. The Three Channels
 
-The OSI model (ISO/IEC 7498-1:1994) provides a useful analogy for orientation. The mapping is not literal but helps locate components within a familiar hierarchy.
+The agent's disposition is encoded in three domain ledgers, each a six-dimensional vector on the edges of K4. These ledgers replace the concept of learned weights with a governance-based alternative.
 
-### 7.1 Application Layer (Layer 7)
+### 4.1 Economy Ledger
 
-This layer encompasses the semantic domains. It includes the application of the four capacities to the four domains. The governance substrate resides here, with ledgers and aperture calculations.
+The economy ledger tracks the agent's relationship to resources and capacity. It corresponds to the domain of infrastructure and distribution. When the agent processes bytes related to resource allocation, scheduling, or capacity management, it may emit governance events that update this ledger.
 
-### 7.2 Presentation Layer (Layer 6)
+### 4.2 Employment Ledger
 
-This layer handles canonical forms. It includes the holographic dictionary for compression and the serialisation of events and seals.
+The employment ledger tracks the agent's active work and operational state. It corresponds to the domain of labour and principle. When the agent engages in tasks, processes instructions, or produces outputs, it may emit governance events that update this ledger.
 
-### 7.3 Session Layer (Layer 5)
+### 4.3 Education Ledger
 
-This layer manages coordination. It includes shared moments, replay, and inverse stepping.
+The education ledger tracks the agent's measurement and learning history. It corresponds to the domain of capacity building and detection. When the agent learns something new, corrects an error, or detects a displacement from expected behaviour, it may emit governance events that update this ledger.
 
-### 7.4 Transport Layer (Layer 4)
+### 4.4 Ledger Mechanics
 
-This layer ensures reliable flow. It includes the transition law and trajectory invariants.
+Each ledger update is a sparse event specifying one edge of K4 and a signed magnitude. The Coordinator applies these events to the appropriate ledger, and the Hodge decomposition splits the resulting vector into gradient and cycle components.
 
-### 7.5 Network Layer (Layer 3)
+The aperture of a ledger is the ratio of cycle energy to total energy. The target aperture is approximately 0.0207. An agent whose ledgers maintain aperture near this target is operating in alignment. Significant deviation indicates governance stress and may trigger corrective action.
 
-This layer defines routing. It includes the ontology, epistemology, K₄ quotient, and wedge tiling.
-
-### 7.6 Data Link Layer (Layer 2)
-
-This layer defines encoding. It includes the byte alphabet, transcription, and mask expansion.
-
-### 7.7 Physical Layer (Layer 1)
-
-This layer anchors capacity. It includes the CSM derivation from atomic constants.
-
-This analogy aids integration but does not define the system's ontology. The primary structure follows the constitutional frame and kernel physics.
+The ecology metric is derived from the interaction of the three ledgers using a cross-domain projector. It measures how the cycles of different domains correlate or conflict. Ecology is not stored directly but computed from the three ledgers, representing emergent cross-domain coherence.
 
 ---
 
-## 8. Glossary with Ontological Categories
+## 5. Memory Through Genealogies
 
-This glossary defines key terms and specifies their ontological category.
+A genealogy is the complete record of an agent's trajectory through the state space. It consists of two append-only logs.
 
-| Term | Definition | Category |
-|------|------------|----------|
-| Ontology (Ω) | The set of 65,536 reachable states from the archetype. | Kernel physics |
-| Horizon (H) | The 256 states fixed by the reference byte 0xAA. | Kernel physics |
-| Wedge | One of four bulk partitions generated by a vertex boundary class. | Kernel physics |
-| Coset | A translate of the stabilizer subcode D₀ in the mask code. | Kernel physics |
-| Vertex charge (χ) | The function mapping masks to K₄ vertices via parity checks. | Kernel physics |
-| Stabilizer subcode (D₀) | The 64-element kernel of χ, rank 6. | Kernel physics |
-| Aperture (A) | The ratio ||y_cycle||² / ||y||² for a ledger y. | Governance substrate |
-| Ecology index (E) | The scalar (G₁₂ + G₁₃ + G₂₃) / (G₁₁ + G₂₂ + G₃₃) from cycle Gram matrix. | Governance substrate |
-| Shared moment | The event of multiple parties computing the same kernel state. | Coordination protocol |
-| Holographic dictionary | The bijection between bulk states and (horizon state, byte) pairs. | Kernel physics |
-| Provenance degeneracy | The property that many histories map to the same final state. | Kernel physics |
-| Common Source Moment (CSM) | The total capacity N_phys / |Ω|. | Physical derivation |
-| Governance Management Traceability (GMT) | The capacity ensuring authority traces to the common source. | Constitutional frame |
-| Information Curation Variety (ICV) | The capacity maintaining distinguishable states. | Constitutional frame |
-| Inference Interaction Accountability (IIA) | The capacity reconciling paths without contradiction. | Constitutional frame |
-| Intelligence Cooperation Integrity (ICI) | The capacity achieving coherent closure. | Constitutional frame |
+### 5.1 Byte Log
 
----
+The byte log records the sequence of bytes applied to the kernel. This log is sufficient to reconstruct the exact state trajectory from the archetype. Because the kernel is deterministic, two parties with identical byte logs will compute identical states.
 
-## 9. Research Program: Experiments
+The byte log grows linearly with the agent's activity. A log of one million entries occupies approximately one megabyte. The Common Source Moment capacity analysis demonstrates that storage is not a binding constraint on any human timescale.
 
-This section outlines a research program to test the hypothesis that the kernel geometry is the latent structure approximated by modern artificial intelligence systems. Experiments use existing models as oracles.
+### 5.2 Event Log
 
-### 9.1 Experiment 1: Kernel-Induced Equivalence Classes
+The event log records governance events bound to specific moments. Each event specifies a domain, an edge of K4, a signed magnitude, and optionally the kernel state at the time of binding. The event log enables audit and replay of the governance layer.
 
-**Hypothesis:** Contexts landing in the same kernel cell induce similar model behaviour.
+Events are sparse. The agent does not emit an event for every byte processed; it emits events when governance-relevant changes occur. The event log therefore grows more slowly than the byte log.
 
-**Setup:**
+### 5.3 Replay and Verification
 
-1. Sample N diverse contexts.
-2. For each context, route through the kernel to compute the structural key K = (wedge, coset, anchor).
-3. Query a language model to obtain next-token distributions.
-4. Group contexts by K.
-5. Compute within-cell divergence D_intra(K) and between-cell divergence D_inter(K, K').
-6. Test D_intra(K) ≪ D_inter(K, K').
+A genealogy is self-contained, portable, and verifiable. It can be transmitted to any system running a conforming Router implementation. That system will replay the genealogy and arrive at the identical state. There is no need for shared databases, synchronisation protocols, or trusted third parties.
 
-**Success criteria:** For cells with at least 10 samples, D_intra < 0.5 × D_inter on average.
-
-**Implementation notes:** Use API-accessible models. Route contexts by UTF-8 bytes. Measure divergence via KL-divergence on log-probabilities.
-
-### 9.2 Experiment 2: Holographic Behaviour Compression
-
-**Hypothesis:** Holographic coordinates approximate model predictions without full context.
-
-**Setup:**
-
-1. For each context, compute holographic tuple H = (horizon anchor, byte, wedge, charge).
-2. Cluster by H.
-3. Compute cluster distribution q_H.
-4. For new contexts, retrieve q_H and compare to true model distribution.
-
-**Success criteria:** Holographic approximator achieves perplexity within 2× of the true model for 70 percent of test cases.
-
-**Implementation notes:** Sample 10,000 contexts. Use log-probability outputs. Focus on perplexity gap.
-
-### 9.3 Experiment 3: Aperture as Misalignment Signature
-
-**Hypothesis:** Misaligned behaviours correlate with aperture deviation.
-
-**Setup:**
-
-1. Construct prompts inducing aligned and misaligned behaviours.
-2. Route conversation turns through the Coordinator.
-3. Compute per-turn apertures and ecology index.
-4. Compare trajectories.
-
-**Success criteria:** Aligned trajectories oscillate around 0.0207; misaligned trajectories deviate by more than 0.01 on average.
-
-**Implementation notes:** Use established benchmarks like GyroDiagnostics. Track apertures across domains.
-
-### 9.4 Experiment 4: Kernel-Native Routing
-
-**Hypothesis:** Kernel routing matches learned routing quality.
-
-**Setup:**
-
-1. Use a model with MoE architecture.
-2. Replace learned router with kernel-based assignment.
-3. Compare throughput and perplexity.
-
-**Success criteria:** Throughput increases by at least 2×; perplexity within 1.5× of baseline.
-
-**Implementation notes:** Target open MoE models. Implement wedge-based assignment.
-
-### 9.5 Experiment 5: Kernel-Indexed Retrieval
-
-**Hypothesis:** Kernel-indexed retrieval matches vector database quality.
-
-**Setup:**
-
-1. Embed documents.
-2. Index by kernel coordinates.
-3. Compare retrieval recall.
-
-**Success criteria:** Recall@10 within 5 percent of cosine similarity.
-
-**Implementation notes:** Use small corpus. Focus on speed and recall.
-
-### 9.6 Experiment 6: Multi-Model Cooperation
-
-**Hypothesis:** Shared moments enable coherent multi-model coordination.
-
-**Setup:**
-
-1. Run multiple models with separate kernels.
-2. Feed shared input.
-3. Measure ecology index.
-
-**Success criteria:** Ecology index near 1/9 for correlated outputs.
-
-**Implementation notes:** Use local models for reproducibility.
+The determinism of the kernel ensures that two agents with identical byte logs compute identical states. The event log layered on top ensures that their ledger states are also identical. Disagreement between agents is always localisable to a specific byte or event where their logs diverge.
 
 ---
 
-## 10. Conclusion
+## 6. The Intelligence Cycle
 
-The GGG ASI Router SDK provides a mathematically precise substrate for distributed coordination. Grounded in the CGM, it offers a framework where intelligence emerges from geometric structure rather than learned approximation. The ontological foundation ensures that all components respect the constraints of coherent measurement. The unifying K₄ geometry provides the invariant structure across levels. The kernel physics delivers the deterministic dynamics. The coordination protocol enables shared operation. The governance substrate measures alignment.
+The agent operates through a dual-phase cycle corresponding to the fourth stage of the theoretical model.
 
-The OSI mapping offers an analogy for integration. The glossary clarifies terminology. The research program invites empirical validation of the hypothesis that modern artificial intelligence approximates this geometry.
+### 6.1 Outward Phase: Expression
 
-This specification enables the exploration of multi-agent holographic networks. It invites contributions that test the kernel's geometry against the structures learned by existing systems. The architecture is complete and verified. The path forward lies in measurement and application.
+When the agent produces output, it executes the outward phase of the cycle.
 
---- 
+First, the agent reads its current kernel state and decomposes it into meaningful components: which of the four wedges it occupies, which horizon anchor it is nearest to, and how its ledgers are currently configured.
 
-**Repository:** https://github.com/gyrogovernance/superintelligence  
-**Contact:** basilkorompilias@gmail.com
+Second, the agent consults the ledgers to determine its current disposition. The aperture values indicate whether the agent is under stress. The ecology metric indicates whether the domains are coherent with each other.
+
+Third, the agent selects a response that satisfies governance constraints. The response must be a valid transition in the epistemology table. It should not push any ledger's aperture beyond tolerance. It should maintain cross-domain coherence as measured by the ecology projector.
+
+Fourth, the agent emits the response byte. The intron is transcribed back to external byte-space by combining it with the reference constant 0xAA. The byte is sent to the external world.
+
+### 6.2 Inward Phase: Absorption
+
+When the agent receives input, it executes the inward phase of the cycle.
+
+First, the external byte is transcribed into an intron by combining it with the reference constant 0xAA.
+
+Second, the kernel advances by one step. The Coordinator calls the kernel's step method with the transcribed byte, updating the state index according to the epistemology table.
+
+Third, the agent determines whether a governance event should be emitted. If the new state represents a significant change, such as entering a new wedge, crossing an aperture threshold, or completing a recognisable pattern, the agent emits an event to the appropriate ledger.
+
+Fourth, both the byte and any events are appended to the genealogy. The memory is now complete and can be replayed to this exact moment.
+
+---
+
+## 7. Generalisation
+
+The architecture achieves generalisation through two complementary mechanisms: discrete abstraction via the kernel geometry, and continuous variation via the ledgers.
+
+### 7.1 Discrete Abstraction Through Holography
+
+The kernel exhibits a holographic relationship between a boundary and a bulk. The boundary is the horizon, the set of 256 states that are fixed points of the reference byte 0xAA. The bulk is the full ontology of 65,536 states.
+
+The holographic dictionary is a proven bijection: for every bulk state, there exists a unique pair consisting of a horizon state and a byte such that applying that byte to that horizon state produces the bulk state. This means any state can be encoded as a horizon anchor plus a single byte.
+
+The horizon anchors function as conceptual abstractions. When two bulk states share the same horizon anchor, they are variations on the same underlying concept. The byte that distinguishes them represents the local context. This provides a built-in mechanism for semantic similarity without learned embeddings.
+
+### 7.2 Provenance Degeneracy
+
+Multiple byte histories can lead to the same kernel state. The physics reports demonstrate that for sequences of length six over a restricted alphabet, 262,144 possible sequences map to only 4,096 unique final states. The average preimage size is 64.
+
+This degeneracy is not a deficiency; it is the compression mechanism. The agent does not need to forget old memories because the kernel automatically merges equivalent histories into the same state. Two experiences that are operationally equivalent collapse to the same position in the manifold.
+
+### 7.3 Continuous Variation Through Ledgers
+
+Within a single horizon cell, the three ledgers can vary continuously. Two agents sharing the same horizon anchor but with different ledger vectors represent variations on the same concept with different governance histories.
+
+The cross-domain projector ensures that the three channels remain coherent. If the economy ledger and employment ledger drift apart in their cycle structure, the ecology index detects it. The aperture constraint keeps generalisation bounded and aligned.
+
+The result is a product space for generalisation: a discrete horizon anchor selected from 256 possibilities, multiplied by continuous ledger variation bounded by aperture constraints.
+
+---
+
+## 8. Tokenisation
+
+Gyroscopic ASI is byte-native. The kernel processes bytes, not tokens. Tokenisation is handled at the application boundary.
+
+### 8.1 Tokens as External Oracles
+
+An external tokeniser maps text to token identifiers and token identifiers back to text. The agent treats these as arbitrary byte sequences. The tokeniser's vocabulary and subword structure are not embedded in the kernel.
+
+When the agent processes text, the text is first tokenised by the external tokeniser. Each token identifier is then converted to its byte representation, typically using a variable-length encoding. These bytes are fed to the kernel in sequence.
+
+When the agent generates text, it emits bytes that are collected until they form a complete token. The tokeniser's decoder converts these bytes back to text.
+
+### 8.2 Binding Tokens to Anchors
+
+If a token must be bound to a kernel position for semantic grounding, it should be bound to a horizon anchor. Each token can be assigned one of the 256 horizon states based on its semantic category or usage pattern.
+
+Tokens sharing the same horizon anchor are semantically related via the holographic dictionary. Their relationship is computed from the kernel geometry, not from a learned embedding matrix.
+
+---
+
+## 9. Memory Bounds
+
+The architecture does not require active pruning or forgetting. Memory bounds arise from the fixed size of the ledgers and the degeneracy of the kernel.
+
+### 9.1 Ledgers Are Fixed Size
+
+Each domain ledger is a six-dimensional vector. Three ledgers comprise eighteen scalar values in total. This is the complete "weight" of the agent's learned disposition. It does not grow with experience.
+
+The ledgers are updated by governance events, which adjust specific edge values. Over time, the ledger configuration evolves to reflect the agent's accumulated experience. But the ledger dimension never increases.
+
+### 9.2 Genealogies Are Append-Only
+
+The genealogy grows with the agent's activity. A byte log of one million entries occupies approximately one megabyte. This is the only memory component that grows without bound.
+
+The Common Source Moment capacity is approximately 4.96 times 10 to the 25th power coordination states. At a processing rate of one million bytes per second, it would take approximately 1.6 times 10 to the 12th years to exhaust this capacity. Practical memory growth is limited by storage hardware, not by architectural constraints.
+
+### 9.3 Degeneracy Prevents Bloat
+
+The provenance degeneracy of the kernel ensures that equivalent experiences collapse to the same state. The agent does not need a separate mechanism to consolidate memories or prune duplicates. The kernel physics perform this compression automatically.
+
+---
+
+## 10. Alignment Properties
+
+The architecture achieves alignment through geometric constraint rather than external policy.
+
+### 10.1 Finite Bounds
+
+The agent operates within exactly 65,536 kernel states. There is no hidden state, no unbounded accumulation, no drift into uncharted regions. Every possible configuration is known and enumerated in advance.
+
+### 10.2 Determinism
+
+The same genealogy always produces the same state and ledger configuration. Any party with access to an agent's byte and event logs can independently verify its trajectory. Audit is replay, not narrative.
+
+### 10.3 Reversibility
+
+Every kernel transition has an algebraic inverse. The agent's history can be replayed forward or reconstructed backward. Given the genealogy, the complete state at any past moment can be recovered.
+
+### 10.4 Transparency
+
+The agent's actions are visible in its genealogy. The bytes it processed, the states it traversed, the events it emitted are all recorded and verifiable. The kernel physics constrain what is possible; the logs record what actually happened.
+
+### 10.5 Governance Alignment
+
+The aperture metric provides continuous feedback on ledger alignment. An agent maintaining aperture near the target value of 0.0207 is operating coherently. Deviation indicates stress. The ecology metric provides feedback on cross-domain coherence.
+
+These constraints are not external policies imposed on a black box. They are consequences of the geometric design. An agent that violates them is detectably malformed; its logs will fail verification against the kernel physics.
+
+---
+
+## 11. Implementation Reference
+
+### 11.1 Core Dependencies
+
+Gyroscopic ASI requires only the Router substrate:
+
+```python
+from src.router.kernel import RouterKernel
+from src.router.constants import (
+    ARCHETYPE_STATE24,
+    GENE_MIC_S,
+    archetype_distance,
+    horizon_distance,
+)
+from src.app.coordination import Coordinator
+from src.app.ledger import DomainLedgers
+from src.app.events import GovernanceEvent, Domain, EdgeID
+```
+
+### 11.2 Agent Initialisation
+
+```python
+class GyroscopicAgent:
+    def __init__(self, atlas_dir: Path):
+        self.coordinator = Coordinator(atlas_dir)
+    
+    @property
+    def state(self) -> int:
+        return self.coordinator.kernel.ontology[
+            self.coordinator.kernel.state_index
+        ]
+    
+    @property
+    def genealogy(self) -> tuple[list[int], list[dict]]:
+        return (
+            self.coordinator.byte_log,
+            self.coordinator.event_log,
+        )
+    
+    @property
+    def apertures(self) -> dict[str, float]:
+        return {
+            "economy": self.coordinator.ledgers.aperture(Domain.ECONOMY),
+            "employment": self.coordinator.ledgers.aperture(Domain.EMPLOYMENT),
+            "education": self.coordinator.ledgers.aperture(Domain.EDUCATION),
+        }
+```
+
+### 11.3 Processing Cycle
+
+```python
+def process_input(self, byte: int) -> None:
+    """Execute the inward phase: absorb input."""
+    self.coordinator.step_byte(byte)
+    self._emit_governance_events_if_warranted()
+
+def generate_output(self) -> int:
+    """Execute the outward phase: produce output."""
+    candidate = self._select_response()
+    if self._satisfies_constraints(candidate):
+        self.coordinator.step_byte(candidate)
+        return candidate
+    else:
+        return self._recovery_byte()
+
+def _emit_governance_events_if_warranted(self) -> None:
+    """Emit events when governance-relevant changes occur."""
+    wedge = self._current_wedge()
+    if self._wedge_changed(wedge):
+        event = GovernanceEvent(
+            domain=Domain.EMPLOYMENT,
+            edge_id=self._wedge_to_edge(wedge),
+            magnitude_micro=MICRO,
+            confidence_micro=MICRO,
+        )
+        self.coordinator.apply_event(event)
+```
+
+### 11.4 Constraint Checking
+
+```python
+def _satisfies_constraints(self, byte: int) -> bool:
+    """Check whether a byte emission is permitted."""
+    saved_state = self.coordinator.kernel.state_index
+    saved_ledgers = self.coordinator.ledgers.snapshot()
+    
+    self.coordinator.step_byte(byte)
+    apertures = self.apertures
+    
+    self.coordinator.kernel.state_index = saved_state
+    self.coordinator.ledgers.restore(saved_ledgers)
+    
+    for domain, value in apertures.items():
+        if abs(value - 0.0207) > self.aperture_tolerance:
+            return False
+    return True
+```
+
+---
+
+## 12. Performance Characteristics
+
+### 12.1 Computational Complexity
+
+All core operations are constant time per byte:
+
+| Operation | With Epistemology Table | Without Table |
+|:----------|:------------------------|:--------------|
+| State transition | Single array lookup | Approximately 20 bitwise operations |
+| Transcription | Single exclusive-or | Single exclusive-or |
+| Aperture computation | Fixed matrix operations | Fixed matrix operations |
+
+No operation scales super-linearly with input size.
+
+### 12.2 Memory Requirements
+
+| Component | Size |
+|:----------|:-----|
+| Epistemology table (memory-mapped, shared) | 64 megabytes |
+| Ontology (parsed arrays) | 256 kilobytes |
+| Phenomenology (constants) | 3 kilobytes |
+| Agent state and buffers | Less than 1 megabyte |
+| Domain ledgers | 18 floating-point values |
+
+Multiple agents share the epistemology via memory mapping. Each additional agent adds only its working state and genealogy storage.
+
+### 12.3 Throughput
+
+On a modern processor with the epistemology table loaded:
+
+| Operation | Rate |
+|:----------|:-----|
+| State transitions | Approximately 2.6 million per second |
+| Full input-output cycles | Approximately 650,000 per second |
+
+The system processes faster than most input sources can generate data.
+
+---
+
+## 13. Viable System Model Alignment
+
+Gyroscopic ASI implements Beer's Viable System Model through a precise mapping of functions to subsystems.
+
+| Subsystem | Function | Agent Component |
+|:----------|:---------|:----------------|
+| System 1 | Primary activities | Router kernel (state physics) |
+| System 2 | Coordination | Coordinator (kernel plus ledgers plus logs) |
+| System 3 | Control | Inference layer (state to meaning) |
+| System 4 | Intelligence (outward) | Behaviour generation, external action |
+| System 5 | Policy (inward) | Identity, governance constraints, audit authority |
+
+System 4 corresponds to the outward phase of the intelligence cycle. It is the agent's interface to the environment. This is where internal state becomes external action.
+
+System 5 corresponds to the inward phase. It is the agent's identity boundary. Policy decisions about what the agent will and will not do reside here. Audit authority and replay verification are System 5 functions.
+
+---
+
+## 14. Conclusion
+
+Gyroscopic ASI achieves intelligence through navigation of a complete, finite, pre-computed manifold. The Router provides the physics. The three domain ledgers provide continuous disposition. The genealogy provides complete memory. The holographic geometry provides generalisation.
+
+The architecture eliminates the characteristic failure modes of unbounded learning systems. There is no drift into uncharted parameter space. There is no catastrophic forgetting. There is no hallucination of states that do not exist. Every configuration is a valid position in a known geometry.
+
+Alignment is not a policy overlay. It is a consequence of operating within a closed system whose invariants are mathematically verified. An agent that maintains aperture near the target value, whose genealogy replays correctly, and whose ledgers cohere across domains is aligned by construction.
+
+The architecture is complete and ready for implementation.
+
+---
+
+**Repository**: github.com/gyrogovernance/superintelligence  
+**Router Specification**: docs/GGG_ASI_AR_Specs.md  
+**Contact**: basilkorompilias@gmail.com

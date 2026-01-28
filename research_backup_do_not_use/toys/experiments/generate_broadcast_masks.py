@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate and save intron broadcast masks for GyroSI Kernel.
+Generate and save intron broadcast masks for GyroASI Kernel.
 """
 
 import numpy as np

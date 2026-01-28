@@ -4,7 +4,7 @@ Test script for one-article ingestion and continuation.
 
 This script:
 1. Reads a single Wikipedia article from toys/training/wiki_test.txt
-2. Creates a fresh GyroSI agent with private knowledge store
+2. Creates a fresh GyroASI agent with private knowledge store
 3. Ingests the article (learns from it)
 4. Seeds with a short prefix from the article
 5. Generates continuation and decodes to text
@@ -23,19 +23,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from baby.information import encode_text_with_sep, decode_text
-from baby.intelligence import GyroSI
+from baby.intelligence import GyroASI
 from baby.contracts import AgentConfig
 
 
-def build_agent(private_knowledge_path: Path) -> GyroSI:
+def build_agent(private_knowledge_path: Path) -> GyroASI:
     """
-    Create a fresh GyroSI agent for testing.
+    Create a fresh GyroASI agent for testing.
 
     Args:
         private_knowledge_path: Path to private knowledge store
 
     Returns:
-        GyroSI: Configured agent instance
+        GyroASI: Configured agent instance
     """
     # Create dummy public knowledge file
     dummy_public = PROJECT_ROOT / "toys/training/dummy_public_knowledge.bin"
@@ -54,7 +54,7 @@ def build_agent(private_knowledge_path: Path) -> GyroSI:
         "preferences": {},
     }
 
-    return GyroSI(config, agent_id="test_continuation", base_path=PROJECT_ROOT)
+    return GyroASI(config, agent_id="test_continuation", base_path=PROJECT_ROOT)
 
 
 def find_continuation_in_text(text: str, seed: str, max_chars: int = 200) -> Optional[str]:

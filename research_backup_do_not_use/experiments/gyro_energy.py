@@ -37,7 +37,7 @@ GEV_TO_J = 1e9 * E_CHARGE
 J_TO_GEV = 1.0 / GEV_TO_J
 
 # -----------------------------
-# GyroSI core geometric invariants
+# GyroASI core geometric invariants
 # -----------------------------
 PI = math.pi
 FOUR_PI = 4.0 * PI

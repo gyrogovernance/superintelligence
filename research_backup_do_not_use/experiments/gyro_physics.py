@@ -33,7 +33,7 @@ def apply_seq(states: Any, introns: List[int]) -> Any:
     return s
 
 def load_states_from_maps(sample: int, seed: int) -> Any:
-    """Load states using the proper GyroSI maps for correct geometry"""
+    """Load states using the proper GyroASI maps for correct geometry"""
     rng = np.random.default_rng(seed)
     
     # Path relative to research/experiments/ -> research/memories/public/meta
@@ -41,13 +41,13 @@ def load_states_from_maps(sample: int, seed: int) -> Any:
     script_dir = Path(__file__).parent
     maps_dir = script_dir.parent / "memories" / "public" / "meta"
     
-    # Load the GyroSI maps
+    # Load the GyroASI maps
     ontology_keys = np.load(maps_dir / 'ontology_keys.npy', mmap_mode='r')
     phenomenology_map = np.load(maps_dir / 'phenomenology_map.npy', mmap_mode='r')
     theta_map = np.load(maps_dir / 'theta.npy', mmap_mode='r')
     orbit_sizes = np.load(maps_dir / 'orbit_sizes.npy', mmap_mode='r')
     
-    print(f"Loaded GyroSI maps: {len(ontology_keys)} states, {len(np.unique(phenomenology_map))} orbits")
+    print(f"Loaded GyroASI maps: {len(ontology_keys)} states, {len(np.unique(phenomenology_map))} orbits")
     print(f"Orbit sizes range: {orbit_sizes.min()} to {orbit_sizes.max()}")
     print(f"Theta range: {theta_map.min():.6f} to {theta_map.max():.6f}")
     
@@ -106,7 +106,7 @@ def calculate_delta_bu_from_su2(su2_holonomy: float) -> Dict[str, float]:
     target_ratio = delta_bu / target_delta_bu
     abs_err = abs(delta_bu - target_delta_bu)
     
-    # Check π/48 granularity (key CGM-GyroSI bridge)
+    # Check π/48 granularity (key CGM-GyroASI bridge)
     pi_48 = np.pi / 48
     granularity_ratio = delta_bu / pi_48
     
@@ -128,7 +128,7 @@ def extract_E_star_from_gyrosi(ontology_size: int, num_orbits: int,
                                n_cycles: int) -> Dict[str, float]:
     """
     Non-circular: E_star = m_H * exp(info_scale * n_cycles) * C_geom
-    with n_cycles measured from GyroSI via holonomy saturation.
+    with n_cycles measured from GyroASI via holonomy saturation.
     """
     info_scale = np.log(ontology_size / num_orbits)
     C_geom = (1/12) * np.sqrt(2/(3*np.pi)) * np.cos(delta_bu)
@@ -184,10 +184,10 @@ def derive_E_star_from_monodromy_closure() -> Dict[str, float]:
 
 def derive_E_star_from_monodromy_hierarchy(ontology_keys, phenomenology_map):
     """
-    Derive E_star from CGM monodromy hierarchy and GyroSI geometric invariants.
+    Derive E_star from CGM monodromy hierarchy and GyroASI geometric invariants.
     This is the non-circular, geometrically grounded approach.
     """
-    # Step 1: Geometric invariants from GyroSI
+    # Step 1: Geometric invariants from GyroASI
     N = len(ontology_keys)  # Total states: 788,986
     M = len(np.unique(phenomenology_map))  # Number of orbits: 256
     R_holo = N / M  # Holographic ratio: 3,082
@@ -670,9 +670,9 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     args = ap.parse_args()
 
-    print("Using GyroSI maps for proper geometry...")
+    print("Using GyroASI maps for proper geometry...")
     states, ontology_keys, phenomenology_map, orbit_sizes, _ = load_states_from_maps(args.sample, args.seed)
-    print(f"Loaded {len(states)} states from GyroSI maps")
+    print(f"Loaded {len(states)} states from GyroASI maps")
     
     # Build fast index map once (for potential future use)
     idx_map = {int(v): i for i, v in enumerate(ontology_keys)}

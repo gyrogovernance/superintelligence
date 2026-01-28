@@ -65,7 +65,7 @@ The InformationEngine coordinates three core responsibilities:
 
    * Conversion between the packed 48-bit integer representation and the canonical geometric tensor form (\[4, 2, 3, 2], ±1).
    * `int_to_tensor(state_int)` and `tensor_to_int(tensor)` perform bidirectional conversion, ensuring strict mapping and validation of all physical states.
-   * All conversion logic is static and is validated to guarantee exact round-trip between representations, matching the physical encoding of GyroSI.
+   * All conversion logic is static and is validated to guarantee exact round-trip between representations, matching the physical encoding of GyroASI.
 
 2. **State Measurement and Divergence**
 
@@ -170,7 +170,7 @@ This architecture guarantees that semantic knowledge is always indexed, updated,
 
 **Physical Principle:** Dual-phase operation (Ingress and Egress cycles)
 
-The `intelligence.py` module defines the protocol and orchestration boundary for the GyroSI agent. It provides all interfaces for state evolution, agent learning, regulation, and multi-agent operation. Each contract is explicit, and every externally callable function or class is referenced by its canonical name.
+The `intelligence.py` module defines the protocol and orchestration boundary for the GyroASI agent. It provides all interfaces for state evolution, agent learning, regulation, and multi-agent operation. Each contract is explicit, and every externally callable function or class is referenced by its canonical name.
 
 #### IntelligenceEngine
 
@@ -198,7 +198,7 @@ The `intelligence.py` module defines the protocol and orchestration boundary for
   Contains all registered hooks, including the algedonic regulator.
 - The algedonic regulator computes a rolling mean of angular divergence. If the divergence exceeds a threshold, corrective introns are applied. Repeated excursions trigger a stabilising autonomic cycle using instructions from phenomenology data. All actions guarantee state integrity after execution.
 
-#### GyroSI
+#### GyroASI
 
 - `ingest(data: bytes) -> None`  
   Applies batch learning to the input sequence and commits all writes.
@@ -217,8 +217,8 @@ The `intelligence.py` module defines the protocol and orchestration boundary for
 
 #### AgentPool
 
-- `get_or_create_agent(agent_id: str, role_hint: Optional[str]) -> GyroSI`  
-  Returns or creates a GyroSI agent, ensuring overlay and eviction policy.
+- `get_or_create_agent(agent_id: str, role_hint: Optional[str]) -> GyroASI`  
+  Returns or creates a GyroASI agent, ensuring overlay and eviction policy.
 
 - `remove_agent(agent_id: str) -> bool`  
   Removes and closes the agent.
@@ -257,7 +257,7 @@ The `intelligence.py` module defines the protocol and orchestration boundary for
 
 ## 6.5 Shared Contracts and Storage Policies
 
-This section defines all interface contracts, canonical storage primitives, and decorator layers for the orchestration, policy, and maintenance operations of the GyroSI S4/S5 system. All API boundaries are strictly enforced and have direct type correspondence in `baby.contracts`. No informal or ad hoc API surfaces exist.
+This section defines all interface contracts, canonical storage primitives, and decorator layers for the orchestration, policy, and maintenance operations of the GyroASI S4/S5 system. All API boundaries are strictly enforced and have direct type correspondence in `baby.contracts`. No informal or ad hoc API surfaces exist.
 
 ### 6.5.1 Contracts: Protocols and Shared Types
 
@@ -357,7 +357,7 @@ All store/view objects must be explicitly closed by the user or registered with 
 ---
 
 **Summary:**  
-The entirety of GyroSI agent knowledge, for any configuration or deployment scale, is maintained through a strict, minimal API over a single append-only Bin file. All canonicalisation, overlays, pruning, and statistics are enforced through well-defined, testable decorator layers and contracts, never requiring runtime code to touch or interpret raw file content.
+The entirety of GyroASI agent knowledge, for any configuration or deployment scale, is maintained through a strict, minimal API over a single append-only Bin file. All canonicalisation, overlays, pruning, and statistics are enforced through well-defined, testable decorator layers and contracts, never requiring runtime code to touch or interpret raw file content.
 
 ---
 
@@ -365,7 +365,7 @@ The entirety of GyroSI agent knowledge, for any configuration or deployment scal
 
 ### 7.1 Project Organization
 
-The GyroSI system enforces strict separation between the core physics kernel, runtime data, and auxiliary applications.
+The GyroASI system enforces strict separation between the core physics kernel, runtime data, and auxiliary applications.
 
 ```
 .
@@ -386,7 +386,7 @@ The GyroSI system enforces strict separation between the core physics kernel, ru
 │   └── policies.py           # PhenotypeStore, storage overlays, policy and maintenance functions
 ├── baby.sh
 ├── docs/
-│   ├── GyroSI_Specs.md
+│   ├── GyroASI_Specs.md
 │   └── CommonGovernanceModel.md
 ├── memories/
 │   ├── __init__.py
@@ -437,14 +437,14 @@ This architecture maintains a strict separation between learned knowledge, raw c
 
 8.1 The Compositional API Pattern
 
-GyroSI's integration model is compositional. All agent orchestration and interaction is implemented by composing the canonical primitives provided in `baby.intelligence`, `baby.contracts`, and `baby.policies`.
+GyroASI's integration model is compositional. All agent orchestration and interaction is implemented by composing the canonical primitives provided in `baby.intelligence`, `baby.contracts`, and `baby.policies`.
 
 **Agent Pool Management:**
 Applications manage a pool of active agents with automatic eviction, overlay storage, and policy control. The pool ensures clean lifecycle and concurrency discipline for all agents.
 
 ### 8.2 Conversation Orchestration
 
-Conversations are managed by composing agent interactions using the stable GyroSI API. No special conversation-specific infrastructure is required.
+Conversations are managed by composing agent interactions using the stable GyroASI API. No special conversation-specific infrastructure is required.
 
 ### 8.3 Protocol Adapters
 

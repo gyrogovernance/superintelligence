@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-GyroSI Topology Analysis: Fermion Mass Patterns in Recursive Structural Intelligence
+GyroASI Topology Analysis: Fermion Mass Patterns in Recursive Structural Intelligence
 
-This script conducts comprehensive physics experiments on the GyroSI topology by mapping
+This script conducts comprehensive physics experiments on the GyroASI topology by mapping
 fermion mass analysis results to the finite 788,986-state manifold and analyzing the 
 resulting spacetime-like behaviors through the lens of Common Governance Model (CGM) 
 principles.
@@ -34,13 +34,13 @@ import numpy as np
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Import GyroSI components
+# Import GyroASI components
 try:
     from baby.constants.atlas_builder import AtlasPaths
     # GyroLog removed - using direct LI-invariant plane classification
     from baby.kernel import governance
 except ImportError as e:
-    print(f"Error importing GyroSI components: {e}")
+    print(f"Error importing GyroASI components: {e}")
     print("Ensure you're running from the correct directory with baby/ module available")
     print(f"Project root: {project_root}")
     print(f"Python path: {sys.path[:3]}")
@@ -99,7 +99,7 @@ class TopologyExperiment:
 
 
 class FermionToIntronMapper:
-    """Maps fermion observables to 8-bit GyroSI introns."""
+    """Maps fermion observables to 8-bit GyroASI introns."""
     
     def __init__(self):
         """Initialize with family bit patterns."""
@@ -180,7 +180,7 @@ class FermionToIntronMapper:
 
 
 class TopologyAnalyzer:
-    """Analyzes GyroSI topology evolution and physics patterns."""
+    """Analyzes GyroASI topology evolution and physics patterns."""
     
     def __init__(self, atlas_paths: AtlasPaths):
         """
@@ -1015,7 +1015,7 @@ def create_fermion_data() -> Dict[str, FermionData]:
 def main():
     """Main entry point for topology analysis."""
     parser = argparse.ArgumentParser(
-        description="GyroSI Topology Analysis: Fermion Mass Patterns in Recursive Structural Intelligence",
+        description="GyroASI Topology Analysis: Fermion Mass Patterns in Recursive Structural Intelligence",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     

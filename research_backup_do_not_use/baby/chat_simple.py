@@ -174,7 +174,7 @@ class GyroChat:
         """Send a message to the server and return the response."""
         if show_user_input:
             print(f"You: {message}")
-        print("GyroSI: ", end="", flush=True)
+        print("GyroASI: ", end="", flush=True)
         
         payload = {
             "input": message,
@@ -231,7 +231,7 @@ class GyroChat:
 
     def run_automated_prompts(self):
         """Run the two automated prompts and exit."""
-        print("🤖 GyroSI BabyLM - Automated Prompts")
+        print("🤖 GyroASI BabyLM - Automated Prompts")
         print("=" * 50)
         print("Running automated prompts...")
         print()
@@ -247,7 +247,7 @@ class GyroChat:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="GyroSI BabyLM Chat Interface")
+    parser = argparse.ArgumentParser(description="GyroASI BabyLM Chat Interface")
     parser.add_argument(
         "--auto", 
         action="store_true", 
@@ -274,7 +274,7 @@ def main():
             chat.run_automated_prompts()
         else:
             # Show menu options
-            print("🤖 GyroSI BabyLM Chat Interface")
+            print("🤖 GyroASI BabyLM Chat Interface")
             print("=" * 50)
             print("Choose an option:")
             print("1. Run automated prompts (How are you? + Algorithms are)")

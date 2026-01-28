@@ -1,7 +1,7 @@
 """
-GyroSI Core Engine: Walking Intelligence on a 48-bit Geometric Manifold
+GyroASI Core Engine: Walking Intelligence on a 48-bit Geometric Manifold
 
-This module implements the core walking mechanics of GyroSI, where intelligence
+This module implements the core walking mechanics of GyroASI, where intelligence
 emerges through recursive navigation of a finite state space using gyrogroup
 operations and monodromic folding.
 

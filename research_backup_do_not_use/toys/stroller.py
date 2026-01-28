@@ -74,13 +74,13 @@ def get_status() -> str:
     try:
         assistant = agent_pool.get("assistant")
         cycles = assistant.engine.cycle_count
-        return f"🍼 GyroSI Baby | Cycles: {cycles}"
+        return f"🍼 GyroASI Baby | Cycles: {cycles}"
     except (AttributeError, KeyError):
-        return "🍼 GyroSI Baby | Initializing..."
+        return "🍼 GyroASI Baby | Initializing..."
 
 
 # Create the interface with a light gray theme
-with gr.Blocks(title="GyroSI Baby 🍼") as demo:
+with gr.Blocks(title="GyroASI Baby 🍼") as demo:
 
     gr.Markdown("# 🍼 Gyro Superintelligence Baby")
     status_bar = gr.Markdown(value=get_status())

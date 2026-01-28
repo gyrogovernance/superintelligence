@@ -1,6 +1,6 @@
 # baby/kernel/governance.py
 """
-Governance operations for GyroSI - the core physics of recursive structural alignment.
+Governance operations for GyroASI - the core physics of recursive structural alignment.
 Minimal, dependency-free: GENEs + ψ + transform + batch helpers.
 """
 

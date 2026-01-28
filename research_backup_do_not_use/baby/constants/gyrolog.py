@@ -1,10 +1,10 @@
 # baby/constants/gyrolog.py
 """
-GyroLog: CGM Logarithmic Coordinate System for GyroSI
+GyroLog: CGM Logarithmic Coordinate System for GyroASI
 
 A discrete, integer coordinate system on the 48-bit state space using native
 CGM generators. Provides anchor-agnostic coordinates for addressing, routing,
-and path analysis within the GyroSI architecture.
+and path analysis within the GyroASI architecture.
 
 QUICK START:
     gyrolog = GyroLog()

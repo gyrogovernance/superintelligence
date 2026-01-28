@@ -57,13 +57,13 @@ def get_user_input():
 def main(args):
     match args.backend:
         case "gyro":
-            # GyroSI backend - use responses API inference wrapper
+            # GyroASI backend - use responses API inference wrapper
             from baby.responses_api.inference.gyro import setup_model
 
             encoding = load_harmony_encoding(HarmonyEncodingName.HARMONY_GPT_OSS)
             infer_next_token = setup_model(encoding=encoding, config_path=getattr(args, "config", "baby/config.json"))
 
-            # Create a simple generator wrapper for GyroSI
+            # Create a simple generator wrapper for GyroASI
             class GyroGenerator:
                 def __init__(self, infer_fn, encoding):
                     self.infer_fn = infer_fn
@@ -76,7 +76,7 @@ def main(args):
                         if next_token in kwargs.get("stop_tokens", []):
                             break
                         current_tokens.append(next_token)
-                        yield next_token, 0.0  # GyroSI is Traceable, so logprob is 0
+                        yield next_token, 0.0  # GyroASI is Traceable, so logprob is 0
 
             generator = GyroGenerator(infer_next_token, encoding)
         case _:
@@ -356,7 +356,7 @@ if __name__ == "__main__":
         "--config",
         metavar="FILE",
         type=str,
-        help="Path to the GyroSI configuration file (for gyro backend)",
+        help="Path to the GyroASI configuration file (for gyro backend)",
         default="baby/config.json",
     )
     args = parser.parse_args()

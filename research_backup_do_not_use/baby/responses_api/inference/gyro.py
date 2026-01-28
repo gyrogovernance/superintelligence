@@ -1,7 +1,7 @@
 """
-GyroSI Streaming Inference: Walking Model Implementation
+GyroASI Streaming Inference: Walking Model Implementation
 
-This module provides the streaming wrapper for the GyroSI walking engine,
+This module provides the streaming wrapper for the GyroASI walking engine,
 implementing the complete walking cycle where each emitted token feeds back
 as input to create continuous monodromic navigation through state space.
 
@@ -24,7 +24,7 @@ from baby.constants.harmony_tokens import MESSAGE, ROLE_USER, ROLE_ASSISTANT, AL
 
 def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
     """
-    Initialize the GyroSI walking model and return inference function.
+    Initialize the GyroASI walking model and return inference function.
     
     The returned function implements the complete walking cycle:
     1. Absorb new tokens (BU-Egress/stance phase)

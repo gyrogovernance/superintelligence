@@ -1,10 +1,10 @@
 # baby/constants/atlas_builder.py
 
 """
-GyroSI Atlas Builder: Canonical Map Construction for Recursive Structural Intelligence
+GyroASI Atlas Builder: Canonical Map Construction for Recursive Structural Intelligence
 
 This module constructs the five fundamental maps that define the complete knowledge
-structure of the GyroSI system:
+structure of the GyroASI system:
 
 1. Ontology (ontology_keys.npy): The finite manifold of all reachable states
 2. Epistemology (epistemology.npy): The complete state transition table
@@ -795,7 +795,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
         Configured argument parser
     """
     parser = argparse.ArgumentParser(
-        description="GyroSI Atlas Builder: Construct canonical knowledge maps",
+        description="GyroASI Atlas Builder: Construct canonical knowledge maps",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

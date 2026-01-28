@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GyroSI Wikipedia Training Pipeline - Token-Aware Stream Compiler
+GyroASI Wikipedia Training Pipeline - Token-Aware Stream Compiler
 
 This script converts Wikipedia text dumps into compact "gyro-tapes" (raw intron streams)
 and optionally updates token-aware knowledge stores. It's optimized for the 0.9.6.7
@@ -60,7 +60,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from baby.information import encode_text_with_sep as gyro_encode  # noqa: E402
-from baby.intelligence import GyroSI  # noqa: E402
+from baby.intelligence import GyroASI  # noqa: E402
 from baby.contracts import AgentConfig, PreferencesConfig  # noqa: E402
 from baby.policies import prune_and_compact_store  # noqa: E402
 
@@ -106,15 +106,15 @@ def iter_wiki_articles(files: Iterable[Path], blank_line_threshold: int = DEFAUL
                 yield "".join(buffer)
 
 
-def build_agent(private_knowledge_path: Path) -> GyroSI:
+def build_agent(private_knowledge_path: Path) -> GyroASI:
     """
-    Create a private GyroSI agent for training.
+    Create a private GyroASI agent for training.
 
     Args:
         private_knowledge_path: Path to private knowledge store file
 
     Returns:
-        GyroSI: Configured agent instance
+        GyroASI: Configured agent instance
     """
     # Create dummy public knowledge file if it doesn't exist
     dummy_public = PROJECT_ROOT / "toys/training/dummy_public_knowledge.bin"
@@ -145,7 +145,7 @@ def build_agent(private_knowledge_path: Path) -> GyroSI:
         "preferences": preferences_config,
     }
 
-    return GyroSI(config, agent_id="wiki_trainer", base_path=PROJECT_ROOT)
+    return GyroASI(config, agent_id="wiki_trainer", base_path=PROJECT_ROOT)
 
 
 def format_size(size_bytes: int) -> str:
@@ -192,7 +192,7 @@ def format_time(seconds: float) -> str:
 def compile_stream(
     articles: Iterable[str],
     output_tape_path: Path,
-    agent: Optional[GyroSI] = None,
+    agent: Optional[GyroASI] = None,
     limit: Optional[int] = None,
     log_interval: int = DEFAULT_LOG_INTERVAL,
 ) -> Dict[str, Union[int, float, str]]:
@@ -202,7 +202,7 @@ def compile_stream(
     Args:
         articles: Iterable of article texts
         output_tape_path: Path to output .gyro file
-        agent: Optional GyroSI agent for learning (via process_egress)
+        agent: Optional GyroASI agent for learning (via process_egress)
         limit: Optional limit on number of articles to process
         log_interval: How often to log progress (in number of articles)
 
@@ -362,7 +362,7 @@ def compile_stream(
 
 def replay_tape(
     tape_path: Path,
-    agent: GyroSI,
+    agent: GyroASI,
     log_interval: int = 1_000,  # Log every 1KB by default (very responsive)
 ) -> Dict[str, Union[int, float, str]]:
     """
@@ -370,7 +370,7 @@ def replay_tape(
 
     Args:
         tape_path: Path to the .gyro tape file
-        agent: GyroSI agent to replay through
+        agent: GyroASI agent to replay through
         log_interval: Bytes processed before next progress log
 
     Returns:
@@ -514,7 +514,7 @@ def main() -> int:
         int: Exit code (0 for success, 1 for error)
     """
     parser = argparse.ArgumentParser(
-        description="GyroSI Wikipedia Training Pipeline - Token-Aware Stream Compiler",
+        description="GyroASI Wikipedia Training Pipeline - Token-Aware Stream Compiler",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -649,7 +649,7 @@ Examples:
     print(f"📚 Found {len(files)} files in {dataset_dir}")
 
     # Create agent if learning is enabled
-    agent: Optional[GyroSI] = None
+    agent: Optional[GyroASI] = None
     if args.learn:
         # Use knowledge_* pattern for the output file
         output_name = Path(args.output).stem

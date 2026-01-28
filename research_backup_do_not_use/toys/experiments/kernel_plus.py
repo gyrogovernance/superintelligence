@@ -1,5 +1,5 @@
 """
-GyroSI Kernel v0.9.12.0 - Complete Physics Implementation for Language Modeling
+GyroASI Kernel v0.9.12.0 - Complete Physics Implementation for Language Modeling
 
 This implements the Common Governance Model (CGM) through a physics-first approach
 to language processing. Replaces transformer matrix multiplications with pure state
@@ -410,7 +410,7 @@ def quantize_and_compress_weights(weights: np.ndarray[Any, Any], max_size: int =
 
 
 class GyroKernel:
-    """GyroSI Kernel v0.9.12.0 - Complete Physics Implementation
+    """GyroASI Kernel v0.9.12.0 - Complete Physics Implementation
 
     Implements the Common Governance Model (CGM) as a functional language model
     that replaces transformer architecture with gyroscopic intelligence.
@@ -505,7 +505,7 @@ class GyroKernel:
         self.stats = {"tokens_learned": 0, "memory_entries": 0, "orbits_discovered": 0, "generation_steps": 0}
 
         if self.debug:
-            print(f"\n🧬 GyroSI Kernel v0.9.12.0 initialized")
+            print(f"\n🧬 GyroASI Kernel v0.9.12.0 initialized")
             print(f"📍 CS state: index={self.CS_STATE_INDEX}, " f"θ={float(self.theta[self.CS_STATE_INDEX]):.4f}")
             print(f"📊 Ontology: {len(self.ontology):,} states")
             print(f"💫 Virtual tokens: {len(self.virtual_tokens):,}")
@@ -1151,7 +1151,7 @@ class GyroKernel:
         """Run demonstration."""
         if self.debug:
             print("\n" + "=" * 10)
-            print(f"GyroSI Kernel v0.9.12.0 - {self.model_name} Demo")
+            print(f"GyroASI Kernel v0.9.12.0 - {self.model_name} Demo")
             print("=" * 10)
 
         # Test questions

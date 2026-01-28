@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-GyroSI Validation Suite: Physics Calibration and Falsification Tests
+GyroASI Validation Suite: Physics Calibration and Falsification Tests
 
-This module provides comprehensive validation of GyroSI physics implementation,
+This module provides comprehensive validation of GyroASI physics implementation,
 ensuring the system behaves according to the Common Governance Model (CGM)
 specification before conducting topology experiments.
 
@@ -76,7 +76,7 @@ def equal_up_to_parity(seq1: List[int], seq2: List[int]) -> bool:
 
 
 class GyroValidationSuite:
-    """Comprehensive validation suite for GyroSI physics."""
+    """Comprehensive validation suite for GyroASI physics."""
     
     def __init__(self, atlas_paths: AtlasPaths):
         """Initialize with atlas maps."""
@@ -750,7 +750,7 @@ class GyroValidationSuite:
     
     def run_full_validation(self) -> Dict[str, Any]:
         """Run complete validation suite and return results."""
-        print("Running GyroSI Validation Suite...")
+        print("Running GyroASI Validation Suite...")
         
         results = {}
         

@@ -1,6 +1,6 @@
 # type: ignore
 # baby/kernel/gyro_core.py
-# Minimal five-map runtime core for GyroSI.
+# Minimal five-map runtime core for GyroASI.
 # Uses ONLY the canonical atlas artifacts:
 #   - theta.npy                (CS)
 #   - ontology_keys.npy        (UNA)

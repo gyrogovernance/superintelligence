@@ -142,7 +142,7 @@ def main() -> None:
     orbit_stats = test_orbit_properties(engine)
 
     # Print concise report
-    print("=== CGM ↔ GyroSI Diagnostic (Notes_1.md) ===")
+    print("=== CGM ↔ GyroASI Diagnostic (Notes_1.md) ===")
     print(f"I_CGM (bits): {I_cgm:.3f}  [expected ~8.18]")
     print(f"ρ_info (bits/steradian): {rho_info:.3f}  [expected ~2.94]")
     print(f"IQ_CGM (layers): {IQ_cgm:.3f}  [expected ~2.45]")

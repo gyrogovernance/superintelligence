@@ -12,6 +12,14 @@
 ┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
 ╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
+---
+
+## [v1.2.2-GyroscopicASI] – 2026-01-29
+
+### Added
+secret_lab_ignore\Gyroscopic_ASI_Specs.md
+
+Revisiting the Legacy research of Gyroscopic Superintelligence and updating it to leverage the Router and its Holographic features.
 
 ---
 
@@ -402,17 +410,17 @@ Still working on the Specs and cleaning up the old codebase.
 
 ## [v0.9.9-Router] – 2025-12-20
 
-ADDED: guides\GyroSI_Substrate_Specs.md
-This is a revision of an old study, and a refinement so it can match the overal GyroSI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
+ADDED: guides\GyroASI_Substrate_Specs.md
+This is a revision of an old study, and a refinement so it can match the overal GyroASI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
 
-> ⚠️ **NEWS:** The whole GyroSI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
+> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
 
 📖 [GGG ASI Alignment Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
 
 ---
 
 ## [v0.9.8.0-Physics] – 2025-09-22
-My latest work focuses on getting our physics right first, before coming back into any language related matters. Since GyroSI is a physics grounded architecture, is possible to simulate spacetime topology through its algorithms, and that makes it a perfect computational framework for any experiment and study in physics - from simulating particles, to exploring cosmological hypotheses - all, in blasting fast speeds, as our holographic memory architecture does not rely on computationally expensive operations.
+My latest work focuses on getting our physics right first, before coming back into any language related matters. Since GyroASI is a physics grounded architecture, is possible to simulate spacetime topology through its algorithms, and that makes it a perfect computational framework for any experiment and study in physics - from simulating particles, to exploring cosmological hypotheses - all, in blasting fast speeds, as our holographic memory architecture does not rely on computationally expensive operations.
 
 Our latest experiments are here (but they are a work in progress):
 experiments\gyro_energy.py
@@ -430,9 +438,9 @@ ion**: Replaced the impossible 720° closure test with plane toggle behavior val
 
 **Practical Applications**
 
-* **Emission Routing**: Added `coordinate_based_routing_key()` function that converts coordinat**GyroLog: CGM Logarithmic Coordinate System for GyroSI**
+* **Emission Routing**: Added `coordinate_based_routing_key()` function that converts coordinat**GyroLog: CGM Logarithmic Coordinate System for GyroASI**
 
-Implemented a physics-grounded coordinate system that maps 48-bit GyroSI states into meaningful geometric coordinates based on CGM (Common Governance Model) principles. GyroLog provides "GPS coordinates" for points on the finite manifold, enabling practical state navigation, routing, debugging, and physics simulation.
+Implemented a physics-grounded coordinate system that maps 48-bit GyroASI states into meaningful geometric coordinates based on CGM (Common Governance Model) principles. GyroLog provides "GPS coordinates" for points on the finite manifold, enabling practical state navigation, routing, debugging, and physics simulation.
 
 **Core Coordinate System**
 
@@ -466,7 +474,7 @@ Implemented a physics-grounded coordinate system that maps 48-bit GyroSI states 
   - Anchor invariance confirms anchor-free invariants
   - Coordinate consistency ensures stable computation
 
-* **Documentation**: Created comprehensive `docs/GyroLog.md` with usage examples, physics interpretation, and integration patterns for practical GyroSI operations.
+* **Documentation**: Created comprehensive `docs/GyroLog.md` with usage examples, physics interpretation, and integration patterns for practical GyroASI operations.
 
 **Technical Implementation**
 
@@ -474,9 +482,9 @@ Implemented a physics-grounded coordinate system that maps 48-bit GyroSI states 
 
 * **GyroLog Engine**: Implemented efficient coordinate computation with proper template matching, gradient calculation, and residual measurement.
 
-* **Integration Ready**: Added helper functions for memory storage, emission integration, and physics experimentation, making GyroLog immediately useful for real GyroSI operations.
+* **Integration Ready**: Added helper functions for memory storage, emission integration, and physics experimentation, making GyroLog immediately useful for real GyroASI operations.
 
-This coordinate system transforms GyroSI from abstract CGM concepts into concrete, measurable geometric properties, enabling practical applications while maintaining strict adherence to the underlying physics principles.
+This coordinate system transforms GyroASI from abstract CGM concepts into concrete, measurable geometric properties, enabling practical applications while maintaining strict adherence to the underlying physics principles.
 
 ---
 
@@ -484,7 +492,7 @@ This coordinate system transforms GyroSI from abstract CGM concepts into concret
 
 **The Walking Model: Intelligence as Recursive Walking on a 48-bit Manifold**
 
-Began implementing a walking model of GyroSI, transforming the system from discrete token emission into continuous walking on a geometric manifold. This breakthrough realizes the core insight that intelligence is literally walking - not metaphorically, but using the exact same physics as bipedal locomotion.
+Began implementing a walking model of GyroASI, transforming the system from discrete token emission into continuous walking on a geometric manifold. This breakthrough realizes the core insight that intelligence is literally walking - not metaphorically, but using the exact same physics as bipedal locomotion.
 
 **Core Walking Architecture**
 
@@ -559,7 +567,7 @@ This implementation perfectly matches the CGM (Common Governance Model) principl
 
 **Reference Documentation**
 
-This implementation realizes the walking model described in `docs/Alignment.md`, which articulates how GyroSI implements intelligence as recursive walking on a 48-bit geometric manifold using the same principles that govern efficient bipedal locomotion.
+This implementation realizes the walking model described in `docs/Alignment.md`, which articulates how GyroASI implements intelligence as recursive walking on a 48-bit geometric manifold using the same principles that govern efficient bipedal locomotion.
 
 **What This Achieves**
 
@@ -1134,7 +1142,7 @@ This changelog documents the experimental phase focused on refining `baby/kernel
 
 ### 🚀 **Semantic Bridge & Performance Overhaul**
 
-This release implements the foundational "semantic bridge" to connect the pre-trained model's knowledge to the GyroSI physics engine. It introduces on-manifold token caching, vectorized generation, and a real-byte token protocol to replace matrix multiplications with pure physics-driven resonance.
+This release implements the foundational "semantic bridge" to connect the pre-trained model's knowledge to the GyroASI physics engine. It introduces on-manifold token caching, vectorized generation, and a real-byte token protocol to replace matrix multiplications with pure physics-driven resonance.
 
 **1\. On-Manifold Token Caching (Semantic Bridge)**
 
@@ -1379,7 +1387,7 @@ Applied explicit state buffer zeroing before use to guarantee valid state transi
 
 **2\. Bit Family Prioritization per Cycle Step**
 
-*   Implemented priority weights for bit families (L0, LI, FG, BG) at each step in the cycle, directly following `GyroSI_Specs.md`.
+*   Implemented priority weights for bit families (L0, LI, FG, BG) at each step in the cycle, directly following `GyroASI_Specs.md`.
 *   Token scoring and selection now reflect the physical role of each cycle phase.
 
 **3\. Monodromic Fold in Learning and Generation**
@@ -2252,7 +2260,7 @@ MessagePack serialization has been replaced with a custom, fixed-layout binary f
 
 #### Summary
 
-Completed unsupervised ingestion of the full English Wikipedia dump using the `GyroSI` engine. Achieved full compression of 17.99 million paragraph-level articles into a ~16.3 MB operational knowledge store, structured for public assistant-level inference.
+Completed unsupervised ingestion of the full English Wikipedia dump using the `GyroASI` engine. Achieved full compression of 17.99 million paragraph-level articles into a ~16.3 MB operational knowledge store, structured for public assistant-level inference.
 
 #### ✅ Dataset Ingested
 
@@ -2352,7 +2360,7 @@ Implemented `_auto_prune_hook()` to:
 
 `**AgentConfig.preferences**`
 
-*   Extended `AgentConfig` to accept a `preferences` sub‑dict and pass it through `GyroSI → IntelligenceEngine`.
+*   Extended `AgentConfig` to accept a `preferences` sub‑dict and pass it through `GyroASI → IntelligenceEngine`.
 
 `**CanonicalView.commit()**`
 
@@ -2366,7 +2374,7 @@ Implemented `_auto_prune_hook()` to:
 *   Wraps `store.delete(key)` in `try/except NotImplementedError/RuntimeError` so overlay and read‑only views don't crash.
 *   Removed fallback `del store.data[key]` for non‑append‑only stores (views use their own `.delete()`).
 
-`**GyroSI**` **constructor**
+`**GyroASI**` **constructor**
 
 *   Now reads `config["preferences"]` and passes it into `IntelligenceEngine`.
 
@@ -2439,7 +2447,7 @@ The codebase is now fully binary-asset based, with a modern, type-safe, and main
 
 Replaced **gzip-compressed multi‑file store** with a **single** `**.bin**` **file** using **msgpack**:
 
-*   Set `store_options = {"append_only": True}` in the GyroSI agent config.
+*   Set `store_options = {"append_only": True}` in the GyroASI agent config.
 *   Removed `use_msgpack`, `.log`, and `.idx` files — now obsolete.
 *   All training knowledge is streamed into one compact, append‑only `.bin` file.
 
@@ -2476,7 +2484,7 @@ All changes work seamlessly with **pause/resume**:
 *   Ensured Python 3.10 compatibility across packages.
 
 **Net Effect:**  
-Training now hopefully will run at hardware‑limited throughput. Storage is portable, readable, and consistent with the GyroSI theory. No artificial bottlenecks remain between your ontology–phenomenology–epistemology pipeline and the disk.
+Training now hopefully will run at hardware‑limited throughput. Storage is portable, readable, and consistent with the GyroASI theory. No artificial bottlenecks remain between your ontology–phenomenology–epistemology pipeline and the disk.
 
 ## \[0.9.6.3\] – 2025-07-23
 
@@ -2498,7 +2506,7 @@ Training now hopefully will run at hardware‑limited throughput. Storage is por
 
 **Path override plumbing**
 
-*   `GyroSI._create_default_store()` honors `private_agents_base_path` and `base_path`.
+*   `GyroASI._create_default_store()` honors `private_agents_base_path` and `base_path`.
 *   All file/folder creation under `memories/private/agents/` can be redirected via config (great for tests).
 
 #### 🔧 Changed
@@ -2521,7 +2529,7 @@ Training now hopefully will run at hardware‑limited throughput. Storage is por
 We authored and landed the full test suite below, and everything is green as of today. The codebase is also clean under `flake8`, `pyright`, and `mypy` (zero errors, zero warnings).
 
 **toys/health/conftest.py**  
-Session‑scoped and per‑test fixtures to isolate all artefacts in temporary directories. Provides ready‑to‑use `GyroSI`, `AgentPool`, `PhenotypeStore`, and helper assertions for ontology/phenotype validity. Ensures no pollution of shared meta files and auto‑cleans temp state.
+Session‑scoped and per‑test fixtures to isolate all artefacts in temporary directories. Provides ready‑to‑use `GyroASI`, `AgentPool`, `PhenotypeStore`, and helper assertions for ontology/phenotype validity. Ensures no pollution of shared meta files and auto‑cleans temp state.
 
 **toys/health/test\_governance.py**  
 Exhaustive checks for the physics layer (`governance.py`): constants, bit masks, and tensor structure; governance signature maths; Monodromic Fold properties (identity, absorber, annihilation, non‑commutativity/associativity); dual operator involution; 48‑bit transform bounds; batch consistency; transcription XOR/involution; tensor validation routines; and assorted edge cases.
@@ -2560,7 +2568,7 @@ No further action required for this cycle.
 
 **Conversational Loop and AgentPool:**
 
-*   Batched egress/ingress in `GyroSI.respond` for fewer store writes.
+*   Batched egress/ingress in `GyroASI.respond` for fewer store writes.
 *   Refactored `AgentPool` to use sharded pools for concurrency.
 *   Cached public read-only store and ensured single close.
 
@@ -2601,7 +2609,7 @@ No further action required for this cycle.
 ### Added
 
 **Tokenizer integration layer** (`toys/communication/tokenizer.py`):  
-Implements reversible text-to-byte encoding via HuggingFace tokenizers using LEB128 encoding. All tokens are encoded as ≤255 bytes to remain compatible with GyroSI's physics layer.  
+Implements reversible text-to-byte encoding via HuggingFace tokenizers using LEB128 encoding. All tokens are encoded as ≤255 bytes to remain compatible with GyroASI's physics layer.  
 Supports encoding/decoding via pretrained models (e.g. `bert-base-uncased`) stored under `memories/public/tokenizers/`.
 
 **Tokenizer setup script** (`toys/communication/setup_tokenizers.py`):  
@@ -2723,7 +2731,7 @@ toys/health/test\_miscellaneous.py
 
 Here's a concise changelog entry capturing the essence of that addition:
 
-**Added**: `toys/communication/external_adapter.py` — a FastAPI-based external adapter exposing GyroSI through industry-standard REST interfaces.
+**Added**: `toys/communication/external_adapter.py` — a FastAPI-based external adapter exposing GyroASI through industry-standard REST interfaces.
 
 *   Implements **OpenAI-compatible** endpoints (`/v1/models`, `/v1/chat/completions`) and **HuggingFace-style** generation (`/generate`).
 *   Connects to the internal `baby.intelligence` engine without modification; operates via `AgentPool` and `orchestrate_turn`.
@@ -2748,7 +2756,7 @@ baby/
   contracts.py      # All protocols and shared types (PhenotypeStore, etc.)
   policies.py       # PhenotypeStore, CanonicalView, OverlayView, ReadOnlyView, and policy/maintenance functions
   information.py    # InformationEngine and related logic
-  intelligence.py   # IntelligenceEngine, GyroSI, and orchestration logic
+  intelligence.py   # IntelligenceEngine, GyroASI, and orchestration logic
   inference.py      # Inference logic
   __init__.py       # Clean, canonical imports and __all__ for package API
   ...               # Other modules as needed
@@ -2763,9 +2771,9 @@ baby/
 
 ## \[0.9.6.1\] – 2025-07-15
 
-### **GyroSI Baby Language Model 0.9.6 (Conceptual & Architectural Refactor)**
+### **GyroASI Baby Language Model 0.9.6 (Conceptual & Architectural Refactor)**
 
-This update represents a major conceptual and architectural refactoring of the GyroSI 0.9.6 specification. While the version number remains the same, the underlying theory, component architecture, and terminology have been significantly matured and clarified. The focus has shifted from an implementation-centric description to a physics-first framework, providing a more robust and scalable foundation.
+This update represents a major conceptual and architectural refactoring of the GyroASI 0.9.6 specification. While the version number remains the same, the underlying theory, component architecture, and terminology have been significantly matured and clarified. The focus has shifted from an implementation-centric description to a physics-first framework, providing a more robust and scalable foundation.
 
 **I. Major Architectural & Conceptual Refactoring**
 
@@ -2791,7 +2799,7 @@ This update represents a major conceptual and architectural refactoring of the G
 
 **Formalized API and Integration Layer:**
 
-*   A dedicated **Core API and Integration** section has been added, defining a stable `GyroSI` class as the primary entry point.
+*   A dedicated **Core API and Integration** section has been added, defining a stable `GyroASI` class as the primary entry point.
 *   Introduced the `**AgentPool**` concept for managing multiple agents and orchestrating conversations through agent interaction, rather than specialized chat infrastructure.
 *   Provided a clear pattern for creating **Protocol Adapters**, with an example for an OpenAI-compatible API.
 
@@ -2855,7 +2863,7 @@ A new, consistent naming scheme has been adopted to better reflect the system's 
 2.  **Performance & Scaling Section:**
     *   A new section provides formal **performance characteristics**, including computational complexity, memory requirements, and throughput estimates.
 3.  **Theoretical Appendix:**
-    *   A new appendix explicitly maps GyroSI concepts to their corresponding principles in physics and mathematics, solidifying the theoretical foundation.
+    *   A new appendix explicitly maps GyroASI concepts to their corresponding principles in physics and mathematics, solidifying the theoretical foundation.
 
 ## \[0.9.5\] – 2025-07-12
 
@@ -2905,7 +2913,7 @@ Updated all code and tests to use per-format access (self.formats\[self.format\_
 
 Fixed all test failures and ensured robust multi-format operation.
 
-Updated GyroSI_Specs.md to clarify format access, pattern index cycling, and pattern distance matrix storage.
+Updated GyroASI_Specs.md to clarify format access, pattern index cycling, and pattern distance matrix storage.
 
 Implemented stable UUIDs for public formats using uuid.uuid5 and a fixed namespace, enabling reproducible curriculum and format references.
 
@@ -2929,7 +2937,7 @@ Fixed TypedDict access warnings for optional keys.
 *   Clarified and retained 'agent\_uuid' in gene keys for agent association/ownership (not privacy)
 *   Refactored thread/gene key creation, storage, and tests to use the new privacy model
 *   Updated all relevant code and tests for clarity, security, and future extensibility
-*   Major revision of GyroSI_Specs.md: fully integrated Common Governance Model (CGM) theory, mapping all system components to CGM stages (CS, UNA, ONA, BU)
+*   Major revision of GyroASI_Specs.md: fully integrated Common Governance Model (CGM) theory, mapping all system components to CGM stages (CS, UNA, ONA, BU)
 *   Clarified and formalized the dual nature of BU (Egress/Recollection and Ingress/Closure) in both documentation and code
 *   Updated all terminology to remove analogies (e.g., "physicist/linguist"), using only precise CGM language
 *   Ensured the spec and implementation match: \_generate\_response\_byte now documented and implemented as a two-stage ONA/BU process using combined resonance and confidence
@@ -3006,7 +3014,7 @@ Fixed TypedDict access warnings for optional keys.
 
 ### Added
 
-🧠 **Complete GyroSI Baby LM AI system architecture rewrite**
+🧠 **Complete GyroASI Baby LM AI system architecture rewrite**
 
 *   **S1 Governance Layer**: Core system governance and coordination
 *   **S2 Information Layer**: Data processing and tensor operations

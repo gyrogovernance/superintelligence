@@ -27,14 +27,14 @@ if __name__ == "__main__":
         metavar="BACKEND",
         type=str,
         help="Inference backend to use",
-        # default to gyro for GyroSI
+        # default to gyro for GyroASI
         default="gyro",
     )
     parser.add_argument(
         "--config",
         metavar="FILE",
         type=str,
-        help="Path to the GyroSI configuration file",
+        help="Path to the GyroASI configuration file",
         default="baby/config.json",
     )
     args = parser.parse_args()

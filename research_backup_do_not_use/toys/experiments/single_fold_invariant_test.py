@@ -236,7 +236,7 @@ def test_parity_closure_basics():
 
 def run_consolidated_test():
     """Run all available theoretical tests."""
-    print("GyroSI Consolidated Theoretical Validation")
+    print("GyroASI Consolidated Theoretical Validation")
     print("=" * 50)
 
     # Load physics maps

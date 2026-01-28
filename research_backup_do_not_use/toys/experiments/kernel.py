@@ -1,5 +1,5 @@
 """
-GyroSI Kernel v0.9.7.2 - Pure Physics Implementation
+GyroASI Kernel v0.9.7.2 - Pure Physics Implementation
 
 This implements the Common Governance Model (CGM) through a physics-first approach
 to language processing. The kernel uses all five physics maps:
@@ -133,7 +133,7 @@ for intron in range(256):
 
 
 class GyroKernel:
-    """GyroSI Kernel v0.9.7.2 - Simplified Pure Physics Implementation
+    """GyroASI Kernel v0.9.7.2 - Simplified Pure Physics Implementation
 
     Core principles:
     - State evolution via epistemology table
@@ -178,12 +178,12 @@ class GyroKernel:
         # Load tokenizer
         self.tokenizer = self._load_tokenizer()
         if self.tokenizer is None:
-            raise RuntimeError("Tokenizer is required for GyroSI physics")
+            raise RuntimeError("Tokenizer is required for GyroASI physics")
         self._build_token_structures()
 
         if self.verbose:
             cs_theta = self._get_theta(self.cs_index)
-            print("GyroSI Kernel v0.9.7.2 initialized")
+            print("GyroASI Kernel v0.9.7.2 initialized")
             print(f"CS state: index={self.cs_index}, θ={cs_theta:.3f}")
 
     def _load_complete_physics(self) -> None:
@@ -505,8 +505,8 @@ class GyroKernel:
 
 
 def demo_kernel():
-    """GyroSI Kernel v0.9.7.2 Demonstration"""
-    print("\nGyroSI Kernel v0.9.7.2 - Simplified Pure Physics")
+    """GyroASI Kernel v0.9.7.2 Demonstration"""
+    print("\nGyroASI Kernel v0.9.7.2 - Simplified Pure Physics")
     print("=" * 10)
 
     # Create kernel
