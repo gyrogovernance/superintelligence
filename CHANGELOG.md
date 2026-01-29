@@ -21,12 +21,25 @@ secret_lab_ignore\Gyroscopic_ASI_Specs.md
 
 Revisiting the Legacy research of Gyroscopic Superintelligence and updating it to leverage the Router and its Holographic features.
 
+
+---
+
+## [v1.2.3-Gyroscopic] – 2026-01-29
+
+### Moved:
+Old ASI Agent Architecture
+- secret_lab_ignore\GyroscopicASI_Legacy_BabyLM 
+
+### Added:
+Revived and Updated Gyroscopic. 
+- secret_lab_ignore\Gyroscopic_ASI_Specs.md
+
 ---
 
 ## [v1.2.2-Logistics] – 2026-01-26
 
-### Added
-- Added `docs\AIR_Logistics.md` - Alignment Infrastructure Routing (AIR) Logistics Framework that provides protocols, ontologies, and routing mechanisms for tracking and verifying coordination across human and artificial agents, treating governance as a logistics discipline with visible and accountable movement of information, authority, and decisions.
+### Added:
+- `docs\AIR_Logistics.md` - Alignment Infrastructure Routing (AIR) Logistics Framework that provides protocols, ontologies, and routing mechanisms for tracking and verifying coordination across human and artificial agents, treating governance as a logistics discipline with visible and accountable movement of information, authority, and decisions.
 
 ---
 
