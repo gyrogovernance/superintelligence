@@ -14,13 +14,45 @@
 ```
 ---
 
-## [v1.2.2-GyroscopicASI] – 2026-01-29
+## [v1.2.4-Gyroscopic] – 2026-01-30
 
-### Added
-secret_lab_ignore\Gyroscopic_ASI_Specs.md
+## [v1.2.4-Gyroscopic] – 2026-01-30
 
-Revisiting the Legacy research of Gyroscopic Superintelligence and updating it to leverage the Router and its Holographic features.
+### Architectural Shift: The Five-Stage Pipeline
+- **New Model:** Five operational stages: Governance Management (Ontology), Information Curation (Epistemology), Inference Interaction (Phenomenology), Intelligence Cooperation Input (Genealogy Egress), and Intelligence Cooperation Output (Genealogy Ingress).
 
+### Feature: The Agent Implementation (`src/agent/`)
+We implemented the complete Gyroscopic Agent, separating the *physics* of the Router from the *behaviour* of the Agent.
+
+*   **Information (`src/agent/information.py`):**
+    *   Formalized the **Dimensional Interface**: Inputs must satisfy $D = 256 \times K$, aligning external embeddings with the Router's horizon structure.
+    *   Established **Canonical Constants**: Defined the default learning rate $\eta$ as the precise geometric gap between the kernel's discrete aperture and the CGM continuous target ($\approx 0.00117$).
+    *   Added `vertex_charge` and `direction_factor` logic to enforce K4 geometry constraints.
+
+*   **Inference (`src/agent/inference.py`):**
+    *   Implemented the **Phenomenology Operator** as a deterministic function, not a storage artifact.
+    *   Defined the **Order-Sensitive Hebbian Update** rule, which accumulates trajectory history into a local field `M` without backpropagation.
+    *   Implemented **Deterministic Byte Scoring** using fixed feature vectors derived from the 12-bit mask anatomy (row groups, parity), replacing learned weights.
+
+*   **Intelligence (`src/agent/intelligence.py`):**
+    *   Created `GyroscopicAgent` to orchestrate the loop between token inputs, embedding projection, and kernel stepping.
+    *   Implemented `select_token` with logit disambiguation to handle the many-to-one mapping of tokens to bytes.
+
+### Refinement: Clarifying "Phenomenology"
+We resolved a critical ambiguity regarding "Phenomenology" by splitting it into two distinct entities:
+1.  **Kernel Phenomenology (`phenomenology.npz`):** A static constants bundle (archetype, mask tables, dual code) used for verification. Updated `src/router/atlas.py` to include `c_perp_12` and parity vectors `q0/q1`.
+2.  **Agent Phenomenology (`Phenomenology` class):** The dynamic operator that performs reshaping, scoring, and byte selection.
+
+### Fixes and Optimizations
+-   **Byte Scoring Logic:** Corrected a mathematical error where the signal term was constant across all bytes. It now correctly projects the accumulated field `M` against unique per-byte feature vectors.
+-   **Horizon Lookup:** Replaced silent failure (defaulting to 0) with explicit error handling in `horizon_index` to prevent state poisoning.
+-   **Token Lookup:** Optimized `byte_to_tokens` from $O(V)$ to $O(1)$ using arithmetic progression.
+-   **Numerical Stability:** Added clipping bounds to the accumulation field `M` to ensure long-running stability.
+
+### Documentation
+-   Updated `Gyroscopic_ASI_Specs.md` to reflect the five-stage mapping.
+-   Removed colloquial claims ("No Salad/Parrot") in favor of precise definitions of alignment properties (Output Incoherence, Verbatim Repetition, Context Loss).
+-   Added strict dimensional reference tables for $K$ values (3, 6, 12, 16) and embedding dimensions.
 
 ---
 

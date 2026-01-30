@@ -155,6 +155,7 @@
     "research/toys/experiments",
     "research/toys/training",
     "research/toys/stroller.py",
+    "secret_lab_ignore/GyroscopicASI_Legacy_BabyLM",
     
     "last-test-run.txt",
     "last_test_run.txt"

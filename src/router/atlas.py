@@ -20,17 +20,17 @@ from numpy.typing import NDArray
 try:
     # Try relative import first (when imported as module)
     from .constants import (
-        ARCHETYPE_A12,
-        ARCHETYPE_B12,
-        ARCHETYPE_STATE24,
-        GENE_MIC_S,
-        XFORM_MASK_BY_BYTE,
-        step_state_by_byte,
-    )
+    ARCHETYPE_A12,
+    ARCHETYPE_B12,
+    ARCHETYPE_STATE24,
+    GENE_MIC_S,
+    XFORM_MASK_BY_BYTE,
+    step_state_by_byte,
+    C_PERP_12,
+    LAYER_MASK_12,
+)
 except ImportError:
     # Fallback for direct execution
-    import sys
-    from pathlib import Path
     # Add the program root to path
     program_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(program_root))
@@ -42,6 +42,8 @@ except ImportError:
         GENE_MIC_S,
         XFORM_MASK_BY_BYTE,
         step_state_by_byte,
+        C_PERP_12,
+        LAYER_MASK_12,
     )
 
 
@@ -83,8 +85,8 @@ def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     masks_a = np.array([(int(XFORM_MASK_BY_BYTE[b]) >> 12) & 0xFFF for b in range(256)], dtype=np.uint16)
     
     # Build A_set and B_set directly
-    a_set = (ARCHETYPE_A12 ^ masks_a).astype(np.uint16) & 0xFFF
-    b_set = (ARCHETYPE_B12 ^ masks_a).astype(np.uint16) & 0xFFF
+    a_set = ((ARCHETYPE_A12 ^ masks_a).astype(np.uint16) & LAYER_MASK_12)
+    b_set = ((ARCHETYPE_B12 ^ masks_a).astype(np.uint16) & LAYER_MASK_12)
     
     # Cartesian product: all combinations
     a_grid, b_grid = np.meshgrid(a_set, b_set, indexing='ij')
@@ -125,8 +127,8 @@ def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> None:
     assert np.all(ontology[:-1] <= ontology[1:]), "Ontology must be sorted"
 
     # Unpack all states into A and B components (vectorized)
-    a = ((ontology >> 12) & 0xFFF).astype(np.uint32)
-    b = (ontology & 0xFFF).astype(np.uint32)
+    a = ((ontology >> 12) & LAYER_MASK_12).astype(np.uint32)
+    b = (ontology & LAYER_MASK_12).astype(np.uint32)
 
     # Build column-wise (byte-by-byte) for better cache locality
     for byte in range(256):
@@ -177,14 +179,17 @@ def build_phenomenology(paths: AtlasPaths) -> None:
     print("Building phenomenology...")
 
     np.savez_compressed(
-        paths.phenomenology,
-        atlas_version=ATLAS_VERSION,
-        archetype_state24=np.uint32(ARCHETYPE_STATE24),
-        archetype_a12=np.uint16(ARCHETYPE_A12),
-        archetype_b12=np.uint16(ARCHETYPE_B12),
-        gene_mic_s=np.uint8(GENE_MIC_S),
-        xform_mask_by_byte=XFORM_MASK_BY_BYTE,
-    )
+            paths.phenomenology,
+            atlas_version=ATLAS_VERSION,
+            archetype_state24=np.uint32(ARCHETYPE_STATE24),
+            archetype_a12=np.uint16(ARCHETYPE_A12),
+            archetype_b12=np.uint16(ARCHETYPE_B12),
+            gene_mic_s=np.uint8(GENE_MIC_S),
+            xform_mask_by_byte=XFORM_MASK_BY_BYTE,
+            c_perp_12=np.array(C_PERP_12, dtype=np.uint16),
+            q0=np.uint16(0x033),
+            q1=np.uint16(0x0F0),
+        )
     
     file_size = paths.phenomenology.stat().st_size
     unique_masks = len(set(int(XFORM_MASK_BY_BYTE[b]) for b in range(256)))

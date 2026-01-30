@@ -1140,28 +1140,6 @@ Future work can refine these estimates by fitting to observable proxies for A_Ec
 
 ---
 
-## Appendix C: GyroASI finite state epistemic core
-
-GyroASI is a micro level architecture that instantiates the Common Governance Model and The Human Mark in a finite state computational core. It starts from the archetypal tensor GENE_Mac_S, a 4 by 2 by 3 by 2 array that encodes the four CGM stages (CS, UNA, ONA, BU) across layers and frames, and the three spatial axes across rows and columns. This tensor is packed into a 48 bit state representation. A fixed set of 256 introns, obtained by a simple XOR transcription from external bytes, acts on this state through precomputed broadcast masks and a path-dependent fold operator.
-
-Exhaustive exploration from the archetypal state under all intron actions yields exactly 788,986 distinct states. This state set is closed under the intron transitions and has graph diameter at most 6, meaning that any state is reachable from any other in no more than six intron steps. Five precomputed maps constitute a complete classification of this finite epistemic phase space:
-
-- An ontology map that assigns each index in [0, 788,985] to a unique 48 bit state.
-
-- An epistemology map, implemented as a 788,986 by 256 transition table, that records the next state for every combination of state and intron.
-
-- A phenomenology map that groups states into 256 strongly connected components, each represented by a canonical orbit representative.
-
-- A theta map that assigns to each state its angular divergence from the archetypal tensor, serving as a geometric observable.
-
-- An orbit size map that records, for each state, the size of its strongly connected component, which can be used as a simple notion of generality or specificity.
-
-Learning in GyroASI is defined as ordered reduction of intron sequences via a non-associative fold operator. This implements a path-dependent update law that preserves the order of experience in the internal state. Generation is implemented by testing candidate tokens against systemic admissibility conditions derived from the current state, recent trajectory and the precomputed maps, without any score based competition between candidates. There are no learned weights or hidden continuous vectors; all dynamics are expressed in terms of the finite state space and its algebraically defined transitions.
-
-From the perspective of The Human Mark, GyroASI is explicitly and unambiguously derivative. It operates entirely as [Authority:Derivative] + [Agency:Derivative], and every state transition is transparent in principle through the epistemology table and the fold operator. This makes GyroASI a useful example of how CGM and THM can inform micro level architectures where alignment conditions and traceability are encoded in the state space and transition rules themselves, rather than applied as external constraints. A full technical specification and reference implementation are provided in the GyroASI repository (Korompilias, 2025d).
-
----
-
 ## References
 
 Beer, S. (1959). Cybernetics and Management. English Universities Press.
