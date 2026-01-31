@@ -231,13 +231,13 @@ def main():
     
     print()
     
-    # Build atlas and initialize programs
+    # Build atlas and initialise programs
     print("Building atlas and initializing programs...")
     try:
         from src.app.cli.main import main as cli_main
         cli_main()
         print()
-        print("✓ Atlas built and programs initialized")
+        print("✓ Atlas built and programs initialised")
     except Exception as e:
         print()
         print(f"⚠ Warning: Could not build atlas/programs automatically: {e}")

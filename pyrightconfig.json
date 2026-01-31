@@ -25,7 +25,7 @@
   "reportInconsistentConstructor": "none",
   "reportOverlappingOverload": "warning",
   "reportMissingSuperCall": "none",
-  "reportUninitializedInstanceVariable": "none",
+  "reportUninitialisedInstanceVariable": "none",
   "reportInvalidStringEscapeSequence": "warning",
   "reportUnknownLambdaType": "none",
   "reportImplicitStringConcatenation": "none",

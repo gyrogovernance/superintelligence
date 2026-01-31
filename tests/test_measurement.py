@@ -105,7 +105,7 @@ class TestMeasurementCollapse:
         x_far = np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float64)
         y_far_float = construct_edge_vector_with_aperture(x_far, target_aperture=0.5)
 
-        # Normalize y_far to have the same empirical score as y_near
+        # Normalise y_far to have the same empirical score as y_near
         scalar_near = float(np.sum(np.abs(y_near_float)))
         scalar_far_orig = float(np.sum(np.abs(y_far_float)))
         y_far_scaled_float = y_far_float * (scalar_near / scalar_far_orig)

@@ -534,7 +534,7 @@ class GyroEngine:
             slab_byte = self._slab_byte(state_int, slab_idx)
             ctx, _ = self._fold8(rp, slab_byte)
 
-            # initialize rotor origin if first time
+            # initialise rotor origin if first time
             if key not in bucket_key:
                 # map ctx deterministically into ring
                 bucket_key[key] = keys[ctx % n]

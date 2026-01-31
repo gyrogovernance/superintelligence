@@ -198,7 +198,7 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
                     content = []
                     for content_entry in entry_dict["content"]:
                         if browser_tool:
-                            text_content, annotation_entries, _has_partial_citations = browser_tool.normalize_citations(
+                            text_content, annotation_entries, _has_partial_citations = browser_tool.normalise_citations(
                                 content_entry["text"]
                             )
                             annotations = [UrlCitation(**a) for a in annotation_entries]
@@ -549,13 +549,13 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
                         if previous_item.channel == "final":
                             annotations = [UrlCitation(**a) for a in current_annotations]
                             if browser_tool:
-                                normalized_text, _annotations, _has_partial_citations = browser_tool.normalize_citations(previous_item.content[0].text)  # type: ignore
+                                normalised_text, _annotations, _has_partial_citations = browser_tool.normalise_citations(previous_item.content[0].text)  # type: ignore
                             else:
-                                normalized_text = previous_item.content[0].text  # type: ignore
+                                normalised_text = previous_item.content[0].text  # type: ignore
                                 annotations = []
                             text_content = TextContentItem(
                                 type="output_text",
-                                text=normalized_text,
+                                text=normalised_text,
                                 annotations=annotations,
                             )
                             yield self._send_event(
@@ -563,7 +563,7 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
                                     type="response.output_text.done",
                                     output_index=current_output_index,
                                     content_index=current_content_index,
-                                    text=normalized_text,
+                                    text=normalised_text,
                                 )
                             )
                             yield self._send_event(
@@ -614,11 +614,11 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
                     output_delta_buffer += self.parser.last_content_delta
                     should_send_output_text_delta = True
                     if browser_tool:
-                        # we normalize on the full current text to get the right indices in citations
-                        updated_output_text, annotations, has_partial_citations = browser_tool.normalize_citations(
+                        # we normalise on the full current text to get the right indices in citations
+                        updated_output_text, annotations, has_partial_citations = browser_tool.normalise_citations(
                             current_output_text_content + output_delta_buffer
                         )
-                        # remove the current text to get back the delta but now normalized
+                        # remove the current text to get back the delta but now normalised
                         output_delta_buffer = updated_output_text[len(current_output_text_content) :]
 
                         # Filter annotations to only include those whose start_index is not already present in current_annotations

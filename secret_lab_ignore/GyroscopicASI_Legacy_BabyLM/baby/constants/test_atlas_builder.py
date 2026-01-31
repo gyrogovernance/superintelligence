@@ -821,7 +821,7 @@ class AtlasBenchmark:
                     if s2_idx == state_idx:
                         period2_counts[intron] += 1
             
-            # Normalize to fraction
+            # Normalise to fraction
             period2_fractions = period2_counts / sample_size
             
             # Compute statistics

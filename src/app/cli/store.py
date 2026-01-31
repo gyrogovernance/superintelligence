@@ -935,7 +935,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> Dict[str, Any]:
     report_json_path = aci_dir / f"{program_slug}.report.json"
     report_md_path = aci_dir / f"{program_slug}.report.md"
     
-    # Initialize coordinator
+    # Initialise coordinator
     coord = Coordinator(atlas_dir)
     
     # Hash-based canonical bytes per attestation

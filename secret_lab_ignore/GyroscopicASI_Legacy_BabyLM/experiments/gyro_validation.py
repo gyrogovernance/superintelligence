@@ -79,7 +79,7 @@ class GyroValidationSuite:
     """Comprehensive validation suite for GyroASI physics."""
     
     def __init__(self, atlas_paths: AtlasPaths):
-        """Initialize with atlas maps."""
+        """Initialise with atlas maps."""
         self.atlas_paths = atlas_paths
         self._load_atlas()
         self._prepare_layer_patterns()

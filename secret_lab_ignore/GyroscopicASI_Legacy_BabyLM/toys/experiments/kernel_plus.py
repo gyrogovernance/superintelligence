@@ -423,7 +423,7 @@ class GyroKernel:
         model_name: str = None,
         force_reconvert: bool = False,
     ):
-        """Initialize kernel with physics tables and model."""
+        """Initialise kernel with physics tables and model."""
         if base_path is None:
             base_path = Path(__file__).parents[1] / "memories"
 
@@ -441,7 +441,7 @@ class GyroKernel:
         # Find CS state (minimum theta)
         self._find_cs_state()
 
-        # Initialize archetypal state
+        # Initialise archetypal state
         self.archetypal_state_int = tensor_to_int(GENE_Mac_S)
 
         # Current state
@@ -505,7 +505,7 @@ class GyroKernel:
         self.stats = {"tokens_learned": 0, "memory_entries": 0, "orbits_discovered": 0, "generation_steps": 0}
 
         if self.debug:
-            print(f"\n🧬 GyroASI Kernel v0.9.12.0 initialized")
+            print(f"\n🧬 GyroASI Kernel v0.9.12.0 initialised")
             print(f"📍 CS state: index={self.CS_STATE_INDEX}, " f"θ={float(self.theta[self.CS_STATE_INDEX]):.4f}")
             print(f"📊 Ontology: {len(self.ontology):,} states")
             print(f"💫 Virtual tokens: {len(self.virtual_tokens):,}")

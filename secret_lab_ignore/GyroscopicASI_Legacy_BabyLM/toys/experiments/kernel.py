@@ -144,7 +144,7 @@ class GyroKernel:
     """
 
     def __init__(self, base_path: Optional[Path] = None, verbose: bool = True):
-        """Initialize kernel with physics tables."""
+        """Initialise kernel with physics tables."""
         if base_path is None:
             base_path = Path(__file__).parents[1] / "memories"
 
@@ -183,7 +183,7 @@ class GyroKernel:
 
         if self.verbose:
             cs_theta = self._get_theta(self.cs_index)
-            print("GyroASI Kernel v0.9.7.2 initialized")
+            print("GyroASI Kernel v0.9.7.2 initialised")
             print(f"CS state: index={self.cs_index}, θ={cs_theta:.3f}")
 
     def _load_complete_physics(self) -> None:

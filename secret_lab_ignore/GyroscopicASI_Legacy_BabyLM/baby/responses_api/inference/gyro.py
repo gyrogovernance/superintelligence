@@ -24,7 +24,7 @@ from baby.constants.harmony_tokens import MESSAGE, ROLE_USER, ROLE_ASSISTANT, AL
 
 def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
     """
-    Initialize the GyroASI walking model and return inference function.
+    Initialise the GyroASI walking model and return inference function.
     
     The returned function implements the complete walking cycle:
     1. Absorb new tokens (BU-Egress/stance phase)
@@ -59,7 +59,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
     runtime_config = config.get("runtime", {})
     version_info = config.get("version", {})
 
-    # Initialize walking engine
+    # Initialise walking engine
     engine_lock = threading.RLock()
     with engine_lock:
         walking_engine = GyroEngine(
@@ -156,8 +156,8 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             session["user_anchor_state"] = new_state
             session["anchor_last_seen_count"] = session["user_token_count"]
 
-    def initialize_session_for_tokens(session: Dict[str, Any], tokens: list[int]) -> None:
-        """Initialize session with full token history using role parsing."""
+    def initialise_session_for_tokens(session: Dict[str, Any], tokens: list[int]) -> None:
+        """Initialise session with full token history using role parsing."""
         parser = StreamableParser(encoding, role=Role.USER)
         
         for token in tokens:
@@ -219,7 +219,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             session = walking_sessions.get(request_id)
             
             if new_request or session is None:
-                # Initialize new walking session
+                # Initialise new walking session
                 session = {
                     "parser": StreamableParser(encoding, role=Role.SYSTEM),
                     "fed_length": 0,
@@ -245,7 +245,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                 walking_sessions[request_id] = session
 
                 if tokens:
-                    initialize_session_for_tokens(session, tokens)
+                    initialise_session_for_tokens(session, tokens)
                 else:
                     session["parser"] = StreamableParser(encoding, role=Role.SYSTEM)
             else:
@@ -256,7 +256,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                     parser = StreamableParser(encoding, role=Role.SYSTEM)
                     
                     if tokens:
-                        initialize_session_for_tokens(session, tokens)
+                        initialise_session_for_tokens(session, tokens)
                     else:
                         session["parser"] = parser
                         session["fed_length"] = 0

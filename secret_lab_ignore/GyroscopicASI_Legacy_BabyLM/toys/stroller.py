@@ -12,7 +12,7 @@ with open(PREFERENCES_PATH) as f:
 
 BASE_PATH = Path(PREFERENCES.get("base_path", PREFERENCES_PATH.parent)).resolve()
 
-# Initialize shared AgentPool
+# Initialise shared AgentPool
 agent_pool = AgentPool(
     ontology_path=PREFERENCES["ontology"]["ontology_map_path"],
     base_knowledge_path=PREFERENCES["public_knowledge"]["path"],

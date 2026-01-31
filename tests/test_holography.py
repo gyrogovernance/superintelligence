@@ -311,7 +311,7 @@ def test_horizon_k4_vertex_subcode_tower():
 
 def test_ecology_signed_cycle_coherence():
     """
-    DECISIVE: Ecology is a signed normalized cycle-coherence invariant across domains.
+    DECISIVE: Ecology is a signed normalised cycle-coherence invariant across domains.
     
     Define cycle components: c_D = P_cycle y_D for each domain ledger.
     Compute cycle Gram matrix: G_ij = <c_i, c_j>
@@ -380,7 +380,7 @@ def test_ecology_signed_cycle_coherence():
         G13 = float(c1 @ c3)
         G23 = float(c2 @ c3)
         
-        # Normalized off-diagonal sum
+        # Normalised off-diagonal sum
         diagonal = G11 + G22 + G33
         if diagonal < 1e-10:
             return 0.0

@@ -31,7 +31,10 @@ from src.agent.inference import Phenomenology, PhenomenologyState
 
 @dataclass
 class AgentConfig:
-    """Configuration for Gyroscopic ASI Agent."""
+    """Configuration for Gyroscopic ASI Agent.
+
+K is the number of channels per horizon (D = 256 * K). K must be one of
+the supported values listed in src.agent.information.K_VALUES."""
     K: int = K_MIN
     eta: float = ETA_DEFAULT  # Aperture gap
     deterministic: bool = True
@@ -64,7 +67,7 @@ class GyroscopicAgent:
         embedding_fn: Optional[Callable[[int], NDArray[np.float32]]] = None,
     ):
         """
-        Initialize agent.
+        Initialise agent.
         
         Args:
             config: agent configuration
@@ -73,13 +76,13 @@ class GyroscopicAgent:
         """
         self.config = config or AgentConfig()
         
-        # Initialize kernel (CS + UNA)
+        # Initialise kernel (CS + UNA)
         self.kernel = RouterKernel(self.config.atlas_dir)
         
-        # Initialize phenomenology (ONA)
+        # Initialise phenomenology (ONA)
         self.phenomenology = Phenomenology(K=self.config.K, eta=self.config.eta)
         
-        # Initialize state
+        # Initialise state
         self.state = AgentState(
             phenomenology=PhenomenologyState.create(self.config.K),
         )

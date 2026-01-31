@@ -106,7 +106,7 @@ class ProgressMonitor:
     
     def __init__(self, operation_name: str) -> None:
         """
-        Initialize progress monitor.
+        Initialise progress monitor.
         
         Args:
             operation_name: Description of the operation being monitored
@@ -175,7 +175,7 @@ class OntologyBuilder:
     
     def __init__(self, configuration: AtlasConfiguration) -> None:
         """
-        Initialize ontology builder.
+        Initialise ontology builder.
         
         Args:
             configuration: Atlas construction parameters
@@ -223,7 +223,7 @@ class OntologyBuilder:
         """
         progress = ProgressMonitor("Discovering ontology")
         
-        # Initialize from the archetypal state
+        # Initialise from the archetypal state
         archetype_integer = int(governance.tensor_to_int(governance.GENE_Mac_S))
         logger.info(f"Starting BFS from archetype: {archetype_integer:012x}")
         
@@ -356,7 +356,7 @@ class EpistemologyBuilder:
     
     def __init__(self, configuration: AtlasConfiguration) -> None:
         """
-        Initialize epistemology builder.
+        Initialise epistemology builder.
         
         Args:
             configuration: Atlas construction parameters
@@ -511,7 +511,7 @@ class PhenomenologyBuilder:
     
     def __init__(self, configuration: AtlasConfiguration) -> None:
         """
-        Initialize phenomenology builder.
+        Initialise phenomenology builder.
         
         Args:
             configuration: Atlas construction parameters
@@ -723,7 +723,7 @@ class AtlasBuilder:
     
     def __init__(self, configuration: Optional[AtlasConfiguration] = None) -> None:
         """
-        Initialize atlas builder.
+        Initialise atlas builder.
         
         Args:
             configuration: Atlas construction parameters (uses defaults if None)

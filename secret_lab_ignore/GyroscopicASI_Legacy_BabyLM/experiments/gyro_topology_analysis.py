@@ -102,7 +102,7 @@ class FermionToIntronMapper:
     """Maps fermion observables to 8-bit GyroASI introns."""
     
     def __init__(self):
-        """Initialize with family bit patterns."""
+        """Initialise with family bit patterns."""
         # Bit families from governance
         self.LI_BITS = 0b01000010  # Bits 1,6 - chirality/parity
         self.FG_BITS = 0b00100100  # Bits 2,5 - foreground flips  
@@ -184,7 +184,7 @@ class TopologyAnalyzer:
     
     def __init__(self, atlas_paths: AtlasPaths):
         """
-        Initialize with atlas maps.
+        Initialise with atlas maps.
         
         Args:
             atlas_paths: Paths to the five canonical maps
@@ -195,7 +195,7 @@ class TopologyAnalyzer:
         # Load atlas maps
         self._load_atlas_maps()
         
-        # Initialize archetype state
+        # Initialise archetype state
         self.archetype_state = governance.tensor_to_int(governance.GENE_Mac_S)
         
         # Prepare layer patterns for signature computation
@@ -702,7 +702,7 @@ class TopologyReporter:
     """Generate comprehensive analysis reports."""
     
     def __init__(self):
-        """Initialize reporter."""
+        """Initialise reporter."""
         pass
     
     def _compute_correlation_check(self, experiments: List[TopologyExperiment]) -> Dict[str, float]:
@@ -1041,7 +1041,7 @@ def main():
         random_seed=args.seed
     )
     
-    # Initialize analyzer with pre-built atlas maps
+    # Initialise analyzer with pre-built atlas maps
     # Path relative to research/experiments/ -> research/memories/public/meta
     script_dir = Path(__file__).parent
     atlas_dir = script_dir.parent / "memories" / "public" / "meta"

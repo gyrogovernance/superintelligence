@@ -82,7 +82,7 @@ class GyroEngine:
         enable_core_gate: bool = False,
     ):
         """
-        Initialize the walking engine with the five canonical maps.
+        Initialise the walking engine with the five canonical maps.
         
         Args:
             atlas_paths: Paths to the five canonical map files
@@ -153,7 +153,7 @@ class GyroEngine:
         # Atlas Ledger for lossless trajectory recording
         self._atlas_ledger_enabled = "atlas_ledger" in (self.store_paths or {})
 
-        # Initialize storage and load existing data
+        # Initialise storage and load existing data
         self._ensure_storage_files()
         self._load_learned_data()
 
@@ -530,7 +530,7 @@ class GyroEngine:
         representative = self.get_orbit_representative(index)
         state_int = int(self.ontology_keys[index])
 
-        # Initialize session state if not provided
+        # Initialise session state if not provided
         omega = session_omega or {}
         bucket_key = session_bucket_key or {}
         bucket_position = session_bucket_position or {}
@@ -574,7 +574,7 @@ class GyroEngine:
             # Context addressing using 6-bit dynamic context
             ctx6 = self._slab_ctx6(state_int, slab_index)
 
-            # Initialize rotor if first time
+            # Initialise rotor if first time
             if channel_key not in bucket_key:
                 bucket_key[channel_key] = context_keys[ctx6 % num_contexts]
                 if channel_key not in bucket_position:

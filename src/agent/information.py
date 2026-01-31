@@ -52,13 +52,14 @@ M_A: float = 0.1995
 ETA_DEFAULT: float = DELTA_A
 
 # Standard K values (channels per horizon)
-K_VALUES: tuple[int, ...] = (3, 6, 12, 16)
+# All values in the 2^n × 3^m pattern that yield valid D = 256 × K
+K_VALUES: tuple[int, ...] = (1, 2, 3, 4, 6, 8, 12, 16)
 
 # Minimal K
-K_MIN: int = 3
+K_MIN: int = 1
 
 # Corresponding embedding dimensions D = 256 * K
-D_VALUES: tuple[int, ...] = tuple(256 * k for k in K_VALUES)  # (768, 1536, 3072, 4096)
+D_VALUES: tuple[int, ...] = tuple(256 * k for k in K_VALUES)  # (256, 512, 768, 1024, 1536, 2048, 3072, 4096)
 
 # M field clipping bound for numerical stability
 M_CLIP: float = 10.0
@@ -159,12 +160,12 @@ def vertex_charge_for_state(state24: int) -> int:
 # =============================================================================
 
 def mask_weight(byte: int) -> float:
-    """Normalized mask weight for byte: popcount / 12."""
+    """Normalised mask weight for byte: popcount / 12."""
     return popcount(mask12_for_byte(byte)) / 12.0
 
 
-def archetype_distance_normalized(state24: int) -> float:
-    """Normalized Hamming distance to archetype: [0, 1]."""
+def archetype_distance_normalised(state24: int) -> float:
+    """Normalised Hamming distance to archetype: [0, 1]."""
     return popcount(state24 ^ ARCHETYPE_STATE24) / 24.0
 
 
@@ -206,6 +207,12 @@ def direction_factor(h_prev: int, h_curr: int, delta_mask: int) -> float:
 
 # =============================================================================
 # Deterministic Byte Feature Vectors
+#
+# Feature vectors are derived from the 12-bit mask anatomy and support all
+# standard K values in the 2^n × 3^m pattern. The construction uses:
+# - K=12: one feature per mask bit (base case)
+# - K<12: average bits over anatomical groups (rows, frames, columns)
+# - K>12: extend with parity-derived features
 # =============================================================================
 
 # bit groups respecting the 2×3×2 anatomy
@@ -231,41 +238,113 @@ def _mask_bits_pm1(m12: int) -> NDArray[np.float32]:
 
 def byte_feature_vector(byte: int, K: int) -> NDArray[np.float32]:
     """
-    Deterministic, non-learned feature vector f_b ∈ ℝ^K derived ONLY from m12 anatomy.
-    Supports K in {3, 6, 12, 16}. (Raise otherwise.)
+    Deterministic, non-learned feature vector f_b ∈ ℝ^K derived from mask anatomy.
+    
+    Supports all K values where D = 256 × K corresponds to standard embedding
+    dimensions following the 2^n × 3^m pattern.
+    
+    Phenomenology enforces K ∈ K_VALUES = (1, 2, 3, 4, 6, 8, 12, 16), so only these
+    cases are used by the reference agent.
+    
+    The construction principle:
+    - K=12 is the base case: one feature per mask bit
+    - K<12: aggregate bits by averaging over anatomical groups
+    - K>12: extend with parity-derived features
     """
     m12 = mask12_for_byte(byte)
     bits12 = _mask_bits_pm1(m12)
-
+    
+    # Base case: one feature per bit
     if K == 12:
         return bits12
-
+    
+    # K < 12: aggregate by averaging
+    if K == 1:
+        # Global average of all 12 bits
+        return np.array([np.mean(bits12)], dtype=np.float32)
+    
+    if K == 2:
+        # Average per frame (bits 0-5 = frame 0, bits 6-11 = frame 1)
+        return np.array([
+            np.mean(bits12[0:6]),
+            np.mean(bits12[6:12]),
+        ], dtype=np.float32)
+    
     if K == 3:
-        # 3 rows (sum over the 4 bits in each row group)
+        # Average per row (4 bits each, spanning both frames)
         out = np.zeros(3, dtype=np.float32)
         for r, idxs in enumerate(_ROW_GROUPS):
             out[r] = sum(bits12[i] for i in idxs) / 4.0
         return out
-
+    
+    if K == 4:
+        # Average per column-pair across frames
+        # Column 0: bits 0,2,4,6,8,10 (even bits)
+        # Column 1: bits 1,3,5,7,9,11 (odd bits)
+        # Split each by frame
+        return np.array([
+            np.mean(bits12[0:6:2]),   # frame 0, column 0
+            np.mean(bits12[1:6:2]),   # frame 0, column 1
+            np.mean(bits12[6:12:2]),  # frame 1, column 0
+            np.mean(bits12[7:12:2]),  # frame 1, column 1
+        ], dtype=np.float32)
+    
     if K == 6:
-        # 2 frames × 3 rows
+        # Average per frame-row (2 bits each)
         out = np.zeros(6, dtype=np.float32)
         for k, idxs in enumerate(_FRAME_ROW_GROUPS):
             out[k] = sum(bits12[i] for i in idxs) / 2.0
         return out
-
+    
+    if K == 8:
+        # 6 frame-row averages + 2 frame parities
+        out = np.zeros(8, dtype=np.float32)
+        for k, idxs in enumerate(_FRAME_ROW_GROUPS):
+            out[k] = sum(bits12[i] for i in idxs) / 2.0
+        out[6] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0  # frame 0 parity
+        out[7] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0  # frame 1 parity
+        return out
+    
+    # K > 12: extend with parity features
     if K == 16:
-        # 12 mask bits + 4 parity-style scalars (still deterministic, still Router-native)
         out = np.zeros(16, dtype=np.float32)
         out[:12] = bits12
-        # additional 4: (global parity, frame0 parity, frame1 parity, vertex parity proxy)
-        out[12] = float(popcount(m12) & 1) * 2.0 - 1.0
-        out[13] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0
-        out[14] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0
-        out[15] = float(vertex_charge(m12) & 1) * 2.0 - 1.0
+        out[12] = float(popcount(m12) & 1) * 2.0 - 1.0  # global parity
+        out[13] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0  # frame 0 parity
+        out[14] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0  # frame 1 parity
+        out[15] = float(vertex_charge(m12) & 1) * 2.0 - 1.0  # vertex charge parity
         return out
-
-    raise ValueError(f"Unsupported K={K}. Supported: 3, 6, 12, 16.")
+    
+    # Fallback for other K: use linear interpolation/extension strategy
+    # This handles any K by combining base bits with derived features
+    if K < 12:
+        # Downsample: split 12 bits into K groups and average
+        out = np.zeros(K, dtype=np.float32)
+        group_size = 12 / K
+        for i in range(K):
+            start = int(i * group_size)
+            end = int((i + 1) * group_size)
+            out[i] = np.mean(bits12[start:end])
+        return out
+    else:
+        # Upsample: 12 bits + (K-12) parity/derived features
+        out = np.zeros(K, dtype=np.float32)
+        out[:12] = bits12
+        # Fill remaining with row parities, column parities, etc.
+        extra = K - 12
+        parity_features = [
+            float(popcount(m12) & 1) * 2.0 - 1.0,  # global
+            float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0,  # frame 0
+            float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0,  # frame 1
+            float(vertex_charge(m12) & 1) * 2.0 - 1.0,  # vertex
+            float(popcount(m12 & 0x333) & 1) * 2.0 - 1.0,  # row 0 parity
+            float(popcount(m12 & 0xCCC) & 1) * 2.0 - 1.0,  # row 1+2 parity
+            float((popcount(m12) >> 1) & 1) * 2.0 - 1.0,  # weight bit 1
+            float((popcount(m12) >> 2) & 1) * 2.0 - 1.0,  # weight bit 2
+        ]
+        for i in range(min(extra, len(parity_features))):
+            out[12 + i] = parity_features[i]
+        return out
 
 
 def byte_feature_matrix(K: int) -> NDArray[np.float32]:

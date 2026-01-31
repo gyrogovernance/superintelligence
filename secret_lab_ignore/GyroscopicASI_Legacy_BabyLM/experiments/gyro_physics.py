@@ -407,7 +407,7 @@ def build_orbit_transition_matrix(orbit_reps, ontology_keys, phenomenology_map, 
     print(f"  Transitions recorded: {transitions}")
     print(f"  Matrix non-zero entries: {np.count_nonzero(T)}")
     
-    # row-normalize
+    # row-normalise
     row_sums = T.sum(axis=1, keepdims=True)
     row_sums[row_sums == 0] = 1.0
     T /= row_sums

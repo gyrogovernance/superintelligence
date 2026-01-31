@@ -123,7 +123,7 @@ The `inference.py` module defines the `InferenceEngine`, which manages the trans
   conf: float        # float32
   ```
 
-  The `mask` is initialized from the `token_id` and represents the 8-bit Monodromic-Fold residue. The `conf` represents epistemic confidence (0.0-1.0) with monotone increase and decay behavior.
+  The `mask` is initialised from the `token_id` and represents the 8-bit Monodromic-Fold residue. The `conf` represents epistemic confidence (0.0-1.0) with monotone increase and decay behavior.
 
 * **Learning (Memory Update):**
   All learning in S3 proceeds by applying the Monodromic Fold to the phenotype's memory mask.

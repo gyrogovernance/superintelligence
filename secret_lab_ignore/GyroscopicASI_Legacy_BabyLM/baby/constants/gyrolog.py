@@ -80,7 +80,7 @@ class GyroLog:
     """CGM logarithmic coordinate system implementation."""
     
     def __init__(self):
-        """Initialize with canonical templates and introns."""
+        """Initialise with canonical templates and introns."""
         
         # Build 48-bit plane templates from GENE_Mac_S
         self.plane_templates = self._build_plane_templates()
@@ -177,7 +177,7 @@ class GyroLog:
                         else:  # row == 2
                             orient_z -= 1
         
-        # Normalize to {-1, +1}
+        # Normalise to {-1, +1}
         return (
             +1 if orient_x >= 0 else -1,
             +1 if orient_y >= 0 else -1,

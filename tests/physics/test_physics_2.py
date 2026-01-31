@@ -572,7 +572,7 @@ class TestKernelMonodromyBaseFiber:
         print(f"    var  popcount(m_y XOR m_z): {var_w:.6f}")
         print(f"    mean fiber-angle θ_v:       {mean_theta:.6f} rad (hypercube-angle mapping)")
 
-        # A* hunt (diagnostic): find smallest nonzero mass and variance-normalized mass
+        # A* hunt (diagnostic): find smallest nonzero mass and variance-normalised mass
         # (no assertions; just prints)
         # probabilities are multiples of 1/256 due to code size
         counts = np.bincount(w.reshape(-1), minlength=13).astype(np.int64)

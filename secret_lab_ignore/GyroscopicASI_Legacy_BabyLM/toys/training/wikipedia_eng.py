@@ -217,7 +217,7 @@ def compile_stream(
     # Create output directory
     output_tape_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Initialize counters
+    # Initialise counters
     articles_processed = 0
     tokens_processed = 0
     bytes_written = 0

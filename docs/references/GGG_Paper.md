@@ -586,7 +586,7 @@ Across scenarios, several robust patterns appear:
 
 The equilibrium test (scenario 6, Figure 4e) shows that initialising at A = A* with misbalanced potentials is not stable. All domains drop sharply in SI before re-equilibrating. This illustrates that aperture balance alone does not define equilibrium: the stage-profile component must also approach the canonical balanced profile. In terms of the Lyapunov governance potential V_CGM, V_apert decays to zero as apertures converge to A*, while V_stage decreases but stabilises at a small positive value. Systems reach the BU manifold, where apertures are balanced but some residual stage-profile displacement persists.
 
-**Figure 4e: Equilibrium Test (Initialized at A*)**
+**Figure 4e: Equilibrium Test (Initialised at A*)**
 
 ![Equilibrium test trajectories](/research/prevention/simulator/results/analysis/scenario6_at_astar_trajectories.png)
 

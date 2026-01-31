@@ -273,7 +273,7 @@ def main(args):
             should_send_output_text_delta = True
             output_text_delta_buffer += parser.last_content_delta
             if args.browser:
-                updated_output_text, _annotations, has_partial_citations = browser_tool.normalize_citations(current_output_text + output_text_delta_buffer)  # type: ignore
+                updated_output_text, _annotations, has_partial_citations = browser_tool.normalise_citations(current_output_text + output_text_delta_buffer)  # type: ignore
                 output_text_delta_buffer = updated_output_text[len(current_output_text) :]
                 if has_partial_citations:
                     should_send_output_text_delta = False

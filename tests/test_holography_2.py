@@ -1044,7 +1044,7 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
                     i2 = idx[u2]
                     rho_u[i, i2] += 1.0 / sigma_size
         
-        # Normalize
+        # Normalise
         trace = np.trace(rho_u)
         if abs(trace) > 1e-12:
             rho_u = rho_u / trace

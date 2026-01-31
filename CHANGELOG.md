@@ -16,8 +16,6 @@
 
 ## [v1.2.4-Gyroscopic] – 2026-01-30
 
-## [v1.2.4-Gyroscopic] – 2026-01-30
-
 ### Architectural Shift: The Five-Stage Pipeline
 - **New Model:** Five operational stages: Governance Management (Ontology), Information Curation (Epistemology), Inference Interaction (Phenomenology), Intelligence Cooperation Input (Genealogy Egress), and Intelligence Cooperation Output (Genealogy Ingress).
 
@@ -1403,7 +1401,7 @@ This represents the most significant architectural change since the project's in
 
 **1\. Root Cause Analysis and Fixes**
 
-Diagnosed the cause of unbounded epistemology state indices: state buffer in `baby/intelligence.py` was uninitialized, resulting in garbage transitions.
+Diagnosed the cause of unbounded epistemology state indices: state buffer in `baby/intelligence.py` was uninitialised, resulting in garbage transitions.
 
 Applied explicit state buffer zeroing before use to guarantee valid state transitions:
 

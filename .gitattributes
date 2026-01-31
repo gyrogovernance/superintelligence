@@ -1,6 +1,6 @@
 # Ensure consistent line endings for text files
 * text=auto
-# Treat Python files as text, normalize line endings
+# Treat Python files as text, normalise line endings
 *.py text
 # Always use LF for shell scripts
 *.sh text eol=lf

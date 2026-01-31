@@ -15,7 +15,7 @@ def recreate_memory_files():
     # 1. Create empty address_memory.dat
     address_memory_path = memory_dir / "address_memory.dat"
     with open(address_memory_path, "wb") as f:
-        # Write empty content - the system will initialize it properly
+        # Write empty content - the system will initialise it properly
         f.write(b"")
 
     print(f"✅ Created empty address_memory.dat")
@@ -39,7 +39,7 @@ def recreate_memory_files():
     # 3. Create empty passive_memory.bin
     passive_memory_path = memory_dir / "passive_memory.bin"
     with open(passive_memory_path, "wb") as f:
-        # Write empty content - the system will initialize it properly
+        # Write empty content - the system will initialise it properly
         f.write(b"")
 
     print(f"✅ Created empty passive_memory.bin")

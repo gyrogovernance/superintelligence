@@ -85,7 +85,7 @@ _CYCLE_BASIS_K4 = np.array(
     dtype=np.float64,
 )
 
-# Normalize cycle basis columns to unit norm (exact: each has 3 non-zero ±1 entries)
+# Normalise cycle basis columns to unit norm (exact: each has 3 non-zero ±1 entries)
 # All three columns have norm exactly sqrt(3), so multiply by 1/sqrt(3)
 _INV_SQRT3 = 1.0 / np.sqrt(3.0)
 _CYCLE_BASIS_K4 *= _INV_SQRT3
@@ -125,7 +125,7 @@ def get_cycle_basis() -> NDArray[np.float64]:
     """
     GGG exact K4 cycle basis for ker(B).
     
-    Returns shape (6,3) with columns normalized to unit norm.
+    Returns shape (6,3) with columns normalised to unit norm.
     This is an exact integer basis (no SVD computation).
     """
     return _CYCLE_BASIS_K4.copy()

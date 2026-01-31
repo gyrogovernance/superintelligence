@@ -17,6 +17,7 @@ from numpy.typing import NDArray
 from src.agent.information import (
     ETA_DEFAULT,
     K_MIN,
+    K_VALUES,
     direction_factor,
     mask_weight,
     vertex_charge_for_byte,
@@ -40,7 +41,7 @@ class PhenomenologyState:
     
     @classmethod
     def create(cls, K: int) -> "PhenomenologyState":
-        """Initialize with zero M."""
+        """Initialise with zero M."""
         return cls(
             M=np.zeros((256, K), dtype=np.float32),
             h_prev=0,
@@ -58,14 +59,14 @@ class Phenomenology:
     
     def __init__(self, K: int = K_MIN, eta: float = ETA_DEFAULT):
         """
-        Initialize Phenomenology.
+        Initialise Phenomenology.
         
         Args:
             K: channels per horizon (D = 256 * K)
             eta: learning rate (default: aperture gap)
         """
-        if K < 1:
-            raise ValueError(f"K must be positive, got {K}")
+        if K not in K_VALUES:
+            raise ValueError(f"K={K} is not supported. Supported K values: {K_VALUES}")
         
         self.K = K
         self.D = 256 * K

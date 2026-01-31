@@ -35,7 +35,7 @@ def extract_boxed_text(text):
     return ""
 
 
-def normalize_number(s):
+def normalise_number(s):
     match = re.match(r"\d+", s)  # match digits from the start
     if not match:
         return None
@@ -57,7 +57,7 @@ class AIME25Eval(Eval):
         examples = [
             {
                 "question": row["question"],
-                "answer": normalize_number(row["answer"]) if isinstance(row["answer"], str) else row["answer"],
+                "answer": normalise_number(row["answer"]) if isinstance(row["answer"], str) else row["answer"],
             }
             for row in examples
         ]

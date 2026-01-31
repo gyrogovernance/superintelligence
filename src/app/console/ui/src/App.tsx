@@ -48,7 +48,7 @@ export default function App() {
   const [editable, setEditable] = useState<EditableState | null>(null);
   const [notes, setNotes] = useState<string>('');
 
-  // Initialize theme
+  // Initialise theme
   useEffect(() => {
     initTheme();
   }, []);

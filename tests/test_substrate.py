@@ -454,7 +454,7 @@ def test_08_component_isolation_and_rollback():
     random.seed(12345)
     ref_byte = 0xAA  # reference involution
 
-    # Step 1: initialize identity in A via x then AA (A-only update)
+    # Step 1: initialise identity in A via x then AA (A-only update)
     identity_byte = 0x42
     a_init, b_init = 0x555, 0x000
     s0 = pack_state(a_init, b_init)

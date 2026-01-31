@@ -369,7 +369,7 @@ This section specifies the kernel’s reachable state space (the ontology), expl
 
 ## 3.1 Reachable State Space
 
-The kernel uses a 24-bit carrier state, so the theoretical state space contains `2^24` possible 24-bit values. The kernel does not range over that full space when initialized from the archetype and stepped with the specified transition law.
+The kernel uses a 24-bit carrier state, so the theoretical state space contains `2^24` possible 24-bit values. The kernel does not range over that full space when initialised from the archetype and stepped with the specified transition law.
 
 ### 3.1.1 Ontology definition
 
@@ -1381,7 +1381,7 @@ This appendix defines optional reference helpers exposed by implementations for 
 
 ## F.1 Cycle basis for K₄
 
-The cycle space `ker(B)` has dimension 3 for K₄. Implementations MAY provide a normalized cycle basis `U ∈ ℝ^{6×3}` whose columns:
+The cycle space `ker(B)` has dimension 3 for K₄. Implementations MAY provide a normalised cycle basis `U ∈ ℝ^{6×3}` whose columns:
 - lie in `ker(B)`
 - have unit norm
 - span the cycle space
