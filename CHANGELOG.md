@@ -14,6 +14,51 @@
 ```
 ---
 
+## [v1.2.5-Spectral] – 2026-01-31
+
+Today we gave the kernel **sight into its own frequency structure**.
+
+Previously, the kernel knew *where* it was (state) and *how to move* (epistemology), but it didn't know *when in the cycle* it stood. Every byte action is a permutation with 4-cycles, and the position within that cycle—the **phase**—was invisible.
+
+We built the **Spectral Atlas**: a precomputed map that tells the kernel, for every state and every possible action, what phase it occupies and what phase it *would* occupy if it took that step. This is the "frequency axis" that was missing from the FITS-like picture.
+
+With phase visible, the inference memory changed shape. Instead of remembering by horizon alone (`M[h,:]`), it now remembers by **horizon and phase** (`M[h,p,:]`). The agent accumulates experience not just about *where* it has been, but about *when in the cycle* it was there.
+
+The second insight was **palindromic generation**. A token is two bytes. The first byte is a coarse spectral move; the second byte refines it. Before today, both bytes required full computation. Now the kernel can **peek** into the future—read the horizon, vertex, and phase it *would* arrive at—without actually stepping. The second byte choice becomes cheaper: it conditions on the peeked future, not a hypothetical.
+
+Finally, we separated **adapters** from the atlas. The atlas is physics. Adapters are plumbing: which external tokens map to which internal IDs, how to reshape an arbitrary embedding into the gyro dimension. Any model can now plug in without touching the kernel.
+
+---
+
+## What Changed
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Phenomenology | Constants file | Spectral atlas with phase cube |
+| Kernel observables | Computed on demand | O(1) lookup + peek methods |
+| Inference memory | `M[h, :]` | `M[h, p, :]` (phase-aware) |
+| Token encoding | `token % 256` (lossy) | Two bytes, lossless |
+| Token generation | Two full steps | Palindromic: peek → cheap second step |
+| Model binding | Hardcoded | Adapters (TokenBinding, EmbeddingAdapter) |
+
+---
+
+## Files Affected
+
+- `router/atlas.py` — Builds spectral atlas (phase cube, peek maps, gamma table)
+- `router/kernel.py` — Loads spectral atlas; exposes `current_phase`, `peek_next_*`
+- `agent/inference.py` — Phase-aware `M[h,p,:]`, mask-gated byte selection
+- `agent/intelligence.py` — Palindromic generation, adapter integration
+- `agent/adapters.py` — **New**: TokenBinding, EmbeddingAdapter, ByteGatingMasks
+
+---
+
+## One-Liner
+
+*The kernel now sees its frequency coordinate and can look before it leaps.*
+
+---
+
 ## [v1.2.4-Gyroscopic] – 2026-01-30
 
 ### Architectural Shift: The Five-Stage Pipeline

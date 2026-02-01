@@ -1,10 +1,11 @@
 """
-Phenomenology operator.
+Inference Function (formerly Phenomenology operator).
 
-Implements:
+Implements phase-aware inference with:
 - Reshape: external vector → horizon × channel tensor
-- Hebbian update: order-sensitive accumulation in M
+- Hebbian update: order-sensitive accumulation in M[h, p, :]
 - Byte scoring: deterministic selection using kernel observables
+- Spectral phase axis for frequency-aware memory
 """
 
 from __future__ import annotations
@@ -18,48 +19,50 @@ from src.agent.information import (
     ETA_DEFAULT,
     K_MIN,
     K_VALUES,
-    direction_factor,
-    mask_weight,
-    vertex_charge_for_byte,
-    byte_feature_matrix,
     M_CLIP,
 )
 
 
 @dataclass
-class PhenomenologyState:
+class InferenceState:
     """
-    Accumulated phenomenology state.
+    Accumulated inference state with phase-aware memory.
     
-    M: (256, K) horizon × channel field
+    M: (256, 4, K) horizon × phase × channel field
     h_prev: previous horizon index
+    p_prev: previous phase
     a_prev: previous local activation
     """
     M: NDArray[np.float32]
     h_prev: int = 0
+    p_prev: int = 0
     a_prev: Optional[NDArray[np.float32]] = None
     
     @classmethod
-    def create(cls, K: int) -> "PhenomenologyState":
+    def create(cls, K: int) -> "InferenceState":
         """Initialise with zero M."""
         return cls(
-            M=np.zeros((256, K), dtype=np.float32),
+            M=np.zeros((256, 4, K), dtype=np.float32),
             h_prev=0,
+            p_prev=0,
             a_prev=None,
         )
 
 
-class Phenomenology:
+class InferenceFunction:
     """
-    Phenomenology operator for Gyroscopic ASI.
+    Inference Function for Gyroscopic ASI.
     
     Maps external vectors + kernel state → byte selection,
-    accumulating trajectory-dependent structure in M.
+    accumulating trajectory-dependent structure in M[h, p, :].
+    
+    The spectral phase axis (p ∈ {0,1,2,3}) captures position in
+    byte-permutation cycles, enabling frequency-aware memory.
     """
     
     def __init__(self, K: int = K_MIN, eta: float = ETA_DEFAULT):
         """
-        Initialise Phenomenology.
+        Initialise Inference Function.
         
         Args:
             K: channels per horizon (D = 256 * K)
@@ -72,10 +75,24 @@ class Phenomenology:
         self.D = 256 * K
         self.eta = eta
         
-        # Precompute byte features for scoring
-        self._byte_weights = np.array([mask_weight(b) for b in range(256)], dtype=np.float32)
-        self._byte_charges = np.array([vertex_charge_for_byte(b) for b in range(256)], dtype=np.int32)
-        self._byte_features = byte_feature_matrix(self.K)  # (256, K)
+        # Precomputed byte properties (will be loaded from kernel if available)
+        self._byte_weights: NDArray[np.float32]
+        self._byte_charges: NDArray[np.uint8]
+        self._byte_features: NDArray[np.float32]
+        self._gamma_table: NDArray[np.float32]
+    
+    def set_kernel_tables(
+        self,
+        byte_weight: NDArray[np.uint8],
+        byte_charge: NDArray[np.uint8],
+        byte_features: NDArray[np.float32],
+        gamma_table: NDArray[np.float32],
+    ) -> None:
+        """Load precomputed tables from kernel's phenomenology."""
+        self._byte_weights = byte_weight.astype(np.float32) / 12.0
+        self._byte_charges = byte_charge
+        self._byte_features = byte_features
+        self._gamma_table = gamma_table
     
     def reshape(self, v: NDArray[np.float32]) -> NDArray[np.float32]:
         """
@@ -90,6 +107,14 @@ class Phenomenology:
         if v.shape[0] != self.D:
             raise ValueError(f"Expected D={self.D}, got {v.shape[0]}")
         return v.reshape(256, self.K)
+    
+    def prepare_field(self, v: NDArray[np.float32]) -> NDArray[np.float32]:
+        """
+        Prepare field for inference (alias for reshape).
+        
+        Call this once per token to avoid redundant reshaping.
+        """
+        return self.reshape(v)
     
     def extract_local(self, X: NDArray[np.float32], h: int) -> NDArray[np.float32]:
         """
@@ -106,78 +131,93 @@ class Phenomenology:
     
     def update(
         self,
-        state: PhenomenologyState,
+        state: InferenceState,
         h_curr: int,
+        p_curr: int,
         a_curr: NDArray[np.float32],
         delta_mask: int,
+        chi_prev: int,
+        chi_curr: int,
     ) -> None:
         """
-        Order-sensitive Hebbian update of M.
+        Phase-aware Hebbian update of M.
         
         Args:
-            state: current phenomenology state (modified in place)
+            state: current inference state (modified in place)
             h_curr: current horizon index
+            p_curr: current phase (0-3)
             a_curr: current local activation (K,)
             delta_mask: 12-bit mask for transition
+            chi_prev: previous vertex charge
+            chi_curr: current vertex charge
         """
         if state.a_prev is None:
-            # First step: just record, no update
             state.h_prev = h_curr
+            state.p_prev = p_curr
             state.a_prev = a_curr.copy()
             return
         
-        # Compute direction factor (order-sensitive)
-        gamma = direction_factor(state.h_prev, h_curr, delta_mask)
+        # Compute direction factor using gamma table
+        w = int(delta_mask).bit_count()
+        
+        # Assert bounds
+        if w > 12:
+            raise ValueError(f"delta_mask popcount out of range: {w} (mask={delta_mask:#x})")
+        
+        gamma = float(self._gamma_table[chi_prev, chi_curr, w])
         
         # Hebbian increment: gamma * (current ⊙ previous)
         delta = gamma * (a_curr * state.a_prev)
         
-        # Update M at current horizon position
-        state.M[h_curr, :] += self.eta * delta
+        # Update M at current horizon and phase position
+        state.M[h_curr, p_curr, :] += self.eta * delta
         
         # Numerical stability: bound M growth
-        np.clip(state.M[h_curr, :], -M_CLIP, M_CLIP, out=state.M[h_curr, :])
+        np.clip(state.M[h_curr, p_curr, :], -M_CLIP, M_CLIP, out=state.M[h_curr, p_curr, :])
         
         # Update previous state
         state.h_prev = h_curr
+        state.p_prev = p_curr
         state.a_prev = a_curr.copy()
     
     def score_bytes(
         self,
-        state: PhenomenologyState,
+        state: InferenceState,
         h_curr: int,
+        p_curr: int,
         a_curr: NDArray[np.float32],
         chi_curr: int,
     ) -> NDArray[np.float32]:
         """
         Score all 256 candidate bytes.
         
-        Uses only kernel observables:
+        Uses kernel observables:
         - M signal (accumulated × current)
         - Mask weight (prefer lighter moves)
         - Vertex charge coherence
         
         Args:
-            state: current phenomenology state
+            state: current inference state
             h_curr: current horizon index
+            p_curr: current phase (0-3)
             a_curr: current local activation (K,)
             chi_curr: current vertex charge
             
         Returns:
             scores: (256,) score for each byte
         """
-        # M signal: how well accumulated M aligns with current activation (per-byte features)
-        x = state.M[h_curr, :] + a_curr                 # (K,)
-        signal = self._byte_features @ x                # (256,) varies by byte
+        # M signal: how well accumulated M aligns with current activation
+        x = state.M[h_curr, p_curr, :] + a_curr
         
-        # Weight penalty: prefer lighter masks (less disruption)
+        signal = self._byte_features @ x
+        
+        # Weight penalty: prefer lighter masks
         weight_term = 1.0 - self._byte_weights
         
         # Vertex coherence: bonus for staying in same wedge
         wedge_match = (self._byte_charges == chi_curr).astype(np.float32)
         
         # Combine with fixed coefficients
-        # (could be tuned, but keeping it simple and deterministic)
         scores = (
             0.5 * signal +
             0.3 * weight_term +
@@ -188,66 +228,108 @@ class Phenomenology:
     
     def select_byte(
         self,
-        state: PhenomenologyState,
-        h_curr: int,
-        a_curr: NDArray[np.float32],
-        chi_curr: int,
+        scores: NDArray[np.float32],
         deterministic: bool = True,
+        allowed_max_byte: int = 255,
+        allowed_mask: Optional[NDArray[np.bool_]] = None,
     ) -> int:
         """
-        Select next byte based on phenomenology.
+        Select byte from scores.
         
         Args:
-            state: current phenomenology state
-            h_curr: current horizon index
-            a_curr: current local activation (K,)
-            chi_curr: current vertex charge
+            scores: (256,) score for each byte
             deterministic: if True, use argmax; else sample from softmax
+            allowed_max_byte: maximum allowed byte value (prefix gating)
+            allowed_mask: optional boolean mask shape (256,) for non-contiguous gating
             
         Returns:
-            selected byte ∈ {0..255}
+            selected byte ∈ {0..allowed_max_byte} ∩ allowed_mask
         """
-        scores = self.score_bytes(state, h_curr, a_curr, chi_curr)
+        limit = allowed_max_byte + 1
+        s = scores[:limit]
         
+        if allowed_mask is not None:
+            allowed_mask = np.asarray(allowed_mask, dtype=np.bool_)
+            if allowed_mask.shape != (256,):
+                raise ValueError(f"allowed_mask must be shape (256,), got {allowed_mask.shape}")
+            m = allowed_mask[:limit]
+            if not m.any():
+                raise ValueError("No allowed bytes under current gating")
+            
+            if deterministic:
+                masked = np.where(m, s, -np.inf)
+                return int(np.argmax(masked))
+            else:
+                idx = np.flatnonzero(m)
+                s2 = s[idx]
+                exp_s = np.exp(s2 - np.max(s2))
+                probs = exp_s / np.sum(exp_s)
+                return int(idx[np.random.choice(len(idx), p=probs)])
+        
+        # No mask: only prefix gating
         if deterministic:
-            return int(np.argmax(scores))
+            return int(np.argmax(s))
         else:
-            # Softmax sampling
-            exp_scores = np.exp(scores - np.max(scores))  # stability
-            probs = exp_scores / np.sum(exp_scores)
-            return int(np.random.choice(256, p=probs))
+            exp_s = np.exp(s - np.max(s))
+            probs = exp_s / np.sum(exp_s)
+            return int(np.random.choice(limit, p=probs))
     
-    def step(
+    def step_with_field(
         self,
-        state: PhenomenologyState,
-        v_curr: NDArray[np.float32],
+        state: InferenceState,
+        X_curr: NDArray[np.float32],
         h_curr: int,
+        p_curr: int,
         delta_mask: int,
+        chi_prev: int,
         chi_curr: int,
         deterministic: bool = True,
+        allowed_max_byte: int = 255,
+        allowed_mask: Optional[NDArray[np.bool_]] = None,
     ) -> int:
         """
-        Complete phenomenology step: update M and select byte.
+        Complete inference step with pre-reshaped field.
         
         Args:
-            state: phenomenology state (modified in place)
-            v_curr: current external vector (D,)
+            state: inference state (modified in place)
+            X_curr: current field (256, K) - already reshaped
             h_curr: current horizon index
+            p_curr: current phase (0-3)
             delta_mask: mask for transition (from previous step)
+            chi_prev: previous vertex charge
             chi_curr: current vertex charge
             deterministic: byte selection mode
+            allowed_max_byte: maximum allowed byte (prefix gating)
+            allowed_mask: optional boolean mask for non-contiguous gating
             
         Returns:
             selected byte
         """
-        # Reshape to horizon × channel
-        X_curr = self.reshape(v_curr)
+        # Guard: ensure all required kernel tables are loaded
+        required_tables = ["_gamma_table", "_byte_features", "_byte_weights", "_byte_charges"]
+        missing_tables = [table for table in required_tables if not hasattr(self, table)]
+        if missing_tables:
+            raise RuntimeError(
+                f"InferenceFunction tables not set. Missing: {missing_tables}. "
+                "Call set_kernel_tables() first."
+            )
+        
+        # Bounds validation to prevent silent out-of-range indexing
+        if not (0 <= h_curr <= 255):
+            raise ValueError(f"horizon index h_curr={h_curr} out of range [0, 255]")
+        if not (0 <= p_curr <= 3):
+            raise ValueError(f"phase p_curr={p_curr} out of range [0, 3]")
+        if not (0 <= allowed_max_byte <= 255):
+            raise ValueError(f"allowed_max_byte={allowed_max_byte} out of range [0, 255]")
         
         # Extract local activation
         a_curr = self.extract_local(X_curr, h_curr)
         
-        # Update M (order-sensitive Hebbian)
-        self.update(state, h_curr, a_curr, delta_mask)
+        # Update M (phase-aware Hebbian)
+        self.update(state, h_curr, p_curr, a_curr, delta_mask, chi_prev, chi_curr)
         
-        # Select byte
-        return self.select_byte(state, h_curr, a_curr, chi_curr, deterministic)
+        # Score bytes
+        scores = self.score_bytes(state, h_curr, p_curr, a_curr, chi_curr)
+        
+        # Select byte (with optional mask)
+        return self.select_byte(scores, deterministic, allowed_max_byte, allowed_mask)

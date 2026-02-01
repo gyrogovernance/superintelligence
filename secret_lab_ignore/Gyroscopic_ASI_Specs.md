@@ -1,3 +1,4 @@
+
 ```
 ┏━╸╻ ╻┏━┓┏━┓┏━┓┏━╸┏━┓┏━┓╻┏━╸                   
 ┃╺┓┗┳┛┣┳┛┃ ┃┗━┓┃  ┃ ┃┣━┛┃┃                     
@@ -24,6 +25,8 @@ The architecture is built upon a deterministic finite-state coordination kernel.
 
 The curriculum that shapes the agent before deployment, including language model weights, training data, tokeniser definitions, and the token-to-byte mapping, is fixed once the agent begins operation. The agent does not modify its weights during operation. All adaptation occurs through trajectory in the kernel state space, recorded in the Genealogy.
 
+Open models such as OLMo may be used before deployment to produce trained parameter sets. At runtime the agent is not required to execute transformer-style forward passes. The trained parameters of such models are treated as a static parameter manifold that can be read on demand when constructing embedding vectors. No further training or gradient descent occurs after deployment; the only live dynamics are the kernel state, the Inference Function field, and the append-only Genealogy.
+
 ### The Five Constitutional Artefacts
 
 The system is defined by five distinct artefacts that map the theoretical constraints of the Common Governance Model to executable software components.
@@ -32,7 +35,14 @@ The system is defined by five distinct artefacts that map the theoretical constr
 
 **The Epistemology** provides motion. It is the complete transition logic, stored as a precomputed lookup table with 65,536 rows and 256 columns, totalling 16,777,216 entries. Each entry maps a current state and input byte to the resulting next state. Each byte action is a bijection on the Ontology, meaning the transition is reversible: given a state and the byte that produced it, the predecessor state can be computed algebraically. The Epistemology artefact occupies 64 megabytes.
 
-**The Phenomenology** governs interaction. It consists of two parts. The first is a constants artefact (occupying 3 kilobytes) containing geometric constants derived from the kernel: the atlas version, Archetype constants, the reference constant 0xAA, the byte-to-mask table, the 16-element dual code, and the parity-check vectors. The second is the Phenomenology operator, a deterministic function that manages the agent's internal activation field and scores potential actions based on their geometric coherence with the agent's trajectory.
+**The Phenomenology** governs interaction. It consists of two layers:
+
+1. A **spectral atlas** (`phenomenology.npz`) generated entirely from the kernel physics. This atlas stores:
+   - Per-state observables: `state_horizon[state]` and `state_vertex[state]`,
+   - A spectral phase cube `phase[state, byte]` giving each state's position in the 4-cycle induced by each byte,
+   - Backward-pass observables `next_horizon[state, byte]`, `next_vertex[state, byte]`, and `next_phase[state, byte]` used to "peek" the consequences of actions without stepping the kernel,
+   - Helper tables for mask weights, K₄ charges, direction factors, and per-byte feature matrices for all supported K.
+2. A dynamic **Inference Function** in the agent, which uses the atlas to perform phase-aware inference. It maintains a field M[h, p, :] for horizon h and phase p, and routes high-dimensional embeddings into byte actions by respecting the spectral geometry.
 
 **The Genealogy** ensures memory. It is the complete, append-only record of all bytes processed by the agent. Unlike hidden state vectors in neural networks, the Genealogy provides a perfect audit trail. Any past state can be reconstructed by replaying the Genealogy from the Archetype.
 
@@ -68,11 +78,17 @@ The 256 byte operations partition into four classes based on a property called v
 
 The quotient induces a coarse 16-state view of the full dynamics, computed from the vertex charge pairs of the two components. Transitioning between wedges represents a shift in governance mode, allowing the agent to recognise distinct types of operation purely through geometry.
 
+### Spectral Phase in Byte-Permutation Cycles
+
+Each non-reference byte defines a permutation of the 65,536-state ontology. For `b ≠ 0xAA`, this permutation decomposes into disjoint cycles of length 4, giving four discrete eigenphases {1, i, −1, −i}. The spectral atlas assigns to each state and byte a **phase index** `p ∈ {0,1,2,3}` that tracks its position within the corresponding cycle, normalized by a canonical anchor. The reference byte `0xAA` acts as an involution, with fixed points on the horizon and 2-cycles elsewhere; its phases are restricted to {0,1}.
+
+This phase coordinate plays a similar role to a frequency axis in a spectral image: it is neither a time parameter nor a rate, but a discrete spectral coordinate that the Inference Function uses as a second axis of memory alongside the horizon.
+
 ### Aperture
 
 To measure alignment conceptually, vectors defined on the edges of K₄ are subjected to Hodge decomposition. This mathematical technique splits any flow of information into two orthogonal components: a gradient component representing flows consistent with a global potential, and a cycle component representing local circulation.
 
-The Aperture is defined as the ratio of energy in the cycle component to the total energy. The Common Governance Model establishes a target Aperture of approximately 0.0207. The kernel possesses an intrinsic Aperture of approximately 0.0195 (specifically 5/256). The difference between these values, approximately 0.00117, serves as the canonical learning rate (denoted η) for the Phenomenology operator. This ties the maximum per-step adjustment to the geometric properties of the space rather than an arbitrary hyperparameter.
+This quantity is referred to as aperture and is defined as the fraction of total energy contained in the cycle component. The Common Governance Model establishes a target aperture of approximately 0.0207. The kernel possesses an intrinsic aperture of approximately 0.0195 (specifically 5/256). The difference between these values, approximately 0.00117, serves as the canonical learning rate (denoted η) for the Phenomenology operator. This ties the maximum per-step adjustment to the geometric properties of the space rather than an arbitrary hyperparameter.
 
 ---
 
@@ -90,98 +106,139 @@ The kernel provides several verified invariants that support audit, integrity ch
 
 ---
 
-## 4. The Phenomenology Operator
+## 4. The Inference Function (Spectral Phenomenology)
 
-The Phenomenology operator is the core of the agent's intelligence. It acts as the bridge between the continuous, high-dimensional embeddings of a language model and the discrete, finite geometry of the kernel. It is deterministic and introduces no learned parameters beyond those fixed at deployment; instead, it accumulates a trajectory-dependent field.
+The Inference Function is the core of the agent's intelligence. It acts as the bridge between the continuous, high-dimensional embeddings of a language model and the discrete, finite spectral geometry of the kernel. It is deterministic in form and introduces no learned parameters beyond those fixed at deployment; instead, it accumulates a trajectory-dependent field.
 
 ### Dimensional Interface
 
-The operator accepts external numeric vectors (embeddings) of dimension D. To interface with the kernel's 256-state Horizon, D must be a multiple of 256. The number of channels per Horizon state is defined as K, such that D = 256 × K. If the external vector does not match the configured dimension, the operator raises an error.
+The Inference Function accepts external numeric vectors (embeddings) of dimension D. To interface with the kernel's 256-state horizon, D must be a multiple of 256. The number of channels per horizon is defined as K such that D = 256 × K. If the external vector does not match the configured dimension, the Inference Function raises an error.
 
-The operator does not require that these vectors be token embeddings. Any external source that can present a deterministic vector of the appropriate dimension is admissible. This includes slices of model parameters, tool outputs, sensor data, or any other structured numeric input. Phenomenology treats all such vectors uniformly as channels over the Horizon.
+The Inference Function does not require that these vectors be token embeddings. Any external source that can present a deterministic vector of the appropriate dimension is admissible. This includes, in particular, vectors built from slices of open model parameters, as well as tool outputs, sensor data, or any other structured numeric input that can be mapped deterministically into a D-dimensional vector. All such vectors are treated uniformly as **fields** over the horizon: the embedding is reshaped to a real-valued array X of shape 256 × K, and the field is sampled at a specific horizon index and phase.
 
-A notable application of this interface is on‑demand parameter access. Model parameters can be flattened or partitioned into segments of length D and presented to Phenomenology as needed. The agent can select which parameter segment to inspect based on its current state and Genealogy, update its internal field M accordingly, and emit actions in the same loop. There is no separate offline parameter pass; reading and acting use the same mechanism.
+### Phase-Aware Memory
 
-The implementation supports K values of 1, 2, 3, 4, 6, 8, 12, and 16, corresponding to embedding dimensions of 256, 512, 768, 1024, 1536, 2048, 3072, and 4096. These align with the kernel anatomy:
+The agent maintains a dynamic field M of shape (256, 4, K). This field represents the agent's accumulated experience along its trajectory, indexed by:
+- horizon index h ∈ {0..255},
+- phase index p ∈ {0..3} (cycle position in byte permutations),
+- channel index c ∈ {0..K−1}.
 
-| K | D | Interpretation |
-|---:|---:|---|
-| 1 | 256 | Global average |
-| 2 | 512 | Global average per frame |
-| 3 | 768 | One channel per spatial row |
-| 4 | 1024 | One channel per frame-column pair |
-| 6 | 1536 | One channel per frame-row |
-| 8 | 2048 | Frame-rows plus frame parities |
-| 12 | 3072 | One channel per component bit |
-| 16 | 4096 | Bits plus parity features |
+For each inference step, given the current (h, p), the Inference Function:
 
-In practice, K = 3, 6, 12, and 16 are recommended when the full three‑dimensional structure of the kernel anatomy is required. Smaller K values provide more compact summaries and may be useful for lightweight or diagnostic configurations.
+1. Extracts the current local activation a_curr = X[h, :].
+2. Computes a direction factor γ from:
+   - the mask weight of the most recent transition,
+   - the vertex charges of the previous and current states,
+   - using a precomputed `gamma_table[ χ_prev, χ_curr, weight ]`.
+3. Applies a phase-aware Hebbian update:
 
-### The Accumulated Field
+   ΔM[h,p,:] = η · γ · (a_curr ⊙ a_prev)
 
-The agent maintains a dynamic field M of shape (256, K). This field represents the agent's accumulated experience along its trajectory. It initialises to zero at agent creation and evolves via an order-sensitive update rule.
+   with clipping to ensure numerical stability.
+4. Scores all 256 candidate bytes from:
+   - the projection of `M[h,p,:] + a_curr` onto per-byte feature vectors,
+   - a weight penalty that prefers lighter masks,
+   - a K₄ vertex coherence term that rewards staying in or near the same wedge.
 
-For every step the agent takes, the operator updates M at the index corresponding to the current Horizon anchor. The update adds the element-wise product of the current and previous local activations, scaled by a direction factor and the learning rate η. The implementation applies numerical clipping to M to maintain stability.
+In deterministic mode, the Inference Function selects the argmax byte. In sampling mode, it draws from a softmax distribution over scores, optionally restricted to a subset of bytes determined by the token vocabulary size.
 
-### The Direction Factor
+### Spectral Role
 
-The direction factor determines whether an interaction strengthens or inhibits a pathway. It combines the normalised mask weight of the transition (popcount divided by 12) with the relationship between the vertex charges of the previous and current states.
-
-The factor values are:
-- Positive 0.5 for same-vertex transitions
-- Positive 1.0 for adjacent-vertex transitions
-- Negative 1.0 for opposite-vertex transitions (where the vertex charges differ by exclusive-or of 3)
-
-A baseline term of 0.1 is added to prevent zero updates when the mask weight is zero.
-
-This mechanism ensures that the agent naturally prefers transitions that respect the tetrahedral connectivity of the K₄ geometry, penalising abrupt jumps between opposing governance modes.
-
-### Byte Feature Vectors
-
-Each byte is assigned a deterministic feature vector of shape (K,). Feature vectors are derived solely from the 12-bit mask anatomy and contain no learned parameters.
-
-For K=12, the feature vector contains the 12 mask bits mapped to the range negative one to positive one. For K=3, the vector contains three values (one per spatial row), each being the average of the four mask bits in that row. For K=6, the vector contains six values (one per frame-row combination). For K=16, the vector contains the 12 mask bits plus four parity-derived values.
-
-### Byte Scoring and Selection
-
-To generate output, the operator scores each of the 256 candidate bytes by combining three terms:
-
-1. **Signal:** The dot product of (M at current Horizon plus current local activation) with the byte's feature vector
-2. **Weight:** One minus the normalised mask weight, preferring lighter masks
-3. **Wedge coherence:** One if the byte's vertex charge matches the current state's vertex charge, zero otherwise
-
-The combination uses fixed coefficients: 0.5 for signal, 0.3 for weight, and 0.2 for wedge coherence.
-
-In deterministic mode, the operator selects the byte with the highest score. In sampling mode, the operator applies softmax to the scores and samples from the resulting distribution.
+The inclusion of phase p as an index of M is the discrete analogue of adding a spectral axis to an image: the agent's memory is not only "where am I on the horizon?" but also "where am I within the byte-cycle phase?". This is the extension of the Inference Function that incorporates spectral phase alongside the Epistemology's geometric foundation; it raises the system from a three-degree-of-freedom motion to a six-degree-of-freedom spectral navigation.
 
 ---
 
 ## 5. Agent Operation
 
-The agent operates in a continuous cycle of input processing (Egress) and output generation (Ingress). Both phases advance the kernel state and append to the Genealogy.
+The agent operates in a continuous cycle of input processing (Egress) and output generation (Ingress). Both phases advance the kernel state by bytes and append to the Genealogy.
+
+### Token Mapping
+
+Tokens are treated as 16-bit coordinations in the internal ontology address space. For token identifiers t in the range 0 to 65,535 inclusive, the agent defines:
+
+```python
+b1 = (t >> 8) & 0xFF
+b2 = t & 0xFF
+```
+
+Each token is realized as a path of length two in the 256-byte action alphabet. The kernel remains byte-native: it applies each of the two bytes in sequence, advancing the state via the Epistemology lookup. No modulo-256 collapse is used; the mapping from tokens to trajectories is lossless up to `vocab_size ≤ 65,536`.
 
 ### Input Processing (Egress)
 
-When the agent receives a token from an external source, it maps the token identifier to a byte using the modulo 256 operation. The kernel applies this byte to its current state using the Epistemology table. The byte is appended to the Genealogy. The agent and Phenomenology operator cache the mask and previous local activation required for the next update of the field M.
+When the agent receives a token from an external source, it:
 
-The internal kernel transition (transcription of byte to intron, expansion to mask, mutation of component A, and gyration) is specified in the Alignment Router document.
+1. Splits the token ID into `(b1, b2)`.
+2. Applies each byte to the kernel in order:
+   - `kernel.step_byte(b1)`,
+   - `kernel.step_byte(b2)`.
+3. Logs both bytes into the Genealogy.
 
-### Output Generation (Ingress)
+This preserves a pure byte trajectory while ensuring that each token has a unique 16-bit internal coordination.
 
-When the agent needs to produce a token, it obtains an embedding vector for the current context from the language model. The Phenomenology operator reshapes this vector to (256, K), extracts the local activation at the current Horizon index, updates the field M, and selects the optimal output byte. The kernel applies this byte. The byte is appended to the Genealogy. The agent identifies the set of all tokens that map to this byte (all token identifiers where identifier modulo 256 equals the byte) and uses the language model's logits to select the specific token from within this valid set.
+### Output Generation (Ingress): Palindromic Two-Byte Inference
 
-#### Router-native byte generation
+To generate an output token, the agent:
 
-The Phenomenology operator defines a complete probability distribution over the 256 byte actions at each step. The scores described in Section 4 are converted either to a deterministic choice (argmax) or to a stochastic choice (sampling from a softmax over scores). This defines a Router-native probabilistic model at the byte level.
+1. Obtains an embedding vector for the current context from an embedding function and adapts it to dimension D = 256 × K. This embedding function may read from a pre-trained language model, from its static parameter tensors, or from any other deterministic source that provides a D-dimensional vector.
+2. Reshapes the embedding into a field X ∈ ℝ^(256×K).
+3. Reads the current spectral observables from the kernel:
+   - horizon `h₀`,
+   - vertex charge `χ₀`,
+   - phase `p₀`,
+   - and the last transition mask and previous vertex `(Δ₀, χ_prev0)` tracked by the agent.
+4. Invokes the Inference Function to select the first byte `b1`, optionally restricted by the vocabulary size:
 
-Language generation can therefore proceed in two ways:
+   ```python
+   b1 = infer.step_with_field(
+       state=inference_state,
+       X_curr=X,
+       h_curr=h0,
+       p_curr=p0,
+       delta_mask=Δ0,
+       chi_prev=χ_prev0,
+       chi_curr=χ0,
+       deterministic=deterministic,
+       allowed_max_byte=max_b1,  # derived from vocab_size
+   )
+   ```
 
-- Using the language model logits to choose a token within the class defined by a byte, as described above.
-- Or using a fixed, invertible mapping between bytes and tokens or characters, without consulting external logits. In this case, the Phenomenology operator alone governs the stochastic language process.
+5. Uses the spectral atlas **without stepping** to peek the next-state observables under `b1`:
+
+   ```python
+   h1   = kernel.peek_next_horizon(b1)
+   χ1   = kernel.peek_next_vertex(b1)
+   p1   = kernel.peek_next_phase(b1)
+   Δ1 = mask12_for_byte(b1)
+   ```
+
+6. Invokes the Inference Function again to select the second byte `b2`, now constrained by the peeked `(h1, p1, χ₁)` and the vocabulary:
+
+   ```python
+   b2 = infer.step_with_field(
+       state=inference_state,
+       X_curr=X,
+       h_curr=h1,
+       p_curr=p1,
+       delta_mask=Δ1,
+       chi_prev=χ0,
+       chi_curr=χ1,
+       deterministic=deterministic,
+       allowed_max_byte=max_b2,
+   )
+   ```
+
+7. Only then applies both bytes to the kernel and logs them to the Genealogy.
+8. Combines `(b1, b2)` into a 16-bit token:
+
+   ```python
+   token_id = (b1 << 8) | b2
+   ```
+
+This "palindromic" pattern reflects BU-Egress and BU-Ingress at the byte level: the first half of the loop chooses a coarse spectral move, while the second half uses a peeked view of the future state to refine the action cheaply and coherently.
 
 ### Tool Execution
 
-Tool calls are handled as byte sequences. The identifier for a tool maps to a specific sequence of bytes. Executing a tool involves stepping the kernel through this sequence, with each byte appended to the Genealogy. The result of the tool is similarly encoded and processed as input. This ensures that all functional actions are recorded and affect the geometric state of the agent.
+Tool calls are handled as byte sequences. The identifier for a tool maps to a specific sequence of bytes. Executing a tool involves stepping the kernel through this sequence, with each byte appended to the Genealogy. The result of the tool is similarly encoded and processed as input. This ensures that all functional actions are recorded in the Genealogy and contribute to the evolution of the kernel state.
 
 ---
 
@@ -199,7 +256,7 @@ The parity commitment (described in Section 3) provides efficient comparison of 
 
 ### Holographic Generalisation
 
-Generalisation in this architecture arises from the holographic structure of the Horizon. Since every state decomposes into a Horizon anchor and a local variation, states that share a Horizon anchor are geometrically related. The agent treats them as variations of the same underlying configuration. This allows the agent to apply patterns learned in one specific context to other contexts that share the same boundary conditions.
+Generalisation in this architecture arises from the holographic structure of the Horizon. Since every state decomposes into a horizon anchor and a local variation, states that share the same horizon anchor occupy related positions in the kernel's finite state space. The agent treats them as variations of the same underlying configuration. This allows the agent to apply patterns learned in one specific context to other contexts that share the same boundary conditions.
 
 ### History Degeneracy
 
@@ -217,47 +274,57 @@ The 16-state quotient system (derived from vertex charge pairs) provides a macro
 
 ### Dependencies
 
-Gyroscopic ASI requires the Router substrate and a language model:
+Gyroscopic ASI requires the Router substrate and an embedding function. A language model is one possible source of embeddings but is not required at runtime:
 
 ```python
 from src.agent.intelligence import GyroscopicAgent, AgentConfig
-from src.agent.inference import Phenomenology, PhenomenologyState
-from src.agent.information import (
-    horizon_index,
-    vertex_charge_for_state,
-    ETA_DEFAULT,
-    K_MIN,
-)
+from src.agent.inference import InferenceFunction, InferenceState
 
+# Example: external LM with its own tokenizer (optional source)
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-model = AutoModelForCausalLM.from_pretrained("model-name")
-tokenizer = AutoTokenizer.from_pretrained("model-name")
+# The above example illustrates integration with a transformer model used as an 
+# embedding source. In parameter-manifold configurations, the agent instead 
+# constructs embedding vectors directly from fixed model parameters or other 
+# static tensors, without executing a forward pass through a language model.
 ```
 
 ### Token Mapping
 
-The interface between the language model and the kernel is a modulo operation:
+The interface between the language model and the kernel uses 16-bit tokens:
+
 
 ```python
-def token_to_byte(token_id: int) -> int:
-    return token_id % 256
+def token_to_bytes(token_id: int) -> tuple[int, int]:
+    b1 = (token_id >> 8) & 0xFF
+    b2 = token_id & 0xFF
+    return b1, b2
 ```
 
-Token identifiers are mapped to bytes by reduction modulo 256. This mapping is total and deterministic. It is an interface convention between the tokeniser and the kernel and does not preserve token identity.
+Each token is split into two bytes for processing through the kernel. The mapping is total and deterministic, preserving the full 16-bit token space up to `vocab_size ≤ 65536`.
 
-### Phenomenology Initialisation
+### Inference Function Initialisation
 
 ```python
-from src.agent.inference import Phenomenology, PhenomenologyState
+from src.agent.inference import InferenceFunction, InferenceState
+from src.agent.information import ETA_DEFAULT
 
-phenomenology = Phenomenology(K=3, eta=0.00117)
-state = PhenomenologyState.create(K=3)
+inference = InferenceFunction(K=3, eta=ETA_DEFAULT)
+state = InferenceState.create(K=3)
 ```
 
 The field M initialises to zero. The learning rate η defaults to the Aperture gap.
 
-The `embedding_fn` passed to the agent need not be a token embedding function. It is any deterministic function that, given a context (for example a token identifier, a parameter address, or a tool state), produces a vector of dimension D = 256 × K. The agent treats this vector as the current external field for Phenomenology.
+The Inference Function obtains its kernel-dependent tables (byte weights, byte charges, direction factors, and feature matrices) indirectly via the `RouterKernel` and the spectral atlas (`phenomenology.npz`), using:
+
+```python
+inference.set_kernel_tables(
+    byte_weight=kernel.byte_weight,
+    byte_charge=kernel.byte_charge,
+    byte_features=features_K3,       # loaded from phenomenology.npz
+    gamma_table=kernel.gamma_table,
+)
+```
 
 ### Agent Initialisation
 
@@ -278,27 +345,40 @@ agent = GyroscopicAgent(config=config)
 ### Generation Loop
 
 ```python
+from pathlib import Path
+from src.agent.intelligence import GyroscopicAgent, AgentConfig
+
+config = AgentConfig(
+    K=3,
+    eta=ETA_DEFAULT,
+    deterministic=True,
+    atlas_dir=Path("data/atlas"),
+    vocab_size=tokenizer.vocab_size,
+)
+
+agent = GyroscopicAgent(config=config)
+
 # Process input tokens
 for token_id in input_tokens:
-    byte = agent.step_input(token_id)
+    agent.step_input(token_id)
 
 # Generate output
 output_tokens = []
 context = list(input_tokens)
 
 for _ in range(max_output):
-    embedding = get_embedding(context[-1])
-    byte = agent.step_output(embedding=embedding)
-    token = agent.select_token(byte, logits=get_logits(context))
+    last_token = context[-1] if context else 0
+    embedding = get_embedding(last_token)    # Embedding function
+    token = agent.step_output(embedding=embedding)
     output_tokens.append(token)
     context.append(token)
 ```
 
-The functions `get_embedding()` and `get_logits()` belong to the external model layer.
+The function `get_embedding()` belongs to the embedding layer. It may, for example, look up a static embedding, read from pre-trained parameter tensors, or call a language model. The agent consumes embedding vectors and returns token identifiers; any additional use of logits or probabilistic information is handled entirely outside the agent or via a separate adapter.
 
 ### Agent State
 
-The agent's complete state consists of: the kernel instance (providing the current state index), the Genealogy (byte log), the Phenomenology field M, and a reference to the language model for token generation. No additional persistent data is required.
+The agent's complete state consists of: the kernel instance (providing the current state index), the Genealogy (byte log), the **Inference field M** (phase‑aware memory M[h,p,:]), and a reference to the embedding function for token generation.
 
 ### Verification
 
@@ -337,6 +417,8 @@ def byte_feature_vector(byte: int, K: int) -> np.ndarray:
 
 The following example shows the construction for the recommended K values. The reference implementation additionally supports K = 1, 2, 4, and 8 using the same grouping principles.
 
+In the reference implementation, these feature vectors are precomputed for all K and stored in `phenomenology.npz` as `features_K{K}`.
+
 ---
 
 ## 8. Performance Characteristics
@@ -351,21 +433,23 @@ All core operations complete in constant time per byte:
 |---|---|
 | State transition | Single array lookup |
 | Transcription (byte to intron) | Single exclusive-or operation |
-| Token mapping | Single modulo operation |
+| Token mapping | Bit-shift and mask (and optional O(1) table lookup via TokenBinding) |
 | Genealogy append | Single write operation |
 | Parity commitment update | Three exclusive-or operations |
+
+The cost of constructing the embedding vector depends on the chosen embedding function. In the parameter-manifold configuration, this construction consists of reading selected rows or slices from fixed parameter tensors and mapping them into the D-dimensional field, without executing full matrix multiplications or attention mechanisms.
 
 ### Space Requirements
 
 | Component | Size |
 |---|---|
 | Epistemology table (shared) | 64 megabytes |
-| Ontology | 256 kilobytes |
-| Phenomenology constants | 3 kilobytes |
+| Ontology (shared) | 256 kilobytes |
+| Spectral atlas (phenomenology.npz, shared) | ~64 megabytes |
 | Kernel state | 3 bytes |
 | Genealogy | Linear in history length |
-| Accumulated field M (K=3) | 3 kilobytes |
-| Accumulated field M (K=16) | 16 kilobytes |
+| Accumulated field M (K=3) | ~12 kilobytes |
+| Accumulated field M (K=16) | ~64 kilobytes |
 
 ### Throughput
 
@@ -388,7 +472,7 @@ The architecture enforces alignment through geometric construction rather than e
 
 **Accountability.** The reversibility of the kernel means that any sequence of actions can be unwound. Given a state and the byte that produced it, the predecessor state is recoverable. This supports rollback operations and precise attribution.
 
-**Coherence.** The geometry reduces the likelihood of incoherent transitions. The direction factor inhibits movement between opposing governance vertices, creating a constraint that guides the agent toward trajectories that respect the K₄ connectivity.
+**Coherence.** The kernel's finite state space and the direction factor reduce the likelihood of incoherent transitions. The direction factor inhibits movement between opposing governance vertices, creating a constraint that guides the agent toward trajectories that respect the K₄ connectivity.
 
 The design is intended to reduce the likelihood of common generation pathologies:
 
@@ -410,13 +494,15 @@ The architecture admits a mapping to Beer's Viable System Model for organisation
 | System 2 | Coordination | Genealogy and parity commitment |
 | System 3 | Control | Kernel invariants and reversibility |
 | System 4 | Environment interface | Embedding input and token output |
-| System 5 | Policy and identity | Phenomenology operator and byte selection |
+| System 5 | Policy and identity | **Inference Function** and byte selection |
 
 ---
 
 ## 11. Conclusion
 
-Gyroscopic ASI specifies an agent architecture in which a deterministic kernel provides a reproducible coordination substrate and an append-only byte history provides the basis for replay and reconstruction. Interpretation is constrained to the agent layer through a deterministic Phenomenology operator that consumes external embeddings and kernel observables to select output bytes.
+Gyroscopic ASI specifies an agent architecture in which a deterministic kernel provides a reproducible coordination substrate and an append-only byte history provides the basis for replay and reconstruction. Interpretation is constrained to the agent layer through a deterministic **Inference Function** and its spectral atlas (Phenomenology), which consume external embeddings and kernel observables to select output bytes.
+
+These embeddings may be constructed from pre-trained open model parameters without executing forward passes at inference time.
 
 The five artefacts (Ontology, Epistemology, Phenomenology, Genealogy, Common Source Moment) correspond to the five foundational constraints of the Common Governance Model. The Ontology establishes reference. The Epistemology provides motion. The Phenomenology governs interaction. The Genealogy ensures closure and reconstruction. The Common Source Moment quantifies capacity.
 

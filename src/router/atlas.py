@@ -4,7 +4,7 @@ Atlas builder.
 Running this module builds:
 - ontology.npy: sorted unique reachable 24-bit states
 - epistemology.npy: [N,256] next-state indices (fast router lookup)
-- phenomenology.npz: capped measurement graph/constants
+- phenomenology.npz: spectral atlas with phase cube and backward-pass observables
 """
 
 from __future__ import annotations
@@ -18,20 +18,21 @@ from numpy.typing import NDArray
 
 # Import constants - handle both direct execution and module import
 try:
-    # Try relative import first (when imported as module)
     from .constants import (
-    ARCHETYPE_A12,
-    ARCHETYPE_B12,
-    ARCHETYPE_STATE24,
-    GENE_MIC_S,
-    XFORM_MASK_BY_BYTE,
-    step_state_by_byte,
-    C_PERP_12,
-    LAYER_MASK_12,
-)
+        ARCHETYPE_A12,
+        ARCHETYPE_B12,
+        ARCHETYPE_STATE24,
+        GENE_MIC_S,
+        XFORM_MASK_BY_BYTE,
+        C_PERP_12,
+        LAYER_MASK_12,
+        Q0,
+        Q1,
+        mask12_for_byte,
+        vertex_charge_from_mask,
+        popcount,
+    )
 except ImportError:
-    # Fallback for direct execution
-    # Add the program root to path
     program_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(program_root))
 
@@ -41,9 +42,13 @@ except ImportError:
         ARCHETYPE_STATE24,
         GENE_MIC_S,
         XFORM_MASK_BY_BYTE,
-        step_state_by_byte,
         C_PERP_12,
         LAYER_MASK_12,
+        Q0,
+        Q1,
+        mask12_for_byte,
+        vertex_charge_from_mask,
+        popcount,
     )
 
 
@@ -65,57 +70,43 @@ class AtlasPaths:
 
 
 # Atlas version - increment when build method or constants change incompatibly
-ATLAS_VERSION = "1.0"
+ATLAS_VERSION = "2.0"
 
 
 def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     """
     Build ontology directly as A_set × B_set using proven closed-form algebra.
-    
+
     By Property P3, Ω = A_set × B_set where:
     - A_set = {ARCHETYPE_A12 XOR m_b : b in [0,255]} (256 elements)
     - B_set = {ARCHETYPE_B12 XOR m_b : b in [0,255]} (256 elements)
-    
-    This is faster and more direct than BFS exploration.
     """
     print("Building ontology...")
     paths.base.mkdir(parents=True, exist_ok=True)
 
-    # Extract A-masks from XFORM_MASK_BY_BYTE
     masks_a = np.array([(int(XFORM_MASK_BY_BYTE[b]) >> 12) & 0xFFF for b in range(256)], dtype=np.uint16)
-    
-    # Build A_set and B_set directly
+
     a_set = ((ARCHETYPE_A12 ^ masks_a).astype(np.uint16) & LAYER_MASK_12)
     b_set = ((ARCHETYPE_B12 ^ masks_a).astype(np.uint16) & LAYER_MASK_12)
-    
-    # Cartesian product: all combinations
-    a_grid, b_grid = np.meshgrid(a_set, b_set, indexing='ij')
-    
-    # Pack into 24-bit states
+
+    a_grid, b_grid = np.meshgrid(a_set, b_set, indexing="ij")
+
     ontology = ((a_grid.astype(np.uint32) << 12) | b_grid.astype(np.uint32)).flatten()
-    
-    # Sort for consistent ordering and ensure uint32 dtype
     ontology = np.sort(ontology).astype(np.uint32)
-    
+
     np.save(paths.ontology, ontology)
-    
+
     file_size = paths.ontology.stat().st_size
     print(f"Ontology complete: {len(ontology):,} unique states")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
-    print(f"  Built directly as 256 × 256 cartesian product")
-    
-    # Verify byte sensitivity
-    unique_from_archetype = len({step_state_by_byte(ARCHETYPE_STATE24, b) for b in range(256)})
-    print(f"  Unique transitions from archetype: {unique_from_archetype} / 256 bytes")
     return ontology
 
 
-def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> None:
+def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> NDArray[np.uint32]:
     """
     Build epistemology as [N,256] indices using vectorized column-wise construction.
-    
-    Each column corresponds to an input byte (0-255), encoding the next state index.
-    Uses vectorized step law computation (same as test) for speed and correctness.
+
+    Returns the epistemology array for use in phenomenology building.
     """
     print("Building epistemology...")
     n = int(ontology.size)
@@ -123,117 +114,304 @@ def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> None:
     from numpy.lib.format import open_memmap
     epi = open_memmap(str(paths.epistemology), mode="w+", dtype=np.uint32, shape=(n, 256))
 
-    # Ensure ontology is sorted for searchsorted
     assert np.all(ontology[:-1] <= ontology[1:]), "Ontology must be sorted"
 
-    # Unpack all states into A and B components (vectorized)
     a = ((ontology >> 12) & LAYER_MASK_12).astype(np.uint32)
     b = (ontology & LAYER_MASK_12).astype(np.uint32)
 
-    # Build column-wise (byte-by-byte) for better cache locality
     for byte in range(256):
         mask24 = int(XFORM_MASK_BY_BYTE[byte])
         m = (mask24 >> 12) & 0xFFF
 
-        # Vectorized step law: compute next states for all ontology states at once
         new_a = (b ^ 0xFFF).astype(np.uint32)
         new_b = ((a ^ m) ^ 0xFFF).astype(np.uint32)
         new_state = ((new_a << 12) | new_b).astype(np.uint32)
 
-        # Find indices using binary search (fast for sorted array)
         idx = np.searchsorted(ontology, new_state).astype(np.int64)
-
-        # Verify membership (should always hold by closure)
         assert np.all(ontology[idx] == new_state), f"Byte {byte}: closure violation detected"
 
-        # Write column
         epi[:, byte] = idx.astype(np.uint32)
 
-        if (byte + 1) % 32 == 0:
+        if (byte + 1) % 64 == 0:
             epi.flush()
             print(f"  Processed {byte + 1:,} / 256 bytes ({100 * (byte + 1) / 256:.1f}%)")
 
     epi.flush()
-    
-    # Verify uniqueness: count distinct transitions per state (sample)
-    unique_per_state = []
-    for i in range(min(10, n)):  # Sample first 10 states
-        unique = len(np.unique(epi[i, :]))
-        unique_per_state.append(unique)
-    avg_unique = sum(unique_per_state) / len(unique_per_state) if unique_per_state else 0
-    
+
     file_size = paths.epistemology.stat().st_size
     print(f"Epistemology complete: [{n:,}, 256] lookup table")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
-    print(f"  Total entries: {n * 256:,}")
-    if unique_per_state:
-        print(f"  Avg unique transitions per state (sample): {avg_unique:.1f} / 256")
+
+    # Return the memmap; build_phenomenology can index it directly.
+    return epi
 
 
-def build_phenomenology(paths: AtlasPaths) -> None:
+def build_phenomenology(
+    paths: AtlasPaths,
+    ontology: NDArray[np.uint32],
+    epistemology: NDArray[np.uint32],
+) -> None:
     """
-    Write capped measurement graph/constants.
+    Build the spectral atlas: phenomenology.npz
 
-    This file is independent of N. Stores byte→mask mapping and archetype.
+    Contains:
+    - Kernel constants (archetype, masks, etc.)
+    - Per-state observables: state_horizon, state_vertex
+    - Spectral phase cube: phase[state, byte]
+    - Backward-pass observables: next_horizon, next_vertex, next_phase
+    - Helper arrays: mask12_by_byte, byte_weight, byte_charge
     """
-    print("Building phenomenology...")
+    print("Building phenomenology (spectral atlas)...")
+    n = len(ontology)
 
-    np.savez_compressed(
-            paths.phenomenology,
-            atlas_version=ATLAS_VERSION,
-            archetype_state24=np.uint32(ARCHETYPE_STATE24),
-            archetype_a12=np.uint16(ARCHETYPE_A12),
-            archetype_b12=np.uint16(ARCHETYPE_B12),
-            gene_mic_s=np.uint8(GENE_MIC_S),
-            xform_mask_by_byte=XFORM_MASK_BY_BYTE,
-            c_perp_12=np.array(C_PERP_12, dtype=np.uint16),
-            q0=np.uint16(0x033),
-            q1=np.uint16(0x0F0),
-        )
-    
+    # Build mask_to_byte lookup
+    mask_to_byte: dict[int, int] = {}
+    for b in range(256):
+        m12 = mask12_for_byte(b)
+        mask_to_byte[m12] = b
+
+    # Build per-byte helpers
+    mask12_by_byte = np.array([mask12_for_byte(b) for b in range(256)], dtype=np.uint16)
+    byte_weight = np.array([popcount(mask12_by_byte[b]) for b in range(256)], dtype=np.uint8)
+    byte_charge = np.array([vertex_charge_from_mask(mask12_by_byte[b]) for b in range(256)], dtype=np.uint8)
+
+    # Build per-state observables
+    print("  Computing per-state observables...")
+    state_horizon = np.empty(n, dtype=np.uint8)
+    state_vertex = np.empty(n, dtype=np.uint8)
+
+    for i, s24 in enumerate(ontology):
+        a12 = (int(s24) >> 12) & 0xFFF
+        mask = a12 ^ ARCHETYPE_A12
+        try:
+            h = mask_to_byte[mask]
+        except KeyError:
+            raise RuntimeError(f"Mask {mask:#x} not in mask_to_byte; atlas inconsistent")
+        state_horizon[i] = h
+        state_vertex[i] = vertex_charge_from_mask(mask)
+
+    # Build spectral phase cube
+    print("  Computing spectral phase cube...")
+    phase = np.zeros((n, 256), dtype=np.uint8)
+
+    for b in range(256):
+        perm = epistemology[:, b]
+        seen = np.zeros(n, dtype=np.uint8)
+
+        for start in range(n):
+            if seen[start]:
+                continue
+
+            # Follow the cycle in the permutation perm
+            cycle: list[int] = []
+            x = int(start)
+            while not seen[x]:
+                seen[x] = 1
+                cycle.append(x)
+                x = int(perm[x])
+
+            # Rotate to canonical anchor (smallest state_index)
+            anchor = min(cycle)
+            k = cycle.index(anchor)
+            cycle = cycle[k:] + cycle[:k]
+
+            cycle_len = len(cycle)
+
+            # Cycle-length sanity checks (directly from perm)
+            if b != GENE_MIC_S:
+                if cycle_len != 4:
+                    raise RuntimeError(f"Byte {b} produced cycle length {cycle_len}, expected 4")
+            else:
+                if cycle_len not in (1, 2):
+                    raise RuntimeError(f"Reference byte {b} produced cycle length {cycle_len}, expected 1 or 2")
+
+            # Assign phase positions
+            for p, s in enumerate(cycle):
+                phase[s, b] = p
+
+        if (b + 1) % 64 == 0:
+            print(f"    Phase computed for {b + 1:,} / 256 bytes")
+
+        # Phase value sanity checks
+        max_phase = int(phase[:, b].max())
+        if b != GENE_MIC_S:
+            if max_phase != 3:
+                raise RuntimeError(f"Phase max for byte {b} is {max_phase}, expected 3")
+        else:
+            if max_phase > 1:
+                raise RuntimeError(f"Phase max for reference byte {b} is {max_phase}, expected <= 1")
+
+    # Build backward-pass observables (peek without stepping)
+    print("  Computing backward-pass observables...")
+    next_horizon = state_horizon[epistemology]
+    next_vertex = state_vertex[epistemology]
+
+    next_phase = np.empty((n, 256), dtype=np.uint8)
+    for b in range(256):
+        next_phase[:, b] = phase[epistemology[:, b], b]
+
+    # Build gamma table for direction factor
+    print("  Computing gamma table...")
+    gamma_table = np.zeros((4, 4, 13), dtype=np.float32)
+    for chi_prev in range(4):
+        for chi_curr in range(4):
+            for w in range(13):
+                if chi_prev == chi_curr:
+                    sign = 0.5
+                elif (chi_prev ^ chi_curr) == 3:
+                    sign = -1.0
+                else:
+                    sign = 1.0
+                gamma_table[chi_prev, chi_curr, w] = sign * (w / 12.0 + 0.1)
+
+    # Build byte feature matrices for all supported K values
+    print("  Computing byte feature matrices...")
+    K_VALUES = (1, 2, 3, 4, 6, 8, 12, 16)
+    feature_matrices: dict[str, NDArray[np.float32]] = {}
+
+    for K in K_VALUES:
+        F = np.zeros((256, K), dtype=np.float32)
+        for b in range(256):
+            F[b, :] = _byte_feature_vector(b, K, mask12_by_byte)
+        feature_matrices[f"features_K{K}"] = F
+
+    # Save all to phenomenology.npz (uncompressed for fast load)
+    print("  Saving phenomenology.npz...")
+    np.savez(
+        paths.phenomenology,
+        # Constants
+        atlas_version=ATLAS_VERSION,
+        archetype_state24=np.uint32(ARCHETYPE_STATE24),
+        archetype_a12=np.uint16(ARCHETYPE_A12),
+        archetype_b12=np.uint16(ARCHETYPE_B12),
+        gene_mic_s=np.uint8(GENE_MIC_S),
+        xform_mask_by_byte=XFORM_MASK_BY_BYTE,
+        c_perp_12=np.array(C_PERP_12, dtype=np.uint16),
+        q0=np.uint16(Q0),
+        q1=np.uint16(Q1),
+        # Per-byte helpers
+        mask12_by_byte=mask12_by_byte,
+        byte_weight=byte_weight,
+        byte_charge=byte_charge,
+        # Per-state observables
+        state_horizon=state_horizon,
+        state_vertex=state_vertex,
+        # Spectral phase cube
+        phase=phase,
+        # Backward-pass observables
+        next_horizon=next_horizon,
+        next_vertex=next_vertex,
+        next_phase=next_phase,
+        # Direction factor table
+        gamma_table=gamma_table,
+        # Feature matrices
+        **feature_matrices,  # type: ignore
+    )
+
     file_size = paths.phenomenology.stat().st_size
-    unique_masks = len(set(int(XFORM_MASK_BY_BYTE[b]) for b in range(256)))
-    print(f"Phenomenology complete: measurement constants")
-    print(f"  File size: {file_size:,} bytes ({file_size / 1024:.2f} KB)")
-    print(f"  Unique masks: {unique_masks} / 256 bytes")
+    print(f"Phenomenology complete: spectral atlas")
+    print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
     print(f"  Atlas version: {ATLAS_VERSION}")
-    print(f"  Contents: atlas_version, archetype_state24, archetype_a12, archetype_b12, gene_mic_s, xform_mask_by_byte")
+    print(f"  Contents: constants + state_horizon/vertex + phase cube + next_* maps + features")
+
+
+def _byte_feature_vector(byte: int, K: int, mask12_by_byte: NDArray[np.uint16]) -> NDArray[np.float32]:
+    """Compute deterministic byte feature vector for given K."""
+    m12 = int(mask12_by_byte[byte])
+
+    bits12 = np.empty(12, dtype=np.float32)
+    for i in range(12):
+        bits12[i] = 1.0 if ((m12 >> i) & 1) else -1.0
+
+    if K == 12:
+        return bits12
+
+    if K == 1:
+        return np.array([np.mean(bits12)], dtype=np.float32)
+
+    if K == 2:
+        return np.array([np.mean(bits12[0:6]), np.mean(bits12[6:12])], dtype=np.float32)
+
+    if K == 3:
+        row_groups = ((0, 1, 6, 7), (2, 3, 8, 9), (4, 5, 10, 11))
+        out = np.zeros(3, dtype=np.float32)
+        for r, idxs in enumerate(row_groups):
+            out[r] = sum(bits12[i] for i in idxs) / 4.0
+        return out
+
+    if K == 4:
+        return np.array(
+            [
+                np.mean(bits12[0:6:2]),
+                np.mean(bits12[1:6:2]),
+                np.mean(bits12[6:12:2]),
+                np.mean(bits12[7:12:2]),
+            ],
+            dtype=np.float32,
+        )
+
+    if K == 6:
+        frame_row_groups = ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11))
+        out = np.zeros(6, dtype=np.float32)
+        for k, idxs in enumerate(frame_row_groups):
+            out[k] = sum(bits12[i] for i in idxs) / 2.0
+        return out
+
+    if K == 8:
+        frame_row_groups = ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11))
+        out = np.zeros(8, dtype=np.float32)
+        for k, idxs in enumerate(frame_row_groups):
+            out[k] = sum(bits12[i] for i in idxs) / 2.0
+        out[6] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0
+        out[7] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0
+        return out
+
+    if K == 16:
+        out = np.zeros(16, dtype=np.float32)
+        out[:12] = bits12
+        out[12] = float(popcount(m12) & 1) * 2.0 - 1.0
+        out[13] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0
+        out[14] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0
+        out[15] = float(vertex_charge_from_mask(m12) & 1) * 2.0 - 1.0
+        return out
+
+    raise ValueError(f"Unsupported K={K}")
 
 
 def build_all(base_dir: Path) -> None:
     paths = AtlasPaths(base=base_dir)
-    print("Atlas Builder")
-    print("----------")
+    print("Atlas Builder v2.0")
+    print("==================")
     t0 = time.time()
+
     ontology = build_ontology(paths)
     print("")
-    build_epistemology(paths, ontology)
+
+    epistemology = build_epistemology(paths, ontology)
     print("")
-    build_phenomenology(paths)
+
+    build_phenomenology(paths, ontology, epistemology)
     print("")
+
     elapsed = time.time() - t0
-    
+
     total_size = (
-        paths.ontology.stat().st_size +
-        paths.epistemology.stat().st_size +
-        paths.phenomenology.stat().st_size
+        paths.ontology.stat().st_size
+        + paths.epistemology.stat().st_size
+        + paths.phenomenology.stat().st_size
     )
-    
+
     print("Summary")
-    print("----------")
+    print("=======")
     print(f"Total build time: {elapsed:.2f} seconds")
     print(f"Total atlas size: {total_size:,} bytes ({total_size / 1024 / 1024:.2f} MB)")
     print(f"Output directory: {paths.base}")
-    print("")
-    print("Maps built:")
-    print(f"  - ontology.npy: {len(ontology):,} states")
-    print(f"  - epistemology.npy: [{len(ontology):,}, 256] lookup table")
-    print(f"  - phenomenology.npz: measurement constants")
 
 
 def main() -> None:
     import argparse
-    parser = argparse.ArgumentParser(description="Build ontology.npy, epistemology.npy, phenomenology.npz")
+
+    parser = argparse.ArgumentParser(description="Build atlas: ontology.npy, epistemology.npy, phenomenology.npz")
     parser.add_argument("--out", type=Path, default=Path("data/atlas"))
     args = parser.parse_args()
     build_all(args.out)

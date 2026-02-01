@@ -6,6 +6,7 @@ Defines:
 - transcription: intron = byte XOR 0xAA
 - pure XOR transformation
 - FIFO gyration (A↔B swap with flip)
+- K₄ vertex charge computation
 """
 
 from __future__ import annotations
@@ -21,6 +22,14 @@ LAYER_MASK_12: int = 0xFFF
 
 ARCHETYPE_A12: int = 0xAAA
 ARCHETYPE_B12: int = 0x555
+
+
+# =============================================================================
+# K₄ Parity Check Vectors
+# =============================================================================
+
+Q0: int = 0x033
+Q1: int = 0x0F0
 
 
 def pack_state(a12: int, b12: int) -> int:
@@ -102,7 +111,7 @@ def step_state_by_byte(state24: int, byte: int) -> int:
 
 def popcount(x: int) -> int:
     """Count the number of set bits (population count)."""
-    return bin(x).count("1")
+    return int(x).bit_count()
 
 
 def archetype_distance(state24: int) -> int:
@@ -150,6 +159,18 @@ def mask12_for_byte(byte: int) -> int:
     """
     mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
     return (mask24 >> 12) & LAYER_MASK_12
+
+
+def vertex_charge_from_mask(m12: int) -> int:
+    """
+    Compute K₄ vertex charge from 12-bit mask.
+    
+    Uses parity check vectors Q0 = 0x033, Q1 = 0x0F0.
+    Returns: v ∈ {0, 1, 2, 3}
+    """
+    b0 = popcount(m12 & Q0) & 1
+    b1 = popcount(m12 & Q1) & 1
+    return (b1 << 1) | b0
 
 
 def dot12(a: int, b: int) -> int:
