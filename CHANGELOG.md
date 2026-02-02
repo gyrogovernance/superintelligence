@@ -15,6 +15,32 @@
 
 ---
 
+## [v1.2.6-Interpretability] – 2026-02-02
+
+This release marks a significant milestone in understanding the internal geometry of large language models through the lens of the Common Governance Model (CGM). We introduce a new suite of mechanistic interpretability tools, a detailed research report, and a novel experimental framework for topology-guided attention optimization.
+
+### 🚀 Added
+
+- **GyroSpectacles (`gyrospectacles.py`)**: A new experimental framework for topology-guided attention optimization. This script tests the hypothesis that standard O(n²) attention in specific heads can be replaced by an efficient O(n) "horizon-bucket retrieval" mechanism at inference time. It measures approximation error, output fidelity (KL divergence, top-k agreement), and both theoretical and actual speedup, directly paving the way for CGM-aligned model optimization.
+- **CGM Tomography (`cgm_tomography.py`)**: A new prompt-free analysis script that probes the model's learned geometry by sampling tokens uniformly and analyzing their embeddings and weight projections against CGM's topological coordinates (horizon, vertex).
+- **Mechanistic Interpretability Probing Suite**: Added several new scripts to support the research, including `olmo_forward_trace.py`, `torch_internals_probe.py`, and `torch_weight_reader_probe.py` to trace model execution and verify weight access patterns.
+
+### 🔬 Research & Analysis
+
+- **New Report (`Mech_Interp_Report.md`)**: Published a comprehensive report detailing the mechanistic interpretability analysis of `OLMo-3-7B-Instruct`. The report synthesizes findings from two phases of research.
+- **Key Findings on OLMo's Internal Geometry**:
+    - **Strong Chirality (CS)**: Q and K projections are structurally and functionally distinct across nearly all layers, confirming a core CGM principle. [1]
+    - **Emergent Governance Quotient (K₄)**: The model's early layers learn to amplify a latent 4-class "vertex" structure present in the embeddings, mirroring CGM's K₄ tetrahedron. [1]
+    - **Hodge-like Head Specialization**: Attention heads exhibit a functional split, with some acting as "gradient heads" (preserving vertex class) and others as "cycle heads" (mixing vertex classes), analogous to a Hodge decomposition on the K₄ graph. [1]
+    - **Absence of Depth-4 Closure**: The model does not appear to implement the strict `LRLR = RLRL` operational closure (BU-Egress) predicted by CGM, suggesting it operates in a less constrained regime. [1]
+- **Reassessment of L17/H27**: The initial finding of a "horizon-tracking head" was refined. The phenomenon is confirmed to be highly localized to structured template boundaries and is not a global horizon-reading mechanism, guiding the research toward more robust, prompt-free methods. [1]
+
+### 📚 Documentation
+
+- **New Report (`Torch_Internals_Report.md`)**: Added a detailed report on the low-level mechanics of PyTorch transformers, documenting weight access patterns, forward pass operations, and architectural facts for OLMo-3-7B. This provides a verified foundation for all interpretability work. [3, 4]
+
+---
+
 ## [v1.2.6-Interpretability] – 2026-02-01
 
 ### Core Architecture
