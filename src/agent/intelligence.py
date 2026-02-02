@@ -23,7 +23,7 @@ from src.agent.information import (
     K_VALUES,
     ETA_DEFAULT,
 )
-from src.agent.adapters import TokenBinding, EmbeddingAdapter, ByteGatingMasks
+from src.agent.adapters import TokenBinding, EmbeddingAdapter, ByteGatingMasks, SemanticTokenCodec
 from src.agent.inference import InferenceFunction, InferenceState
 
 
@@ -35,17 +35,26 @@ class AgentConfig:
     the supported values listed in src.agent.information.K_VALUES.
     
     vocab_size limits the range of valid token IDs (0 to vocab_size-1).
-    Must be in [1, 65536].
+    Must be in [1, 2^(8*bytes_per_token)].
+    
+    bytes_per_token is the fixed width (L) for token-to-byte encoding.
+    Default is 2 (legacy 16-bit). Use 4 for models like OLMo with >65536 vocab.
+    
+    semantic_codec_path: if provided, uses LSH-based semantic encoding/decoding
+    for tokens instead of raw big-endian byte mapping. Required for meaningful
+    language generation with large vocabularies.
     """
     K: int = K_MIN
     eta: float = ETA_DEFAULT
     deterministic: bool = True
     atlas_dir: Path = Path("data/atlas")
     vocab_size: int = 65536
+    bytes_per_token: int = 2  # L: 2 for legacy 16-bit, 4 for OLMo (32-bit)
     
     # Optional adapter paths (model-specific, separate from atlas)
     token_binding_path: Optional[Path] = None
     embedding_adapter_path: Optional[Path] = None
+    semantic_codec_path: Optional[Path] = None  # SemanticTokenCodec for 4-byte LSH
 
 
 @dataclass
@@ -61,14 +70,15 @@ class GyroscopicAgent:
     Gyroscopic ASI Agent.
     
     Implements the complete architecture:
-    - CS (Ontology): token → byte → state
+    - CS (Ontology): token -> byte -> state
     - UNA (Epistemology): state transitions
     - ONA (Inference): phase-aware activation processing, M accumulation, byte selection
     - BU-Eg (Genealogy In): byte logging
-    - BU-In (Genealogy Out): byte → token
+    - BU-In (Genealogy Out): byte -> token
     
-    Uses palindromic token generation: first byte selects coarse spectral move,
-    second byte is chosen with peeked next-state observables (cheaper).
+    Uses sequential prefix-peek planning for token generation:
+    pick b1, peek -> pick b2, peek -> ... -> pick bL (for L = bytes_per_token).
+    Each byte is chosen with vocab-gated constraints and peeked next-state observables.
     """
     
     def __init__(
@@ -89,8 +99,17 @@ class GyroscopicAgent:
         # Validate config
         if self.config.K not in K_VALUES:
             raise ValueError(f"K={self.config.K} is not supported. Supported: {K_VALUES}")
-        if not (1 <= self.config.vocab_size <= 65536):
-            raise ValueError(f"vocab_size must be in [1, 65536], got {self.config.vocab_size}")
+        
+        L = self.config.bytes_per_token
+        if not (1 <= L <= 8):
+            raise ValueError(f"bytes_per_token must be in [1, 8], got {L}")
+        
+        max_vocab = 1 << (8 * L)
+        if not (1 <= self.config.vocab_size <= max_vocab):
+            raise ValueError(
+                f"vocab_size must be in [1, {max_vocab}] for bytes_per_token={L}, "
+                f"got {self.config.vocab_size}"
+            )
         
         # Initialise kernel (CS + UNA + spectral atlas)
         self.kernel = RouterKernel(self.config.atlas_dir)
@@ -116,6 +135,7 @@ class GyroscopicAgent:
         # Optional adapters
         self.token_binding: Optional[TokenBinding] = None
         self.embedding_adapter: Optional[EmbeddingAdapter] = None
+        self.semantic_codec: Optional[SemanticTokenCodec] = None
         self._gating_masks: Optional[ByteGatingMasks] = None
         
         if self.config.token_binding_path is not None:
@@ -135,6 +155,14 @@ class GyroscopicAgent:
                     f"gyro D={self.inference.D}"
                 )
         
+        if self.config.semantic_codec_path is not None:
+            self.semantic_codec = SemanticTokenCodec.load(self.config.semantic_codec_path)
+            if self.semantic_codec.vocab_size != self.config.vocab_size:
+                raise ValueError(
+                    f"SemanticTokenCodec vocab_size={self.semantic_codec.vocab_size} != "
+                    f"AgentConfig vocab_size={self.config.vocab_size}"
+                )
+        
         # Initialise state
         self.state = AgentState(
             inference=InferenceState.create(self.config.K),
@@ -143,9 +171,9 @@ class GyroscopicAgent:
         # Embedding function
         self._embedding_fn = embedding_fn or self._zero_embedding
         
-        # Track last mask and vertex for Hebbian update
-        self._last_mask: int = 0
-        self._last_vertex: int = 0
+        # Track last mask and vertex for Hebbian update (from kernel's initial state)
+        self._last_mask: int = mask12_for_byte(self.kernel.last_byte)
+        self._last_vertex: int = self.kernel.current_vertex
     
     def _zero_embedding(self, token_id: int) -> NDArray[np.float32]:
         """Default embedding: zero vector."""
@@ -163,13 +191,13 @@ class GyroscopicAgent:
         self._last_vertex = prev_vertex
     
     def _to_internal_id(self, external_token_id: int) -> int:
-        """Convert external token ID to internal 16-bit ID."""
+        """Convert external token ID to internal ID."""
         if self.token_binding is None:
             return int(external_token_id)
         return self.token_binding.to_internal(external_token_id)
     
     def _to_external_id(self, internal_id: int) -> int:
-        """Convert internal 16-bit ID to external token ID."""
+        """Convert internal ID to external token ID."""
         if self.token_binding is None:
             return int(internal_id)
         return self.token_binding.to_external(internal_id)
@@ -186,6 +214,32 @@ class GyroscopicAgent:
             + (f" and != adapter input_dim={self.embedding_adapter.input_dim}" 
                if self.embedding_adapter else "")
         )
+    
+    def _allowed_max_next_byte_contiguous(self, prefix: list[int]) -> int:
+        """
+        For contiguous vocab [0..V-1], big-endian fixed width L.
+        
+        Returns max allowed byte at the next position, assuming prefix is valid.
+        If prefix already matches the max token's prefix, the next byte is
+        capped at the corresponding byte of max_id. Otherwise, returns 255.
+        """
+        L = self.config.bytes_per_token
+        V = self.config.vocab_size
+        max_id = V - 1
+        max_bytes = list(max_id.to_bytes(L, "big"))
+        
+        i = len(prefix)
+        if i >= L:
+            raise ValueError("prefix already complete")
+        
+        # Compare prefix with max_bytes prefix
+        for j in range(i):
+            if prefix[j] < max_bytes[j]:
+                return 255  # Unconstrained
+            if prefix[j] > max_bytes[j]:
+                raise ValueError("prefix exceeds vocab range")
+        # Equal so far: cap at max_bytes[i]
+        return max_bytes[i]
     
     def reset(self) -> None:
         """Reset agent to initial state."""
@@ -220,30 +274,70 @@ class GyroscopicAgent:
     # Token Interface
     # =========================================================================
     
-    def token_to_bytes(self, token_id: int) -> tuple[int, int]:
+    def token_to_bytes(self, token_id: int) -> list[int]:
         """
-        Map 16-bit token to (b1, b2) bytes.
+        Map token to L bytes.
         
-        b1 = (token_id >> 8) & 0xFF
-        b2 = token_id & 0xFF
+        If semantic_codec is loaded, uses LSH-based semantic encoding.
+        Otherwise uses big-endian fixed-width encoding.
+        
+        L = bytes_per_token. Returns list of L bytes.
         """
-        b1 = (token_id >> 8) & 0xFF
-        b2 = token_id & 0xFF
-        return b1, b2
+        if self.semantic_codec is not None:
+            return self.semantic_codec.encode(token_id)
+        
+        L = self.config.bytes_per_token
+        max_id = (1 << (8 * L)) - 1
+        if not (0 <= token_id <= max_id):
+            raise ValueError(
+                f"token_id {token_id} out of range for bytes_per_token={L}"
+            )
+        return list(int(token_id).to_bytes(L, "big"))
     
-    def bytes_to_token(self, b1: int, b2: int) -> int:
+    def bytes_to_token(self, bs: list[int]) -> int:
         """
-        Reconstruct token from bytes.
+        Reconstruct token from L bytes (big-endian).
         
-        token = (b1 << 8) | b2
+        Note: For semantic codec, use bytes_to_token_semantic() instead,
+        which requires probe and embed_tokens for proper decoding.
+        
+        L = bytes_per_token. bs must have exactly L elements.
         """
-        return (b1 << 8) | b2
+        L = self.config.bytes_per_token
+        if len(bs) != L:
+            raise ValueError(f"expected {L} bytes, got {len(bs)}")
+        return int.from_bytes(bytes(int(b) & 0xFF for b in bs), "big")
+    
+    def bytes_to_token_semantic(
+        self,
+        bs: list[int],
+        probe: "NDArray[np.float32]",
+        embed_tokens: "NDArray[np.float32]",
+    ) -> int:
+        """
+        Decode bytes to token using semantic codec with prefix backoff.
+        
+        Args:
+            bs: L bytes from byte selection
+            probe: context probe vector for scoring candidates
+            embed_tokens: embedding table for candidate scoring
+            
+        Returns:
+            token_id decoded with semantic prefix backoff
+        """
+        if self.semantic_codec is None:
+            return self.bytes_to_token(bs)
+        
+        import torch
+        probe_t = torch.from_numpy(probe).float()
+        embed_t = torch.from_numpy(embed_tokens)
+        return self.semantic_codec.decode(bs, probe_t, embed_t)
     
     # =========================================================================
     # Core Loop
     # =========================================================================
     
-    def step_input(self, token_id: int) -> tuple[int, int]:
+    def step_input(self, token_id: int) -> list[int]:
         """
         Process input token (BU-Eg: Genealogy In).
         
@@ -251,7 +345,7 @@ class GyroscopicAgent:
             token_id: input token (external ID)
             
         Returns:
-            (b1, b2) bytes that were processed
+            list of L bytes that were processed
             
         Raises:
             ValueError: if token_id >= vocab_size
@@ -259,14 +353,14 @@ class GyroscopicAgent:
         if token_id >= self.config.vocab_size:
             raise ValueError(f"token_id {token_id} >= vocab_size {self.config.vocab_size}")
         
-        # External → internal → bytes
+        # External -> internal -> bytes
         internal_id = self._to_internal_id(token_id)
-        b1, b2 = self.token_to_bytes(internal_id)
+        bs = self.token_to_bytes(internal_id)
         
-        for byte in (b1, b2):
+        for byte in bs:
             self._step_kernel_and_log(byte)
         
-        return b1, b2
+        return bs
     
     def step_output(
         self,
@@ -338,10 +432,14 @@ class GyroscopicAgent:
     
     def generate_token(self, embedding: NDArray[np.float32]) -> int:
         """
-        Generate one token (two kernel steps) using palindromic inference.
+        Generate one token (L kernel steps) using sequential prefix-peek planning.
         
-        First byte selects coarse spectral move.
-        Second byte uses peeked next-state observables (cheaper).
+        For each byte position i in [0..L-1]:
+        1. Read spectral observables (h, chi, p) from ephemeral state
+        2. Select byte via Inference Function with vocab-gated constraint
+        3. Advance ephemeral state via epistemology lookup (peek)
+        
+        After all L bytes are planned, commit them to the real kernel and genealogy.
         
         Args:
             embedding: input embedding vector (D,)
@@ -350,65 +448,60 @@ class GyroscopicAgent:
             generated token (external ID)
         """
         X = self.inference.prepare_field(embedding)
+        L = self.config.bytes_per_token
         
-        h0 = self.kernel.current_horizon
-        chi0 = self.kernel.current_vertex
-        p0 = self.kernel.current_phase
-        delta0 = self._last_mask
-        chi_prev0 = self._last_vertex
+        # Ephemeral planning state (starts from real kernel state)
+        idx = int(self.kernel.state_index)
+        last_byte = int(self.kernel.last_byte)
+        delta_mask = int(self._last_mask)
+        chi_prev = int(self._last_vertex)
         
-        # Determine gating for b1
-        V = self.config.vocab_size
-        if self._gating_masks is not None:
-            b1_mask = self._gating_masks.allowed_b1
-            max_b1 = 255
-        else:
-            b1_mask = None
-            max_b1 = (V - 1) >> 8
+        planned: list[int] = []
         
-        b1 = self.inference.step_with_field(
-            state=self.state.inference,
-            X_curr=X,
-            h_curr=h0,
-            p_curr=p0,
-            delta_mask=delta0,
-            chi_prev=chi_prev0,
-            chi_curr=chi0,
-            deterministic=self.config.deterministic,
-            allowed_max_byte=max_b1,
-            allowed_mask=b1_mask,
-        )
+        for _ in range(L):
+            # Read spectral observables from ephemeral state
+            h = int(self.kernel.state_horizon[idx])
+            chi = int(self.kernel.state_vertex[idx])
+            p = int(self.kernel.phase[idx, last_byte])
+            
+            # Vocab gating for this byte position
+            allowed_max = self._allowed_max_next_byte_contiguous(planned)
+            
+            # Select byte via inference
+            b = self.inference.step_with_field(
+                state=self.state.inference,
+                X_curr=X,
+                h_curr=h,
+                p_curr=p,
+                delta_mask=delta_mask,
+                chi_prev=chi_prev,
+                chi_curr=chi,
+                deterministic=self.config.deterministic,
+                allowed_max_byte=allowed_max,
+                allowed_mask=None,
+            )
+            
+            planned.append(b)
+            
+            # Advance ephemeral state by chosen byte (peek, no commit)
+            idx = int(self.kernel.epistemology[idx, b])
+            last_byte = int(b)
+            delta_mask = mask12_for_byte(b)
+            chi_prev = chi
         
-        h1 = self.kernel.peek_next_horizon(b1)
-        chi1 = self.kernel.peek_next_vertex(b1)
-        p1 = self.kernel.peek_next_phase(b1)
-        delta1 = mask12_for_byte(b1)
+        # Commit: step the real kernel and log genealogy
+        for b in planned:
+            self._step_kernel_and_log(b)
         
-        # Determine gating for b2
-        if self._gating_masks is not None:
-            b2_mask = self._gating_masks.get_b2_mask(b1)
-            max_b2 = 255
-        else:
-            max_b2 = (V - 1) & 0xFF if b1 == (V - 1) >> 8 else 255
-            b2_mask = None
+        internal_id = self.bytes_to_token(planned)
         
-        b2 = self.inference.step_with_field(
-            state=self.state.inference,
-            X_curr=X,
-            h_curr=h1,
-            p_curr=p1,
-            delta_mask=delta1,
-            chi_prev=chi0,
-            chi_curr=chi1,
-            deterministic=self.config.deterministic,
-            allowed_max_byte=max_b2,
-            allowed_mask=b2_mask,
-        )
+        # Safety check
+        if internal_id >= self.config.vocab_size:
+            raise RuntimeError(
+                f"planned bytes produced out-of-range token_id {internal_id} "
+                f"(vocab_size={self.config.vocab_size})"
+            )
         
-        self._step_kernel_and_log(b1)
-        self._step_kernel_and_log(b2)
-        
-        internal_id = self.bytes_to_token(b1, b2)
         return self._to_external_id(internal_id)
     
     # =========================================================================

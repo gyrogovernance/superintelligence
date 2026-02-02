@@ -154,87 +154,107 @@ The agent operates in a continuous cycle of input processing (Egress) and output
 
 ### Token Mapping
 
-Tokens are treated as 16-bit coordinations in the internal ontology address space. For token identifiers t in the range 0 to 65,535 inclusive, the agent defines:
+Tokens are treated as fixed-width L-byte coordinations in the internal ontology address space, where L is the configured `bytes_per_token` (default 2 for legacy 16-bit; 4 for models like OLMo with vocab > 65536).
+
+Token IDs range from 0 to `2^(8*L) - 1`; the effective vocabulary is `0..vocab_size-1`. Encoding uses fixed-width big-endian:
 
 ```python
-b1 = (t >> 8) & 0xFF
-b2 = t & 0xFF
+def token_to_bytes(token_id: int, L: int) -> list[int]:
+    return list(token_id.to_bytes(L, "big"))
+
+def bytes_to_token(bs: list[int]) -> int:
+    return int.from_bytes(bytes(bs), "big")
 ```
 
-Each token is realized as a path of length two in the 256-byte action alphabet. The kernel remains byte-native: it applies each of the two bytes in sequence, advancing the state via the Epistemology lookup. No modulo-256 collapse is used; the mapping from tokens to trajectories is lossless up to `vocab_size ≤ 65,536`.
+Each token is realised as a path of length L in the 256-byte action alphabet. The kernel remains byte-native: it applies each of the L bytes in sequence, advancing the state via the Epistemology lookup. The mapping from tokens to trajectories is lossless and bijective for all token IDs in the valid range.
+
+**Example:** For OLMo (vocab_size = 100,278), use L = 4. Token ID 100,000 encodes as bytes `[0x00, 0x01, 0x86, 0xA0]`.
 
 ### Input Processing (Egress)
 
 When the agent receives a token from an external source, it:
 
-1. Splits the token ID into `(b1, b2)`.
+1. Encodes the token ID into L bytes using fixed-width big-endian: `bs = token_to_bytes(token_id, L)`.
 2. Applies each byte to the kernel in order:
-   - `kernel.step_byte(b1)`,
-   - `kernel.step_byte(b2)`.
-3. Logs both bytes into the Genealogy.
+   - `kernel.step_byte(bs[0])`,
+   - `kernel.step_byte(bs[1])`,
+   - ... through `kernel.step_byte(bs[L-1])`.
+3. Logs all L bytes into the Genealogy.
 
-This preserves a pure byte trajectory while ensuring that each token has a unique 16-bit internal coordination.
+This preserves a pure byte trajectory while ensuring that each token has a unique L-byte internal coordination.
 
-### Output Generation (Ingress): Palindromic Two-Byte Inference
+### Output Generation (Ingress): Sequential Prefix-Peek Inference
 
-To generate an output token, the agent:
+To generate a token of L bytes, the agent selects bytes sequentially. For each position i in [0..L-1]:
 
-1. Obtains an embedding vector for the current context from an embedding function and adapts it to dimension D = 256 × K. This embedding function may read from a pre-trained language model, from its static parameter tensors, or from any other deterministic source that provides a D-dimensional vector.
-2. Reshapes the embedding into a field X ∈ ℝ^(256×K).
-3. Reads the current spectral observables from the kernel:
-   - horizon `h₀`,
-   - vertex charge `χ₀`,
-   - phase `p₀`,
-   - and the last transition mask and previous vertex `(Δ₀, χ_prev0)` tracked by the agent.
-4. Invokes the Inference Function to select the first byte `b1`, optionally restricted by the vocabulary size:
+1. Read current spectral observables (h, chi, phase) from the **ephemeral** state after the chosen prefix.
+2. Select the next byte via the Inference Function, gated by vocabulary constraints.
+3. Advance the ephemeral state via epistemology lookup (peek, no commit).
 
+After all L bytes are selected, apply them to the real kernel and append to the Genealogy.
+
+**Detailed procedure:**
+
+1. Obtain an embedding vector for the current context from an embedding function and adapt it to dimension D = 256 x K. This embedding function may read from a pre-trained language model, from its static parameter tensors, or from any other deterministic source that provides a D-dimensional vector.
+2. Reshape the embedding into a field X in R^(256 x K).
+3. Initialise ephemeral planning state from the real kernel:
+   - `idx = kernel.state_index`
+   - `last_byte = kernel.last_byte`
+   - `delta_mask = last_mask` (tracked by agent)
+   - `chi_prev = last_vertex` (tracked by agent)
+   - `planned = []` (empty prefix)
+
+4. For each byte position i in [0..L-1]:
+
+   a. Read spectral observables from ephemeral state:
    ```python
-   b1 = infer.step_with_field(
+   h = kernel.state_horizon[idx]
+   chi = kernel.state_vertex[idx]
+   p = kernel.phase[idx, last_byte]
+   ```
+
+   b. Compute vocab-gated constraint for this position:
+   ```python
+   allowed_max = allowed_max_next_byte(planned, vocab_size, L)
+   ```
+
+   c. Select byte via Inference Function:
+   ```python
+   b = infer.step_with_field(
        state=inference_state,
        X_curr=X,
-       h_curr=h0,
-       p_curr=p0,
-       delta_mask=Δ0,
-       chi_prev=χ_prev0,
-       chi_curr=χ0,
+       h_curr=h,
+       p_curr=p,
+       delta_mask=delta_mask,
+       chi_prev=chi_prev,
+       chi_curr=chi,
        deterministic=deterministic,
-       allowed_max_byte=max_b1,  # derived from vocab_size
+       allowed_max_byte=allowed_max,
    )
    ```
 
-5. Uses the spectral atlas **without stepping** to peek the next-state observables under `b1`:
-
+   d. Append to prefix and advance ephemeral state:
    ```python
-   h1   = kernel.peek_next_horizon(b1)
-   χ1   = kernel.peek_next_vertex(b1)
-   p1   = kernel.peek_next_phase(b1)
-   Δ1 = mask12_for_byte(b1)
+   planned.append(b)
+   idx = kernel.epistemology[idx, b]
+   last_byte = b
+   delta_mask = mask12_for_byte(b)
+   chi_prev = chi
    ```
 
-6. Invokes the Inference Function again to select the second byte `b2`, now constrained by the peeked `(h1, p1, χ₁)` and the vocabulary:
-
+5. Commit: apply all L bytes to the real kernel and log to Genealogy:
    ```python
-   b2 = infer.step_with_field(
-       state=inference_state,
-       X_curr=X,
-       h_curr=h1,
-       p_curr=p1,
-       delta_mask=Δ1,
-       chi_prev=χ0,
-       chi_curr=χ1,
-       deterministic=deterministic,
-       allowed_max_byte=max_b2,
-   )
+   for b in planned:
+       kernel.step_byte(b)
+       genealogy.append(b)
    ```
 
-7. Only then applies both bytes to the kernel and logs them to the Genealogy.
-8. Combines `(b1, b2)` into a 16-bit token:
-
+6. Decode planned bytes to token ID:
    ```python
-   token_id = (b1 << 8) | b2
+   token_id = bytes_to_token(planned)
    ```
 
-This "palindromic" pattern reflects BU-Egress and BU-Ingress at the byte level: the first half of the loop chooses a coarse spectral move, while the second half uses a peeked view of the future state to refine the action cheaply and coherently.
+This sequential pattern extends the inference loop to arbitrary token widths: each successive byte is chosen with more prefix constraint and more peeked spectral structure, while the kernel physics remain unchanged. Each successive byte is chosen with tighter vocabulary constraints and more accumulated M structure, making later byte selections increasingly determined by context.
 
 ### Tool Execution
 
@@ -291,17 +311,19 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 ### Token Mapping
 
-The interface between the language model and the kernel uses 16-bit tokens:
-
+The interface between the language model and the kernel uses fixed-width L-byte tokens:
 
 ```python
-def token_to_bytes(token_id: int) -> tuple[int, int]:
-    b1 = (token_id >> 8) & 0xFF
-    b2 = token_id & 0xFF
-    return b1, b2
+def token_to_bytes(token_id: int, L: int) -> list[int]:
+    """Map token to L bytes (big-endian, fixed-width)."""
+    return list(token_id.to_bytes(L, "big"))
+
+def bytes_to_token(bs: list[int]) -> int:
+    """Reconstruct token from L bytes (big-endian)."""
+    return int.from_bytes(bytes(bs), "big")
 ```
 
-Each token is split into two bytes for processing through the kernel. The mapping is total and deterministic, preserving the full 16-bit token space up to `vocab_size ≤ 65536`.
+Each token is split into L bytes for processing through the kernel. The mapping is total and deterministic, preserving the full L-byte token space. For L=2 (legacy), vocab_size <= 65536. For L=4 (e.g. OLMo), vocab_size <= 2^32.
 
 ### Inference Function Initialisation
 
@@ -334,6 +356,22 @@ from pathlib import Path
 
 config = AgentConfig(
     K=3,
+    eta=0.00117,
+    deterministic=True,
+    atlas_dir=Path("data/atlas"),
+)
+
+agent = GyroscopicAgent(config=config)
+```
+
+For OLMo (hidden_size=4096, vocab_size=100278):
+
+```python
+# OLMo configuration
+config = AgentConfig(
+    K=16,                      # D = 256 * 16 = 4096
+    bytes_per_token=4,         # 32-bit tokens for vocab > 65536
+    vocab_size=100278,
     eta=0.00117,
     deterministic=True,
     atlas_dir=Path("data/atlas"),

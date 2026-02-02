@@ -1,66 +1,37 @@
-# Python 3.14 optimized ML stack (Windows)
+# Gyroscopic ASI Agent - Python 3.11+ (tested on 3.14)
 
 # Core dependencies
-numpy>=2.0.0
-ujson>=5.10.0
+numpy>=2.4.0
 pyyaml>=6.0
 
-# Extra features
-emoji>=2.14.0
-nltk>=3.9.0
+# ML / Transformers stack (for OLMo integration)
+torch>=2.10.0
+transformers>=5.0.0
+tokenizers>=0.22.0
+safetensors>=0.7.0
+huggingface-hub>=1.3.0
 
-# Protocols / API
-fastapi>=0.116.0
-pydantic>=2.11.0
-uvicorn>=0.35.0
+# API framework
+fastapi>=0.128.0
+pydantic>=2.12.0
+uvicorn>=0.34.0
 httpx>=0.28.0
 
-# Language processing
-# Keep transformers moderate to ensure Py3.14 wheels availability
-transformers>=4.43.2,<4.56.0
-# Use CPU or DirectML builds explicitly per environment
-# For CPU-only (default):
-# For DirectML/CPU on Windows (pins compatible with torch-directml)
-# Note: torch-directml not available for Python 3.14 yet
-torch>=2.9.0
-torchvision>=0.22.0
-# torch-directml
-# torchaudio has fewer prebuilt wheels on Windows; pin compatible if needed
-# torchaudio==2.5.1
-huggingface_hub>=0.23.0,<0.36.0
-openai-harmony>=0.0.4
+# Testing
+pytest>=9.0.0
 
-# Storage & JIT
-numba>=0.63.0
-llvmlite>=0.44.0
-
-# Development
-black>=23.7.0
-flake8>=6.1.0
-isort>=5.12.0
-mypy>=1.5.0
-psutil>=5.9.0
-pytest>=7.4.0
-questionary>=2.0.1
-tqdm>=4.66.0
-autopep8>=1.7.0
+# Development tools
+black>=24.0.0
+flake8>=7.0.0
+isort>=5.13.0
+mypy>=1.8.0
+pyright>=1.1.0
 
 # Type stubs
 types-tqdm>=4.66.0
-types-ujson>=5.10.0
-typing-extensions>=4.7.0
-types-psutil
+typing-extensions>=4.10.0
 
-# Additional dependencies
-gradio>=3.50.0
-rich
-gpt-oss>=0.0.4
-tiktoken>=0.11.0
-lxml>=6.0.0
-regex>=2025.7.0
-requests>=2.32.0
-
-# Development tools
-pyright>=1.1.0
-
-zstandard>=0.22.0
+# Utilities
+tqdm>=4.66.0
+psutil>=5.9.0
+rich>=13.0.0

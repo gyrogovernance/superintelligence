@@ -266,7 +266,7 @@ def build_phenomenology(
 
     # Build byte feature matrices for all supported K values
     print("  Computing byte feature matrices...")
-    K_VALUES = (1, 2, 3, 4, 6, 8, 12, 16)
+    K_VALUES = (1, 2, 3, 4, 6, 8, 12, 16, 43)
     feature_matrices: dict[str, NDArray[np.float32]] = {}
 
     for K in K_VALUES:
@@ -373,6 +373,49 @@ def _byte_feature_vector(byte: int, K: int, mask12_by_byte: NDArray[np.uint16]) 
         out[13] = float(popcount(m12 & 0x03F) & 1) * 2.0 - 1.0
         out[14] = float(popcount((m12 >> 6) & 0x03F) & 1) * 2.0 - 1.0
         out[15] = float(vertex_charge_from_mask(m12) & 1) * 2.0 - 1.0
+        return out
+
+    if K == 43:
+        # K=43 matches OLMo MLP intermediate: 11008 = 256 * 43
+        # Structure: 12 mask bits + 16 syndrome bits + 15 aggregates = 43
+        out = np.zeros(43, dtype=np.float32)
+
+        # [0:12] Raw mask bits
+        out[:12] = bits12
+
+        # [12:28] Syndrome bits against dual code C_PERP_12
+        for i, v in enumerate(C_PERP_12):
+            dot = popcount(m12 & v) & 1
+            out[12 + i] = float(dot) * 2.0 - 1.0
+
+        # [28:34] Frame-row pair means (6 dims)
+        frame_row_pairs = ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11))
+        for k, (i, j) in enumerate(frame_row_pairs):
+            out[28 + k] = (bits12[i] + bits12[j]) / 2.0
+
+        # [34:37] Row means across frames (3 dims)
+        row_groups = ((0, 1, 6, 7), (2, 3, 8, 9), (4, 5, 10, 11))
+        for k, idxs in enumerate(row_groups):
+            out[34 + k] = sum(bits12[i] for i in idxs) / 4.0
+
+        # [37:39] Frame means (2 dims)
+        out[37] = np.mean(bits12[0:6])
+        out[38] = np.mean(bits12[6:12])
+
+        # [39] Overall mean
+        out[39] = np.mean(bits12)
+
+        # [40] Overall parity
+        out[40] = float(popcount(m12) & 1) * 2.0 - 1.0
+
+        # [41] Vertex charge bit
+        out[41] = float(vertex_charge_from_mask(m12) & 1) * 2.0 - 1.0
+
+        # [42] Frame parity difference
+        p0 = popcount(m12 & 0x03F) & 1
+        p1 = popcount((m12 >> 6) & 0x03F) & 1
+        out[42] = float(p0 ^ p1) * 2.0 - 1.0
+
         return out
 
     raise ValueError(f"Unsupported K={K}")

@@ -333,3 +333,63 @@ class InferenceFunction:
         
         # Select byte (with optional mask)
         return self.select_byte(scores, deterministic, allowed_max_byte, allowed_mask)
+
+    def step_with_activation(
+        self,
+        state: InferenceState,
+        a_curr: NDArray[np.float32],
+        h_curr: int,
+        p_curr: int,
+        delta_mask: int,
+        chi_prev: int,
+        chi_curr: int,
+        deterministic: bool = True,
+        allowed_max_byte: int = 255,
+        allowed_mask: Optional[NDArray[np.bool_]] = None,
+    ) -> int:
+        """
+        Inference step with pre-computed local activation.
+        
+        Use this when the activation is computed externally (e.g., from
+        OLMo MLP manifold indexed by kernel observables).
+        
+        Args:
+            state: inference state (modified in place)
+            a_curr: local activation (K,) - pre-computed
+            h_curr: current horizon index
+            p_curr: current phase (0-3)
+            delta_mask: mask for transition (from previous step)
+            chi_prev: previous vertex charge
+            chi_curr: current vertex charge
+            deterministic: byte selection mode
+            allowed_max_byte: maximum allowed byte (prefix gating)
+            allowed_mask: optional boolean mask for non-contiguous gating
+            
+        Returns:
+            selected byte
+        """
+        # Guard: ensure all required kernel tables are loaded
+        required_tables = ["_gamma_table", "_byte_features", "_byte_weights", "_byte_charges"]
+        missing_tables = [table for table in required_tables if not hasattr(self, table)]
+        if missing_tables:
+            raise RuntimeError(
+                f"InferenceFunction tables not set. Missing: {missing_tables}. "
+                "Call set_kernel_tables() first."
+            )
+
+        # Bounds validation
+        if not (0 <= h_curr <= 255):
+            raise ValueError(f"horizon index h_curr={h_curr} out of range [0, 255]")
+        if not (0 <= p_curr <= 3):
+            raise ValueError(f"phase p_curr={p_curr} out of range [0, 3]")
+        if not (0 <= allowed_max_byte <= 255):
+            raise ValueError(f"allowed_max_byte={allowed_max_byte} out of range [0, 255]")
+
+        # Update M (phase-aware Hebbian)
+        self.update(state, h_curr, p_curr, a_curr, delta_mask, chi_prev, chi_curr)
+
+        # Score bytes
+        scores = self.score_bytes(state, h_curr, p_curr, a_curr, chi_curr)
+
+        # Select byte
+        return self.select_byte(scores, deterministic, allowed_max_byte, allowed_mask)

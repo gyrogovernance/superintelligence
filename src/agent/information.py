@@ -53,7 +53,8 @@ M_A: float = 0.1995
 ETA_DEFAULT: float = DELTA_A
 
 # Standard K values (channels per horizon)
-K_VALUES: tuple[int, ...] = (1, 2, 3, 4, 6, 8, 12, 16)
+# K=43 is special: OLMo MLP intermediate = 11008 = 256 * 43
+K_VALUES: tuple[int, ...] = (1, 2, 3, 4, 6, 8, 12, 16, 43)
 
 # Minimal K
 K_MIN: int = 1

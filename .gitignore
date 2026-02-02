@@ -148,3 +148,6 @@ last_test_run.txt
 
 # Program data (user-generated program contracts)
 data/programs/
+
+# Models
+data/models/
