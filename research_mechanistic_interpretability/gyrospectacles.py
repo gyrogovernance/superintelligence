@@ -1,991 +1,561 @@
 """
-GyroSpectacles: Topology-Guided Attention Optimization
+GyroSpectacles v10 (Adapter-driven): Use TRAINED GyroAdaptor artifacts to steer OLMo.
 
-Tests whether transformer attention heads can be replaced with
-horizon-bucket retrieval using the CGM kernel atlas.
-
-This script:
-1. Routes tokens through the kernel to assign topological coordinates (horizon, vertex)
-2. Captures real attention outputs from OLMo
-3. Computes what horizon-bucket attention WOULD produce
-4. Measures approximation error and theoretical speedup
-5. Optionally runs with actual replacement to measure real speedup
-
-No training. No weight modification. Just inference-time interception.
-
-Metrics:
-- Attention approximation error (L2, cosine similarity)
-- Output divergence (logit KL, top-k agreement)
-- Theoretical FLOPs saved
-- Actual timing comparison
-
-Usage:
-    python gyrospectacles.py --model-path data/models/OLMo-3-7B-Instruct
-    python gyrospectacles.py --model-path data/models/OLMo-3-7B-Instruct --replace
+Run:
+  python research_mechanistic_interpretability/gyrospectacles.py
 """
 
 from __future__ import annotations
 
-import argparse
+import os
+import sys
 import time
-from dataclasses import dataclass, field
+import gc
+import traceback
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, List, Tuple, Dict, Optional, NamedTuple
 
 import numpy as np
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
-from transformers import AutoModelForCausalLM, AutoTokenizer, BatchEncoding
+
+# Ensure "src" imports work
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 
 # =============================================================================
-# Horizon Labeler: Routes tokens through kernel to get topological coordinates
+# Config - using regular class to avoid dataclass issues
 # =============================================================================
 
-@dataclass
-class TopologicalLabels:
-    """Per-position topological coordinates from kernel routing."""
-    horizons: list[int]          # h ∈ {0..255} per position
-    vertices: list[int]          # χ ∈ {0..3} per position
-    phases: list[int]            # p ∈ {0..3} per position
-    gammas: list[float]          # cumulative gamma per token
-    token_ids: list[int]         # original token IDs
+class SpectaclesConfig:
+    """Configuration for GyroSpectacles."""
     
-    def __len__(self) -> int:
-        return len(self.horizons)
-    
-    def horizon_tensor(self, device: torch.device) -> torch.Tensor:
-        return torch.tensor(self.horizons, dtype=torch.long, device=device)
-    
-    def vertex_tensor(self, device: torch.device) -> torch.Tensor:
-        return torch.tensor(self.vertices, dtype=torch.long, device=device)
+    def __init__(self) -> None:
+        # Paths
+        self.model_path = Path("data/models/Olmo-3-7B-Instruct")
+        self.atlas_dir = Path("data/atlas")
+        self.codec_path = Path("data/atlas/semantic_codec.npz")
+        self.adaptor_dir = Path("data/gyroadaptor_out")
+        self.act_adapter_path = Path("data/gyroadaptor_out/act_adapter.pt")
+        self.bias_head_path = Path("data/gyroadaptor_out/bias_head.pt")
+        self.probe_path = Path("data/gyroadaptor_out/probe_L16.pt")
+        
+        # Probe layer
+        self.probe_layer_for_gate: int = 16
+        
+        # Dimensions
+        self.hidden_dim: int = 4096
+        self.K: int = 43
+        
+        # Runtime
+        self.max_prompt_tokens: int = 160
+        self.torch_num_threads: int = 12
+        self.device: str = "cpu"
+        self.dtype = torch.bfloat16
+        
+        # Bias control
+        self.bias_max: float = 8.0
+        
+        # Gating thresholds
+        self.gap_low: float = 0.15
+        self.gap_high: float = 0.35
+        self.probe_mismatch_weight: float = 0.6
+        
+        # Byte scoring weights
+        self.score_signal: float = 0.55
+        self.score_weight: float = 0.25
+        self.score_wedge: float = 0.20
+        self.score_phase: float = 0.10
+        
+        # Wedge bonuses/penalties
+        self.wedge_same_bonus: float = 1.0
+        self.wedge_adj_bonus: float = 0.2
+        self.wedge_opp_penalty: float = -1.2
+        
+        # Phase matching
+        self.phase_match_bonus: float = 0.25
+        
+        # Reporting
+        self.teacher_forced_max_tokens: int = 120
 
 
-class HorizonLabeler:
-    """
-    Routes tokens through the kernel to assign topological coordinates.
-    
-    Uses SemanticTokenCodec for token->bytes, then steps kernel to get
-    (horizon, vertex, phase) per position.
-    """
-    
-    def __init__(self, atlas_dir: Path, codec_path: Path):
-        from src.router.kernel import RouterKernel
-        from src.agent.adapters import SemanticTokenCodec
-        
-        self.kernel = RouterKernel(atlas_dir)
-        self.codec = SemanticTokenCodec.load(codec_path)
-        
-        # Cache gamma table for scoring
-        self.gamma_table = self.kernel.gamma_table
-    
-    def label_sequence(self, token_ids: list[int]) -> TopologicalLabels:
-        """
-        Route token sequence through kernel, return per-position labels.
-        
-        For each token:
-        1. Encode to 4 bytes via codec
-        2. Step kernel through those bytes
-        3. Record final (horizon, vertex, phase) and cumulative gamma
-        """
-        self.kernel.reset()
-        
-        horizons = []
-        vertices = []
-        phases = []
-        gammas = []
-        
-        for tid in token_ids:
-            bs = self.codec.encode(tid)
-            
-            # Track gamma through the 4 bytes
-            gamma_sum = 0.0
-            chi_prev = self.kernel.current_vertex
-            
-            for b in bs:
-                chi_curr = self.kernel.peek_next_vertex(b)
-                w = int(self.kernel.byte_weight[b])
-                gamma = float(self.gamma_table[chi_prev, chi_curr, w])
-                gamma_sum += gamma
-                
-                self.kernel.step_byte(b)
-                chi_prev = chi_curr
-            
-            # Record final state for this token
-            horizons.append(self.kernel.current_horizon)
-            vertices.append(self.kernel.current_vertex)
-            phases.append(self.kernel.current_phase)
-            gammas.append(gamma_sum)
-        
-        return TopologicalLabels(
-            horizons=horizons,
-            vertices=vertices,
-            phases=phases,
-            gammas=gammas,
-            token_ids=token_ids,
+CFG = SpectaclesConfig()
+
+TEST_PROMPTS: Tuple[str, ...] = (
+    """The development of artificial intelligence has been transformative.
+From academic research to everyday applications, AI has changed how we interact
+with technology. Machine learning revolutionized the field in the 2010s.""",
+    """Quantum mechanics changed our understanding of the physical world.
+The theory emerged to explain phenomena classical physics could not account for,
+such as blackbody radiation and the photoelectric effect.""",
+    """Mathematics spans thousands of years across human civilizations.
+From earliest counting systems to modern abstract structures, mathematical
+thought represents humanity's greatest intellectual achievements.""",
+)
+
+
+# =============================================================================
+# Atlas lens
+# =============================================================================
+
+class AtlasLens(NamedTuple):
+    gamma_table: np.ndarray
+    features: np.ndarray
+    byte_weight: np.ndarray
+    byte_charge: np.ndarray
+    next_phase: np.ndarray
+    state_horizon: np.ndarray
+    state_vertex: np.ndarray
+    epistemology: np.ndarray
+
+
+def load_atlas_lens(atlas_dir: Path, K: int) -> AtlasLens:
+    phen = atlas_dir / "phenomenology.npz"
+    epi = atlas_dir / "epistemology.npy"
+    with np.load(phen, allow_pickle=False) as z:
+        fk = f"features_K{K}"
+        if fk not in z.files:
+            avail = [k for k in z.files if k.startswith("features_K")]
+            raise ValueError(f"{phen} missing {fk}. Available: {avail}")
+        return AtlasLens(
+            gamma_table=z["gamma_table"].astype(np.float32, copy=False),
+            features=z[fk].astype(np.float32, copy=False),
+            byte_weight=z["byte_weight"].astype(np.uint8, copy=False),
+            byte_charge=z["byte_charge"].astype(np.uint8, copy=False),
+            next_phase=z["next_phase"].astype(np.uint8, copy=False),
+            state_horizon=z["state_horizon"].astype(np.uint8, copy=False),
+            state_vertex=z["state_vertex"].astype(np.uint8, copy=False),
+            epistemology=np.load(epi, mmap_mode="r"),
         )
 
 
 # =============================================================================
-# Bucket Attention: O(n) horizon-indexed retrieval
+# Trained modules
 # =============================================================================
 
-class BucketAttention:
-    """
-    Computes attention output via horizon-bucket pooling.
-    
-    Instead of O(n²) pairwise attention:
-    1. Pool V vectors by horizon bucket: V_bucket[h] = mean(V[positions with horizon h])
-    2. For each query position, retrieve V_bucket[h_query]
-    
-    This is O(n) in sequence length.
-    """
-    
-    def __init__(self, n_buckets: int = 256, use_gamma_weighting: bool = False):
-        self.n_buckets = n_buckets
-        self.use_gamma_weighting = use_gamma_weighting
-    
-    def compute(
-        self,
-        V: torch.Tensor,                    # [batch, heads, seq, head_dim]
-        query_horizons: torch.Tensor,       # [seq] horizon index per query position
-        key_horizons: torch.Tensor,         # [seq] horizon index per key position
-        gamma_table: Optional[torch.Tensor] = None,
-        query_vertices: Optional[torch.Tensor] = None,
-        key_vertices: Optional[torch.Tensor] = None,
-    ) -> torch.Tensor:
-        """
-        Compute bucket-attention output.
-        
-        Returns: [batch, heads, seq, head_dim] approximating attention output
-        """
-        batch, heads, seq_len, head_dim = V.shape
-        device = V.device
-        
-        # Pool V by horizon bucket
-        # V_pooled[batch, heads, bucket, head_dim]
-        V_pooled = torch.zeros(batch, heads, self.n_buckets, head_dim, device=device, dtype=V.dtype)
-        bucket_counts = torch.zeros(batch, self.n_buckets, device=device, dtype=torch.float32)
-        
-        # Accumulate V into buckets
-        for pos in range(seq_len):
-            h = int(key_horizons[pos].item())
-            V_pooled[:, :, h, :] += V[:, :, pos, :]
-            bucket_counts[:, h] += 1.0
-        
-        # Average (avoid div by zero)
-        bucket_counts = bucket_counts.clamp(min=1.0)
-        for h in range(self.n_buckets):
-            V_pooled[:, :, h, :] /= bucket_counts[:, h].unsqueeze(1).unsqueeze(-1)
-        
-        # Retrieve for each query position
-        output = torch.zeros_like(V)
-        
-        if self.use_gamma_weighting and gamma_table is not None and query_vertices is not None and key_vertices is not None:
-            # Weighted retrieval using gamma
-            output = self._gamma_weighted_retrieval(
-                V_pooled, query_horizons, key_horizons, 
-                gamma_table, query_vertices, key_vertices, bucket_counts
-            )
-        else:
-            # Simple retrieval: just take the bucket matching query horizon
-            for pos in range(seq_len):
-                h = int(query_horizons[pos].item())
-                output[:, :, pos, :] = V_pooled[:, :, h, :]
-        
-        return output
-    
-    def _gamma_weighted_retrieval(
-        self,
-        V_pooled: torch.Tensor,
-        query_horizons: torch.Tensor,
-        key_horizons: torch.Tensor,
-        gamma_table: torch.Tensor,
-        query_vertices: torch.Tensor,
-        key_vertices: torch.Tensor,
-        bucket_counts: torch.Tensor,
-    ) -> torch.Tensor:
-        """
-        Weighted retrieval: blend buckets using gamma as soft attention.
-        
-        For each query, compute gamma-weight for each bucket and blend.
-        This is still O(n * n_buckets) = O(n) since n_buckets is fixed at 256.
-        """
-        batch, heads, n_buckets, head_dim = V_pooled.shape
-        seq_len = query_horizons.shape[0]
-        device = V_pooled.device
-        
-        output = torch.zeros(batch, heads, seq_len, head_dim, device=device, dtype=V_pooled.dtype)
-        
-        # Precompute bucket-level vertex (mode of vertices in each bucket)
-        # For simplicity, use the vertex of first position in each bucket
-        bucket_vertex = torch.zeros(n_buckets, dtype=torch.long, device=device)
-        for pos in range(seq_len):
-            h = int(key_horizons[pos].item())
-            if bucket_counts[0, h] == 1:  # First occurrence
-                bucket_vertex[h] = key_vertices[pos]
-        
-        for pos in range(seq_len):
-            h_q = int(query_horizons[pos].item())
-            chi_q = int(query_vertices[pos].item())
-            
-            # Compute gamma weights for all buckets
-            weights = torch.zeros(n_buckets, device=device)
-            for h_k in range(n_buckets):
-                if bucket_counts[0, h_k] > 0:
-                    chi_k = int(bucket_vertex[h_k].item())
-                    # Use weight=6 (middle value) as proxy
-                    gamma = float(gamma_table[chi_q, chi_k, 6])
-                    # Boost same-horizon bucket
-                    if h_k == h_q:
-                        gamma += 2.0
-                    weights[h_k] = gamma
-            
-            # Softmax over non-empty buckets
-            mask = bucket_counts[0] > 0
-            weights[~mask] = float('-inf')
-            weights = F.softmax(weights, dim=0)
-            
-            # Weighted sum of V_pooled
-            for h_k in range(n_buckets):
-                if mask[h_k]:
-                    output[:, :, pos, :] += weights[h_k] * V_pooled[:, :, h_k, :]
-        
-        return output
-    
-    def theoretical_flops_saved(self, seq_len: int, head_dim: int, n_heads: int) -> dict[str, Any]:
-        """
-        Compute theoretical FLOPs saved by using bucket attention.
-        
-        Standard attention per head:
-        - Q @ K.T: seq × seq × head_dim (2 * seq² * head_dim FLOPs)
-        - softmax: seq × seq
-        - weights @ V: seq × seq × head_dim (2 * seq² * head_dim FLOPs)
-        Total: ~4 * seq² * head_dim per head
-        
-        Bucket attention per head:
-        - Pool V into 256 buckets: seq * head_dim
-        - Retrieve for each position: seq * head_dim (or seq * 256 * head_dim with gamma)
-        Total: ~2 * seq * head_dim (simple) or ~512 * seq * head_dim (gamma-weighted)
-        """
-        standard_flops = 4 * seq_len * seq_len * head_dim * n_heads
-        bucket_simple_flops = 2 * seq_len * head_dim * n_heads
-        bucket_gamma_flops = 512 * seq_len * head_dim * n_heads
-        
-        return {
-            "standard_attention_flops": standard_flops,
-            "bucket_simple_flops": bucket_simple_flops,
-            "bucket_gamma_flops": bucket_gamma_flops,
-            "speedup_simple": standard_flops / bucket_simple_flops,
-            "speedup_gamma": standard_flops / bucket_gamma_flops,
-            "seq_len": seq_len,
-            "crossover_seq_len": 256 * 2,  # Where bucket becomes faster
-        }
-
-
-# =============================================================================
-# Attention Capture: Hooks to intercept real attention outputs
-# =============================================================================
-
-@dataclass
-class CapturedAttention:
-    """Captured attention data from a forward pass."""
-    layer: int
-    head: int
-    attention_weights: torch.Tensor  # [batch, heads, seq, seq] or per-head slice
-    attention_output: torch.Tensor   # [batch, seq, hidden] before output projection
-    V: torch.Tensor                  # [batch, heads, seq, head_dim] value vectors
-    Q: Optional[torch.Tensor] = None
-    K: Optional[torch.Tensor] = None
-
-
-class AttentionCaptureHooks:
-    """
-    Registers hooks to capture attention internals during forward pass.
-    """
-    
-    def __init__(self, model: torch.nn.Module, target_layers: list[int]):
-        self.model = model
-        self.target_layers = target_layers
-        self.captures: dict[int, dict[str, torch.Tensor]] = {}
-        self.hooks: list[Any] = []
-        
-        self._register_hooks()
-    
-    def _register_hooks(self) -> None:
-        for layer_idx in self.target_layers:
-            layer = self.model.model.layers[layer_idx]
-            
-            # Hook into self_attn to capture Q, K, V and outputs
-            hook = layer.self_attn.register_forward_hook(
-                self._make_capture_hook(layer_idx)
-            )
-            self.hooks.append(hook)
-    
-    def _make_capture_hook(self, layer_idx: int) -> Any:
-        def hook(module: torch.nn.Module, inputs: tuple[Any, ...], outputs: Any) -> None:
-            # outputs is typically (attn_output, attn_weights, past_key_value)
-            # or just attn_output depending on config
-            
-            hidden_states = inputs[0]  # Input to attention
-            
-            # Get Q, K, V by accessing the projections
-            # This is model-specific; for OLMo:
-            batch, seq_len, hidden = hidden_states.shape
-            
-            Q = module.q_proj(hidden_states)
-            K = module.k_proj(hidden_states)
-            V = module.v_proj(hidden_states)
-            
-            # Reshape to [batch, heads, seq, head_dim]
-            num_heads = module.num_heads
-            head_dim = hidden // num_heads
-            
-            Q = Q.view(batch, seq_len, num_heads, head_dim).transpose(1, 2)
-            K = K.view(batch, seq_len, num_heads, head_dim).transpose(1, 2)
-            V = V.view(batch, seq_len, num_heads, head_dim).transpose(1, 2)
-            
-            # Compute attention weights manually for analysis
-            scale = head_dim ** -0.5
-            attn_weights = torch.matmul(Q, K.transpose(-2, -1)) * scale
-            attn_weights = F.softmax(attn_weights, dim=-1)
-            
-            # Store captures
-            self.captures[layer_idx] = {
-                "Q": Q.detach(),
-                "K": K.detach(),
-                "V": V.detach(),
-                "attn_weights": attn_weights.detach(),
-                "attn_output": outputs[0].detach() if isinstance(outputs, tuple) else outputs.detach(),
-            }
-        
-        return hook
-    
-    def clear(self) -> None:
-        self.captures.clear()
-    
-    def remove_hooks(self) -> None:
-        for hook in self.hooks:
-            hook.remove()
-        self.hooks.clear()
-
-
-# =============================================================================
-# Spectacles Replacement: Actually substitute bucket attention
-# =============================================================================
-
-class SpectaclesModule(torch.nn.Module):
-    """
-    Wrapper that replaces attention computation for specified heads.
-    
-    For replaced heads: use bucket attention
-    For other heads: use original attention
-    """
-    
-    def __init__(
-        self,
-        original_attn: torch.nn.Module,
-        replaced_heads: list[int],
-        bucket_attention: BucketAttention,
-        labels: TopologicalLabels,
-        gamma_table: torch.Tensor,
-    ):
+class ActAdapter(nn.Module):
+    def __init__(self, hidden_dim: int = 4096, K: int = 43, hidden_m: int = 256) -> None:
         super().__init__()
-        self.original_attn = original_attn
-        self.replaced_heads = set(replaced_heads)
-        self.bucket_attention = bucket_attention
-        self.labels = labels
-        self.gamma_table = gamma_table
-        
-        self.num_heads = original_attn.num_heads
-        self.head_dim = original_attn.head_dim
-    
-    def forward(
-        self,
-        hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.Tensor] = None,
-        past_key_value: Optional[tuple[torch.Tensor, ...]] = None,
-        output_attentions: bool = False,
-        use_cache: bool = False,
-        **kwargs: Any,
-    ) -> tuple[torch.Tensor, None, Optional[tuple[torch.Tensor, ...]]]:
-        batch, seq_len, hidden = hidden_states.shape
-        device = hidden_states.device
-        
-        # Get Q, K, V from original projections
-        Q = self.original_attn.q_proj(hidden_states)
-        K = self.original_attn.k_proj(hidden_states)
-        V = self.original_attn.v_proj(hidden_states)
-        
-        # Reshape
-        Q = Q.view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        K = K.view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        V = V.view(batch, seq_len, self.num_heads, self.head_dim).transpose(1, 2)
-        
-        # Apply rotary embeddings if present (model-specific)
-        if hasattr(self.original_attn, 'rotary_emb') and position_ids is not None:
-            cos, sin = self.original_attn.rotary_emb(V, position_ids)
-            Q, K = apply_rotary_pos_emb(Q, K, cos, sin)
-        
-        # Compute attention output per head
-        scale = self.head_dim ** -0.5
-        attn_outputs = []
-        
-        horizons = self.labels.horizon_tensor(device)
-        vertices = self.labels.vertex_tensor(device)
-        
-        for head_idx in range(self.num_heads):
-            if head_idx in self.replaced_heads:
-                # Use bucket attention for this head
-                V_head = V[:, head_idx:head_idx+1, :, :]  # [batch, 1, seq, head_dim]
-                
-                bucket_out = self.bucket_attention.compute(
-                    V=V_head,
-                    query_horizons=horizons,
-                    key_horizons=horizons,
-                    gamma_table=self.gamma_table,
-                    query_vertices=vertices,
-                    key_vertices=vertices,
-                )
-                attn_outputs.append(bucket_out)
-            else:
-                # Use standard attention for this head
-                Q_head = Q[:, head_idx, :, :]  # [batch, seq, head_dim]
-                K_head = K[:, head_idx, :, :]
-                V_head = V[:, head_idx, :, :]
-                
-                scores = torch.matmul(Q_head, K_head.transpose(-2, -1)) * scale
-                
-                if attention_mask is not None:
-                    scores = scores + attention_mask
-                
-                weights = F.softmax(scores, dim=-1)
-                out = torch.matmul(weights, V_head)
-                attn_outputs.append(out.unsqueeze(1))
-        
-        # Concatenate heads
-        attn_output = torch.cat(attn_outputs, dim=1)  # [batch, heads, seq, head_dim]
-        attn_output = attn_output.transpose(1, 2).contiguous().view(batch, seq_len, hidden)
-        
-        # Output projection
-        attn_output = self.original_attn.o_proj(attn_output)
-        
-        return (attn_output, None, past_key_value)
+        self.net = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_m),
+            nn.GELU(),
+            nn.Linear(hidden_m, K),
+        )
+
+    def forward(self, h_last: torch.Tensor) -> torch.Tensor:
+        return self.net(h_last)
 
 
-def apply_rotary_pos_emb(
-    q: torch.Tensor, 
-    k: torch.Tensor, 
-    cos: torch.Tensor, 
-    sin: torch.Tensor
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """Apply rotary position embeddings (simplified)."""
-    # This is a simplified version; real implementation depends on model
-    q_embed = (q * cos) + (rotate_half(q) * sin)
-    k_embed = (k * cos) + (rotate_half(k) * sin)
-    return q_embed, k_embed
+class BiasHead(nn.Module):
+    def __init__(self, hidden_dim: int = 4096, hidden_m: int = 256, bias_max: float = 8.0) -> None:
+        super().__init__()
+        self.bias_max = float(bias_max)
+        self.net = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_m),
+            nn.GELU(),
+            nn.Linear(hidden_m, 1),
+        )
+
+    def forward(self, h_last: torch.Tensor) -> torch.Tensor:
+        b = F.softplus(self.net(h_last)).squeeze(-1)
+        return torch.clamp(b, 0.0, self.bias_max)
 
 
-def rotate_half(x: torch.Tensor) -> torch.Tensor:
-    """Rotate half the hidden dims."""
-    x1 = x[..., :x.shape[-1] // 2]
-    x2 = x[..., x.shape[-1] // 2:]
-    return torch.cat((-x2, x1), dim=-1)
+class HorizonVertexPhaseProbe(nn.Module):
+    def __init__(self, hidden_dim: int = 4096, hidden_m: int = 512) -> None:
+        super().__init__()
+        self.mlp = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_m),
+            nn.GELU(),
+            nn.Linear(hidden_m, hidden_m),
+            nn.GELU(),
+        )
+        self.out_h = nn.Linear(hidden_m, 256)
+        self.out_v = nn.Linear(hidden_m, 4)
+        self.out_p = nn.Linear(hidden_m, 4)
+
+    def forward(self, h: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        x = self.mlp(h)
+        return self.out_h(x), self.out_v(x), self.out_p(x)
 
 
 # =============================================================================
-# Main Experiment
+# Memory + scoring
 # =============================================================================
 
-@dataclass
-class ExperimentConfig:
-    model_path: Path
-    atlas_dir: Path = Path("data/atlas")
-    codec_path: Optional[Path] = None
-    target_layers: list[int] = field(default_factory=lambda: [17])
-    target_heads: list[int] = field(default_factory=lambda: [27])
-    test_prompts: list[str] = field(default_factory=lambda: [
-        "The fundamental principles of quantum mechanics state that",
-        "In the year 2050, artificial intelligence had become",
-        "The mathematical proof begins by assuming that",
-    ])
-    run_replacement: bool = False
-    use_gamma_weighting: bool = False
-    device: str = "cuda" if torch.cuda.is_available() else "cpu"
+class MemoryColumn:
+    def __init__(self, K: int, eta: float = 0.00117, m_clip: float = 10.0, device: Optional[torch.device] = None) -> None:
+        self.K = K
+        self.eta = float(eta)
+        self.m_clip = float(m_clip)
+        self.device = device or torch.device("cpu")
+        self.M = torch.zeros((256, 4, K), dtype=torch.float32, device=self.device)
+        self.a_prev: Optional[torch.Tensor] = None
+
+    def reset(self) -> None:
+        self.M.zero_()
+        self.a_prev = None
+
+    def update(self, h: int, p: int, a_curr: torch.Tensor, gamma: float) -> None:
+        a = a_curr.to(dtype=torch.float32)
+        if self.a_prev is None:
+            self.a_prev = a.detach().clone()
+            return
+        self.M[h, p, :] += self.eta * float(gamma) * (a.detach() * self.a_prev)
+        self.M[h, p, :].clamp_(-self.m_clip, self.m_clip)
+        self.a_prev = a.detach().clone()
 
 
-@dataclass
-class ExperimentResults:
-    # Approximation quality
-    attention_l2_error: dict[str, float] = field(default_factory=dict)
-    attention_cosine_sim: dict[str, float] = field(default_factory=dict)
-    output_l2_error: dict[str, float] = field(default_factory=dict)
-    
-    # Output divergence
-    logit_kl_divergence: float = 0.0
-    top1_agreement: float = 0.0
-    top5_agreement: float = 0.0
-    
-    # Performance
-    baseline_time_ms: float = 0.0
-    spectacles_time_ms: float = 0.0
-    speedup_ratio: float = 0.0
-    theoretical_speedup: float = 0.0
-    
-    # Topological stats
-    gamma_stats: dict[str, float] = field(default_factory=dict)
-    horizon_coverage: int = 0
-    vertex_distribution: list[int] = field(default_factory=list)
+class GyroPlanner:
+    def __init__(self, cfg: SpectaclesConfig, lens: AtlasLens, embed_tokens: torch.Tensor, codec: Any, device: torch.device) -> None:
+        self.cfg = cfg
+        self.lens = lens
+        self.codec = codec
+        self.device = device
 
+        self.embed_tokens = embed_tokens.float().cpu()
+        self.features = torch.from_numpy(lens.features).to(device=device, dtype=torch.float32)
+        self.byte_weight = torch.from_numpy(lens.byte_weight.astype(np.float32) / 12.0).to(device)
+        self.byte_charge = torch.from_numpy(lens.byte_charge.astype(np.int64)).to(device)
+        self.next_phase = lens.next_phase
+        self.epi = lens.epistemology
+        self.state_horizon = lens.state_horizon
+        self.state_vertex = lens.state_vertex
 
-class GyroSpectaclesExperiment:
-    """
-    Main experiment class for GyroSpectacles.
-    """
-    
-    def __init__(self, config: ExperimentConfig):
-        self.config = config
-        self.device = torch.device(config.device)
-        
-        print("=" * 60)
-        print("GyroSpectacles: Topology-Guided Attention Optimization")
-        print("=" * 60)
-        
-        # Load model
-        print(f"\nLoading model from {config.model_path}...")
-        self.tokenizer = AutoTokenizer.from_pretrained(config.model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            config.model_path,
-            torch_dtype=torch.bfloat16,
-            device_map=config.device,
+        self.memory = MemoryColumn(K=cfg.K, eta=0.00117, m_clip=10.0, device=device)
+
+    def reset(self) -> None:
+        self.memory.reset()
+
+    def score_all_bytes(self, idx: int, h: int, chi: int, p: int, a_curr: torch.Tensor) -> torch.Tensor:
+        x = self.memory.M[h, p, :] + a_curr.to(dtype=torch.float32)
+        signal = torch.matmul(self.features, x)
+        weight_term = 1.0 - self.byte_weight
+
+        ch = self.byte_charge
+        same = (ch == chi).float() * self.cfg.wedge_same_bonus
+        opp = ((ch ^ chi) == 3).float() * self.cfg.wedge_opp_penalty
+        adj = (1.0 - (same != 0).float() - (opp != 0).float()).clamp(0, 1) * self.cfg.wedge_adj_bonus
+        wedge_term = same + opp + adj
+
+        next_p = torch.from_numpy(self.next_phase[idx, :].astype(np.int64)).to(self.device)
+        phase_term = (next_p == p).float() * self.cfg.phase_match_bonus
+
+        return (
+            self.cfg.score_signal * signal
+            + self.cfg.score_weight * weight_term
+            + self.cfg.score_wedge * wedge_term
+            + self.cfg.score_phase * phase_term
         )
-        self.model.eval()
-        print(f"  Model loaded: {self.model.config.num_hidden_layers} layers, "
-              f"{self.model.config.num_attention_heads} heads")
-        
-        # Load kernel and codec
-        print(f"\nLoading kernel from {config.atlas_dir}...")
-        codec_path = config.codec_path or (config.atlas_dir / "semantic_codec.npz")
-        if not codec_path.exists():
-            raise FileNotFoundError(
-                f"Semantic codec not found at {codec_path}. "
-                "Build it first with: python -m src.agent.build_codec"
-            )
-        
-        self.labeler = HorizonLabeler(config.atlas_dir, codec_path)
-        print("  Kernel loaded: 65536 states, 256 horizons")
-        
-        # Initialize bucket attention
-        self.bucket_attention = BucketAttention(
-            n_buckets=256,
-            use_gamma_weighting=config.use_gamma_weighting,
-        )
-        
-        # Prepare gamma table as tensor
-        self.gamma_table = torch.from_numpy(
-            self.labeler.kernel.gamma_table
-        ).to(self.device)
-        
-        print("\nTarget heads for replacement:")
-        for layer in config.target_layers:
-            for head in config.target_heads:
-                print(f"  Layer {layer}, Head {head}")
+
+    def plan_bytes(self, idx0: int, h0: int, chi0: int, p0: int, a_curr: torch.Tensor) -> List[int]:
+        planned: List[int] = []
+        idx, h, chi, p = int(idx0), int(h0), int(chi0), int(p0)
+
+        for _ in range(4):
+            scores = self.score_all_bytes(idx, h, chi, p, a_curr)
+            b = int(scores.argmax().item())
+            planned.append(b)
+
+            idx_next = int(self.epi[idx, b])
+            h_next = int(self.state_horizon[idx_next])
+            chi_next = int(self.state_vertex[idx_next])
+            p_next = int(self.next_phase[idx, b])
+
+            idx, h, chi, p = idx_next, h_next, chi_next, p_next
+
+        return planned
+
+    def decode_token(self, planned_bytes: List[int], probe: torch.Tensor) -> int:
+        return int(self.codec.decode(planned_bytes, probe.float().cpu(), self.embed_tokens))
+
+
+# =============================================================================
+# Metrics helpers
+# =============================================================================
+
+def nll_next_token(logits: torch.Tensor, input_ids: torch.Tensor) -> float:
+    target = input_ids[:, 1:].contiguous()
+    pred = logits[:, :-1, :].float().contiguous()
+    logp = F.log_softmax(pred, dim=-1)
+    nll = -logp.gather(-1, target.unsqueeze(-1)).squeeze(-1)
+    return float(nll.mean().item())
+
+
+def kl_div_fn(base_logits: torch.Tensor, new_logits: torch.Tensor) -> float:
+    p = base_logits.float()
+    q = new_logits.float()
+    p_log = F.log_softmax(p, dim=-1)
+    q_log = F.log_softmax(q, dim=-1)
+    p_prob = p_log.exp()
+    return float((p_prob * (p_log - q_log)).sum(dim=-1).mean().item())
+
+
+def cosine_logits(base_logits: torch.Tensor, new_logits: torch.Tensor) -> float:
+    return float(F.cosine_similarity(
+        base_logits.flatten().float().unsqueeze(0),
+        new_logits.flatten().float().unsqueeze(0),
+        dim=1,
+    ).item())
+
+
+def print_teacher_forced(tokenizer: Any, logits: torch.Tensor, max_tokens: int, title: str) -> None:
+    pred = logits.argmax(dim=-1)[0].tolist()[:max_tokens]
+    print(f"\n{title}")
+    print("-" * 60)
+    print(tokenizer.decode(pred, skip_special_tokens=False))
+
+
+def cosine_gap(embed_tokens: torch.Tensor, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+    ea = embed_tokens[a].float()
+    eb = embed_tokens[b].float()
+    cos = F.cosine_similarity(ea, eb, dim=-1)
+    return 1.0 - cos
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+def run() -> None:
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from src.agent.adapters import SemanticTokenCodec
+    from src.router.kernel import RouterKernel
+
+    torch.set_num_threads(CFG.torch_num_threads)
+    os.environ["OMP_NUM_THREADS"] = str(CFG.torch_num_threads)
+    os.environ["MKL_NUM_THREADS"] = str(CFG.torch_num_threads)
+
+    device = torch.device(CFG.device)
+
+    print("=" * 70)
+    print("GyroSpectacles v10")
+    print("=" * 70)
+    print(f"device={CFG.device} dtype={CFG.dtype} threads={CFG.torch_num_threads}")
+    sys.stdout.flush()
+
+    # Check artifacts
+    print("\n[1] Checking artifacts...")
+    missing = []
+    for name, path in [
+        ("act_adapter", CFG.act_adapter_path),
+        ("bias_head", CFG.bias_head_path),
+        ("probe", CFG.probe_path),
+        ("codec", CFG.codec_path),
+        ("phenomenology", CFG.atlas_dir / "phenomenology.npz"),
+    ]:
+        if not path.exists():
+            missing.append(str(path))
+    if missing:
+        print("ERROR: Missing files:")
+        for m in missing:
+            print(f"  {m}")
+        return
+    print("    All artifacts OK")
+    sys.stdout.flush()
+
+    # Load model
+    print("\n[2] Loading model...")
+    sys.stdout.flush()
+    gc.collect()
     
-    def run(self) -> ExperimentResults:
-        """Run the full experiment."""
-        results = ExperimentResults()
-        
-        # Temporary storage for aggregation
-        l2_error_lists: dict[str, list[float]] = {}
-        cosine_sim_lists: dict[str, list[float]] = {}
-        
-        for prompt_idx, prompt in enumerate(self.config.test_prompts):
-            print(f"\n{'='*60}")
-            print(f"Prompt {prompt_idx + 1}/{len(self.config.test_prompts)}")
-            print(f"{'='*60}")
-            print(f"Text: {prompt[:50]}...")
-            
-            prompt_results = self._run_single_prompt(prompt)
-            
-            # Aggregate results
-            for key, value in prompt_results.attention_l2_error.items():
-                if key not in l2_error_lists:
-                    l2_error_lists[key] = []
-                l2_error_lists[key].append(value)
-            
-            for key, value in prompt_results.attention_cosine_sim.items():
-                if key not in cosine_sim_lists:
-                    cosine_sim_lists[key] = []
-                cosine_sim_lists[key].append(value)
-        
-        # Average across prompts
-        for key, values in l2_error_lists.items():
-            results.attention_l2_error[key] = sum(values) / len(values)
-        
-        for key, values in cosine_sim_lists.items():
-            results.attention_cosine_sim[key] = sum(values) / len(values)
-        
-        self._print_summary(results)
-        
-        return results
+    tok = AutoTokenizer.from_pretrained(CFG.model_path)
+    print("    Tokenizer OK")
+    sys.stdout.flush()
     
-    def _run_single_prompt(self, prompt: str) -> ExperimentResults:
-        """Run experiment on a single prompt."""
-        results = ExperimentResults()
-        
-        # Tokenize
-        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        token_ids = inputs.input_ids[0].tolist()
-        seq_len = len(token_ids)
-        
-        print(f"\n  Sequence length: {seq_len} tokens")
-        
-        # Get topological labels
-        labels = self.labeler.label_sequence(token_ids)
-        
-        # Topological stats
-        results.horizon_coverage = len(set(labels.horizons))
-        results.vertex_distribution = [
-            sum(1 for v in labels.vertices if v == i) for i in range(4)
-        ]
-        results.gamma_stats = {
-            "mean": float(np.mean(labels.gammas)),
-            "std": float(np.std(labels.gammas)),
-            "min": float(np.min(labels.gammas)),
-            "max": float(np.max(labels.gammas)),
-        }
-        
-        print(f"  Horizon coverage: {results.horizon_coverage}/256")
-        print(f"  Vertex distribution: {results.vertex_distribution}")
-        print(f"  Gamma: mean={results.gamma_stats['mean']:.3f}, "
-              f"std={results.gamma_stats['std']:.3f}")
-        
-        # Register hooks to capture attention
-        hooks = AttentionCaptureHooks(self.model, self.config.target_layers)
-        
-        # Baseline forward pass
-        print("\n  Running baseline forward pass...")
+    model = AutoModelForCausalLM.from_pretrained(
+        CFG.model_path,
+        torch_dtype=CFG.dtype,
+        device_map={"": CFG.device},
+        low_cpu_mem_usage=True,
+    )
+    model.eval()
+    model.config.output_hidden_states = True
+    print("    Model OK")
+    sys.stdout.flush()
+
+    embed_tokens = model.model.embed_tokens.weight.detach().float().cpu()
+    print(f"    Embeddings: {embed_tokens.shape}")
+
+    # Load components
+    print("\n[3] Loading components...")
+    lens = load_atlas_lens(CFG.atlas_dir, K=CFG.K)
+    print("    Atlas OK")
+    
+    codec = SemanticTokenCodec.load(CFG.codec_path)
+    print("    Codec OK")
+
+    act = ActAdapter(hidden_dim=CFG.hidden_dim, K=CFG.K, hidden_m=256).to(device)
+    act.load_state_dict(torch.load(CFG.act_adapter_path, map_location=device, weights_only=True))
+    act.eval()
+    print("    ActAdapter OK")
+
+    bias_head = BiasHead(hidden_dim=CFG.hidden_dim, hidden_m=256, bias_max=CFG.bias_max).to(device)
+    bias_head.load_state_dict(torch.load(CFG.bias_head_path, map_location=device, weights_only=True))
+    bias_head.eval()
+    print("    BiasHead OK")
+
+    probe = HorizonVertexPhaseProbe(hidden_dim=CFG.hidden_dim, hidden_m=512).to(device)
+    probe.load_state_dict(torch.load(CFG.probe_path, map_location=device, weights_only=True))
+    probe.eval()
+    print("    Probe OK")
+    sys.stdout.flush()
+
+    planner = GyroPlanner(CFG, lens, embed_tokens=embed_tokens, codec=codec, device=device)
+    kernel = RouterKernel(CFG.atlas_dir)
+    print("    Planner/Kernel OK")
+
+    # Run prompts
+    all_stats: List[Dict[str, float]] = []
+
+    for pi, prompt in enumerate(TEST_PROMPTS, start=1):
+        print("\n" + "=" * 70)
+        print(f"PROMPT {pi}/{len(TEST_PROMPTS)}")
+        print("=" * 70)
+
+        enc = tok(prompt, return_tensors="pt", truncation=True, max_length=CFG.max_prompt_tokens)
+        input_ids = enc["input_ids"].to(device)
+        token_ids = input_ids[0].tolist()
+        S = len(token_ids)
+        print(f"Tokens: {S}")
+
+        print("Forward pass...", end=" ", flush=True)
+        t0 = time.perf_counter()
+        with torch.inference_mode():
+            out = model(input_ids=input_ids, output_hidden_states=True)
+        t_fwd = (time.perf_counter() - t0) * 1000.0
+        print(f"{t_fwd:.0f} ms")
+
+        hs = out.hidden_states
+        assert hs is not None, "hidden_states is None"
+        hidden_last = hs[-1][0, :S, :].to(torch.float32)
+        hidden_gate = hs[CFG.probe_layer_for_gate + 1][0, :S, :].to(torch.float32)
+
+        base_logits = out.logits[0, :S, :].float().cpu()
+        base_top1 = base_logits.argmax(dim=-1)
+        _, base_top5 = base_logits.topk(5, dim=-1)
+
+        # Compute gyro targets
+        kernel.reset()
+        planner.reset()
+
+        gyro_targets = torch.empty((S,), dtype=torch.int64)
+        h_after = torch.empty((S,), dtype=torch.int64)
+        chi_after = torch.empty((S,), dtype=torch.int64)
+        p_after = torch.empty((S,), dtype=torch.int64)
+
+        bytes4 = [codec.encode(int(tid)) for tid in token_ids]
+        gamma = lens.gamma_table
+        bw = lens.byte_weight
+
+        print("Computing gyro targets...", end=" ", flush=True)
         t0 = time.perf_counter()
         
-        with torch.no_grad():
-            baseline_outputs = self.model(**inputs)
-        
-        results.baseline_time_ms = (time.perf_counter() - t0) * 1000
-        print(f"  Baseline time: {results.baseline_time_ms:.2f} ms")
-        
-        # Analyze captured attention
-        for layer_idx in self.config.target_layers:
-            if layer_idx not in hooks.captures:
-                print(f"  Warning: Layer {layer_idx} not captured")
-                continue
-            
-            capture = hooks.captures[layer_idx]
-            V = capture["V"]
-            attn_weights = capture["attn_weights"]
-            
-            # Compute bucket attention output
-            horizons = labels.horizon_tensor(self.device)
-            vertices = labels.vertex_tensor(self.device)
-            
-            for head_idx in self.config.target_heads:
-                key = f"L{layer_idx}H{head_idx}"
-                
-                # Get real attention output for this head
-                V_head = V[:, head_idx:head_idx+1, :, :]
-                real_weights = attn_weights[:, head_idx, :, :]
-                real_output = torch.matmul(real_weights, V[:, head_idx, :, :])
-                
-                # Get bucket attention output
-                bucket_output = self.bucket_attention.compute(
-                    V=V_head,
-                    query_horizons=horizons,
-                    key_horizons=horizons,
-                    gamma_table=self.gamma_table if self.config.use_gamma_weighting else None,
-                    query_vertices=vertices if self.config.use_gamma_weighting else None,
-                    key_vertices=vertices if self.config.use_gamma_weighting else None,
-                )
-                bucket_output = bucket_output.squeeze(1)  # [batch, seq, head_dim]
-                
-                # Compute errors
-                l2_error = torch.norm(real_output - bucket_output).item()
-                l2_norm = torch.norm(real_output).item()
-                relative_l2 = l2_error / (l2_norm + 1e-8)
-                
-                cosine_sim = F.cosine_similarity(
-                    real_output.flatten(),
-                    bucket_output.flatten(),
-                    dim=0
-                ).item()
-                
-                results.attention_l2_error[key] = relative_l2
-                results.attention_cosine_sim[key] = cosine_sim
-                
-                print(f"\n  {key}:")
-                print(f"    Relative L2 error: {relative_l2:.4f}")
-                print(f"    Cosine similarity: {cosine_sim:.4f}")
-                
-                # Analyze attention pattern vs horizon match
-                self._analyze_attention_pattern(
-                    attn_weights[:, head_idx, :, :],
-                    horizons,
-                    key
-                )
-        
-        # Theoretical speedup
-        head_dim = self.model.config.hidden_size // self.model.config.num_attention_heads
-        n_replaced = len(self.config.target_layers) * len(self.config.target_heads)
-        
-        flops_info = self.bucket_attention.theoretical_flops_saved(
-            seq_len=seq_len,
-            head_dim=head_dim,
-            n_heads=n_replaced,
-        )
-        
-        results.theoretical_speedup = flops_info["speedup_simple"]
-        print(f"\n  Theoretical speedup (simple bucket): {results.theoretical_speedup:.1f}x")
-        print(f"  (at seq_len={seq_len}, replacing {n_replaced} heads)")
-        
-        # Run with actual replacement if requested
-        if self.config.run_replacement:
-            print("\n  Running with spectacles replacement...")
-            results = self._run_with_replacement(inputs, labels, baseline_outputs, results)
-        
-        hooks.remove_hooks()
-        hooks.clear()
-        
-        return results
-    
-    def _analyze_attention_pattern(
-        self,
-        attn_weights: torch.Tensor,
-        horizons: torch.Tensor,
-        key: str,
-    ) -> None:
-        """Analyze how well attention aligns with horizon structure."""
-        seq_len = attn_weights.shape[-1]
-        
-        # For each query, what fraction of attention goes to same-horizon keys?
-        same_horizon_mass = 0.0
-        
-        for q in range(seq_len):
-            h_q = horizons[q].item()
-            
-            # Mask for same horizon
-            same_h_mask = (horizons == h_q).float()
-            
-            # Attention mass on same horizon
-            mass = (attn_weights[0, q, :] * same_h_mask).sum().item()
-            same_horizon_mass += mass
-        
-        avg_same_horizon = same_horizon_mass / seq_len
-        
-        # Expected if uniform random
-        horizon_counts = torch.bincount(horizons, minlength=256)  # type: ignore[attr-defined]
-        expected_random = (horizon_counts.float() / seq_len).sum().item() / 256
-        
-        enrichment = avg_same_horizon / (expected_random + 1e-8)
-        
-        print(f"    Same-horizon attention mass: {avg_same_horizon:.4f}")
-        print(f"    Expected (random): {expected_random:.4f}")
-        print(f"    Enrichment: {enrichment:.2f}x")
-    
-    def _run_with_replacement(
-        self,
-        inputs: BatchEncoding,
-        labels: TopologicalLabels,
-        baseline_outputs: Any,
-        results: ExperimentResults,
-    ) -> ExperimentResults:
-        """Run forward pass with actual attention replacement."""
-        
-        # Save original attention modules
-        original_attns: dict[int, torch.nn.Module] = {}
-        
-        for layer_idx in self.config.target_layers:
-            layer = self.model.model.layers[layer_idx]
-            original_attns[layer_idx] = layer.self_attn
-            
-            # Replace with spectacles module
-            layer.self_attn = SpectaclesModule(
-                original_attn=layer.self_attn,
-                replaced_heads=self.config.target_heads,
-                bucket_attention=self.bucket_attention,
-                labels=labels,
-                gamma_table=self.gamma_table,
-            )
-        
-        # Forward pass with replacement
-        t0 = time.perf_counter()
-        
-        with torch.no_grad():
-            spectacles_outputs = self.model(**inputs)
-        
-        results.spectacles_time_ms = (time.perf_counter() - t0) * 1000
-        
-        # Restore original modules
-        for layer_idx in self.config.target_layers:
-            self.model.model.layers[layer_idx].self_attn = original_attns[layer_idx]
-        
-        # Compare outputs
-        baseline_logits = baseline_outputs.logits
-        spectacles_logits = spectacles_outputs.logits
-        
-        if baseline_logits is None or spectacles_logits is None:
-            print("  Warning: Could not compare logits (None returned)")
-            return results
-        
-        # KL divergence
-        baseline_probs = F.softmax(baseline_logits, dim=-1)
-        spectacles_log_probs = F.log_softmax(spectacles_logits, dim=-1)
-        kl_div = F.kl_div(spectacles_log_probs, baseline_probs, reduction='batchmean').item()
-        results.logit_kl_divergence = kl_div
-        
-        # Top-k agreement
-        top1_baseline = baseline_logits.argmax(dim=-1)
-        top1_spectacles = spectacles_logits.argmax(dim=-1)
-        results.top1_agreement = (top1_baseline == top1_spectacles).float().mean().item()
-        
-        _, top5_baseline = baseline_logits.topk(5, dim=-1)
-        
-        # Check if top-1 of spectacles is in top-5 of baseline
-        top5_agreement = 0.0
-        for i in range(top5_baseline.shape[1]):
-            if top1_spectacles[0, i] in top5_baseline[0, i]:
-                top5_agreement += 1
-        results.top5_agreement = top5_agreement / top5_baseline.shape[1]
-        
-        results.speedup_ratio = results.baseline_time_ms / results.spectacles_time_ms
-        
-        print(f"\n  Spectacles time: {results.spectacles_time_ms:.2f} ms")
-        print(f"  Actual speedup: {results.speedup_ratio:.2f}x")
-        print(f"  Logit KL divergence: {kl_div:.6f}")
-        print(f"  Top-1 agreement: {results.top1_agreement:.2%}")
-        print(f"  Top-5 agreement: {results.top5_agreement:.2%}")
-        
-        return results
-    
-    def _print_summary(self, results: ExperimentResults) -> None:
-        """Print final summary."""
-        print("\n" + "=" * 60)
-        print("SUMMARY")
-        print("=" * 60)
-        
-        print("\nApproximation Quality (averaged across prompts):")
-        for key in sorted(results.attention_l2_error.keys()):
-            l2 = results.attention_l2_error[key]
-            cos = results.attention_cosine_sim[key]
-            print(f"  {key}: L2={l2:.4f}, cosine={cos:.4f}")
-        
-        if results.spectacles_time_ms > 0:
-            print("\nPerformance:")
-            print(f"  Baseline: {results.baseline_time_ms:.2f} ms")
-            print(f"  Spectacles: {results.spectacles_time_ms:.2f} ms")
-            print(f"  Speedup: {results.speedup_ratio:.2f}x")
-            
-            print("\nOutput Fidelity:")
-            print(f"  KL divergence: {results.logit_kl_divergence:.6f}")
-            print(f"  Top-1 agreement: {results.top1_agreement:.2%}")
-            print(f"  Top-5 agreement: {results.top5_agreement:.2%}")
-        
-        print(f"\nTheoretical speedup: {results.theoretical_speedup:.1f}x")
-        print("  (speedup grows with sequence length)")
+        for t in range(S):
+            idx0 = int(kernel.state_index)
+            h0 = int(kernel.current_horizon)
+            chi0 = int(kernel.current_vertex)
+            p0 = int(kernel.current_phase)
 
+            a_curr = act(hidden_last[t].to(device))
+            planned = planner.plan_bytes(idx0, h0, chi0, p0, a_curr)
+            gyro_targets[t] = planner.decode_token(planned, hidden_last[t])
 
-# =============================================================================
-# Entry Point
-# =============================================================================
+            chi_prev = int(kernel.current_vertex)
+            for b in bytes4[t]:
+                chi_next = int(kernel.peek_next_vertex(b))
+                w = int(bw[int(b)])
+                g = float(gamma[chi_prev, chi_next, w])
+                planner.memory.update(int(kernel.current_horizon), int(kernel.current_phase), a_curr, g)
+                kernel.step_byte(b)
+                chi_prev = chi_next
 
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="GyroSpectacles: Topology-Guided Attention Optimization"
-    )
-    parser.add_argument(
-        "--model-path",
-        type=Path,
-        default=Path("data/models/OLMo-3-7B-Instruct"),
-        help="Path to OLMo model",
-    )
-    parser.add_argument(
-        "--atlas-dir",
-        type=Path,
-        default=Path("data/atlas"),
-        help="Path to kernel atlas directory",
-    )
-    parser.add_argument(
-        "--codec-path",
-        type=Path,
-        default=None,
-        help="Path to semantic codec (default: atlas_dir/semantic_codec.npz)",
-    )
-    parser.add_argument(
-        "--layers",
-        type=int,
-        nargs="+",
-        default=[17],
-        help="Target layers for replacement",
-    )
-    parser.add_argument(
-        "--heads",
-        type=int,
-        nargs="+",
-        default=[27],
-        help="Target heads for replacement",
-    )
-    parser.add_argument(
-        "--replace",
-        action="store_true",
-        help="Actually replace attention and measure speedup",
-    )
-    parser.add_argument(
-        "--gamma-weighting",
-        action="store_true",
-        help="Use gamma-weighted bucket retrieval",
-    )
-    parser.add_argument(
-        "--prompts",
-        type=str,
-        nargs="+",
-        default=None,
-        help="Custom test prompts",
-    )
-    
-    args = parser.parse_args()
-    
-    config = ExperimentConfig(
-        model_path=args.model_path,
-        atlas_dir=args.atlas_dir,
-        codec_path=args.codec_path,
-        target_layers=args.layers,
-        target_heads=args.heads,
-        run_replacement=args.replace,
-        use_gamma_weighting=args.gamma_weighting,
-    )
-    
-    if args.prompts:
-        config.test_prompts = args.prompts
-    
-    experiment = GyroSpectaclesExperiment(config)
-    results = experiment.run()
-    
-    # Final verdict
-    print("\n" + "=" * 60)
-    print("VERDICT")
-    print("=" * 60)
-    
-    avg_cosine = float(np.mean(list(results.attention_cosine_sim.values()))) if results.attention_cosine_sim else 0.0
-    avg_l2 = float(np.mean(list(results.attention_l2_error.values()))) if results.attention_l2_error else 1.0
-    
-    if avg_cosine > 0.9 and avg_l2 < 0.2:
-        print("✓ VIABLE: Bucket attention closely approximates real attention")
-        print("  Proceed to full replacement and scaling tests")
-    elif avg_cosine > 0.7:
-        print("◐ PROMISING: Moderate approximation quality")
-        print("  Consider gamma-weighting or targeting different heads")
-    else:
-        print("✗ NOT VIABLE: Poor approximation quality")
-        print("  These heads may not be topology-addressable")
+            h_after[t] = int(kernel.current_horizon)
+            chi_after[t] = int(kernel.current_vertex)
+            p_after[t] = int(kernel.current_phase)
+
+        t_gyro = (time.perf_counter() - t0) * 1000.0
+        print(f"{t_gyro:.0f} ms")
+
+        # Compute gap and gating
+        gap = cosine_gap(embed_tokens, base_top1.cpu(), gyro_targets.cpu())
+
+        with torch.inference_mode():
+            lh, lv, lp = probe(hidden_gate.to(device))
+            ph = F.softmax(lh, dim=-1)
+            pv = F.softmax(lv, dim=-1)
+            pp = F.softmax(lp, dim=-1)
+
+            idx_t = torch.arange(S, device=device)
+            mh = 1.0 - ph[idx_t, h_after.to(device)]
+            mv = 1.0 - pv[idx_t, chi_after.to(device)]
+            mp = 1.0 - pp[idx_t, p_after.to(device)]
+            mismatch = ((mh + mv + mp) / 3.0).float().cpu()
+
+        eff = gap + CFG.probe_mismatch_weight * mismatch
+        gate = torch.zeros_like(eff)
+        gate[eff > CFG.gap_high] = 1.0
+        gate[(eff > CFG.gap_low) & (eff <= CFG.gap_high)] = 0.5
+
+        with torch.inference_mode():
+            bias = bias_head(hidden_last.to(device)).float().cpu()
+
+        boosted_logits = base_logits.clone()
+        boosted_logits[torch.arange(S), gyro_targets] += gate * bias
+
+        boost_top1 = boosted_logits.argmax(dim=-1)
+        _, boost_top5 = boosted_logits.topk(5, dim=-1)
+
+        # Metrics
+        base_hit1 = float((base_top1 == gyro_targets).float().mean().item())
+        base_hit5 = float((base_top5 == gyro_targets.unsqueeze(-1)).any(dim=-1).float().mean().item())
+        boost_hit1 = float((boost_top1 == gyro_targets).float().mean().item())
+        boost_hit5 = float((boost_top5 == gyro_targets.unsqueeze(-1)).any(dim=-1).float().mean().item())
+
+        intervention_rate = float((gate > 0).float().mean().item())
+        avg_gap = float(gap.mean().item())
+        avg_mismatch = float(mismatch.mean().item())
+
+        base_logits_b = base_logits.unsqueeze(0)
+        boosted_logits_b = boosted_logits.unsqueeze(0)
+
+        kld = kl_div_fn(base_logits_b, boosted_logits_b)
+        cosL = cosine_logits(base_logits_b, boosted_logits_b)
+        nll_b = nll_next_token(base_logits_b, input_ids.cpu())
+        nll_g = nll_next_token(boosted_logits_b, input_ids.cpu())
+        nll_ratio = nll_g / max(nll_b, 1e-9)
+
+        print("\nMetrics")
+        print("-" * 60)
+        print(f"Gyro hit@1: base {base_hit1:.3f} -> boosted {boost_hit1:.3f}")
+        print(f"Gyro hit@5: base {base_hit5:.3f} -> boosted {boost_hit5:.3f}")
+        print(f"gap={avg_gap:.3f} mismatch={avg_mismatch:.3f} intervention={intervention_rate:.3f}")
+        print(f"KL={kld:.4f} cosine={cosL:+.4f} NLL_ratio={nll_ratio:.4f}")
+
+        print_teacher_forced(tok, base_logits_b, CFG.teacher_forced_max_tokens, "BASE argmax")
+        print_teacher_forced(tok, boosted_logits_b, CFG.teacher_forced_max_tokens, "BOOST argmax")
+
+        all_stats.append({
+            "base_hit1": base_hit1, "base_hit5": base_hit5,
+            "boost_hit1": boost_hit1, "boost_hit5": boost_hit5,
+            "avg_gap": avg_gap, "avg_mismatch": avg_mismatch,
+            "intervention_rate": intervention_rate,
+            "kl": kld, "cosine": cosL, "nll_ratio": nll_ratio,
+        })
+
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+    for k in all_stats[0].keys():
+        vals = [s[k] for s in all_stats]
+        print(f"{k:18s}: {np.mean(vals):.4f}")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        run()
+    except Exception:
+        traceback.print_exc()

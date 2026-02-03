@@ -10,12 +10,17 @@ transformers>=5.0.0
 tokenizers>=0.22.0
 safetensors>=0.7.0
 huggingface-hub>=1.3.0
+accelerate>=1.0.0
+scikit-learn>=1.5.0
 
 # API framework
 fastapi>=0.128.0
 pydantic>=2.12.0
 uvicorn>=0.34.0
 httpx>=0.28.0
+
+# Crypto (CLI/store and server)
+cryptography>=41.0.0
 
 # Testing
 pytest>=9.0.0

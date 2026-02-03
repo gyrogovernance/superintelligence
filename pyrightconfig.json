@@ -6,6 +6,7 @@
   "extraPaths": ["research", "src"],
   "typeCheckingMode": "strict",
   "reportMissingTypeStubs": false,
+  "reportMissingModuleSource": "none",
   "reportUnknownMemberType": "none",
   "reportUnknownArgumentType": "none",
   "reportUnknownVariableType": "none",
@@ -36,6 +37,12 @@
   "strictListInference": false,
   "strictDictionaryInference": false,
   "strictSetInference": false,
+  "typeCheckingMode": "basic",
+  "reportAttributeAccessIssue": "none",
+  "reportOptionalSubscript": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
   "analyzeUnannotatedFunctions": true,
   "strictParameterNoneValue": false,
   "enableTypeIgnoreComments": true,
@@ -159,8 +166,6 @@
     
     "last-test-run.txt",
     "last_test_run.txt",
-
-    ".kilocode",
 
     "typings/stubs"
   ]

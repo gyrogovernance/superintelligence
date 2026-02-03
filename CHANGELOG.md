@@ -15,6 +15,73 @@
 
 ---
 
+# Changelog
+
+## [v1.2.6-Interpretability] – 2026-02-03
+
+This release documents the complete arc from mechanistic discovery through architectural iteration to a functioning coordination layer between the CGM Router Kernel and OLMo-3-7B.
+
+### Research Findings
+
+**CGM Tomography Results:**
+- Layer 0 Q/K projections sharpen the K₄ vertex structure (governance quotient) by approximately 4x without explicit training
+- Strong chirality confirmed: Q and K projections are structurally distinct across all layers (cosine similarity 0.1 to 0.2)
+- Emergent Hodge-like head specialization: some heads preserve vertex class ("gradient"), others mix vertices ("cycle")
+- Depth-4 closure (BU-Egress) is absent, confirming OLMo operates as a chaotic approximation rather than constitutional CGM physics
+
+**Horizon Enrichment Validation:**
+- Specific attention heads show up to 97x horizon enrichment (L17/H27, L7/H5)
+- Transformers attempt topological addressing but inefficiently at O(n²)
+- L17/H27 phenomena are localized to template boundaries, not a global horizon-reading mechanism
+
+### Architectural Evolution
+
+**Rejected Approaches:**
+- Pure Indexing: treating OLMo as static weight manifold (too radical, requires training from scratch)
+- Heuristic Steering (GyroSpectacles v1-v9): soft bias via norm ratios (too conservative, perturbations damped out)
+- Full Attention Replacement: 100% bucket mean substitution (19% top-5 agreement, destroys fine-grained information)
+- Wave Injection: strong additive MLP signals (language collapse, wrong basis)
+
+**Adopted Architecture (Coordination Learning):**
+- Probes read kernel coordinates (Horizon, Vertex, Phase) from OLMo hidden states
+- ActAdapter translates hidden states into kernel's native activation basis (K=43)
+- BiasHead applies sparse learnable control to align logits with kernel planning
+
+### Implementation
+
+**Pipeline Changes:**
+- Refactored to single script replacing complex CLI flags
+- Fixed training objective: predict Gyro Targets (kernel-planned tokens) instead of ground truth text
+- Implemented candidate softmax training (CPU-friendly)
+- Added teacher-forced byte planning for ActAdapter
+
+**Algorithmic Refinements:**
+- Enforced causality via prefix-sum pooling (prevents future token leakage)
+- Bucket keys changed from Horizon to (Horizon, Phase) for richer topology
+- Added recency mixture: last-seen representative mixed with bucket mean
+- Implemented Top-L retrieval: queries attend to L most recent keys per bucket, preserving token identity with O(n) routing
+
+### Empirical Results
+
+| Metric | Value | Significance |
+|--------|-------|--------------|
+| Probe Accuracy (L16-31) | ~99% | Kernel coordinates recoverable from hidden states |
+| Gyro Target Agreement | 26% | Kernel and OLMo coordinating (not orthogonal) |
+| Control Head Hit@5 | 0% to 10.2% | Sparse bias head learning target alignment |
+| Steerability | Confirmed | Contextual token nudging without grammar destruction |
+
+### Artifacts
+
+- `act_adapter.pt`: Activation translation layer
+- `bias_head.pt`: Sparse control head  
+- `probe_L*.pt`: Layer-wise coordinate probes
+
+### Status
+
+Successfully learned how to coordinate (the mapping layer) without relearning the model's curriculum. The adapter functions as a runtime patch deployable for inference or distillable into a LoRA for permanent fine-tuning.
+
+---
+
 ## [v1.2.6-Interpretability] – 2026-02-02
 
 This release marks a significant milestone in understanding the internal geometry of large language models through the lens of the Common Governance Model (CGM). We introduce a new suite of mechanistic interpretability tools, a detailed research report, and a novel experimental framework for topology-guided attention optimization.

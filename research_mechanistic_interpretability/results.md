@@ -3,7 +3,7 @@ OLMo Forward Pass Trace
 =====
 
 Loading model from data\models\Olmo-3-7B-Instruct...
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 3220.71it/s, Materi
 Model loaded in 1.6s
 

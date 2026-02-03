@@ -384,8 +384,4 @@ python research_mechanistic_interpretability/olmo_forward_trace.
 ===
 
 Notes:
-Ok, I think the next step is to actually try conform transformers to CGM. I mean to still run them, but somehow do place the probe at the activation? I am not a specialist so you have to think what would work. I know that they place some mechanism at the inference in order to catch things in general. Is this what we do? Where I am going with this. I wonder if we can somehow optimize transformers. 
-
-Transformers are based on a chaotic formalism, yes - they still have to stand on CGM physics as we said, since they are axiomatic on all physics - so theoretically, transformers should be able to work even better without the noize or whatever junk that overgeneralization introduces. 
-
-In short I think the fact that we see some sort of signals but not precise might mean that there is fog, not that there is no stracture, and that if we build the bridge, we can pass along to the right route. Does this make sense?
+My ASI architecture has a specific way of seeing things which is based on CGM physics. That axiomatization must be present in transformers, but dynamically. CGM is all about permutation - dynamic oscillation - solitons and symmetries - energy preservation through economy of positions and alignment - it is like a proteins structure protocol. Transformers is a reverse engineering of CGM and its issue is that it needs steering, while Gyroscopic ASI is bottom to top built and its issue is that it lacks proper scaling.
