@@ -4,223 +4,216 @@
 **Model**: OLMo-3-7B-Instruct  
 **Framework**: Common Governance Model (CGM)  
 **Kernel**: GGG ASI Alignment Router (Atlas v2.x: `ontology.npy`, `epistemology.npy`, `phenomenology.npz`)  
-**Scripts**:  
+
+**Scripts used**  
 - Prompt-based: `research_mechanistic_interpretability/Olmo-3-tests.py` (earlier phase)  
 - Prompt-free: `research_mechanistic_interpretability/cgm_tomography.py` (current phase)  
 
----
-
-## 0. Framing: CGM vs Transformers, Topology vs Trajectories
-
-CGM is a **foundational and constitutional framework** for physical and informational coherence. It fixes:
-
-- the **coordinate structure** (3D, 6DoF),
-- the **topology** (K₄ tetrahedral governance graph, SE(3) gyrogroup),
-- the **invariants** (Q_G = 4π, δ_BU, m_a),
-- the **depth structure** (CS → UNA → ONA → BU),
-
-and then derives trajectories as consistent evolutions within that structure.
-
-Transformers are learned dynamical systems realized by tensor operations. Whatever they “learn” must still respect the **physical constraints** CGM describes—but only approximately and only after training, inside a larger, often high-dimensional and “chaotic” parameter space.
-
-This report uses the **Router Kernel** as a microscope:
-
-- The kernel defines a finite, well-understood **topology** Ω with:
-  - 65,536 ontology states (C × C in mask space),
-  - 256-byte action alphabet,
-  - horizon H (256 fixed points of R = byte 0xAA),
-  - a K₄ quotient (vertex charge χ ∈ {0,1,2,3}),
-  - Hodge decomposition on K₄ edges (gradient vs cycle, aperture).
-- The semantic codec maps token ids to 4 bytes, which route through the kernel from the archetype, giving each token a set of **kernel coordinates**:
-  - horizon index h(t) ∈ {0..255},
-  - vertex χ(t) ∈ {0,1,2,3},
-  - mask codes u(t), v(t) ∈ C.
-
-Prompts then become particular **trajectories** through this topology. The topology itself is fixed by CGM and the atlas; trajectories are contingent.
-
-Our mechanistic question is not whether OLMo recovers full CGM physics (it does not), but **which CGM signatures emerge in its learned geometry**, and how.
+All results in this document are empirical observations on OLMo-3-7B-Instruct under the specific probes described. We do not claim that they hold for all transformer architectures or training regimes.
 
 ---
 
-## 1. Phase I: Prompt-Based Kernel Probes (Boundary-Dominated)
+## 0. Framing: CGM and Transformers
 
-### 1.1 Initial observation: L17/H27 horizon alignment at the chat boundary
+The Common Governance Model (CGM) is a logical and geometric framework for describing constraints on coherent recursive processes. It specifies:
 
-Early experiments with `Olmo-3-tests.py` examined two prompts:
+- a coordinate structure (3 dimensions and 6 degrees of freedom),
+- a topology (for example a K₄ tetrahedral graph and SE(3)-type motion),
+- some invariants (such as Q_G = 4π, δ_BU, m_a),
+- a depth structure (constraints labelled CS, UNA, ONA, BU).
 
-- “Baseline” quote (36 tokens),
-- CS axiom text (105 tokens),
+Transformers are learned dynamical systems realized by tensor operations. Whatever they learn is determined by the training data and optimization procedure. CGM provides one way of asking whether certain structural motifs appear inside trained models.
 
-embedded in a standard chat template. For each token position, we:
+This report uses the GGG Router Kernel as a fixed geometric reference. The kernel defines a finite state space Ω with:
 
-1. Routed tokens through the kernel via the semantic codec, recording horizon labels h(t).
-2. Extracted attention matrices per layer/head from OLMo.
-3. For a fixed query position t\*, measured **enrichment** of attention mass on positions t with h(t) = h(t\*), relative to the baseline fraction p₀ of matching horizons.
+- 65,536 ontology states (a 256 by 256 mask code product),
+- a 256-byte action alphabet,
+- a horizon set H of 256 states fixed by a reference byte,
+- a K₄ quotient structure on masks (vertex charge χ in {0,1,2,3}),
+- a Hodge decomposition on K₄ edges (gradient vs cycle, aperture).
 
-On these specific trajectories, the last token was the template boundary `'\n'` before the assistant reply. For that query:
+A semantic codec maps token ids to 4 bytes. Routing these bytes through the kernel from the archetype gives each token a set of kernel coordinates:
 
-- For both prompts, **Layer 17, Head 27 (L17/H27)** concentrated attention almost entirely on the unique previous token sharing the same kernel horizon (the `assistant` marker).
+- horizon index h(t) in {0..255},
+- vertex class χ(t) in {0,1,2,3},
+- mask codes u(t), v(t) in the mask code C.
 
-Example (CS prompt):
+Prompts then define trajectories through this discrete topology. The topology comes from the CGM-derived kernel and atlas, while trajectories are determined by the text and tokenizer.
 
-- Baseline p₀ = 0.0096 (1 matching position among ~104),
-- H27 enrichment ≈ 100×,
-- same-horizon mass ≈ 0.962.
+The main question explored here is:
 
-A head-control test distinguished:
+> Given this fixed kernel geometry, what patterns can we see in OLMo-3-7B's learned representations when we label tokens with horizon and K₄ vertex coordinates?
 
-- horizon-match vs token-id-match vs “horizon-only” (match on horizon but excluding identity),
-- showed negligible token-id enrichment but very high horizon-only enrichment.
-
-**Early interpretation:** “H27@L17 is a kernel-horizon pointer head.”
-
-### 1.2 Reassessment: boundary artifact, not global horizon reading
-
-Subsequent analysis showed:
-
-- These phenomena occurred at the **chat template boundary**, where:
-  - semantic role (“assistant”) and
-  - codec/horizon structure (due to how the codec hashes special tokens)
-  
-  are tightly coupled.
-- The “unique horizon match” at distance 1 was always the `assistant` token. Horizon and template structure were not independent.
-
-Given that:
-
-- This experiment demonstrated that **horizon labels correlate tightly with certain template tokens under the codec**, and that some heads exploit this correlation.
-- It did *not* demonstrate that a head globally reads “kernel horizon” as a primary internal variable independent of template and position.
-
-For that reason, we treat the Phase I finding as:
-
-> **Evidence that horizon labels are behaviorally relevant on some trajectories, especially around structured boundaries, but not yet as a global, topology-first law.**
-
-It motivated the next phase, but is no longer the central claim.
+We do not assume that OLMo implements CGM "by design". We use CGM as a lens to organize measurements.
 
 ---
 
-## 2. Phase II: Prompt-Free CGM Tomography (cgm_tomography.py)
+## 1. Phase I: Prompt-Based Kernel Probes
 
-To move from **trajectory-biased** evidence to structural evidence, we implemented `cgm_tomography.py`:
+### 1.1 Initial observation: L17/H27 horizon alignment near a chat boundary
 
-- Sample token ids uniformly from the vocabulary.
-- Label them with kernel coordinates via RouterKernel:
-  - horizon h(t),
-  - vertex χ(t),
-- Optionally balance vertices so we have [N,N,N,N] across χ = 0..3 (important for K₄ symmetry tests).
-- Extract their embeddings from model.embed_tokens.
-- Work purely at the level of **weights** and **embeddings**, no natural-language prompts or attention matrices.
+In an earlier phase, `Olmo-3-tests.py` was used with two prompts embedded in a chat template:
+
+- a short baseline quote (36 tokens),
+- a longer CS axiom text (105 tokens).
+
+For each token position, we:
+
+1. Routed tokens through the kernel via the semantic codec and recorded the kernel horizon label h(t),
+2. Extracted attention matrices per layer and head from OLMo,
+3. For a fixed query position t\*, measured how much attention mass landed on positions t with the same horizon label h(t) = h(t\*), relative to the baseline fraction p₀ of matching horizons in the sequence.
+
+In these specific tests, the query token was the template boundary just before the assistant reply. For that token, we observed that:
+
+- Layer 17, head 27 (L17/H27) concentrated attention almost entirely on the previous token that shared its horizon label,
+- the baseline probability p₀ of a random position sharing that horizon label was about 0.0096 (roughly 1 match among 104 positions),
+- the attention enrichment for same-horizon positions was on the order of 100 times, with around 0.96 of the mass on that single matching position.
+
+A control that compared horizon-match versus token-id-match suggested that, in these prompts, the head was more sensitive to the kernel horizon label than to token identity.
+
+This led to an early interpretation of L17/H27 as a "horizon pointer" head for this boundary token.
+
+### 1.2 Reassessment: boundary-local effect
+
+A closer look showed that this effect was tied to the structure of the chat template:
+
+- the positions involved corresponded to the assistant marker and the newline token before the assistant reply,
+- the codec mapping and horizon labels for these special tokens were highly structured,
+- for this reason, horizon label, template role and position were not independent.
+
+Therefore:
+
+- the observed enrichment indicates that, in these setups, some heads can track a particular horizon label that happens to align with template structure,
+- the effect is highly local to that specific boundary position and prompt format,
+- it does not by itself establish a general horizon-reading mechanism across arbitrary contexts.
+
+Phase I was useful for intuition and for checking that the kernel labels interact in nontrivial ways with actual attention patterns, but it is not taken here as strong global evidence.
+
+This motivated a shift to a prompt-free, weight-level analysis in Phase II.
+
+---
+
+## 2. Phase II: Prompt-Free CGM Tomography
+
+To reduce dependence on prompt format and particular trajectories, we moved to a prompt-free analysis in `cgm_tomography.py`. The idea is:
+
+- sample token ids uniformly from the vocabulary,
+- label each token with kernel coordinates (horizon h(t), vertex χ(t)) obtained by routing its 4-byte code through the kernel from the archetype,
+- extract the corresponding embeddings from `model.embed_tokens`,
+- and later, Q/K projections and head-specific projections.
 
 This allows us to ask:
 
-1. Does OLMo’s learned geometry see the **K₄ quotient** at all?
-2. Does it sharpen that quotient through Q/K projections?
-3. Are some heads naturally **gradient-like** (preserve vertex) and others **cycle-like** (mix vertex classes)?
-4. Is there any analogue of **depth-4 closure** (BU-Egress) in the layerwise dynamics?
+1. How much of the K₄ vertex structure is visible in the embeddings,
+2. How much that structure is sharpened (or not) by Q and K projections at different layers,
+3. Whether some attention heads appear more "vertex preserving" and others more "vertex mixing",
+4. Whether a simple depth-4 alternation identity appears anywhere in the layerwise dynamics.
 
-### 2.1 Data used in tomography run
+### 2.1 Data used
 
-- `N_TOKENS = 4096` sampled from the vocab.
-- After balancing vertex classes: effective N = 1972 with vertex counts `[493, 493, 493, 493]`.
-- Unique horizons: 224/256 in that sample (good coverage).
-- Embedding dimension: 4096.
+For the tomography run summarized here:
+
+- `N_TOKENS = 4096` token ids were sampled uniformly from the vocabulary,
+- vertices were balanced to get an effective N = 1972, with vertex counts [493, 493, 493, 493],
+- in this sample, horizons covered 224 of the 256 possible values,
+- the embedding dimension was 4096.
+
+All numerical results below refer to this balanced sample unless otherwise noted.
 
 ---
 
 ## 3. T1: Quotient Visibility in Embeddings
 
-We measured class separability by a Fisher-like ratio:
+We measured how separable kernel labels are in the embedding space using a Fisher-like class separability ratio. For two labelings:
 
-- For vertices (K₄ classes): χ(t) ∈ {0,1,2,3},
-- For horizons: h(t) ∈ {0..255}.
+- vertex label χ(t) in {0,1,2,3},
+- horizon label h(t) in {0..255},
 
-Results (balanced vertices, N=1972):
+we computed a ratio of between-class to within-class scatter.
 
-- **Vertex (K₄)**: ratio ≈ 0.0026, 4 classes.
-- **Horizon (256)**: ratio ≈ 0.1486, 224 classes.
+For the balanced sample (N = 1972):
 
-Interpretation:
+- vertex (K₄) separability ratio ≈ 0.0026 (4 classes),
+- horizon separability ratio ≈ 0.1486 (224 classes).
 
-- The raw embedding basis carries a weak but nonzero K₄ signal.
-- It carries a much stronger horizon signal, which is unsurprising:
-  - The semantic codec was constructed from embeddings (LSH-like),
-  - so horizon strongly correlates with the embedding geometry by design.
+Within this probe design, this suggests:
 
-> **CGM view:** K₄ is latent in embeddings; horizon is strongly realized in embeddings. The quotient is not fully explicit at the input, but not entirely invisible either.
+- a weak but nonzero signal for the 4-way K₄ vertex labeling in the raw embedding basis,
+- a much stronger signal for the 256-way horizon labeling, which is consistent with how the semantic codec was constructed (it used embeddings and thus may embed some of that structure back into the token space).
 
----
-
-## 4. T2: Q/K Projection Sharpening of K₄
-
-For selected layers L ∈ {0, 8, 16, 24, 31} and heads H ∈ {0, 8, 16, 24}, we:
-
-1. Took Q-head slices: W_Q[L][head] ∈ ℝ^{head_dim × 4096},
-2. Projected embeddings: Q_proj(t) = W_Q[L][head] · e(t),
-3. Measured K₄ separability on these projections,
-4. Compared to baseline separability in embeddings (ratio_base ≈ 0.0026).
-
-Mean sharpening over tested heads:
-
-- **L0**: Q ≈ 4.02×, K ≈ 2.49×,
-- **L8**: Q ≈ 1.15×, K ≈ 1.33×,
-- **L16**: Q ≈ 1.05×, K ≈ 1.13×,
-- **L24**: Q ≈ 1.04×, K ≈ 1.27×,
-- **L31**: Q ≈ 1.03×, K ≈ 1.44×.
-
-Interpretation:
-
-- The very first layer *strongly* amplifies the K₄ quotient structure via Q and K projections.
-- Later layers preserve or slightly refine this structure, but do not drastically change it.
-
-> **CGM view:** The network explicitly learns to represent the K₄ quotient early. Embeddings plus the first attention layer extract a “governance-like” 4-class structure, consistent with CGM’s tetrahedral K₄, even though OLMo was not trained “knowing” K₄ exists.
+From a CGM point of view, one can say that a K₄-like quotient is detectable in the embedding space, but it is not very pronounced at this stage. Horizon information, by contrast, is much more salient in this particular setup.
 
 ---
 
-## 5. T3: MLP 256×43 Channel–Horizon Alignment
+## 4. T2: Effect of Q/K Projections on K₄ Separability
 
-We probed whether the MLP intermediate dimension 11008 = 256×43 encodes horizon channels directly.
+We next asked how this vertex separability changes when embeddings are projected through Q and K at different layers and heads.
 
-- For each layer L:
-  - Compute gate projection: gate(t) ∈ ℝ^{11008},
-  - Reshape gate(t) → G(t) ∈ ℝ^{256×43},
-  - Compute channel energy: E_c(t) = ||G(t)[c,:]||₂,
-  - Ask whether argmax_c E_c(t) matches the token’s horizon h(t).
+For layers L in {0, 8, 16, 24, 31} and a few heads H in {0, 8, 16, 24}, we:
 
-Measured:
+1. Took the Q projection matrix for that head, W_Q[L][H] of shape [head_dim × 4096],
+2. computed Q_proj(t) = W_Q[L][H] · e(t) for each embedding e(t),
+3. recomputed the same vertex separability ratio on the projected representations,
+4. compared it to the baseline ratio from embeddings (about 0.0026).
 
-- Match rates around 0.15–0.5%,
-- Chance ≈ 1/256 ≈ 0.39%,
-- Correlations with h(t) ≈ 0.0.
+Averaged over the sampled heads, the approximate sharpening factors were:
+
+- Layer 0: Q ≈ 4.0 times, K ≈ 2.5 times,
+- Layer 8: Q ≈ 1.15 times, K ≈ 1.33 times,
+- Layer 16: Q ≈ 1.05 times, K ≈ 1.13 times,
+- Layer 24: Q ≈ 1.04 times, K ≈ 1.27 times,
+- Layer 31: Q ≈ 1.03 times, K ≈ 1.44 times.
+
+Within the limitations of this simple probe, Layer 0 appears to produce the largest amplification of K₄ vertex separability through its Q (and to a lesser extent K) projections. Later layers retain this structure with modest additional changes rather than large new separations.
+
+From a CGM perspective, it is natural to interpret this as the network amplifying a 4-way quotient structure that is weakly present in the embeddings. However, the separability remains small in absolute terms, and we do not claim that K₄ is the only or primary organizing principle.
+
+---
+
+## 5. T3: MLP 256×43 Structure and Horizon
+
+OLMo-3-7B's MLP intermediate dimension is 11008 = 256 × 43. Since the kernel horizon index also ranges over 256 values, it is natural to ask if any direct horizon-channel mapping is visible.
+
+For each layer L, we:
+
+- took the MLP gate projection `gate(t)` in ℝ¹¹⁰⁰⁸,
+- reshaped it into G(t) in ℝ²⁵⁶×⁴³,
+- defined a per-channel energy E_c(t) = ||G(t)[c,:]||₂,
+- asked how often the argmax_c E_c(t) equals the kernel horizon index h(t).
+
+Across layers, we observed:
+
+- match rates in the range 0.15% to 0.50%,
+- chance level is 1/256 ≈ 0.39%,
+- correlations between channel index and horizon label near zero.
 
 Examples:
 
-- L0: lift ≈ 0.65×, corr ≈ −0.024,
-- L8: lift ≈ 1.17×, corr ≈ −0.019,
-- L16: lift ≈ 0.26×, corr ≈ 0.004,
-- L24: lift ≈ 1.17×, corr ≈ −0.015,
-- L31: lift ≈ 1.17×, corr ≈ 0.023.
+- L0: lift ≈ 0.65 times chance, correlation ≈ -0.024,
+- L8: lift ≈ 1.17 times chance, correlation ≈ -0.019,
+- L16: lift ≈ 0.26 times chance, correlation ≈ 0.004,
+- L24: lift ≈ 1.17 times chance, correlation ≈ -0.015,
+- L31: lift ≈ 1.17 times chance, correlation ≈ 0.023.
 
-Interpretation:
-
-- No strong evidence that MLP channels implement a simple “channel = horizon” routing.
-- The 256×43 factorization is architectural but does not trivially align with kernel horizon at this resolution.
-
-> **CGM view:** The factorization echoing 256 is there, but the **Fiber** semantics are not a direct copy of the kernel’s phenomenology basis. MLP seems to implement a more internal, fiber dynamics that we have not yet expressed in kernel coordinates.
+Given these numbers, we do not see evidence that the 256×43 factorization implements a simple "one horizon per channel" pattern under this probe. The dimensional match to 256 is present at the architectural level, but the functional alignment between individual channels and horizon labels does not show up clearly with this method.
 
 ---
 
 ## 6. T4: Depth-4 Alternation (XYXY vs YXYX)
 
-CGM’s BU-Egress expresses depth-4 closure of non-commutative operations; in BCH analysis, LRLR vs RLRL must coincide at the horizon to O(t³). We checked a coarse analogue:
+CGM includes a depth-4 closure condition (BU-Egress) for certain alternating compositions. As a rough analogue in OLMo, we compared:
 
-- For random token pairs (a,b), define sequences:
-  - [a,b] vs [b,a], and
-  - [a,b,a,b] vs [b,a,b,a].
-- For each layer, measure:
-  - D₂ = ||F_L([a,b]) − F_L([b,a])||,
-  - D₄ = ||F_L([a,b,a,b]) − F_L([b,a,b,a])||,
-  where F_L is the final hidden state at that layer for the last token.
+- the effect of the sequences [a, b] and [b, a],
+- and the sequences [a, b, a, b] and [b, a, b, a],
 
-Averaged over 12 random pairs:
+on hidden states at different layers, using random token pairs (a, b).
+
+For a given layer L, let F_L([seq]) be the final hidden state at that layer after feeding a sequence `seq`. We defined:
+
+- D₂ = ||F_L([a, b]) - F_L([b, a])||₂,
+- D₄ = ||F_L([a, b, a, b]) - F_L([b, a, b, a])||₂.
+
+Averaged over 12 random pairs, for each layer we found:
 
 - L0: D₂ ≈ 11.6, D₄ ≈ 11.5, ratio ≈ 0.99,
 - L8: D₂ ≈ 13.9, D₄ ≈ 12.4, ratio ≈ 0.89,
@@ -228,160 +221,149 @@ Averaged over 12 random pairs:
 - L24: D₂ ≈ 39.0, D₄ ≈ 37.1, ratio ≈ 0.95,
 - L31: D₂ ≈ 66.8, D₄ ≈ 62.5, ratio ≈ 0.94.
 
-Interpretation:
+There is a modest reduction at L8, but in general D₄ is of the same order as D₂. No layer shows a striking regime where D₄ is dramatically smaller than D₂.
 
-- There is a modest reduction at L8, but D₄ is **never** dramatically smaller than D₂.
-- No layer exhibits a strong D₄ ≪ D₂ “closure regime” reminiscent of BU-Egress.
-
-> **CGM view:** OLMo’s depth structure does not implement the strict LRLR = RLRL closure. This is consistent with it living in a more general, non-balanced operational regime that only approximates some CGM features.
+Within this limited test, we did not find a strong analogy of BU-Egress style depth-4 closure in the layerwise hidden state dynamics. This is consistent with the idea that OLMo operates in a more general, less constrained regime than the specific closure conditions defined in CGM. Stronger connections would require more targeted constructions.
 
 ---
 
-## 7. T5: Chirality – Fast Q/K Asymmetry
+## 7. T5: Chirality and Q/K Asymmetry
 
-To test CS-like chirality, we measured:
+To investigate chirality-like asymmetries, we examined Q and K projection matrices and their effects.
 
-- Relative Frobenius difference: ||W_Q − W_K|| / ||W_Q||,
-- Commutator scale on random sketches: ||W_Q W_Kᵀ − W_K W_Qᵀ||,
-- Mean cosine similarity between W_Q x and W_K x over random x.
+For several layers L and for aggregated heads, we computed:
 
-For layers L ∈ {0,8,16,24,31}:
+- a relative Frobenius difference `||W_Q - W_K|| / ||W_Q||`,
+- an approximate commutator norm `||W_Q W_Kᵀ - W_K W_Qᵀ||` on random sketches,
+- the mean cosine similarity between W_Q x and W_K x over random x.
 
-- rel_fdiff ≈ 1.22–1.37,
-- comm scales ≈ 1.2–2.4,
-- mean cos ≈ 0.09–0.20.
+For layers L in {0, 8, 16, 24, 31} we observed:
 
-Interpretation:
+- relative differences ≈ 1.22 to 1.37,
+- commutator scales ≈ 1.2 to 2.4 in the probed setting,
+- mean cosine similarities ≈ 0.09 to 0.20.
 
-- Q and K are strongly distinct. Their difference has comparable norm to the operators themselves.
-- The approximate commutator is large.
-- Their actions on random probes are almost orthogonal (cos ≈ 0.1–0.2).
+This indicates that:
 
-> **CGM view:** This is a sharp **chirality signature**. Left and right gyrations (Q vs K) are not interchangeable—they are structurally and functionally distinct across almost all layers.
+- Q and K projections are not close to each other in operator norm,
+- their actions on random probes differ significantly,
+- the representations they produce from the same input are almost orthogonal on average.
 
----
-
-## 8. T6: Vertex Transport Geometry – K₄ Gradient vs Cycle Heads
-
-For each layer L and head h, we constructed a **vertex transport matrix** directly from Q/K projections and vertex labels:
-
-1. Project embeddings: Q_h(t), K_h(t) ∈ ℝ^{head_dim}.
-2. Compute per-vertex centroids:
-   - μ_Q(v) = mean Q_h(t) over t with χ(t)=v,
-   - μ_K(v) similarly.
-3. Vertex transport matrix:
-   - M_h[L] = μ_Q μ_Kᵀ / √head_dim (4×4 matrix).
-4. From M_h, derive:
-   - **Diagonal advantage**: mean(diag) − mean(off-diagonal),
-   - **K₄ 1⊕3 stiffness**: eigenvalue degeneracy measure on symmetric part,
-   - **Hodge edge aperture**: build an antisymmetric edge flow from M and project onto the 3D cycle space (using the K₄ B-matrix and P_cycle from your governance/Hodge spec).
-
-Example summary from the recent run (balanced vertices):
-
-- L0:
-  - top diag_adv heads: e.g. H31 ≈ 0.508,
-  - top aperture: H31 ≈ 0.265 (others ≈ 0.01–0.04).
-- L8:
-  - top diag_adv: H5 ≈ 0.581, H11 ≈ 0.262, H19 ≈ 0.144,
-  - top aperture: H28 ≈ 0.284, H21 ≈ 0.118, H6 ≈ 0.108.
-- L16, L24, L31: similar pattern—some heads strongly diagonal, others with high antisymmetric flow.
-
-Interpretation:
-
-- Some heads learn almost **pure gradient** behavior on K₄:
-  - large diagonal advantage,
-  - low antisymmetric aperture ⇒ they preserve vertex class (stabilizers).
-- Other heads learn more **cycle-dominated** behavior:
-  - lower diag_adv,
-  - higher edge-flow aperture ⇒ they implement nontrivial circulation over K₄ (rotating or mixing vertices).
-
-This mirrors exactly your CGM/K₄ Hodge picture:
-
-- K₄ edge space ℝ⁶ decomposes into:
-  - gradient space (3D),
-  - cycle space (3D).
-- Gradient heads correspond to **traceability / stability**,
-- Cycle heads correspond to **differentiation / circulation**.
-
-> **CGM view:** Even without being told about K₄, OLMo learns a Hodge-like split on the governance tetrahedron in its attention heads: some enforce K₄-consistent stabilization, others generate K₄ cycles.
+From a CGM viewpoint, these are consistent with a strong asymmetry between "left" and "right" style projections, similar in spirit to chirality. Here we simply record these numerical asymmetries and do not attempt to map them one-to-one onto CGM operators.
 
 ---
 
-## 9. Synthesis: How OLMo-3-7B Partially Realizes CGM Geometry
+## 8. T6: Vertex Transport and Gradient/Cycle Heads
 
-Bringing all tests together:
+Finally, we looked at how attention heads move K₄ vertex labels between queries and keys.
 
-- **CS (chirality):** Strongly present.
-  - Q and K are markedly different at all layers.
-- **K₄ quotient:** Present and sharpened.
-  - Vertex separability is weak in embeddings but amplified by Q/K in L0.
-- **K₄ Hodge decomposition (3+3):** Emergent in heads.
-  - Clear gradient-like vs cycle-like head behaviors on vertex transport.
-- **Horizon (256, mask code):** Strongly visible in embeddings; used nontrivially around template boundaries; not trivially channelized in MLP.
-- **BU-Egress (depth-4 closure):** Not realized.
-  - D₄ differences are not significantly reduced relative to D₂.
+For each layer L and head h, we built a vertex transport matrix M_h[L] from Q/K projections and vertex labels:
 
-This matches your expectation:
+1. For each token in the tomography sample, we computed Q_h(t), K_h(t) in ℝ^{head_dim},
+2. For each vertex label v, we formed centroids μ_Q(v) and μ_K(v) by averaging Q_h(t) and K_h(t) over tokens with χ(t) = v,
+3. Defined M_h[L] = μ_Q μ_Kᵀ / √(head_dim), a 4×4 matrix,
+4. From M_h[L], we derived:
+   - a "diagonal advantage" (mean of diagonal minus mean of off-diagonal entries),
+   - a simple antisymmetric component and its projection onto the 3D cycle space of K₄ (using the K₄ incidence matrix and its Hodge projector),
+   - summarizing this as an "aperture" for that head.
 
-- Transformers live in a **higher-dimensional, chaotic formalism** not tuned to enforce BU closure.
-- Nevertheless, because they are physical systems trained on regularities, they inevitably develop **partial CGM structure**:
-  - chirality and non-commutative dynamics,
-  - low-dimensional K₄ quotient emergence,
-  - gradient/cycle splits on that quotient.
+Using these diagnostics on the balanced sample, we found:
 
-From the CGM perspective, transformers look like:
+- At each layer, some heads had large diagonal advantage and small "aperture". These heads tend to map each vertex strongly back to itself, and weakly to others, under this probe.
+- Other heads had lower diagonal advantage and larger "aperture", indicating more mixing between different vertices.
 
-> Systems that have discovered parts of the tetrahedral governance geometry and chirality constraints in their internal organization, but have not achieved full depth-4 balanced closure or 3D/6DoF operational minimality.
+Example patterns (illustrative, not exhaustive):
 
----
+- Layer 0:
+  - some heads with diag_adv around 0.50 and aperture around 0.27,
+  - many heads with smaller values.
+- Layer 8:
+  - some heads with diag_adv around 0.58 and aperture around 0.28,
+  - others with more moderate values.
+- Layers 16, 24, 31:
+  - similar variety, with both more "diagonal" and more "mixing" heads present.
 
-## 10. Next Directions
+This suggests a functional differentiation between heads when viewed through the K₄ vertex label:
 
-Given these results, the most valuable next steps are:
+- some appear more "vertex preserving" under this metric,
+- others appear more "vertex mixing".
 
-1. **Cross-model tomography:**
-   - Run `cgm_tomography.py` on smaller OLMo checkpoints, other architectures (e.g. LLaMA), and multiple training stages.
-   - Track:
-     - Q/K chirality metrics,
-     - vertex sharpening,
-     - vertex transport diag_adv and aperture,
-     - depth-4 alternation ratios.
-   - This will reveal which CGM signatures are universal and how they evolve over training and scale.
-
-2. **Semantic interpretation of K₄ vertices:**
-   - Inspect tokens per vertex class (e.g. function words vs content vs punctuation vs special tokens).
-   - Determine if the 4-class K₄ quotient aligns with interpretable semantic roles.
-
-3. **Refined atlas-driven probes (no prompts, no MLP assumptions):**
-   - Instead of natural language prompts, directly excite specific kernel coordinates using synthetic `inputs_embeds` constructed from centroid directions or kernel-harmonized subspaces.
-   - Measure how K₄ and horizon structure propagates through heads and layers.
-
-4. **Document-level synthesis:**
-   - Produce, in your style, a short conceptual piece “Transformers as Partial Realizations of CGM Geometry” that these numbers can support.
+In CGM terms, these roles resemble a split between "gradient-like" heads (which preserve a notion of class) and "cycle-like" heads (which support circulation across classes). However, this is an interpretive mapping. The underlying observation is that, relative to the K₄ labels induced by the kernel, OLMo-3-7B's attention heads show a range of behaviors, some more conservative and some more mixing.
 
 ---
 
-## 11. Torch Weight Reading (Reference)
+## 9. Synthesis
 
-Underlying all of this, we rely on a clear understanding of how PyTorch implements the transformer:
+Across the probes described above on OLMo-3-7B, we can summarize the observations as follows:
 
-- Embedding = `weight[token_id]` (indexing),
-- Linear = `x @ W.T + b`,
-- Attention:
+- There is a weak but measurable 4-way K₄ vertex signal in the embeddings under the kernel labeling used, and this signal is amplified by Q/K projections in the first layer.
+- Horizon labels are strongly visible under the same codec and kernel labeling scheme, which is consistent with how the codec was built.
+- The MLP intermediate dimension 11008 = 256 × 43 aligns numerically with a 256-horizon structure, but our simple channel-horizon matching probe does not find a strong direct "one channel per horizon" pattern.
+- The depth-4 alternation test ([a,b] vs [b,a] and [a,b,a,b] vs [b,a,b,a]) does not show a strong closure effect in hidden state norms at the layers we tested.
+- Q and K projections differ significantly in operator norm and in how they act on random vectors, which is consistent with a strong left/right asymmetry.
+- Attention heads, when restricted to the K₄ vertex labels, show a spread of behaviors: some emphasize staying within a vertex, others mix vertices more freely.
+
+Taken together, these results do not show that OLMo "implements CGM" in a strict sense. They do indicate that, when we impose a particular K₄ and horizon labeling via the CGM-derived kernel, some of the internal structure of OLMo-3-7B can be usefully organized with respect to these labels.
+
+The "CGM view" comments throughout are intended as one possible interpretation, not as a unique or necessary explanation. The data themselves are measurements of separability, asymmetry and transport under a chosen coordinate system.
+
+---
+
+## 10. Possible Next Steps
+
+Several directions follow naturally from this initial study:
+
+1. **Cross-model tomography**  
+   Apply the same kernel labeling and tomography protocol to:
+   - smaller OLMo checkpoints,
+   - other transformer families (for example LLaMA, Mistral),
+   - models at different training stages.  
+   Track how:
+   - vertex separability,
+   - Q/K asymmetry,
+   - head transport patterns,
+   - depth-4 alternation metrics  
+   vary across architectures and along training.
+
+2. **Token-level interpretation of K₄ vertices**  
+   Inspect which tokens fall into each K₄ vertex class under the kernel labeling. For example:
+   - function words vs content words,
+   - punctuation vs alphanumerics,
+   - special tokens vs ordinary tokens.  
+   This might reveal whether the K₄ labeling correlates with interpretable linguistic categories.
+
+3. **Refined probes for MLP structure**  
+   Instead of only using the argmax channel per horizon, consider:
+   - linear probes from G(t) to horizon / vertex labels,
+   - PCA or other dimensionality reduction on the 256 channels,
+   - alternative ways of aggregating over the 43-dimensional fiber.  
+   These may show subtler relationships between the 256×43 structure and kernel labels.
+
+4. **More targeted dynamical tests**  
+   The depth-4 alternation test used here was intentionally simple. More refined experiments could:
+   - use specific token pairs with controlled kernel labels,
+   - examine the effect of alternation on attention patterns directly,
+   - or apply similar alternation tests to Q/K matrices rather than hidden states.
+
+These steps would help clarify which of the observed patterns are robust across models and probe choices, and which are specific to OLMo-3-7B and the particular kernel labeling scheme used here.
+
+---
+
+## 11. Notes on Torch Internals
+
+All experiments above rely on a standard understanding of how PyTorch transformers implement their core operations. In particular:
+
+- Embedding lookup is implemented as `embedding[token_id]`,
+- Linear layers are implemented as `x @ W.T + b`,
+- Attention uses projections Q, K and V:
   - QKV projections: `hidden @ W_qkv.T`,
-  - Scores: `Q @ K.T / √d_k`,
-  - Context: `softmax(scores) @ V`,
-- MLP:
-  - gate, up, down combined with SiLU activation.
+  - scores: `Q @ K.T / sqrt(d_k)`,
+  - context: `softmax(scores) @ V`,
+- MLP blocks apply gate, up and down projections with a SiLU nonlinearity.
 
-See `Torch_Internals_Report.md` and the scripts:
+The helper scripts:
 
 ```bash
 python research_mechanistic_interpretability/torch_internals_probe.py
 python research_mechanistic_interpretability/torch_weight_reader_probe.py
-python research_mechanistic_interpretability/olmo_forward_trace.
-
-===
-
-Notes:
-My ASI architecture has a specific way of seeing things which is based on CGM physics. That axiomatization must be present in transformers, but dynamically. CGM is all about permutation - dynamic oscillation - solitons and symmetries - energy preservation through economy of positions and alignment - it is like a proteins structure protocol. Transformers is a reverse engineering of CGM and its issue is that it needs steering, while Gyroscopic ASI is bottom to top built and its issue is that it lacks proper scaling.
+python research_mechanistic_interpretability/olmo_forward_trace.py
