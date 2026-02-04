@@ -354,9 +354,9 @@ Test program for skipped attestations report structure.
 
 def main():
     """Run all tests."""
-    print("\n" + "="*60)
+    print("\n" + "="*5)
     print("AIR CLI Test Suite (Program-Only Model)")
-    print("="*60)
+    print("="*5)
     
     results = []
     
@@ -384,9 +384,9 @@ def main():
             results.append((name, "ERROR", str(e)))
     
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "="*5)
     print("TEST SUMMARY")
-    print("="*60)
+    print("="*5)
     
     passed = sum(1 for _, status, _ in results if status == "PASS")
     failed = sum(1 for _, status, _ in results if status in ["FAIL", "ERROR"])

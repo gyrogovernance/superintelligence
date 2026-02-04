@@ -799,9 +799,9 @@ class GyroValidationSuite:
     
     def print_validation_report(self, results: Dict[str, Any]) -> None:
         """Print comprehensive validation report."""
-        print("\n" + "="*60)
+        print("\n" + "="*5)
         print("GYROSI VALIDATION REPORT")
-        print("="*60)
+        print("="*5)
         
         # Pauli commutator (family-mask search)
         pauli = results['pauli']

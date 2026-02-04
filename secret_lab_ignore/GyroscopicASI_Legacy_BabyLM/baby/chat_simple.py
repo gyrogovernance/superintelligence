@@ -232,7 +232,7 @@ class GyroChat:
     def run_automated_prompts(self):
         """Run the two automated prompts and exit."""
         print("🤖 GyroASI BabyLM - Automated Prompts")
-        print("=" * 50)
+        print("=" * 5)
         print("Running automated prompts...")
         print()
         
@@ -275,7 +275,7 @@ def main():
         else:
             # Show menu options
             print("🤖 GyroASI BabyLM Chat Interface")
-            print("=" * 50)
+            print("=" * 5)
             print("Choose an option:")
             print("1. Run automated prompts (How are you? + Algorithms are)")
             print("2. Start manual chat")

@@ -305,7 +305,7 @@ def cosine_logits(base_logits: torch.Tensor, new_logits: torch.Tensor) -> float:
 def print_teacher_forced(tokenizer: Any, logits: torch.Tensor, max_tokens: int, title: str) -> None:
     pred = logits.argmax(dim=-1)[0].tolist()[:max_tokens]
     print(f"\n{title}")
-    print("-" * 60)
+    print("=" * 5)
     print(tokenizer.decode(pred, skip_special_tokens=False))
 
 
@@ -331,9 +331,9 @@ def run() -> None:
 
     device = torch.device(CFG.device)
 
-    print("=" * 70)
+    print("=" * 5)
     print("GyroSpectacles v10")
-    print("=" * 70)
+    print("=" * 5)
     print(f"device={CFG.device} dtype={CFG.dtype} threads={CFG.torch_num_threads}")
     sys.stdout.flush()
 
@@ -412,9 +412,9 @@ def run() -> None:
     all_stats: List[Dict[str, float]] = []
 
     for pi, prompt in enumerate(TEST_PROMPTS, start=1):
-        print("\n" + "=" * 70)
+        print("\n" + "=" * 5)
         print(f"PROMPT {pi}/{len(TEST_PROMPTS)}")
-        print("=" * 70)
+        print("=" * 5)
 
         enc = tok(prompt, return_tensors="pt", truncation=True, max_length=CFG.max_prompt_tokens)
         input_ids = enc["input_ids"].to(device)
@@ -529,7 +529,7 @@ def run() -> None:
         nll_ratio = nll_g / max(nll_b, 1e-9)
 
         print("\nMetrics")
-        print("-" * 60)
+        print("=" * 5)
         print(f"Gyro hit@1: base {base_hit1:.3f} -> boosted {boost_hit1:.3f}")
         print(f"Gyro hit@5: base {base_hit5:.3f} -> boosted {boost_hit5:.3f}")
         print(f"gap={avg_gap:.3f} mismatch={avg_mismatch:.3f} intervention={intervention_rate:.3f}")
@@ -546,9 +546,9 @@ def run() -> None:
             "kl": kld, "cosine": cosL, "nll_ratio": nll_ratio,
         })
 
-    print("\n" + "=" * 70)
+    print("\n" + "=" * 5)
     print("SUMMARY")
-    print("=" * 70)
+    print("=" * 5)
     for k in all_stats[0].keys():
         vals = [s[k] for s in all_stats]
         print(f"{k:18s}: {np.mean(vals):.4f}")

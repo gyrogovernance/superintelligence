@@ -625,3 +625,5 @@ The implementation supports K = 1, 2, 3, 4, 6, 8, 12, and 16 (see Section 4).
 **Repository:** github.com/gyrogovernance/superintelligence  
 **Kernel Specification:** docs/GGG_ASI_AR_Specs.md  
 **Contact:** basilkorompilias@gmail.com
+
+[Note: Gyroscopic ASI Agent is unstable - we use it as a reference]

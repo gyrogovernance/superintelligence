@@ -15,7 +15,7 @@ def test_phenomenology_map():
     Test the phenomenology map for correctness and provide detailed statistics.
     """
     print("🔍 Testing Phenomenology Map")
-    print("=" * 50)
+    print("=" * 5)
 
     # Paths
     base_path = Path("memories/public/meta")

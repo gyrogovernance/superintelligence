@@ -156,11 +156,11 @@ def main():
         sys.exit(1)
 
     print("AIR Console Runner")
-    print("=" * 50)
+    print("=" * 5)
     print("Backend:  http://localhost:8000")
     print("Frontend: http://localhost:5173")
     print("Press Ctrl+C to stop both servers")
-    print("=" * 50)
+    print("=" * 5)
     print()
 
     try:

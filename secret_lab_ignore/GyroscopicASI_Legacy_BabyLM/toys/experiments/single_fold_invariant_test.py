@@ -237,7 +237,7 @@ def test_parity_closure_basics():
 def run_consolidated_test():
     """Run all available theoretical tests."""
     print("GyroASI Consolidated Theoretical Validation")
-    print("=" * 50)
+    print("=" * 5)
 
     # Load physics maps
     epistemology, theta_map, phenomenology, orbit_sizes = load_physics_maps()
@@ -262,7 +262,7 @@ def run_consolidated_test():
         except Exception as e:
             print(f"   ERROR: {e}")
 
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 5)
     print(f"Results: {passed}/{total} tests passed")
 
     if passed == total:

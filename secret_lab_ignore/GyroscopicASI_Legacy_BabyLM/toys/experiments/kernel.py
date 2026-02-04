@@ -452,10 +452,10 @@ class GyroKernel:
         tokens = []
 
         if debug:
-            print("\n" + "=" * 50)
+            print("\n" + "=" * 5)
             print("GENERATION")
             print(f"Initial: θ={self._get_theta(self.current_state_index):.3f}")
-            print("=" * 50)
+            print("=" * 5)
 
         for i in range(max_tokens):
             token_id = self.generate_token()
@@ -499,7 +499,7 @@ class GyroKernel:
 
         if debug:
             print(f"\nGenerated: {result}")
-            print("=" * 50 + "\n")
+            print("=" * 5 + "\n")
 
         return result
 

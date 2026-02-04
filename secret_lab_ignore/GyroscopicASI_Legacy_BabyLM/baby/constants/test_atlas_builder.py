@@ -870,7 +870,7 @@ class AtlasBenchmark:
     def run_all_tests(self) -> bool:
         """Run all benchmark tests."""
         self.log("Starting Atlas Builder Benchmark Tests", "SUMMARY")
-        self.log("=" * 50, "SUMMARY")
+        self.log("=" * 5, "SUMMARY")
         
         tests = [
             ("File Existence", self.test_file_existence),
@@ -907,7 +907,7 @@ class AtlasBenchmark:
         
         # Summary
         elapsed = time.time() - self.start_time
-        self.log("\n" + "=" * 50, "SUMMARY")
+        self.log("\n" + "=" * 5, "SUMMARY")
         self.log(f"Benchmark completed in {elapsed:.2f}s", "SUMMARY")
         self.log(f"Results: {passed}/{total} tests passed", "SUMMARY")
         

@@ -202,7 +202,7 @@ def install_frontend_deps(npm_path):
 def main():
     """Main installer."""
     print("AIR Console Installer")
-    print("=" * 50)
+    print("=" * 5)
     print()
     
     # Check prerequisites
@@ -245,7 +245,7 @@ def main():
         print("  python air_cli.py")
     
     print()
-    print("=" * 50)
+    print("=" * 5)
     print("Installation complete!")
     print()
     print("Run the console with:")

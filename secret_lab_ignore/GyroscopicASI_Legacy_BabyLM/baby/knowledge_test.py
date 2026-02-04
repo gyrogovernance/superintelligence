@@ -517,9 +517,9 @@ class RobustKnowledgeTestRunner:
 
     def print_summary(self):
         """Print test summary and results."""
-        self.log_clean("\n" + "=" * 50)
+        self.log_clean("\n" + "=" * 5)
         self.log_clean("📊 KNOWLEDGE TEST SUMMARY")
-        self.log_clean("=" * 50)
+        self.log_clean("=" * 5)
 
         if self.test_results:
             # Memory stats
@@ -533,7 +533,7 @@ class RobustKnowledgeTestRunner:
         else:
             self.log_clean("No test results available")
 
-        self.log_clean("=" * 50)
+        self.log_clean("=" * 5)
 
 
 def main():
