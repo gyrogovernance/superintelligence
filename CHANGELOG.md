@@ -15,6 +15,28 @@
 
 ---
 
+## [v1.2.7-GyroTomography] – 2026-02-05
+
+## Mechanistic Interpretability Research
+
+### Added
+- Initial geometric analysis of QK attention weights in OLMo-3-7B-Instruct and GPT-2-124M
+- Coverage metric based on participation ratio of singular values from QK weight products
+- Comparison baselines: random Gaussian matrices, alternative weight pairs (QV, KV, QQ, MLP)
+
+### Observations (preliminary, two models only)
+- OLMo-3-7B: Total QK coverage sums to ~12.62 (within 0.4% of 4π); Layer 0 shows bimodal head distribution (Gini ~0.63)
+- GPT-2-124M: Total QK coverage sums to ~8.09 (within 1.1% of 8); Layer 0 is uniform (Gini ~0.14)
+- Both models show decreasing Gini across depth (correlation r ≈ -0.66 to -0.70)
+- The 4π-like total appears specific to QK weights in OLMo; other weight pairs deviate substantially
+
+### Notes
+- Numerical alignments with theoretical constants are noted but not validated—could reflect training dynamics rather than anything fundamental
+- Only two models tested; patterns may not generalize
+- Next step: test additional architectures (Llama, Mistral, Pythia) to check if L0 structure predicts total coverage behavior
+
+---
+
 ## [v1.2.7-GyroTomography] – 2026-02-04
 
 **Overview:** 

@@ -1,6 +1,6 @@
 # Research Report: Gyroscopic Tomography of OLMo-3-7B
 
-**Date:** February 2026
+**Date:** 04 February 2026
 **Subject:** Geometric Alignment between the GGG Router and Transformer Internals
 
 ## Executive Summary

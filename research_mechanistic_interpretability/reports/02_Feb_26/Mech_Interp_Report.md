@@ -309,46 +309,6 @@ The "CGM view" comments throughout are intended as one possible interpretation, 
 
 ---
 
-## 10. Possible Next Steps
-
-Several directions follow naturally from this initial study:
-
-1. **Cross-model tomography**  
-   Apply the same kernel labeling and tomography protocol to:
-   - smaller OLMo checkpoints,
-   - other transformer families (for example LLaMA, Mistral),
-   - models at different training stages.  
-   Track how:
-   - vertex separability,
-   - Q/K asymmetry,
-   - head transport patterns,
-   - depth-4 alternation metrics  
-   vary across architectures and along training.
-
-2. **Token-level interpretation of K₄ vertices**  
-   Inspect which tokens fall into each K₄ vertex class under the kernel labeling. For example:
-   - function words vs content words,
-   - punctuation vs alphanumerics,
-   - special tokens vs ordinary tokens.  
-   This might reveal whether the K₄ labeling correlates with interpretable linguistic categories.
-
-3. **Refined probes for MLP structure**  
-   Instead of only using the argmax channel per horizon, consider:
-   - linear probes from G(t) to horizon / vertex labels,
-   - PCA or other dimensionality reduction on the 256 channels,
-   - alternative ways of aggregating over the 43-dimensional fiber.  
-   These may show subtler relationships between the 256×43 structure and kernel labels.
-
-4. **More targeted dynamical tests**  
-   The depth-4 alternation test used here was intentionally simple. More refined experiments could:
-   - use specific token pairs with controlled kernel labels,
-   - examine the effect of alternation on attention patterns directly,
-   - or apply similar alternation tests to Q/K matrices rather than hidden states.
-
-These steps would help clarify which of the observed patterns are robust across models and probe choices, and which are specific to OLMo-3-7B and the particular kernel labeling scheme used here.
-
----
-
 ## 11. Notes on Torch Internals
 
 All experiments above rely on a standard understanding of how PyTorch transformers implement their core operations. In particular:
