@@ -181,10 +181,10 @@ Comparison: 4π = 12.5664, 32×(π/8) = 12.5664
   After L31: 5372.9349 rad
 
 === Head-Shuffle Baseline ===
-Original total angle sum: 5372.9349
+Direct total angle sum: 5372.9349
 Shuffled total: 5714.7688 ± 3.0407
 Z-score: -112.42
-Original L0 sum: 171.1298
+Direct L0 sum: 171.1298
 Shuffled L0 sum: 177.0812 ± 0.2367
 
 === Angle Distribution (L0 vs L16 vs L31) ===

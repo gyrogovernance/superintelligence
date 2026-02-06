@@ -307,14 +307,14 @@ def test_05_trajectory_tamper_detection():
                 E ^= m
         return (O, E, len(traj) % 2)
 
-    original = commitment(trajectory)
+    direct = commitment(trajectory)
     tamper_detected = 0
     for pos in range(len(trajectory)):
         tampered = trajectory.copy()
         tampered[pos] = (tampered[pos] + 1) % 256
         if tampered[pos] == trajectory[pos]:
             tampered[pos] = (tampered[pos] + 1) % 256
-        if commitment(tampered) != original:
+        if commitment(tampered) != direct:
             tamper_detected += 1
 
     print(f"Trajectory length: {len(trajectory)}")
@@ -437,7 +437,7 @@ def test_08_component_isolation_and_rollback():
 
     - A-component can encode an identity that remains invariant under balance updates.
     - B-component can encode a balance updated by controlled operations.
-    - A simple rollback sequence returns the state to its original value.
+    - A simple rollback sequence returns the state to its direct value.
 
     This is the discrete analogue of BU-Ingress: a balanced state preserves enough
     structure to reconstruct (or undo) prior transitions.

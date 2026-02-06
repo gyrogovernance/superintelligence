@@ -326,7 +326,7 @@ The canonical knowledge store is **PhenotypeStore**, implemented as a single-fil
 
 - **All mutations are streamed to the Bin file**. No `.log` or `.idx` sidecar files are written in append-only mode. **Deletion is not supported**; instead, call `prune_and_compact_store` to create a new file without old entries.
 
-- **CanonicalView** applies canonicalisation (using a phenomenology map) for all key lookups, so each unique operational orbit is consistently addressed regardless of its physical context. The original context is retained in `_original_context` for provenance.  
+- **CanonicalView** applies canonicalisation (using a phenomenology map) for all key lookups, so each unique operational orbit is consistently addressed regardless of its physical context. The direct context is retained in `_direct_context` for provenance.  
   - All lookups and puts are transparently normalised.
 
 - **OverlayView** composes private (agent) and public (shared) stores, always writing to the private overlay, and reading from private first, then public. Both overlays must implement the PhenotypeStore interface.

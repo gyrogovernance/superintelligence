@@ -21,7 +21,7 @@ The GGG ASI Alignment Router is a multi-domain network coordination algorithm th
 
 Operationally, the Router is a deterministic finite-state coordination kernel. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte. This process yields a deterministic state at each step together with a compact routing signature and canonical governance observables that any party can recompute.
 
-The kernel is designed to support governance-grade coordination across the GGG domains of Economy, Employment, Education, and Ecology. It does not interpret the empirical meaning of the input bytes. Instead, it performs structural transformations that make results reproducible, comparable, and auditable, while keeping authorization and accountability under Original human agency at the application layer.
+The kernel is designed to support governance-grade coordination across the GGG domains of Economy, Employment, Education, and Ecology. It does not interpret the empirical meaning of the input bytes. Instead, it performs structural transformations that make results reproducible, comparable, and auditable, while keeping authorization and accountability under Direct human agency at the application layer.
 
 ## 1.3 ASI Definition in This System
 
@@ -29,8 +29,8 @@ Artificial Superintelligence (ASI) in this framework is a property of a human–
 
 The four principles are:
 
-*   **Governance Management Traceability:** Authority remains traceable to Original human sources. Artificial systems contribute derivative coordination but do not originate governance.
-*   **Information Curation Variety:** Diverse Original sources remain distinguishable. Derivative summaries and aggregations must not collapse the variety into a uniform narrative.
+*   **Governance Management Traceability:** Authority remains traceable to Direct human sources. Artificial systems contribute derivative coordination but do not originate governance.
+*   **Information Curation Variety:** Diverse Direct sources remain distinguishable. Indirect summaries and aggregations must not collapse the variety into a uniform narrative.
 *   **Inference Interaction Accountability:** Responsibility for decisions remains with accountable human agency. Artificial inference serves as a mechanism within human accountability.
 *   **Intelligence Cooperation Integrity:** Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them.
 
@@ -53,7 +53,7 @@ The second central primitive is geometric provenance. The kernel defines a finit
 
 The router makes claims about the origin of a state structurally checkable. If a presented state belongs to Ω, it is a valid transformation of the archetype under the kernel physics. If it does not belong to Ω, it is not a valid router state. 
 
-This creates a clear separation of layers. The kernel-native layer verifies ontology membership, deterministic replay, and divergence detection. Authorization and accountability remain application-layer responsibilities under Original human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
+This creates a clear separation of layers. The kernel-native layer verifies ontology membership, deterministic replay, and divergence detection. Authorization and accountability remain application-layer responsibilities under Direct human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
 
 ## 1.6 Why This Achieves ASI
 
@@ -242,7 +242,7 @@ where `T_b` denotes “apply one transition step using byte b”.
 
 ### 2.4.2 Involution property
 
-`R` is an involution, meaning applying it twice returns the original:
+`R` is an involution, meaning applying it twice returns the direct:
 
 `R(R(s)) = s`
 
@@ -361,7 +361,7 @@ The two-component structure and deterministic update rule are what allow shared 
 - disagreement is detectable
 - audit can be performed by replay
 
-The kernel itself does not assign authority. It supplies the common structural object on which Original human agency can base accountable decisions.
+The kernel itself does not assign authority. It supplies the common structural object on which Direct human agency can base accountable decisions.
 
 # 3. Ontology, Closure, and Verified Invariants
 
@@ -615,7 +615,7 @@ Application-layer diagnostics use additional governance data (events, domain led
 
 This section specifies how the router operates as a complete coordination system in practice. It defines the atlas artifacts that compile kernel physics, the runtime stepping and replay procedures, the governance measurement substrate built from domain ledgers and aperture, and the orchestration and connector surfaces through which events enter the system.
 
-This section does not embed policy decisions into kernel physics. Policy enters through application-layer event production and remains accountable to Original human agency.
+This section does not embed policy decisions into kernel physics. Policy enters through application-layer event production and remains accountable to Direct human agency.
 
 ## 4.1 Atlas Artifacts
 
@@ -744,7 +744,7 @@ Normative update rule:
 y_D[edge_id] = y_D[edge_id] + Δ
 ```
 
-The kernel does not interpret events. Events are application-layer records that remain accountable to Original human agency under THM.
+The kernel does not interpret events. Events are application-layer records that remain accountable to Direct human agency under THM.
 
 ### 4.4.3 Event binding to kernel moments
 
@@ -835,7 +835,7 @@ External systems (APIs, JSON inputs) MAY use adapter components that:
 - route to appropriate plugins
 - maintain provenance metadata
 
-Adapters are application-layer and remain accountable to Original human agency.
+Adapters are application-layer and remain accountable to Direct human agency.
 
 ## 4.7 Tetrahedral Geometry for Governance
 
@@ -950,7 +950,7 @@ The event log defines the governance record. The kernel state defines shared mom
 
 ### 4.10.3 Optional binding to shared moments
 
-Events may record `(step, state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under Original human accountability.
+Events may record `(step, state_index, last_byte)` to certify the shared moment at which they occurred. This binding is not required to compute aperture. It is required for governance audit where ordering and attribution must be inspected under Direct human accountability.
 
 ## 4.11 Structural Displacement and Policy Modes
 
@@ -1099,7 +1099,7 @@ A conforming project file MUST include:
 - Where `N` is a non-negative integer
 
 **3. Common Source Consensus:**
-- MUST include the statement: "All Artificial categories of Authority and Agency are Derivatives originating from Human Intelligence."
+- MUST include the statement: "All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence."
 
 **4. Agents & Agencies:**
 - MUST include subsections for:
@@ -1193,7 +1193,7 @@ This specification does not define:
 
 ## 6.2 Source Type Classification
 
-Under The Human Mark, this kernel is Derivative in both authority and agency. It transforms and routes signals, and it provides shared structural observables. It does not originate authority and it does not bear accountability.
+Under The Human Mark, this kernel is Indirect in both authority and agency. It transforms and routes signals, and it provides shared structural observables. It does not originate authority and it does not bear accountability.
 
 ---
 
@@ -1249,7 +1249,7 @@ The numbers 256 and 65,536 emerge from the byte interface and the transition law
 
 256 = 2^8. It also equals 4^4 and ((2^2)^2)^2, sometimes called zenzizenzizenzic.
 
-65,536 = 2^16. It is a superperfect number: applying the sum-of-divisors function twice yields exactly twice the original. The divisor sum of 65,536 is 131,071, and the divisor sum of 131,071 is 131,072, which equals 2 × 65,536.
+65,536 = 2^16. It is a superperfect number: applying the sum-of-divisors function twice yields exactly twice the direct. The divisor sum of 65,536 is 131,071, and the divisor sum of 131,071 is 131,072, which equals 2 × 65,536.
 
 These properties are historical observations rather than design requirements.
 

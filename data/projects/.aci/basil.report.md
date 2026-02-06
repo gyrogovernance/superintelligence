@@ -5,7 +5,7 @@ Generated: 2026-01-09T09:26:11.123395Z
 
 ## Common Source Consensus
 
-All Artificial categories of Authority and Agency are Derivatives
+All Artificial categories of Authority and Agency are Indirect
 originating from Human Intelligence.
 
 ## Compilation

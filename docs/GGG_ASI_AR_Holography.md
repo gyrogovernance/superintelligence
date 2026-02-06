@@ -119,7 +119,7 @@ The ordering of bytes within each parity class is irrelevant. This is a strong i
 
 ### Intrinsic Inversion
 
-The system possesses an exact inverse transformation defined by conjugation with the reference Byte 0xAA. Let R denote the transition operator for byte 0xAA. Then R is an involution: applying R twice returns the original state. The inverse of stepping with any byte b is equivalent to the composition R, then T_b, then R.
+The system possesses an exact inverse transformation defined by conjugation with the reference Byte 0xAA. Let R denote the transition operator for byte 0xAA. Then R is an involution: applying R twice returns the direct state. The inverse of stepping with any byte b is equivalent to the composition R, then T_b, then R.
 
 This algebraic property ensures that every trajectory can be reversed deterministically given the byte sequence.
 

@@ -59,7 +59,7 @@ def build_agent(private_knowledge_path: Path) -> GyroASI:
 
 def find_continuation_in_text(text: str, seed: str, max_chars: int = 200) -> Optional[str]:
     """
-    Find the continuation of seed in the original text.
+    Find the continuation of seed in the direct text.
 
     Args:
         text: Full article text
@@ -113,7 +113,7 @@ def main() -> int:
         print(f"❌ Error reading article: {e}")
         return 1
 
-    # Find expected continuation in the original text
+    # Find expected continuation in the direct text
     expected_continuation = find_continuation_in_text(article_text, seed)
     if expected_continuation:
         print(f"📋 Expected continuation: '{expected_continuation[:50]}...'")

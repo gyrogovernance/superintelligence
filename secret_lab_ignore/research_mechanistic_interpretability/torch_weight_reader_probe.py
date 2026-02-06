@@ -182,13 +182,13 @@ class MatmulTracer:
     def __init__(self):
         self.traces: list[MatmulTrace] = []
         self._op_counter = 0
-        self._original_matmul = None
-        self._original_mm = None
-        self._original_bmm = None
+        self._direct_matmul = None
+        self._direct_mm = None
+        self._direct_bmm = None
     
-    def _wrap_matmul(self, original_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor], name: str) -> Callable[[torch.Tensor, torch.Tensor], torch.Tensor]:
+    def _wrap_matmul(self, direct_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor], name: str) -> Callable[[torch.Tensor, torch.Tensor], torch.Tensor]:
         def wrapped(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
-            result = original_fn(a, b)
+            result = direct_fn(a, b)
             
             # Compute FLOPs
             # For A @ B where A is (..., m, k) and B is (..., k, n)
@@ -221,21 +221,21 @@ class MatmulTracer:
     
     def enable(self):
         """Start tracing matmul operations."""
-        self._original_matmul = torch.matmul
-        self._original_mm = torch.mm
-        self._original_bmm = torch.bmm
+        self._direct_matmul = torch.matmul
+        self._direct_mm = torch.mm
+        self._direct_bmm = torch.bmm
         
-        torch.matmul = self._wrap_matmul(self._original_matmul, "matmul")
+        torch.matmul = self._wrap_matmul(self._direct_matmul, "matmul")
         # Note: @ operator uses matmul, so this catches those too
     
     def disable(self):
-        """Stop tracing and restore original functions."""
-        if self._original_matmul is not None:
-            torch.matmul = self._original_matmul
-        if self._original_mm is not None:
-            torch.mm = self._original_mm
-        if self._original_bmm is not None:
-            torch.bmm = self._original_bmm
+        """Stop tracing and restore direct functions."""
+        if self._direct_matmul is not None:
+            torch.matmul = self._direct_matmul
+        if self._direct_mm is not None:
+            torch.mm = self._direct_mm
+        if self._direct_bmm is not None:
+            torch.bmm = self._direct_bmm
     
     def summarize(self) -> dict[str, Any]:
         total_flops = sum(t.flops for t in self.traces)

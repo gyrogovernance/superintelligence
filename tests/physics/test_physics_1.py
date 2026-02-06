@@ -80,7 +80,7 @@ class TestTranscription:
         assert GENE_MIC_S == 0xAA
 
     def test_transcription_involution(self):
-        """Applying transcription twice returns original byte."""
+        """Applying transcription twice returns direct byte."""
         for byte in range(256):
             intron = byte_to_intron(byte)
             recovered = byte_to_intron(intron)

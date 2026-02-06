@@ -150,9 +150,9 @@ The kernel operates on a 24-bit state split into two 12-bit components, designat
 
 The transition law proceeds in defined steps. Given a current state and an input byte, the kernel first computes the intron by XORing the byte with 0xAA. It then expands the intron to a 12-bit mask for the A component using a canonical expansion function. The B mask is always zero. The kernel mutates A by XORing it with the mask. Finally, the kernel performs gyration: the next A becomes B XOR 0xFFF, and the next B becomes the mutated A XOR 0xFFF.
 
-This transition law is bijective on the ontology for each byte. Every state has exactly one predecessor and one successor under each byte operation. The reference byte 0xAA produces a zero mask and acts as an involution: applying it twice returns to the original state. The inverse of any byte operation is computable as a conjugation by the reference byte.
+This transition law is bijective on the ontology for each byte. Every state has exactly one predecessor and one successor under each byte operation. The reference byte 0xAA produces a zero mask and acts as an involution: applying it twice returns to the direct state. The inverse of any byte operation is computable as a conjugation by the reference byte.
 
-The kernel exhibits a depth-four identity: for any two bytes x and y, applying the sequence x, y, x, y returns to the original state. This closure property is verified for all 65,536 ordered byte pairs. The trajectory of any byte sequence can be computed in closed form from the XOR parity of masks at odd and even positions.
+The kernel exhibits a depth-four identity: for any two bytes x and y, applying the sequence x, y, x, y returns to the direct state. This closure property is verified for all 65,536 ordered byte pairs. The trajectory of any byte sequence can be computed in closed form from the XOR parity of masks at odd and even positions.
 
 ### 5.2 Holographic Structure
 

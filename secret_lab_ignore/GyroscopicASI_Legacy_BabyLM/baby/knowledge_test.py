@@ -98,12 +98,12 @@ class RobustKnowledgeTestRunner:
             # Run with cwd as project root because the recreator uses relative paths
             import os
 
-            original_cwd = os.getcwd()
+            direct_cwd = os.getcwd()
             try:
                 os.chdir(self.project_root)
                 recreate_memory_files()
             finally:
-                os.chdir(original_cwd)
+                os.chdir(direct_cwd)
         except Exception as e:
             self.log(f"Failed to create knowledge memory files: {e}", "ERROR")
             # Do not raise; let validation report precise issues

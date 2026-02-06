@@ -90,7 +90,7 @@ This is an exact theorem following from palindromic symmetry. The value π/2 is 
 
 ### 3.3 Involution Structure
 
-Byte 0xAA has mask zero and acts as an involution: applying it twice returns to the original state. This reference operator R = T_{0xAA} satisfies R² = I.
+Byte 0xAA has mask zero and acts as an involution: applying it twice returns to the direct state. This reference operator R = T_{0xAA} satisfies R² = I.
 
 The involution provides the mechanism for:
 - Defining inverses: T_b⁻¹ = R T_b R

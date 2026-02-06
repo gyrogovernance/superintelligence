@@ -1221,7 +1221,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> Dict[str, Any]:
     report_md_lines.extend([
         "## Common Source Consensus",
         "",
-        "All Artificial categories of Authority and Agency are Derivatives",
+        "All Artificial categories of Authority and Agency are Indirect",
         "originating from Human Intelligence.",
         "",
     ])
@@ -1287,7 +1287,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> Dict[str, Any]:
         for warning in parse_warnings:
             report_md_lines.append(f"- {warning}\n")
         for missing in missing_ids:
-            report_md_lines.append(f"- Index {missing['index']}: Generated ID `{missing['generated_id']}` (original ID missing)\n")
+            report_md_lines.append(f"- Index {missing['index']}: Generated ID `{missing['generated_id']}` (direct ID missing)\n")
     
     report_md_path.parent.mkdir(parents=True, exist_ok=True)
     report_md_path.write_text("\n".join(report_md_lines), encoding="utf-8")

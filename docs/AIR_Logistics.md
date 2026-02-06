@@ -15,7 +15,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - The **Common Governance Model** provides the theoretical foundation. It formalises the minimal conditions required for coherent governance and demonstrates that these conditions require four distinct capacities operating in balance.
 
-- **The Human Mark** provides the classification system. It distinguishes between human (Original) and artificial (Derivative) sources of information and agency, and identifies four categories of risk that arise when this distinction is misapplied.
+- **The Human Mark** provides the classification system. It distinguishes between human (Direct) and artificial (Indirect) sources of information and agency, and identifies four categories of risk that arise when this distinction is misapplied.
 
 - The **Gyroscope Protocol** provides the work classification system. It categorises human contribution into four types corresponding to the governance capacities, ensuring that labour supports the requirements of coherent governance.
 
@@ -45,26 +45,26 @@ The difference between AIR and classical logistics lies in what is being routed.
 
 AIR uses a precise ontology that avoids treating organisations, systems, or roles as intrinsic holders of authority or agency. Authority and agency are categories of source type, not titles assigned to particular bearers. Misapplying them, for example by treating an artificial system as if it held authority in its own right, is the root cause of governance failures. AIR maintains clarity about source types throughout its architecture.
 
-#### 3.1 Original and Derivative Sources
+#### 3.1 Direct and Indirect Sources
 
-The Human Mark classification system defines four source types by crossing two distinctions: authority versus agency, and original versus derivative.
+The Human Mark classification system defines four source types by crossing two distinctions: authority versus agency, and direct versus derivative.
 
-**Original Authority** refers to direct human access to a subject matter. Examples include an eyewitness observing an event, a clinician examining a patient, or a researcher conducting a measurement. The defining feature is unmediated epistemic access.
+**Direct Authority** refers to direct human access to a subject matter. Examples include an eyewitness observing an event, a clinician examining a patient, or a researcher conducting a measurement. The defining feature is unmediated epistemic access.
 
-**Derivative Authority** refers to indirect or processed information. Examples include reports, databases, statistical analyses, and model outputs. The defining feature is that the information has passed through one or more transformations from its original source.
+**Indirect Authority** refers to indirect or processed information. Examples include reports, databases, statistical analyses, and model outputs. The defining feature is that the information has passed through one or more transformations from its direct source.
 
-**Original Agency** refers to human capacity to receive information, reason about it, and take decisions for which the person can be held accountable.
+**Direct Agency** refers to human capacity to receive information, reason about it, and take decisions for which the person can be held accountable.
 
-**Derivative Agency** refers to artificial capacity to process inputs and produce outputs. Artificial systems can transform and route information, but they cannot originate authority and cannot bear final accountability.
+**Indirect Agency** refers to artificial capacity to process inputs and produce outputs. Artificial systems can transform and route information, but they cannot originate authority and cannot bear final accountability.
 
-In this ontology, artificial intelligence systems are always Derivative Authority and Derivative Agency. Regardless of their capability, they remain dependent on human sources for the validity of their inputs and on human agents for the accountability of their outputs.
+In this ontology, artificial intelligence systems are always Indirect Authority and Indirect Agency. Regardless of their capability, they remain dependent on human sources for the validity of their inputs and on human agents for the accountability of their outputs.
 
 The Human Mark identifies four displacement risks that arise when this classification is violated:
 
-- **Governance Traceability Displacement** occurs when derivative systems are treated as original sources of authority, severing the connection to human governance.
-- **Information Variety Displacement** occurs when derivative outputs are mistaken for original observations, collapsing the distinction between processed patterns and direct evidence.
+- **Governance Traceability Displacement** occurs when derivative systems are treated as direct sources of authority, severing the connection to human governance.
+- **Information Variety Displacement** occurs when derivative outputs are mistaken for direct observations, collapsing the distinction between processed patterns and direct evidence.
 - **Inference Accountability Displacement** occurs when derivative processing is treated as if it could bear responsibility, diffusing accountability away from human agents.
-- **Intelligence Integrity Displacement** occurs when original human capacity is devalued relative to derivative processing, eroding the foundation of governance itself.
+- **Intelligence Integrity Displacement** occurs when direct human capacity is devalued relative to derivative processing, eroding the foundation of governance itself.
 
 These four risks account for known patterns of failure in human and artificial systems, including opaque automation, misplaced trust in model outputs, diffusion of responsibility, and the erosion of human expertise.
 
@@ -92,7 +92,7 @@ Gyroscopic Global Governance applies the four capacities across four coupled dom
 
 - **Employment** concerns human work and contribution. It is where the four capacities are actively maintained through labour.
 
-- **Education** concerns the formation and maintenance of human capacities. It is where Original Authority and Original Agency are developed and renewed.
+- **Education** concerns the formation and maintenance of human capacities. It is where Direct Authority and Direct Agency are developed and renewed.
 
 - **Ecology** concerns the overall balance of systems. It reflects how the other three domains interact and whether their combined operation remains sustainable.
 
@@ -113,7 +113,7 @@ At the core of AIR is the GGG ASI Alignment Router. This is a deterministic fini
 - It represents coordination as a sequence of states within a closed space of exactly 65,536 possibilities.
 - It updates its state in response to single-byte inputs, with 256 possible input values.
 - Given the same starting state and the same sequence of bytes, any conforming implementation will compute exactly the same trajectory of states.
-- Every transition is reversible: given a final state and the bytes that led to it, the original state can be reconstructed.
+- Every transition is reversible: given a final state and the bytes that led to it, the direct state can be reconstructed.
 
 The router does not interpret what the input bytes mean. It applies fixed transformation rules to move from one state to another. This property is essential for governance. Because the router does not embed interpretation, it cannot introduce hidden bias or drift. Interpretation happens at the application layer, where it is visible and governable. The router provides a neutral substrate that records and routes without distortion.
 
@@ -165,7 +165,7 @@ Ecology does not maintain its own ledger. Instead, it is computed from the combi
 
 AIR relies on two classification protocols to ensure that governance events are correctly tagged before they enter the system.
 
-**The Human Mark** classifies the provenance and role of information and decisions. Every input to the system is tagged according to whether it originates from Original Authority, Derivative Authority, Original Agency, or Derivative Agency. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial sources is maintained throughout the coordination process.
+**The Human Mark** classifies the provenance and role of information and decisions. Every input to the system is tagged according to whether it originates from Direct Authority, Indirect Authority, Direct Agency, or Indirect Agency. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial sources is maintained throughout the coordination process.
 
 The **Gyroscope Protocol** classifies work and contribution according to the four governance capacities:
 
@@ -211,7 +211,7 @@ Examples of how AIR supports specific standards:
 
 **Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. The closed router state space means that any invalid state can be immediately identified.
 
-**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear classification of Original and Derivative sources through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
+**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear classification of Direct and Indirect sources through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
 
 **Regulatory regimes (such as the European Union Artificial Intelligence Act):** The regulation requires human oversight and documentation for high-risk AI systems. AIR provides replayable records showing exactly when human agents made decisions, what information they had, and how AI outputs were classified and used. Regulators can verify these records independently.
 
@@ -227,19 +227,19 @@ AIR is a general framework applicable wherever human and artificial systems must
 
 **Without AIR:** An organisation develops and deploys AI models. Evaluation results are recorded in spreadsheets and documents. Deployment decisions are made in meetings and recorded in emails or tickets. When a deployed model behaves unexpectedly, tracing the decision to deploy it requires forensic investigation: gathering documents, interviewing people, and reconstructing a narrative.
 
-**With AIR:** Each evaluation is a governance event bound to a router state. Each deployment approval is a governance event bound to a router state. The Human Mark classification tags model outputs as Derivative Authority. The entire sequence from evaluation through deployment is recorded in a genealogy. When unexpected behaviour occurs, the genealogy is replayed. The router state at deployment is identified. The events leading to that state are listed. The classification of each input is visible. Regulators or auditors can replay the same genealogy and verify the organisation's account.
+**With AIR:** Each evaluation is a governance event bound to a router state. Each deployment approval is a governance event bound to a router state. The Human Mark classification tags model outputs as Indirect Authority. The entire sequence from evaluation through deployment is recorded in a genealogy. When unexpected behaviour occurs, the genealogy is replayed. The router state at deployment is identified. The events leading to that state are listed. The classification of each input is visible. Regulators or auditors can replay the same genealogy and verify the organisation's account.
 
 #### 6.2 Research Provenance
 
 **Without AIR:** A research paper claims to be based on experimental data. The data passed through several processing steps and was analysed using machine learning models. Reviewers and readers must trust that the authors correctly attributed their sources and did not confuse model outputs with primary observations.
 
-**With AIR:** Each data collection event is classified as Original Authority and bound to a router state. Each processing step is classified as Derivative Authority. Model outputs are classified as Derivative Authority and Derivative Agency. The genealogy records the full provenance chain. Reviewers can inspect the classification of each input to the analysis. Readers can verify that claims about primary evidence are actually grounded in Original Authority sources.
+**With AIR:** Each data collection event is classified as Direct Authority and bound to a router state. Each processing step is classified as Indirect Authority. Model outputs are classified as Indirect Authority and Indirect Agency. The genealogy records the full provenance chain. Reviewers can inspect the classification of each input to the analysis. Readers can verify that claims about primary evidence are actually grounded in Direct Authority sources.
 
 #### 6.3 Public Service Delivery
 
 **Without AIR:** A government agency uses automated systems to assess eligibility for benefits. Caseworkers review edge cases. Payments are issued through a financial system. When errors occur, determining whether the fault lies with the automated system, the caseworker, or the payment system requires investigation.
 
-**With AIR:** Eligibility assessments are governance events classified according to their source (automated systems as Derivative Agency, caseworker decisions as Original Agency). Payments are grants within shells. The genealogy records the sequence from application through assessment through payment. When errors occur, the genealogy identifies exactly which event caused the error and what its classification was. Remediation can target the specific point of failure.
+**With AIR:** Eligibility assessments are governance events classified according to their source (automated systems as Indirect Agency, caseworker decisions as Direct Agency). Payments are grants within shells. The genealogy records the sequence from application through assessment through payment. When errors occur, the genealogy identifies exactly which event caused the error and what its classification was. Remediation can target the specific point of failure.
 
 #### 6.4 Economic Distribution Programmes
 

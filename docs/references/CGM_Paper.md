@@ -278,7 +278,7 @@ S → (□B → ([R]S ↔ S ∧ ¬([L]S ↔ S) ∧ ¬□E ∧ ¬□¬E))
 ```
 
 > [!INFO]  
-> **What this means:** The balanced state at depth four contains sufficient information to reconstruct all prior conditions: the original chirality (CS), the contingent unity (UNA), and the non-absolute opposition (ONA). Balance implies memory.  
+> **What this means:** The balanced state at depth four contains sufficient information to reconstruct all prior conditions: the direct chirality (CS), the contingent unity (UNA), and the non-absolute opposition (ONA). Balance implies memory.  
 > 
 > **Why it matters:** This ensures that achieving balanced closure doesn't erase the structural distinctions that made the system interesting in the first place. The future state preserves the information required to reconstitute past distinctions without collapsing them.  
 > 

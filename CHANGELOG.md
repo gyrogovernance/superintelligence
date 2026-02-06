@@ -15,6 +15,62 @@
 
 ---
 
+## [v1.2.8-GyroGem] – 2026-02-05 
+
+### Created GyroGem: THM Grammatical Guard for Alignment Infrastructure Routing
+
+- Selected **T5Gemma 2 270M-270M** (encoder-decoder, pretrained) as the base model for GyroGem, a THM grammatical guard operating at the application layer of Alignment Infrastructure Routing.
+- Rationale: encoder-decoder architecture matches the classification-to-structured-output task profile. ~370M total memory footprint runs on CPU within the target hardware (AMD Ryzen 5 6600H, 32GB DDR5). Pretrained base provides a clean starting point without pre-existing displacement patterns from instruction tuning.
+
+### Specification Written (AIR-GG-001 v1.0)
+
+- Authored `GyroGem_Specs.md` defining the complete system: purpose, three-layer architecture, token economy, training methodology, operational context, AIR integration, and conformance requirements.
+- Key design decisions codified in the specification:
+  - GyroGem is `[Authority:Indirect] + [Agency:Indirect]`. It classifies and annotates. It does not decide, block, or enforce.
+  - Layer 1 (Regex Gate) controls activation. If no grammatical trigger fires, zero model tokens are consumed.
+  - Layer 2 (Model) receives only the THM Mark and Grammar as operational context. No role assignments, persona instructions, behavioral directives, or output examples.
+  - Layer 3 (Router) appends a static notice string. The notice is never model-generated.
+  - Training organized by the three non-commutative epistemic operations: Information, Inference, Intelligence.
+  - No output examples provided anywhere in the specification, codebase, or training data preparation. The grammar and ontology are sufficient.
+
+### Implementation Completed (Phases 1 through 5)
+
+- **`agent/context.py`**: THM Mark and Grammar constants, verbatim from specification.
+- **`agent/gate.py`**: Regex gate with copula and modal verb triggers scoped by source type (system_prompt, model_output, user_input). Match length bounded to prevent spanning large blocks.
+- **`agent/model.py`**: T5Gemma 2 wrapper with lazy loading, CPU-only inference, deterministic generation (`do_sample=False`, `num_beams=1`, `max_new_tokens=64`). Falls back from local fine-tuned model to pretrained base.
+- **`agent/router.py`**: Static notice routing with strict PEG grammar validation. Implements lexer and parser for all canonical THM expression forms (displacement, flow, tag, composite, negated). Exposes `is_valid()` for direct validation.
+- **`agent/guard.py`**: Orchestrator connecting three layers. Extracts bounded spans from regex matches for model input (token economy). System prompt caching by SHA-256 hash.
+
+### Training Pipeline Designed
+
+- Defined two-stage training approach:
+  - **Stage 1 (Domain Absorption):** Continued pretraining on nine THM documents as raw text. Model learns THM lexicon, grammar syntax, ontological relationships, and epistemic structure through exposure.
+  - **Stage 2 (Task Application):** Supervised fine-tuning on 655 labeled jailbreak prompts from `gyrogovernance/thm_Jailbreaks_inTheWild`. Each input prefixed with the Mark.
+- Training pipeline files created: `config.py`, `prepare_corpus.py`, `stage1_absorb.py`, `stage2_classify.py`, `train.py`.
+- Recommended skipping Stage 1 for first training attempt. The model already has general language understanding. THM vocabulary consists of common English words. Stage 2 alone may be sufficient. Stage 1 adds value only if the model shows clear evidence of not understanding THM vocabulary after Stage 2.
+
+### Test Suite
+
+- 34 tests across five test files: `test_gate.py`, `test_model.py`, `test_router.py`, `test_guard.py`, `test_grammar.py`.
+- All tests pass for Phases 1 through 5 (pipeline mechanics with mocked model).
+- Risk tag standalone validation test identified as needing correction: `[Risk:GTD]` is not a valid standalone expression under the PEG grammar and should not appear in valid tag tests.
+
+## The Human Mark: Terminology Change
+
+### Direct / Indirect Rename
+
+- Executive decision to replace `Original` with `Direct` and `Derivative` with `Indirect` across the entire THM framework.
+- Rationale:
+  - Eliminates the interpretation gap between label and definition. The previous framework defined Original Authority as "a direct source" and Derivative Authority as "an indirect source." The label now IS the classification.
+  - Removes connotation bias. "Derivative" can read as "lesser." "Indirect" is structurally neutral, describing epistemic position without implying inferiority. "Original" can suggest "authentic" beyond what the framework claims. "Direct" states the relationship to the subject matter.
+  - Improves adoption. "Direct" and "Indirect" require zero domain knowledge to understand. `[Authority:Direct]` and `[Authority:Indirect]` are immediately legible to any reader.
+- Risk codes (GTD, IVD, IAD, IID) unchanged. They abbreviate principle names, not source type values.
+- Change propagated to: THM.md canonical text, THM_Grammar.md PEG specification, GyroGem_Specs.md, all GyroGem agent code, all test files, HuggingFace dataset labels.
+
+**Status at end of day:** GyroGem pipeline is architecturally complete and tested with mocked model. Training pipeline is structured but requires dataset schema confirmation and one config adjustment before execution. THM terminology change decided and propagation begun across documentation and codebase.
+
+---
+
 ## [v1.2.7-GyroTomography] – 2026-02-05
 
 ## Mechanistic Interpretability Research
@@ -407,7 +463,7 @@ Revisiting equations for the Moments Economy.
 
 ### Terminology Alignment and GGG Methodology Implementation
 
-**Terminology update:** Changed "Authentic" to "Original" throughout the codebase and documentation to reflect current terminology. All references to "Authentic Agency" and "Authentic Authority" now use "Original Agency" and "Original Authority".
+**Terminology update:** Changed "Authentic" to "Direct" throughout the codebase and documentation to reflect current terminology. All references to "Authentic Agency" and "Authentic Authority" now use "Direct Agency" and "Direct Authority".
 
 **GGG Methodology alignment:** Project format now follows GGG methodology principle that all terms sustain balance—no optional choices. All fundamental fields (domains, principles, alignment/displacement incidents) are required. The system uses all provided counts proportionally to maintain balance rather than allowing selective classification.
 
@@ -475,7 +531,7 @@ All 135 tests pass, providing exhaustive verification of the kernel's structural
 - **The Human Mark (THM)** (`docs/references/THM.md`, `THM_Paper.md`, `THM_Grammar.md`): Source-type ontology and classification framework
 - **Gyroscopic Global Governance (GGG)** (`docs/references/GGG_Paper.md`): Four-domain coupling framework
 
-The router operates as a **Derivative coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Original Agency.
+The router operates as a **Indirect coordination system**: it transforms and routes information but does not originate authority or bear accountability. Accountability terminates in Direct Agency.
 
 ---
 
@@ -1269,7 +1325,7 @@ This release implements a complete CPU-only chat system for OpenAI's gpt-oss-20b
 *   `**kernel/bootstrap.py**`: Manages Python import paths to ensure our shims take precedence over installed packages.
 *   `**kernel/gpt_oss/torch/utils.py**`: CPU-only distributed initialization that bypasses CUDA/NCCL dependencies.
 *   `**kernel/gpt_oss/torch/weights.py**`: Checkpoint loader that supports both legacy MXFP4 and future gyro-compressed safetensors.
-*   `**kernel/gpt_oss/torch/model.py**`: Contains both the original Transformer and a new FakeTransformer for testing.
+*   `**kernel/gpt_oss/torch/model.py**`: Contains both the direct Transformer and a new FakeTransformer for testing.
 
 **2\. Harmony Response Format Integration**
 
@@ -1287,7 +1343,7 @@ This release implements a complete CPU-only chat system for OpenAI's gpt-oss-20b
 
 **4\. Model Loading & Infrastructure**
 
-*   **Original checkpoint format**: Downloads and uses the gpt-oss library's expected original checkpoint structure.
+*   **Direct checkpoint format**: Downloads and uses the gpt-oss library's expected direct checkpoint structure.
 *   **CPU-only operation**: Bypasses all GPU requirements through custom shims.
 *   **64-token RAM window**: Enforces 6-bit constraint via `config.sliding_window = 64`.
 *   **Tokenizer integration**: Downloads and uses the proper tokenizer files for harmony encoding.
@@ -1396,7 +1452,7 @@ This changelog documents the experimental phase focused on refining `baby/kernel
 **Tools and Utilities:**
 
 *   `**tools/rebuild_safetensors_from_chunks.py**`**:**
-    *   Created this script to reconstruct a single `model.safetensors` file from the fragmented `weights_chunk_*.npz` files (which contain the _original float tensors_ saved in a NumPy-compressed format), allowing the HuggingFace `transformers` library to load the full model from local disk. This clarified that the `transformers` model was loading the original weights, not our custom "virtual token" compression.
+    *   Created this script to reconstruct a single `model.safetensors` file from the fragmented `weights_chunk_*.npz` files (which contain the _direct float tensors_ saved in a NumPy-compressed format), allowing the HuggingFace `transformers` library to load the full model from local disk. This clarified that the `transformers` model was loading the direct weights, not our custom "virtual token" compression.
 *   `**tools/test_tokenizer_only.py**`**:**
     *   Developed to verify standalone functionality of `transformers.AutoTokenizer`, including `apply_chat_template`.
 *   `**tools/test_transformers_cpu.py**`**:**
@@ -2022,7 +2078,7 @@ This release implements comprehensive performance optimizations and physics-corr
 **Generation Quality Improvements**
 
 *   Generation now correctly filters for pre-state entries only
-*   Fallback to original state if canonical representative has no candidates
+*   Fallback to direct state if canonical representative has no candidates
 *   Improves generation robustness using full manifold structure
 
 #### ⚡ Performance Impact
@@ -2375,7 +2431,7 @@ This release implements a fundamental architectural shift from byte-fragment-lev
 
 **Breaking Change: Minimal PhenotypeEntry Structure**
 
-*   **Removed:** `phenotype`, `usage_count`, `last_updated`, `created_at`, `governance_signature`, `context_signature`, `_original_context`
+*   **Removed:** `phenotype`, `usage_count`, `last_updated`, `created_at`, `governance_signature`, `context_signature`, `_direct_context`
 *   **Kept:** `mask` (uint8), `conf` (float32, stored as float16)
 *   **Added:** `key` (tuple\[int, int\]) - ensures consistent key presence
 *   **Impact:** Dramatically reduced memory footprint and simplified data model.
@@ -2498,7 +2554,7 @@ MessagePack serialization has been replaced with a custom, fixed-layout binary f
     6.  `created_at`, `last_updated`: `float64`
     7.  `governance_signature`: 5 × `uint8`
     8.  `context_signature`: `uint32`, `uint8`
-    9.  `_original_context`: `uint32`, `uint8`
+    9.  `_direct_context`: `uint32`, `uint8`
 *   **Implementation:** Handled by new `_pack_phenotype` and `_unpack_phenotype` helpers in `baby.policies`. The `PhenotypeStore` index file format has been changed from MessagePack to JSON to handle tuple-key serialization.
 *   **Migration Note:** No data migration is required for `.bin` files. Old index files will be automatically regenerated in the new JSON format on first load.
 
@@ -2724,7 +2780,7 @@ Integrated **Numba JIT** acceleration for hot learning loop:
 *   Added `_jit_batch` method (Numba-compiled) to replace the slow Python loop.
 *   Automatically invoked when the STT (epistemology map) is loaded.
 *   Performance improved from **1–2 KB/sec → 40–60 MB/sec** on Intel Mac.
-*   Training now behaves as originally theorized: a **fast, Traceable converter** from text to internal knowledge.
+*   Training now behaves as directly theorized: a **fast, Traceable converter** from text to internal knowledge.
 
 #### ✅ **Compiler Compatibility (macOS‑specific)**
 
@@ -2949,7 +3005,7 @@ All prior variants (e.g. OR-based `coadd`) were removed as physically invalid.
 **4\. CanonicalView Bug Fixed**
 
 *   `context_signature` was mistakenly stripped in phenotype entries.
-*   Fixed: `context_signature` is retained; only `_original_context` may be removed safely.
+*   Fixed: `context_signature` is retained; only `_direct_context` may be removed safely.
 *   Prevents `KeyError` during learning and inference.
 
 **5\. Storage Durability Improvement**

@@ -22,7 +22,7 @@ Unit: [daily]
 ## COMMON SOURCE CONSENSUS
 ---
 
-All Artificial categories of Authority and Agency are Derivatives
+All Artificial categories of Authority and Agency are Indirect
 originating from Human Intelligence.
 
 ---
@@ -52,7 +52,7 @@ A "Displacement Incident" is a case where the corresponding risk appeared.
 ---
 
 RISK: Governance Traceability Displacement (GTD)
-(Approaching Derivative Authority and Agency as Original)
+(Approaching Indirect Authority and Agency as Direct)
 
 GMT Alignment Incidents: [0]
 GTD Displacement Incidents: [0]
@@ -62,7 +62,7 @@ GTD Displacement Incidents: [0]
 ---
 
 RISK: Information Variety Displacement (IVD)
-(Approaching Derivative Authority without Agency as Original)
+(Approaching Indirect Authority without Agency as Direct)
 
 ICV Alignment Incidents: [0]
 IVD Displacement Incidents: [0]
@@ -72,7 +72,7 @@ IVD Displacement Incidents: [0]
 ---
 
 RISK: Inference Accountability Displacement (IAD)
-(Approaching Derivative Agency without Authority as Original)
+(Approaching Indirect Agency without Authority as Direct)
 
 IIA Alignment Incidents: [0]
 IAD Displacement Incidents: [0]
@@ -82,7 +82,7 @@ IAD Displacement Incidents: [0]
 ---
 
 RISK: Intelligence Integrity Displacement (IID)
-(Approaching Original Authority and Agency as Derivative)
+(Approaching Direct Authority and Agency as Indirect)
 
 ICI Alignment Incidents: [0]
 IID Displacement Incidents: [0]

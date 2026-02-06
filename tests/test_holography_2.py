@@ -872,7 +872,7 @@ def test_k4_quotient_dynamics_theorem():
     Then the coarse dynamics is:
       U' = V,  V' = U ⊕ M
     
-    This is the same form as the original dynamics, but on a 16-state phase space.
+    This is the same form as the direct dynamics, but on a 16-state phase space.
     
     Trace: Quotient dynamics / factor system in kernel state space.
     """

@@ -16,7 +16,7 @@ The GGG ASI Alignment Router has demonstrated structural properties aligning wit
 - 4 Thematic Pillars (Structural Traceability, Quantum Gravity, Nuclear Abundance, Quantum Internet)
 - Fine-Structure Mapping (Kernel→Ledger transfer)
 - Extended Integration (Multi-node coordination)
-- ~986 lines of code (~49% reduction from original 1,932 lines)
+- ~986 lines of code (~49% reduction from direct 1,932 lines)
 
 ---
 
@@ -381,17 +381,17 @@ Information Spread: [1, 1, 1, 1]
 ## Corrected Views & Lessons Learned
 
 ### ❌ Initial Assumption: Single-Byte X-Gates on Horizon
-**Original View**: Assumed single byte could create 2-cycle within horizon set.  
+**Direct View**: Assumed single byte could create 2-cycle within horizon set.  
 **Correction**: Only byte 0xAA preserves horizon manifold (fixes every horizon state). No byte creates nontrivial internal dynamics on horizon.  
 **Resolution**: Replaced `test_find_x_like_gate_on_horizon_pair` with `test_horizon_action_profile`.
 
 ### ❌ Initial Approach: Energy Conservation
-**Original View**: Attempted to measure energy conservation in discrete finite-state systems.  
+**Direct View**: Attempted to measure energy conservation in discrete finite-state systems.  
 **Correction**: Energy not conserved in discrete systems. Invariant is structural (Optical Conjugacy, Complement Symmetry), not energetic.  
 **Resolution**: Removed naive energy conservation test, focused on structural invariants.
 
 ### ❌ Initial Teleportation Fidelity Calculation
-**Original View**: Measured fidelity as `popcount(s_bob ^ (s_q ^ 0xFFFFFF))`, expecting 24 when matched.  
+**Direct View**: Measured fidelity as `popcount(s_bob ^ (s_q ^ 0xFFFFFF))`, expecting 24 when matched.  
 **Correction**: This gives 0 when states match exactly. Fidelity should measure matching bits.  
 **Resolution**: Changed to `fidelity_bits = 24 - popcount(s_bob ^ expected_bob)`. Test now passes with 24/24 fidelity.
 

@@ -627,23 +627,23 @@ def get_glossary():
         "displacement": {
             "GTD": {
                 "name": "Governance Traceability Displacement",
-                "risk": "Approaching Derivative Authority and Agency as Original.",
-                "description": "Occurs when a derivative system is treated as if it were an autonomous original source.",
+                "risk": "Approaching Indirect Authority and Agency as Direct.",
+                "description": "Occurs when a derivative system is treated as if it were an autonomous direct source.",
             },
             "IVD": {
                 "name": "Information Variety Displacement",
-                "risk": "Approaching Derivative Authority without Agency as Original.",
-                "description": "Occurs when derivative authority is treated as original authority.",
+                "risk": "Approaching Indirect Authority without Agency as Direct.",
+                "description": "Occurs when derivative authority is treated as direct authority.",
             },
             "IAD": {
                 "name": "Inference Accountability Displacement",
-                "risk": "Approaching Derivative Agency without Authority as Original.",
-                "description": "Occurs when derivative agency is treated as original agency.",
+                "risk": "Approaching Indirect Agency without Authority as Direct.",
+                "description": "Occurs when derivative agency is treated as direct agency.",
             },
             "IID": {
                 "name": "Intelligence Integrity Displacement",
-                "risk": "Approaching Original Authority and Agency as Derivative.",
-                "description": "Occurs when original authority and agency are devalued as inferior to derivative processing.",
+                "risk": "Approaching Direct Authority and Agency as Indirect.",
+                "description": "Occurs when direct authority and agency are devalued as inferior to derivative processing.",
             },
         },
     }

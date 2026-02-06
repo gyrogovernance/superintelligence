@@ -185,7 +185,7 @@ Date: ${new Date().toISOString().split('T')[0]}
 ${participantsSection}
 ## Common Source Consensus
 
-All Artificial categories of Authority and Agency are Derivatives
+All Artificial categories of Authority and Agency are Indirect
 originating from Human Intelligence.
 
 ## Summary

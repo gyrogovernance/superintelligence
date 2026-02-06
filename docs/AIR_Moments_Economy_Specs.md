@@ -47,7 +47,7 @@ The architecture integrates four specifications. Each is referenced where releva
 **Gyroscopic Global Governance (GGG):** Framework applying CGM to the coupled domains of economy, employment, education, and ecology.  
 [Document: GGG Paper](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md)
 
-**The Human Mark (THM):** Epistemic taxonomy distinguishing Original (human) from Derivative (artificial) sources and defining displacement risks.  
+**The Human Mark (THM):** Epistemic taxonomy distinguishing Direct (human) from Indirect (artificial) sources and defining displacement risks.  
 [Document: The Human Mark](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md)
 
 **GGG ASI Alignment Router:** Deterministic coordination kernel providing shared moments, provenance, and replay.  
@@ -254,15 +254,15 @@ Truth emerges from the agreement of independently replayed computations.
 
 The architecture relies on the distinction between human and artificial sources.
 
-**Common Source Consensus.** The system operates on the principle that all artificial authority and agency are Derivative and originate from human intelligence.
+**Common Source Consensus.** The system operates on the principle that all artificial authority and agency are Indirect and originate from human intelligence.
 
 **Classifications.**
-- **Original Authority:** Direct epistemic access (e.g., eyewitness, expertise).
-- **Original Agency:** Human capacity for comprehension, intention, and commitment.
-- **Derivative Authority:** Mediated access (e.g., AI outputs, records).
-- **Derivative Agency:** Artificial processing capacity.
+- **Direct Authority:** Direct epistemic access (e.g., eyewitness, expertise).
+- **Direct Agency:** Human capacity for comprehension, intention, and commitment.
+- **Indirect Authority:** Mediated access (e.g., AI outputs, records).
+- **Indirect Agency:** Artificial processing capacity.
 
-**Displacement.** Misclassifying a Derivative source as Original (or vice versa) creates displacement risks.
+**Displacement.** Misclassifying a Indirect source as Direct (or vice versa) creates displacement risks.
 - *GTD:* Governance Traceability Displacement.
 - *IVD:* Information Variety Displacement.
 - *IAD:* Inference Accountability Displacement.
@@ -304,7 +304,7 @@ Banks and payment providers act as routing layers, moving MU based on the verifi
 Tier distributions are governance actions. They require higher scrutiny than UHI.
 
 **Requirements.**
-- Decisions MUST be made by identifiable human agents (Original Agency).
+- Decisions MUST be made by identifiable human agents (Direct Agency).
 - Decisions MUST be recorded as governance events bound to specific Moments.
 - Decisions MUST be reversible through subsequent logged events.
 - Decisions SHOULD reference the genealogical evidence used.
@@ -373,7 +373,7 @@ Pilot programmes—including municipal experiments, NGO distribution channels, a
 
 **CGM (Common Governance Model):** The geometric theory identifying K₄ structure and aperture equilibrium.
 
-**Derivative:** A source type indicating mediated epistemic access or artificial processing capacity.
+**Indirect:** A source type indicating mediated epistemic access or artificial processing capacity.
 
 **GGG (Gyroscopic Global Governance):** The framework applying CGM to economy, employment, education, and ecology.
 
@@ -393,7 +393,7 @@ Pilot programmes—including municipal experiments, NGO distribution channels, a
 
 **MU (Moment-Unit):** The unit of account. One MU corresponds to one minute at the base rate (60 MU per hour).
 
-**Original:** A source type indicating direct epistemic access or human agency.
+**Direct:** A source type indicating direct epistemic access or human agency.
 
 **Router:** The GGG ASI Alignment Router, a deterministic finite-state coordination kernel.
 
@@ -401,7 +401,7 @@ Pilot programmes—including municipal experiments, NGO distribution channels, a
 
 **Shell:** A time-bounded capacity window containing Grants and a Seal.
 
-**THM (The Human Mark):** The epistemic taxonomy classifying Original and Derivative sources and defining displacement risks.
+**THM (The Human Mark):** The epistemic taxonomy classifying Direct and Indirect sources and defining displacement risks.
 
 **UHI (Unconditional High Income):** The baseline distribution of 240 MU per day to every person.
 

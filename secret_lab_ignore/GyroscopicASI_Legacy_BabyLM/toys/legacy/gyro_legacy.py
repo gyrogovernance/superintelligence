@@ -299,7 +299,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                 # Use latest user token state as anchor
                 sess["state"] = anchor_state
             else:
-                # Use original K-token anchor
+                # Use direct K-token anchor
                 sess["state"] = anchor_state
             sess["anchor_applied"] = True
 

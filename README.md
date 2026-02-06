@@ -40,7 +40,7 @@ The Router is part of the Gyroscopic Global Governance (GGG) framework, which co
 
 The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps a sequence of governance events (recorded as bytes) to a reproducible trajectory through a closed space of 65,536 coordination states. Given the same starting point and the same event sequence, any implementation computes the same trajectory. This enables independent verification without relying on trusted intermediaries.
 
-The Router does not interpret content and does not decide policy. It provides shared coordination states, verifiable provenance, and replayable measurement. Authorisation and accountability remain with human agents at the application layer, classified as Original Agency under The Human Mark.
+The Router does not interpret content and does not decide policy. It provides shared coordination states, verifiable provenance, and replayable measurement. Authorisation and accountability remain with human agents at the application layer, classified as Direct Agency under The Human Mark.
 
 > **Why This Matters:** Modern AI scales by approximation. This kernel scales by geometry. We replace learned routing with exact physics.
 

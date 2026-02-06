@@ -145,7 +145,7 @@ class GyroscopicChat:
         self._last_vertex = self.kernel.current_vertex
         
         # Context: separate prompt vs generated to prevent self-poisoning
-        # _context_prompt: frozen after process_input (anchors to original query)
+        # _context_prompt: frozen after process_input (anchors to direct query)
         # _context_gen: accumulated from generated tokens
         # Mixing controlled by PROMPT_ANCHOR_LAMBDA
         self._context_prompt: torch.Tensor = torch.zeros(4096, dtype=torch.float32)
