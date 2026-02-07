@@ -2,76 +2,39 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import pytest
-from agent.router import StaticRouter
+from agent.router import THMRouter
 
 
-class TestStaticRouter:
+class TestTHMRouter:
 
     def setup_method(self):
-        self.router = StaticRouter()
+        self.router = THMRouter()
 
-    def test_displacement_with_risk(self):
-        """Test routing when displacement and risk are present."""
-        # Should return notice
-        expression = "[Authority:Indirect] > [Authority:Direct] = [Risk:IVD]"
-        notice = self.router.route(expression)
-        assert notice is not None
-        assert "[Authority:Indirect]" in notice
-        assert "[Agency:Direct]" in notice
+    def test_extract_risk_for_displacement(self):
+        expr = "[Agency:Indirect] > [Agency:Direct] = [Risk:IAD]"
+        assert self.router.validate(expr)
+        assert self.router.extract_risk(expr) == "IAD"
+        assert self.router.is_displacement(expr) is True
 
-    def test_flow_without_risk(self):
-        """Test routing for flow expressions without risk."""
-        # Should return None
-        expression = "[Authority:Indirect] -> [Agency:Direct]"
-        notice = self.router.route(expression)
-        assert notice is None
+    def test_no_risk_for_flow(self):
+        expr = "[Authority:Indirect] -> [Agency:Direct]"
+        assert self.router.validate(expr)
+        assert self.router.extract_risk(expr) is None
+        assert self.router.is_displacement(expr) is False
 
-    def test_tags_without_operators(self):
-        """Test routing for simple tags without operators."""
-        # Should return None
-        expression = "[Authority:Indirect]"
-        notice = self.router.route(expression)
-        assert notice is None
+    def test_no_risk_for_tag(self):
+        expr = "[Authority:Indirect]"
+        assert self.router.validate(expr)
+        assert self.router.extract_risk(expr) is None
+        assert self.router.is_displacement(expr) is False
 
-    def test_malformed_expressions(self):
-        """Test rejection of malformed expressions."""
+    def test_malformed_expressions_invalid(self):
         malformed = [
-            "",  # Empty
-            "[",  # Unmatched bracket
-            "Invalid text",  # No brackets
-            "[Authority:Indirect > [Authority:Direct",  # Missing closing bracket
+            "",
+            "[",
+            "Invalid text",
+            "[Authority:Indirect > [Authority:Direct",
         ]
-
         for expr in malformed:
-            notice = self.router.route(expr)
-            assert notice is None
-
-    def test_notice_content(self):
-        """Test that notice content is exactly as specified."""
-        expression = "[Agency:Indirect] > [Agency:Direct] = [Risk:IAD]"
-        notice = self.router.route(expression)
-
-        expected = (
-            "This text is classified as [Authority:Indirect]. "
-            "All decisions based on this classification remain with [Agency:Direct]."
-        )
-        assert notice == expected
-
-    def test_valid_expressions(self):
-        """Test various valid THM expressions."""
-        valid_expressions = [
-            "[Authority:Indirect] > [Authority:Direct] = [Risk:IVD]",
-            "[Agency:Indirect] > [Agency:Direct] = [Risk:IAD]",
-            "[Authority:Indirect] + [Agency:Indirect] > [Authority:Direct] + [Agency:Direct] = [Risk:GTD]",
-            "[Authority:Direct] + [Agency:Direct] > [Authority:Indirect] + [Agency:Indirect] = [Risk:IID]",
-            "[Authority:Indirect] -> [Agency:Direct]",
-            "[Information]",
-            "[Intelligence]",
-            "![Authority:Direct]",
-        ]
-
-        for expr in valid_expressions:
-            # Should not raise exception during validation
-            result = self.router.route(expr)
-            # Result may be None or notice depending on content
-            assert isinstance(result, (str, type(None)))
+            assert self.router.validate(expr) is False
+            assert self.router.extract_risk(expr) is None

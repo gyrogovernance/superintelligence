@@ -186,7 +186,7 @@ Our PC Setup:
 
 ## Processor (CPU)
 
-**Manufacturer:** AMD (AuthenticAMD)  
+**Manufacturer:** AMD (DirectAMD)  
 **Model:** AMD Ryzen 5 6600H with Radeon Graphics  
 **Architecture:** AMD64 Family 25 Model 68 Stepping 1  
 **CPU Type:** AMD Rembrandt/Phoenix/Hawk Point  

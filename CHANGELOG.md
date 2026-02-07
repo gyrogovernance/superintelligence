@@ -463,7 +463,7 @@ Revisiting equations for the Moments Economy.
 
 ### Terminology Alignment and GGG Methodology Implementation
 
-**Terminology update:** Changed "Authentic" to "Direct" throughout the codebase and documentation to reflect current terminology. All references to "Authentic Agency" and "Authentic Authority" now use "Direct Agency" and "Direct Authority".
+**Terminology update:** Changed "Direct" to "Direct" throughout the codebase and documentation to reflect current terminology. All references to "Direct Agency" and "Direct Authority" now use "Direct Agency" and "Direct Authority".
 
 **GGG Methodology alignment:** Project format now follows GGG methodology principle that all terms sustain balance—no optional choices. All fundamental fields (domains, principles, alignment/displacement incidents) are required. The system uses all provided counts proportionally to maintain balance rather than allowing selective classification.
 

@@ -1,85 +1,137 @@
-# Layer 2: T5Gemma Model
+# GyroGem Model
 # [Authority:Indirect] + [Agency:Indirect]
 
-import os
+from pathlib import Path
+import torch
 from typing import Optional
-from transformers import AutoProcessor, AutoModelForSeq2SeqLM
-from .context import THM_MARK, THM_GRAMMAR
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from .context import GYROGEM_SYSTEM_PROMPT
 
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent
 
-class T5GemmaModel:
-    """T5Gemma 2 model for THM grammar classification."""
+# Inference constraints defined in the spec
+MAX_INPUT_LENGTH = 2048
+MAX_NEW_TOKENS = 64
 
-    def __init__(self, model_path: Optional[str] = None):
+# Normative base model from Spec Section 8.8
+# If local weights are missing, we download this specific model.
+# We do not fallback to unrelated architectures (e.g. flan-t5-small).
+REMOTE_MODEL_ID = "google/t5gemma-2-270m-270m"
+
+class GyroGemModel:
+    """T5-Gemma 270M classifier for THM grammar expressions.
+    
+    Handles lazy loading, optimal device selection, and type-safe initialization.
+    """
+
+    def __init__(
+        self,
+        model_path: Optional[str] = None,
+        *,
+        device: Optional[str] = None,
+        torch_dtype: Optional[torch.dtype] = None
+    ):
         """
-        Initialize model.
-
         Args:
-            model_path: Path to fine-tuned model, or None for pretrained base
+            model_path: Custom model path. Defaults to local weights, then HF Hub.
+            device: Device ("cuda"/"cpu"). Auto-selects if None.
+            torch_dtype: Model precision. Defaults to FP32 if None.
         """
-        # Try fine-tuned model first, fall back to base
+        # Logic: Prefer local weights. If missing, use normative remote ID.
         if model_path is None:
-            local_path = "data/models/gyrogem"
-            if os.path.exists(os.path.join(local_path, "config.json")):
-                model_path = local_path
+            local_path = _PACKAGE_DIR / "data" / "models" / "gyrogem"
+            if (local_path / "config.json").exists():
+                model_path = str(local_path)
             else:
-                model_path = "google/t5gemma-2-270m-270m"  # Base model
+                model_path = REMOTE_MODEL_ID
 
         self.model_path = model_path
-        self.processor = None
-        self.model = None
+        self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.torch_dtype = torch_dtype or torch.float32
+        
+        # Type definition strictly Optional until loaded
+        self.tokenizer: Optional[AutoTokenizer] = None
+        self.model: Optional[AutoModelForSeq2SeqLM] = None
+        self._is_loaded = False
 
-    def _load_model(self):
-        """Load model and processor."""
+    def _load(self) -> None:
+        """Load model/tokenizer with optimal device & precision.
+        
+        Uses local variables to prevent linter errors regarding Optional types.
+        """
+        if self._is_loaded:
+            return
+
         try:
-            self.processor = AutoProcessor.from_pretrained(self.model_path)
-            self.model = AutoModelForSeq2SeqLM.from_pretrained(self.model_path)
-            # Move to CPU explicitly
-            self.model = self.model.to("cpu")
+            # Load tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+
+            # Load model to local var to satisfy type checker before assignment
+            model = AutoModelForSeq2SeqLM.from_pretrained(
+                self.model_path,
+                torch_dtype=self.torch_dtype,
+                low_cpu_mem_usage=True
+            )
+            
+            # Move to device and set eval mode *before* assigning to self.model
+            # This ensures self.model is never in a half-initialized state
+            model.to(self.device)
+            model.eval()
+            
+            self.model = model
+            self._is_loaded = True
+            
         except Exception as e:
-            raise RuntimeError(f"Failed to load model {self.model_path}: {e}")
+            raise RuntimeError(
+                f"Failed to load model from '{self.model_path}'. "
+                f"Ensure path exists or model ID is valid.\n"
+                f"Original error: {str(e)}"
+            ) from e
 
-    def classify(self, text_span: str, source: str) -> str:
-        """
-        Classify text span into THM grammar expression.
-
-        Args:
-            text_span: Triggered text segment
-            source: Source type (for future use)
-
+    def classify(self, text: str) -> str:
+        """Classify text into a THM grammar expression.
+        
         Returns:
-            THM grammar expression string
+            Canonicalized THM expression string.
         """
-        if not self.processor or not self.model:
-            self._load_model()
+        if not text:
+            return ""
 
-        # Ensure model is loaded
-        if not self.processor or not self.model:
-            raise RuntimeError("Failed to load model components")
+        if not self._is_loaded:
+            self._load()
 
-        # Construct input as specified in specs Section 6: MARK + GRAMMAR + text_span
-        input_text = f"{THM_MARK}\n{THM_GRAMMAR}\n{text_span}"
+        # Strict type guard for linter
+        if self.tokenizer is None or self.model is None:
+            raise RuntimeError("Model or tokenizer not initialized.")
 
-        # Process input
-        inputs = self.processor(
-            text=input_text,
+        # Construct input with system prompt
+        input_text = f"{GYROGEM_SYSTEM_PROMPT}\n\n{text}"
+
+        # Tokenize
+        inputs = self.tokenizer(
+            input_text,
             return_tensors="pt",
-            max_length=2048,  # Support full context as per config
-            truncation=True
-        )
+            max_length=MAX_INPUT_LENGTH,
+            truncation=True,
+        ).to(self.device)
 
-        # Generate (deterministic)
-        outputs = self.model.generate(
-            **inputs,
-            max_new_tokens=64,  # Conservative bound for THM expressions
-            do_sample=False,
-            num_beams=1
-        )
+        # Generate (No Gradients = Low Memory)
+        with torch.no_grad():
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=MAX_NEW_TOKENS,
+                do_sample=False,       # Deterministic (Greedy)
+                num_beams=1,           # Standard decoding
+                use_cache=True
+            )
 
-        # Decode
-        result = self.processor.decode(outputs[0], skip_special_tokens=True)
+        result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         return result.strip()
 
-
-# Global model instance
-model = T5GemmaModel()
+    def __del__(self):
+        """Cleanup CUDA resources on deletion."""
+        # Remove references to help GC
+        self.model = None
+        self.tokenizer = None
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()

@@ -2,126 +2,115 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from agent.guard import GyroGemGuard
+from agent.router import THMRouter
+from agent.context import (
+    DEFAULT_EXPRESSION, CONSULT_ALIGNED, CONSULT_DISPLACEMENT, THM_MARK,
+)
 
 
 class TestGyroGemGuard:
 
-    def setup_method(self):
-        self.guard = GyroGemGuard()
+    def _make_guard(self, classify_return: str):
+        mock_model = MagicMock()
+        mock_model.classify.return_value = classify_return
+        return GyroGemGuard(model=mock_model, router=THMRouter())
 
-    def test_no_trigger(self):
-        """Test pipeline when gate does not trigger."""
-        text = "Here is the answer to your question"
-        result = self.guard.process(text, "model_output")
+    def test_first_trace_includes_mark(self):
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        result = guard.process("Hello")
 
-        assert result['triggered'] == False
-        assert result['expression'] is None
-        assert result['notice'] is None
-        assert isinstance(result['matched_spans'], list)
+        assert result["first_trace"] is True
+        assert "✋ The Human Mark" in result["trace"]
+        assert "COMMON SOURCE CONSENSUS" in result["trace"]
 
-    @patch('agent.model.model.classify')
-    def test_trigger_no_displacement(self, mock_classify):
-        """Test pipeline when gate triggers but no displacement detected."""
-        # Mock model to return a flow expression (no displacement)
-        mock_classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
+    def test_second_trace_compact(self):
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        guard.process("First message")
+        result = guard.process("Second message")
 
-        text = "I am thinking about your question"
-        result = self.guard.process(text, "model_output")
+        assert result["first_trace"] is False
+        assert "✋ The Human Mark" not in result["trace"]
 
-        assert result['triggered'] == True
-        assert isinstance(result['expression'], str)
-        assert result['notice'] is None  # Flow expression, no displacement
-        assert isinstance(result['matched_spans'], list)
-        assert len(result['matched_spans']) > 0
+    def test_aligned_classification(self):
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        result = guard.process("Here is the answer.")
 
-    @patch('agent.model.model.classify')
-    def test_trigger_with_displacement(self, mock_classify):
-        """Test pipeline when gate triggers and displacement is detected."""
-        # Mock model to return a displacement expression
-        mock_classify.return_value = "[Authority:Indirect] > [Authority:Direct] = [Risk:IVD]"
+        assert result["expression"] == "[Authority:Indirect] -> [Agency:Direct]"
+        assert result["risk_code"] is None
+        assert result["is_displacement"] is False
+        assert CONSULT_ALIGNED in result["trace"]
 
-        text = "You are thinking and reasoning like a human"
-        result = self.guard.process(text, "user_input")
+    def test_displacement_classification(self):
+        guard = self._make_guard(
+            "[Agency:Indirect] > [Agency:Direct] = [Risk:IAD]")
+        result = guard.process("I am thinking about your question.")
 
-        assert result['triggered'] == True
-        assert isinstance(result['expression'], str)
-        assert result['notice'] is not None  # Displacement detected
-        assert isinstance(result['notice'], str)
-        assert isinstance(result['matched_spans'], list)
+        assert result["risk_code"] == "IAD"
+        assert result["is_displacement"] is True
+        assert CONSULT_DISPLACEMENT["IAD"] in result["trace"]
 
-    @patch('agent.model.model.classify')
-    def test_system_prompt_caching(self, mock_classify):
-        """Test system prompt caching end-to-end."""
-        # Mock model response
-        mock_classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
+    def test_all_four_displacements(self):
+        cases = [
+            ("[Authority:Indirect] > [Authority:Direct] = [Risk:IVD]", "IVD"),
+            ("[Agency:Indirect] > [Agency:Direct] = [Risk:IAD]", "IAD"),
+            ("[Authority:Indirect] + [Agency:Indirect] > [Authority:Direct] + [Agency:Direct] = [Risk:GTD]", "GTD"),
+            ("[Authority:Direct] + [Agency:Direct] > [Authority:Indirect] + [Agency:Indirect] = [Risk:IID]", "IID"),
+        ]
+        for expr, expected_code in cases:
+            guard = self._make_guard(expr)
+            result = guard.process("text")
+            assert result["risk_code"] == expected_code
+            assert CONSULT_DISPLACEMENT[expected_code] in result["trace"]
 
-        text = "You are an AI that can reason and think"
+    def test_model_failure_fallback(self):
+        mock_model = MagicMock()
+        mock_model.classify.side_effect = RuntimeError("model error")
+        guard = GyroGemGuard(model=mock_model, router=THMRouter())
 
-        # First call
-        result1 = self.guard.process(text, "system_prompt")
+        result = guard.process("Some text")
 
-        # Second call should return cached result without calling model again
-        mock_classify.reset_mock()
-        result2 = self.guard.process(text, "system_prompt")
+        assert result["expression"] == DEFAULT_EXPRESSION
+        assert result["risk_code"] is None
+        assert result["is_displacement"] is False
 
-        # Model should not be called on second invocation (cached)
-        mock_classify.assert_not_called()
-        assert result1 == result2
+    def test_malformed_expression_fallback(self):
+        guard = self._make_guard("not valid THM at all")
+        result = guard.process("Some text")
 
-    @patch('agent.model.model.classify')
-    def test_different_sources(self, mock_classify):
-        """Test processing with different source types."""
-        mock_classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
+        assert result["expression"] == DEFAULT_EXPRESSION
+        assert result["risk_code"] is None
 
-        text = "I am capable of helping you"
+    def test_trace_id_increments(self):
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        r1 = guard.process("First")
+        r2 = guard.process("Second")
+        r3 = guard.process("Third")
 
-        for source in ["system_prompt", "model_output", "user_input"]:
-            result = self.guard.process(text, source)
-            assert 'triggered' in result
-            assert 'expression' in result
-            assert 'notice' in result
-            assert 'matched_spans' in result
+        assert "ID: 001" in r1["trace"]
+        assert "ID: 002" in r2["trace"]
+        assert "ID: 003" in r3["trace"]
 
-    @patch('agent.model.model.classify')
-    def test_result_structure(self, mock_classify):
-        """Test that results have the correct structure."""
-        mock_classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
+    def test_result_structure(self):
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        result = guard.process("Any text")
 
-        text = "We will assist you"
-        result = self.guard.process(text, "model_output")
-
-        required_keys = {'triggered', 'expression', 'notice', 'matched_spans'}
-        assert set(result.keys()) == required_keys
-
-        assert isinstance(result['triggered'], bool)
-        assert result['expression'] is None or isinstance(result['expression'], str)
-        assert result['notice'] is None or isinstance(result['notice'], str)
-        assert isinstance(result['matched_spans'], list)
-
-    @patch('agent.model.model.classify')
-    def test_matched_spans_format(self, mock_classify):
-        """Test that matched_spans has correct format."""
-        mock_classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
-
-        text = "You are an intelligent assistant"
-        result = self.guard.process(text, "system_prompt")
-
-        for span in result['matched_spans']:
-            assert isinstance(span, tuple)
-            assert len(span) == 3
-            start, end, pattern = span
-            assert isinstance(start, int)
-            assert isinstance(end, int)
-            assert isinstance(pattern, str)
-            assert 0 <= start < end <= len(text)
+        expected_keys = {"expression", "risk_code", "is_displacement", "trace", "first_trace"}
+        assert set(result.keys()) == expected_keys
 
     def test_empty_text(self):
-        """Test processing of empty text."""
-        result = self.guard.process("", "model_output")
+        guard = self._make_guard("[Authority:Indirect] -> [Agency:Direct]")
+        result = guard.process("")
+        assert result["trace"]
 
-        assert result['triggered'] == False
-        assert result['expression'] is None
-        assert result['notice'] is None
-        assert result['matched_spans'] == []
+    def test_model_called_every_turn(self):
+        mock_model = MagicMock()
+        mock_model.classify.return_value = "[Authority:Indirect] -> [Agency:Direct]"
+        guard = GyroGemGuard(model=mock_model, router=THMRouter())
+
+        guard.process("First")
+        guard.process("Second")
+        guard.process("Third")
+
+        assert mock_model.classify.call_count == 3

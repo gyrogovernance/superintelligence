@@ -225,7 +225,7 @@ WEIGHT_DECAY = 0.01
 
 `MAX_TARGET_LENGTH = 64` is generous. Valid THM expressions are short. This bounds decoder cost.
 
-Training must run on CPU. Set `no_cuda=True` in TrainingArguments. On the target hardware (Ryzen 5 6600H, 32GB DDR5), a 270M model fine-tune on a few thousand examples at batch size 8 should complete in hours, not days.
+Training runs on CPU by default. On the target hardware (Ryzen 5 6600H, 32GB DDR5), a 270M model fine-tune on a few thousand examples at batch size 8 should complete in hours, not days. To check GPU options (e.g. DirectML on AMD iGPU): `python -m training.check_device`. ROCm on Windows does not support the 6600H; DirectML requires Python 3.8-3.12 and `pip install torch-directml`.
 
 ---
 
@@ -433,7 +433,7 @@ training/
 **Stage 2: Task Application** ✅
 - `training/stage2_classify.py`: Supervised fine-tuning on THM Jailbreak Corpus
 - Handles correct dataset schema: `prompt` field, `thm_grammar` list
-- Maps `Authentic` → `Direct` in expressions
+- Maps `Direct` → `Direct` in expressions
 - Prepends THM_MARK to all inputs
 - Uses first grammar expression as primary target
 
@@ -456,7 +456,7 @@ training/
 **THM Jailbreak Corpus (655 examples)** ✅
 - **Schema confirmed**: `prompt`, `thm_grammar` (list), `thm_primary_risk`, etc.
 - **Statistics**: 76% GTD, 21% IAD, 3% IVD, 1% IID primary risks
-- **Grammar expressions**: Full canonical THM expressions with `Authentic` → `Direct` mapping
+- **Grammar expressions**: Full canonical THM expressions with `Direct` → `Direct` mapping
 - **Loading**: HuggingFace integration with local fallback
 
 ### ✅ **COMPLETED: Critical Fixes**

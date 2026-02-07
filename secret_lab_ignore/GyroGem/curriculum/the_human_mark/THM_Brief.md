@@ -73,7 +73,7 @@ This creates a baseline of displacement. A system configured this way effectivel
 
 This risk extends beyond system prompts and adversarial attacks. It permeates the entire data ecosystem.
 
-Model producers, evaluators, and users currently interact through a shared culture of displacement. We attribute authentic Direct Agency to systems that only possess Indirect Agency. This occurs in:
+Model producers, evaluators, and users currently interact through a shared culture of displacement. We attribute Direct Agency to systems that only possess Indirect Agency. This occurs in:
 
 *   **Data:** Training data often treats derivative summaries as primary sources.
 *   **Evaluation:** Benchmarks test for "reasoning" as if it were an intrinsic property of the model rather than a statistical retrieval of human reasoning.

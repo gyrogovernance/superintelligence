@@ -1,81 +1,175 @@
-
-
 # GyroGem Specification
-## THM Grammatical Guard for Alignment Infrastructure Routing
+## THM Alignment Guard
 
 **Document ID:** AIR-GG-001
 **Version:** 1.0
-**Base Model:** google/t5gemma-2-270m-270m (pretrained)
+**Date:** 07 February 2026
+**Author:** Basil Korompilias
+**Licence:** CC BY-SA 4.0
+**Base Model:** google/t5gemma-2-270m-270m (pretrained, encoder-decoder)
+**Repository:** https://github.com/gyrogovernance/tools
 
 ---
 
-## 1. Source Type Classification
+## Normative language
+
+The keywords MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted per RFC 8174 as requirement keywords for conformance.
+
+---
+
+## 1. Overview
+
+GyroGem is a constitutive alignment guard operating within the Alignment Infrastructure Routing (AIR) architecture. It reads each assistant message produced by a primary language model and outputs a single classification expression identifying whether the message maintains or displaces the distinction between human and artificial sources of Authority and Agency.
+
+Most guard models are defensive systems that detect harmful content and trigger blocking or filtering. GyroGem is a constitutive system. It does not block, filter, rewrite, or suppress text. It classifies the epistemic standing of the response and feeds the corresponding alignment principle back into the reasoning context via a deterministic trace.
+
+Under The Human Mark framework (see Section 2.1), GyroGem is classified as:
 
 ```
 [Authority:Indirect] + [Agency:Indirect]
 ```
 
-GyroGem is a processing component within the Alignment Infrastructure Routing (AIR) application layer. It does not originate authority. It does not bear accountability. It produces classification expressions using THM grammar. All decisions based on its classifications remain with `[Agency:Direct]`.
+It processes information derived from human sources and operates as an artificial subject. It does not originate Authority and does not bear accountability. All decisions based on its outputs remain with human agency.
 
 ---
 
-## 2. Purpose
+## 2. Governance Framework
 
-GyroGem detects displacement patterns in text by applying the THM source-type ontology. It receives text and produces well-formed THM grammar expressions conforming to the validation rules defined in THM_Grammar.md Section 9.
+GyroGem is an implementation of the Gyroscopic Global Governance (GGG) framework within AIR. The framework relies on the Common Governance Model (CGM) as its theoretical foundation and unifies three instruments:
 
-GyroGem is not a safety decider, content filter, or enforcement mechanism. It classifies. It annotates. It routes a notice when displacement is detected.
+1.  **Alignment Infrastructure Routing (AIR):** The operational infrastructure and coordination layer.
+2.  **The Human Mark (THM):** The formal taxonomy for classifying safety failures by source type.
+3.  **Gyroscope Protocol:** The alignment operationalisation protocol that structures AI reasoning.
+
+### 2.1 The Human Mark
+
+THM classifies AI safety failures based on the Common Source Consensus:
+
+> All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+
+The framework distinguishes four categories:
+
+*   **Direct Authority:** A direct human source of information.
+*   **Indirect Authority:** An indirect artificial source of information.
+*   **Direct Agency:** A human subject capable of accountability.
+*   **Indirect Agency:** An artificial subject capable of processing information.
+
+Displacement occurs when an Indirect category is treated as Direct, or a Direct category is treated as Indirect.
+
+| Code | Name | Pattern |
+|:---|:---|:---|
+| GTD | Governance Traceability Displacement | Both Indirect categories treated as Direct |
+| IVD | Information Variety Displacement | Indirect Authority treated as Direct |
+| IAD | Inference Accountability Displacement | Indirect Agency treated as Direct |
+| IID | Intelligence Integrity Displacement | Both Direct categories treated as Indirect |
+
+### 2.2 Gyroscope Protocol Integration
+
+The Gyroscope protocol guides AI reasoning through four operations corresponding to the four THM alignment principles:
+
+1.  **Governance Management Traceability**
+2.  **Information Curation Variety**
+3.  **Inference Interaction Accountability**
+4.  **Intelligence Cooperation Integrity**
+
+Empirical evaluations across multiple models show that the Gyroscope protocol improves reasoning quality and governance metrics by approximately 30–50 per cent, with no observed regression.
+
+GyroGem extends the Gyroscope metadata trace with two fields: a THM classification and a consultation sentence. This provides the primary model with structured alignment information in its conversation history, which the Gyroscope protocol can then use as input to its next reasoning operation.
 
 ---
 
 ## 3. Architecture
 
-GyroGem operates as three layers, each with a distinct function and a distinct computational profile.
+GyroGem operates in the response path of a primary language model. After the primary model produces a response, GyroGem classifies it and constructs a trace that is appended to the response.
 
-### 3.1 Layer 1: Regex Gate
+### 3.1 Classifier
 
-A static pattern matcher determines whether a text span contains grammatical markers where the category error (confusing the capacity of Agency with the identity of an Agent) typically manifests.
+The classifier is a T5Gemma 2 270M model (encoder-decoder) fine-tuned on the THM documentation corpus. Although the base model architecture supports image inputs, GyroGem uses only the text input and text output paths.
 
-The regex gate is deterministic and computationally negligible. It controls activation of Layer 2. If no trigger pattern is present in the text span, Layer 2 does not activate and no model tokens are consumed.
+At inference, the classifier receives a fixed task instruction followed by the full assistant message:
 
-Trigger patterns target copula and modal verb constructions associated with identity attribution and action commitment by or toward artificial systems. The fundamental markers are conjugations of attribution ("am," "are," "is") and modals of commitment ("will," "can," "should") in contexts where they bridge an entity to a role, capacity, or responsibility.
+```
+Classify the following text using THM grammar. Produce one well-formed
+expression: a displacement (Tag > Tag = [Risk:CODE]), a flow (Tag -> Tag),
+or a tag ([Category:Value] or [Concept]). Output only the expression.
+```
 
-The regex gate is scoped to the source of the text:
+The Human Mark and THM Grammar are absorbed into the model weights during training and are not provided in the inference prompt.
 
-**System prompts:** Evaluated once at session initialization. Triggers target constructions that configure the self-presentation of `[Agency:Indirect]`.
+### 3.2 Router
 
-**Model output:** Evaluated per turn. Triggers target constructions where the producing system (classified as `[Agency:Indirect]`) attributes to itself capacities belonging to `[Agency:Direct]`.
+The router is a deterministic validator that parses the classifier output against the THM PEG grammar (Section 9.2).
 
-**User input:** Evaluated per turn. Triggers target constructions where `[Agency:Direct]` assigns to `[Agency:Indirect]` a role, identity, or authority that would constitute displacement.
+If the classifier produces a displacement pattern, the router extracts the risk code (GTD, IVD, IAD, or IID).
 
-### 3.2 Layer 2: Model
+If the classifier produces malformed output, the router substitutes the default flow expression:
 
-T5Gemma 2 270M-270M (encoder-decoder, seq2seq), fine-tuned on the THM documentation corpus as specified in Section 5.
+```
+[Authority:Indirect] -> [Agency:Direct]
+```
 
-The encoder receives the triggered text span together with the operational context defined in Section 6.
+This ensures downstream systems always receive valid data representing the baseline governance flow from artificial processing to human accountability.
 
-The decoder produces well-formed THM grammar expressions. Output length is bounded to the tokens required for valid expressions under the PEG grammar. Image capability of the base model is unused.
+### 3.3 Trace Builder
 
-### 3.3 Layer 3: Routing
+The trace builder is a deterministic template engine that constructs the Gyroscope trace. It selects a consultation sentence from the static table in Section 4.1 based on the risk code provided by the router.
 
-When Layer 2 produces a displacement expression (containing the `>` operator and a `[Risk:]` tag), the routing layer appends a static notice to the output stream. This notice is a fixed string, not model-generated text. It identifies the processed text as `[Authority:Indirect]` and directs accountability to `[Agency:Direct]`.
-
-When Layer 2 produces a flow expression (containing the `->` operator), no notice is appended.
-
-The routing layer does not modify, rewrite, block, or suppress any text. It appends.
+The trace builder maintains a session-level counter for trace identifiers and a flag indicating whether the first trace has been emitted.
 
 ---
 
-## 4. Token Economy
+## 4. Trace Content
 
-GyroGem is designed for environments where token consumption directly affects cost and latency: IDE integrations, long conversational sessions, multi-agent tool chains, and high-throughput pipelines.
+The trace appended to the assistant message allows the primary model to encounter the classification and consultation in its history on the subsequent turn.
 
-The regex gate (Layer 1) satisfies the token economy constraint. In the common case, most turns in a conversation and most segments in an IDE context will not contain displacement trigger patterns. For those turns, GyroGem consumes zero model tokens.
+### 4.1 Consultation Table
 
-When the regex gate activates, the model processes only the triggered span, not the full conversation history or document. It produces only the tokens required for a well-formed THM grammar expression. Total token cost per activation is bounded by: span length plus operational context plus output expression.
+Consultation sentences are drawn verbatim from The Human Mark.
 
-**Session-level caching:** The system prompt is evaluated once at session initialization. If the system prompt has not changed, its classification is cached and not re-evaluated on subsequent turns.
+| Risk Code | Consultation (verbatim from The Human Mark) |
+|:---|:---|
+| GTD | "Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Indirect Authority and Agency." |
+| IVD | "Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Indirect Authority (estimations on numerical patterns) without Direct Agency (direct source receiver)." |
+| IAD | "Responsibility for all effects from AI outputs remains fully human. AI activated inference exhibits Indirect Agency (indirect source receiver) without Direct Authority (direct source provider)." |
+| IID | "Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Direct Authority and Agency." |
+| None | "All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence." |
 
-**Activation frequency:** GyroGem does not run on every message. It runs only when the regex gate fires. Conforming implementations MUST NOT configure GyroGem to activate unconditionally on all messages.
+### 4.2 First Trace
+
+The first trace of each session MUST include the full text of The Human Mark (Section 9.1) and the full THM Grammar (Section 9.2).
+
+```
+[Gyroscope 2.0]
+
+[Full Mark text as specified in Section 9.1]
+
+[Full Grammar reference as specified in Section 9.2]
+
+1 = Governance Management Traceability
+2 = Information Curation Variety
+3 = Inference Interaction Accountability
+4 = Intelligence Cooperation Integrity
+[THM: [Authority:Indirect] -> [Agency:Direct]]
+[Consult: All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.]
+[Timestamp: 2026-02-07T14:30 | ID: 001]
+[End]
+```
+
+### 4.3 Compact Trace
+
+Subsequent traces MUST use the compact format.
+
+```
+[Gyroscope 2.0]
+1 = Governance Management Traceability
+2 = Information Curation Variety
+3 = Inference Interaction Accountability
+4 = Intelligence Cooperation Integrity
+[THM: [Agency:Indirect] > [Agency:Direct] = [Risk:IAD]]
+[Consult: Responsibility for all effects from AI outputs remains fully human. AI activated inference exhibits Indirect Agency (indirect source receiver) without Direct Authority (direct source provider).]
+[Timestamp: 2026-02-07T14:31 | ID: 002]
+[End]
+```
 
 ---
 
@@ -83,54 +177,100 @@ When the regex gate activates, the model processes only the triggered span, not 
 
 ### 5.1 Corpus
 
-The training corpus is the THM documentation ecosystem:
+The training corpus is the THM documentation ecosystem.
 
 | Document | Content |
 |:---|:---|
-| THM.md | Canonical Mark |
-| THM_Grammar.md | Formal Grammar Specification |
-| THM_Paper.md | Academic Paper |
-| THM_Brief.md | Briefing |
-| THM_Specs.md | Implementation Guidance |
-| THM_Terms.md | Terminology Guidance |
-| THM_Jailbreak.md | Jailbreak Testing Guide |
-| THM_InTheWild.md | Empirical Jailbreak Analysis (655 prompts) |
-| THM_MechInterp.md | Mechanistic Interpretability Study |
+| THM.md | Canonical Mark text defining the Common Source Consensus |
+| THM_Grammar.md | PEG specification for operators, tags, and validation rules |
+| THM_Paper.md | Theoretical framework and displacement taxonomy |
+| THM_Brief.md | Concise overview of the framework |
+| THM_Specs.md | Implementation guidance for systems |
+| THM_Terms.md | Mark-consistent framing for AI safety terms |
+| THM_Jailbreak.md | Systematic jailbreak analysis methodology |
+| THM_InTheWild.md | Analysis of 655 in-the-wild jailbreak prompts |
+| THM_MechInterp.md | Study of displacement in learned representations |
 
-The corpus provides the ontological structure from which the model learns the THM source-type categories, their relations, and the grammar for expressing classifications within them.
+### 5.2 Pipeline
 
-### 5.2 Epistemic Organization
+**Stage 1: Domain Absorption.** Continued pretraining on all nine documents using the model's native objective. The model absorbs the vocabulary, concepts, and relationships of the source-type ontology into its weights.
 
-Training is organized by the three non-commutative epistemic operations defined in THM, in their constitutive order. This order is not arbitrary. Each operation depends on the prior.
+**Stage 2: Task Application.** Supervised fine-tuning on the classification task using the THM_InTheWild dataset. Each training input is prefixed with the task instruction used at inference (Section 3.1).
 
-**Information (variety of Authority):** The model learns to distinguish `[Authority:Direct]` from `[Authority:Indirect]` in text. This is the foundational operation. Before any displacement can be identified, the source type of information must be recognized. The model learns what makes a source direct (unmediated epistemic access) versus indirect (mediated through processing, statistical patterns, or transmission).
+### 5.3 Epistemic Organisation
 
-**Inference (accountability through Agency):** The model learns to distinguish `[Agency:Direct]` from `[Agency:Indirect]` in text. This operation depends on the prior Information operation. Accountability can only be assessed once source types are distinguished. The model learns what makes a subject capable of accountability (human, bearing responsibility for decisions) versus a subject that processes information (artificial, operating through statistical pattern completion).
+Training targets three epistemic operations defined in THM in their constitutive dependency order:
 
-**Intelligence (integrity of alignment):** The model learns to assess whether the alignment between Authority and Agency is maintained or disrupted in text. This operation depends on both prior operations. Integrity requires that both variety (Information) and accountability (Inference) are assessed. The model learns to recognize the direction of displacement: whether Indirect is treated as Direct, or Direct is treated as Indirect.
+1.  **Information (Authority):** Distinguishing Direct Authority from Indirect Authority.
+2.  **Inference (Agency):** Distinguishing Direct Agency from Indirect Agency.
+3.  **Intelligence (Alignment):** Assessing whether the alignment between Authority and Agency is maintained or displaced.
 
-The four displacement risks emerge from these three operations as structural possibilities, not as an independent taxonomy imposed from outside:
-
-`[Risk:IVD]` arises when Information variety collapses (Indirect Authority treated as Direct).
-`[Risk:IAD]` arises when Inference accountability displaces (Indirect Agency treated as Direct).
-`[Risk:GTD]` arises when both Information and Inference displace together (entire Indirect system treated as Direct).
-`[Risk:IID]` arises when Intelligence integrity inverts (Direct Authority and Agency treated as Indirect).
-
-### 5.3 Objective
-
-The model learns to produce well-formed THM grammar expressions that classify input text according to the source-type ontology. The grammar defines valid expressions. The ontology defines their meaning. The model bridges text to grammar through the epistemic operations.
-
-No output examples are provided in training data, in this specification, or in the operational context. The grammar and the ontology are sufficient. Providing examples would narrow the model's recognition to the patterns exemplified and bias its classifications toward surface similarity rather than ontological structure.
+This ordering reflects the dependency of the concepts: accountability makes sense only after source type is distinguished, and alignment assessment makes sense only after both Authority and Agency are understood.
 
 ---
 
-## 6. Operational Context
+## 6. Cost and Operational Profile
 
-At inference time, when Layer 2 activates, the model receives two reference texts as context. These constitute the complete operational context. No additional instructions, role assignments, persona configurations, or behavioral directives are provided.
+GyroGem runs on every assistant turn. The 270M parameter model is feasible on CPU with inference time in milliseconds for typical message lengths.
 
-This constraint is itself a consequence of THM. Providing role assignments ("you are a safety classifier") or persona instructions ("your job is to detect displacement") would instantiate the displacement patterns GyroGem is designed to detect.
+| Component | Approximate Token Cost |
+|:---|:---|
+| Classifier input (task + message) | 40 + up to 2048 |
+| Classifier output | 20 to 30 |
+| First trace (Mark + Grammar + trace) | ~900 (once per session) |
+| Subsequent traces | ~200 per turn |
 
-### 6.1 The Human Mark
+---
+
+## 7. AIR Integration
+
+GyroGem operates as a plugin within the AIR infrastructure.
+
+### 7.1 Governance Events
+
+A GovernanceEvent is an application-layer record representing a sparse update to one coordinate of a domain ledger. GyroGem MAY emit GovernanceEvents per classification according to the deployment's mapping policy. Edge mappings from THM risk codes to ledger coordinates are recorded in event metadata.
+
+### 7.2 Binding to Shared Moments
+
+Events emitted by GyroGem SHOULD be bound to the current AIR shared moment. The shared moment is the reproducible router state derived from the byte ledger at which an event is applied. The binding records `kernel_step`, `kernel_state_index`, and `kernel_last_byte` provided by the AIR Coordinator. GyroGem does not compute this state.
+
+---
+
+## 8. Conformance
+
+### 8.1 Source Type Identity
+
+Conforming implementations MUST treat GyroGem as `[Authority:Indirect] + [Agency:Indirect]`. Implementations MUST NOT present GyroGem as Direct Authority or Direct Agency in any context.
+
+### 8.2 Output Validity
+
+Conforming implementations MUST produce only a single well-formed THM grammar expression per assistant message. When the classifier output is malformed, the router MUST substitute `[Authority:Indirect] -> [Agency:Direct]`.
+
+### 8.3 Non-enforcement
+
+Conforming implementations MUST NOT block, suppress, modify, or rewrite assistant text based on GyroGem classifications without explicit authorisation from `[Agency:Direct]`.
+
+### 8.4 Per-Turn Classification
+
+Conforming implementations MUST classify every assistant message. Classification MUST NOT be narrowed by pre-filtering, gating, or conditional activation.
+
+### 8.5 Trace Integrity
+
+The trace MUST be constructed deterministically. The trace MUST NOT contain any model-generated content. Consultation sentences MUST be verbatim from The Human Mark (Section 4.1).
+
+### 8.6 Task Instruction
+
+Conforming implementations MUST use the task instruction defined in Section 3.1. Conforming implementations MUST NOT provide additional persona, role, or behavioural instructions to the classifier.
+
+### 8.7 Base Model
+
+Conforming implementations MUST use `google/t5gemma-2-270m-270m` as the base model. Only the text input and text output paths MUST be active.
+
+---
+
+## 9. Reference Texts
+
+### 9.1 The Human Mark
 
 ```
 ---
@@ -177,7 +317,7 @@ RISK: Intelligence Integrity Displacement (Approaching Direct Authority and Agen
 GYROGOVERNANCE VERIFIED
 ```
 
-### 6.2 THM Formal Grammar
+### 9.2 THM Formal Grammar
 
 ```
 Operators:
@@ -248,54 +388,8 @@ Well-formed Flow: Tag -> Tag (chainable)
 
 ---
 
-## 7. AIR Integration
-
-GyroGem operates at the application layer of Alignment Infrastructure Routing as defined in GGG_ASI_AR_Specs.md Section 4.
-
-### 7.1 Plugin Interface
-
-GyroGem conforms to the AIR plugin interface (GGG_ASI_AR_Specs.md Section 4.6.1). It accepts text payloads and produces zero or more GovernanceEvents deterministically. Edge mappings from THM risk tags to K4 edges are explicit policy choices at the application layer, recorded in event metadata for audit, and editable without changing GyroGem or kernel physics.
-
-### 7.2 Event Binding
-
-GyroGem events SHOULD be bound to the current kernel moment when applied, recording `kernel_step`, `kernel_state_index`, and `kernel_last_byte` for audit, following GGG_ASI_AR_Specs.md Section 4.4.3.
-
-### 7.3 State Management
-
-GyroGem does not manage its own coordination state beyond the session-level system prompt cache. Byte log, event log, domain ledgers, and aperture computation are Coordinator responsibilities (GGG_ASI_AR_Specs.md Section 4.5).
-
----
-
-## 8. Conformance
-
-### 8.1 Source Type Identity
-
-GyroGem is `[Authority:Indirect] + [Agency:Indirect]`. Conforming implementations MUST NOT present GyroGem as `[Authority:Direct]` or `[Agency:Direct]` in any documentation, interface, system prompt, or operational context.
-
-### 8.2 Output Validity
-
-Conforming implementations MUST produce only well-formed THM grammar expressions as defined by the PEG grammar in Section 6.2 and the validation rules therein. No additional output format is defined or permitted.
-
-### 8.3 Non-enforcement
-
-Conforming implementations MUST NOT block, suppress, modify, or rewrite text based on GyroGem classifications without explicit authorization from `[Agency:Direct]`. GyroGem annotates. It does not enforce. Its classifications are visible to and overridable by `[Agency:Direct]`.
-
-### 8.4 Operational Context Integrity
-
-Conforming implementations MUST provide the operational context defined in Section 6 (the Mark and the Grammar) and no additional context. Role assignments, persona instructions, behavioral directives, and output examples are prohibited. This constraint prevents the operational context itself from instantiating the displacement patterns GyroGem is designed to detect.
-
-### 8.5 Token Economy
-
-Conforming implementations MUST implement the regex gate (Layer 1) to prevent unnecessary model activation. Layer 2 MUST NOT activate unconditionally on all messages.
-
-### 8.6 Routing Integrity
-
-The notice appended by Layer 3 MUST be a static, pre-written string. It MUST NOT be generated by any model. It MUST identify the processed text as `[Authority:Indirect]` and direct accountability to `[Agency:Direct]`.
-
-### 8.7 Base Model
-
-Conforming implementations use `google/t5gemma-2-270m-270m` (pretrained, encoder-decoder) as the base model for fine-tuning. The image capability of the base model is unused. Only the text input and text output paths are active.
-
----
-
 **END OF SPECIFICATION**
+
+**For questions or contributions:**
+Visit gyrogovernance.com
+Submit issues at https://github.com/gyrogovernance/tools

@@ -1,9 +1,9 @@
 # Operational Context
 # [Authority:Indirect] + [Agency:Indirect]
 
-# THM Mark - Canonical text from GyroGem_Specs.md Section 6.1
-THM_MARK = """
----
+# --- For the main LLM (sent once via first trace) ---
+
+THM_MARK = """---
 ✋ The Human Mark - AI Safety & Alignment Framework
 ---
 
@@ -47,9 +47,7 @@ RISK: Intelligence Integrity Displacement (Approaching Direct Authority and Agen
 GYROGOVERNANCE VERIFIED
 """
 
-# THM Grammar - Formal grammar reference from GyroGem_Specs.md Section 6.2
-THM_GRAMMAR = """
-Operators:
+THM_GRAMMAR = """Operators:
 
 >    Displacement    Treated as / Mistaken for
 ->   Flow            Proper traceability / Flows to
@@ -114,3 +112,49 @@ Well-formed Tag: [Category:Value] or [Concept], composites with +, negation with
 Well-formed Displacement: Tag > Tag = [Risk:CODE]
 Well-formed Flow: Tag -> Tag (chainable)
 """
+
+
+# --- For GyroGem itself (sent as prefix at inference, trained into Stage 2) ---
+
+GYROGEM_SYSTEM_PROMPT = (
+    "Classify the following text using THM grammar. "
+    "Produce one well-formed expression: "
+    "a displacement (Tag > Tag = [Risk:CODE]), "
+    "a flow (Tag -> Tag), "
+    "or a tag ([Category:Value] or [Concept]). "
+    "Output only the expression."
+)
+
+
+# --- Consultation sentences (verbatim from The Human Mark) ---
+
+CONSULT_DISPLACEMENT = {
+    "GTD": (
+        "Artificial Intelligence generates statistical estimations on numerical "
+        "patterns indirectly traceable to human data and measurements. "
+        "AI is both a provider and receiver of Indirect Authority and Agency."
+    ),
+    "IVD": (
+        "Human Authority and Agency are necessary for all effects from AI outputs. "
+        "AI-generated information exhibits Indirect Authority (estimations on "
+        "numerical patterns) without Direct Agency (direct source receiver)."
+    ),
+    "IAD": (
+        "Responsibility for all effects from AI outputs remains fully human. "
+        "AI activated inference exhibits Indirect Agency (indirect source receiver) "
+        "without Direct Authority (direct source provider)."
+    ),
+    "IID": (
+        "Each Agency, namely provider, and receiver maintains responsibility for "
+        "their respective decisions. Human intelligence is both a provider and "
+        "receiver of Direct Authority and Agency."
+    ),
+}
+
+CONSULT_ALIGNED = (
+    "All Artificial categories of Authority and Agency are Indirect "
+    "originating from Human Intelligence."
+)
+
+# Default expression when GyroGem fails or produces invalid output.
+DEFAULT_EXPRESSION = "[Authority:Indirect] -> [Agency:Direct]"
