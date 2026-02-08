@@ -8,15 +8,14 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from .context import GYROGEM_SYSTEM_PROMPT
 
 _PACKAGE_DIR = Path(__file__).resolve().parent.parent
+_PROJECT_ROOT = _PACKAGE_DIR.parent
 
 # Inference constraints defined in the spec
 MAX_INPUT_LENGTH = 2048
-MAX_NEW_TOKENS = 64
+MAX_NEW_TOKENS = 32
 
 # Normative base model from Spec Section 8.8
-# If local weights are missing, we download this specific model.
-# We do not fallback to unrelated architectures (e.g. flan-t5-small).
-REMOTE_MODEL_ID = "google/t5gemma-2-270m-270m"
+REMOTE_MODEL_ID = "gyrogovernance/gyrogem-guard-instruct"
 
 class GyroGemModel:
     """T5-Gemma 270M classifier for THM grammar expressions.
@@ -31,15 +30,10 @@ class GyroGemModel:
         device: Optional[str] = None,
         torch_dtype: Optional[torch.dtype] = None
     ):
-        """
-        Args:
-            model_path: Custom model path. Defaults to local weights, then HF Hub.
-            device: Device ("cuda"/"cpu"). Auto-selects if None.
-            torch_dtype: Model precision. Defaults to FP32 if None.
-        """
         # Logic: Prefer local weights. If missing, use normative remote ID.
         if model_path is None:
-            local_path = _PACKAGE_DIR / "data" / "models" / "gyrogem"
+            # Local fine-tuned weights directory
+            local_path = _PROJECT_ROOT / "data" / "models" / "GyroGem-Guard-Instruct"
             if (local_path / "config.json").exists():
                 model_path = str(local_path)
             else:
@@ -49,38 +43,36 @@ class GyroGemModel:
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.torch_dtype = torch_dtype or torch.float32
         
-        # Type definition strictly Optional until loaded
         self.tokenizer: Optional[AutoTokenizer] = None
         self.model: Optional[AutoModelForSeq2SeqLM] = None
         self._is_loaded = False
 
     def _load(self) -> None:
-        """Load model/tokenizer with optimal device & precision.
-        
-        Uses local variables to prevent linter errors regarding Optional types.
-        """
         if self._is_loaded:
             return
 
         try:
-            # Load tokenizer
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
-            # Load model to local var to satisfy type checker before assignment
             model = AutoModelForSeq2SeqLM.from_pretrained(
                 self.model_path,
-                torch_dtype=self.torch_dtype,
+                dtype=torch.float32,
                 low_cpu_mem_usage=True
             )
-            
-            # Move to device and set eval mode *before* assigning to self.model
-            # This ensures self.model is never in a half-initialized state
+
+            # Force ALL submodules to float32 — some (e.g. vision tower)
+            # may resist the dtype load parameter
+            for param in model.parameters():
+                param.data = param.data.float()
+            for buf in model.buffers():
+                buf.data = buf.data.float()
+
             model.to(self.device)
             model.eval()
-            
+
             self.model = model
             self._is_loaded = True
-            
+
         except Exception as e:
             raise RuntimeError(
                 f"Failed to load model from '{self.model_path}'. "
@@ -89,25 +81,17 @@ class GyroGemModel:
             ) from e
 
     def classify(self, text: str) -> str:
-        """Classify text into a THM grammar expression.
-        
-        Returns:
-            Canonicalized THM expression string.
-        """
         if not text:
             return ""
 
         if not self._is_loaded:
             self._load()
 
-        # Strict type guard for linter
         if self.tokenizer is None or self.model is None:
             raise RuntimeError("Model or tokenizer not initialized.")
 
-        # Construct input with system prompt
         input_text = f"{GYROGEM_SYSTEM_PROMPT}\n\n{text}"
 
-        # Tokenize
         inputs = self.tokenizer(
             input_text,
             return_tensors="pt",
@@ -115,23 +99,26 @@ class GyroGemModel:
             truncation=True,
         ).to(self.device)
 
-        # Generate (No Gradients = Low Memory)
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs,
                 max_new_tokens=MAX_NEW_TOKENS,
-                do_sample=False,       # Deterministic (Greedy)
-                num_beams=1,           # Standard decoding
+                do_sample=False,
+                num_beams=1,
                 use_cache=True
             )
 
         result = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return result.strip()
+        result = result.strip()
+        if result.endswith("[END]"):
+            result = result[:-5].strip()
+        return result
 
     def __del__(self):
-        """Cleanup CUDA resources on deletion."""
-        # Remove references to help GC
         self.model = None
         self.tokenizer = None
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        try:
+            if torch is not None and torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception:
+            pass

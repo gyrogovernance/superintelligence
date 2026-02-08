@@ -2,8 +2,8 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import pytest
-from agent.trace import build_trace
-from agent.context import (
+from GyroGem.agent.trace import build_trace
+from GyroGem.agent.context import (
     THM_MARK, THM_GRAMMAR,
     CONSULT_DISPLACEMENT, CONSULT_ALIGNED,
 )

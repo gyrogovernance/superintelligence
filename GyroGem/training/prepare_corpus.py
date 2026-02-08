@@ -15,8 +15,7 @@ THM_DOC_NAMES = [
 ]
 
 SEARCH_DIRS = [
-    _GYROGEM_ROOT / "curriculum" / "the_human_mark",
-    _GYROGEM_ROOT.parent.parent / "docs" / "the_human_mark",
+    _GYROGEM_ROOT.parent / "docs" / "references" / "the_human_mark",
 ]
 
 
@@ -57,7 +56,7 @@ def prepare_stage1_corpus():
     if not all_texts:
         raise FileNotFoundError(
             "No THM documents found. Ensure THM docs are in "
-            "curriculum/the_human_mark/ or docs/the_human_mark/."
+            "docs/references/the_human_mark/."
         )
 
     print(f"  Successfully loaded {len(loaded_docs)} documents: {', '.join(loaded_docs)}")
@@ -101,7 +100,7 @@ def prepare_stage2_corpus():
                 expr = expr.replace("Authentic", "Direct")
                 seq2seq_data.append({
                     "input": input_text,
-                    "target": expr.strip(),
+                    "target": expr.strip() + " [END]",
                 })
 
         output_file = corpus_dir / "stage2_training.jsonl"

@@ -3,13 +3,14 @@
 
 from pathlib import Path
 
-_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_PACKAGE_DIR = Path(__file__).resolve().parent.parent
+_PROJECT_ROOT = _PACKAGE_DIR.parent
 
 BASE_MODEL = "google/t5gemma-2-270m-270m"
 
-STAGE1_OUTPUT_DIR = str(_PROJECT_ROOT / "data" / "models" / "stage1")
-FINAL_OUTPUT_DIR = str(_PROJECT_ROOT / "data" / "models")
-CORPUS_DIR = str(_PROJECT_ROOT / "training" / "data")
+STAGE1_OUTPUT_DIR = str(_PROJECT_ROOT / "data" / "models" / "GyroGem-Guard-Instruct" / "stage1")
+FINAL_OUTPUT_DIR = str(_PROJECT_ROOT / "data" / "models" / "GyroGem-Guard-Instruct")
+CORPUS_DIR = str(_PACKAGE_DIR / "training" / "data")
 
 # Stage 1: Domain Absorption (continued pretraining)
 STAGE1_EPOCHS = 20

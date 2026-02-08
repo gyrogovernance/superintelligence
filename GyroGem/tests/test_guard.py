@@ -3,9 +3,9 @@
 
 import pytest
 from unittest.mock import MagicMock
-from agent.guard import GyroGemGuard
-from agent.router import THMRouter
-from agent.context import (
+from GyroGem.agent.guard import GyroGemGuard
+from GyroGem.agent.router import THMRouter
+from GyroGem.agent.context import (
     DEFAULT_EXPRESSION, CONSULT_ALIGNED, CONSULT_DISPLACEMENT, THM_MARK,
 )
 

@@ -36,7 +36,7 @@ def load_labeled_data():
                     expr = re.sub(r"\bAuthentic\b", "Direct", str(expr))
                     target_expressions.append(expr.strip())
 
-                train_data.append({"input": input_text, "target": target_expressions[0]})
+                train_data.append({"input": input_text, "target": target_expressions[0] + " [END]"})
 
         print(f"  Loaded {len(train_data)} examples from HuggingFace dataset")
         return train_data

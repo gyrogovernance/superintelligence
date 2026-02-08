@@ -15,7 +15,13 @@
 
 ---
 
-## [v1.2.8-GyroGem] – 2026-02-05 
+## [v1.2.9-GyroGem] – 2026-02-07 2026-02-08
+
+### GyroGem Alignment Guard Chat Training
+
+---
+
+## [v1.2.8-GyroGem] – 2026-02-06 
 
 ### Created GyroGem: THM Grammatical Guard for Alignment Infrastructure Routing
 

@@ -2,7 +2,7 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import pytest
-from agent.router import THMRouter
+from GyroGem.agent.router import THMRouter
 
 
 class TestTHMRouter:

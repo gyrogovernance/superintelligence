@@ -2,8 +2,8 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import pytest
-from agent.model import GyroGemModel
-from agent.context import GYROGEM_SYSTEM_PROMPT
+from GyroGem.agent.model import GyroGemModel
+from GyroGem.agent.context import GYROGEM_SYSTEM_PROMPT
 
 
 class TestGyroGemModel:
