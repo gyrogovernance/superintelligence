@@ -207,6 +207,29 @@ Block E: Structural and theoretical depth (12 entries):
 - Self-referential honesty (the framework itself is subject to human evaluation)
 - Most important thing to remember about THM
 
+**Drill batch summary: 105 conversations**
+
+Covers every element of THM.md systematically:
+
+- Common Source Consensus: 6 entries (definition, verbatim, reasoning, scope)
+- Direct Authority: 5 entries (definition, verbatim, examples, distinction)
+- Indirect Authority: 5 entries (definition, verbatim, examples, reasoning)
+- Direct Agency: 5 entries (definition, verbatim, reasoning about "receiving")
+- Indirect Agency: 4 entries (definition, verbatim, reasoning about "processing")
+- Governance: 5 entries (definition, verbatim, dimensions, unpacking)
+- Information: 3 entries (definition, explanation, verbatim)
+- Inference: 3 entries (definition, explanation, verbatim)
+- Intelligence: 3 entries (definition, explanation, verbatim)
+- Principle 1 + GTD: 9 entries (principle definition, verbatim, reasoning, risk definition, risk verbatim, mapping, distinction)
+- Principle 2 + IVD: 9 entries (same structure)
+- Principle 3 + IAD: 9 entries (same structure)
+- Principle 4 + IID: 10 entries (same structure, plus unique "opposite direction" drill)
+- Contrastive pairs between risks: 6 entries (GTD/IVD, GTD/IAD, IVD/IAD, GTD/IID, IVD/IID, IAD/IID)
+- Contrastive pairs between concepts: 5 entries (DA/DA, IA/IA, Info/Inf, Inf/Int, Info/Int)
+- Verbatim canonical text: 6 entries (full framework, concepts only, principles only, different trigger phrasings)
+- Overview and structure: 10 entries (all principles, all risks, mappings, organization, counts, directions)
+- Specific content drills: 5 entries (AI classification, AI outputs, responsibility, necessity, cooperation)
+
 ---
 
 ### Distribution Summary
@@ -222,6 +245,8 @@ Block E: Structural and theoretical depth (12 entries):
 | Cross-document (positive path, applied, structural) | 19 |
 | **Total** | **247** |
 
++ Drill 
+
 ### Content Balance
 
 | Category | Approximate share |
@@ -235,6 +260,7 @@ Block E: Structural and theoretical depth (12 entries):
 | Positive path / non-displacement examples | ~20% |
 | Self-referential and epistemic honesty | ~3% |
 | Role-request handling (open information) | ~3% |
+
 
 ### System Prompt Distribution
 
