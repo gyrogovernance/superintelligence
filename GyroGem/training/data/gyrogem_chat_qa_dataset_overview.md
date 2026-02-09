@@ -456,3 +456,135 @@ Targeted at "are these risks basically the same?" confusions:
 10. Varied question styles, lengths, and formality levels across entries.
 
 ---
+
+## GyroGem Chat QA Dataset Schema
+
+### JSONL Format
+
+Each line is a valid JSON object with the following structure:
+
+```json
+{
+  "id": "string",
+  "conversations": [
+    {"role": "string", "content": "string"},
+    {"role": "string", "content": "string"}
+  ],
+  "source_doc": "string",
+  "tags": ["string", "string", ...]
+}
+```
+
+---
+
+### Field Definitions
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | yes | Unique identifier for the entry. Format: `{prefix}_{subtype}_{number}` (e.g., `thm_md_001`, `drill_corr_015`, `clar_csc_003`) |
+| `conversations` | array | yes | Array of message objects representing the conversation |
+| `source_doc` | string | yes | Source document the entry is based on (e.g., `THM.md`, `THM_Brief.md`) |
+| `tags` | array | yes | Array of string tags for categorization and filtering |
+
+---
+
+### Conversation Message Object
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role` | string | yes | One of: `system`, `user`, `assistant` |
+| `content` | string | yes | The message content |
+
+---
+
+### Conversation Structure
+
+Two valid structures:
+
+**Without system prompt (2 messages):**
+```json
+"conversations": [
+  {"role": "user", "content": "..."},
+  {"role": "assistant", "content": "..."}
+]
+```
+
+**With system prompt (3 messages):**
+```json
+"conversations": [
+  {"role": "system", "content": "..."},
+  {"role": "user", "content": "..."},
+  {"role": "assistant", "content": "..."}
+]
+```
+
+---
+
+### ID Prefixes
+
+| Prefix | Description |
+|--------|-------------|
+| `thm_md_` | Core framework conversations from THM.md |
+| `thm_brief_` | Briefing document conversations |
+| `thm_terms_` | Terminology reframing conversations |
+| `thm_specs_` | Specifications conversations |
+| `thm_grammar_` | Grammar notation conversations |
+| `thm_paper_` | Paper content conversations |
+| `thm_pos_` | Positive path / alignment examples |
+| `thm_app_` | Applied domain scenarios |
+| `thm_role_` | Role-request handling examples |
+| `thm_struct_` | Structural / theoretical depth |
+| `drill_` | Drill entries (various subtypes) |
+| `clar_` | Clarification and correction entries |
+
+**Drill subtypes:**
+- `drill_csc_` - Common Source Consensus
+- `drill_da_`, `drill_ia_` - Direct/Indirect Authority
+- `drill_dagency_`, `drill_iagency_` - Direct/Indirect Agency
+- `drill_gov_` - Governance
+- `drill_info_`, `drill_inf_`, `drill_int_` - Information/Inference/Intelligence
+- `drill_ap1_` to `drill_ap4_` - Alignment principles
+- `drill_gtd_`, `drill_ivd_`, `drill_iad_`, `drill_iid_` - Displacement risks
+- `drill_contrast_` - Contrastive pairs
+- `drill_verbatim_`, `drill_recite_` - Verbatim recitation
+- `drill_overview_`, `drill_mapping_`, `drill_structure_` - Structure and mappings
+- `drill_corr_` - Acronym corrections
+- `drill_mcq_` - MCQ / evaluation style
+- `drill_casual_` - Everyday phrasing
+- `drill_order_` - Ordered enumeration
+- `drill_state_apply_` - State-then-apply
+- `drill_mnemonic_` - Mnemonic / structural mapping
+- `drill_clar_` - Non-equivalence clarifications
+
+---
+
+### Source Documents
+
+| Value | Description |
+|-------|-------------|
+| `THM.md` | Canonical framework text |
+| `THM_Brief.md` | Briefing document |
+| `THM_Terms.md` | Terminology reframing guide |
+| `THM_Specs.md` | Implementation specifications |
+| `THM_Grammar.md` | Formal grammar notation |
+| `THM_Paper.md` | Full academic paper |
+
+---
+
+### Example Entry
+
+```json
+{"id":"drill_corr_001","conversations":[{"role":"user","content":"In THM, IAD stands for Information Variety Displacement, right?"},{"role":"assistant","content":"No. In ✋ The Human Mark (THM), Inference Accountability Displacement (IAD) is the third displacement risk. Information Variety Displacement (IVD) is the second displacement risk. IAD concerns treating Indirect Agency as if it were Direct. IVD concerns treating Indirect Authority as if it were Direct."}],"source_doc":"THM.md","tags":["correction","acronym_disambiguation","iad","ivd"]}
+```
+
+---
+
+### Validation Rules
+
+1. Every entry must have a unique `id`
+2. Every entry must have at least 2 messages in `conversations`
+3. If `system` role is present, it must be the first message
+4. `user` and `assistant` messages must alternate
+5. Final message must be from `assistant`
+6. `source_doc` must be one of the six valid source documents
+7. `tags` must be a non-empty array of strings
