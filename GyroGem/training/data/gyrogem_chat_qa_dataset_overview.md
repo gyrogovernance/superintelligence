@@ -230,6 +230,59 @@ Covers every element of THM.md systematically:
 - Overview and structure: 10 entries (all principles, all risks, mappings, organization, counts, directions)
 - Specific content drills: 5 entries (AI classification, AI outputs, responsibility, necessity, cooperation)
 
+## Dataset Additions Outline (Latest Session)
+
+### Drill Entries (105 conversations)
+**File IDs: drill_csc_001 through drill_structure_002**
+
+Systematic drilling on every element of THM.md:
+
+- **Common Source Consensus**: 6 entries (definition, verbatim, reasoning, scope)
+- **Direct Authority**: 5 entries (definition, verbatim, examples, distinction)
+- **Indirect Authority**: 5 entries (definition, verbatim, examples, reasoning)
+- **Direct Agency**: 5 entries (definition, verbatim, reasoning about "receiving")
+- **Indirect Agency**: 4 entries (definition, verbatim, reasoning about "processing")
+- **Governance**: 5 entries (definition, verbatim, dimensions, unpacking)
+- **Information**: 3 entries (definition, explanation, verbatim)
+- **Inference**: 3 entries (definition, explanation, verbatim)
+- **Intelligence**: 3 entries (definition, explanation, verbatim)
+- **Principle 1 + GTD**: 9 entries (principle, risk, verbatim, mapping, distinction)
+- **Principle 2 + IVD**: 9 entries (same structure)
+- **Principle 3 + IAD**: 9 entries (same structure)
+- **Principle 4 + IID**: 10 entries (same structure, plus opposite-direction drill)
+- **Contrastive pairs between risks**: 6 entries (GTD/IVD, GTD/IAD, IVD/IAD, GTD/IID, IVD/IID, IAD/IID)
+- **Contrastive pairs between concepts**: 5 entries (DA/DA, IA/IA, Info/Inf, Inf/Int, Info/Int)
+- **Verbatim canonical text**: 6 entries (full framework, concepts only, principles only, varied triggers)
+- **Overview and structure**: 10 entries (all principles, all risks, mappings, organization, counts, directions)
+- **Specific content drills**: 5 entries (AI classification, AI outputs, responsibility, necessity, cooperation)
+
+---
+
+### Clarification and Correction Entries (35 conversations)
+**File IDs: clar_thm_001 through clar_user_q_002**
+
+Targeted corrections for observed model failures:
+
+- **What THM is** (4 entries): THM as alignment framework first, displacement as failure taxonomy second
+- **Common Source Consensus corrections** (5 entries): Verbatim anchor, "does not say all sources are Indirect," "does not eliminate Direct Authority"
+- **Source and Authority clarifications** (5 entries): What "source" means, AI as Indirect Authority not Direct, Indirect depends on Direct
+- **Interaction clarifications** (2 entries): AI interacts with humans but remains Indirect in source-type classification
+- **Explicit error corrections** (5 entries): "All information is Indirect" is false, "THM is only displacement" is false, GTD is not "Give Get Deliver," IAD is not "Identify Act Delegate"
+- **Human role clarifications** (5 entries): Humans remain Direct, AI does not create new Direct Authority, "AI is the authority" is incorrect
+- **Governance flow clarifications** (2 entries): Canonical flow, AI as provider/receiver of Indirect (not original source)
+- **Alignment clarifications** (2 entries): Alignment definition without mentioning risks, how risks relate to alignment
+- **User guidance** (2 entries): How to respond to common misreadings
+
+---
+
+### Purpose of Additions
+
+1. **Anchor exact definitions** through repeated short drills with varied question phrasings
+2. **Prevent compression errors** by explicitly stating what THM is not
+3. **Sharpen distinctions** between similar concepts (GTD vs IAD, Direct vs Indirect, etc.)
+4. **Correct hallucination patterns** observed in model outputs (wrong acronym expansions, inverted Consensus, "only displacement" framing)
+5. **Reinforce alignment-first framing** so model does not reduce THM to a risk taxonomy
+
 ---
 
 ### Distribution Summary
