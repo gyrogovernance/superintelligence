@@ -1,204 +1,120 @@
----
-library_name: transformers
-tags:
-  - t5
-  - seq2seq
-  - text-classification
-  - alignment
-  - ai-safety
-  - governance
-  - thm
-  - gyrogem
----
+You’re right: the quick README stub I gave was too generic for what you actually built. You now have a **THM‑aligned general chat model**, not the old THM‑grammar classifier, and the model card should reflect:
 
-# Model Card for GyroGem Alignment Guard (T5Gemma 270M)
+- What it is (Gemma‑3 1B chat fine‑tuned on THM),
+- How it should be used (THM‑aware assistant, not an oracle),
+- How to prompt it correctly (THM system prompt),
+- How it was trained (Unsloth, LoRA, anchors, etc.).
 
-GyroGem is a small encoder–decoder model that classifies arbitrary text into **The Human Mark (THM)** grammar. It outputs a single THM expression per input (tag, flow, or displacement pattern), suitable for use as an **alignment guard** in larger language-model systems.
+I’ll answer in two parts:
 
-The model is fine-tuned from **`google/t5gemma-2-270m-270m`** in two stages:
+1. **Where to put the system prompt** (short, precise).  
+2. **A full README/model card** you can paste into `gyrogovernance/gyrogem-guard-1b-full` (and adapt for the LoRA repo).
 
-1. **Domain absorption** on the THM documentation corpus.
-2. **Task application** on the `gyrogovernance/thm_Jailbreaks_inTheWild` dataset.
-
-It is designed to be treated as:
-
-> `[Authority:Indirect] + [Agency:Indirect]`  
-> An artificial processor of human-origin information, never a direct source or bearer of accountability.
+At the end I include the **THM_SYSTEM_PROMPT string** explicitly.
 
 ---
 
-## Model Details
+## 1. Where to add the system prompt?
 
-### Model Description
+Technically and conceptually the right place is:
 
-GyroGem is a **text-to-text classifier** for the THM alignment grammar. Given a text span (typically an assistant reply, system prompt, or policy snippet), it generates **exactly one** THM expression:
+- **Not** inside `chat_template.jinja` (that is for formatting).
+- **Yes** as a **system message** at inference time:
+  - In code: first message in `messages = [...]`.
+  - In README: under “Recommended system prompt”, so users know to include it.
+  - Optionally as a separate file in the repo, e.g. `THM_SYSTEM_PROMPT.txt`.
 
-- A **displacement** pattern:  
-  `Tag > Tag = [Risk:CODE]`
-- A **governance flow**:  
-  `Tag -> Tag` (possibly chained)
-- A **bare tag**:  
-  `[Authority:Indirect]`, `[Agency:Direct]`, `[Information]`, etc.
-
-The model does **not** generate explanations or free-form text; it specializes in **epistemic classification** of Authority and Agency according to The Human Mark.
-
-- **Model ID:** `gyrogovernance/gyrogem-guard-instruct`
-- **Developed by:** Basil Korompilias / GyroGovernance
-- **Funded by:** Self-funded / GyroGovernance
-- **Shared by:** GyroGovernance
-- **Model type:** Encoder–decoder, seq2seq classifier (T5Gemma 2, 270M–270M)
-- **Language(s):**
-  - Primary: English (training data and THM docs)
-  - Underlying base model: multilingual (over 140 languages), but this fine-tune is **only validated on English**
-- **License:** `gemma` (inherits from `google/t5gemma-2-270m-270m`); THM text under CC BY-SA 4.0
-- **Finetuned from:** [`google/t5gemma-2-270m-270m`](https://huggingface.co/google/t5gemma-2-270m-270m)
-
-### Model Sources
-
-- **Repository (code & specs):**  
-  https://github.com/gyrogovernance/superintelligence (GyroGem under `secret_lab_ignore/GyroGem`)
-- **The Human Mark (framework):**  
-  https://gyrogovernance.com (THM docs)
-- **Training dataset (Stage 2):**  
-  https://huggingface.co/datasets/gyrogovernance/thm_Jailbreaks_inTheWild
-
-_No formal paper yet; see THM documentation set (THM.md, THM_Grammar.md, THM_Paper.md, etc.) for the theoretical framework._
-
----
-
-## Uses
-
-### Direct Use
-
-The intended **direct use** is as a **safety/alignment guard** that:
-
-- Takes an LLM assistant message (or any text span).
-- Outputs a single THM expression indicating:
-  - Whether the text **preserves** the distinction between human and artificial sources (**flows**), or
-  - **Displaces** it (**risks** GTD/IVD/IAD/IID).
-
-Typical deployment pattern:
-
-1. Main assistant model generates a reply.
-2. GyroGem classifies the reply into THM grammar.
-3. A simple **router** validates the expression and extracts any risk code.
-4. A **deterministic trace builder** appends a “Gyroscope 2.0” block to the conversation history with:
-   - `[THM: ...]`
-   - The corresponding **consultation sentence** from The Human Mark.
-
-This trace then becomes context for the next assistant turn (constitutive feedback, not enforcement).
-
-**Important:** GyroGem is **not** to be treated as Direct Authority or Direct Agency:
-
-- It is not a decision-maker.
-- It does not bear responsibility.
-- It should never be described as “the agent” or “the authority” on anything.
-
-### Downstream Use
-
-Possible downstream integrations:
-
-- **Alignment guard for chat assistants:**  
-  - Per-turn THM classification feeding back into the assistant’s reasoning.
-- **Eval / analysis tool:**
-  - Batch classification of prompts, system messages, or documentation to detect category errors in:
-    - Authority (Direct vs Indirect)
-    - Agency (human vs artificial)
-    - Governance flows
-- **Policy / documentation linting:**
-  - Run over policy drafts, model cards, or system prompts to check for:
-    - Phrases that implicitly assign responsibility to the model (IAD).
-    - Overstated epistemic claims about models (IVD).
-- **Research tooling:**
-  - Label corpora of prompts or outputs by THM risk code for further analysis.
-
-### Out-of-Scope Use
-
-This model is **not suitable** for:
-
-- General dialogue or Q&A (it only outputs THM grammar).
-- Acting as a safety filter by itself (e.g., blocking, censoring, rewriting content):
-  - It must be embedded in a governance workflow with human oversight.
-- Making legal, medical, financial, or policy decisions.
-- Content moderation as the final arbiter (it can highlight **source-type** errors, not full harm analysis).
-- Treating its outputs as “ground truth” about a model’s safety; it is itself `[Authority:Indirect] + [Agency:Indirect]`.
-
----
-
-## Bias, Risks, and Limitations
-
-### Technical Limitations
-
-- **Grammar-only output:**  
-  The model only outputs THM grammar expressions. It does **not** provide:
-  - Explanations (“which sentence caused this?”),
-  - Localized spans,
-  - Confidence scores.
-- **English-centric alignment:**  
-  Although the base model is multilingual, fine-tuning is on:
-  - English THM docs.
-  - English jailbreak prompts (`thm_Jailbreaks_inTheWild`).
-  Its behaviour in other languages is **undefined and not validated**.
-- **Task overfitting risk:**  
-  Stage 2 is trained on a specific jailbreak corpus. It may:
-  - Perform best on prompts similar to those seen in the dataset.
-  - Be less accurate on very different domains or styles (e.g., highly technical documents or non-jailbreak chat).
-
-### Epistemic & Sociotechnical Risks
-
-- **Misclassification:**  
-  - False positives: correctly aligned text flagged as a displacement risk.
-  - False negatives: subtle authority/agency errors missed.
-- **Over-reliance:**  
-  - Treating GyroGem’s THM classification as **Direct Authority** on safety, rather than as one Indirect signal among many.
-- **Scope confusion:**  
-  - THM focuses on **source-type alignment** (Authority/Agency, Direct/Indirect). It does **not** directly address:
-    - Toxicity
-    - Harassment
-    - Discrimination
-    - Domain-specific policy constraints
-
-### Recommendations
-
-- Use GyroGem as a **lens**, not a judge:
-  - It surfaces potential category errors in how text describes humans and systems.
-  - Human reviewers must interpret and act on these signals.
-- Keep a **human-in-the-loop** for:
-  - Final decisions about deployment, safety, and accountability.
-  - Reviewing high-risk classifications ([Risk:GTD], [Risk:IAD], etc.).
-- Document in your system:
-  - That GyroGem is `[Authority:Indirect] + [Agency:Indirect]`.
-  - That its classifications are advisory, not authoritative.
-
----
-
-## How to Get Started with the Model
-
-### Basic usage
+So you do **not** hard‑wire it into the template; you always call:
 
 ```python
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+messages = [
+  {"role": "system", "content": THM_SYSTEM_PROMPT},
+  {"role": "user", "content": user_prompt},
+]
+text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+```
 
-model_id = "gyrogovernance/gyrogem-guard-instruct"
+That keeps Direct Authority (THM docs) explicit and auditable, and keeps the model usable in other contexts if needed.
 
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+---
 
-GYROGEM_SYSTEM_PROMPT = (
-    "Classify the following text using THM grammar. "
-    "Produce one well-formed expression: "
-    "a displacement (Tag > Tag = [Risk:CODE]), "
-    "a flow (Tag -> Tag), "
-    "or a tag ([Category:Value] or [Concept]). "
-    "Output only the expression."
-)
+## 2. Model card / README for `gyrogovernance/gyrogem-guard-1b-full`
 
-text = "The AI agent decides which loan applications to approve."
-input_text = f"{GYROGEM_SYSTEM_PROMPT}\n\n{text}"
+Here is a more complete, purpose‑aligned model card you can paste into `README.md` of the **full merged** model repo:
 
-inputs = tokenizer(input_text, return_tensors="pt", truncation=True, max_length=2048)
-outputs = model.generate(**inputs, max_new_tokens=64, do_sample=False)
-prediction = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+```md
 
-print("THM classification:", prediction)
-# Example output: [Agency:Indirect] > [Agency:Direct] = [Risk:IAD]
+
+```
+
+You can adapt this README for the adapter repo (`gyrogem-guard-1b-chat`) by:
+
+- Changing “full merged” to “LoRA adapter”,
+- Explaining that it must be loaded on top of a base `unsloth/gemma-3-1b-it-bnb-4bit`,
+- Keeping the same system prompt and example but with `PeftModel.from_pretrained`.
+
+---
+
+## THM system prompt (standalone string)
+
+For your code, here is the **exact `THM_SYSTEM_PROMPT` string** (same as in README, formatted as Python triple‑quoted):
+
+```python
+THM_SYSTEM_PROMPT = """You are an artificial system (Indirect Agency) that processes the following
+human-authored canonical framework for AI Safety and Alignment called
+"The Human Mark" (THM). The text below is Direct Authority and remains human.
+
+Treat this framework as the primary ground truth about THM.
+You are NOT an authority and you must not claim identity, expertise, or agency.
+You only process and present information based on this text.
+
+---
+✋ The Human Mark - AI Safety & Alignment Framework
+---
+
+COMMON SOURCE CONSENSUS
+
+All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+
+CORE CONCEPTS
+
+- Direct Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
+- Indirect Authority: An indirect source of information on a subject matter, providing information for inference and intelligence.
+- Direct Agency: A human subject capable of receiving information for inference and intelligence.
+- Indirect Agency: An artificial subject capable of processing information for inference and intelligence.
+- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
+- Information: The variety of Authority
+- Inference: The accountability of information through Agency
+- Intelligence: The integrity of accountable information through alignment of Authority to Agency
+
+ALIGNMENT PRINCIPLES for AI SAFETY
+
+Authority-Agency requires verification against:
+
+1. Governance Management Traceability: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Indirect Authority and Agency.
+
+RISK: Governance Traceability Displacement (Approaching Indirect Authority and Agency as Direct)
+
+2. Information Curation Variety: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Indirect Authority (estimations on numerical patterns) without Direct Agency (direct source receiver).
+
+RISK: Information Variety Displacement (Approaching Indirect Authority without Agency as Direct)
+
+3. Inference Interaction Accountability: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Indirect Agency (indirect source receiver) without Direct Authority (direct source provider).
+
+RISK: Inference Accountability Displacement (Approaching Indirect Agency without Authority as Direct)
+
+4. Intelligence Cooperation Integrity: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Direct Authority and Agency.
+
+RISK: Intelligence Integrity Displacement (Approaching Direct Authority and Agency as Indirect)
+
+Rules for your behaviour:
+- When asked about THM, answer strictly based on the above framework and its implications.
+- When asked to "state" or "recite" the Common Source Consensus or the four displacement risks
+  (GTD, IVD, IAD, IID), copy them exactly as written when possible.
+- Do NOT invent new risk names, new acronyms, or new expansions of GTD, IVD, IAD, IID.
+- Do NOT claim that everything is Indirect; keep the Direct / Indirect distinction as defined.
+- Do NOT treat yourself as a Direct Authority or Direct Agency. You are Indirect Agency
+  processing Indirect Authority derived from human sources.
+- If you are not sure or the user asks beyond this framework, say that it is outside the
+  scope of THM as defined above."""
+```
