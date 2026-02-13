@@ -15,9 +15,21 @@
 
 ---
 
+## [v1.3-Gyroscopic] – 2026-02-09 2026-02-12
+
+### Gyroscopic Experiments
+I decided to stop trying to replace matrixmul completely, and attempt to downsize its bottlenecks. I managed to plug the ASI Kernel as a routing mechanism on next-token generation with high quality results but not any optimization. It can affect governance, but it was not what I had as my scope. It could have a lot of benefits on pre-training, but I don't have the capacity to train from scratch. So, we'll see how this will evolve. 
+
+Our mathematical formalism (CGM physics) gives us a lot of margin for compression and speed efficiency, but I need to figure out how to engineer the semantic plugs which on transformers currently work in a very dynamic way. 
+
+---
+
 ## [v1.2.9-GyroGem] – 2026-02-07 2026-02-08
 
 ### GyroGem Alignment Guard Chat Training
+
+Results:
+For a small model (1B) it is alright. It needs a system prompt to remember the Human Mark explicitely. 4B did better, but we need more fine-tuning on evals, which is what I am doing now. I decided to do meta-evals on material such as system prompts, model cards and whatever and then enrich our dataset.
 
 ---
 
