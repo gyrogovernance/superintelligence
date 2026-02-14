@@ -6,7 +6,7 @@ import numpy as np
 from numpy.typing import NDArray
 from pathlib import Path
 
-from ..router.kernel import RouterKernel
+from ..router.kernel import RouterKernel  # pyright: ignore[reportMissingImports]
 from .adaptor import GyroAdaptor
 from .lens import AdaptorLens, ContextBuilder, ContextState
 from .inference_core import InferenceState, InferenceRoles, InferenceEgress

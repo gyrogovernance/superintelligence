@@ -84,6 +84,22 @@ AIR applies the Router to two related coordination challenges.
 
 ---
 
+## 🤖 GyroLabe: AI Coordination
+
+GyroLabe is a coordination logistics system that couples high-dimensional AI models to the Router's finite geometric reference frame. It establishes a closed loop between a model's stochastic inference and the kernel's deterministic geometry.
+
+**How it works:**
+1. **Kernel Observables:** The kernel exposes discrete geometric coordinates (horizon, vertex, phase).
+2. **Projection Mask:** These coordinates shape a mask applied to the model's internal activations.
+3. **Logit Re-ranking:** Output probabilities are subtly biased by kernel geometry.
+4. **Token-to-Byte:** The sampled token drives the kernel to its next state.
+
+This creates **Topological Alignment**: the model's internal dynamics resonate with the kernel's structure without collapsing its generative capacity. It provides a shared, verifiable ledger of the generation trajectory and enables "shared moments" between distributed AI agents.
+
+See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mechanistic Interpretability Report](docs/reports/GyroLabe_MI_Tests_Report.md).
+
+---
+
 ![Moments Economy Cover Image](/assets/moments_cover.png)
 
 ## 💰 Moments Economy
@@ -105,6 +121,7 @@ See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Sp
 - **Understanding the kernel physics:** Start with [Kernel Specifications](docs/GGG_ASI_AR_Specs.md) and [Physics Tests Report](docs/reports/Physics_Tests_Report.md)
 - **Running the console:** Go to [AIR Console](#-quick-start) section below
 - **Exploring holography:** Start with [Holographic Algorithm Formalization](docs/GGG_ASI_AR_Holography.md) and [Holography Tests Report](docs/reports/Holography_Tests_Report.md)
+- **Coordinating LLMs:** See [GyroLabe: AI Coordination](docs/AIR_GyroLabe_Specs.md)
 - **Multi-agent experiments:** See the [SDK Network Specification](docs/GGG_ASI_AR_SDK_Network.md)
 - **Moments Economy:** See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md)
 
@@ -119,6 +136,7 @@ See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Sp
 - 🌐 [**Holographic Algorithm Formalization**](docs/GGG_ASI_AR_Holography.md) - Holographic architecture and boundary-to-bulk scaling
 - 🔗 [**SDK: Multi-Agent Holographic Networks**](docs/GGG_ASI_AR_SDK_Network.md) - Distributed coordination and experimentation specification
 - 🌐 [**SDK: The Holographic Web**](docs/GGG_ASI_AR_SDK_Holographic_Web.md) - Internet coordination architecture specification
+- 🤖 [**GyroLabe: AI Coordination Specs**](docs/AIR_GyroLabe_Specs.md) - Holographic coordination for LLMs
 
 ### Economic Architecture
 - 💰 [**Moments Economy Architecture Specification**](docs/AIR_Moments_Economy_Specs.md) - Monetary system based on physical capacity of the atomic standard
@@ -130,6 +148,7 @@ See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Sp
 - 📊 [**Holography Tests Report**](docs/reports/Holography_Tests_Report.md) - Verified holographic structure and boundary-to-bulk scaling
 - 📊 [**All Tests Results**](docs/reports/All_Tests_Results.md) - Comprehensive test suite results
 - 📊 [**Other Tests Report**](docs/reports/Other_Tests_Report.md) - Additional test coverage and validation
+- 📊 [**GyroLabe: Mechanistic Interpretability Report**](docs/reports/GyroLabe_MI_Tests_Report.md) - Empirical results on topological alignment and coupling
 
 ### Supporting Theory
 - 📖 [**Common Governance Model (CGM)**](docs/references/CGM_Paper.md) - Theoretical foundations
@@ -153,6 +172,7 @@ If you're evaluating this work for research, policy, or implementation:
 
 - `src/router/` kernel physics, atlas builder, kernel runtime
 - `src/app/` coordinator, governance events, domain ledgers, aperture
+- `src/tools/` GyroLabe coordination system and analysis tools
 - `src/plugins/` analytics helpers, adapters, framework connectors
 - `docs/` specifications and notes
 - `tests/` exhaustive kernel and measurement verification

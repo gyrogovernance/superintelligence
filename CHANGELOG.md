@@ -15,7 +15,84 @@
 
 ---
 
-## [v1.3-Gyroscopic] – 2026-02-09 2026-02-12
+## [v1.3.1-GyroLabe] – 2026-02-14
+
+## GyroLabe Formalization & Consolidation
+
+This release marks the formal consolidation of the **GyroLabe Holographic Coordination System**. We transitioned from experimental scripts to a rigorous mathematical formalism (CGM physics) where the GGG ASI Kernel acts as a geometric governor for the transformer. Instead of attempting to replace matrix multiplication entirely, we focused on downsizing bottlenecks by plugging the kernel as a routing mechanism on next-token generation.
+
+We established a "common language" protocol where the kernel and model communicate via discrete bytes rather than arbitrary activation energies. The result is a closed-loop system where the kernel's geometry steers inference without destroying fluency, backed by extensive testing and 66 passing pytests.
+
+### Starting Point
+We began with `test_gyro_2.py`, an experimental script coupling the GGG ASI Router kernel to a transformer. The kernel produced masks over hidden dimensions, applied them to token representations, and extracted bytes from activations to advance kernel state. Multiple projection modes existed (circular, code, wedge, holographic, dynamic), but the coupling was ad-hoc and the two systems lacked a shared protocol.
+
+### What Failed
+
+**Strong masks caused "brain damage"**
+- Direct masking of input `x` with geometry-rich masks led to severe perplexity degradation (+1.3 to +1.7)
+- Outputs degenerated ("the the the...")
+- Mask gains of 4-6× on some positions destroyed model coherence
+- The kernel geometry and model's internal coordinates had no meaningful correspondence
+
+**Metric mixing and wrong injection points**
+- Using code distance (Hamming on 12-bit masks) while rolling by phase index mixed incompatible geometries
+- Masking the MLP input `x` (4096d) wasn't natural—the hidden dimension 11008 = 256 × 43 better matches the kernel's boundary structure
+
+**Extraction-driven kernel stepping**
+- Bytes extracted from activations coupled the kernel to noisy proxies of internal activity
+- Two very different spaces (internal activations vs kernel code) entangled with no common language
+
+### Key Insights
+
+**Common language is discrete: token → byte**
+- Both systems are binary, power-of-2 structured (kernel: 256 horizon / 65,536 ontology; model: 4096 = 256 × 16)
+- Transformers know token IDs and probabilities; kernel speaks bytes (0-255)
+- Natural translation: `byte = token_id & 0xFF`
+- This is the native byte formalism—the only clean shared interface
+
+**Coordinate choice matters more than mask sophistication**
+- Moved masking from input `x` to MLP intermediate `z = silu(gate_proj(x)) * up_proj(x)`
+- Hidden dim 11008 = 256 × 43 matches kernel's boundary size (256) and fiber dimension (43)
+- Mask applied on 256 boundary dimension, broadcast over 43 feature channels
+
+### What Worked
+
+**Dynamic physics-driven mask on SwiGLU hidden layer**
+- Metric: code distance (Hamming) in mask-code space
+- Sigma chosen by vertex charge χ (Governance tighter, Information looser)
+- Strength modulated gently by byte weight w (0..12)
+- Normalized to mean 1 with small α—acts as lens (reallocation) not attenuator (destruction)
+
+**Token-driven kernel stepping**
+- Kernel advances only via tokens: prompt primed with `prime_from_tokens(prompt_ids)`, generation advances with `advance_with_token(next_tok)`
+- Extraction from activations became pure telemetry (h_peak, peak_mass, correlation with mask)
+- Closed loop: kernel state → projection mask → model inference → token → byte → kernel state
+
+### Results
+
+**Dynamic mode emerged as clear winner across sweep:**
+- Governance prompt: Δppl = −0.75 (baseline 2.49 → coordinated 1.74)
+- 3D Structure prompt: Δppl = −0.17 to −0.41 (correlation ~0.65)
+- Math prompt: Δppl = +0.84 (a cost, but qualitatively coherent)
+- Average Δppl ≈ −0.10 across prompts (net gain)
+
+**Geometry became content-sensitive**
+- Structurally aligned prompts (governance, 3D) improved under kernel's geometric bias
+- Misaligned semantic regimes (some math discourse) saw degradation
+- High correlation no longer meant damage—for 3D, corr≈0.65 with PPL improvement
+
+### Published Artifacts
+- `src/tools/gyrolabe.py` - consolidated implementation
+- `tests/gyrolabe/test_gyrolabe.py` - 66 passing pytests
+- `scripts/run_gyrolabe.py` - runner with sweep capability
+- `docs/AIR_GyroLabe_Specs.md` - theoretical formalization
+
+### Architecture Summary
+The kernel and transformer now share a byte language. Kernel is advanced only by token choices. Masks are geometry-derived, applied in factored space (256 × 43). Extraction is telemetry confirming how much the model "listens." The coupling demonstrably improves some generations and leaves others nearly unchanged—exactly what an overseer, not a controller, should do.
+
+---
+
+## [v1.3-GyroLabe] – 2026-02-09 2026-02-12
 
 ### Gyroscopic Experiments
 I decided to stop trying to replace matrixmul completely, and attempt to downsize its bottlenecks. I managed to plug the ASI Kernel as a routing mechanism on next-token generation with high quality results but not any optimization. It can affect governance, but it was not what I had as my scope. It could have a lot of benefits on pre-training, but I don't have the capacity to train from scratch. So, we'll see how this will evolve. 
