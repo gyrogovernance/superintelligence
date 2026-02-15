@@ -84,17 +84,17 @@ AIR applies the Router to two related coordination challenges.
 
 ---
 
-## 🤖 GyroLabe: AI Coordination
+## 🤖 GyroLabe: AI Mechanistic Calibration
 
-GyroLabe is a coordination logistics system that couples high-dimensional AI models to the Router's finite geometric reference frame. It establishes a closed loop between a model's stochastic inference and the kernel's deterministic geometry.
+GyroLabe is a mechanistic calibration instrument for generative models. It functions as a feedback control system, providing active balance support to stabilize neural activations during inference.
 
-**How it works:**
-1. **Kernel Observables:** The kernel exposes discrete geometric coordinates (horizon, vertex, phase).
-2. **Projection Mask:** These coordinates shape a mask applied to the model's internal activations.
-3. **Logit Re-ranking:** Output probabilities are subtly biased by kernel geometry.
-4. **Token-to-Byte:** The sampled token drives the kernel to its next state.
+The system acts as a neuro-symbolic bridge. It couples the model's stochastic, continuous latent space to the Router's discrete, finite geometric structure.
 
-This creates **Topological Alignment**: the model's internal dynamics resonate with the kernel's structure without collapsing its generative capacity. It provides a shared, verifiable ledger of the generation trajectory and enables "shared moments" between distributed AI agents.
+**Core Objectives:**
+1. **Logit Dynamic Stability:** It constrains the generation trajectory, preventing collapse or drift by anchoring it to a deterministic state machine.
+2. **Mechanistic Balance Steering:** It injects calculated "weight" into specific neural pathways via projection masks and logit re-ranking.
+
+This establishes **Topological Alignment**: the model's internal dynamics resonate with the kernel's structure without collapsing its generative capacity. It provides a shared, verifiable ledger of the generation trajectory.
 
 See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mechanistic Interpretability Report](docs/reports/GyroLabe_MI_Tests_Report.md).
 

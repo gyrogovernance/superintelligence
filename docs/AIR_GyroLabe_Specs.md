@@ -1,7 +1,25 @@
-# GyroLabe: Holographic Coordination Logistics System  
-## Technical Specification
+# GyroLabe: An AI Mechanistic Calibration Instrument
+**Neural Activation Coordination and Guidance**
 
-### 1. System Overview
+## 1. Technical Specification - Overview
+
+GyroLabe is a **mechanistic calibration instrument** for artificial intelligence models. It functions as a **feedback control system**, providing active balance support to stabilize neural activations during inference.
+
+The system acts as a **neuro-symbolic bridge**. It couples the model's stochastic, continuous latent space to a discrete, finite geometric structure.
+
+By imposing a rigid geometric reference frame onto the fluid activations of the model, GyroLabe achieves two objectives:
+
+1.  **Logit Dynamic Stability:** It constrains the model's generation trajectory, preventing collapse or drift (hallucination) by anchoring it to a deterministic state machine.
+2.  **Mechanistic Balance Steering:** It injects calculated "weight" into specific neural pathways, ensuring that the model's output remains structurally consistent with the reference geometry.
+
+Unlike training-based alignment (RLHF), GyroLabe operates purely at inference time. It does not alter the model's weights but rather steers the flow of information through the network, much like a governor on a mechanical engine.
+
+**Objective:**
+The primary goal is to constrain the high-entropy "hallucination" space of generative models without sacrificing their creative capability. GyroLabe ensures that while the content remains flexible, the **trajectory of activations** adheres to a stable, reproducible geometric logic.
+
+---
+
+### 1.1 Routing
 
 GyroLabe couples a generative language model to a finite, discrete geometric reference frame.
 
@@ -12,7 +30,7 @@ The reference frame is the **GGG ASI Alignment Router Kernel**, a deterministic 
 
 The kernel does not interpret meaning. It transforms bytes through fixed-width bit operations and exposes geometric observables. The model remains stochastic. GyroLabe biases the model's inference using kernel geometry, while the kernel advances deterministically from the model's sampled tokens.
 
-#### 1.1 Closed loop (per generated token)
+#### 1.2 Closed loop (per generated token)
 
 At each inference step:
 
@@ -22,7 +40,7 @@ At each inference step:
 4. **Sample token:** model samples a token (stochastic inference preserved).  
 5. **Token → byte → kernel:** driving byte = (token_id & 0xFF) advances the kernel.
 
-#### 1.2 Common Language and byte streams
+#### 1.3 Common Language and byte streams
 
 **Common Language (token → byte)**  
 - Driving byte: `byte = token_id & 0xFF`  
@@ -33,11 +51,11 @@ At each inference step:
 - **Driving byte stream:** derived from sampled tokens, advances the kernel.  
 - **Extracted byte stream:** derived from activations, recorded as telemetry only. It does not advance the kernel.
 
-#### 1.3 Scope
+#### 1.4 Scope
 
 GyroLabe uses only the kernel physics layer of the router system. It does not include application governance components such as domain ledgers, governance events, coordinator plugins, or external Hodge decompositions.
 
-#### 1.4 Model compatibility (reference implementation)
+#### 1.5 Model compatibility (reference implementation)
 
 The GyroLabe formalism is model-agnostic, but the reference implementation targets transformer families with LLaMA/OLMo/Mistral-like structure.
 

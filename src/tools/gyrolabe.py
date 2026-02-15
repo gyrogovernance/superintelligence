@@ -1,6 +1,6 @@
 # src/tools/gyrolabe.py
 """
-GyroLabe: Holographic Coordination Logistics System.
+GyroLabe: An AI Calibration Instrument.
 
 Couples a generative AI model to the GGG ASI Alignment Router Kernel,
 establishing a closed-loop coordination cycle between the model's
@@ -318,7 +318,7 @@ class RoutedMLP(nn.Module):
 
 
 class GyroLabe:
-    """Holographic Coordination Logistics System.
+    """An AI Calibration Instrument.
 
     Couples a generative AI model to the GGG ASI Alignment Router Kernel.
     
