@@ -45,13 +45,13 @@ class CoordinationStatus:
 # SI second definition: caesium-133 hyperfine transition frequency
 ATOMIC_HZ_CS133: int = 9_192_631_770
 
-# Router ontology size (proven as C × C where |C| = 256)
+# Router ontology size (proven as C x C where |C| = 256)
 OMEGA_SIZE: int = 65_536
 
 
 def raw_microcells_per_moment() -> float:
     """
-    N_phys = (4/3)π f_Cs³
+    N_phys = (4/3)pi f_Cs^3
     
     Raw physical microcells in 1-second light-sphere volume at atomic wavelength resolution.
     The speed of light cancels exactly (proven in test_moments_2.py).
@@ -62,18 +62,18 @@ def raw_microcells_per_moment() -> float:
 
 def csm_total_mu() -> float:
     """
-    CSM = N_phys / |Ω|
+    CSM = N_phys / |Omega|
     
     Total Common Source Moment capacity in MU.
     
     This is the TOTAL structural capacity, derived from the volume of a 1-second 
     light-sphere at atomic resolution (N_phys), coarse-grained by the Router 
-    ontology size (|Ω| = 65,536).
+    ontology size (|Omega| = 65,536).
     
     The "1 second" is consumed in the derivation of N_phys; CSM is not a rate 
     and does not accumulate over time. It is a fixed total capacity.
     
-    The uniform division by |Ω| is forced by symmetry: the Router's transitive 
+    The uniform division by |Omega| is forced by symmetry: the Router's transitive 
     group action plus physical isotropy of the light-sphere require uniform 
     coarse-graining. This is the unique symmetry-invariant measure (proven in 
     test_moments_2.py).
@@ -151,8 +151,8 @@ class Coordinator:
                 confidence_micro=ev.confidence_micro,
                 meta=dict(ev.meta),  # Copy dict to preserve audit trail immutability
                 kernel_step=self.kernel.step,
-                kernel_state_index=self.kernel.state_index,
-                kernel_last_byte=self.kernel.last_byte,
+                kernel_state_index=int(self.kernel.state_index[0]),
+                kernel_last_byte=int(self.kernel.last_byte[0]),
             )
 
         self.ledgers.apply_event(ev)
@@ -179,7 +179,7 @@ class Coordinator:
             "state_hex": sig.state_hex,
             "a_hex": sig.a_hex,
             "b_hex": sig.b_hex,
-            "last_byte": self.kernel.last_byte,
+            "last_byte": int(self.kernel.last_byte[0]),
             "byte_log_len": len(self.byte_log),
             "event_log_len": len(self.event_log),
         }
@@ -406,7 +406,7 @@ class Coordinator:
                 break
             b = self.byte_log.pop()
             self.kernel.step_byte_inverse(b)
-        self.kernel.last_byte = self.byte_log[-1] if self.byte_log else GENE_MIC_S
+        self.kernel.last_byte[:] = self.byte_log[-1] if self.byte_log else GENE_MIC_S
         assert self.kernel.step == len(self.byte_log)
 
     def sign_bundle(self, bundle_json_bytes: bytes, private_key: Any) -> bytes:
@@ -498,4 +498,3 @@ class Coordinator:
                     counts["education"] += 1
         
         return counts
-

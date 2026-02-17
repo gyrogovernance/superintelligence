@@ -70,14 +70,14 @@ class AtlasPaths:
 
 
 # Atlas version - increment when build method or constants change incompatibly
-ATLAS_VERSION = "2.0"
+ATLAS_VERSION = "2.1"
 
 
 def build_ontology(paths: AtlasPaths) -> NDArray[np.uint32]:
     """
-    Build ontology directly as A_set × B_set using proven closed-form algebra.
+    Build ontology directly as A_set x B_set using proven closed-form algebra.
 
-    By Property P3, Ω = A_set × B_set where:
+    By Property P3, Omega = A_set x B_set where:
     - A_set = {ARCHETYPE_A12 XOR m_b : b in [0,255]} (256 elements)
     - B_set = {ARCHETYPE_B12 XOR m_b : b in [0,255]} (256 elements)
     """
@@ -142,7 +142,6 @@ def build_epistemology(paths: AtlasPaths, ontology: NDArray[np.uint32]) -> NDArr
     print(f"Epistemology complete: [{n:,}, 256] lookup table")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
 
-    # Return the memmap; build_phenomenology can index it directly.
     return epi
 
 
@@ -160,6 +159,7 @@ def build_phenomenology(
     - Spectral phase cube: phase[state, byte]
     - Backward-pass observables: next_horizon, next_vertex, next_phase
     - Helper arrays: mask12_by_byte, byte_weight, byte_charge
+    - Feature matrices for various K values
     """
     print("Building phenomenology (spectral atlas)...")
     n = len(ontology)
@@ -202,7 +202,6 @@ def build_phenomenology(
             if seen[start]:
                 continue
 
-            # Follow the cycle in the permutation perm
             cycle: list[int] = []
             x = int(start)
             while not seen[x]:
@@ -210,14 +209,12 @@ def build_phenomenology(
                 cycle.append(x)
                 x = int(perm[x])
 
-            # Rotate to canonical anchor (smallest state_index)
             anchor = min(cycle)
             k = cycle.index(anchor)
             cycle = cycle[k:] + cycle[:k]
 
             cycle_len = len(cycle)
 
-            # Cycle-length sanity checks (directly from perm)
             if b != GENE_MIC_S:
                 if cycle_len != 4:
                     raise RuntimeError(f"Byte {b} produced cycle length {cycle_len}, expected 4")
@@ -225,14 +222,12 @@ def build_phenomenology(
                 if cycle_len not in (1, 2):
                     raise RuntimeError(f"Reference byte {b} produced cycle length {cycle_len}, expected 1 or 2")
 
-            # Assign phase positions
             for p, s in enumerate(cycle):
                 phase[s, b] = p
 
         if (b + 1) % 64 == 0:
             print(f"    Phase computed for {b + 1:,} / 256 bytes")
 
-        # Phase value sanity checks
         max_phase = int(phase[:, b].max())
         if b != GENE_MIC_S:
             if max_phase != 3:
@@ -250,20 +245,6 @@ def build_phenomenology(
     for b in range(256):
         next_phase[:, b] = phase[epistemology[:, b], b]
 
-    # Build gamma table for direction factor
-    print("  Computing gamma table...")
-    gamma_table = np.zeros((4, 4, 13), dtype=np.float32)
-    for chi_prev in range(4):
-        for chi_curr in range(4):
-            for w in range(13):
-                if chi_prev == chi_curr:
-                    sign = 0.5
-                elif (chi_prev ^ chi_curr) == 3:
-                    sign = -1.0
-                else:
-                    sign = 1.0
-                gamma_table[chi_prev, chi_curr, w] = sign * (w / 12.0 + 0.1)
-
     # Build byte feature matrices for all supported K values
     print("  Computing byte feature matrices...")
     K_VALUES = (1, 2, 3, 4, 6, 8, 12, 16, 43)
@@ -275,7 +256,7 @@ def build_phenomenology(
             F[b, :] = _byte_feature_vector(b, K, mask12_by_byte)
         feature_matrices[f"features_K{K}"] = F
 
-    # Save all to phenomenology.npz (uncompressed for fast load)
+    # Save all to phenomenology.npz
     print("  Saving phenomenology.npz...")
     np.savez(
         paths.phenomenology,
@@ -302,10 +283,8 @@ def build_phenomenology(
         next_horizon=next_horizon,
         next_vertex=next_vertex,
         next_phase=next_phase,
-        # Direction factor table
-        gamma_table=gamma_table,
         # Feature matrices
-        **feature_matrices,  # type: ignore
+        **feature_matrices,  # pyright: ignore[reportArgumentType]
     )
 
     file_size = paths.phenomenology.stat().st_size
@@ -376,42 +355,31 @@ def _byte_feature_vector(byte: int, K: int, mask12_by_byte: NDArray[np.uint16]) 
         return out
 
     if K == 43:
-        # K=43 matches OLMo MLP intermediate: 11008 = 256 * 43
-        # Structure: 12 mask bits + 16 syndrome bits + 15 aggregates = 43
         out = np.zeros(43, dtype=np.float32)
 
-        # [0:12] Raw mask bits
         out[:12] = bits12
 
-        # [12:28] Syndrome bits against dual code C_PERP_12
         for i, v in enumerate(C_PERP_12):
             dot = popcount(m12 & v) & 1
             out[12 + i] = float(dot) * 2.0 - 1.0
 
-        # [28:34] Frame-row pair means (6 dims)
         frame_row_pairs = ((0, 1), (2, 3), (4, 5), (6, 7), (8, 9), (10, 11))
         for k, (i, j) in enumerate(frame_row_pairs):
             out[28 + k] = (bits12[i] + bits12[j]) / 2.0
 
-        # [34:37] Row means across frames (3 dims)
         row_groups = ((0, 1, 6, 7), (2, 3, 8, 9), (4, 5, 10, 11))
         for k, idxs in enumerate(row_groups):
             out[34 + k] = sum(bits12[i] for i in idxs) / 4.0
 
-        # [37:39] Frame means (2 dims)
         out[37] = np.mean(bits12[0:6])
         out[38] = np.mean(bits12[6:12])
 
-        # [39] Overall mean
         out[39] = np.mean(bits12)
 
-        # [40] Overall parity
         out[40] = float(popcount(m12) & 1) * 2.0 - 1.0
 
-        # [41] Vertex charge bit
         out[41] = float(vertex_charge_from_mask(m12) & 1) * 2.0 - 1.0
 
-        # [42] Frame parity difference
         p0 = popcount(m12 & 0x03F) & 1
         p1 = popcount((m12 >> 6) & 0x03F) & 1
         out[42] = float(p0 ^ p1) * 2.0 - 1.0
@@ -423,7 +391,7 @@ def _byte_feature_vector(byte: int, K: int, mask12_by_byte: NDArray[np.uint16]) 
 
 def build_all(base_dir: Path) -> None:
     paths = AtlasPaths(base=base_dir)
-    print("Atlas Builder v2.0")
+    print("Atlas Builder v2.1")
     print("==================")
     t0 = time.time()
 

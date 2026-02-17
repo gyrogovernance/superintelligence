@@ -15,6 +15,84 @@
 
 ---
 
+## [v1.3.2-GyroLabe] – 2026-02-16
+
+Removed logit re-ranking from GyroLabe. Added differential mask modulation based on gauge transport distance. The kernel now steers only through activation masking.
+
+### Successful Experiments
+
+The ablation experiments revealed that re-ranking and masking interact destructively. The mask changes the model's internal representation, which shifts which tokens appear in top-k. Re-ranking then pushes those already-distorted candidates further based on kernel geometry. The compounded effect caused perplexity explosion (1.88 to 4.51 on governance).
+
+Re-ranking alone was nearly neutral (1.89 vs 1.88 baseline), confirming the damage came from the interaction, not from re-ranking in isolation.
+
+### Why Differential Masking Works
+
+The differential mask modulates strength based on transition distance in code space:
+
+```
+diff_scale = 0.5 + 0.5 * (td / 12)
+mask = 1 + diff_scale * (mask - 1)
+```
+
+Where `td` is the Hamming distance between consecutive horizon masks. This connects to the kernel's gauge structure: the transition distance is the same quantity that appears in the commutator and monodromy constructions.
+
+When the kernel takes a small step (low td), the mask stays close to 1.0. When it takes a large step, the mask applies at full strength. This prevents over-steering when the kernel state is stable and allows stronger guidance during transitions.
+
+### Krawtchouk Spectral Analysis
+
+We decomposed the Gaussian mask profiles into Krawtchouk polynomial basis (the natural orthogonal basis for radial functions on Hamming space). Results showed 95% of energy in 2-4 components across all (chi, p) settings, confirming the masks are spectrally low-order. This validates the Gaussian choice but also suggests future optimization: replacing exp() with a 3-term Krawtchouk sum would be algebraically exact and computationally cheaper.
+
+## Code Changes
+
+### gyrolabe.py
+
+- Removed `_rerank_topk_logits_kernel_native` function
+- Removed re-ranking call from `generate()`
+- Added `_build_gaussian_lut()` and `_GAUSSIAN_LUT` (precomputed 4x4x13 table replacing runtime exp())
+- Changed `compute_mask()`: added `prev_h` parameter for differential modulation, removed `n_fiber` parameter (mask is now shape [256], broadcast happens at application site)
+- Changed `RoutedMLP`: receives mask via `set_mask()`, applies [256] mask broadcast across n_feat
+- Changed `GyroLabe`: tracks `_prev_h` for differential modulation
+
+### kernel.py
+
+- Removed `gamma_table` from required helpers
+
+### atlas.py
+
+- Removed `gamma_table` computation and storage
+
+## Experimental Results
+
+Tested on OLMo-3-7B with 200 tokens, seed=42:
+
+| Mode | Governance PPL | Geometry PPL |
+|------|----------------|--------------|
+| Baseline | 1.88 | 1.37 |
+| Standard (mask + rerank) | 4.51 | 1.63 |
+| Mask only | 2.48 | 1.40 |
+| Rerank only | 1.89 | 1.95 |
+| Differential | 2.23 | 1.34 |
+
+Structural invariants held across all modes: mean_code_dist near 6.0, horizon entropy near 7 bits, positive correlation (0.4-0.6).
+
+## What Was Tested But Not Kept
+
+- Fiber modulation via features_K43: mixed results, adds complexity without clear benefit
+- Algebraic re-ranking with syndrome scores: no improvement, re-ranking remains harmful regardless of scoring function
+- Ternary mask approximation: high correlation (0.85-0.88) at threshold 0.05, but no runtime benefit since we use LUT anyway
+
+### Future Directions (Not Implemented Today)
+- Walsh spectrum on byte-domain:
+  A clean next step is to compute the 256-point Walsh-Hadamard transform of the mask profiles on the byte group directly (GF(2)^8), aligning exactly with your mask12_for_byte map, and then possibly designing masks by selecting low-frequency components.
+
+- Fiber-aware modulation revisited:
+  Now that the base architecture is stable, we can re-introduce a carefully scaled [256, 43] fiber mask on top of the D5 scalar mask and test again.
+
+- Syndrome diagnostics for pathologies:
+  Using C_PERP_12 and mask12_syndrome to spot “structurally unusual” byte sequences could be turned into real-time warnings for misaligned trajectories.
+
+---
+
 ## [v1.3.1-GyroLabe] – 2026-02-14
 
 ## GyroLabe Formalization & Consolidation

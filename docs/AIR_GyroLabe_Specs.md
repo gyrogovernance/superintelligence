@@ -9,7 +9,7 @@ The system acts as a **neuro-symbolic bridge**. It couples the model's stochasti
 
 By imposing a rigid geometric reference frame onto the fluid activations of the model, GyroLabe achieves two objectives:
 
-1.  **Logit Dynamic Stability:** It constrains the model's generation trajectory, preventing collapse or drift (hallucination) by anchoring it to a deterministic state machine.
+1.  **Activation Dynamic Stability:** It constrains the model's generation trajectory, preventing collapse or drift (hallucination) by anchoring it to a deterministic state machine.
 2.  **Mechanistic Balance Steering:** It injects calculated "weight" into specific neural pathways, ensuring that the model's output remains structurally consistent with the reference geometry.
 
 Unlike training-based alignment (RLHF), GyroLabe operates purely at inference time. It does not alter the model's weights but rather steers the flow of information through the network, much like a governor on a mechanical engine.
@@ -25,8 +25,8 @@ GyroLabe couples a generative language model to a finite, discrete geometric ref
 
 The reference frame is the **GGG ASI Alignment Router Kernel**, a deterministic finite-state machine with:
 
-- **States:** 65,536 (2¹⁶)  
-- **Actions:** 256 (one for each byte 0..255)  
+- **States:** 65,536 (2^16)
+- **Actions:** 256 (one for each byte 0..255)
 
 The kernel does not interpret meaning. It transforms bytes through fixed-width bit operations and exposes geometric observables. The model remains stochastic. GyroLabe biases the model's inference using kernel geometry, while the kernel advances deterministically from the model's sampled tokens.
 
@@ -34,21 +34,20 @@ The kernel does not interpret meaning. It transforms bytes through fixed-width b
 
 At each inference step:
 
-1. **Read kernel observables:** horizon h, vertex charge χ, phase p (and last-byte weight w).  
-2. **Projection:** compute a geometry-derived mask and apply it inside routed MLP layers.  
-3. **Sampling bias:** re-rank top-k logits using kernel geometry and an intrinsic aperture scale.  
-4. **Sample token:** model samples a token (stochastic inference preserved).  
-5. **Token → byte → kernel:** driving byte = (token_id & 0xFF) advances the kernel.
+1. **Read kernel observables:** horizon h, vertex charge chi, phase p (and last-byte weight w).
+2. **Projection:** compute a geometry-derived mask with differential modulation and apply it inside routed MLP layers.
+3. **Sample token:** model samples a token (stochastic inference preserved).
+4. **Token to byte to kernel:** driving byte = (token_id & 0xFF) advances the kernel.
 
 #### 1.3 Common Language and byte streams
 
-**Common Language (token → byte)**  
-- Driving byte: `byte = token_id & 0xFF`  
-- The mapping is **many-to-one**: many tokens share the same driving byte.  
+**Common Language (token to byte)**
+- Driving byte: `byte = token_id & 0xFF`
+- The mapping is **many-to-one**: many tokens share the same driving byte.
 - Every token maps to a valid kernel action.
 
-**Two recorded byte streams**  
-- **Driving byte stream:** derived from sampled tokens, advances the kernel.  
+**Two recorded byte streams**
+- **Driving byte stream:** derived from sampled tokens, advances the kernel.
 - **Extracted byte stream:** derived from activations, recorded as telemetry only. It does not advance the kernel.
 
 #### 1.4 Scope
@@ -61,7 +60,7 @@ The GyroLabe formalism is model-agnostic, but the reference implementation targe
 
 The reference implementation requires:
 
-- **Layer access:** `model.model.layers` exists and is indexable  
+- **Layer access:** `model.model.layers` exists and is indexable
 - **MLP structure:** routed layers expose a SwiGLU-style MLP with:
   - `gate_proj`, `up_proj`, `down_proj`
 - **Divisibility constraints:**
@@ -76,21 +75,21 @@ If these constraints are not met, the reference implementation raises errors rat
 
 #### 2.1 State space
 
-The kernel operates on a finite state space Ω with exactly 65,536 states.
+The kernel operates on a finite state space Omega with exactly 65,536 states.
 
 Each state is represented as two 12-bit components:
 
-- **A:** active component (12 bits)  
+- **A:** active component (12 bits)
 - **B:** passive component (12 bits)
 
-Each 12-bit component corresponds to a 2 × 3 × 2 binary grid.
+Each 12-bit component corresponds to a 2 x 3 x 2 binary grid.
 
 Let M be the kernel's 256-element 12-bit mask set. Then:
 
-- A_set = { archetype_A ⊕ m : m ∈ M }  
-- B_set = { archetype_B ⊕ m : m ∈ M }  
-- Ω = A_set × B_set  
-- ∣Ω∣ = 256 × 256 = 65,536  
+- A_set = { archetype_A XOR m : m in M }
+- B_set = { archetype_B XOR m : m in M }
+- Omega = A_set x B_set
+- |Omega| = 256 x 256 = 65,536
 
 The kernel is **byte-complete**: all bytes 0..255 are valid actions.
 
@@ -98,35 +97,35 @@ The kernel is **byte-complete**: all bytes 0..255 are valid actions.
 
 The kernel defines a distinguished subset called the Horizon H:
 
-- A state lies on the Horizon when: `A = B ⊕ 0xFFF`  
+- A state lies on the Horizon when: `A = B XOR 0xFFF`
 - There are exactly 256 Horizon states
 
 A verified discrete bijection (the Holographic Dictionary) relates bulk states to boundary structure in the form:
 
-- (horizon anchor, byte) ↔ bulk state  
+- (horizon anchor, byte) <-> bulk state
 
 This is "holographic" in the strict discrete sense of a bijection, not a physical claim.
 
 #### 2.3 Intrinsic invariants
 
-**Intrinsic aperture (A_kernel)**  
+**Intrinsic aperture (A_kernel)**
 The kernel's intrinsic aperture is:
 
-- A_kernel = 5/256 ≈ 0.01953
+- A_kernel = 5/256 approximately 0.01953
 
-This value arises from the mask code's weight distribution (probability of masks with weight ≤ 1). In GyroLabe, A_kernel is used as the global scale factor for logit re-ranking, ensuring the kernel's influence remains a small, geometry-grounded perturbation.
+This value arises from the mask code's weight distribution (probability of masks with weight at most 1). A_kernel characterizes the minimal sector of the defect weight distribution and serves as a structural invariant of the kernel physics.
 
-**Monodromy defect angle**  
-From the minimal nonzero mask weight sector under θ = arccos(1 − w/6):
+**Monodromy defect angle**
+From the minimal nonzero mask weight sector under theta = arccos(1 - w/6):
 
-- δ_kernel ≈ 0.1952 rad
+- delta_kernel approximately 0.1952 rad
 
 #### 2.4 Trajectory invariants (parity commitment)
 
-For a byte sequence producing masks m₁, m₂, …, mₙ:
+For a byte sequence producing masks m_1, m_2, ..., m_n:
 
-- O = m₁ ⊕ m₃ ⊕ m₅ ⊕ …  
-- E = m₂ ⊕ m₄ ⊕ m₆ ⊕ …  
+- O = m_1 XOR m_3 XOR m_5 XOR ...
+- E = m_2 XOR m_4 XOR m_6 XOR ...
 
 The final state depends only on the initial state, O, E, and n mod 2. The ordering of bytes within each parity class is irrelevant. The triple (O, E, parity) provides a compact integrity check for long ledgers.
 
@@ -138,32 +137,31 @@ Given the same archetype state and the same driving byte ledger prefix, all conf
 
 The kernel's runtime stepping and observables are provided by atlas artifacts.
 
-**Files (reference atlas build sizes)**  
-- `ontology.npy` (262,272 bytes): 65,536 reachable states  
-- `epistemology.npy` (67,108,992 bytes): 65,536 × 256 next-state index table  
-- `phenomenology.npz` (67,347,289 bytes): observables and lookup tables  
+**Files (reference atlas build sizes)**
+- `ontology.npy` (262,272 bytes): 65,536 reachable states
+- `epistemology.npy` (67,108,992 bytes): 65,536 x 256 next-state index table
+- `phenomenology.npz` (67,347,289 bytes): observables and lookup tables
 
-**phenomenology.npz contents**  
+**phenomenology.npz contents**
 The reference implementation expects per-state and per-byte lookup arrays sufficient to provide:
 
-- per-state observables: horizon, vertex, phase  
-- per-byte properties: byte_weight, byte_charge  
-- coupling table(s): gamma_table  
+- per-state observables: horizon, vertex, phase
+- per-byte properties: byte_weight, byte_charge
 - optional helper arrays may be present
 
 Kernel stepping at runtime is an O(1) table lookup:
 
 - `state_index = epistemology[state_index, byte]`
 
-**Concurrency**  
+**Concurrency**
 The atlas artifacts are immutable after loading. In multi-threaded or multi-process deployments, a single copy of the atlas can be shared via memory mapping (mmap) to minimize RAM usage. This is especially relevant when running multiple model replicas on the same host.
 
 #### 2.7 Verification
 
 The reference implementation is accompanied by unit and integration tests.
 
-- Kernel and atlas correctness are validated by router test suites and exhaustive transition checks during atlas build.  
-- GyroLabe coupling logic is validated by tests under `tests/gyrolabe/`, including mask computation, re-ranking stability, and telemetry range checks.  
+- Kernel and atlas correctness are validated by router test suites and exhaustive transition checks during atlas build.
+- GyroLabe coupling logic is validated by tests under `tests/gyrolabe/`, including mask computation and telemetry range checks.
 - Tests requiring atlas artifacts are skipped when artifacts are not present.
 
 ---
@@ -180,112 +178,109 @@ Reference implementation: `prime_from_tokens()` in `src/tools/gyrolabe.py`.
 
 At each step t, GyroLabe reads these kernel observables:
 
-- **Horizon index hₜ ∈ [0, 255]**  
-  Primary coordinate for projection and re-ranking.
+- **Horizon index h_t in [0, 255]**
+  Primary coordinate for projection.
 
-- **Vertex charge χₜ ∈ [0, 3]**  
-  K₄ vertex class for the current position; used as a wedge selector and width selector.
+- **Vertex charge chi_t in [0, 3]**
+  K_4 vertex class for the current position; used as a wedge selector and width selector.
 
-- **Phase pₜ ∈ [0, 3]**  
+- **Phase p_t in [0, 3]**
   Cycle phase of the last action; used as a modulation factor (not as a mask shift) in the reference implementation.
 
-- **Last-byte weight wₜ ∈ [0, 12]**  
+- **Last-byte weight w_t in [0, 12]**
   Hamming weight of the 12-bit mask of the most recently applied driving byte; scales projection strength.
 
-#### 3.3 Projection (kernel → model activations)
+#### 3.3 Projection (kernel to model activations)
 
 The reference implementation applies a mask inside routed MLP layers to the SwiGLU hidden activation:
 
-- z = silu(gate_proj(x)) ⊙ up_proj(x)
+- z = silu(gate_proj(x)) * up_proj(x)
 
 The intermediate hidden dimension is factored as:
 
-- hidden_dim = 256 × N_feat  
-  (example: OLMo uses hidden_dim = 11008 = 256 × 43)
+- hidden_dim = 256 x N_feat
+  (example: OLMo uses hidden_dim = 11008 = 256 x 43)
 
-**Boundary index interpretation**  
-Boundary index x ∈ {0..255} is treated as a byte-labeled code element. Distances are computed as Hamming distance in the kernel's 12-bit mask code.
+**Boundary index interpretation**
+Boundary index x in {0..255} is treated as a byte-labeled code element. Distances are computed as Hamming distance in the kernel's 12-bit mask code.
 
-**Mask computation (reference implementation behavior)**  
-- The mask is centered in code space at the current horizon index hₜ via distances = code_dist_matrix[hₜ, x].  
-- Phase pₜ modulates mask width (sigma), not the mask center.
+**Gaussian lookup table**
+The Gaussian base values are precomputed for all (chi, p, distance) triples. There are 4 chi values, 4 phase values, and 13 possible distances, giving 208 precomputed floats. At runtime, the mask is constructed by table lookup rather than computing the exponential function.
+
+**Mask computation (reference implementation behavior)**
+- The mask is computed once per token step in `begin_step()`, then broadcast to all routed MLP layers. This avoids redundant computation.
+- The mask is centered in code space at the current horizon index h via distances = code_dist_matrix[h, x].
+- Phase p modulates mask width (sigma), not the mask center.
+- The Gaussian base is looked up from the precomputed table indexed by (chi, p, distance).
+- The byte charge table used for the vertex wedge is the kernel's own `byte_charge` array, loaded from the atlas. GyroLabe does not rebuild this table.
+
+**Differential modulation**
+GyroLabe tracks the previous horizon index across steps. When the previous horizon is available, the transition distance in code space modulates the mask strength:
+
+1. Compute td = HammingDistance(mask(prev_h), mask(h)) in the 12-bit mask code.
+2. Compute diff_scale = 0.5 + 0.5 * (td / 12).
+3. Scale the mask deviation: mask = 1 + diff_scale * (mask - 1).
+
+When the transition distance is small (the kernel moved a short distance in code space), the mask is attenuated toward unity. When the transition distance is large, the mask applies at full or greater strength. On the first step of a sequence, no previous horizon is available and differential modulation is not applied.
+
+This connects the mask dynamics to the kernel's gauge structure: the transition distance td is determined by the XOR of consecutive masks, which is the same quantity that appears in the commutator and monodromy constructions.
 
 A readable step summary:
 
-1. **Code-space radius:** compute d(x) = HammingDistance(mask(hₜ), mask(x))  
-2. **Gaussian base:** mask_base(x) = exp(−0.5 · (d(x)/σ)²), with σ selected by χₜ and modulated by pₜ  
-3. **Vertex wedge:** boost positions whose byte charge matches χₜ  
-4. **Strength scaling:** blend toward 1 using a factor derived from wₜ  
-5. **Normalization:** scale so mean(mask) = 1 and broadcast across N_feat
+1. **Gaussian base:** look up precomputed values from table indexed by (chi, p, distance).
+2. **Vertex wedge:** boost positions whose byte charge matches chi.
+3. **Strength scaling:** blend toward 1 using a factor derived from w.
+4. **Differential modulation:** scale mask deviation by transition distance from previous horizon.
+5. **Normalization:** scale so mean(mask) = 1 and broadcast across N_feat.
 
-Reference implementation: `compute_mask()` and `RoutedMLP` in `src/tools/gyrolabe.py`.
+Reference implementation: `compute_mask()` in `src/tools/gyrolabe.py`. Mask is computed in `GyroLabe.begin_step()` and pushed to `RoutedMLP` layers via `set_mask()`.
 
-#### 3.4 Logit re-ranking (kernel → sampling surface)
-
-Before sampling, GyroLabe may re-rank the model's top-k logits using kernel geometry.
-
-**Scope and interface**  
-- Re-ranking is applied **only to top-k candidates**.
-- Candidate tokens are mapped to bytes by `byte = token_id & 0xFF`.
-
-**Scoring components**  
-- **Code distance:** d = HammingDistance(mask(hₜ), mask(byte))
-- **Alignment score:** align = 1.0 − (d / 12.0)
-- **Vertex compatibility:** bonus if candidate's byte charge matches χₜ
-- **Gamma interaction:** Γ[χ, q, w] is a precomputed tensor stored in the atlas. It encodes structural compatibility between the current vertex class χ, the candidate's byte charge q, and the candidate's mask weight w.
-
-**Adjustment scale**  
-- Δlogit is proportional to A_kernel and the spread of the top-k logits.
-- This keeps the effect a small perturbation, not an override.
-
-Reference implementation: `_rerank_topk_logits_kernel_native()` in `src/tools/gyrolabe.py`.
-
-#### 3.5 Token advancement (model → kernel)
+#### 3.4 Token advancement (model to kernel)
 
 After sampling:
 
-- driving_byteₜ = token_idₜ & 0xFF  
-- `kernel.step_byte(driving_byteₜ)`
+- driving_byte_t = token_id_t & 0xFF
+- `kernel.step_byte(driving_byte_t)`
 
 This is the only mechanism by which the kernel advances in the reference implementation.
 
 Reference implementation: `advance_with_token()` in `src/tools/gyrolabe.py`.
 
-#### 3.6 Extraction telemetry (model → analysis only)
+#### 3.5 Extraction telemetry (model to analysis only)
 
 GyroLabe extracts telemetry from activations to measure coupling quality. This telemetry does not affect kernel stepping.
 
-**Extraction mechanism**  
+**Extraction mechanism**
 The extraction of a byte from the activation peak follows a specific geometric heuristic:
 
 1. Reshape output activation to boundary form [batch, 256, N_fiber].
 2. Compute energy (squared magnitude) at each of the 256 boundary positions.
 3. Identify the peak boundary index h_peak with maximal energy.
 4. Select the fiber vector at that position (dimension N_fiber).
-5. Form the extracted byte from the **sign pattern** of fiber channels: bit i is 1 if channel[2i] > 0, else 0.
+5. Form the extracted byte from the sign pattern of fiber channels: bit i is 1 if channel[2i] > 0, else 0.
 
-**Telemetry metrics**  
+**Telemetry metrics**
 - **h_peak:** boundary index with maximum energy
 - **peak_mass:** concentration at the peak
-- **correlation:** cosine similarity between energy distribution and the applied mask  
-- **code_dist:** Hamming distance in mask code space between hₜ and h_peak  
+- **correlation:** cosine similarity between energy distribution and the applied mask
+- **code_dist:** Hamming distance in mask code space between h and h_peak
 
-**Diagnostic coordinate μ (telemetry only)**  
+**Diagnostic coordinate mu (telemetry only)**
 The telemetry also computes:
 
-- μₜ = (hₜ + 64 · pₜ) mod 256  
-- dist_to_μ = circular distance from h_peak to μₜ  
-- This μₜ is a diagnostic phase-lifted coordinate. It is not the center of the projection mask in the reference implementation.
+- mu_t = (h_t + 64 * p_t) mod 256
+- dist_to_mu = circular distance from h_peak to mu_t
+- This mu_t is a diagnostic phase-lifted coordinate. It is not the center of the projection mask in the reference implementation.
 
 Reference implementation: `extract_byte()`, `begin_step()`, `end_step()` in `src/tools/gyrolabe.py`.
 
-#### 3.7 Code distance baseline (why "near 6" is neutral)
+#### 3.6 Code distance baseline (why "near 6" is neutral)
 
 The kernel mask code C is a linear [12, 8] code with a palindromic weight distribution centered at weight 6. For two masks drawn without structural bias from C, the expected Hamming distance is 6 bits.
 
 Interpretation:
 
-- **code_dist ≈ 6 over long trajectories** indicates the interaction preserves the intrinsic isotropy of the code space.  
+- **code_dist near 6 over long trajectories** indicates the interaction preserves the intrinsic isotropy of the code space.
 - **Systematic deviation away from 6** (as an average over many steps) indicates directional bias in how the coupled system explores code space.
 
 ---
@@ -294,20 +289,19 @@ Interpretation:
 
 This specification corresponds to the reference implementation organized as follows:
 
-- **Kernel stepping and observables:** `src/router/kernel.py` (uses atlas artifacts)  
-- **Kernel-derived constants and helpers:** `src/router/constants.py`  
-- **Coupling system and generation loop:** `src/tools/gyrolabe.py`  
+- **Kernel stepping and observables:** `src/router/kernel.py` (uses atlas artifacts)
+- **Kernel-derived constants and helpers:** `src/router/constants.py`
+- **Coupling system and generation loop:** `src/tools/gyrolabe.py`
   - `GyroLabe` (wrapping, telemetry, stepping)
-  - `RoutedMLP` (projection injection)
-  - `compute_mask` (projection mask)
-  - `_rerank_topk_logits_kernel_native` (top-k re-ranking)
-  - `generate` (sampling loop with optional coupling)
+  - `RoutedMLP` (projection injection via received mask)
+  - `compute_mask` (projection mask with Gaussian LUT and differential scaling)
+  - `generate` (sampling loop with projection coupling)
 - **Runner with diagnostics:** `scripts/run_gyrolabe.py`
 
 Configuration surface:
 
-- `CouplingConfig.routed_layers`: explicit layer list (or auto-detect)  
-- `CouplingConfig.store_layer_telemetry`: enable or suppress per-layer telemetry storage  
+- `CouplingConfig.routed_layers`: explicit layer list (or auto-detect)
+- `CouplingConfig.store_layer_telemetry`: enable or suppress per-layer telemetry storage
 
 ---
 
@@ -317,46 +311,44 @@ GyroLabe exposes summary statistics over a trajectory.
 
 #### 5.1 Kernel and ledger metrics
 
-- steps processed  
-- kernel signature (state hex and components)  
-- parity invariants: O, E, parity  
+- steps processed
+- kernel signature (state hex and components)
+- parity invariants: O, E, parity
 
 #### 5.2 Distribution metrics
 
-- horizon coverage: unique_h, horizon entropy  
-- vertex distribution: χ histogram  
-- driving byte distribution: unique bytes, byte entropy  
+- horizon coverage: unique_h, horizon entropy
+- vertex distribution: chi histogram
+- driving byte distribution: unique bytes, byte entropy
 - mask weight histogram (from driving bytes)
 
 #### 5.3 Alignment metrics
 
-- mean_code_dist (baseline near 6.0 is neutral isotropy)  
-- mean_correlation (energy distribution vs mask)  
-- mean_gain_at_peak (mask value at peak, mask is mean-normalized to 1)  
-- distances to diagnostic μ (phase-lifted coordinate, telemetry only)
+- mean_code_dist (baseline near 6.0 is neutral isotropy)
+- mean_correlation (energy distribution vs mask)
+- mean_gain_at_peak (mask value at peak, mask is mean-normalized to 1)
+- distances to diagnostic mu (phase-lifted coordinate, telemetry only)
 
 #### 5.4 Quality metrics (logprobs and perplexity)
 
 In the reference implementation:
 
-- logprobs are computed from the model's **unmodified logits** (before re-ranking)
-- sampling may occur from a **re-ranked** top-k distribution
+- logprobs are computed from the model's logits
+- sampling occurs from the standard top-k distribution
 
-Interpretation:
-
-- These logprobs measure "how probable were the sampled tokens under the base model distribution," not likelihood under the re-ranked distribution.
+These logprobs measure "how probable were the sampled tokens under the model distribution."
 
 ---
 
 ### 6. Topological alignment
 
-**Definition**  
-Topological alignment is the condition where the coupled model–kernel dynamics preserve the intrinsic metric structure of the kernel mask code C, where the intrinsic metric is **Hamming distance on the 12-bit codewords**.
+**Definition**
+Topological alignment is the condition where the coupled model-kernel dynamics preserve the intrinsic metric structure of the kernel mask code C, where the intrinsic metric is **Hamming distance on the 12-bit codewords**.
 
 Operational evidence (observed together, over long runs):
 
-- code_dist remains near the code's natural 6-bit baseline  
-- correlation is consistently positive beyond null baselines  
+- code_dist remains near the code's natural 6-bit baseline
+- correlation is consistently positive beyond null baselines
 - horizon and byte entropies remain high (exploration is not collapsed)
 
 ---
@@ -365,10 +357,7 @@ Operational evidence (observed together, over long runs):
 
 #### 7.1 Generative guidance
 
-The kernel biases generation through:
-
-- **internal coupling:** projection mask inside routed MLP layers  
-- **output coupling:** geometry-aware top-k re-ranking
+The kernel biases generation through internal coupling: a differentially modulated projection mask inside routed MLP layers. The mask strength adapts to the transition distance in code space between consecutive kernel states.
 
 The model remains stochastic. The kernel provides a stable finite reference geometry.
 
@@ -390,47 +379,49 @@ The kernel's 256-element boundary can be lifted to a 256-dimensional vector spac
 
 ### 9. Operational considerations
 
-#### 9.1 Batch vectorization
+#### 9.1 Batch support
 
-Production inference operates on batches of sequences (batch size B > 1). GyroLabe supports full vectorization:
+The Router Kernel supports batch inference (B >= 1). All per-sequence state is stored in arrays of shape (B,):
 
-- **Kernel state:** The kernel maintains a state vector of size B. Each sequence in the batch evolves an independent trajectory.
-- **Atlas lookups:** Next-state transitions and observable lookups are vectorized integer gather operations.
-- **Mask computation:** The projection mask becomes a tensor of shape [B, 256, 1], computed in parallel for the (hₜ, χₜ, pₜ, wₜ) tuple of each sequence.
-- **Telemetry:** Per-sequence extraction and metric collection are independent and parallelizable.
+- **Kernel state:** `state_index` and `last_byte` are numpy arrays of shape (batch_size,). Each sequence in the batch evolves an independent trajectory.
+- **Atlas lookups:** Next-state transitions use numpy advanced indexing: `epistemology[state_indices, bytes]`. This is efficient on both CPU and GPU.
+- **Batch management:** `resize_batch(new_size)` adjusts the batch dimension, resetting all sequences to archetype.
+- **Stepping:** `step_byte()` accepts either a scalar (broadcast to all sequences) or an array of shape (batch_size,) for per-sequence bytes.
+
+The GyroLabe coupling layer currently operates on sequence 0 of the kernel batch (single-sequence generation). The kernel's batch capability enables future multi-sequence coordination without architectural changes.
 
 #### 9.2 Computational overhead
 
-The coordination cycle adds minimal latency to the inference loop:
+The coordination cycle adds minimal latency:
 
-- **Kernel stepping:** O(1) integer array lookup per sequence. Negligible compared to matrix multiplications in transformer layers.
-- **Mask computation:** Gaussian over 256 positions, then element-wise multiplication on the hidden state. Cost is proportional to activation size, typically < 1% of layer compute.
-- **Re-ranking:** Operations are performed only on the top-k candidates (e.g., k = 40), not the full vocabulary. Cost is negligible relative to the forward pass.
+- **Kernel stepping:** O(1) integer array lookup per sequence.
+- **Mask computation:** Computed once per token step in `begin_step()`, then reused by all routed layers. Uses precomputed Gaussian LUT (208 floats). Differential modulation adds one integer distance lookup.
+- **Projection:** Element-wise multiplication on the hidden state inside each routed layer. Less than 1% of layer compute.
 
-The dominant cost remains the model's own forward and backward passes. GyroLabe overhead is not measurable at typical inference scales.
+The dominant cost remains the model's own forward pass.
 
 #### 9.3 Precision and determinism
 
-**Kernel (integer domain)**  
+**Kernel (integer domain)**
 - Uses uint16/uint32 arithmetic throughout.
 - Bit-exact across all hardware platforms (CPU, CUDA, MPS).
 - Ledger replay produces identical states on any conforming implementation.
 
-**Projection and re-ranking (floating-point domain)**  
+**Projection (floating-point domain)**
 - Uses standard floating-point math (exp, division, multiplication).
 - Minor numerical divergence across platforms is expected due to FP associativity and fused operations.
 - This divergence does **not** affect the discrete kernel state, which depends only on the driving byte (derived from the sampled token_id, an integer).
 
 #### 9.4 Memory considerations
 
-**Atlas sharing**  
+**Atlas sharing**
 - The atlas is read-only after loading.
 - In multi-process deployments (e.g., multiple model replicas on one host), the atlas can be memory-mapped (mmap) so all processes share a single physical copy.
 - Total atlas footprint: approximately 128 MiB.
 
-**Per-sequence state**  
-- Each active sequence requires storage for one kernel state index (uint32) plus any accumulated telemetry.
-- For B concurrent sequences without stored telemetry: 4B bytes of kernel state.
+**Per-sequence state**
+- Each active sequence requires storage for one kernel state index (int64) plus any accumulated telemetry.
+- For B concurrent sequences without stored telemetry: 16B bytes of kernel state (8 for state_index + 8 for last_byte).
 
 #### 9.5 Failure modes
 

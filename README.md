@@ -90,11 +90,11 @@ GyroLabe is a mechanistic calibration instrument for generative models. It funct
 
 The system acts as a neuro-symbolic bridge. It couples the model's stochastic, continuous latent space to the Router's discrete, finite geometric structure.
 
-**Core Objectives:**
-1. **Logit Dynamic Stability:** It constrains the generation trajectory, preventing collapse or drift by anchoring it to a deterministic state machine.
-2. **Mechanistic Balance Steering:** It injects calculated "weight" into specific neural pathways via projection masks and logit re-ranking.
+**Core objectives:**
+1. **Activation Dynamic Stability:** It constrains the model's internal generation dynamics by anchoring routed MLP activations to a deterministic kernel reference frame.
+2. **Mechanistic Balance Steering:** It injects geometry-derived weight into specific pathways via projection masks with differential modulation.
 
-This establishes **Topological Alignment**: the model's internal dynamics resonate with the kernel's structure without collapsing its generative capacity. It provides a shared, verifiable ledger of the generation trajectory.
+This establishes **Topological Alignment**: the model's internal dynamics remain coherent with the kernel's code geometry without collapsing exploration. The kernel provides a shared, verifiable byte ledger of the trajectory, enabling replay and audit.
 
 See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mechanistic Interpretability Report](docs/reports/GyroLabe_MI_Tests_Report.md).
 

@@ -25,6 +25,16 @@ def rmsnorm(v: NDArray[np.float32], eps: float = 1e-6) -> NDArray[np.float32]:
     return v / (np.sqrt(np.mean(v * v)) + eps)
 
 
+def gamma_value(chi_prev: int, chi_curr: int, w: int) -> float:
+    if chi_prev == chi_curr:
+        sign = 0.5
+    elif (chi_prev ^ chi_curr) == 3:
+        sign = -1.0
+    else:
+        sign = 1.0
+    return float(sign * (min(int(w), 12) / 12.0 + 0.1))
+
+
 @dataclass
 class InferenceRoles:
     """
@@ -34,7 +44,6 @@ class InferenceRoles:
     """
     K: int
     eta: float
-    gamma_table: NDArray[np.float32]  # [4,4,13]
     mode: Literal["td", "hebb"] = "td"
 
     def retention(self, p: int, chi_prev: int, chi_curr: int, w: int) -> float:
@@ -73,7 +82,7 @@ class InferenceRoles:
         w = int(byte_weight)
         chi_prev = int(sigma.last_chi)
         chi_curr = int(chi_next)
-        gamma = float(self.gamma_table[chi_prev, chi_curr, min(w, 12)])
+        gamma = gamma_value(chi_prev, chi_curr, w)
         f = self.retention(int(p_next), chi_prev, chi_curr, w)
 
         hN = int(h_next)
@@ -103,9 +112,8 @@ class InferenceEgress:
     temperature: float
     weight_penalty: float
 
-    features: NDArray[np.float32]     # [256,K]
-    gamma_table: NDArray[np.float32]  # [4,4,13]
-    byte_weight: NDArray[np.uint8]    # [256]
+    features: NDArray[np.float32]   # [256,K]
+    byte_weight: NDArray[np.uint8]  # [256]
 
     def policy(
         self,
@@ -115,9 +123,7 @@ class InferenceEgress:
         p: int,
         sigma: InferenceState,
         O_field: NDArray[np.float32],
-        cf_h: NDArray[np.uint8],
         cf_chi: NDArray[np.uint8],
-        cf_p: NDArray[np.uint8],
     ) -> NDArray[np.float32]:
         x = rmsnorm((sigma.M[int(h), int(p), :] + O_field[int(h), :]).astype(np.float32))
 
@@ -125,7 +131,7 @@ class InferenceEgress:
         for b in range(256):
             chi1 = int(cf_chi[b])
             w = int(self.byte_weight[b])
-            gamma = float(self.gamma_table[int(chi), chi1, min(w, 12)])
+            gamma = gamma_value(int(chi), chi1, w)
             scores[b] = gamma * float(self.features[b] @ x) - self.weight_penalty * float(w)
 
         temp = max(float(self.temperature), 1e-8)

@@ -131,7 +131,6 @@ For each inference step, given the current (h, p), the Inference Function:
 2. Computes a direction factor γ from:
    - the mask weight of the most recent transition,
    - the vertex charges of the previous and current states,
-   - using a precomputed `gamma_table[ χ_prev, χ_curr, weight ]`.
 3. Applies a phase-aware Hebbian update:
 
    ΔM[h,p,:] = η · γ · (a_curr ⊙ a_prev)
@@ -346,7 +345,6 @@ inference.set_kernel_tables(
     byte_weight=kernel.byte_weight,
     byte_charge=kernel.byte_charge,
     byte_features=features_K3,       # loaded from phenomenology.npz
-    gamma_table=kernel.gamma_table,
 )
 ```
 
