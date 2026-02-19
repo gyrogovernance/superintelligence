@@ -12,17 +12,25 @@ The walking model implements two primary phases:
 Walking continues until natural amplitude decay (balance achieved).
 """
 
-from typing import Callable, Dict, Any, Optional
+import collections
 import json
 import threading
-import collections
+from collections.abc import Callable
 from pathlib import Path
-from openai_harmony import StreamableParser, Role
+from typing import Any
+
+from openai_harmony import Role, StreamableParser
+
+from baby.constants.harmony_tokens import (
+    ALL_CONTROL_TOKENS,
+    MESSAGE,
+    ROLE_ASSISTANT,
+    ROLE_USER,
+)
 from baby.kernel.gyro_core import GyroEngine
-from baby.constants.harmony_tokens import MESSAGE, ROLE_USER, ROLE_ASSISTANT, ALL_CONTROL_TOKENS
 
 
-def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
+def setup_model(encoding, config_path: str) -> Callable[..., int | None]:
     """
     Initialise the GyroASI walking model and return inference function.
     
@@ -72,7 +80,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         )
 
     # Session management
-    walking_sessions: Dict[str, Dict[str, Any]] = {}
+    walking_sessions: dict[str, dict[str, Any]] = {}
     sessions_lock = threading.RLock()
 
     def is_user_role(role) -> bool:
@@ -99,7 +107,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         role_value = getattr(role, "value", None)
         return role_value == "assistant"
 
-    def process_new_tokens(session: Dict[str, Any], new_tokens: list[int]) -> None:
+    def process_new_tokens(session: dict[str, Any], new_tokens: list[int]) -> None:
         """
         Process delta tokens with role-based learning.
         
@@ -107,7 +115,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         """
         parser = session["parser"]
         user_token_encountered = False
-        
+
         for token in new_tokens:
             parser.process(token)
 
@@ -133,53 +141,53 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             # Reset anchor application flag when new user content arrives
             session["anchor_applied"] = False
 
-    def update_egress_tracking(session: Dict[str, Any], token: int) -> None:
+    def update_egress_tracking(session: dict[str, Any], token: int) -> None:
         """Update session egress tracking with geometry-adaptive sizing."""
         # Adapt deque size to active slab count
         sector_signature = walking_engine.compute_sector_signature(session["state"])
         active_slab_count = max(1, bin(sector_signature).count("1"))
-        
+
         current_deque = session["recent_egress"]
         if current_deque.maxlen != active_slab_count:
             prior_items = list(current_deque)
             session["recent_egress"] = collections.deque(
-                prior_items[-active_slab_count:], 
+                prior_items[-active_slab_count:],
                 maxlen=active_slab_count
             )
 
-    def update_anchor_state(session: Dict[str, Any], new_state: int) -> None:
+    def update_anchor_state(session: dict[str, Any], new_state: int) -> None:
         """Update anchor state based on user token count."""
-        target_threshold = session.get("anchor_target_threshold", 
+        target_threshold = session.get("anchor_target_threshold",
                                      int(walking_engine.runtime.get("anchor_prefix_tokens", 12)))
-        
+
         if session["user_token_count"] >= target_threshold:
             session["user_anchor_state"] = new_state
             session["anchor_last_seen_count"] = session["user_token_count"]
 
-    def initialise_session_for_tokens(session: Dict[str, Any], tokens: list[int]) -> None:
+    def initialise_session_for_tokens(session: dict[str, Any], tokens: list[int]) -> None:
         """Initialise session with full token history using role parsing."""
         parser = StreamableParser(encoding, role=Role.USER)
-        
+
         for token in tokens:
             parser.process(token)
-            
+
             if is_user_role(parser.current_role) and token not in ALL_CONTROL_TOKENS:
                 previous_state = session["state"]
                 new_state = walking_engine.learn_from_user_token(previous_state, token)
                 session["state"] = new_state
                 session["user_token_count"] = session.get("user_token_count", 0) + 1
                 session["last_user_token"] = token  # Track last user token for adjacency seeding
-                
+
                 update_egress_tracking(session, token)
                 update_anchor_state(session, new_state)
-                
+
             elif is_assistant_role(parser.current_role) and token not in ALL_CONTROL_TOKENS:
                 session["state"] = walking_engine.transit_on_assistant_token(session["state"], token)
 
         session["parser"] = parser
         session["fed_length"] = len(tokens)
 
-    def reset_session_state(session: Dict[str, Any]) -> None:
+    def reset_session_state(session: dict[str, Any]) -> None:
         """Reset session to initial walking state."""
         session["state"] = walking_engine.start_state()
         session["user_token_count"] = 0
@@ -193,13 +201,13 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         session["bucket_position"].clear()
         session["monodromy"].clear()
         session["slab_cursor"].clear()
-        
+
         # Reset egress tracking
         session["recent_egress"] = collections.deque(maxlen=1)
         session["recent_egress_phases"] = []
         session["walk_phase"] = 0  # NEW: Reset walk momentum
 
-    def infer_next_token(tokens: list[int], temperature: float = 0.0, **kwargs) -> Optional[int]:
+    def infer_next_token(tokens: list[int], temperature: float = 0.0, **kwargs) -> int | None:
         """
         Main inference function implementing the walking model.
         
@@ -217,7 +225,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
 
         with sessions_lock:
             session = walking_sessions.get(request_id)
-            
+
             if new_request or session is None:
                 # Initialise new walking session
                 session = {
@@ -254,7 +262,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                     # Conversation history shrank - resync from scratch
                     reset_session_state(session)
                     parser = StreamableParser(encoding, role=Role.SYSTEM)
-                    
+
                     if tokens:
                         initialise_session_for_tokens(session, tokens)
                     else:
@@ -280,7 +288,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             session["state"] = anchor_state
             session["anchor_applied"] = True
             session["walk_phase"] = 0  # NEW: fresh walk from anchor
-            
+
             # Seed adjacency with last user token at anchor contexts
             if session["last_user_token"] is not None:
                 rep = walking_engine.get_orbit_representative(walking_engine.state_to_index[anchor_state])
@@ -319,33 +327,33 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         # BU-Ingress: Generate next token (swing phase)
         emission_result = walking_engine.emit_next_from_state(
             session["state"],
-            session_omega=session["omega"], 
-            session_bucket_key=session["bucket_key"], 
+            session_omega=session["omega"],
+            session_bucket_key=session["bucket_key"],
             session_bucket_position=session["bucket_position"],
-            session_monodromy=session.get("monodromy"), 
+            session_monodromy=session.get("monodromy"),
             recent_egress_phases=session.get("recent_egress_phases", []),
             session_slab_cursor=session.get("slab_cursor"),
             session_walk_phase=session.get("walk_phase", 0),  # NEW
             session_prev_by_ctx=session.get("prev_by_ctx"),  # NEW: Context-scoped predecessor
         )
-        
+
         if emission_result is None:
             # Natural stopping condition reached
             return None
 
-        (next_token, _, omega, bucket_key, bucket_position, 
+        (next_token, _, omega, bucket_key, bucket_position,
          monodromy, slab_cursor) = emission_result
-        
+
         # CRITICAL: Feed generated token back as input (continuous walking)
         session["state"] = walking_engine.transit_on_assistant_token(session["state"], next_token)
-        
+
         # NEW: Update the walk's own momentum
         token_phase, _ = walking_engine.compute_token_phase(next_token)
         session["walk_phase"] = walking_engine.monodromic_fold(session["walk_phase"], token_phase)
-        
+
         # Walk momentum is used in strides and amplitude checks, not applied to state
         # This preserves traceability and keeps ctx6 in populated regions
-        
+
         # Update session walking state
         session["omega"] = omega
         session["bucket_key"] = bucket_key
@@ -368,11 +376,11 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         alignment_amplitude = walking_engine.compute_alignment_amplitude(
             session["state"], representative_index, session["walk_phase"]
         )
-        
+
         if alignment_amplitude == 0:
             # Walk complete - natural balance achieved
             session["walk_complete"] = True
-            
+
         return next_token
 
     return infer_next_token

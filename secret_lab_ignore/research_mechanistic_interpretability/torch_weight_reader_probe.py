@@ -13,16 +13,16 @@ so we can implement equivalent behavior with kernel-based routing.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
-
 
 # =========
 # Part 1: Low-Level Weight Access Mechanics
@@ -38,10 +38,10 @@ def demonstrate_weight_reading() -> dict[str, Any]:
     3. The "magic" is parallelized matmul, not complex weight reading
     """
     results: dict[str, Any] = {}
-    
+
     # Create a Linear layer with known weights
     linear = nn.Linear(4, 3, bias=True)
-    
+
     # Manually set weights so we can trace exact computation
     with torch.no_grad():
         linear.weight.copy_(torch.tensor([
@@ -50,32 +50,32 @@ def demonstrate_weight_reading() -> dict[str, Any]:
             [0.0, 0.0, 0.0, 1.0],  # row 2: selects input[3]
         ]))
         linear.bias.copy_(torch.tensor([0.1, 0.2, 0.3]))
-    
+
     # Input vector
     x = torch.tensor([[1.0, 2.0, 3.0, 4.0]])  # (1, 4)
-    
+
     # Forward pass through module
     y = linear(x)
-    
+
     # Manual computation showing exactly what happens:
     # y = x @ weight.T + bias
     # For each output[i]: sum over j of (x[j] * weight[i,j]) + bias[i]
-    
+
     manual_y = torch.zeros(1, 3)
     weight = linear.weight.detach()
     bias = linear.bias.detach()
-    
+
     for i in range(3):  # output dimension
         val = 0.0
         for j in range(4):  # input dimension
             val += x[0, j].item() * weight[i, j].item()
         val += bias[i].item()
         manual_y[0, i] = val
-    
+
     results["module_output"] = y.tolist()
     results["manual_output"] = manual_y.tolist()
     results["match"] = torch.allclose(y, manual_y)
-    
+
     # Show the computation breakdown
     results["computation_trace"] = []
     for i in range(3):
@@ -86,7 +86,7 @@ def demonstrate_weight_reading() -> dict[str, Any]:
             "plus_bias": f" + {bias[i].item():.1f}",
             "result": y[0, i].item()
         })
-    
+
     return results
 
 
@@ -100,24 +100,24 @@ def demonstrate_attention_weight_reading() -> dict[str, Any]:
     - Kernel routing could replace the WHAT decision
     """
     results: dict[str, Any] = {}
-    
+
     hidden_dim = 8
     num_heads = 2
     head_dim = hidden_dim // num_heads
     seq_len = 4
-    
+
     # Simulate QKV projection weights
     W_qkv = torch.randn(3 * hidden_dim, hidden_dim) * 0.1
-    
+
     # Input hidden states
     x = torch.randn(1, seq_len, hidden_dim)
-    
+
     # QKV projection (combined)
     qkv = x @ W_qkv.T  # (1, seq, 3*hidden)
-    
+
     # Split into Q, K, V
     Q, K, V = qkv.chunk(3, dim=-1)  # each (1, seq, hidden)
-    
+
     results["shapes"] = {
         "input": list(x.shape),
         "W_qkv": list(W_qkv.shape),
@@ -126,36 +126,36 @@ def demonstrate_attention_weight_reading() -> dict[str, Any]:
         "K": list(K.shape),
         "V": list(V.shape),
     }
-    
+
     # Reshape for multi-head
     Q_heads = Q.view(1, seq_len, num_heads, head_dim).transpose(1, 2)
     K_heads = K.view(1, seq_len, num_heads, head_dim).transpose(1, 2)
     V_heads = V.view(1, seq_len, num_heads, head_dim).transpose(1, 2)
-    
+
     results["multihead_shapes"] = {
         "Q_heads": list(Q_heads.shape),  # (1, heads, seq, head_dim)
         "K_heads": list(K_heads.shape),
         "V_heads": list(V_heads.shape),
     }
-    
+
     # Attention scores: Q @ K.T
     # This is the O(n^2) operation
     scale = head_dim ** -0.5
     attn_scores = (Q_heads @ K_heads.transpose(-2, -1)) * scale
     attn_weights = torch.softmax(attn_scores, dim=-1)
-    
+
     results["attention"] = {
         "scores_shape": list(attn_scores.shape),  # (1, heads, seq, seq)
         "weights_shape": list(attn_weights.shape),
         "weights_sum_per_query": attn_weights.sum(dim=-1).tolist(),  # should be 1
     }
-    
+
     # Attention mechanics observation
     results["attention_mechanics"] = {
         "operation": "Compute seq x seq scores, then softmax, then apply to V",
         "complexity": "O(seq^2) in the scores and apply steps"
     }
-    
+
     return results
 
 
@@ -163,7 +163,7 @@ def demonstrate_attention_weight_reading() -> dict[str, Any]:
 # Part 2: Tracing Actual Torch Operations
 # =========
 
-@dataclass 
+@dataclass
 class MatmulTrace:
     """Record a single matmul operation."""
     op_id: int
@@ -185,18 +185,18 @@ class MatmulTracer:
         self._direct_matmul = None
         self._direct_mm = None
         self._direct_bmm = None
-    
+
     def _wrap_matmul(self, direct_fn: Callable[[torch.Tensor, torch.Tensor], torch.Tensor], name: str) -> Callable[[torch.Tensor, torch.Tensor], torch.Tensor]:
         def wrapped(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
             result = direct_fn(a, b)
-            
+
             # Compute FLOPs
             # For A @ B where A is (..., m, k) and B is (..., k, n)
             # FLOPs = 2 * m * k * n (multiply-add)
             shape_a = list(a.shape)
             shape_b = list(b.shape)
             shape_out = list(result.shape)
-            
+
             # Simple FLOPs estimate
             if len(shape_a) >= 2 and len(shape_b) >= 2:
                 m = shape_a[-2]
@@ -206,7 +206,7 @@ class MatmulTracer:
                 flops = 2 * batch * m * k * n
             else:
                 flops = 0
-            
+
             self.traces.append(MatmulTrace(
                 op_id=self._op_counter,
                 shape_a=shape_a,
@@ -215,19 +215,19 @@ class MatmulTracer:
                 flops=flops,
             ))
             self._op_counter += 1
-            
+
             return result
         return wrapped
-    
+
     def enable(self):
         """Start tracing matmul operations."""
         self._direct_matmul = torch.matmul
         self._direct_mm = torch.mm
         self._direct_bmm = torch.bmm
-        
+
         torch.matmul = self._wrap_matmul(self._direct_matmul, "matmul")
         # Note: @ operator uses matmul, so this catches those too
-    
+
     def disable(self):
         """Stop tracing and restore direct functions."""
         if self._direct_matmul is not None:
@@ -236,7 +236,7 @@ class MatmulTracer:
             torch.mm = self._direct_mm
         if self._direct_bmm is not None:
             torch.bmm = self._direct_bmm
-    
+
     def summarize(self) -> dict[str, Any]:
         total_flops = sum(t.flops for t in self.traces)
         return {
@@ -263,21 +263,21 @@ def demonstrate_mlp_weight_reading() -> dict[str, Any]:
     - Each channel has 43-dim fiber features
     """
     results: dict[str, Any] = {}
-    
+
     hidden_dim = 16
     intermediate_dim = 64  # Simplified; real is 11008
-    
+
     # MLP weights
     W_gate = torch.randn(intermediate_dim, hidden_dim) * 0.1
     W_up = torch.randn(intermediate_dim, hidden_dim) * 0.1
     W_down = torch.randn(hidden_dim, intermediate_dim) * 0.1
-    
+
     # Input
     x = torch.randn(1, 4, hidden_dim)  # (batch, seq, hidden)
-    
+
     # Step 1: Gate projection
     gate = x @ W_gate.T  # (1, 4, intermediate)
-    
+
     results["gate"] = {
         "input_shape": list(x.shape),
         "weight_shape": list(W_gate.shape),
@@ -285,45 +285,45 @@ def demonstrate_mlp_weight_reading() -> dict[str, Any]:
         "operation": "x @ W_gate.T",
         "weight_access": "Row i of W_gate is read for output channel i"
     }
-    
-    # Step 2: Up projection  
+
+    # Step 2: Up projection
     up = x @ W_up.T
-    
+
     results["up"] = {
         "input_shape": list(x.shape),
         "weight_shape": list(W_up.shape),
         "output_shape": list(up.shape),
         "operation": "x @ W_up.T",
     }
-    
+
     # Step 3: Gated activation
     # SiLU(gate) * up, element-wise
     intermediate = torch.nn.functional.silu(gate) * up
-    
+
     results["activation"] = {
         "gate_shape": list(gate.shape),
         "up_shape": list(up.shape),
         "intermediate_shape": list(intermediate.shape),
         "operation": "silu(gate) * up (element-wise)"
     }
-    
+
     # Step 4: Down projection
     output = intermediate @ W_down.T
-    
+
     results["down"] = {
         "input_shape": list(intermediate.shape),
         "weight_shape": list(W_down.shape),
         "output_shape": list(output.shape),
         "operation": "intermediate @ W_down.T",
     }
-    
+
     # Architectural observation
     results["architectural_note"] = {
         "olmo_intermediate": 11008,
         "factorization": "256 x 43",
         "note": "This factorization is an architectural fact, not a claim about routing"
     }
-    
+
     return results
 
 
@@ -339,43 +339,43 @@ def demonstrate_embedding_reading() -> dict[str, Any]:
     This is already kernel-compatible: token_id -> vector
     """
     results: dict[str, Any] = {}
-    
+
     vocab_size = 1000
     embed_dim = 32
-    
+
     # Create embedding
     embed = nn.Embedding(vocab_size, embed_dim)
-    
+
     # Token IDs
     token_ids = torch.tensor([[42, 100, 7, 999]])  # (1, seq)
-    
+
     # Embedding lookup
     embeddings = embed(token_ids)  # (1, seq, embed_dim)
-    
+
     results["shapes"] = {
         "token_ids": list(token_ids.shape),
         "weight": list(embed.weight.shape),
         "output": list(embeddings.shape),
     }
-    
+
     # Show that it's just indexing
     manual_embeddings = embed.weight[token_ids]
     results["is_indexing"] = torch.allclose(embeddings, manual_embeddings)
-    
+
     # For each token, we just read row token_id from weight
     results["access_pattern"] = {
         "operation": "weight[token_id]",
         "for_token_42": f"Read row 42 of weight matrix -> {embed_dim}-dim vector",
         "no_matmul": "This is array indexing, not matrix multiplication"
     }
-    
+
     # Kernel replacement
     results["kernel_replacement"] = {
         "current": "embed_weight[token_id] -> 4096-dim vector",
         "proposed": "kernel_state(token) -> (horizon, vertex, phase, u, v)",
         "routing": "Use kernel observables to route instead of dense embedding"
     }
-    
+
     return results
 
 
@@ -392,37 +392,37 @@ def demonstrate_layernorm_reading() -> dict[str, Any]:
     - beta (bias): learned shift per feature
     """
     results: dict[str, Any] = {}
-    
+
     hidden_dim = 8
     ln = nn.LayerNorm(hidden_dim)
-    
+
     # Input
     x = torch.randn(1, 4, hidden_dim)
-    
+
     # Forward
     y = ln(x)
-    
+
     results["shapes"] = {
         "input": list(x.shape),
         "weight_gamma": list(ln.weight.shape),
         "bias_beta": list(ln.bias.shape),
         "output": list(y.shape),
     }
-    
+
     # Manual computation
     mean = x.mean(dim=-1, keepdim=True)
     var = x.var(dim=-1, keepdim=True, unbiased=False)
     x_norm = (x - mean) / torch.sqrt(var + ln.eps)
     y_manual = x_norm * ln.weight + ln.bias
-    
+
     results["is_correct"] = torch.allclose(y, y_manual, atol=1e-5)
-    
+
     results["weight_access"] = {
         "gamma": "Element-wise multiplication (not matmul)",
         "beta": "Element-wise addition",
         "per_feature": "Each feature has its own scale/shift"
     }
-    
+
     return results
 
 
@@ -464,7 +464,7 @@ def main():
     print("OLMo Weight Reader Probe")
     print("=" * 5)
     print("\nInvestigating HOW PyTorch reads transformer weights\n")
-    
+
     # Part 1: Basic weight reading
     print("-" * 5)
     print("1. Linear Layer Weight Reading")
@@ -476,7 +476,7 @@ def main():
     print("\n  Computation breakdown:")
     for trace in linear_results["computation_trace"]:
         print(f"    output[{trace['output_idx']}] = {trace['sum_terms']}{trace['plus_bias']} = {trace['result']:.1f}")
-    
+
     # Part 2: Attention weight reading
     print("\n" + "-" * 5)
     print("2. Attention Weight Reading")
@@ -491,7 +491,7 @@ def main():
     print("  Attention mechanics:")
     for k, v in attn_results["attention_mechanics"].items():
         print(f"    {k}: {v}")
-    
+
     # Part 3: MLP weight reading
     print("\n" + "-" * 5)
     print("3. MLP Weight Reading")
@@ -504,7 +504,7 @@ def main():
     print("\n  Architectural note:")
     for k, v in mlp_results["architectural_note"].items():
         print(f"    {k}: {v}")
-    
+
     # Part 4: Embedding reading
     print("\n" + "-" * 5)
     print("4. Embedding Weight Reading")
@@ -517,7 +517,7 @@ def main():
     print("  Access pattern:")
     for k, v in embed_results["access_pattern"].items():
         print(f"    {k}: {v}")
-    
+
     # Part 5: LayerNorm reading
     print("\n" + "-" * 5)
     print("5. LayerNorm Weight Reading")
@@ -529,7 +529,7 @@ def main():
     print("  Weight access:")
     for k, v in ln_results["weight_access"].items():
         print(f"    {k}: {v}")
-    
+
     # Part 6: Summary
     print("\n" + "-" * 5)
     print("6. Operations Summary")
@@ -539,7 +539,7 @@ def main():
         verified = details.get("verified", False)
         status = "(verified)" if verified else ""
         print(f"  {op}: {details['operation']} {status}")
-    
+
     print("\nProbe complete.")
 
 

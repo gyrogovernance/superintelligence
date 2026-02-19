@@ -1,17 +1,22 @@
 from __future__ import annotations
-import argparse, os
-import numpy as np
-from typing import Any, Dict, List
-from numpy.typing import NDArray
-from numpy.linalg import eigvals
+
+import argparse
+import os
 
 # Add the parent directory to the path so we can import baby modules
 import sys
+from typing import Any
+
+import numpy as np
+from numpy.linalg import eigvals
+from numpy.typing import NDArray
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from baby.kernel.governance import (
+    BG_MASK,
+    FG_MASK,
     apply_gyration_and_transform_batch,
-    FG_MASK, BG_MASK,
 )
 
 # ---------- helpers ----------
@@ -26,7 +31,7 @@ def hamming_angle_masked(a: int, b: int, mask: int) -> float:
     cos_th = max(-1.0, min(1.0, cos_th))
     return float(np.arccos(cos_th))
 
-def apply_seq(states: Any, introns: List[int]) -> Any:
+def apply_seq(states: Any, introns: list[int]) -> Any:
     s = states.copy()
     for ii in introns:
         s = apply_gyration_and_transform_batch(s, ii & 0xFF)
@@ -35,38 +40,38 @@ def apply_seq(states: Any, introns: List[int]) -> Any:
 def load_states_from_maps(sample: int, seed: int) -> Any:
     """Load states using the proper GyroASI maps for correct geometry"""
     rng = np.random.default_rng(seed)
-    
+
     # Path relative to research/experiments/ -> research/memories/public/meta
     from pathlib import Path
     script_dir = Path(__file__).parent
     maps_dir = script_dir.parent / "memories" / "public" / "meta"
-    
+
     # Load the GyroASI maps
     ontology_keys = np.load(maps_dir / 'ontology_keys.npy', mmap_mode='r')
     phenomenology_map = np.load(maps_dir / 'phenomenology_map.npy', mmap_mode='r')
     theta_map = np.load(maps_dir / 'theta.npy', mmap_mode='r')
     orbit_sizes = np.load(maps_dir / 'orbit_sizes.npy', mmap_mode='r')
-    
+
     print(f"Loaded GyroASI maps: {len(ontology_keys)} states, {len(np.unique(phenomenology_map))} orbits")
     print(f"Orbit sizes range: {orbit_sizes.min()} to {orbit_sizes.max()}")
     print(f"Theta range: {theta_map.min():.6f} to {theta_map.max():.6f}")
-    
+
     if sample <= 1:
         return np.array([ontology_keys[0]], dtype=np.uint64)
-    
+
     # Use orbit representatives for proper geometry (as your assistant suggested)
     unique_orbits = np.unique(phenomenology_map)
     orbit_reps = []
-    
+
     for orbit_id in unique_orbits:
         # Find the first state in each orbit (representative)
         orbit_indices = np.where(phenomenology_map == orbit_id)[0]
         if len(orbit_indices) > 0:
             orbit_reps.append(ontology_keys[orbit_indices[0]])
-    
+
     orbit_reps = np.array(orbit_reps, dtype=np.uint64)
     print(f"Found {len(orbit_reps)} orbit representatives")
-    
+
     if sample <= len(orbit_reps):
         # Use all orbit representatives if sample is small enough
         return orbit_reps[:sample], ontology_keys, phenomenology_map, orbit_sizes, theta_map
@@ -81,38 +86,38 @@ BG1 = 0b00001000
 
 # ---------- experiments ----------
 
-def measure_su2_holonomy(states: Any) -> Dict[str, float]:
+def measure_su2_holonomy(states: Any) -> dict[str, float]:
     """Measure SU(2) holonomy in BG sector - our most reliable measurement"""
     s_ij = apply_seq(states, [FG1, BG1])
     s_ji = apply_seq(states, [BG1, FG1])
-    
+
     # Use BG mask for SU(2) holonomy measurement
     bg_holonomy = float(np.mean([hamming_angle_masked(int(a), int(b), int(BG_MASK)) for a,b in zip(s_ij, s_ji)]))
-    
+
     # Cross-check with FG mask
     fg_holonomy = float(np.mean([hamming_angle_masked(int(a), int(b), int(FG_MASK)) for a,b in zip(s_ij, s_ji)]))
-    
+
     return {
         "NC_FG_BG_bg": bg_holonomy,
         "NC_FG_BG_fg": fg_holonomy,
     }
 
-def calculate_delta_bu_from_su2(su2_holonomy: float) -> Dict[str, float]:
+def calculate_delta_bu_from_su2(su2_holonomy: float) -> dict[str, float]:
     """Calculate δ_BU from SU(2) holonomy using the relationship φ_SU2 = 3 × δ_BU"""
     target_delta_bu = 0.19534217658
     delta_bu = su2_holonomy / 3.0
-    
+
     # Calculate key ratios and metrics
     target_ratio = delta_bu / target_delta_bu
     abs_err = abs(delta_bu - target_delta_bu)
-    
+
     # Check π/48 granularity (key CGM-GyroASI bridge)
     pi_48 = np.pi / 48
     granularity_ratio = delta_bu / pi_48
-    
+
     # Check π/16 ratio (CGM target)
     pi_16_ratio = delta_bu / (np.pi / 16)
-    
+
     return {
         "delta_bu_from_su2": delta_bu,
         "su2_holonomy_input": su2_holonomy,
@@ -125,7 +130,7 @@ def calculate_delta_bu_from_su2(su2_holonomy: float) -> Dict[str, float]:
 
 def extract_E_star_from_gyrosi(ontology_size: int, num_orbits: int,
                                su2_holonomy: float, delta_bu: float,
-                               n_cycles: int) -> Dict[str, float]:
+                               n_cycles: int) -> dict[str, float]:
     """
     Non-circular: E_star = m_H * exp(info_scale * n_cycles) * C_geom
     with n_cycles measured from GyroASI via holonomy saturation.
@@ -142,7 +147,7 @@ def extract_E_star_from_gyrosi(ontology_size: int, num_orbits: int,
         "m_H": m_H,
     }
 
-def derive_E_star_from_monodromy_closure() -> Dict[str, float]:
+def derive_E_star_from_monodromy_closure() -> dict[str, float]:
     """
     E_star emerges when monodromy reaches π (half closure)
     This is purely geometric - no arbitrary choices
@@ -152,23 +157,23 @@ def derive_E_star_from_monodromy_closure() -> Dict[str, float]:
     delta_bu = 0.195342  # Dual-pole
     su2 = 0.587901  # Commutator
     four_leg = 0.862833  # Toroidal
-    
+
     # The monodromy is accumulating toward π
     target = np.pi
-    
+
     # The scaling factor per level (how monodromy grows)
     ratio = four_leg / omega  # ≈ 8.8
-    
+
     # Levels needed to reach π (binary scaling)
     levels_to_closure = np.log(target / omega) / np.log(2)  # ≈ 5
-    
+
     # State-space scaling factor
     state_ratio = 788986 / 256  # ≈ 3082.76
-    
+
     # E_star from completing the hierarchy
     m_H = 125.0  # GeV (allowed anchor)
     E_star = m_H * (state_ratio ** levels_to_closure)
-    
+
     return {
         "E_star_GeV": E_star,
         "omega": omega,
@@ -194,41 +199,41 @@ def derive_E_star_from_monodromy_hierarchy(ontology_keys, phenomenology_map):
     print(f"Total states (N): {N:,}")
     print(f"Number of orbits (M): {M}")
     print(f"Holographic ratio (R_holo): {R_holo:.6f}")
-    
+
     # Step 2: Monodromy values from CGM (first principles)
     omega = 0.097671  # Single transition
     delta_BU = 0.195342  # Dual-pole
     phi_SU2 = 0.587901  # SU(2) commutator holonomy
     phi_4leg = 0.862833  # 4-leg toroidal holonomy
     target_closure = np.pi  # Geometric closure at π radians
-    
-    print(f"Monodromy hierarchy:")
+
+    print("Monodromy hierarchy:")
     print(f"  ω (single): {omega:.6f} rad")
     print(f"  δ_BU (dual-pole): {delta_BU:.6f} rad")
     print(f"  φ_SU2 (commutator): {phi_SU2:.6f} rad")
     print(f"  φ_4leg (toroidal): {phi_4leg:.6f} rad")
     print(f"  Target closure: {target_closure:.6f} rad (π)")
-    
+
     # Step 3: Calculate levels to closure
     # Using the geometric hierarchy: ω → δ_BU → φ_SU2 → φ_4leg → π
     levels_to_closure = np.log(target_closure / omega) / np.log(2)
     print(f"Levels to closure: {levels_to_closure:.6f}")
-    
+
     # Step 4: Derive E_star from holographic ratio
     m_H = 125.0  # Higgs mass (experimental anchor)
     E_star = m_H * (R_holo ** levels_to_closure)
-    
-    print(f"E_star calculation:")
+
+    print("E_star calculation:")
     print(f"  m_H: {m_H} GeV")
     print(f"  R_holo^{levels_to_closure:.2f}: {R_holo:.0f}^{levels_to_closure:.2f} = {R_holo**levels_to_closure:.2e}")
     print(f"  E_star: {E_star:.3e} GeV")
-    
+
     # Compare to Planck energy
     E_planck = 1.22e19  # GeV
     ratio_to_planck = E_star / E_planck
     print(f"  E_planck: {E_planck:.2e} GeV")
     print(f"  Ratio to Planck: {ratio_to_planck:.3f}")
-    
+
     return {
         "E_star_GeV": E_star,
         "N_states": N,
@@ -253,33 +258,33 @@ def predict_G_from_E_star(E_star_GeV, delta_BU):
     # CGM geometric prefactor
     C_geom = (1/12) * np.sqrt(2/(3*np.pi)) * np.cos(delta_BU)
     print(f"CGM geometric prefactor: {C_geom:.6f}")
-    
+
     # Proton mass
     mu_GeV = 0.938272081  # GeV
     print(f"Proton mass: {mu_GeV:.6f} GeV")
-    
+
     # Dimensionless gravitational coupling
     alpha_G = C_geom * (mu_GeV / E_star_GeV)**2
     print(f"α_G (dimensionless): {alpha_G:.3e}")
-    
+
     # Physical constants
     hbar = 1.054571817e-34  # J⋅s
     c = 299792458.0         # m/s
     m_proton = 1.67262192369e-27  # kg
-    
+
     # Newton's constant
     G_pred = alpha_G * (hbar * c) / (m_proton**2)
-    
+
     # Compare to CODATA
     G_codata = 6.67430e-11  # m³/kg⋅s²
     ratio = G_pred / G_codata
     error_percent = abs(ratio - 1) * 100
-    
+
     print(f"G prediction: {G_pred:.3e} m³/kg⋅s²")
     print(f"G CODATA: {G_codata:.3e} m³/kg⋅s²")
     print(f"Ratio: {ratio:.6f}")
     print(f"Error: {error_percent:.2f}%")
-    
+
     return {
         "G_pred": G_pred,
         "G_codata": G_codata,
@@ -298,27 +303,27 @@ def derive_E_star_from_maps(ontology_keys, theta_map, phi_su2):
     # The ontology size encodes the information content
     info_content = np.log2(len(ontology_keys))
     print(f"Information content: {info_content:.6f} bits")
-    
-    # The orbit count encodes the observable dimensions  
+
+    # The orbit count encodes the observable dimensions
     observable_dims = np.log2(256)  # = 8 bits
     print(f"Observable dimensions: {observable_dims:.6f} bits")
-    
+
     # The difference is the hidden dimensions
     hidden_dims = info_content - observable_dims
     print(f"Hidden dimensions: {hidden_dims:.6f} bits")
-    
+
     # The dimension ratio
     dimension_ratio = 2**hidden_dims
     print(f"Dimension ratio: {dimension_ratio:.6f}")
-    
+
     # The correct closure angle is π (from CGM framework)
     closure_angle = np.pi
     print(f"Closure angle: {closure_angle:.6f} rad (π)")
-    
+
     # The complete formula - use the correct closure condition
     m_H = 125.0
     E_star = m_H * dimension_ratio  # Simple, correct formula
-    
+
     return {
         "E_star_GeV": E_star,
         "info_content": info_content,
@@ -334,29 +339,29 @@ def analyze_orbit_distribution(orbit_sizes):
     Analyze the orbit size distribution to understand degeneracy.
     The maximum orbit size (48,496) is suspiciously close to 48 × 1000.
     """
-    print(f"Orbit size analysis:")
+    print("Orbit size analysis:")
     print(f"  Min: {orbit_sizes.min()}")
     print(f"  Max: {orbit_sizes.max()}")
     print(f"  Mean: {orbit_sizes.mean():.1f}")
     print(f"  Median: {np.median(orbit_sizes):.1f}")
     print(f"  Std: {orbit_sizes.std():.1f}")
-    
+
     # Check the 48 × 1000 hypothesis
     max_size = orbit_sizes.max()
     ratio_48k = max_size / 48000
     print(f"  Max size / 48000: {ratio_48k:.6f}")
-    
+
     # Check if it's close to 48 × 1000
     if abs(ratio_48k - 1.0) < 0.01:
-        print(f"  ✓ Max orbit size ≈ 48 × 1000 (48-bit context)")
+        print("  ✓ Max orbit size ≈ 48 × 1000 (48-bit context)")
     else:
-        print(f"  ✗ Max orbit size ≠ 48 × 1000")
-    
+        print("  ✗ Max orbit size ≠ 48 × 1000")
+
     # Analyze the distribution
     unique_sizes, counts = np.unique(orbit_sizes, return_counts=True)
     print(f"  Unique sizes: {len(unique_sizes)}")
     print(f"  Most common size: {unique_sizes[np.argmax(counts)]} (appears {counts.max()} times)")
-    
+
     return {
         "min": orbit_sizes.min(),
         "max": orbit_sizes.max(),
@@ -385,13 +390,13 @@ def build_orbit_transition_matrix(orbit_reps, ontology_keys, phenomenology_map, 
         oi = orbit_id_of_state(s0[0])
         if oi >= 0:
             unique_orbits.add(oi)
-    
+
     n_orbits = len(unique_orbits)
     orbit_to_idx = {orbit_id: idx for idx, orbit_id in enumerate(sorted(unique_orbits))}
-    
+
     print(f"  Building transition matrix: {n_orbits} orbits")
     print(f"  Orbit representatives: {len(orbit_reps)}")
-    
+
     T = np.zeros((n_orbits, n_orbits), dtype=np.float64)
     # collect one representative per orbit id (already what orbit_reps is)
     transitions = 0
@@ -406,18 +411,18 @@ def build_orbit_transition_matrix(orbit_reps, ontology_keys, phenomenology_map, 
 
     print(f"  Transitions recorded: {transitions}")
     print(f"  Matrix non-zero entries: {np.count_nonzero(T)}")
-    
+
     # row-normalise
     row_sums = T.sum(axis=1, keepdims=True)
     row_sums[row_sums == 0] = 1.0
     T /= row_sums
-    
+
     # Check for issues
     if np.all(T == 0):
         print("  WARNING: All transition probabilities are zero!")
     elif np.any(np.isnan(T)):
         print("  WARNING: NaN values in transition matrix!")
-    
+
     return T
 
 def spectral_radius(T):
@@ -510,7 +515,7 @@ def solve_Estar_from_G(G_codata: float = 6.67430e-11) -> float:
 def measure_per_cycle_expansion_orbit(states: Any,
                                       idx_map: dict[int,int],
                                       orbit_sizes: NDArray[np.float64],
-                                      seq: List[int],
+                                      seq: list[int],
                                       rounds: int = 1) -> float:
     """Measure per-cycle expansion via orbit-size ratios (robust median)"""
     def sizes_for(s):
@@ -604,50 +609,50 @@ def measure_recursion_depth(states: Any, max_cycles: int = 12, tol: float = 5e-4
 
     return best_k
 
-def calculate_physical_constants(delta_bu: float, su2_holonomy: float) -> Dict[str, float]:
+def calculate_physical_constants(delta_bu: float, su2_holonomy: float) -> dict[str, float]:
     """Calculate derived physical constants from δ_BU with systematic corrections"""
     # CGM constants
     m_p = 1.0 / (2.0 * np.sqrt(2.0 * np.pi))  # 0.199471140201
-    
+
     # Base formula
     alpha_0 = (delta_bu ** 4) / m_p
-    
+
     # Aperture gap
     delta = 1.0 - delta_bu / m_p
-    
+
     # SU(2) holonomy (exact)
     phi_su2 = 2.0 * np.arccos((1.0 + 2.0 * np.sqrt(2.0)) / 4.0)
-    
+
     # Curvature ratio (from Thomas-Wigner curvature)
     F_bar = 0.622543  # Measured curvature
     R = (F_bar / np.pi) / m_p
-    
+
     # Holographic parameters
     h_ratio = 4.417034  # 4-leg/8-leg holonomy ratio
-    
+
     # Inverse duality parameters
     rho = 0.979300446087  # Closure fraction
     diff = phi_su2 - 3.0 * delta_bu  # Monodromic residue
-    
+
     # Systematic corrections
     # 1. Curvature backreaction
     alpha_1 = alpha_0 * (1.0 - (3.0/4.0) * R * delta**2)
-    
+
     # 2. Holographic coupling
     holographic_factor = (5.0/6.0) * ((phi_su2/(3.0*delta_bu)) - 1.0) * (1.0 - delta**2 * h_ratio) * delta**2 / (4.0 * np.pi * np.sqrt(3.0))
     alpha_2 = alpha_1 * (1.0 - holographic_factor)
-    
+
     # 3. Inverse duality equilibrium
     alpha_3 = alpha_2 * (1.0 + (1.0/rho) * diff * delta**4)
-    
+
     # Compare to experimental value
     alpha_codata = 0.007297352563
     alpha_ratio = alpha_3 / alpha_codata
     alpha_error = abs(alpha_3 - alpha_codata) / alpha_codata * 100
-    
+
     # Higgs boundary condition
     higgs_boundary = (delta_bu ** 4) / (4 * m_p ** 2)
-    
+
     return {
         "alpha_base": alpha_0,
         "alpha_corrected": alpha_3,
@@ -673,7 +678,7 @@ def main():
     print("Using GyroASI maps for proper geometry...")
     states, ontology_keys, phenomenology_map, orbit_sizes, _ = load_states_from_maps(args.sample, args.seed)
     print(f"Loaded {len(states)} states from GyroASI maps")
-    
+
     # Build fast index map once (for potential future use)
     idx_map = {int(v): i for i, v in enumerate(ontology_keys)}
     _ = phenomenology_map  # Suppress unused variable warning
@@ -696,12 +701,12 @@ def main():
         print(f"{k}: {v:.9f}")
 
     print("\n--- C.5: E_star from Maps-Only Invariants (Corrected Approach) ---")
-    
+
     # First, analyze the orbit distribution
     print("\n--- Orbit Distribution Analysis ---")
     orbit_analysis = analyze_orbit_distribution(orbit_sizes)
     _ = orbit_analysis  # Suppress unused variable warning
-    
+
     # Extract dimensionless invariants from maps
     N = len(ontology_keys)  # Total states: 788,986
     M = len(np.unique(phenomenology_map))  # Number of orbits: 256
@@ -709,29 +714,29 @@ def main():
     print(f"Total states (N): {N:,}")
     print(f"Number of orbits (M): {M}")
     print(f"Holographic ratio (R_holo): {R_holo:.6f}")
-    
+
     # Measure SU(2) holonomy and derived quantities
     phi_su2 = su2_results["NC_FG_BG_bg"]
     delta_bu = delta_bu_results["delta_bu_from_su2"]
     m_p = 1.0 / (2.0 * np.sqrt(2.0 * np.pi))
     rho = delta_bu / m_p
-    
-    print(f"\nMeasured invariants from maps:")
+
+    print("\nMeasured invariants from maps:")
     print(f"φ_SU2 (measured): {phi_su2:.6f} rad")
     print(f"δ_BU = φ_SU2/3: {delta_bu:.6f} rad")
     print(f"ρ = δ_BU/m_p: {rho:.6f}")
-    
+
     # Measure effective recursion exponent from maps (both methods)
-    print(f"\nMeasuring effective recursion exponent ν_eff from maps...")
-    
+    print("\nMeasuring effective recursion exponent ν_eff from maps...")
+
     # Method 1: From holonomy + orbit-level mixing
     nu_eff_holo = measure_nu_eff_from_holonomy(phi_su2, states, ontology_keys, phenomenology_map)
     print(f"ν_eff (holonomy + mixing): {nu_eff_holo:.6f}")
-    
+
     # Method 2: From cycles to π
     nu_eff_cycles = measure_nu_eff_from_cycles(states)
     print(f"ν_eff (cycles to π): {nu_eff_cycles:.6f}")
-    
+
     # If holonomy method fails (due to transition matrix issues), use cycles method
     if nu_eff_holo == 0.0:
         print("  Using cycles method only (holonomy method failed)")
@@ -740,75 +745,75 @@ def main():
         # Use average of both methods
         nu_eff = (nu_eff_holo + nu_eff_cycles) / 2.0
         print(f"ν_eff (average): {nu_eff:.6f}")
-    
+
     # The proposal suggests that the old hardcoded approach was close but needed refinement
     # Let's use the old approach as a reference and see how close we are
     old_levels = np.log(np.pi / 0.097671) / np.log(2)  # Old hardcoded value
     print(f"  Old hardcoded levels_to_closure: {old_levels:.6f}")
     print(f"  New measured ν_eff: {nu_eff:.6f}")
     print(f"  Ratio (old/new): {old_levels/nu_eff:.3f}")
-    
+
     # The proposal suggests that we need to refine the ν_eff measurement
     # Let's try using the theoretical approach but with the measured φ_SU2
     # This might give us a better estimate
     phi_su2_measured = su2_results["NC_FG_BG_bg"]
     nu_eff_theoretical = np.log2(np.pi / phi_su2_measured)
     print(f"  ν_eff from theoretical approach with measured φ_SU2: {nu_eff_theoretical:.6f}")
-    
+
     # Use the theoretical approach as the primary method
     nu_eff = nu_eff_theoretical
     print(f"  Using theoretical approach with measured φ_SU2: ν_eff = {nu_eff:.6f}")
-    
+
     # Build dimensionless energy index from maps-only invariants
     # Try different values of p to see which gives better results
     for p in [0, 1, 2, 4, 6, 8]:
         E_hat = build_E_hat(R_holo, nu_eff, rho, p=p)
         print(f"Ê⋆ (p={p}): {E_hat:.6e}")
-    
+
     # Use p=4 as suggested in the proposal
     E_hat = build_E_hat(R_holo, nu_eff, rho, p=4)
     print(f"Ê⋆ (dimensionless, p=4): {E_hat:.6e}")
-    
+
     # Make dimensionful with external anchor (m_H)
     m_H = 125.0  # GeV
     E_star_GeV = m_H * E_hat
     E_star_J = E_star_GeV * 1.602176634e-10  # Convert GeV to J
-    
-    print(f"\nE⋆ calculation:")
+
+    print("\nE⋆ calculation:")
     print(f"m_H: {m_H} GeV")
     print(f"Ê⋆: {E_hat:.6e}")
     print(f"E⋆ = m_H × Ê⋆: {E_star_GeV:.3e} GeV")
     print(f"E⋆ (J): {E_star_J:.3e} J")
-    
+
     # C.6: G Prediction from E_star using correct bridge
     print("\n--- C.6: G Prediction from E_star (Correct Bridge) ---")
-    
+
     G_pred = predict_G_from_Estar(E_star_J)
     G_codata = 6.67430e-11  # m³/kg⋅s²
     ratio = G_pred / G_codata
     error_percent = abs(ratio - 1) * 100
-    
+
     print(f"G prediction: {G_pred:.3e} m³/kg⋅s²")
     print(f"G CODATA: {G_codata:.3e} m³/kg⋅s²")
     print(f"Ratio: {ratio:.6f}")
     print(f"Error: {error_percent:.2f}%")
-    
+
     # Verification: solve E⋆ from CODATA G
     E_star_from_G = solve_Estar_from_G(G_codata)
     E_star_from_G_GeV = E_star_from_G / 1.602176634e-10  # Convert J to GeV
     E_hat_from_G = E_star_from_G_GeV / m_H
-    
-    print(f"\nVerification (inverted bridge):")
+
+    print("\nVerification (inverted bridge):")
     print(f"E⋆(from G): {E_star_from_G_GeV:.3e} GeV")
     print(f"Ê⋆(from G): {E_hat_from_G:.6e}")
     print(f"Ê⋆(measured)/Ê⋆(from G): {E_hat/E_hat_from_G:.3f}")
-    
+
     # Show why gravity appears "weak"
-    print(f"\nWhy gravity appears 'weak':")
-    print(f"G ∝ 1/E⋆², so large E⋆ suppresses G")
+    print("\nWhy gravity appears 'weak':")
+    print("G ∝ 1/E⋆², so large E⋆ suppresses G")
     print(f"E⋆ ≈ {E_star_GeV:.2e} GeV >> m_H = {m_H} GeV")
     print(f"Suppression factor: (E⋆/m_H)² ≈ {(E_star_GeV/m_H)**2:.1e}")
-    
+
     # Use the corrected approach as primary result
     E_star_GeV_final = E_star_GeV
 
@@ -822,9 +827,9 @@ def main():
     print(f"α error: {physical_constants['alpha_error_percent']:.3f}% ({physical_constants['alpha_error_ppb']:.1f} ppb)")
     print(f"Aperture gap: {physical_constants['delta_aperture']:.6f} (target: 0.0207)")
     print(f"Monodromic residue: {physical_constants['monodromic_residue']:.6f}")
-    
+
     print("\n--- E: Theoretical Validation ---")
-    print(f"φ_SU2 exact (CGM): 0.587900762 rad")
+    print("φ_SU2 exact (CGM): 0.587900762 rad")
     print(f"φ_SU2 measured: {su2_results['NC_FG_BG_bg']:.9f} rad")
     print(f"φ_SU2 error: {abs(0.587900762 - su2_results['NC_FG_BG_bg'])/0.587900762*100:.3f}%")
     print(f"Curvature ratio: {physical_constants['curvature_ratio']:.6f}")
@@ -834,16 +839,16 @@ def main():
     print(f"Closure fraction (ρ = δ_BU/m_p): {closure_fraction:.6f} (target: 0.9793)")
     print(f"Closure fraction error: {abs(closure_fraction - 0.9793)/0.9793*100:.3f}%")
     print(f"Monodromic residue: {physical_constants['monodromic_residue']:.6f}")
-    
-    print(f"\n--- F: Summary (Corrected Maps-Only Approach) ---")
+
+    print("\n--- F: Summary (Corrected Maps-Only Approach) ---")
     print(f"E⋆ (from maps): {E_star_GeV_final:.3e} GeV")
     print(f"G prediction: {G_pred:.3e} m³/kg⋅s²")
     print(f"G CODATA: {G_codata:.3e} m³/kg⋅s²")
     print(f"Error: {error_percent:.2f}%")
     print(f"Ê⋆ consistency check: {E_hat/E_hat_from_G:.3f} (target: ~1.0)")
-    
+
     # Show comparison with old hardcoded approach
-    print(f"\n--- G: Comparison with Old Hardcoded Approach ---")
+    print("\n--- G: Comparison with Old Hardcoded Approach ---")
     old_levels = np.log(np.pi / 0.097671) / np.log(2)  # Old hardcoded value
     old_E_hat = R_holo ** old_levels
     old_E_star_GeV = m_H * old_E_hat
@@ -851,26 +856,26 @@ def main():
     old_G_pred = predict_G_from_Estar(old_E_star_J)
     old_ratio = old_G_pred / G_codata
     old_error = abs(old_ratio - 1) * 100
-    
-    print(f"Old approach (hardcoded levels):")
+
+    print("Old approach (hardcoded levels):")
     print(f"  levels_to_closure: {old_levels:.3f}")
     print(f"  E⋆: {old_E_star_GeV:.3e} GeV")
     print(f"  G error: {old_error:.2f}%")
-    print(f"New approach (measured ν_eff):")
+    print("New approach (measured ν_eff):")
     print(f"  ν_eff: {nu_eff:.3f}")
     print(f"  E⋆: {E_star_GeV_final:.3e} GeV")
     print(f"  G error: {error_percent:.2f}%")
     print(f"Improvement: {old_error/error_percent:.1f}x better")
-    
-    print(f"\n--- H: Key Insights ---")
+
+    print("\n--- H: Key Insights ---")
     print(f"• Maps provide only dimensionless invariants: N={N:,}, M={M}, R_holo={R_holo:.1f}")
     print(f"• Measured ν_eff from lattice dynamics: {nu_eff:.3f} (vs hardcoded {old_levels:.3f})")
     print(f"• Dimensionless Ê⋆ = R_holo^ν_eff × ρ^4 = {E_hat:.3e}")
     print(f"• External anchor m_H = {m_H} GeV makes E⋆ dimensionful")
-    print(f"• Bridge G = ζc⁵ℏ/(S_min Q_G³ E⋆²) explains 'weak' gravity")
+    print("• Bridge G = ζc⁵ℏ/(S_min Q_G³ E⋆²) explains 'weak' gravity")
     print(f"• Gravity suppression factor: (E⋆/m_H)² ≈ {(E_star_GeV_final/m_H)**2:.1e}")
-    
-    print(f"\nUsing corrected maps-only approach (non-circular, geometrically grounded)")
+
+    print("\nUsing corrected maps-only approach (non-circular, geometrically grounded)")
 
 if __name__ == "__main__":
     main()

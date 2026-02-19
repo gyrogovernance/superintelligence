@@ -1,4 +1,5 @@
-from typing import Callable, Any
+from collections.abc import Callable
+from typing import Any
 
 def njit(*args: Any, **kwargs: Any) -> Callable[..., Any]: ...
 def jit(*args: Any, **kwargs: Any) -> Callable[..., Any]: ...

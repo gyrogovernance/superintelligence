@@ -8,9 +8,9 @@ import os
 import sys
 import time
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any
-from enum import Enum
 
 import numpy as np
 import torch

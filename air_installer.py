@@ -6,10 +6,10 @@ Usage:
     python air_installer.py
 """
 
+import os
+import shutil
 import subprocess
 import sys
-import shutil
-import os
 from pathlib import Path
 
 # Get program root
@@ -32,7 +32,7 @@ def check_node_npm():
     # Try direct PATH check first
     node_path = shutil.which("node")
     npm_path = shutil.which("npm")
-    
+
     # On Windows, check common installation paths
     if sys.platform == "win32" and not node_path:
         common_node_paths = [
@@ -55,7 +55,7 @@ def check_node_npm():
                 Path(user_profile) / "AppData" / "Roaming" / "npm" / "node.exe",
                 Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "node.exe",
             ])
-        
+
         for path in common_node_paths:
             if path.exists():
                 node_path = str(path)
@@ -67,7 +67,7 @@ def check_node_npm():
                 # Re-check with shutil.which after PATH update
                 node_path = shutil.which("node") or node_path
                 break
-    
+
     if sys.platform == "win32" and not npm_path:
         common_npm_paths = [
             Path("C:/Program Files/nodejs/npm.cmd"),
@@ -89,7 +89,7 @@ def check_node_npm():
                 Path(user_profile) / "AppData" / "Roaming" / "npm" / "npm.cmd",
                 Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "npm.cmd",
             ])
-        
+
         for path in common_npm_paths:
             if path.exists():
                 npm_path = str(path)
@@ -100,7 +100,7 @@ def check_node_npm():
                 # Re-check with shutil.which after PATH update
                 npm_path = shutil.which("npm") or npm_path
                 break
-    
+
     if not node_path:
         print("✗ Node.js not found in PATH")
         if sys.platform == "win32":
@@ -116,7 +116,7 @@ def check_node_npm():
             print("\nPlease install Node.js from: https://nodejs.org/")
             print("Or use a Node.js version manager like nvm.")
         return None
-    
+
     # Try to run node
     try:
         result = subprocess.run(
@@ -131,13 +131,13 @@ def check_node_npm():
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"✗ Node.js found at {node_path} but version check failed: {e}")
         return None
-    
+
     if not npm_path:
         print("✗ npm not found (should come with Node.js)")
         print(f"  Node.js is at: {node_path}")
         print("  npm should be in the same directory")
         return None
-    
+
     # Try to run npm
     try:
         result = subprocess.run(
@@ -152,15 +152,15 @@ def check_node_npm():
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print(f"✗ npm found at {npm_path} but version check failed: {e}")
         return None
-    
+
     return npm_path
 
 
 def check_python_deps():
     """Check if Python dependencies are installed."""
     try:
-        import uvicorn
         import fastapi
+        import uvicorn
         # Imports successful - dependencies are installed
         del uvicorn, fastapi  # Clean up to satisfy linter
         print("✓ Python dependencies installed")
@@ -177,7 +177,7 @@ def install_frontend_deps(npm_path):
     if not UI_DIR.exists():
         print(f"Error: UI directory not found: {UI_DIR}")
         return False
-    
+
     print(f"\nInstalling frontend dependencies in {UI_DIR}...")
     try:
         # Use npm_path directly, or "npm" if it's in PATH
@@ -204,33 +204,33 @@ def main():
     print("AIR Console Installer")
     print("=" * 5)
     print()
-    
+
     # Check prerequisites
     print("Checking prerequisites...")
     print()
-    
+
     if not check_python():
         sys.exit(1)
     print()
-    
+
     npm_path = check_node_npm()
     if not npm_path:
         print()
         print("Please install Node.js and npm, then run this installer again.")
         sys.exit(1)
     print()
-    
+
     if not check_python_deps():
         print()
         sys.exit(1)
     print()
-    
+
     # Install frontend deps (pass npm_path)
     if not install_frontend_deps(npm_path):
         sys.exit(1)
-    
+
     print()
-    
+
     # Build atlas and initialise programs
     print("Building atlas and initializing programs...")
     try:
@@ -243,7 +243,7 @@ def main():
         print(f"⚠ Warning: Could not build atlas/programs automatically: {e}")
         print("You can run this manually later with:")
         print("  python air_cli.py")
-    
+
     print()
     print("=" * 5)
     print("Installation complete!")

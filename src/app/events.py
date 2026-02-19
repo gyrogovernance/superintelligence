@@ -14,8 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Dict, Optional
-
+from typing import Any
 
 # Fixed-point micro-unit constant (1.0 = 1,000,000 micro-units)
 MICRO = 1_000_000
@@ -58,19 +57,19 @@ class GovernanceEvent:
     edge_id: EdgeID
     magnitude_micro: int
     confidence_micro: int = MICRO
-    meta: Dict[str, Any] = field(default_factory=dict)
+    meta: dict[str, Any] = field(default_factory=dict)
 
     # Optional: bind the event to a kernel "moment" (step, state_index, last_byte)
     # so the event log can be replayed deterministically.
-    kernel_step: Optional[int] = None
-    kernel_state_index: Optional[int] = None
-    kernel_last_byte: Optional[int] = None
+    kernel_step: int | None = None
+    kernel_state_index: int | None = None
+    kernel_last_byte: int | None = None
 
     def signed_value_micro(self) -> int:
         """Return signed value in micro-units: (magnitude_micro * confidence_micro) // MICRO"""
         return (self.magnitude_micro * self.confidence_micro) // MICRO
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "domain": int(self.domain),
             "edge_id": int(self.edge_id),
@@ -99,7 +98,7 @@ class Grant:
     anchor: str
     mu_allocated: int
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "identity": str(self.identity),
             "identity_id": str(self.identity_id),
@@ -126,7 +125,7 @@ class Shell:
     used_capacity_MU: int
     free_capacity_MU: int
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "header": str(self.header),
             "seal": str(self.seal),
@@ -147,12 +146,12 @@ class Archive:
     - used_capacity_MU: sum of used MU across all Shells
     - free_capacity_MU: remaining MU across all Shells
     """
-    per_identity_MU: Dict[str, int]
+    per_identity_MU: dict[str, int]
     total_capacity_MU: int
     used_capacity_MU: int
     free_capacity_MU: int
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "per_identity_MU": dict(self.per_identity_MU),
             "total_capacity_MU": int(self.total_capacity_MU),

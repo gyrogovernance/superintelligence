@@ -47,9 +47,11 @@ import json
 import sys
 import time
 import warnings
+from collections.abc import Iterable, Iterator
 from itertools import islice
 from pathlib import Path
-from typing import Iterator, Iterable, Optional, List, Union, Dict, cast, Any
+from typing import Any, cast
+
 import numpy as np
 
 # Suppress all warnings
@@ -59,9 +61,9 @@ warnings.filterwarnings("ignore")
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from baby.contracts import AgentConfig, PreferencesConfig  # noqa: E402
 from baby.information import encode_text_with_sep as gyro_encode  # noqa: E402
 from baby.intelligence import GyroASI  # noqa: E402
-from baby.contracts import AgentConfig, PreferencesConfig  # noqa: E402
 from baby.policies import prune_and_compact_store  # noqa: E402
 
 # Default constants
@@ -87,7 +89,7 @@ def iter_wiki_articles(files: Iterable[Path], blank_line_threshold: int = DEFAUL
         open_func = gzip.open if file_path.suffix == ".gz" else open
 
         with open_func(file_path, "rt", encoding="utf-8", errors="ignore") as f:
-            buffer: List[str] = []
+            buffer: list[str] = []
             blank_line_count = 0
 
             for line in f:
@@ -192,10 +194,10 @@ def format_time(seconds: float) -> str:
 def compile_stream(
     articles: Iterable[str],
     output_tape_path: Path,
-    agent: Optional[GyroASI] = None,
-    limit: Optional[int] = None,
+    agent: GyroASI | None = None,
+    limit: int | None = None,
     log_interval: int = DEFAULT_LOG_INTERVAL,
-) -> Dict[str, Union[int, float, str]]:
+) -> dict[str, int | float | str]:
     """
     Compile Wikipedia articles into a gyro-tape and optionally update knowledge store.
 
@@ -314,7 +316,7 @@ def compile_stream(
     final_rate_bytes = bytes_written / total_elapsed / (1024 * 1024) if total_elapsed > 0 else 0
 
     # Prepare stats dictionary
-    stats: Dict[str, Union[int, float, str]] = {
+    stats: dict[str, int | float | str] = {
         "articles_processed": articles_processed,
         "tokens_processed": tokens_processed,
         "bytes_written": bytes_written,
@@ -364,7 +366,7 @@ def replay_tape(
     tape_path: Path,
     agent: GyroASI,
     log_interval: int = 1_000,  # Log every 1KB by default (very responsive)
-) -> Dict[str, Union[int, float, str]]:
+) -> dict[str, int | float | str]:
     """
     Replay a gyro-tape through an agent for learning.
 
@@ -461,7 +463,7 @@ def replay_tape(
     final_rate = bytes_processed / total_elapsed / (1024 * 1024) if total_elapsed > 0 else 0
 
     # Prepare stats dictionary
-    stats: Dict[str, Union[int, float, str]] = {
+    stats: dict[str, int | float | str] = {
         "tape_size": tape_size,
         "bytes_processed": bytes_processed,
         "processing_time": total_elapsed,
@@ -649,7 +651,7 @@ Examples:
     print(f"📚 Found {len(files)} files in {dataset_dir}")
 
     # Create agent if learning is enabled
-    agent: Optional[GyroASI] = None
+    agent: GyroASI | None = None
     if args.learn:
         # Use knowledge_* pattern for the output file
         output_name = Path(args.output).stem

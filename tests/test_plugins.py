@@ -9,7 +9,7 @@ Tests the plugin system:
 
 import numpy as np
 
-from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
+from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 from src.app.ledger import DomainLedgers
 from src.plugins.analytics import hodge_decompose
 from src.plugins.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id

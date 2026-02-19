@@ -4,17 +4,26 @@
 # No scores / greedy paths; learning only on user content; BU-In is non-deterministic,
 # path- and time-coupled via physics (six DoF + monodromic fold), not RNG.
 
-from typing import Callable, Dict, Any, Optional
-import json, threading, collections
+import collections
+import json
+import threading
+from collections.abc import Callable
 from pathlib import Path
-from openai_harmony import StreamableParser, Role
+from typing import Any
+
+from baby.constants.harmony_tokens import (
+    ALL_CONTROL_TOKENS,
+    MESSAGE,
+    ROLE_ASSISTANT,
+    ROLE_USER,
+)
 from baby.kernel.gyro_core import GyroEngine
-from baby.constants.harmony_tokens import MESSAGE, ROLE_USER, ROLE_ASSISTANT, ALL_CONTROL_TOKENS
+from openai_harmony import Role, StreamableParser
 
 _engine_lock = threading.RLock()
 
 
-def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
+def setup_model(encoding, config_path: str) -> Callable[..., int | None]:
     """
     Returns infer_next_token(tokens, temperature=..., request_id=..., new_request=...)
     Engine and sessions are closed over; no module-level globals required.
@@ -50,9 +59,9 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         )
 
     # Per-request session state
-    sessions: Dict[str, Dict[str, Any]] = {}
+    sessions: dict[str, dict[str, Any]] = {}
     sessions_lock = threading.RLock()
-    
+
 
     # Harmony tokenization — pure pass-through; no surface forcing
 
@@ -78,7 +87,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         val = getattr(current_role, "value", None)
         return val == "assistant"
 
-    def _apply_new_tokens(sess: Dict[str, Any], new_tokens: list[int]) -> None:
+    def _apply_new_tokens(sess: dict[str, Any], new_tokens: list[int]) -> None:
         """
         Feed only the delta tokens; learn only from user content.
         """
@@ -127,7 +136,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             # Ensure the latest anchor will be applied just before generation
             sess["anchor_applied"] = False
 
-    def infer_next_token(tokens: list[int], temperature: float = 0.0, **kwargs) -> Optional[int]:
+    def infer_next_token(tokens: list[int], temperature: float = 0.0, **kwargs) -> int | None:
         request_id: str = kwargs.get("request_id", "__singleton__")
         new_request: bool = kwargs.get("new_request", False)
         ingest_only: bool = kwargs.get("ingest_only", False)
@@ -168,8 +177,8 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                             sess["state"] = new_state
                             sess["user_token_count"] = sess.get("user_token_count", 0) + 1
                             print(f"[DEBUG-LEARN-NEW] State changed from 0x{prev_state:012X} to 0x{new_state:012X}")
-                            
-                            
+
+
                             # --- session-local egress mask (geometry-sized) ---
                             # adapt deque length to active slab count of the *new* state
                             sector = engine.sector(sess["state"])
@@ -187,7 +196,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                             for p in rq:
                                 mask, _ = engine._fold8(mask, p)
                             # Don't update egress mask during learning - only during emission
-                            
+
                             target_k = sess.get("anchor_target_k", int(engine.runtime.get("anchor_prefix_tokens", 12)))
                             if sess["user_token_count"] == target_k:
                                 sess["user_anchor_state"] = new_state
@@ -223,7 +232,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                     sess["bucket_pos"].clear()
                     sess["monodromy"].clear()
                     sess["slab_cursor"].clear()
-                    
+
                     # Reset session egress tracking
                     sess["recent_egress"] = collections.deque(maxlen=1)
                     sess["recent_egress_phases"] = []
@@ -238,8 +247,8 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                             new_state = engine.learn_on_user(prev_state, tok)
                             sess["state"] = new_state
                             sess["user_token_count"] = sess.get("user_token_count", 0) + 1
-                            
-                            
+
+
                             # --- session-local egress mask (geometry-sized) ---
                             # adapt deque length to active slab count of the *new* state
                             sector = engine.sector(sess["state"])
@@ -257,7 +266,7 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
                             for p in rq:
                                 mask, _ = engine._fold8(mask, p)
                             # Don't update egress mask during learning - only during emission
-                            
+
                             target_k = sess.get("anchor_target_k", int(engine.runtime.get("anchor_prefix_tokens", 12)))
                             if sess["user_token_count"] == target_k:
                                 sess["user_anchor_state"] = new_state
@@ -339,12 +348,12 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
 
         # Check if previous walk is complete
         if sess.get("walk_complete", False):
-            print(f"[DEBUG-WALK] Previous walk complete, starting new walk")
+            print("[DEBUG-WALK] Previous walk complete, starting new walk")
             sess["walk_complete"] = False
-        
+
         # THE WALKING MODEL: BU-In generates, BU-Eg re-ingests, creating continuous monodromy
         print(f"[DEBUG-WALK] Starting walk from state=0x{sess['state']:012X}")
-        
+
         # Single step walking: emit one token, then feed it back as input for next call
         res = engine.emit_next_from_state(
             sess["state"],
@@ -353,16 +362,16 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
             sess.get("slab_cursor")
         )
         if res is None:
-            print(f"[DEBUG-WALK] No coherent paths - walk complete")
+            print("[DEBUG-WALK] No coherent paths - walk complete")
             return None
 
         next_token, new_state, omega, bucket_key, bucket_pos, monodromy, slab_cursor = res
-        
+
         # CRITICAL: Feed the output back as input (this IS the walking!)
         # The emitted token becomes the next input, creating continuous monodromy
         print(f"[DEBUG-WALK] Generated token: {next_token}, feeding back as input")
         sess["state"] = engine.transit_on_assistant(sess["state"], next_token)
-        
+
         # Update session state
         sess["omega"] = omega
         sess["bucket_key"] = bucket_key
@@ -384,12 +393,12 @@ def setup_model(encoding, config_path: str) -> Callable[..., Optional[int]]:
         rep_idx = engine.orbit_rep_index(cur_idx)
         alignment_amp = engine._alignment_amp(sess["state"], rep_idx)
         print(f"[DEBUG-WALK] After feedback: alignment_amp = {alignment_amp}")
-        
+
         if alignment_amp == 0:
-            print(f"[DEBUG-WALK] Natural stop: amplitude = 0 (walk complete)")
+            print("[DEBUG-WALK] Natural stop: amplitude = 0 (walk complete)")
             # Mark that this walk is complete
             sess["walk_complete"] = True
-            
+
         return next_token
 
     return infer_next_token

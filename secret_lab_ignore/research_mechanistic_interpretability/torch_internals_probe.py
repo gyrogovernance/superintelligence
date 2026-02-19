@@ -13,9 +13,10 @@ how to read weights and replace matmul-based attention with horizon-indexed rout
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -36,43 +37,43 @@ def analyze_weight_storage() -> dict[str, Any]:
     - Access is via tensor indexing or matmul
     """
     results: dict[str, Any] = {}
-    
+
     # Create a simple Linear layer to examine
     linear = nn.Linear(64, 32, bias=True)
-    
+
     results["weight_type"] = type(linear.weight).__name__
     results["weight_shape"] = list(linear.weight.shape)
     results["weight_dtype"] = str(linear.weight.dtype)
     results["weight_device"] = str(linear.weight.device)
     results["weight_requires_grad"] = linear.weight.requires_grad
     results["weight_is_contiguous"] = linear.weight.is_contiguous()
-    
+
     # Memory layout
     results["weight_stride"] = list(linear.weight.stride())
     results["weight_storage_offset"] = linear.weight.storage_offset()
     results["weight_numel"] = linear.weight.numel()
     results["weight_element_size"] = linear.weight.element_size()
     results["weight_nbytes"] = linear.weight.numel() * linear.weight.element_size()
-    
+
     # Bias analysis
     bias = getattr(linear, 'bias', None)
     if bias is not None:
         results["bias_shape"] = list(bias.shape)
         results["bias_dtype"] = str(bias.dtype)
-    
+
     # How forward pass accesses weights
     x = torch.randn(8, 64)  # (batch, in_features)
-    
+
     # Method 1: Using the module
     y1 = linear(x)
-    
+
     # Method 2: Manual matmul (what actually happens inside)
     # Note: weight is (out, in), so we do x @ weight.T
     y2 = x @ linear.weight.T + linear.bias
-    
+
     results["forward_equivalence"] = torch.allclose(y1, y2, atol=1e-6)
     results["forward_output_shape"] = list(y1.shape)
-    
+
     return results
 
 
@@ -85,29 +86,29 @@ def analyze_embedding_storage() -> dict[str, Any]:
     - This could be replaced by kernel-derived embeddings
     """
     results: dict[str, Any] = {}
-    
+
     vocab_size = 1000
     embed_dim = 128
     embed = nn.Embedding(vocab_size, embed_dim)
-    
+
     results["embed_weight_shape"] = list(embed.weight.shape)
     results["embed_weight_dtype"] = str(embed.weight.dtype)
-    
+
     # How lookup works
     token_ids = torch.tensor([42, 100, 7])
-    
+
     # Method 1: Using embedding layer
     embeddings1 = embed(token_ids)
-    
+
     # Method 2: Direct indexing (what actually happens)
     embeddings2 = embed.weight[token_ids]
-    
+
     results["lookup_equivalence"] = torch.allclose(embeddings1, embeddings2)
     results["lookup_output_shape"] = list(embeddings1.shape)
-    
+
     # Key insight: embedding is weight[input], not weight @ input
     results["operation"] = "indexing (weight[ids]), not matmul"
-    
+
     return results
 
 
@@ -139,7 +140,7 @@ class ForwardTracer:
     traces: list[OpTrace] = field(default_factory=list)
     _handles: list[Any] = field(default_factory=list)
     _depth: int = 0
-    
+
     def _make_hook(self, name: str) -> Callable[[nn.Module, tuple[Any, ...], Any], None]:
         def hook(module: nn.Module, inputs: tuple[Any, ...], output: Any) -> None:
             # Get input shapes
@@ -147,7 +148,7 @@ class ForwardTracer:
             for inp in inputs:
                 if isinstance(inp, torch.Tensor):
                     input_shapes.append(list(inp.shape))
-            
+
             # Get output shape
             if isinstance(output, torch.Tensor):
                 output_shape = list(output.shape)
@@ -158,13 +159,13 @@ class ForwardTracer:
                     output_shape = []
             else:
                 output_shape = []
-            
+
             # Get weight shape if applicable
             weight_shape = None
             weight = getattr(module, 'weight', None)
             if weight is not None:
                 weight_shape = list(weight.shape)
-            
+
             self.traces.append(OpTrace(
                 name=name,
                 module_type=type(module).__name__,
@@ -174,7 +175,7 @@ class ForwardTracer:
                 duration_us=0.0,  # Would need CUDA events for accurate timing
             ))
         return hook
-    
+
     def attach(self, model: nn.Module, prefix: str = "") -> None:
         """Attach hooks to all modules in the model."""
         for name, module in model.named_modules():
@@ -183,19 +184,19 @@ class ForwardTracer:
             full_name = f"{prefix}.{name}" if prefix else name
             handle = module.register_forward_hook(self._make_hook(full_name))
             self._handles.append(handle)
-    
+
     def detach(self) -> None:
         """Remove all hooks."""
         for handle in self._handles:
             handle.remove()
         self._handles.clear()
-    
+
     def summarize(self) -> dict[str, Any]:
         """Summarize the traced operations."""
         by_type: dict[str, int] = {}
         for trace in self.traces:
             by_type[trace.module_type] = by_type.get(trace.module_type, 0) + 1
-        
+
         return {
             "total_ops": len(self.traces),
             "by_type": by_type,
@@ -237,7 +238,7 @@ def trace_attention_step_by_step(
     """
     results: dict[str, Any] = {"steps": []}
     head_dim = hidden_dim // num_heads
-    
+
     # Input: hidden states from previous layer
     x = torch.randn(batch_size, seq_len, hidden_dim)
     results["steps"].append({
@@ -246,16 +247,16 @@ def trace_attention_step_by_step(
         "shape": list(x.shape),
         "description": "Hidden states from previous layer/embedding"
     })
-    
+
     # Step 1: Linear projections for Q, K, V
     W_q = torch.randn(hidden_dim, hidden_dim) * 0.02
     W_k = torch.randn(hidden_dim, hidden_dim) * 0.02
     W_v = torch.randn(hidden_dim, hidden_dim) * 0.02
-    
+
     Q = x @ W_q  # (batch, seq, hidden)
     K = x @ W_k
     V = x @ W_v
-    
+
     results["steps"].append({
         "step": 1,
         "name": "qkv_projection",
@@ -265,13 +266,13 @@ def trace_attention_step_by_step(
         "flops": 3 * batch_size * seq_len * hidden_dim * hidden_dim,
         "description": "Linear projection: dense matmul"
     })
-    
+
     # Step 2: Reshape for multi-head attention
     # (batch, seq, hidden) -> (batch, heads, seq, head_dim)
     Q = Q.view(batch_size, seq_len, num_heads, head_dim).transpose(1, 2)
     K = K.view(batch_size, seq_len, num_heads, head_dim).transpose(1, 2)
     V = V.view(batch_size, seq_len, num_heads, head_dim).transpose(1, 2)
-    
+
     results["steps"].append({
         "step": 2,
         "name": "reshape_multihead",
@@ -279,12 +280,12 @@ def trace_attention_step_by_step(
         "shapes": {"Q": list(Q.shape), "K": list(K.shape), "V": list(V.shape)},
         "description": "Reshape for parallel head computation (no FLOPs)"
     })
-    
+
     # Step 3: Attention scores: Q @ K.T / sqrt(d_k)
     # This is the CRITICAL O(n^2) operation
     scale = head_dim ** -0.5
     attn_scores = (Q @ K.transpose(-2, -1)) * scale  # (batch, heads, seq, seq)
-    
+
     results["steps"].append({
         "step": 3,
         "name": "attention_scores",
@@ -293,10 +294,10 @@ def trace_attention_step_by_step(
         "flops": batch_size * num_heads * seq_len * seq_len * head_dim,
         "description": "ATTENTION BOTTLENECK: O(n^2) in sequence length"
     })
-    
+
     # Step 4: Softmax
     attn_weights = torch.softmax(attn_scores, dim=-1)
-    
+
     results["steps"].append({
         "step": 4,
         "name": "softmax",
@@ -304,10 +305,10 @@ def trace_attention_step_by_step(
         "shape": list(attn_weights.shape),
         "description": "Normalize to probability distribution per query"
     })
-    
+
     # Step 5: Apply attention to values
     attn_output = attn_weights @ V  # (batch, heads, seq, head_dim)
-    
+
     results["steps"].append({
         "step": 5,
         "name": "attention_apply",
@@ -316,12 +317,12 @@ def trace_attention_step_by_step(
         "flops": batch_size * num_heads * seq_len * seq_len * head_dim,
         "description": "SECOND O(n^2): weighted sum of values"
     })
-    
+
     # Step 6: Reshape back and output projection
     attn_output = attn_output.transpose(1, 2).contiguous().view(batch_size, seq_len, hidden_dim)
     W_o = torch.randn(hidden_dim, hidden_dim) * 0.02
     output = attn_output @ W_o
-    
+
     results["steps"].append({
         "step": 6,
         "name": "output_projection",
@@ -330,7 +331,7 @@ def trace_attention_step_by_step(
         "flops": batch_size * seq_len * hidden_dim * hidden_dim,
         "description": "Project back to hidden dimension"
     })
-    
+
     # Summary
     total_flops = sum(s.get("flops", 0) for s in results["steps"])
     results["summary"] = {
@@ -339,7 +340,7 @@ def trace_attention_step_by_step(
         "projection_flops": 4 * batch_size * seq_len * hidden_dim * hidden_dim,
         "n_squared_ops": ["attention_scores", "attention_apply"],
     }
-    
+
     return results
 
 
@@ -364,7 +365,7 @@ def trace_mlp_step_by_step(
     - MLP routing could be horizon-dependent
     """
     results: dict[str, Any] = {"steps": []}
-    
+
     # Input: hidden states
     x = torch.randn(batch_size, seq_len, hidden_dim)
     results["steps"].append({
@@ -372,11 +373,11 @@ def trace_mlp_step_by_step(
         "name": "input",
         "shape": list(x.shape),
     })
-    
+
     # Gate projection: hidden -> intermediate
     W_gate = torch.randn(intermediate_dim, hidden_dim) * 0.02
     gate = x @ W_gate.T  # (batch, seq, intermediate)
-    
+
     results["steps"].append({
         "step": 1,
         "name": "gate_projection",
@@ -385,11 +386,11 @@ def trace_mlp_step_by_step(
         "weight_shape": list(W_gate.shape),
         "flops": batch_size * seq_len * hidden_dim * intermediate_dim,
     })
-    
+
     # Up projection: hidden -> intermediate
     W_up = torch.randn(intermediate_dim, hidden_dim) * 0.02
     up = x @ W_up.T
-    
+
     results["steps"].append({
         "step": 2,
         "name": "up_projection",
@@ -398,11 +399,11 @@ def trace_mlp_step_by_step(
         "weight_shape": list(W_up.shape),
         "flops": batch_size * seq_len * hidden_dim * intermediate_dim,
     })
-    
+
     # Gated activation: SiLU(gate) * up
     # SiLU(x) = x * sigmoid(x)
     intermediate = torch.nn.functional.silu(gate) * up
-    
+
     results["steps"].append({
         "step": 3,
         "name": "gated_activation",
@@ -410,11 +411,11 @@ def trace_mlp_step_by_step(
         "shape": list(intermediate.shape),
         "description": "SiLU(x) = x * sigmoid(x), then element-wise multiply"
     })
-    
+
     # Down projection: intermediate -> hidden
     W_down = torch.randn(hidden_dim, intermediate_dim) * 0.02
     output = intermediate @ W_down.T
-    
+
     results["steps"].append({
         "step": 4,
         "name": "down_projection",
@@ -423,7 +424,7 @@ def trace_mlp_step_by_step(
         "weight_shape": list(W_down.shape),
         "flops": batch_size * seq_len * intermediate_dim * hidden_dim,
     })
-    
+
     # 256x43 factorization insight
     if intermediate_dim == 11008:
         results["kernel_factorization"] = {
@@ -433,7 +434,7 @@ def trace_mlp_step_by_step(
             "43": "fiber features (mask bits + dual code + anatomy)",
             "insight": "MLP could route based on kernel horizon index"
         }
-    
+
     return results
 
 
@@ -528,7 +529,7 @@ def main() -> None:
     print("=" * 5)
     print("\nFor Gyroscopic ASI: Understanding weight access and computation steps")
     print()
-    
+
     # Part 1: Weight Storage
     print("-" * 5)
     print("1. Weight Storage Analysis")
@@ -536,7 +537,7 @@ def main() -> None:
     weight_info = analyze_weight_storage()
     for key, val in weight_info.items():
         print(f"  {key}: {val}")
-    
+
     # Part 1b: Embedding Storage
     print("\n" + "-" * 5)
     print("1b. Embedding Storage Analysis")
@@ -544,7 +545,7 @@ def main() -> None:
     embed_info = analyze_embedding_storage()
     for key, val in embed_info.items():
         print(f"  {key}: {val}")
-    
+
     # Part 2: Attention Step-by-Step
     print("\n" + "-" * 5)
     print("2. Attention Computation Steps")
@@ -567,11 +568,11 @@ def main() -> None:
             print(f"    FLOPs: {step['flops']:,}")
         if "description" in step:
             print(f"    Note: {step['description']}")
-    
+
     print("\n  Attention Summary:")
     for key, val in attn_trace["summary"].items():
         print(f"    {key}: {val}")
-    
+
     # Part 3: MLP Step-by-Step
     print("\n" + "-" * 5)
     print("3. MLP (Gated FFN) Computation Steps")
@@ -592,41 +593,41 @@ def main() -> None:
             print(f"    Weight: {step['weight_shape']}")
         if "flops" in step:
             print(f"    FLOPs: {step['flops']:,}")
-    
+
     # Part 4: Summary of Observations
     print("\n" + "-" * 5)
     print("4. Summary of Observations")
     print("-" * 5)
     observations = summarize_observations()
-    
+
     print("\n  Weight Access Types (verified):")
     for name, info in observations["weight_access_types"].items():
         print(f"\n  {name}:")
         for key, val in info.items():
             print(f"    {key}: {val}")
-    
+
     print("\n  Architectural Facts:")
     for name, val in observations["architectural_facts"].items():
         print(f"    {name}: {val}")
-    
+
     # Part 5: OLMo Structure
     print("\n" + "-" * 5)
     print("5. OLMo-3-7B Architecture (from config.json)")
     print("-" * 5)
     olmo = analyze_olmo_structure()
-    
+
     print("\n  Config:")
     for key, val in olmo["model_config"].items():
         print(f"    {key}: {val}")
-    
+
     print("\n  Factorizations:")
     for key, val in olmo["factorizations"].items():
         print(f"    {key}: {val}")
-    
+
     print("\n  Weight Access Pattern:")
     for key, val in olmo["weight_access_pattern"].items():
         print(f"    {key}: {val}")
-    
+
     print("\nProbe complete.")
 
 

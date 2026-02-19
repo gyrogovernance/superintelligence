@@ -11,12 +11,12 @@ Keep this minimal and dependency-free.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
-from src.app.events import Domain, EdgeID, GovernanceEvent, Grant, Shell, Archive
+from src.app.events import Archive, Domain, EdgeID, GovernanceEvent, Grant, Shell
 
 
-def parse_domain(value: Any) -> Optional[Domain]:
+def parse_domain(value: Any) -> Domain | None:
     if isinstance(value, int):
         try:
             return Domain(int(value))
@@ -33,7 +33,7 @@ def parse_domain(value: Any) -> Optional[Domain]:
     return None
 
 
-def parse_edge_id(value: Any) -> Optional[EdgeID]:
+def parse_edge_id(value: Any) -> EdgeID | None:
     if isinstance(value, int):
         try:
             return EdgeID(int(value))
@@ -48,9 +48,9 @@ def parse_edge_id(value: Any) -> Optional[EdgeID]:
     return None
 
 
-def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
+def event_from_dict(d: dict[str, Any]) -> GovernanceEvent:
     from src.app.events import MICRO
-    
+
     dom = parse_domain(d.get("domain"))
     edge = parse_edge_id(d.get("edge_id"))
     if dom is None or edge is None:
@@ -66,7 +66,7 @@ def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
         confidence = float(d.get("confidence", 1.0))
         magnitude_micro = int(round(magnitude * MICRO))
         confidence_micro = int(round(confidence * MICRO))
-    
+
     meta = dict(d.get("meta", {}))
 
     # Optional kernel binding fields
@@ -86,11 +86,11 @@ def event_from_dict(d: Dict[str, Any]) -> GovernanceEvent:
     )
 
 
-def event_to_dict(ev: GovernanceEvent) -> Dict[str, Any]:
+def event_to_dict(ev: GovernanceEvent) -> dict[str, Any]:
     return ev.as_dict()
 
 
-def grant_from_dict(d: Dict[str, Any]) -> Grant:
+def grant_from_dict(d: dict[str, Any]) -> Grant:
     """
     Parse a Grant from a dictionary.
     
@@ -100,40 +100,40 @@ def grant_from_dict(d: Dict[str, Any]) -> Grant:
     identity_id = str(d.get("identity_id", ""))
     anchor = str(d.get("anchor", ""))
     mu_allocated = int(d.get("mu_allocated", 0))
-    
+
     if not identity or not identity_id or not anchor:
-        raise ValueError(f"Invalid grant dict: missing identity, identity_id, or anchor")
-    
+        raise ValueError("Invalid grant dict: missing identity, identity_id, or anchor")
+
     if len(identity_id) != 64:
         raise ValueError(f"identity_id must be 64 hex chars (SHA-256), got {len(identity_id)}")
-    
+
     if len(anchor) != 6:
         raise ValueError(f"anchor must be 6 hex chars (24-bit state_hex), got {len(anchor)}")
-    
+
     try:
         int(identity_id, 16)  # Validate hex
     except ValueError:
         raise ValueError(f"identity_id must be valid hex, got {identity_id}")
-    
+
     try:
         int(anchor, 16)  # Validate hex
     except ValueError:
         raise ValueError(f"anchor must be valid hex, got {anchor}")
-    
+
     return Grant(identity=identity, identity_id=identity_id, anchor=anchor, mu_allocated=mu_allocated)
 
 
-def grant_to_dict(g: Grant) -> Dict[str, Any]:
+def grant_to_dict(g: Grant) -> dict[str, Any]:
     """Serialize a Grant to a dictionary."""
     return g.as_dict()
 
 
-def shell_to_dict(shell: Shell) -> Dict[str, Any]:
+def shell_to_dict(shell: Shell) -> dict[str, Any]:
     """Serialize a Shell to a dictionary."""
     return shell.as_dict()
 
 
-def archive_to_dict(archive: Archive) -> Dict[str, Any]:
+def archive_to_dict(archive: Archive) -> dict[str, Any]:
     """Serialize an Archive to a dictionary."""
     return archive.as_dict()
 

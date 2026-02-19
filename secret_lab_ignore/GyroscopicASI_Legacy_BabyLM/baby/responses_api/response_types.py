@@ -1,4 +1,4 @@
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Literal
 
 # ReasoningEffort import removed as it was unused
 from pydantic import BaseModel
@@ -18,10 +18,10 @@ class UrlCitation(BaseModel):
 
 
 class TextContentItem(BaseModel):
-    type: Union[Literal["text"], Literal["input_text"], Literal["output_text"]]
+    type: Literal["text"] | Literal["input_text"] | Literal["output_text"]
     text: str
-    status: Optional[str] = "completed"
-    annotations: Optional[list[UrlCitation]] = None
+    status: str | None = "completed"
+    annotations: list[UrlCitation] | None = None
 
 
 class SummaryTextContentItem(BaseModel):
@@ -39,14 +39,14 @@ class ReasoningItem(BaseModel):
     id: str = "rs_1234"
     type: Literal["reasoning"]
     summary: list[SummaryTextContentItem]
-    content: Optional[list[ReasoningTextContentItem]] = []
+    content: list[ReasoningTextContentItem] | None = []
 
 
 class Item(BaseModel):
-    type: Optional[Literal["message"]] = "message"
+    type: Literal["message"] | None = "message"
     role: Literal["user", "assistant", "system"]
-    content: Union[list[TextContentItem], str]
-    status: Union[Literal["in_progress", "completed", "incomplete"], None] = None
+    content: list[TextContentItem] | str
+    status: Literal["in_progress", "completed", "incomplete"] | None = None
 
 
 class FunctionCallItem(BaseModel):
@@ -66,25 +66,25 @@ class FunctionCallOutputItem(BaseModel):
 
 class WebSearchActionSearch(BaseModel):
     type: Literal["search"]
-    query: Optional[str] = None
+    query: str | None = None
 
 
 class WebSearchActionOpenPage(BaseModel):
     type: Literal["open_page"]
-    url: Optional[str] = None
+    url: str | None = None
 
 
 class WebSearchActionFind(BaseModel):
     type: Literal["find"]
-    pattern: Optional[str] = None
-    url: Optional[str] = None
+    pattern: str | None = None
+    url: str | None = None
 
 
 class WebSearchCallItem(BaseModel):
     type: Literal["web_search_call"]
     id: str = "ws_1234"
     status: Literal["in_progress", "completed", "incomplete"] = "completed"
-    action: Union[WebSearchActionSearch, WebSearchActionOpenPage, WebSearchActionFind]
+    action: WebSearchActionSearch | WebSearchActionOpenPage | WebSearchActionFind
 
 
 class Error(BaseModel):
@@ -105,9 +105,9 @@ class Usage(BaseModel):
 class FunctionToolDefinition(BaseModel):
     type: Literal["function"]
     name: str
-    parameters: Dict[str, Any]  # this should be typed stricter if you add strict mode
+    parameters: dict[str, Any]  # this should be typed stricter if you add strict mode
     strict: bool = False  # change this if you support strict mode
-    description: Optional[str] = ""
+    description: str | None = ""
 
 
 class BrowserToolConfig(BaseModel):
@@ -119,39 +119,39 @@ class ReasoningConfig(BaseModel):
 
 
 class ResponsesRequest(BaseModel):
-    instructions: Optional[str] = None
-    max_output_tokens: Optional[int] = DEFAULT_MAX_OUTPUT_TOKENS
-    input: Union[str, list[Union[Item, ReasoningItem, FunctionCallItem, FunctionCallOutputItem, WebSearchCallItem]]]
-    model: Optional[str] = MODEL_IDENTIFIER
-    stream: Optional[bool] = False
-    tools: Optional[list[Union[FunctionToolDefinition, BrowserToolConfig]]] = []
-    reasoning: Optional[ReasoningConfig] = ReasoningConfig()
-    metadata: Optional[Dict[str, Any]] = {}
-    tool_choice: Optional[Literal["auto", "none"]] = "auto"
-    parallel_tool_calls: Optional[bool] = False
-    store: Optional[bool] = False
-    previous_response_id: Optional[str] = None
-    temperature: Optional[float] = DEFAULT_TEMPERATURE
-    include: Optional[list[str]] = None
+    instructions: str | None = None
+    max_output_tokens: int | None = DEFAULT_MAX_OUTPUT_TOKENS
+    input: str | list[Item | ReasoningItem | FunctionCallItem | FunctionCallOutputItem | WebSearchCallItem]
+    model: str | None = MODEL_IDENTIFIER
+    stream: bool | None = False
+    tools: list[FunctionToolDefinition | BrowserToolConfig] | None = []
+    reasoning: ReasoningConfig | None = ReasoningConfig()
+    metadata: dict[str, Any] | None = {}
+    tool_choice: Literal["auto", "none"] | None = "auto"
+    parallel_tool_calls: bool | None = False
+    store: bool | None = False
+    previous_response_id: str | None = None
+    temperature: float | None = DEFAULT_TEMPERATURE
+    include: list[str] | None = None
 
 
 class ResponseObject(BaseModel):
-    output: list[Union[Item, ReasoningItem, FunctionCallItem, FunctionCallOutputItem, WebSearchCallItem]]
+    output: list[Item | ReasoningItem | FunctionCallItem | FunctionCallOutputItem | WebSearchCallItem]
     created_at: int
-    usage: Optional[Usage] = None
+    usage: Usage | None = None
     status: Literal["completed", "failed", "incomplete", "in_progress"] = "in_progress"
     background: None = None
-    error: Optional[Error] = None
-    incomplete_details: Optional[IncompleteDetails] = None
-    instructions: Optional[str] = None
-    max_output_tokens: Optional[int] = None
-    max_tool_calls: Optional[int] = None
-    metadata: Optional[Dict[str, Any]] = {}
-    model: Optional[str] = MODEL_IDENTIFIER
-    parallel_tool_calls: Optional[bool] = False
-    previous_response_id: Optional[str] = None
-    id: Optional[str] = "resp_1234"
-    object: Optional[str] = "response"
-    text: Optional[Dict[str, Any]] = None
-    tool_choice: Optional[str] = "auto"
-    top_p: Optional[int] = 1
+    error: Error | None = None
+    incomplete_details: IncompleteDetails | None = None
+    instructions: str | None = None
+    max_output_tokens: int | None = None
+    max_tool_calls: int | None = None
+    metadata: dict[str, Any] | None = {}
+    model: str | None = MODEL_IDENTIFIER
+    parallel_tool_calls: bool | None = False
+    previous_response_id: str | None = None
+    id: str | None = "resp_1234"
+    object: str | None = "response"
+    text: dict[str, Any] | None = None
+    tool_choice: str | None = "auto"
+    top_p: int | None = 1

@@ -1,5 +1,5 @@
 # torchrun --nproc-per-node=4 responses_api.py
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -7,16 +7,16 @@ from .response_types import (
     FunctionCallItem,
     Item,
     ReasoningItem,
+    ReasoningTextContentItem,
     ResponseObject,
     TextContentItem,
-    ReasoningTextContentItem,
-    WebSearchCallItem,
     UrlCitation,
+    WebSearchCallItem,
 )
 
 
 class ResponseEvent(BaseModel):
-    sequence_number: Optional[int] = 1
+    sequence_number: int | None = 1
 
 
 class ResponseCreatedEvent(ResponseEvent):
@@ -65,13 +65,13 @@ class ResponseReasoningTextDone(ResponseEvent):
 class ResponseOutputItemAdded(ResponseEvent):
     type: Literal["response.output_item.added"] = "response.output_item.added"
     output_index: int = 0
-    item: Union[Item, ReasoningItem, FunctionCallItem, WebSearchCallItem]
+    item: Item | ReasoningItem | FunctionCallItem | WebSearchCallItem
 
 
 class ResponseOutputItemDone(ResponseEvent):
     type: Literal["response.output_item.done"] = "response.output_item.done"
     output_index: int = 0
-    item: Union[Item, ReasoningItem, FunctionCallItem, WebSearchCallItem]
+    item: Item | ReasoningItem | FunctionCallItem | WebSearchCallItem
 
 
 class ResponseInProgressEvent(ResponseEvent):
@@ -84,7 +84,7 @@ class ResponseContentPartAdded(ResponseEvent):
     item_id: str = "item_1234"
     output_index: int = 0
     content_index: int = 0
-    part: Union[TextContentItem, ReasoningTextContentItem]
+    part: TextContentItem | ReasoningTextContentItem
 
 
 class ResponseOutputTextDone(ResponseEvent):
@@ -101,7 +101,7 @@ class ResponseContentPartDone(ResponseEvent):
     item_id: str = "item_1234"
     output_index: int = 0
     content_index: int = 0
-    part: Union[TextContentItem, ReasoningTextContentItem]
+    part: TextContentItem | ReasoningTextContentItem
 
 
 class ResponseOutputTextAnnotationAdded(ResponseEvent):

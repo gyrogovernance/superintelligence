@@ -207,3 +207,122 @@ Vertex distribution is approximately uniform (expected: 125 for 500 steps, 95 fo
 The mask table used by the kernel has a palindromic weight distribution with mean approximately 6 (measured from get_mask12_table).
 
 **Observed (Governance, 500 tokens):**
+
+===
+
+UPDATE:
+
+## 1. 500‑token results: what actually improved?
+
+### Reference: old MI report (before CGM sigma + focus)
+
+From `GyroLabe_MI_Tests_Report.md` (coordinated vs baseline, 500 tokens):
+
+- Governance:  
+  - Baseline ppl = **1.86**  
+  - Coordinated ppl = **1.65**  
+  - Δppl = **−0.21** (better)
+
+- Mathematics:  
+  - Baseline ppl = **1.92**  
+  - Coordinated ppl = **2.45**  
+  - Δppl = **+0.53** (worse)
+
+- Geometry:  
+  - Baseline ppl = **1.45**  
+  - Coordinated ppl = **1.59**  
+  - Δppl = **+0.15** (worse)
+
+So originally:
+- Governance clearly benefited,
+- Math was significantly harmed,
+- Geometry was slightly harmed.
+
+---
+
+### New 500‑token results (with CGM sigma + sigma_focus)
+
+#### Governance
+
+- Baseline: ppl = **1.86** (unchanged)
+- Coordinated: ppl = **1.79** (238 tokens)
+- Δppl = **−0.07**  
+- Δlogprob = **+0.039**
+
+The coordinated governance output is shorter (238 tokens vs 500), but ppl is length-normalized, so the comparison is valid.
+
+**Change vs old MI:**
+- Old improvement: −0.21
+- New improvement: −0.07
+
+So governance is still *better than baseline*, but the improvement is **smaller** than before.
+
+#### Mathematics
+
+- Baseline: ppl = **1.92**
+- Coordinated: ppl = **1.44**
+- Δppl = **−0.48**  
+- Δlogprob = **+0.289**
+
+This is a **big flip** from the old report:
+
+- Old: +0.53 (coordinated worse)  
+- New: −0.48 (coordinated **much better**)
+
+And qualitatively, the new coordinated math output is no longer a trivial “0×a+b=b” explanation. It’s a **long, structured exposition of 3D+time geometry and relativity** with equations and correct concepts.
+
+So: for math, CGM sigma + focus turned a clearly bad regime into a strongly positive one.
+
+#### Geometry
+
+- Baseline: ppl = **1.45**
+- Coordinated: ppl = **1.69**
+- Δppl = **+0.24**
+
+Old report:
+- Δppl = **+0.15**
+
+So geometry is still worse than baseline and is slightly more harmed than before.
+
+The coordinated geometry output is more like a technical Q&A (Rodrigues rotation formula, axis parameterization) and less like a direct continuation of the original text. That stylistic shift likely hurts logprob under the base model.
+
+---
+
+### Aggregate view
+
+Comparing old vs new coordinated behavior:
+
+- **Governance:**  
+  - Old GyroLabe: clear win (−0.21)  
+  - New: still a win, but smaller (−0.07)
+
+- **Math:**  
+  - Old: big loss (+0.53)  
+  - New: big win (−0.48)
+
+- **Geometry:**  
+  - Old: modest loss (+0.15)  
+  - New: slightly larger loss (+0.24)
+
+So in 500‑token runs:
+
+- We **massively improved** the math behavior (from bad to very good).
+- We preserved a **small improvement** for governance (though weaker than before).
+- We **slightly worsened** perplexity for geometry relative to the old configuration.
+
+Structurally (diagnostics):
+
+- Horizon exploration remains strong:
+  - Gov: H(h) = 7.14 bits, 156/256 unique
+  - Math: 7.55 bits, 216/256 unique
+  - Geometry: 7.59 bits, 218/256 unique
+- code_dist ≈ 6.0, std ≈ 0.8 (topological alignment preserved)
+- gain_at_peak ≈ 1.0, tiny std (extraction still neutral)
+- Correlation remains in the 0.37–0.64 band (slightly higher for math & geometry than the original 0.38–0.59).
+
+So CGM sigma + focus:
+
+- Does not break the kernel geometry,
+- Strengthens coupling (correlation),
+- Shifts where the model spends its “semantic budget”:  
+  math now lands in deeply geometric territory the original model rarely visited.

@@ -13,18 +13,17 @@ This script:
 This tests whether the system can learn from one article and continue from a seed.
 """
 
-import sys
 import json
+import sys
 from pathlib import Path
-from typing import Optional
 
 # Add program root to path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from baby.information import encode_text_with_sep, decode_text
-from baby.intelligence import GyroASI
 from baby.contracts import AgentConfig
+from baby.information import decode_text, encode_text_with_sep
+from baby.intelligence import GyroASI
 
 
 def build_agent(private_knowledge_path: Path) -> GyroASI:
@@ -57,7 +56,7 @@ def build_agent(private_knowledge_path: Path) -> GyroASI:
     return GyroASI(config, agent_id="test_continuation", base_path=PROJECT_ROOT)
 
 
-def find_continuation_in_text(text: str, seed: str, max_chars: int = 200) -> Optional[str]:
+def find_continuation_in_text(text: str, seed: str, max_chars: int = 200) -> str | None:
     """
     Find the continuation of seed in the direct text.
 

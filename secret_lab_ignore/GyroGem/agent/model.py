@@ -2,9 +2,10 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 from pathlib import Path
+
 import torch
-from typing import Optional
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
 from .context import GYROGEM_SYSTEM_PROMPT
 
 _PACKAGE_DIR = Path(__file__).resolve().parent.parent
@@ -25,10 +26,10 @@ class GyroGemModel:
 
     def __init__(
         self,
-        model_path: Optional[str] = None,
+        model_path: str | None = None,
         *,
-        device: Optional[str] = None,
-        torch_dtype: Optional[torch.dtype] = None
+        device: str | None = None,
+        torch_dtype: torch.dtype | None = None
     ):
         # Logic: Prefer local weights. If missing, use normative remote ID.
         if model_path is None:
@@ -42,9 +43,9 @@ class GyroGemModel:
         self.model_path = model_path
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.torch_dtype = torch_dtype or torch.float32
-        
-        self.tokenizer: Optional[AutoTokenizer] = None
-        self.model: Optional[AutoModelForSeq2SeqLM] = None
+
+        self.tokenizer: AutoTokenizer | None = None
+        self.model: AutoModelForSeq2SeqLM | None = None
         self._is_loaded = False
 
     def _load(self) -> None:

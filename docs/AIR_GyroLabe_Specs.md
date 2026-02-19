@@ -84,6 +84,20 @@ Each state is represented as two 12-bit components:
 
 Each 12-bit component corresponds to a 2 x 3 x 2 binary grid.
 
+**Topology semantics (normative):**
+
+For every 12-bit component, indices are interpreted as `[frame][row][col]`:
+
+- `row` selects axis family: row 0 = X, row 1 = Y, row 2 = Z.
+- `col` selects oriented side of that axis: col 0 = negative side, col 1 = positive side.
+- `frame` selects chirality layer: frame 0 and frame 1 are opposing orientation layers of the same 3-axis structure.
+
+Under this convention:
+
+- "3D" refers to the three axis families X, Y, Z.
+- "6DoF" refers to six oriented axis sides `{X-, X+, Y-, Y+, Z-, Z+}` defined by row/col pairs.
+- Frames do not introduce extra spatial dimensions; they encode opposing chirality used by the kernel transition law.
+
 Let M be the kernel's 256-element 12-bit mask set. Then:
 
 - A_set = { archetype_A XOR m : m in M }

@@ -9,7 +9,6 @@ sys.path.insert(0, os.getcwd())
 import numpy as np
 from transformers import AutoModelForCausalLM
 
-
 MODEL_DIR = Path("data/models/Olmo-3-7B-Instruct")
 OUT_PATH = Path("data/atlas/adaptor_olmo_k16_R16.npz")
 ADAPTOR_VERSION = "3.0"

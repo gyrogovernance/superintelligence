@@ -24,18 +24,18 @@ Key discoveries:
 6) CGM reconstruction: δ, m_a, Q_G, α from kernel-only discrete constants
 """
 
-import pytest
-import numpy as np
-from numpy.typing import NDArray
-from pathlib import Path
 from collections import Counter
-from typing import List, Tuple
+from pathlib import Path
+
+import numpy as np
+import pytest
+from numpy.typing import NDArray
 
 from src.router.constants import (
-    unpack_state,
-    LAYER_MASK_12,
     ARCHETYPE_A12,
     ARCHETYPE_B12,
+    LAYER_MASK_12,
+    unpack_state,
 )
 
 # Diagnostic printing flag (set to False to suppress output)
@@ -64,7 +64,7 @@ def is_horizon_state(state24: int) -> bool:
     return a == (b ^ LAYER_MASK_12)
 
 
-def cycle_decomposition_lengths(perm: NDArray[np.int64]) -> List[int]:
+def cycle_decomposition_lengths(perm: NDArray[np.int64]) -> list[int]:
     """
     Return cycle lengths of a permutation perm on [0..n-1].
 
@@ -73,7 +73,7 @@ def cycle_decomposition_lengths(perm: NDArray[np.int64]) -> List[int]:
     perm = np.asarray(perm, dtype=np.int64).reshape(-1)
     n = int(perm.size)
     visited = np.zeros(n, dtype=np.bool_)
-    lengths: List[int] = []
+    lengths: list[int] = []
 
     for i in range(n):
         if visited[i]:
@@ -92,7 +92,7 @@ def cycle_decomposition_lengths(perm: NDArray[np.int64]) -> List[int]:
     return lengths
 
 
-def print_cycle_stats(title: str, lengths: List[int], show_top: int = 12) -> Tuple[int, float, int]:
+def print_cycle_stats(title: str, lengths: list[int], show_top: int = 12) -> tuple[int, float, int]:
     """
     Print cycle histogram stats and return (max_len, mean_len, num_cycles).
     """
@@ -126,7 +126,7 @@ def print_cycle_stats(title: str, lengths: List[int], show_top: int = 12) -> Tup
     return max_len, mean_len, num_cycles
 
 
-def inverse_bytes(byte_val: int) -> List[int]:
+def inverse_bytes(byte_val: int) -> list[int]:
     """
     Spec: T_x^{-1} = R ∘ T_x ∘ R, where R = T_0xAA.
     Implement inverse as byte sequence [0xAA, x, 0xAA].
@@ -135,7 +135,7 @@ def inverse_bytes(byte_val: int) -> List[int]:
     return [0xAA, x, 0xAA]
 
 
-def commutator_bytes(x: int, y: int) -> List[int]:
+def commutator_bytes(x: int, y: int) -> list[int]:
     """
     Kernel commutator word (operator order):
       K = T_x ∘ T_y ∘ T_x^{-1} ∘ T_y^{-1}
@@ -445,7 +445,7 @@ class TestKernelCommutatorAsTranslation:
 
         print("\n  A*-search (kernel-only, intrinsic probability masses):")
         print(f"    A* ≈ {A_star:.6f}")
-        print(f"    Closest prob to A* in popcount(d):")
+        print("    Closest prob to A* in popcount(d):")
         print(f"      w={best_w_for_A}  prob={probs_w[best_w_for_A]:.6f}  |diff|={abs(probs_w[best_w_for_A]-A_star):.6f}")
 
         # Kernel-native aperture: A_kernel = 5/256 (minimal sector mass)

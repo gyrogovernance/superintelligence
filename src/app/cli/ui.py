@@ -45,6 +45,7 @@ def kv(key: str, value: str, indent: int = 0) -> str:
 
 from typing import Any
 
+
 def table(rows: list[list[Any]], headers: list[str]) -> str:
     """Simple fixed-width table."""
     if not rows:

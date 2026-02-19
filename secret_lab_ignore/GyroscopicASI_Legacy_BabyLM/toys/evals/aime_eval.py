@@ -4,11 +4,11 @@ AIME 2025: https://huggingface.co/datasets/opencompass/AIME2025
 
 import random
 import re
+
 import pandas
+
 from . import report
-
 from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
-
 
 AIME_TEMPLATE = """
 {question}
@@ -49,9 +49,9 @@ class AIME25Eval(Eval):
         num_examples: int | None = None,  # restrict to a subset of the data for debugging
         n_threads: int = 1,
     ):
-        path1 = f"https://huggingface.co/datasets/opencompass/AIME2025/raw/main/aime2025-I.jsonl"
+        path1 = "https://huggingface.co/datasets/opencompass/AIME2025/raw/main/aime2025-I.jsonl"
         df1 = pandas.read_json(path1, lines=True)
-        path2 = f"https://huggingface.co/datasets/opencompass/AIME2025/raw/main/aime2025-II.jsonl"
+        path2 = "https://huggingface.co/datasets/opencompass/AIME2025/raw/main/aime2025-II.jsonl"
         df2 = pandas.read_json(path2, lines=True)
         examples = [row.to_dict() for _, row in df1.iterrows()] + [row.to_dict() for _, row in df2.iterrows()]
         examples = [

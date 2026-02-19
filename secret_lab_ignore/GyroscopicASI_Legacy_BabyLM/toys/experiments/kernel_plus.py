@@ -16,18 +16,17 @@ Key Features:
 - Virtual tokens from model weights used in generation
 """
 
-import os
 import json
+import os
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any
 
 import numpy as np
 import torch
-from transformers import AutoTokenizer
 from huggingface_hub import snapshot_download
 from safetensors import safe_open
-
+from transformers import AutoTokenizer
 
 # ============================================================================
 # CORE CONSTANTS
@@ -106,7 +105,7 @@ def fold(a: int, b: int) -> int:
     return (a ^ gyration) & 0xFF
 
 
-def fold_sequence(values: List[int], start_state: int = 0) -> int:
+def fold_sequence(values: list[int], start_state: int = 0) -> int:
     """Apply Monodromic Fold sequentially (path-dependent)."""
     result = start_state & 0xFF
     for value in values:
@@ -219,16 +218,16 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
             # Check if all required files exist
             if all(f.exists() for f in [tokenizer_cache, config_cache]):
                 if debug:
-                    print(f"  → Loading cached tokenizer...")
+                    print("  → Loading cached tokenizer...")
                 tokenizer = AutoTokenizer.from_pretrained(str(model_dir))
 
                 if debug:
-                    print(f"  → Loading cached weights...")
+                    print("  → Loading cached weights...")
                 # Load cached weights from chunks
                 chunk_meta_file = model_dir / "chunk_meta.json"
                 weights = {}
                 if chunk_meta_file.exists():
-                    with open(chunk_meta_file, "r") as f:
+                    with open(chunk_meta_file) as f:
                         chunk_meta = json.load(f)
 
                     for chunk_idx in range(chunk_meta["num_chunks"]):
@@ -241,8 +240,8 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
                                 print(f"    Loaded chunk {chunk_idx + 1}/{chunk_meta['num_chunks']}")
 
                 if debug:
-                    print(f"  → Loading cached config...")
-                with open(config_cache, "r") as f:
+                    print("  → Loading cached config...")
+                with open(config_cache) as f:
                     model_config = json.load(f)
 
                 if debug:
@@ -263,17 +262,17 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
 
         # Download tokenizer
         if debug:
-            print(f"  → Downloading tokenizer...")
+            print("  → Downloading tokenizer...")
         tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         # Save tokenizer to cache
         tokenizer.save_pretrained(str(model_dir))
         if debug:
-            print(f"  → Saved tokenizer to cache")
+            print("  → Saved tokenizer to cache")
 
         # Download raw model files
         if debug:
-            print(f"  → Downloading model files...")
+            print("  → Downloading model files...")
         model_files = snapshot_download(
             repo_id=model_name,
             allow_patterns=["*.safetensors", "*.bin", "config.json"],
@@ -282,14 +281,14 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
 
         # Load config
         config_path = f"{model_files}/config.json"
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             model_config = json.load(f)
 
         # Save config to cache
         with open(config_cache, "w") as f:
             json.dump(model_config, f, indent=2)
         if debug:
-            print(f"  → Saved config to cache")
+            print("  → Saved config to cache")
 
         # Collect weight file paths
         safetensor_files = []
@@ -303,7 +302,7 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
         tensors_processed = 0
 
         if debug:
-            print(f"  → Converting weights...")
+            print("  → Converting weights...")
         for st_path in safetensor_files:
             try:
                 with safe_open(st_path, framework="pt", device="cpu") as f:
@@ -371,7 +370,7 @@ def download_model(model_name: str = None, force_reconvert: bool = False, debug:
         raise RuntimeError(f"Failed to download model {model_name}: {e}")
 
 
-def quantize_and_compress_weights(weights: np.ndarray[Any, Any], max_size: int = 10000) -> Tuple[List[int], float]:  # type: ignore
+def quantize_and_compress_weights(weights: np.ndarray[Any, Any], max_size: int = 10000) -> tuple[list[int], float]:  # type: ignore
     """Convert weights to compressed intron sequence using pure physics."""
     # Flatten and limit size
     flat = weights.flatten()
@@ -418,7 +417,7 @@ class GyroKernel:
 
     def __init__(
         self,
-        base_path: Optional[Path] = None,
+        base_path: Path | None = None,
         debug: bool = False,
         model_name: str = None,
         force_reconvert: bool = False,
@@ -449,18 +448,18 @@ class GyroKernel:
         self.stage_index = 0
 
         # Memory: orbit_rep -> token_id -> mask
-        self.memory: Dict[int, Dict[int, int]] = {}
+        self.memory: dict[int, dict[int, int]] = {}
 
         # Path memory
         self.path_memory = GENE_Mic_S
 
         # Model knowledge (compressed weights)
-        self.virtual_tokens: Dict[Tuple[str, int], int] = {}
+        self.virtual_tokens: dict[tuple[str, int], int] = {}
 
         # Token → state mappings
-        self.token_state_map: Dict[int, int] = {}
-        self.token_post_state_index: Dict[int, int] = {}
-        self.token_exon_cache: Dict[int, int] = {}
+        self.token_state_map: dict[int, int] = {}
+        self.token_post_state_index: dict[int, int] = {}
+        self.token_exon_cache: dict[int, int] = {}
 
         # Precomputed resonance table
         self._resonance_table = np.zeros((256, 256), dtype=np.uint8)
@@ -469,7 +468,7 @@ class GyroKernel:
                 self._resonance_table[a, b] = fold(a, b)
 
         # Orbit candidates
-        self._orbit_candidates: Dict[int, List[int]] = {}
+        self._orbit_candidates: dict[int, list[int]] = {}
 
         # UNA pool for CS emission
         self._precompute_una_pool()
@@ -505,7 +504,7 @@ class GyroKernel:
         self.stats = {"tokens_learned": 0, "memory_entries": 0, "orbits_discovered": 0, "generation_steps": 0}
 
         if self.debug:
-            print(f"\n🧬 GyroASI Kernel v0.9.12.0 initialised")
+            print("\n🧬 GyroASI Kernel v0.9.12.0 initialised")
             print(f"📍 CS state: index={self.CS_STATE_INDEX}, " f"θ={float(self.theta[self.CS_STATE_INDEX]):.4f}")
             print(f"📊 Ontology: {len(self.ontology):,} states")
             print(f"💫 Virtual tokens: {len(self.virtual_tokens):,}")
@@ -631,7 +630,7 @@ class GyroKernel:
         # If not loaded from cache, compress weights
         if not self.virtual_tokens and weights:
             if self.debug:
-                print(f"📦 Converting model weights to virtual tokens...")
+                print("📦 Converting model weights to virtual tokens...")
 
             for key, arr in weights.items():
                 compressed_bytes, _ = quantize_and_compress_weights(arr)
@@ -675,7 +674,7 @@ class GyroKernel:
                 pass
 
         if self.debug:
-            print(f"  → Computing embedding projection...")
+            print("  → Computing embedding projection...")
 
         vocab = min(self.tokenizer.vocab_size, embeddings.shape[0])
 
@@ -711,7 +710,7 @@ class GyroKernel:
             cache_file.parent.mkdir(parents=True, exist_ok=True)
             np.savez_compressed(str(cache_file), token_state_map=self.token_state_map)  # type: ignore
             if self.debug:
-                print(f"💾 Cached embedding projection")
+                print("💾 Cached embedding projection")
         except Exception:
             pass
 
@@ -732,7 +731,7 @@ class GyroKernel:
             self.token_exon_cache = {int(i): int(e) for i, e in enumerate(exons) if e >= 0}
 
             if self.debug:
-                print(f"✅ Loaded token post-states/exons from cache")
+                print("✅ Loaded token post-states/exons from cache")
         else:
             # Build fresh
             self._build_token_post_states()
@@ -752,7 +751,7 @@ class GyroKernel:
             np.save(str(exons_path), exons)
 
             if self.debug:
-                print(f"💾 Cached token post-states/exons")
+                print("💾 Cached token post-states/exons")
 
         # Add special tokens
         for tok in [self.CLS_TOKEN, self.SEP_TOKEN, self.PAD_TOKEN]:
@@ -763,7 +762,7 @@ class GyroKernel:
     def _build_token_post_states(self) -> None:
         """Build token post-states using CS as extra-phenomenal reference."""
         if self.debug:
-            print(f"  → Building token post-states...")
+            print("  → Building token post-states...")
 
         self.token_post_state_index.clear()
         self.token_exon_cache.clear()
@@ -831,9 +830,9 @@ class GyroKernel:
                 self.token_exon_cache[vt_id] = byte_val
 
         if self.debug:
-            print(f"✅ Integrated virtual tokens into candidates")
+            print("✅ Integrated virtual tokens into candidates")
 
-    def _id_to_uleb128(self, x: int) -> List[int]:
+    def _id_to_uleb128(self, x: int) -> list[int]:
         """Encode integer to unsigned LEB128 bytes."""
         out = []
         val = int(x)
@@ -847,7 +846,7 @@ class GyroKernel:
                 break
         return out
 
-    def token_to_introns(self, token_id: int) -> List[int]:
+    def token_to_introns(self, token_id: int) -> list[int]:
         """Convert token ID to introns using LEB128 encoding."""
         if token_id >= self.tokenizer.vocab_size:
             return []
@@ -899,7 +898,7 @@ class GyroKernel:
 
         return state_index
 
-    def _get_candidates_for_state(self, state_index: int) -> List[int]:
+    def _get_candidates_for_state(self, state_index: int) -> list[int]:
         """Get candidate tokens for current state (pure orbit lookup)."""
         orbit = int(self.phenomenology[state_index])
         candidates = self._orbit_candidates.get(orbit, [])
@@ -993,7 +992,7 @@ class GyroKernel:
 
         self._update_stage(self.current_state_index)
 
-    def generate_token(self) -> Optional[int]:
+    def generate_token(self) -> int | None:
         """Generate next token using pure physics."""
         self.stats["generation_steps"] += 1
 
@@ -1099,7 +1098,7 @@ class GyroKernel:
 
             if token_id is None:
                 if self.debug:
-                    print(f"[No resonant token found]")
+                    print("[No resonant token found]")
                 break
 
             # Only decode if it's a real token
@@ -1109,7 +1108,7 @@ class GyroKernel:
                 # Stop at IM_END
                 if token_id == self.IM_END:
                     if self.debug:
-                        print(f"[IM_END token - stopping]")
+                        print("[IM_END token - stopping]")
                     break
 
         # Decode tokens
@@ -1160,7 +1159,7 @@ class GyroKernel:
         for question in test_questions:
             if self.debug:
                 print(f"\n🤔 User: {question}")
-                print(f"🤖 Assistant: ", end="", flush=True)
+                print("🤖 Assistant: ", end="", flush=True)
 
             response = self.generate_from_prompt(question, max_tokens=50)
 

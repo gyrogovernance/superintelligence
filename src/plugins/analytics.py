@@ -17,7 +17,6 @@ from numpy.typing import NDArray
 
 from src.app.ledger import get_projections
 
-
 EdgeVec = NDArray[np.float64]
 
 
@@ -40,12 +39,12 @@ def hodge_decompose(y: EdgeVec) -> HodgeDecomposition:
     """
     y_float = np.asarray(y, dtype=np.float64).reshape(6)
     P_grad, P_cycle = get_projections()
-    
+
     # Work directly with float64 (hodge_decomposition converts to float64 internally anyway)
     # This avoids quantization errors from int64 conversion
     y_grad = P_grad @ y_float
     y_cycle = P_cycle @ y_float
-    
+
     # Compute aperture using the float64 arrays directly
     y_norm_sq = float(y_float @ y_float)
     if y_norm_sq == 0.0:
@@ -53,6 +52,6 @@ def hodge_decompose(y: EdgeVec) -> HodgeDecomposition:
     else:
         cycle_norm_sq = float(y_cycle @ y_cycle)
         aperture = cycle_norm_sq / y_norm_sq
-    
+
     return HodgeDecomposition(y_grad=y_grad, y_cycle=y_cycle, aperture=aperture)
 

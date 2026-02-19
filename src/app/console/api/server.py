@@ -4,16 +4,17 @@ AIR Governance Console API Server.
 A thin HTTP layer that imports and calls existing modules.
 """
 
-from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
-from pydantic import BaseModel
-from typing import Dict, Any
 import json
 import re
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from src.app.cli import store, templates
 from src.app.cli.schemas import A_STAR
@@ -58,19 +59,19 @@ def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
     """
     bundle_path = bundles_dir() / f"{slug}.zip"
     report_path = aci_dir() / f"{slug}.report.json"
-    
+
     # Check if report exists (Local status minimum)
     if not report_path.exists():
         return ("Local", False, None)
-    
+
     # Report exists but no bundle yet
     if not bundle_path.exists():
         return ("Local", False, None)
-    
+
     # Check signature in bundle
     signed = False
     signer_fingerprint = None
-    
+
     try:
         import zipfile
         with zipfile.ZipFile(bundle_path, "r") as zf:
@@ -83,14 +84,14 @@ def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
                         signer_fingerprint = f"{public_key_hex[:8]}...{public_key_hex[-8:]}"
     except Exception:
         pass
-    
+
     # Check if bundle is verified (try verification)
     verified = False
     try:
         verified = store.verify_bundle(atlas_dir(), bundle_path)
     except Exception:
         pass
-    
+
     if verified:
         return ("Verified", signed, signer_fingerprint)
     else:
@@ -135,7 +136,7 @@ def _has_private_key() -> bool:
     return False
 
 
-def get_ecology_data(slug: str) -> tuple[Dict[str, Any] | None, list[Dict[str, Any]]]:
+def get_ecology_data(slug: str) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     """
     Get ecology data for a program.
     Returns: (archive_data, shells_list)
@@ -144,25 +145,25 @@ def get_ecology_data(slug: str) -> tuple[Dict[str, Any] | None, list[Dict[str, A
     """
     archive_path = aci_dir() / f"{slug}.archive.json"
     shells_path = aci_dir() / f"{slug}.shells.jsonl"
-    
+
     archive_data = None
     if archive_path.exists():
         try:
             archive_data = json.loads(archive_path.read_text(encoding="utf-8"))
         except Exception:
             pass
-    
+
     shells_list = []
     if shells_path.exists():
         try:
-            with open(shells_path, "r", encoding="utf-8") as f:
+            with open(shells_path, encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line:
                         shells_list.append(json.loads(line))
         except Exception:
             pass
-    
+
     return archive_data, shells_list
 
 
@@ -190,11 +191,11 @@ def list_programs():
         id_path = aci_dir() / f"{slug}.id"
         if id_path.exists():
             program_id = id_path.read_text(encoding="utf-8").strip()
-        
+
         # Get governance flags
         status, signed, _ = get_bundle_status(slug)
         verified = (status == "Verified")
-        
+
         programs.append({
             "slug": slug,
             "program_id": program_id,
@@ -272,7 +273,7 @@ def get_program(slug: str):
 
     # Get ecology data
     archive_data, shells_list = get_ecology_data(slug)
-    
+
     ecology = None
     if archive_data:
         ecology = {
@@ -390,7 +391,7 @@ def update_program(slug: str, req: UpdateProgramRequest):
             content,
             flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
         )
-    
+
     # Update participants (agencies) section
     agencies_pattern = r'(###\s+Agencies\s*\n+)(.*?)(?=^##|\Z)'
     agencies_content = req.agencies if req.agencies.strip() else "(Names of agencies involved in this program)"
@@ -405,7 +406,7 @@ def update_program(slug: str, req: UpdateProgramRequest):
     # Update notes section
     # Template format: ## NOTES on one line, --- on the next line
     notes_pattern = r'(^##\s+NOTES\s*\n---?\s*\n)(.*?)(?=^##|\Z)'
-    
+
     if re.search(notes_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
         # Replace existing NOTES section
         def replace_notes(match):
@@ -441,14 +442,14 @@ def sync_program_endpoint(slug: str):
     program_path = programs_dir() / f"{slug}.md"
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
-    
+
     # Sync the program
     store.sync_program(atlas_dir(), program_path)
-    
+
     # Sign bundle if enabled
     if get_sign_bundle_on_sync():
         from cryptography.hazmat.primitives import serialization
-        
+
         # Try to load private key from config
         private_key = None
         config_path = aci_dir() / ".config.json"
@@ -462,13 +463,13 @@ def sync_program_endpoint(slug: str):
                     )
             except Exception:
                 pass
-        
+
         # Bundle will be signed if key is available
         try:
             store.bundle_program(atlas_dir(), program_path, private_key)
         except Exception:
             pass
-    
+
     # Return updated state
     return get_program(slug)
 
@@ -512,7 +513,7 @@ def download_bundle(slug: str):
     private_key = None
     if get_sign_bundle_on_sync():
         from cryptography.hazmat.primitives import serialization
-        
+
         config_path = aci_dir() / ".config.json"
         if config_path.exists():
             try:
@@ -524,7 +525,7 @@ def download_bundle(slug: str):
                     )
             except Exception:
                 pass
-    
+
     try:
         store.bundle_program(atlas_dir(), program_path, private_key)
     except FileNotFoundError as e:
@@ -545,7 +546,7 @@ def verify_bundle_endpoint(slug: str):
     bundle_path = bundles_dir() / f"{slug}.zip"
     if not bundle_path.exists():
         raise HTTPException(404, "Bundle not found. Export a bundle first.")
-    
+
     try:
         verified = store.verify_bundle(atlas_dir(), bundle_path)
         if verified:

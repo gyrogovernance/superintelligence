@@ -1,12 +1,10 @@
+# === secret_lab_ignore/agent/adaptor.py ===
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
-
-from .kron import KronFactors
 
 
 @dataclass(frozen=True)
@@ -14,147 +12,109 @@ class AdaptorMeta:
     adaptor_version: str
     model_name: str
     nb: int
-    nf: int
-    R: int
-    operators: tuple[str, ...]
-    residual_energy: dict[str, float]
-    tail_fraction: dict[str, float]
-    operator_set_hash: str
-    build_timestamp_utc: str
-    build_status: str
-    orthogonality_error: float
+    nf_hidden: int
+    nf_mlp: int
+    K: int
+    n_layers: int
+    processed_layers: NDArray[np.int32]
+    op_names: tuple[str, ...]
+    deltas: NDArray[np.uint8]  # [8]
 
 
 @dataclass(frozen=True)
 class GyroAdaptor:
-    """
-    External-manifold adaptor, weights-only.
-
-    Provides:
-    - boundary chart U (nb x nb)
-    - compiled operators W ~= sum_r A_r kron B_r (stored as KronFactors)
-    - deterministic way to produce O_field[nb,K] from semantic vector x in R^(nb*nf)
-    """
     meta: AdaptorMeta
-    U: NDArray[np.float32]  # [nb, nb] orthogonal
-    boundary_basis: str
-    # operator name -> KronFactors
-    ops: dict[str, KronFactors]
-    # phase-indexed lookup directions [p, nb, nf]
-    D_phase: Optional[NDArray[np.float32]]
-    # reducer from fiber nf -> K (defaults to identity if K==nf)
-    R_fiber: NDArray[np.float32]  # [K, nf]
+    intron_sensitivity: NDArray[np.float32]   # [n_layers, 3, 8]
+    intron_coherence: NDArray[np.float32]     # [n_layers, 3, 8]
+    intron_pair_counts: NDArray[np.int32]     # [n_layers, 3, 8]
+    vertex_flow: NDArray[np.float32]          # [n_layers, 3, 4, 4]
 
     @property
     def nb(self) -> int:
         return int(self.meta.nb)
 
     @property
-    def nf(self) -> int:
-        return int(self.meta.nf)
-
-    @property
     def K(self) -> int:
-        return int(self.R_fiber.shape[0])
+        return int(self.meta.K)
 
-    def chart_vec(self, x: NDArray[np.float32]) -> NDArray[np.float32]:
-        """
-        x in R^(nb*nf) -> X in R^(nb,nf) with boundary chart applied.
+    # ---------------------------------------------------------------------
+    # Compatibility helpers (run.py expects these)
+    # ---------------------------------------------------------------------
 
-        X = reshape( (U ⊗ I_nf) x )
-        Implementation: reshape x to (nb,nf), then multiply boundary axis by U.
+    def layer_profiles(self) -> NDArray[np.float32]:
         """
-        nb, nf = self.nb, self.nf
-        assert x.shape == (nb * nf,)
-        X0 = x.reshape(nb, nf)
-        X = (self.U @ X0).astype(np.float32)
-        return X
+        Per-layer mean intron sensitivity profile.
+        Returns: [n_layers, 8] averaged across the 3 MLP ops.
+        """
+        return np.mean(self.intron_sensitivity, axis=1).astype(np.float32, copy=False)
 
-    def unchart_vec(self, X: NDArray[np.float32]) -> NDArray[np.float32]:
-        nb, nf = self.nb, self.nf
-        assert X.shape == (nb, nf)
-        X0 = (self.U.T @ X).astype(np.float32)
-        return X0.reshape(nb * nf)
+    def layer_ranking(self) -> NDArray[np.int32]:
+        """
+        Layers sorted by total sensitivity (most sensitive first).
+        Returns indices in 0..n_layers-1 (i.e., indices into processed_layers).
+        """
+        totals = np.sum(self.intron_sensitivity, axis=(1, 2)).astype(np.float64)  # [n_layers]
+        return np.argsort(-totals).astype(np.int32)
 
-    def build_O_field_from_x(self, x: NDArray[np.float32]) -> NDArray[np.float32]:
-        """
-        Produce O_field[nb,K] from semantic vector x by:
-        - charting into X[nb,nf]
-        - reducing fiber: O[h] = R_fiber @ X[h]
-        """
-        X = self.chart_vec(x)  # [nb,nf]
-        O = (X @ self.R_fiber.T).astype(np.float32)  # [nb,K]
-        return O
+    def mean_dir_weights(self) -> NDArray[np.float32]:
+        """Mean direction weights [8] across layers and operators."""
+        w = np.mean(self.intron_sensitivity, axis=(0, 1)).astype(np.float32, copy=False)
+        if float(np.sum(w)) < 1e-10:
+            w = np.ones(8, dtype=np.float32)
+        return w
 
-    def build_O_field_from_X(self, X: NDArray[np.float32]) -> NDArray[np.float32]:
+    def build_similarity(self, h: int) -> NDArray[np.float32]:
         """
-        Produce O_field[nb,K] directly from adaptor semantic state X[nb,nf].
-        """
-        nb, nf = self.nb, self.nf
-        assert X.shape == (nb, nf)
-        return (X @ self.R_fiber.T).astype(np.float32)
+        Similarity weights over boundary indices [256] based on weighted
+        Hamming distance in byte-xor (intron) space.
 
-    def apply_phase_op(self, X: NDArray[np.float32], phase: int) -> NDArray[np.float32]:
+        delta = h XOR h_target (byte)
+        dist(delta) = sum_i w_i * bit_i(delta)
+        sim = exp(-dist / sum(w))
         """
-        Read from parameter manifold at the given phase.
-        If phase directions are unavailable, return X unchanged.
-        """
-        nb, nf = self.nb, self.nf
-        assert X.shape == (nb, nf)
-        p = int(phase) & 3
+        h = int(h) & 0xFF
+        w = self.mean_dir_weights()  # [8]
+        wsum = float(np.sum(w)) + 1e-8
 
-        if self.D_phase is not None:
-            D = self.D_phase[p]
-            if D.shape != (nb, nf):
-                raise ValueError(f"D_phase[{p}] shape {D.shape} incompatible with X shape {X.shape}")
-            proj = np.sum(X * D, axis=1, keepdims=True).astype(np.float32)
-            return (proj * D).astype(np.float32)
+        targets = np.arange(256, dtype=np.uint16)
+        delta = (targets ^ h).astype(np.uint16)
 
-        return X.astype(np.float32, copy=True)
+        bits = np.zeros((256, 8), dtype=np.float32)
+        for i in range(8):
+            bits[:, i] = ((delta >> i) & 1).astype(np.float32)
+
+        dist = bits @ w  # [256]
+        sim = np.exp(-dist / wsum).astype(np.float32)
+        sim /= (float(sim.mean()) + 1e-8)
+        return sim
 
     @classmethod
-    def load(cls, path: str) -> "GyroAdaptor":
+    def load(cls, path: str) -> GyroAdaptor:
         z = np.load(path, allow_pickle=False)
-        operators = tuple(str(x) for x in z["operators"])
-        meta = AdaptorMeta(
-            adaptor_version=str(z["adaptor_version"]) if "adaptor_version" in z else "1.0",
-            model_name=str(z["model_name"]),
-            nb=int(z["nb"]),
-            nf=int(z["nf"]),
-            R=int(z["R"]),
-            operators=operators,
-            residual_energy={k: float(z[f"resid_{k}"]) for k in operators if f"resid_{k}" in z},
-            tail_fraction={k: float(z[f"tail_frac_{k}"]) for k in operators if f"tail_frac_{k}" in z},
-            operator_set_hash=str(z["operator_set_hash"]) if "operator_set_hash" in z else "",
-            build_timestamp_utc=str(z["build_timestamp_utc"]) if "build_timestamp_utc" in z else "",
-            build_status=str(z["build_status"]) if "build_status" in z else "unknown",
-            orthogonality_error=float(z["orthogonality_error"]) if "orthogonality_error" in z else float("nan"),
-        )
-        U = z["U"].astype(np.float32)
-        basis = str(z["boundary_basis"]) if "boundary_basis" in z else "chart"
-        R_fiber = z["R_fiber"].astype(np.float32)
-        ops: dict[str, KronFactors] = {}
-        for name in meta.operators:
-            a_key = f"A_{name}"
-            b_key = f"B_{name}"
-            s_key = f"S_{name}"
-            if a_key in z and b_key in z and s_key in z:
-                A = z[a_key].astype(np.float32)
-                B = z[b_key].astype(np.float32)
-                S = z[s_key].astype(np.float32)
-                ops[name] = KronFactors(A=A, B=B, S=S)
+        version = str(z["adaptor_version"]) if "adaptor_version" in z else "1.0"
 
-        D_phase = None
-        if "D_phase" in z:
-            D_phase = z["D_phase"].astype(np.float32)
-            if D_phase.ndim != 3 or D_phase.shape[0] != 4:
-                raise ValueError("D_phase has unexpected shape; rebuild adaptor with lookup directions.")
+        if version.startswith("4.1"):
+            meta = AdaptorMeta(
+                adaptor_version=str(z["adaptor_version"]),
+                model_name=str(z["model_name"]),
+                nb=int(z["nb"]),
+                nf_hidden=int(z["nf_hidden"]),
+                nf_mlp=int(z["nf_mlp"]),
+                K=int(z["K"]),
+                n_layers=int(z["n_layers"]),
+                processed_layers=z["processed_layers"].astype(np.int32),
+                op_names=tuple(str(x) for x in z["op_names"]),
+                deltas=z["deltas"].astype(np.uint8),
+            )
+            return cls(
+                meta=meta,
+                intron_sensitivity=z["intron_sensitivity"].astype(np.float32),
+                intron_coherence=z["intron_coherence"].astype(np.float32),
+                intron_pair_counts=z["intron_pair_counts"].astype(np.int32),
+                vertex_flow=z["vertex_flow"].astype(np.float32),
+            )
 
-        return cls(
-            meta=meta,
-            U=U,
-            boundary_basis=basis,
-            ops=ops,
-            D_phase=D_phase,
-            R_fiber=R_fiber,
+        raise ValueError(
+            f"Adaptor version {version} not supported. "
+            f"Rebuild with: python -m secret_lab_ignore.agent.adaptor_build"
         )

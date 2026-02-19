@@ -4,9 +4,8 @@
 # Deterministic template. No model generates any part of this.
 
 from datetime import datetime, timezone
-from typing import Optional
-from .context import THM_MARK, THM_GRAMMAR, CONSULT_DISPLACEMENT, CONSULT_ALIGNED
 
+from .context import CONSULT_ALIGNED, CONSULT_DISPLACEMENT, THM_GRAMMAR, THM_MARK
 
 _FIRST_TRACE_TEMPLATE = """[Gyroscope 2.0]
 
@@ -36,9 +35,9 @@ _TRACE_TEMPLATE = """[Gyroscope 2.0]
 
 def build_trace(
     thm_expression: str,
-    risk_code: Optional[str],
+    risk_code: str | None,
     trace_id: int,
-    timestamp: Optional[str] = None,
+    timestamp: str | None = None,
     first: bool = False,
 ) -> str:
     """Build a Gyroscope 2.0 trace block with THM classification.

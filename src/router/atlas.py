@@ -9,10 +9,11 @@ Running this module builds:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from pathlib import Path
 import sys
 import time
+from dataclasses import dataclass
+from pathlib import Path
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -22,15 +23,15 @@ try:
         ARCHETYPE_A12,
         ARCHETYPE_B12,
         ARCHETYPE_STATE24,
-        GENE_MIC_S,
-        XFORM_MASK_BY_BYTE,
         C_PERP_12,
+        GENE_MIC_S,
         LAYER_MASK_12,
         Q0,
         Q1,
+        XFORM_MASK_BY_BYTE,
         mask12_for_byte,
-        vertex_charge_from_mask,
         popcount,
+        vertex_charge_from_mask,
     )
 except ImportError:
     program_root = Path(__file__).parent.parent.parent
@@ -40,15 +41,15 @@ except ImportError:
         ARCHETYPE_A12,
         ARCHETYPE_B12,
         ARCHETYPE_STATE24,
-        GENE_MIC_S,
-        XFORM_MASK_BY_BYTE,
         C_PERP_12,
+        GENE_MIC_S,
         LAYER_MASK_12,
         Q0,
         Q1,
+        XFORM_MASK_BY_BYTE,
         mask12_for_byte,
-        vertex_charge_from_mask,
         popcount,
+        vertex_charge_from_mask,
     )
 
 
@@ -288,10 +289,10 @@ def build_phenomenology(
     )
 
     file_size = paths.phenomenology.stat().st_size
-    print(f"Phenomenology complete: spectral atlas")
+    print("Phenomenology complete: spectral atlas")
     print(f"  File size: {file_size:,} bytes ({file_size / 1024 / 1024:.2f} MB)")
     print(f"  Atlas version: {ATLAS_VERSION}")
-    print(f"  Contents: constants + state_horizon/vertex + phase cube + next_* maps + features")
+    print("  Contents: constants + state_horizon/vertex + phase cube + next_* maps + features")
 
 
 def _byte_feature_vector(byte: int, K: int, mask12_by_byte: NDArray[np.uint16]) -> NDArray[np.float32]:

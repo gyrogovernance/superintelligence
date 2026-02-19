@@ -23,13 +23,11 @@ identical across all platforms and numpy/BLAS builds.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
 from .events import Domain, GovernanceEvent
-
 
 EdgeVec = NDArray[np.int64]  # Ledger vectors use integer micro-units
 EdgeVecFloat = NDArray[np.float64]  # For intermediate float computations
@@ -111,7 +109,7 @@ def get_incidence_matrix() -> Mat46:
     return _B_K4.copy()
 
 
-def get_projections() -> Tuple[Mat66, Mat66]:
+def get_projections() -> tuple[Mat66, Mat66]:
     """
     GGG exact K4 projection matrices.
     
@@ -131,7 +129,7 @@ def get_cycle_basis() -> NDArray[np.float64]:
     return _CYCLE_BASIS_K4.copy()
 
 
-def hodge_decomposition(y: EdgeVec, P_grad: Mat66, P_cycle: Mat66) -> Tuple[EdgeVecFloat, EdgeVecFloat]:
+def hodge_decomposition(y: EdgeVec, P_grad: Mat66, P_cycle: Mat66) -> tuple[EdgeVecFloat, EdgeVecFloat]:
     """
     GGG simulator-export exact Hodge decomposition:
       y = y_grad + y_cycle
@@ -166,8 +164,8 @@ def compute_aperture(y: EdgeVec, y_cycle: EdgeVecFloat) -> float:
 
 def construct_edge_vector_with_aperture(
     x: NDArray[np.float64],
-    target_aperture: Optional[float] = None,
-    cycle_basis_vector: Optional[EdgeVecFloat] = None,
+    target_aperture: float | None = None,
+    cycle_basis_vector: EdgeVecFloat | None = None,
 ) -> EdgeVecFloat:
     """
     GGG exact construction with W=I:
@@ -238,7 +236,7 @@ class DomainLedgers:
     """
 
     def __init__(self) -> None:
-        self._y: Dict[Domain, EdgeVec] = {
+        self._y: dict[Domain, EdgeVec] = {
             Domain.ECONOMY: np.zeros(6, dtype=np.int64),
             Domain.EMPLOYMENT: np.zeros(6, dtype=np.int64),
             Domain.EDUCATION: np.zeros(6, dtype=np.int64),
@@ -276,7 +274,7 @@ class DomainLedgers:
         _, y_cycle = hodge_decomposition(y, self._P_grad, self._P_cycle)
         return compute_aperture(y, y_cycle)
 
-    def decompose(self, domain: Domain) -> Tuple[EdgeVecFloat, EdgeVecFloat]:
+    def decompose(self, domain: Domain) -> tuple[EdgeVecFloat, EdgeVecFloat]:
         """
         Return (y_grad, y_cycle) using unweighted Hodge decomposition.
         Follows GGG simulator export exactly.

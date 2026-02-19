@@ -7,13 +7,12 @@ The atlas stores raw activation pools plus mean and std so that downstream
 scripts can whiten and project as needed.
 """
 
-import os
 from pathlib import Path
 
 import numpy as np
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
 from tqdm import tqdm
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 MODEL_DIR = Path("data/models/Olmo-3-7B-Instruct")
 OUTPUT_DIR = Path("data/atlas/olmo_3_7b_manifolds")

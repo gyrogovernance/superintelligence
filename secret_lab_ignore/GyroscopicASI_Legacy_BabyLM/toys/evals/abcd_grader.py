@@ -1,7 +1,6 @@
 import re
 import sys
 
-
 _PATTERNS = [
     # 0)"**Answer:** A" or "*Answers* – B", i.e. markdown‐wrapped "Answer(s)" with an unwrapped letter.
     re.compile(

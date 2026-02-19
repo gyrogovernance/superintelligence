@@ -22,12 +22,10 @@ from src.router.constants import (
     ARCHETYPE_A12,
     ARCHETYPE_B12,
 )
-
 from tests._physics_utils import (
     popcount12_arr,
     weight_enumerator_counts,
 )
-
 
 # -----------------------------
 # Fixtures
@@ -88,28 +86,28 @@ class TestApertureConstraintHalfInteger:
         """
         masks = atlas["masks_a12"].astype(np.uint16)
         counts = weight_enumerator_counts(masks)
-        
+
         A_kernel = float((counts[0] + counts[1]) / 256.0)
         closure = 1.0 - A_kernel
-        
+
         theta_min = float(np.arccos(5.0 / 6.0))
         delta_kernel = theta_min / 3.0
         m_a_kernel = delta_kernel / closure
-        
+
         # CGM says Q_G = 4π
         Q_G_CGM = 4.0 * np.pi
-        
+
         # Test the fundamental constraint
         product_cgm = Q_G_CGM * (m_a_kernel ** 2)
-        
+
         # Also compute Q_G_kernel from the reconstruction
         Q_G_kernel = 1.0 / (2.0 * (m_a_kernel ** 2))
         # Q_G_kernel × m_a_kernel² = 0.5 by definition
-        
+
         # The real question: how close is 4π × m_a_kernel² to 0.5?
         deviation = abs(product_cgm - 0.5)
         relative = deviation / 0.5
-        
+
         print("\n" + "="*10)
         print("APERTURE CONSTRAINT: Q_G × m_a² = 1/2")
         print("="*10)
@@ -118,18 +116,18 @@ class TestApertureConstraintHalfInteger:
         print(f"  θ_min    = {theta_min:.12f} rad")
         print(f"  δ_kernel = {delta_kernel:.12f} rad")
         print(f"  m_a_kernel = {m_a_kernel:.12f}")
-        print(f"")
+        print("")
         print(f"  4π × m_a_kernel² = {product_cgm:.12f}")
-        print(f"  Expected (CGM)   = 0.500000000000")
+        print("  Expected (CGM)   = 0.500000000000")
         print(f"  Deviation        = {deviation:.12f}")
         print(f"  Relative error   = {100*relative:.6f}%")
-        print(f"")
+        print("")
         print(f"  Q_G_kernel (from 1/(2m_a²)) = {Q_G_kernel:.12f}")
         print(f"  Q_G_CGM (4π)                = {Q_G_CGM:.12f}")
-        
+
         # Hard assertion: should be within 1%
         assert relative < 0.01, f"Aperture constraint violated: 4π × m_a² = {product_cgm:.6f} ≠ 0.5"
-        
+
         print("  ✓ Aperture constraint 4π × m_a² ≈ 0.5 holds within 1%")
 
 
@@ -149,26 +147,26 @@ class TestHolonomyGroupIsCode:
         achievable defects = C.
         """
         masks = atlas["masks_a12"].astype(np.uint16)
-        
+
         # Build all achievable defects
         achievable = set()
         for y in range(256):
             for z in range(256):
                 d = int(masks[y]) ^ int(masks[z])
                 achievable.add(d)
-        
+
         # Build the mask code
         code_set = set(int(m) for m in masks)
-        
+
         print("\n" + "="*10)
         print("HOLONOMY GROUP = MASK CODE")
         print("="*10)
         print(f"  |Achievable defects| = {len(achievable)}")
         print(f"  |Mask code C|        = {len(code_set)}")
         print(f"  Sets equal           = {achievable == code_set}")
-        
+
         assert achievable == code_set, "Holonomy group ≠ mask code"
-        
+
         # The group structure: C is closed under XOR
         # Verify explicitly
         closed = True
@@ -177,7 +175,7 @@ class TestHolonomyGroupIsCode:
                 if (a ^ b) not in code_set:
                     closed = False
                     break
-        
+
         print(f"  XOR closure verified = {closed}")
         print("  ✓ Holonomy group is isomorphic to (Z/2)^8")
 
@@ -200,55 +198,55 @@ class TestOpticalConjugacyShellProduct:
         Is there a 4π² connection?
         """
         ont = atlas["ont"]
-        
+
         a = ((ont >> 12) & 0xFFF).astype(np.uint16)
         b = (ont & 0xFFF).astype(np.uint16)
-        
+
         da = popcount12_arr((a ^ np.uint16(ARCHETYPE_A12)).astype(np.uint16))
         db = popcount12_arr((b ^ np.uint16(ARCHETYPE_B12)).astype(np.uint16))
         dist24 = (da + db).astype(np.int64)
-        
+
         counts = np.bincount(dist24, minlength=25).astype(np.int64)
-        
+
         # Shell products d × (24-d)
         products = [d * (24 - d) for d in range(25)]
-        
+
         # Weighted by counts
         total_states = int(counts.sum())
         mean_d = float(np.sum(np.arange(25) * counts)) / total_states
         mean_product = float(np.sum(np.array(products) * counts)) / total_states
-        
+
         # Identity: d(24-d) = 144 - (d-12)², so E[d(24-d)] = 144 - Var(d)
         var_d = float(np.sum((np.arange(25) - mean_d) ** 2 * counts)) / total_states
-        
+
         # 4π² ≈ 39.478
         four_pi_sq = 4.0 * np.pi ** 2
-        
+
         print("\n" + "="*10)
         print("OPTICAL CONJUGACY: SHELL PRODUCTS")
         print("="*10)
         print(f"  Mean distance d        = {mean_d:.6f} (expected 12.0)")
         print(f"  Mean product d(24-d)   = {mean_product:.6f}")
         print(f"  Max product (at d=12)  = {12 * 12} = 144 = 12²")
-        print(f"")
-        print(f"  Identity: E[d(24-d)] = 144 - Var(d)")
+        print("")
+        print("  Identity: E[d(24-d)] = 144 - Var(d)")
         print(f"  Var(d)               = {var_d:.6f}")
         print(f"  144 - Var(d)         = {144 - var_d:.6f}")
-        print(f"  (Expected: Var(d) = 10, from Var(w1) + Var(w2) = 5 + 5)")
-        print(f"")
+        print("  (Expected: Var(d) = 10, from Var(w1) + Var(w2) = 5 + 5)")
+        print("")
         print(f"  4π²                    = {four_pi_sq:.6f}")
         print(f"  mean_product / 4π²     = {mean_product / four_pi_sq:.6f}")
         print(f"  144 / 4π²              = {144 / four_pi_sq:.6f}")
-        
+
         # Verify symmetry
         symmetric = all(int(counts[d]) == int(counts[24-d]) for d in range(25))
         print(f"  Shell symmetry (d ↔ 24-d) = {symmetric}")
-        
+
         assert symmetric
         assert abs(mean_d - 12.0) < 0.01
         assert abs(var_d - 10.0) < 0.01, "Variance should be 10 (sum of two independent weight variances)"
         assert abs(mean_product - (144 - var_d)) < 1e-6, "Identity E[d(24-d)] = 144 - Var(d) should hold"
-        
+
         print("  ✓ Optical conjugacy structure verified")
         print("  ✓ Second-moment identity: E[d(24-d)] = 144 - Var(d) = 134")
 
@@ -275,19 +273,19 @@ class TestKQGCommutatorScale:
         """
         masks = atlas["masks_a12"].astype(np.uint16)
         counts = weight_enumerator_counts(masks)
-        
+
         A_kernel = float((counts[0] + counts[1]) / 256.0)
         closure = 1.0 - A_kernel
         theta_min = float(np.arccos(5.0 / 6.0))
         delta_kernel = theta_min / 3.0
         m_a_kernel = delta_kernel / closure
-        
+
         K_QG_kernel = (np.pi / 4.0) / m_a_kernel
         K_QG_CGM = (np.pi ** 2) / np.sqrt(2.0 * np.pi)
-        
+
         # Also: S_ONA = o_p / m_a = (π/4) / m_a
         S_ONA_kernel = (np.pi / 4.0) / m_a_kernel
-        
+
         print("\n" + "="*10)
         print("COMMUTATOR SCALE K_QG")
         print("="*10)
@@ -296,11 +294,11 @@ class TestKQGCommutatorScale:
         print(f"  K_QG_CGM         = π²/√(2π) = {K_QG_CGM:.12f}")
         print(f"  Difference       = {K_QG_kernel - K_QG_CGM:+.12f}")
         print(f"  Relative error   = {100*abs(K_QG_kernel - K_QG_CGM)/K_QG_CGM:.6f}%")
-        print(f"")
+        print("")
         print(f"  S_ONA_kernel     = {S_ONA_kernel:.12f}")
         print(f"  K_QG = S_ONA?    : {K_QG_kernel:.6f} vs {S_ONA_kernel:.6f}")
-        print(f"  (In CGM: K_QG = S_CS/2 = S_ONA)")
-        
+        print("  (In CGM: K_QG = S_CS/2 = S_ONA)")
+
         assert abs(K_QG_kernel - K_QG_CGM) / K_QG_CGM < 0.01
         assert abs(K_QG_kernel - S_ONA_kernel) < 1e-10, "K_QG should equal S_ONA in this setup"
 
@@ -422,16 +420,16 @@ class TestRestrictedAlphabetPhaseTransition:
         visited = np.zeros(N, dtype=bool)
         frontier = np.array([start_idx], dtype=np.int64)
         visited[start_idx] = True
-        
+
         allowed_array = np.array(allowed_bytes, dtype=np.int64)
-        
+
         while len(frontier) > 0:
             next_idxs = epi[frontier][:, allowed_array].ravel()
             next_idxs = np.unique(next_idxs)
             new = next_idxs[~visited[next_idxs]]
             visited[new] = True
             frontier = new
-        
+
         return int(visited.sum())
 
     def test_rank_orbit_theorem(self, atlas):
@@ -451,38 +449,38 @@ class TestRestrictedAlphabetPhaseTransition:
         ont = atlas["ont"]
         epi = atlas["epi"]
         masks = atlas["masks_a12"].astype(np.uint16)
-        
+
         # Archetype index
         arch_state = (int(ARCHETYPE_A12) << 12) | int(ARCHETYPE_B12)
         arch_idx = int(np.where(ont == arch_state)[0][0])
-        
+
         print("\n" + "=" * 10)
         print("RANK/ORBIT THEOREM: RESTRICTED ALPHABET")
         print("=" * 10)
-        
+
         mismatches = []
         for t in range(13):
             # Allowed bytes: mask weight <= t
             allowed = [b for b in range(256) if bin(int(masks[b])).count('1') <= t]
-            
+
             if not allowed:
                 continue
-            
+
             # Compute rank of mask subspace
             mask_list = [int(masks[b]) for b in allowed]
             rank_t = self._gf2_rank(mask_list)
             pred_size = 2 ** (2 * rank_t)
-            
+
             # Compute actual orbit size via BFS
             orbit_size = self._bfs_orbit_size(epi, arch_idx, allowed)
-            
+
             match = (orbit_size == pred_size)
             if not match:
                 mismatches.append((t, rank_t, pred_size, orbit_size))
-            
+
             print(f"  t={t:2d}: |allowed|={len(allowed):3d}, rank={rank_t}, "
                   f"pred={pred_size:6d}, orbit={orbit_size:6d}, match={match}")
-        
+
         print(f"\n  Mismatches: {len(mismatches)}")
         assert len(mismatches) == 0, f"Rank/orbit theorem failed at thresholds: {mismatches}"
 
@@ -493,7 +491,7 @@ class TestRestrictedAlphabetPhaseTransition:
         "bubble sub-ontology"; at or above, you have full Ω.
         """
         masks = atlas["masks_a12"].astype(np.uint16)
-        
+
         ranks = []
         for t in range(13):
             allowed = [b for b in range(256) if bin(int(masks[b])).count('1') <= t]
@@ -503,21 +501,21 @@ class TestRestrictedAlphabetPhaseTransition:
             mask_list = [int(masks[b]) for b in allowed]
             rank_t = self._gf2_rank(mask_list)
             ranks.append(rank_t)
-        
+
         # Find critical threshold: smallest t where rank_t == 8
         critical_t = next((t for t, r in enumerate(ranks) if r == 8), None)
-        
+
         print("\n" + "=" * 10)
         print("NUCLEATION BARRIER: CRITICAL THRESHOLD")
         print("=" * 10)
         print("  Rank progression by weight threshold t:")
         for t in range(13):
             print(f"    t={t:2d}: rank={ranks[t]}, 2^(2*rank)={2**(2*ranks[t])}")
-        
+
         print(f"\n  Critical threshold: t={critical_t} (rank jumps to 8)")
         print(f"  Below t={critical_t}: bubble sub-ontology (strict subset of Ω)")
         print(f"  At t>={critical_t}: full Ω accessible (65536 states)")
-        
+
         # Assertions: monotonicity and full rank at t=12
         assert all(ranks[i] <= ranks[i+1] for i in range(12)), "Rank must be non-decreasing"
         assert ranks[12] == 8, "Full alphabet must generate rank 8"
@@ -530,19 +528,19 @@ class TestRestrictedAlphabetPhaseTransition:
         generates full rank (8)? This tests minimal generator requirements.
         """
         masks = atlas["masks_a12"].astype(np.uint16)
-        
+
         # Try random subsets of various sizes
         rng = np.random.default_rng(2025)
         sizes_to_try = [4, 5, 6, 7, 8, 9, 10, 12, 16, 32]
-        
+
         min_observed = None
         max_observed = {}
-        
+
         print("\n" + "=" * 10)
         print("MINIMAL GENERATOR COUNT")
         print("=" * 10)
         print("  Sampling random byte subsets to find minimal generators:")
-        
+
         for k in sizes_to_try:
             ranks_seen = []
             for _ in range(100):
@@ -550,19 +548,19 @@ class TestRestrictedAlphabetPhaseTransition:
                 mask_list = [int(masks[b]) for b in subset]
                 rank = self._gf2_rank(mask_list)
                 ranks_seen.append(rank)
-            
+
             max_rank = max(ranks_seen)
             full_rank_count = sum(1 for r in ranks_seen if r == 8)
             max_observed[k] = (max_rank, full_rank_count)
-            
+
             print(f"    k={k:2d}: max_rank={max_rank}, full_rank_count={full_rank_count}/100")
-            
+
             if max_rank == 8 and min_observed is None:
                 min_observed = k
-        
+
         print(f"\n  Minimum k with full rank observed: {min_observed}")
-        print(f"  (Code dimension = 8, so theoretical minimum is k >= 8)")
-        
+        print("  (Code dimension = 8, so theoretical minimum is k >= 8)")
+
         # Assertions
         assert min_observed is not None, "Must find full rank at some subset size"
         assert min_observed >= 8, "Need at least 8 generators for rank 8"

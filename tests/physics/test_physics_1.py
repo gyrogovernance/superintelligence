@@ -13,22 +13,23 @@ HOW TO RUN ALL PHYSICS TESTS:
 python -m pytest -v -s tests/test_physics_1.py tests/test_physics_2.py tests/test_physics_3.py tests/test_physics_4.py
 """
 
-import pytest
-import numpy as np
 from pathlib import Path
 
+import numpy as np
+import pytest
+
 from src.router.constants import (
-    GENE_MIC_S,
     ARCHETYPE_A12,
     ARCHETYPE_B12,
     ARCHETYPE_STATE24,
+    GENE_MIC_S,
     LAYER_MASK_12,
-    pack_state,
-    unpack_state,
+    XFORM_MASK_BY_BYTE,
     byte_to_intron,
     expand_intron_to_mask24,
+    pack_state,
     step_state_by_byte,
-    XFORM_MASK_BY_BYTE,
+    unpack_state,
 )
 
 
@@ -40,7 +41,7 @@ class TestStateRepresentation:
         a, b = unpack_state(ARCHETYPE_STATE24)
         assert a == ARCHETYPE_A12, f"A component: expected {hex(ARCHETYPE_A12)}, got {hex(a)}"
         assert b == ARCHETYPE_B12, f"B component: expected {hex(ARCHETYPE_B12)}, got {hex(b)}"
-        
+
         reconstructed = pack_state(a, b)
         assert reconstructed == ARCHETYPE_STATE24
 
@@ -52,7 +53,7 @@ class TestStateRepresentation:
             (0xAAA, 0x555),
             (0x123, 0x456),
         ]
-        
+
         for a_in, b_in in test_cases:
             packed = pack_state(a_in, b_in)
             a_out, b_out = unpack_state(packed)
@@ -65,7 +66,7 @@ class TestStateRepresentation:
         s1 = pack_state(0xFFF, 0x000)
         a1, b1 = unpack_state(s1)
         assert a1 == 0xFFF and b1 == 0x000
-        
+
         # Set A = all zeros, B = all ones
         s2 = pack_state(0x000, 0xFFF)
         a2, b2 = unpack_state(s2)
@@ -142,54 +143,54 @@ class TestFIFOGyration:
         byte = 0x42
         state = ARCHETYPE_STATE24
         _, b = unpack_state(state)
-        
+
         next_state = step_state_by_byte(state, byte)
         new_a, _ = unpack_state(next_state)
-        
+
         # new_A should equal ~old_B
         expected_new_a = b ^ LAYER_MASK_12
         assert new_a == expected_new_a, f"new_A = {hex(new_a)}, expected {hex(expected_new_a)}"
 
 class TestCGMChirality:
     """Test CS axiom: gyration provides fundamental chirality."""
-    
+
     def test_gyration_not_pure_swap(self):
         """Gyration must not be a simple A↔B swap (needs the flip)."""
         state = pack_state(0x123, 0x456)
         # Apply identity mask (byte 0xAA → intron 0x00 → mask_a ≈ 0)
         next_state = step_state_by_byte(state, 0xAA)
-        
+
         a, b = unpack_state(state)
         new_a, new_b = unpack_state(next_state)
-        
+
         # If it were pure swap: new_a == b and new_b == a
         # But we have flip, so:
         assert new_a == (b ^ LAYER_MASK_12)
         assert new_b == (a ^ LAYER_MASK_12)
-        
+
         # Not pure swap
         assert new_a != b or new_b != a, "Gyration is pure swap (missing flip)"
-    
+
     def test_gyration_asymmetry(self):
         """new_A depends only on old_B; new_B depends on mutated_A."""
         # This is the CS chirality: right (B→A) preserves horizon structure,
         # left (A→B) incorporates mutation
-        
+
         state = pack_state(0xAAA, 0x555)
         byte = 0x42
-        
+
         mask24 = int(XFORM_MASK_BY_BYTE[byte])
         mask_a = (mask24 >> 12) & LAYER_MASK_12
-        
+
         a, b = unpack_state(state)
-        
+
         # Expected behavior
         expected_new_a = b ^ LAYER_MASK_12  # Right: B → A (preserving)
         expected_new_b = (a ^ mask_a) ^ LAYER_MASK_12  # Left: A mutation → B (altering)
-        
+
         next_state = step_state_by_byte(state, byte)
         actual_new_a, actual_new_b = unpack_state(next_state)
-        
+
         assert actual_new_a == expected_new_a, "Right transition broken"
         assert actual_new_b == expected_new_b, "Left transition broken"
 
@@ -209,7 +210,7 @@ class TestInvariants:
         """Same (state, byte) must always produce same next state."""
         test_states = [ARCHETYPE_STATE24, 0x123456, 0xABC555]
         test_bytes = [0x00, 0x42, 0xAA, 0xFF]
-        
+
         for state in test_states:
             for byte in test_bytes:
                 s1 = step_state_by_byte(state, byte)
@@ -362,23 +363,23 @@ class TestClosedFormDepthLaws:
 def print_physics_summary(request):
     """Print summary statistics after all tests."""
     yield
-    
+
     print("\n" + "="*10)
     print("PHYSICS TEST SUMMARY")
     print("="*10)
-    
+
     # Count unique masks
     unique_masks = len(set(int(XFORM_MASK_BY_BYTE[b]) for b in range(256)))
     print(f"Unique masks: {unique_masks} / 256")
-    
+
     # Count non-zero A masks
     nonzero_a = sum(1 for b in range(256) if (int(XFORM_MASK_BY_BYTE[b]) >> 12) != 0)
     print(f"Non-zero A masks: {nonzero_a} / 256")
-    
+
     # Check B masks (should all be zero)
     nonzero_b = sum(1 for b in range(256) if (int(XFORM_MASK_BY_BYTE[b]) & LAYER_MASK_12) != 0)
     print(f"Non-zero B masks: {nonzero_b} / 256 (expected 0)")
-    
+
     print("="*10)
 
 
@@ -503,16 +504,16 @@ class TestQuantumGravityManifold:
         print("\n" + "="*10)
         print("PILLAR 2: Holographic Area/Entropy Scaling")
         print("="*10)
-        
+
         # Horizon Area = 256 states.
         # We measure the "Atmosphere" (states 1-step away from Horizon).
         atlas_dir = Path("data/atlas")
         if not atlas_dir.exists():
             pytest.skip("No Atlas")
-        
+
         epistemology = np.load(atlas_dir / "epistemology.npy")
         ontology = np.load(atlas_dir / "ontology.npy")
-        
+
         # Identify horizon indices: A = ~B
         horizon_indices = []
         for i, s in enumerate(ontology):
@@ -520,9 +521,9 @@ class TestQuantumGravityManifold:
             a, b = unpack_state(s)
             if a == (b ^ LAYER_MASK_12):
                 horizon_indices.append(i)
-        
+
         horizon_set = set(horizon_indices)
-        
+
         # Atmosphere: The boundary layer of the Horizon
         atmosphere = set()
         for idx in horizon_indices:
@@ -530,21 +531,21 @@ class TestQuantumGravityManifold:
             for byte in range(256):
                 next_idx = int(epistemology[idx, byte])
                 atmosphere.add(next_idx)
-        
+
         # Remove the horizon states themselves to get the pure boundary layer
         boundary_layer = atmosphere - horizon_set
-        
+
         print(f"  Horizon Area (States): {len(horizon_indices)}")
         print(f"  Boundary Layer Volume: {len(boundary_layer)}")
         print(f"  Total Atmosphere (Horizon + Boundary): {len(atmosphere)}")
-        
+
         # Holographic Check:
         # In a 3D system, Boundary (Area) should scale as Volume^(2/3).
         # Here, we check the ratio.
         ratio = len(boundary_layer) / len(horizon_indices) if len(horizon_indices) > 0 else 0
         print(f"  Expansion Ratio (Boundary/Area): {ratio:.2f}")
-        
-        # 256 * 256 = 65536. 
+
+        # 256 * 256 = 65536.
         # If the Boundary Layer captures the whole ontology, the Horizon
         # is a 'Maximal Observer' (Holographic Principle).
         assert len(atmosphere) == 65536, (

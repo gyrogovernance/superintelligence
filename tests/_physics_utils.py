@@ -8,13 +8,11 @@ to reduce duplication and improve maintainability.
 from __future__ import annotations
 
 from math import comb
-from typing import List, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.router.constants import ARCHETYPE_A12, ARCHETYPE_B12
-
 
 # Popcount and parity LUTs for 12-bit values
 _POP12 = np.array([bin(i).count("1") for i in range(4096)], dtype=np.uint8)
@@ -49,7 +47,7 @@ def weight_enumerator_counts(codewords12: NDArray[np.uint16]) -> NDArray[np.int6
     return counts
 
 
-def cycle_lengths_of_permutation(perm: NDArray[np.int64]) -> List[int]:
+def cycle_lengths_of_permutation(perm: NDArray[np.int64]) -> list[int]:
     """
     Return sorted list of cycle lengths for a permutation.
 
@@ -57,7 +55,7 @@ def cycle_lengths_of_permutation(perm: NDArray[np.int64]) -> List[int]:
     """
     n = int(perm.size)
     visited = np.zeros(n, dtype=np.bool_)
-    lengths: List[int] = []
+    lengths: list[int] = []
     for start in range(n):
         if visited[start]:
             continue
@@ -92,7 +90,7 @@ def apply_word_to_indices(epi: NDArray[np.uint32], idxs: NDArray[np.int64], byte
     return cur
 
 
-def compose_epi(epi: NDArray[np.uint32], idxs: NDArray[np.int64], bytes_seq: List[int]) -> NDArray[np.int64]:
+def compose_epi(epi: NDArray[np.uint32], idxs: NDArray[np.int64], bytes_seq: list[int]) -> NDArray[np.int64]:
     """
     Compose atlas transitions using epistemology.
 
@@ -158,7 +156,7 @@ def coeffs_archetype_distance_enumerator_closed_form() -> list[int]:
     return poly_convolve(coeffs_poly_1_plus_z2_pow_k(8), coeffs_poly_1_plus_z_pow_k(8))
 
 
-def dual_code_from_parity_checks(parity_checks: List[int]) -> NDArray[np.uint16]:
+def dual_code_from_parity_checks(parity_checks: list[int]) -> NDArray[np.uint16]:
     """Generate dual code from parity check vectors."""
     r = len(parity_checks)
     out = np.zeros(1 << r, dtype=np.uint16)
@@ -184,7 +182,7 @@ def krawtchouk(n: int, w: int, j: int) -> int:
     return s
 
 
-def table(title: str, rows: List[Tuple[str, str]], enable: bool = True) -> None:
+def table(title: str, rows: list[tuple[str, str]], enable: bool = True) -> None:
     """Print a formatted table (gated by enable flag)."""
     if not enable:
         return

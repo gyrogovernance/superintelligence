@@ -5,7 +5,7 @@ Minimal, dependency-free: GENEs + ψ + transform + batch helpers.
 """
 
 from functools import reduce
-from typing import List, Tuple, cast
+from typing import cast
 
 import numpy as np
 from numpy.typing import NDArray
@@ -40,7 +40,7 @@ EXON_BROADCAST_MASKS = {
     "dynamic": EXON_DYNAMIC_MASK,
 }
 
-def _build_masks_and_constants() -> Tuple[int, int, int, List[int]]:
+def _build_masks_and_constants() -> tuple[int, int, int, list[int]]:
     """
     Compute FG/BG masks (layer-select) and intron broadcast patterns (ψ-domain).
     Returns (FG_MASK, BG_MASK, FULL_MASK, INTRON_BROADCAST_MASKS_LIST).
@@ -58,7 +58,7 @@ def _build_masks_and_constants() -> Tuple[int, int, int, List[int]]:
                         BG |= 1 << bit_index
     FULL_MASK = (1 << 48) - 1
 
-    intron_broadcast_masks_list: List[int] = []
+    intron_broadcast_masks_list: list[int] = []
     for i in range(256):
         # broadcast byte across 6 bytes (to 48 bits)
         mask = 0
@@ -99,10 +99,10 @@ def int_to_tensor(state: int) -> NDArray[np.int8]:
     """Convert 48-bit integer back to tensor [4,2,3,2]."""
     # Convert to 48-bit binary representation
     bits = [(state >> i) & 1 for i in range(47, -1, -1)]
-    
+
     # Convert bits to tensor values: 0→+1, 1→-1
     tensor_flat = np.array([1 if bit == 0 else -1 for bit in bits], dtype=np.int8)
-    
+
     # Reshape to [4,2,3,2] using C order
     return tensor_flat.reshape((4, 2, 3, 2), order="C")
 
@@ -122,7 +122,7 @@ def fold(a: int, b: int) -> int:
     gyr_b = b ^ (a & (~b & MASK8))
     return (a ^ gyr_b) & MASK8
 
-def fold_sequence(introns: List[int], start: int = 0) -> int:
+def fold_sequence(introns: list[int], start: int = 0) -> int:
     return reduce(fold, introns, start)
 
 # -------------------------------------------------------------------

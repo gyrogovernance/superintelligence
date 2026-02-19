@@ -2,8 +2,6 @@
 # [Authority:Indirect] + [Agency:Indirect]
 
 import re
-from typing import Optional
-
 
 _RISK_RE = re.compile(r"\[Risk:(GTD|IVD|IAD|IID)\]")
 _CAT_TAG_RE = re.compile(r"^\[(Authority|Agency)\s*:\s*(Direct|Indirect)\]$")
@@ -25,7 +23,7 @@ class THMRouter:
         except Exception:
             return False
 
-    def extract_risk(self, expression: str) -> Optional[str]:
+    def extract_risk(self, expression: str) -> str | None:
         expr = (expression or "").strip()
         if not self.validate(expr):
             return None

@@ -16,10 +16,10 @@ import json
 import signal
 import subprocess
 import sys
-import time
 import threading
+import time
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Any
 
 import requests
 
@@ -31,10 +31,10 @@ class RobustKnowledgeTestRunner:
         self.port = port
         self.config_path = config_path
         self.base_url = f"http://localhost:{port}"
-        self.server_process: Optional[subprocess.Popen[str]] = None
-        self.test_results: Dict[str, Any] = {}
-        self.startup_logs: List[str] = []
-        self.server_errors: List[str] = []
+        self.server_process: subprocess.Popen[str] | None = None
+        self.test_results: dict[str, Any] = {}
+        self.startup_logs: list[str] = []
+        self.server_errors: list[str] = []
 
         # Paths
         self.project_root = Path(__file__).parent.parent
@@ -59,11 +59,11 @@ class RobustKnowledgeTestRunner:
         formatted_msg = f"[{timestamp}] [{level:5}] {message}"
         print(formatted_msg)
         self.startup_logs.append(formatted_msg)
-    
+
     def log_clean(self, message: str):
         """Clean logging without timestamps for test results."""
         print(message)
-    
+
     def log_critical(self, message: str):
         """Critical logging with timestamps for important stages."""
         timestamp = time.strftime("%H:%M:%S")
@@ -91,12 +91,14 @@ class RobustKnowledgeTestRunner:
             import sys
             if str(self.project_root) not in sys.path:
                 sys.path.insert(0, str(self.project_root))
-            
-            # Import lazily to avoid side effects unless needed
-            from baby.constants.recreate_memory_files import recreate_memory_files  # type: ignore
 
+            # Import lazily to avoid side effects unless needed
             # Run with cwd as project root because the recreator uses relative paths
             import os
+
+            from baby.constants.recreate_memory_files import (
+                recreate_memory_files,  # type: ignore
+            )
 
             direct_cwd = os.getcwd()
             try:
@@ -272,7 +274,7 @@ class RobustKnowledgeTestRunner:
             self.log(f"❌ Failed to start server: {e}", "ERROR")
             return False
 
-    def inject_knowledge_safe(self, article_content: str) -> Optional[str]:
+    def inject_knowledge_safe(self, article_content: str) -> str | None:
         """Inject knowledge with ingestion-only mode (max_output_tokens=0)."""
         self.log("📚 Injecting knowledge...")
 
@@ -365,7 +367,7 @@ class RobustKnowledgeTestRunner:
                                 break
                         if response_text:
                             break
-                    
+
                     self.log_clean(f"  → '{response_text}'")
 
                     self.test_results["query_response"] = {
@@ -377,7 +379,7 @@ class RobustKnowledgeTestRunner:
 
                     return True, had_backend_exception
                 else:
-                    self.log(f"❌ Query failed: No valid assistant message with text content", "ERROR")
+                    self.log("❌ Query failed: No valid assistant message with text content", "ERROR")
                     return False, had_backend_exception
 
             else:
@@ -388,7 +390,7 @@ class RobustKnowledgeTestRunner:
             self.log(f"❌ Query error: {e}", "ERROR")
             return False, had_backend_exception
 
-    def get_memory_stats(self) -> Dict[str, Any]:
+    def get_memory_stats(self) -> dict[str, Any]:
         """Get comprehensive memory statistics."""
         stats = {
             "passive_memory_exists": False,
@@ -420,10 +422,10 @@ class RobustKnowledgeTestRunner:
         # Load both files
         wiki_content = self.wiki_test_path.read_text(encoding="utf-8")
         conversation_content = self.conversation_bootstrap_path.read_text(encoding="utf-8")
-        
+
         # Combine with a separator
         combined_content = f"{wiki_content}\n\n{conversation_content}"
-        
+
         self.log_clean(f"📖 Loaded: wiki={len(wiki_content)} chars, conversation={len(conversation_content)} chars, total={len(combined_content)} chars")
         return combined_content
 
@@ -463,10 +465,10 @@ class RobustKnowledgeTestRunner:
             # Test all sentences to check for consistency - ALL must succeed
             successful_queries = 0
             backend_exceptions = 0
-            
+
             # Clear any existing server errors
             self.server_errors.clear()
-            
+
             # Test all sentences
             self.log_clean(f"\n🧪 Testing {len(test_sentences)} queries:")
             for sentence in test_sentences:

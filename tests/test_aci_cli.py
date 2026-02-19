@@ -4,12 +4,13 @@ AIR CLI test suite - program-only, non-interactive model.
 Tests the default behavior: sync all programs, verify, bundle.
 """
 
+import json
+import shutil
 import subprocess
 import sys
-from pathlib import Path
-import shutil
-import json
 import zipfile
+from pathlib import Path
+
 import pytest
 
 Program_ROOT = Path(__file__).parent.parent
@@ -39,7 +40,7 @@ def cleanup_data():
     data_dir = Program_ROOT / "data"
     if not data_dir.exists():
         return
-    
+
     # Remove programs directory (but not atlas)
     programs_dir = data_dir / "programs"
     if programs_dir.exists():
@@ -49,19 +50,19 @@ def cleanup_data():
 def test_a_cold_start_builds_atlas_and_templates():
     """Test A: Cold start builds atlas + templates."""
     cleanup_data()
-    
+
     exit_code, stdout, stderr = run_aci()
     if exit_code != 0:
         print(f"STDOUT:\n{stdout}")
         print(f"STDERR:\n{stderr}")
     assert exit_code == 0, f"Exit code {exit_code}, stderr: {stderr}, stdout: {stdout[:500]}"
-    
+
     # Check atlas files
     atlas_dir = Program_ROOT / "data" / "atlas"
     required_files = ["ontology.npy", "epistemology.npy", "phenomenology.npz"]
     for f in required_files:
         assert (atlas_dir / f).exists(), f"Missing atlas file: {f}"
-    
+
     # Check template
     template = Program_ROOT / "data" / "programs" / "_template.md"
     assert template.exists(), "Missing program template"
@@ -72,7 +73,7 @@ def test_b_compile_program_into_artifacts():
     # Create test program
     programs_dir = Program_ROOT / "data" / "programs"
     programs_dir.mkdir(parents=True, exist_ok=True)
-    
+
     program_md = programs_dir / "test-program.md"
     program_content = """---
 program_name: Test Program
@@ -113,14 +114,14 @@ computed:
 Test program description.
 """
     program_md.write_text(program_content, encoding="utf-8")
-    
+
     # Run aci
     exit_code, stdout, stderr = run_aci()
     if exit_code != 0:
         print(f"STDOUT:\n{stdout}")
         print(f"STDERR:\n{stderr}")
     assert exit_code == 0, f"Exit code {exit_code}, stderr: {stderr}, stdout: {stdout[:500]}"
-    
+
     # Check artifacts
     aci_dir = Program_ROOT / "data" / "programs" / ".aci"
     required_artifacts = [
@@ -129,21 +130,21 @@ Test program description.
         "test-program.report.json",
         "test-program.report.md",
     ]
-    
+
     for artifact in required_artifacts:
         assert (aci_dir / artifact).exists(), f"Missing artifact: {artifact}"
-    
+
     # Check bundle
     bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
     assert bundle.exists(), "Missing bundle"
-    
+
     # Verify bundle contents
     with zipfile.ZipFile(bundle, "r") as zf:
         files = zf.namelist()
         required = ["program.md", "bytes.bin", "events.jsonl", "report.json", "report.md", "bundle.json"]
         missing = [f for f in required if f not in files]
         assert not missing, f"Bundle missing files: {missing}"
-    
+
     # Clean up test program
     if program_md.exists():
         program_md.unlink()
@@ -152,12 +153,12 @@ Test program description.
 def test_c_tamper_detection():
     """Test C: Tamper detection - verify bundle integrity check directly."""
     from src.app.cli import store
-    
+
     # Find bundle
     bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
     if not bundle.exists():
         pytest.skip("No bundle to tamper")
-    
+
     # Create tampered bundle (corrupt bytes.bin)
     tampered = Program_ROOT / "data" / "programs" / "bundles" / "test-program-tampered.zip"
     with zipfile.ZipFile(bundle, "r") as src:
@@ -168,14 +169,14 @@ def test_c_tamper_detection():
                     # Corrupt first byte
                     data = b"\xff" + data[1:] if len(data) > 0 else b"\xff"
                 dst.writestr(item, data)
-    
+
     # Test verify_bundle directly (CLI would overwrite, so we test the library function)
     atlas_dir = Program_ROOT / "data" / "atlas"
     assert not store.verify_bundle(atlas_dir, tampered), "Tampered bundle should fail verification"
-    
+
     # Clean up
     tampered.unlink()
-    
+
     # Clean up test program
     program_md = Program_ROOT / "data" / "programs" / "test-program.md"
     if program_md.exists():
@@ -187,7 +188,7 @@ def test_d_determinism():
     # Ensure test program exists (program_id will be auto-generated in .aci/ on first sync)
     programs_dir = Program_ROOT / "data" / "programs"
     programs_dir.mkdir(parents=True, exist_ok=True)
-    
+
     program_md = programs_dir / "test-program.md"
     if not program_md.exists():
         # Create program (program_id will be auto-generated in .aci/ on first sync)
@@ -230,23 +231,23 @@ computed:
 Test program description.
 """
         program_md.write_text(program_content, encoding="utf-8")
-    
+
     bundle = Program_ROOT / "data" / "programs" / "bundles" / "test-program.zip"
-    
+
     # Run first time and extract bundle.json
     exit_code1, _stdout1, _stderr1 = run_aci()
     assert exit_code1 == 0, "First run should succeed"
-    
+
     with zipfile.ZipFile(bundle, "r") as zf:
         bundle_json1 = json.loads(zf.read("bundle.json"))
-    
+
     # Run second time and extract bundle.json
     exit_code2, _stdout2, _stderr2 = run_aci()
     assert exit_code2 == 0, "Second run should succeed"
-    
+
     with zipfile.ZipFile(bundle, "r") as zf:
         bundle_json2 = json.loads(zf.read("bundle.json"))
-    
+
     # Remove non-deterministic fields for comparison
     bundle_json1.pop("generated_at", None)
     bundle_json2.pop("generated_at", None)
@@ -258,9 +259,9 @@ Test program description.
     bundle_json2["logs"].pop("report_json_sha256", None)
     bundle_json1["logs"].pop("report_md_sha256", None)
     bundle_json2["logs"].pop("report_md_sha256", None)
-    
+
     assert bundle_json1 == bundle_json2, "Bundle.json differs between runs (excluding timestamps and program/report hashes)"
-    
+
     # Clean up test program
     if program_md.exists():
         program_md.unlink()
@@ -329,24 +330,24 @@ IID Displacement Incidents: [0]
 Test program for skipped attestations report structure.
 """
     program_md.write_text(program_content, encoding="utf-8")
-    
+
     # Run aci
     _exit_code, _stdout, _stderr = run_aci()
-    
+
     # Check report
     report_json = Program_ROOT / "data" / "programs" / ".aci" / "test-skip.report.json"
     assert report_json.exists(), "Report not generated"
-    
+
     report_data = json.loads(report_json.read_text())
-    
+
     # Verify skipped_attestations field exists in compilation section
     assert "compilation" in report_data, "Report missing compilation section"
     assert "skipped_attestations" in report_data["compilation"], "Report missing skipped_attestations field"
-    
+
     skipped = report_data["compilation"]["skipped_attestations"]
     # With bracket notation, all attestations are valid, so skipped should be empty
     assert isinstance(skipped, list), "skipped_attestations should be a list"
-    
+
     # Clean up test program
     if program_md.exists():
         program_md.unlink()
@@ -357,9 +358,9 @@ def main():
     print("\n" + "="*5)
     print("AIR CLI Test Suite (Program-Only Model)")
     print("="*5)
-    
+
     results = []
-    
+
     tests = [
         ("Cold Start", test_a_cold_start_builds_atlas_and_templates),
         ("Program Compilation", test_b_compile_program_into_artifacts),
@@ -367,7 +368,7 @@ def main():
         ("Determinism", test_d_determinism),
         ("Skipped Attestations", test_e_skipped_attestations_in_report),
     ]
-    
+
     for name, test_func in tests:
         try:
             result = test_func()
@@ -382,16 +383,16 @@ def main():
             import traceback
             traceback.print_exc()
             results.append((name, "ERROR", str(e)))
-    
+
     # Summary
     print("\n" + "="*5)
     print("TEST SUMMARY")
     print("="*5)
-    
+
     passed = sum(1 for _, status, _ in results if status == "PASS")
     failed = sum(1 for _, status, _ in results if status in ["FAIL", "ERROR"])
     skipped = sum(1 for _, status, _ in results if status == "SKIP")
-    
+
     for name, status, _ in results:
         if status == "PASS":
             print(f"[OK] {name}")
@@ -401,9 +402,9 @@ def main():
             print(f"[ERROR] {name}")
         else:
             print(f"[SKIP] {name}")
-    
+
     print(f"\nTotal: {len(results)} | Passed: {passed} | Failed: {failed} | Skipped: {skipped}")
-    
+
     if failed > 0:
         sys.exit(1)
     else:

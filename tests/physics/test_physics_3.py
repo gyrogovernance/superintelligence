@@ -51,7 +51,6 @@ from __future__ import annotations
 from collections import Counter
 from math import pi
 from pathlib import Path
-from typing import List, Tuple
 
 import numpy as np
 import pytest
@@ -63,7 +62,6 @@ from src.router.constants import (
     ARCHETYPE_STATE24,
     LAYER_MASK_12,
 )
-
 from tests._physics_utils import (
     apply_word_to_indices,
     coeffs_archetype_distance_enumerator_closed_form,
@@ -74,19 +72,20 @@ from tests._physics_utils import (
     krawtchouk,
     parity12_arr,
     popcount12_arr,
-    table as _table,
     uv_from_state24,
     weight_enumerator_counts,
     word_odd_even_xors,
 )
-
+from tests._physics_utils import (
+    table as _table,
+)
 
 # Diagnostic printing flag (set to False to suppress output)
 PRINT = True
 
 
 # Helper wrapper for table() that respects PRINT flag
-def table_if_enabled(title: str, rows: List[Tuple[str, str]]) -> None:
+def table_if_enabled(title: str, rows: list[tuple[str, str]]) -> None:
     """Wrapper for table() that respects PRINT flag."""
     _table(title, rows, enable=PRINT)
 
@@ -202,7 +201,7 @@ class TestKernelByteCyclesAndEigenphases:
         n = int(epi.shape[0])
         idxs = np.arange(n, dtype=np.int64)
 
-        bad: List[int] = []
+        bad: list[int] = []
         for b in range(256):
             if b == 0xAA:
                 continue

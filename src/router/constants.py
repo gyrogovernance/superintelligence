@@ -11,7 +11,8 @@ Defines:
 
 from __future__ import annotations
 
-from typing import Iterable, Union
+from collections.abc import Iterable
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -59,17 +60,17 @@ def expand_intron_to_mask24(intron: int) -> int:
     Bottom 12 bits (Type B mask) must be 0 because B is not mutated pre-gyration.
     """
     x = int(intron) & 0xFF
-    
+
     # Direct mapping: use all 8 bits to build 12-bit patterns
     # Frame 0 (bits 0-5): lower 6 bits of intron
     # Frame 1 (bits 6-11): upper 2 bits + lower 4 bits (simple mix)
     frame0_a = x & 0x3F
     frame1_a = ((x >> 6) | ((x & 0x0F) << 2)) & 0x3F
     mask_a = frame0_a | (frame1_a << 6)
-    
+
     # Critical: B is not mutated directly in this tick
     mask_b = 0
-    
+
     return ((mask_a & 0xFFF) << 12) | (mask_b & 0xFFF)
 
 
@@ -96,16 +97,16 @@ def step_state_by_byte(state24: int, byte: int) -> int:
     """
     mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
     mask_a = (mask24 >> 12) & LAYER_MASK_12
-    
+
     a, b = unpack_state(state24)
-    
+
     # Mutate TYPE A only
     a1 = (a ^ mask_a) & LAYER_MASK_12
-    
+
     # FIFO gyration with flip
     new_a = b ^ LAYER_MASK_12
     new_b = a1 ^ LAYER_MASK_12
-    
+
     return pack_state(new_a, new_b)
 
 
@@ -216,7 +217,7 @@ def trajectory_parity_commitment(items: Iterable[ByteItem]) -> tuple[int, int, i
     """
     O = E = 0
     idx = 0
-    
+
     for item in items:
         if isinstance(item, (bytes, bytearray, memoryview)):
             for b in item:
@@ -233,7 +234,7 @@ def trajectory_parity_commitment(items: Iterable[ByteItem]) -> tuple[int, int, i
             else:
                 E ^= m
             idx += 1
-    
+
     return (O, E, idx % 2)
 
 

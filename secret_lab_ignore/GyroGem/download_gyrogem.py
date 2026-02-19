@@ -1,5 +1,6 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from pathlib import Path
+
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 model_id = "gyrogovernance/gyrogem-guard-instruct"
 _project_root = Path(__file__).resolve().parent.parent

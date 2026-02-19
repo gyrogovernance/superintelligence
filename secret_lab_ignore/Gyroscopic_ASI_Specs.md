@@ -62,6 +62,18 @@ The architecture relies on specific geometric properties of the kernel to ensure
 
 The kernel operates on a 24-bit state, split into two 12-bit components designated A (active) and B (passive). Each component maps to a discrete 2×3×2 grid (two frames, three rows, two columns), representing a three-dimensional space with six degrees of freedom.
 
+**Topology semantics (normative).** For each 12-bit component, indices are interpreted as `[frame][row][col]`:
+
+- `row` defines axis family: row 0 = X, row 1 = Y, row 2 = Z.
+- `col` defines oriented side of the axis: col 0 = negative side, col 1 = positive side.
+- `frame` defines chirality layer: frame 0 and frame 1 are opposing orientation layers of the same 3-axis structure.
+
+Under this interpretation:
+
+- "3D" means three axis families (X, Y, Z).
+- "6DoF" means six oriented axis sides `{X-, X+, Y-, Y+, Z-, Z+}` determined by row/col pairs.
+- Frames do not add spatial dimensions; they encode opposing chirality used by the transition dynamics.
+
 Each input byte maps to a 12-bit value called a mask through a fixed expansion function. The mask determines which bits of the A component are toggled during a transition. After mutation, the kernel performs a gyration step: the next A becomes the complement of the current B, and the next B becomes the complement of the mutated A. This asymmetric update creates fundamental chirality in the transition law.
 
 The kernel exhibits a phase transition at mask weight two. When only bytes with mask weight zero or one are used, the reachable states form a restricted bubble of 256 states. Adding any byte with mask weight two or greater unlocks the full state space of 65,536 states.

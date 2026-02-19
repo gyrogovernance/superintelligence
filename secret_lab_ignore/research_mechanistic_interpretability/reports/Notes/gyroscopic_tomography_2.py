@@ -24,7 +24,6 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -75,9 +74,9 @@ def route_bytes4(kernel, tids: np.ndarray) -> int:
     return int(kernel.state_horizon[kernel.state_index])
 
 
-def collect_batch(model, input_ids: torch.Tensor, layers: List[int]) -> Dict[int, torch.Tensor]:
+def collect_batch(model, input_ids: torch.Tensor, layers: list[int]) -> dict[int, torch.Tensor]:
     layer_set = set(layers)
-    acts: Dict[int, List[torch.Tensor]] = {L: [] for L in layers}
+    acts: dict[int, list[torch.Tensor]] = {L: [] for L in layers}
 
     def hook_factory(idx):
         def _hook(_m, _i, out):
@@ -113,27 +112,27 @@ def procrustes_so(M: torch.Tensor) -> torch.Tensor:
 def edge_transport(z_i: torch.Tensor, z_j: torch.Tensor, pool: torch.Tensor, k: int, q: int) -> torch.Tensor:
     p = z_i.shape[0]
     I = torch.eye(p, dtype=torch.float32)
-    
+
     mid = 0.5 * (z_i + z_j)
     d_mid = torch.norm(pool - mid.unsqueeze(0), dim=1)
     _, cand_idx = torch.topk(d_mid, min(4*k, pool.shape[0]), largest=False)
     cand = pool[cand_idx]
-    
+
     d_i = torch.norm(cand - z_i.unsqueeze(0), dim=1)
     d_j = torch.norm(cand - z_j.unsqueeze(0), dim=1)
     _, ii = torch.topk(d_i, k, largest=False)
     _, ij = torch.topk(d_j, k, largest=False)
-    
+
     union_idx = torch.unique(torch.cat([ii, ij]))
     mu = cand[union_idx].mean(dim=0)
-    
+
     X = cand[ii] - mu
     Y = cand[ij] - mu
-    
+
     stacked = torch.cat([X, Y], dim=0)
     _, _, Vt = torch.linalg.svd(stacked, full_matrices=False)
     B = Vt[:q, :].T
-    
+
     Xq, Yq = X @ B, Y @ B
     Rq = procrustes_so(Yq.T @ Xq)
     return B @ Rq @ B.T + (I - B @ B.T)
@@ -149,7 +148,7 @@ def rect_holonomy(z0: torch.Tensor, u: torch.Tensor, v: torch.Tensor, eps: float
     return float(torch.norm(diff, p="fro") / (2.0 * np.sqrt(p)))
 
 
-def whiten_row_pool(pool_4096: torch.Tensor, row: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def whiten_row_pool(pool_4096: torch.Tensor, row: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     grid = pool_4096.view(pool_4096.shape[0], 256, 16)
     row_pool = grid[:, row, :]
     mu = row_pool.mean(dim=0)
@@ -179,9 +178,9 @@ def main():
     horizons = np.array([route_bytes4(kernel, input_ids[i].numpy()) for i in range(N_SEQ)], dtype=np.int32)
     print(f"Horizons: unique={len(np.unique(horizons))} range=[{horizons.min()},{horizons.max()}]")
 
-    all_acts: Dict[int, List[torch.Tensor]] = {L: [] for L in LAYERS}
+    all_acts: dict[int, list[torch.Tensor]] = {L: [] for L in LAYERS}
     print(f"Collecting activations in batches of {BATCH_SIZE}...")
-    
+
     for start in range(0, N_SEQ, BATCH_SIZE):
         end = min(start + BATCH_SIZE, N_SEQ)
         batch_ids = input_ids[start:end]
@@ -201,7 +200,7 @@ def main():
 
     for L in LAYERS:
         acts = layer_acts[L]
-        
+
         mu_global = acts.mean(dim=0)
         std_global = acts.std(dim=0).clamp(min=1e-8)
         acts_w = (acts - mu_global) / std_global
@@ -242,14 +241,14 @@ def main():
         print(f"  Horizon (H):  {stats(h_arr)}")
         print(f"  Neighbor (N): {stats(n_arr)}")
         print(f"  Random (R):   {stats(r_arr)}")
-        
+
         ratio_h_r = h_arr.mean() / (r_arr.mean() + 1e-8)
         ratio_h_n = h_arr.mean() / (n_arr.mean() + 1e-8)
-        
+
         from scipy import stats as sp_stats
         t_hr, p_hr = sp_stats.ttest_ind(h_arr, r_arr)
         t_hn, p_hn = sp_stats.ttest_ind(h_arr, n_arr)
-        
+
         print(f"  H/R ratio: {ratio_h_r:.3f}  t={t_hr:.2f} p={p_hr:.4f}")
         print(f"  H/N ratio: {ratio_h_n:.3f}  t={t_hn:.2f} p={p_hn:.4f}")
 

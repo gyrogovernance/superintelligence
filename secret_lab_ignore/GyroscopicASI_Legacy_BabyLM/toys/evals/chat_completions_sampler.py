@@ -6,7 +6,6 @@ from openai import OpenAI
 
 from .types import MessageList, SamplerBase, SamplerResponse
 
-
 OPENAI_SYSTEM_MESSAGE_API = "You are a helpful assistant."
 OPENAI_SYSTEM_MESSAGE_CHATGPT = (
     "You are ChatGPT, a large language model trained by OpenAI, based on the GPT-4 architecture."

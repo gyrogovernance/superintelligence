@@ -20,7 +20,7 @@ import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Literal, Any
+from typing import Any, Literal
 
 import blobfile as bf
 import numpy as np

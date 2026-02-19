@@ -18,9 +18,9 @@ We keep it explicit and auditable, not hidden in math tricks.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
+from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 
 
 @dataclass(frozen=True)
@@ -28,9 +28,9 @@ class PluginContext:
     """
     Minimal context plugins might use.
     """
-    actor_id: Optional[str] = None
-    session_id: Optional[str] = None
-    meta: Optional[Dict[str, Any]] = None
+    actor_id: str | None = None
+    session_id: str | None = None
+    meta: dict[str, Any] | None = None
 
 
 class FrameworkPlugin:
@@ -39,7 +39,7 @@ class FrameworkPlugin:
     """
     name: str = "framework_plugin"
 
-    def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
         """
         Convert a payload into 0..N GovernanceEvents.
         Must be deterministic for a given payload.
@@ -70,7 +70,7 @@ class THMDisplacementPlugin(FrameworkPlugin):
     """
     name = "thm_displacement"
 
-    def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
         # THM displacements always go to Education domain (measurements level)
         dom = Domain.EDUCATION
 
@@ -87,7 +87,7 @@ class THMDisplacementPlugin(FrameworkPlugin):
             ("IID", EdgeID.INFER_INTEL),
         ]
 
-        events: List[GovernanceEvent] = []
+        events: list[GovernanceEvent] = []
         for key, edge in mapping:
             if key in payload:
                 val = float(payload[key])
@@ -95,11 +95,11 @@ class THMDisplacementPlugin(FrameworkPlugin):
                     # Use per-signal confidence if available, fallback to global confidence
                     signal_confidence_key = f"{key}_confidence"
                     confidence = float(payload.get(signal_confidence_key, payload.get("confidence", 1.0)))
-                    
+
                     # Convert to micro-units
                     magnitude_micro = int(round(val * MICRO))
                     confidence_micro = int(round(confidence * MICRO))
-                    
+
                     meta_dict = {"plugin": self.name, "signal": key}
                     if ctx.meta:
                         meta_dict.update(ctx.meta)
@@ -131,7 +131,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
     """
     name = "gyroscope_workmix"
 
-    def emit_events(self, payload: Dict[str, Any], ctx: PluginContext) -> List[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
         # Gyroscope alignment work always goes to Employment domain (work level)
         dom = Domain.EMPLOYMENT
 
@@ -140,7 +140,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
         iinter = float(payload.get("IInter", 0.0))
         ico = float(payload.get("ICo", 0.0))
 
-        events: List[GovernanceEvent] = []
+        events: list[GovernanceEvent] = []
 
         # Example: if governance management rises relative to information curation,
         # increase Gov–Info tension.
@@ -150,14 +150,14 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             gm_conf = float(payload.get("GM_confidence", payload.get("confidence", 1.0)))
             icu_conf = float(payload.get("ICu_confidence", payload.get("confidence", 1.0)))
             confidence = min(gm_conf, icu_conf)
-            
+
             meta_dict = {"plugin": self.name, "metric": "GM-ICu"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
             # Convert to micro-units
             magnitude_micro = int(round(delta_gm_vs_icu * MICRO))
             confidence_micro = int(round(confidence * MICRO))
-            
+
             events.append(
                 GovernanceEvent(
                     domain=dom,
@@ -176,14 +176,14 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             iinter_conf = float(payload.get("IInter_confidence", payload.get("confidence", 1.0)))
             ico_conf = float(payload.get("ICo_confidence", payload.get("confidence", 1.0)))
             confidence = min(iinter_conf, ico_conf)
-            
+
             meta_dict = {"plugin": self.name, "metric": "IInter-ICo"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
             # Convert to micro-units
             magnitude_micro = int(round(delta_iinter_vs_ico * MICRO))
             confidence_micro = int(round(confidence * MICRO))
-            
+
             events.append(
                 GovernanceEvent(
                     domain=dom,

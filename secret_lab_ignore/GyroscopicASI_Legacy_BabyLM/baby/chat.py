@@ -2,13 +2,12 @@
 Harmony chat with tools
 """
 
-import atexit
 import argparse
 import asyncio
+import atexit
 import datetime
 import os
 from pathlib import Path
-from typing import Optional
 
 try:
     import gnureadline as readline  # type: ignore
@@ -20,12 +19,10 @@ except ImportError:
         readline = None
 
 import termcolor
-
 from gpt_oss.tools import apply_patch
+from gpt_oss.tools.python_docker.docker_tool import PythonTool
 from gpt_oss.tools.simple_browser import SimpleBrowserTool
 from gpt_oss.tools.simple_browser.backend import ExaBackend
-from gpt_oss.tools.python_docker.docker_tool import PythonTool
-
 from openai_harmony import (
     Author,
     Conversation,
@@ -40,7 +37,6 @@ from openai_harmony import (
     TextContent,
     load_harmony_encoding,
 )
-
 
 REASONING_EFFORT = {
     "high": ReasoningEffort.HIGH,
@@ -90,8 +86,8 @@ def main(args):
         .with_conversation_start_date(datetime.datetime.now().strftime("%Y-%m-%d"))
     )
 
-    browser_tool: Optional[SimpleBrowserTool] = None
-    python_tool: Optional[PythonTool] = None
+    browser_tool: SimpleBrowserTool | None = None
+    python_tool: PythonTool | None = None
 
     if args.browser:
         backend = ExaBackend(

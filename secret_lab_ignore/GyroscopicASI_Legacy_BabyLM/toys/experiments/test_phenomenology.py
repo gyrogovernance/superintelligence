@@ -4,10 +4,11 @@ Test and analyze the generated phenomenology map.
 Verifies correctness and provides detailed statistics.
 """
 
-import numpy as np
-from pathlib import Path
-from baby.information import InformationEngine
 import sys
+from pathlib import Path
+
+import numpy as np
+from baby.information import InformationEngine
 
 
 def test_phenomenology_map():
@@ -56,7 +57,7 @@ def test_phenomenology_map():
         theta = np.load(theta_path)
 
         N = len(ontology)
-        print(f"\n📈 Basic Statistics:")
+        print("\n📈 Basic Statistics:")
         print(f"   Total states: {N:,}")
         print(f"   Phenomenology map shape: {phenomenology.shape}")
         print(f"   Orbit sizes shape: {orbit_sizes.shape}")
@@ -65,9 +66,9 @@ def test_phenomenology_map():
         # Analyze phenomenology map
         unique_reps = np.unique(phenomenology)
         num_orbits = len(unique_reps)
-        print(f"\n🌀 Orbit Analysis:")
+        print("\n🌀 Orbit Analysis:")
         print(f"   Unique orbit representatives: {num_orbits}")
-        print(f"   Expected orbits: 256")
+        print("   Expected orbits: 256")
         print(f"   Match expected: {'✅' if num_orbits == 256 else '❌'}")
 
         # Analyze orbit sizes
@@ -76,7 +77,7 @@ def test_phenomenology_map():
             count = np.sum(orbit_sizes == size)
             orbit_size_distribution[int(size)] = count
 
-        print(f"\n📏 Orbit Size Distribution:")
+        print("\n📏 Orbit Size Distribution:")
         total_states_check = 0
         for size in sorted(orbit_size_distribution.keys()):
             count = orbit_size_distribution[size]
@@ -84,7 +85,7 @@ def test_phenomenology_map():
             total_states_check += states_in_orbits
             print(f"   Size {size:4d}: {count:6,} states ({count//size:4d} orbits)")
 
-        print(f"\n🔍 Consistency Checks:")
+        print("\n🔍 Consistency Checks:")
         print(f"   Total states from orbit analysis: {total_states_check:,}")
         print(f"   Expected total states: {N:,}")
         print(f"   States match: {'✅' if total_states_check == N else '❌'}")
@@ -104,7 +105,7 @@ def test_phenomenology_map():
         )
 
         # Test with InformationEngine
-        print(f"\n🔧 Testing InformationEngine integration...")
+        print("\n🔧 Testing InformationEngine integration...")
         try:
             engine = InformationEngine(
                 keys_path=str(ontology_path),
@@ -131,13 +132,13 @@ def test_phenomenology_map():
                     f"     {i+1:2d}. Index {idx:6d} → State 0x{state:012X} → Index {back_idx:6d} {status} (orbit: {orbit_card})"
                 )
 
-            print(f"\n✅ InformationEngine integration successful!")
+            print("\n✅ InformationEngine integration successful!")
 
         except Exception as e:
             print(f"\n❌ InformationEngine integration failed: {e}")
             return False
 
-        print(f"\n🎉 Phenomenology map appears to be correct and functional!")
+        print("\n🎉 Phenomenology map appears to be correct and functional!")
         return True
 
     except Exception as e:

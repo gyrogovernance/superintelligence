@@ -16,26 +16,29 @@ import hashlib
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 try:
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey  # type: ignore
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # type: ignore
+        Ed25519PrivateKey,
+        Ed25519PublicKey,
+    )
 except ImportError:
     Ed25519PrivateKey = None  # type: ignore
     Ed25519PublicKey = None  # type: ignore
 
 from src.router.kernel import RouterKernel
 
-from .events import GovernanceEvent, Domain, EdgeID, Grant, Shell, MICRO
+from .events import MICRO, Domain, EdgeID, GovernanceEvent, Grant, Shell
 from .ledger import DomainLedgers
 
 
 @dataclass
 class CoordinationStatus:
-    kernel: Dict[str, Any]
-    ledgers: Dict[str, Any]
-    apertures: Dict[str, float]
-    fiat: Dict[str, Any] | None = None
+    kernel: dict[str, Any]
+    ledgers: dict[str, Any]
+    apertures: dict[str, float]
+    fiat: dict[str, Any] | None = None
 
 
 # CSM (Common Source Moment) capacity constants
@@ -90,16 +93,16 @@ class Coordinator:
         self.ledgers = DomainLedgers()
 
         # Audit logs (kept simple; you can persist externally)
-        self.byte_log: List[int] = []
-        self.event_log: List[Dict[str, Any]] = []
+        self.byte_log: list[int] = []
+        self.event_log: list[dict[str, Any]] = []
 
         # Fiat substrate state
         self.sealer = RouterKernel(atlas_dir)
-        self.fiat_grants_current: Dict[str, Grant] = {}  # key = identity_id
-        self.fiat_shell_log: List[Shell] = []
-        self.fiat_shell_grants_log: List[Tuple[Shell, List[Grant]]] = []
-        self.fiat_archive_totals: Dict[str, int] = {}  # key = identity_id (collision-resistant)
-        self.fiat_identity_id_to_identity: Dict[str, str] = {}  # identity_id -> last seen identity label (for reporting)
+        self.fiat_grants_current: dict[str, Grant] = {}  # key = identity_id
+        self.fiat_shell_log: list[Shell] = []
+        self.fiat_shell_grants_log: list[tuple[Shell, list[Grant]]] = []
+        self.fiat_archive_totals: dict[str, int] = {}  # key = identity_id (collision-resistant)
+        self.fiat_identity_id_to_identity: dict[str, str] = {}  # identity_id -> last seen identity label (for reporting)
         self.fiat_used_total: int = 0
         self.fiat_capacity_total: int = 0
 
@@ -117,7 +120,7 @@ class Coordinator:
         b = int(byte) & 0xFF
         self.kernel.step_byte(b)
         self.byte_log.append(b)
-        
+
         # Emit Economy domain event for kernel structural activity
         if emit_system_event:
             # Small magnitude representing structural substrate evolution
@@ -201,7 +204,7 @@ class Coordinator:
 
         return CoordinationStatus(kernel=kernel_info, ledgers=ledgers, apertures=apertures, fiat=fiat_info)
 
-    def anchor_identity(self, name: str) -> Tuple[str, str]:
+    def anchor_identity(self, name: str) -> tuple[str, str]:
         """
         Compute identity_id and anchor for an identity name.
         
@@ -213,7 +216,7 @@ class Coordinator:
         The identity_id provides collision resistance (256 bits).
         The anchor provides structural meaning in kernel phase space.
         """
-        seed = f"identity:{name}".encode("utf-8")
+        seed = f"identity:{name}".encode()
         h = hashlib.sha256(seed).digest()
         identity_id = h.hex()  # Full 256-bit hash (64 hex chars)
         sig = self.sealer.route_from_archetype(h)
@@ -234,11 +237,11 @@ class Coordinator:
         """
         if mu_allocated < 0:
             raise ValueError(f"mu_allocated must be non-negative, got {mu_allocated}")
-        
+
         identity_id, anchor = self.anchor_identity(identity)
         if identity_id in self.fiat_grants_current:
-            raise ValueError(f"Identity already has a grant in current shell")
-        
+            raise ValueError("Identity already has a grant in current shell")
+
         grant = Grant(identity=identity, identity_id=identity_id, anchor=anchor, mu_allocated=mu_allocated)
         self.fiat_grants_current[identity_id] = grant
 
@@ -262,28 +265,28 @@ class Coordinator:
         else:
             header_str = str(header)
             header_bytes = header_str.encode("utf-8")
-        
+
         # Build receipts by sorting grants by identity_id (canonical ordering)
         # Receipt = identity_id (32 bytes) || anchor (3 bytes) || mu (8 bytes)
         grants_list = list(self.fiat_grants_current.values())
-        receipts: List[bytes] = []
+        receipts: list[bytes] = []
         for g in sorted(grants_list, key=lambda gg: gg.identity_id):
             mu_bytes = g.mu_allocated.to_bytes(8, "big", signed=False)
             receipt = bytes.fromhex(g.identity_id) + bytes.fromhex(g.anchor) + mu_bytes
             receipts.append(receipt)
-        
+
         # Route header || receipts through sealer
         payload = header_bytes + b"".join(receipts)
         sig = self.sealer.route_from_archetype(payload)
         seal = sig.state_hex
-        
+
         # Compute used/free capacity
         used = sum(g.mu_allocated for g in grants_list)
         free = total_capacity_MU - used
-        
+
         if used > total_capacity_MU:
             raise ValueError(f"Used capacity {used} exceeds total capacity {total_capacity_MU}")
-        
+
         # Create shell
         shell = Shell(
             header=header_str,
@@ -292,7 +295,7 @@ class Coordinator:
             used_capacity_MU=used,
             free_capacity_MU=free,
         )
-        
+
         # Update state
         self.fiat_shell_log.append(shell)
         self.fiat_shell_grants_log.append((shell, grants_list))
@@ -301,13 +304,13 @@ class Coordinator:
         for g in grants_list:
             self.fiat_archive_totals[g.identity_id] = self.fiat_archive_totals.get(g.identity_id, 0) + g.mu_allocated
             self.fiat_identity_id_to_identity[g.identity_id] = g.identity
-        
+
         # Clear current grants
         self.fiat_grants_current.clear()
-        
+
         return shell
 
-    def fiat_status(self) -> Dict[str, Any]:
+    def fiat_status(self) -> dict[str, Any]:
         """
         Return fiat substrate status.
         
@@ -323,12 +326,12 @@ class Coordinator:
         - meta_root: optional meta-root from shell seals
         """
         # Derive per-identity totals from identity_id totals (for reporting)
-        per_identity_totals: Dict[str, int] = {}
+        per_identity_totals: dict[str, int] = {}
         for identity_id, total in self.fiat_archive_totals.items():
             identity = self.fiat_identity_id_to_identity.get(identity_id, identity_id)
             per_identity_totals[identity] = per_identity_totals.get(identity, 0) + total
-        
-        status: Dict[str, Any] = {
+
+        status: dict[str, Any] = {
             "pending_grants_count": len(self.fiat_grants_current),
             "total_capacity_MU": self.fiat_capacity_total,
             "used_capacity_MU": self.fiat_used_total,
@@ -337,7 +340,7 @@ class Coordinator:
             "per_anchor_totals": dict(self.fiat_archive_totals),
             "per_identity_totals": per_identity_totals,
         }
-        
+
         if self.fiat_shell_log:
             last_shell = self.fiat_shell_log[-1]
             status["current_shell_header"] = last_shell.header
@@ -348,10 +351,10 @@ class Coordinator:
             status["current_shell_header"] = None
             status["last_shell_seal"] = None
             status["meta_root"] = None
-        
+
         return status
 
-    def meta_root_from_shell_seals(self, seals: List[str]) -> str:
+    def meta_root_from_shell_seals(self, seals: list[str]) -> str:
         """
         Compute meta-root from list of shell seals.
         
@@ -372,16 +375,16 @@ class Coordinator:
         """
         if not self.fiat_shell_grants_log:
             raise ValueError("No shells to rollback")
-        
+
         shell, grants = self.fiat_shell_grants_log.pop()
-        
+
         # Remove from visible log too (keep both in sync)
         assert self.fiat_shell_log and self.fiat_shell_log[-1].seal == shell.seal
         self.fiat_shell_log.pop()
-        
+
         self.fiat_capacity_total -= shell.total_capacity_MU
         self.fiat_used_total -= shell.used_capacity_MU
-        
+
         for g in grants:
             prev = self.fiat_archive_totals.get(g.identity_id, 0)
             new = prev - g.mu_allocated
@@ -399,7 +402,7 @@ class Coordinator:
             n: number of steps to rollback
         """
         from src.router.constants import GENE_MIC_S
-        
+
         n = min(n, self.kernel.step)
         for _ in range(n):
             if not self.byte_log:
@@ -424,7 +427,7 @@ class Coordinator:
             raise ImportError("cryptography package required for bundle signing")
         if not isinstance(private_key, Ed25519PrivateKey):
             raise TypeError(f"private_key must be Ed25519PrivateKey, got {type(private_key)}")
-        
+
         digest = hashlib.sha256(bundle_json_bytes).digest()
         return private_key.sign(digest)
 
@@ -444,7 +447,7 @@ class Coordinator:
             raise ImportError("cryptography package required for bundle signature verification")
         if not isinstance(public_key, Ed25519PublicKey):
             raise TypeError(f"public_key must be Ed25519PublicKey, got {type(public_key)}")
-        
+
         try:
             digest = hashlib.sha256(bundle_json_bytes).digest()
             public_key.verify(signature, digest)
@@ -457,7 +460,7 @@ class Coordinator:
         self.ledgers = DomainLedgers()
         self.byte_log.clear()
         self.event_log.clear()
-        
+
         # Reset fiat substrate
         self.sealer = RouterKernel(self.atlas_dir)
         self.fiat_grants_current.clear()
@@ -468,7 +471,7 @@ class Coordinator:
         self.fiat_used_total = 0
         self.fiat_capacity_total = 0
 
-    def derive_domain_counts(self) -> Dict[str, int]:
+    def derive_domain_counts(self) -> dict[str, int]:
         """
         Derive domain_counts from the event log.
         
@@ -484,7 +487,7 @@ class Coordinator:
             "employment": 0,
             "education": 0,
         }
-        
+
         for log_entry in self.event_log:
             event_dict = log_entry.get("event", {})
             domain_int = event_dict.get("domain")
@@ -496,5 +499,5 @@ class Coordinator:
                     counts["employment"] += 1
                 elif domain == Domain.EDUCATION:
                     counts["education"] += 1
-        
+
         return counts

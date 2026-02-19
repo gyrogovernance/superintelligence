@@ -1,8 +1,8 @@
 # scroller.py
-import gradio as gr
 import json
 from pathlib import Path
-from typing import List, Tuple
+
+import gradio as gr
 from baby.intelligence import AgentPool, orchestrate_turn
 
 # Load preferences
@@ -26,7 +26,7 @@ agent_pool.ensure_triad()
 
 
 # Process a chat turn
-def chat_fn(message: str, history: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
+def chat_fn(message: str, history: list[tuple[str, str]]) -> list[tuple[str, str]]:
     if not message:
         return history
 
@@ -63,7 +63,7 @@ def chat_fn(message: str, history: List[Tuple[str, str]]) -> List[Tuple[str, str
 
 
 # Reset agents
-def reset_agents() -> List[Tuple[str, str]]:
+def reset_agents() -> list[tuple[str, str]]:
     agent_pool.close_all()
     agent_pool.ensure_triad()
     return []

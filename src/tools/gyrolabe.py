@@ -18,7 +18,7 @@ Coordination cycle (per inference step):
 
 from __future__ import annotations
 
-import math
+import math as _math
 import time
 import warnings
 from dataclasses import dataclass, field
@@ -30,11 +30,29 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
+_M_A = 1.0 / (2.0 * _math.sqrt(2.0 * _math.pi))
+_S_CS = (_math.pi / 2.0) / _M_A
+_S_UNA = (1.0 / _math.sqrt(2.0)) / _M_A
+_S_ONA = (_math.pi / 4.0) / _M_A
+_S_BU_SIGMA = 24.0
+
+from src.router.constants import mask12_for_byte, popcount, trajectory_parity_commitment
 from src.router.kernel import RouterKernel
-from src.router.constants import trajectory_parity_commitment, mask12_for_byte, popcount
 
 N_BOUNDARY = 256
 QUARTER_TURN = 64
+
+# ---------------------------------------------------------------------------
+# Dynamic sigma focusing (kernel-native, CGM-compliant refinement)
+#
+# Uses the code-space motion between consecutive horizons:
+#   D = code_dist(prev_h, h) / 12 in [0,1]
+# and applies a small multiplicative sigma scale:
+#   sigma_scale = 1 - K*(D - 0.5)
+# so large jumps (D>0.5) narrow the mask and small jumps widen it slightly.
+# ---------------------------------------------------------------------------
+SIGMA_FOCUS_K: float = 0.40
+SIGMA_FOCUS_CLIP = (0.30, 2.50)
 
 
 @dataclass
@@ -108,13 +126,27 @@ def get_code_distance_matrix() -> np.ndarray:
 
 
 def _build_gaussian_lut() -> np.ndarray:
-    """Precompute Gaussian base values for all (chi, p, distance) triples.
-    4 chi x 4 phase x 13 distances = 208 floats."""
-    base_sigma = {0: 2.0, 1: 4.0, 2: 3.0, 3: 2.5}
+    """
+    Precompute Gaussian base values for all (chi, p, distance) triples.
+    4 chi x 4 phase x 13 distances = 208 floats.
+
+    Sigma values are CGM-grounded from stage actions S_CS, S_UNA, S_ONA.
+    Chi maps to K4 vertex which maps to CGM stage:
+      chi=0 (Governance / CS):    tight coupling, sigma = S_CS / 2 ≈ 3.94
+      chi=1 (Information / UNA):  orthogonal split, sigma = S_UNA ≈ 3.55
+      chi=2 (Inference / ONA):    diagonal activation, sigma = S_ONA ≈ 3.94
+      chi=3 (Intelligence / BU):  balance / near-uniform, sigma = large
+    """
+    cgm_base_sigma = {
+        0: _S_CS / 2.0,
+        1: _S_UNA,
+        2: _S_ONA,
+        3: _S_BU_SIGMA,
+    }
     lut = np.zeros((4, 4, 13), dtype=np.float32)
     for chi in range(4):
         for p in range(4):
-            sigma = base_sigma[chi]
+            sigma = cgm_base_sigma[chi]
             phase_factor = 1.0 + 0.1 * (p - 1.5) / 1.5
             sigma = max(0.5, sigma * phase_factor)
             for d in range(13):
@@ -142,10 +174,28 @@ def compute_mask(
     """
     code_dist_matrix = get_code_distance_matrix()
 
-    distances = code_dist_matrix[h, :].astype(np.int32)
+    distances_i = code_dist_matrix[h, :].astype(np.int32)  # integer distances in {0..12}
     chi_idx = min(max(chi, 0), 3)
     p_idx = min(max(p, 0), 3)
-    mask_base = _GAUSSIAN_LUT[chi_idx, p_idx, distances]
+
+    # Base radial profile row for this (chi, p)
+    base_row = _GAUSSIAN_LUT[chi_idx, p_idx, :].astype(np.float32)  # shape (13,)
+
+    # Dynamic sigma focusing: distance scaling + linear interpolation on the LUT row
+    if prev_h is not None:
+        td = int(code_dist_matrix[prev_h, h])        # 0..12
+        D = float(td) / 12.0                         # 0..1
+        sigma_scale = 1.0 - SIGMA_FOCUS_K * (D - 0.5)
+        sigma_scale = float(max(SIGMA_FOCUS_CLIP[0], min(SIGMA_FOCUS_CLIP[1], sigma_scale)))
+    else:
+        sigma_scale = 1.0
+
+    d_eff = distances_i.astype(np.float32) / sigma_scale   # float distances
+    d0 = np.clip(d_eff.astype(np.int32), 0, 12)
+    d1 = np.clip(d0 + 1, 0, 12)
+    frac = (d_eff - d0.astype(np.float32)).astype(np.float32)
+
+    mask_base = (1.0 - frac) * base_row[d0] + frac * base_row[d1]
 
     same_chi = (byte_charge_table == chi).astype(np.float32)
     wedge_factor = 1.0 + 0.2 * same_chi
@@ -158,6 +208,8 @@ def compute_mask(
     mask_np = 1.0 + alpha * (mask_wedge - 1.0)
 
     if prev_h is not None:
+        # Differential modulation remains as-is (strength scaling).
+        # Note: td was computed above too; recompute for clarity and isolation.
         td = int(code_dist_matrix[prev_h, h])
         diff_scale = 0.5 + 0.5 * (td / 12.0)
         mask_np = 1.0 + diff_scale * (mask_np - 1.0)
@@ -240,6 +292,114 @@ class RoutedMLP(nn.Module):
         return out.view(*shape[:-1], d_model)
 
 
+class SparseRoutedMLP(nn.Module):
+    """
+    Kernel-routed sparse MLP. Computes only selected boundary slices
+    instead of the full 256-wide intermediate.
+
+    Falls back to full computation if no mask is set.
+    """
+
+    def __init__(self, mlp: nn.Module, layer_idx: int, n_fiber: int, width: int = 64):
+        super().__init__()
+        required = ("gate_proj", "up_proj", "down_proj")
+        missing = [a for a in required if not hasattr(mlp, a)]
+        if missing:
+            raise TypeError(f"MLP missing {missing}.")
+        self.mlp = mlp
+        self.layer_idx = layer_idx
+        self.n_fiber = n_fiber
+        self.width = width
+        self._collector: list[tuple[int, int, int, float, Tensor]] | None = None
+        self._mask: Tensor | None = None
+        self._selected_positions: Tensor | None = None
+        self._full_mode: bool = True
+
+    def set_collector(self, collector: list[tuple[int, int, int, float, Tensor]] | None) -> None:
+        self._collector = collector
+
+    def set_mask(self, mask: Tensor | None) -> None:
+        self._mask = mask
+        self._selected_positions = None
+        self._full_mode = True
+
+    def set_sparse(self, mask: Tensor, positions: Tensor) -> None:
+        self._mask = mask
+        self._selected_positions = positions
+        self._full_mode = False
+
+    def set_full(self) -> None:
+        self._selected_positions = None
+        self._full_mode = True
+
+    def forward(self, x: Tensor) -> Tensor:
+        shape = x.shape
+        d_model = shape[-1]
+        x_flat = x.reshape(-1, d_model)
+        batch = x_flat.shape[0]
+
+        if self._full_mode or self._selected_positions is None:
+            gate = self.mlp.gate_proj(x_flat)
+            up = self.mlp.up_proj(x_flat)
+            z = F.silu(gate) * up
+
+            hidden_dim = z.shape[-1]
+            n_feat = hidden_dim // N_BOUNDARY
+            if self._mask is not None:
+                mask_1d = self._mask.view(N_BOUNDARY)
+                z_view = z.view(-1, N_BOUNDARY, n_feat)
+                z = (z_view * mask_1d.view(1, N_BOUNDARY, 1)).view(-1, hidden_dim)
+
+            out = self.mlp.down_proj(z)
+        else:
+            out = self._sparse_forward(x_flat, batch)
+
+        if self._collector is not None:
+            b, h_peak, peak_mass, energy = extract_byte(out, self.n_fiber)
+            self._collector.append((self.layer_idx, b, h_peak, peak_mass, energy))
+
+        return out.view(*shape[:-1], d_model)
+
+    def _sparse_forward(self, x_flat: Tensor, batch: int) -> Tensor:
+        positions = self._selected_positions
+        mask = self._mask
+        if positions is None or mask is None:
+            raise RuntimeError("Sparse mode activated without positions or mask.")
+
+        hidden_dim = self.mlp.gate_proj.weight.shape[0]
+        n_feat = hidden_dim // N_BOUNDARY
+        w = positions.shape[0]
+
+        gate_w = self.mlp.gate_proj.weight
+        up_w = self.mlp.up_proj.weight
+        gate_dev = gate_w.device
+        positions_dev = positions.to(gate_dev)
+
+        offsets = positions_dev.unsqueeze(1) * n_feat
+        offsets = offsets + torch.arange(n_feat, device=gate_dev)
+        row_idx = offsets.view(-1)
+
+        gate_sel = F.linear(x_flat, gate_w[row_idx, :])
+        up_sel = F.linear(x_flat, up_w[row_idx, :])
+
+        if self.mlp.gate_proj.bias is not None:
+            gate_sel = gate_sel + self.mlp.gate_proj.bias[row_idx]
+        if self.mlp.up_proj.bias is not None:
+            up_sel = up_sel + self.mlp.up_proj.bias[row_idx]
+
+        z_sel = F.silu(gate_sel) * up_sel
+        z_view = z_sel.view(batch, w, n_feat)
+        if mask is not None:
+            mask_positions = positions.to(mask.device)
+            mask_sel = mask[mask_positions].to(gate_dev)
+            z_view = z_view * mask_sel.view(1, w, 1)
+        z_sel = z_view.view(batch, w * n_feat)
+
+        down_w_sel = self.mlp.down_proj.weight[:, row_idx]
+        out = F.linear(z_sel, down_w_sel, bias=self.mlp.down_proj.bias)
+        return out
+
+
 class GyroLabe:
     """An AI Calibration Instrument.
 
@@ -281,11 +441,12 @@ class GyroLabe:
             self.routed_layers = _detect_routed_layers(model)
 
         self._originals: dict[int, nn.Module] = {}
-        self._wrapped: dict[int, RoutedMLP] = {}
+        self._wrapped: dict[int, RoutedMLP | SparseRoutedMLP] = {}
         self._installed = False
         self._collector: list[tuple[int, int, int, float, Tensor]] | None = None
         self._device: torch.device = torch.device("cpu")
         self._dtype: torch.dtype = torch.float32
+        self._sparse_width: int | None = None
 
         self._step_h: int = 0
         self._step_chi: int = 0
@@ -298,19 +459,28 @@ class GyroLabe:
         self.byte_log: list[int] = []
         self.trajectory: list[dict[str, Any]] = []
 
-    def install(self) -> None:
-        """Install routing wrappers on the configured MLP layers."""
+    def install(self, sparse_width: int | None = None) -> None:
+        """
+        Install routing wrappers on the configured MLP layers.
+
+        sparse_width: if set, use SparseRoutedMLP with this many positions.
+                      If None, use standard RoutedMLP.
+        """
         if self._installed:
             return
 
         self._device = next(self.model.parameters()).device
         self._dtype = next(self.model.parameters()).dtype
+        self._sparse_width = sparse_width
 
         layers = self.model.model.layers
         for i in self.routed_layers:
             orig = layers[i].mlp
             self._originals[i] = orig
-            wrapped = RoutedMLP(orig, i, self.n_fiber)
+            if sparse_width is not None:
+                wrapped = SparseRoutedMLP(orig, i, self.n_fiber, width=sparse_width)
+            else:
+                wrapped = RoutedMLP(orig, i, self.n_fiber)
             self._wrapped[i] = wrapped
             layers[i].mlp = wrapped
 
@@ -329,8 +499,25 @@ class GyroLabe:
         self._wrapped.clear()
         self._installed = False
 
-    def begin_step(self) -> None:
-        """Begin a coordination step: compute mask once and push to all layers."""
+    def _select_positions(self, h: int, width: int) -> Tensor:
+        """
+        Select which boundary positions to compute, centered on horizon h.
+
+        Uses code distance: pick the `width` positions closest to h.
+        """
+        code_dist_matrix = get_code_distance_matrix()
+        distances = code_dist_matrix[h, :]  # [256]
+        indices = np.argsort(distances)[:width]
+        return torch.tensor(indices, dtype=torch.long, device=self._device)
+
+    def begin_step(self, sparse_width: int | None = None) -> None:
+        """
+        Begin a coordination step.
+
+        If sparse_width is set, only compute that many boundary positions
+        in routed MLP layers (centered on current horizon in code distance).
+        If None, compute all 256 (original behavior).
+        """
         self._step_h = int(self.kernel.current_horizon.item())
         self._step_chi = int(self.kernel.current_vertex.item())
         self._step_p = int(self.kernel.current_phase.item())
@@ -338,7 +525,7 @@ class GyroLabe:
         self._step_mu_qturn = (self._step_mu + QUARTER_TURN) % N_BOUNDARY
 
         last_byte_weight = int(self.kernel.byte_weight[self.kernel.last_byte.item()])
-        
+
         mask = compute_mask(
             self._device, self._dtype,
             self._step_h, self._step_chi, self._step_p,
@@ -349,10 +536,20 @@ class GyroLabe:
 
         self._mask_boundary = mask.float().cpu().numpy()
 
+        sparse_step_width = sparse_width if sparse_width is not None else self._sparse_width
+
         self._collector = []
         for w in self._wrapped.values():
             w.set_collector(self._collector)
-            w.set_mask(mask)
+
+            if sparse_step_width is not None and isinstance(w, SparseRoutedMLP):
+                positions = self._select_positions(self._step_h, sparse_step_width)
+                w.set_sparse(mask, positions)
+            elif isinstance(w, SparseRoutedMLP):
+                w.set_full()
+                w.set_mask(mask)
+            else:
+                w.set_mask(mask)
 
         self._prev_h = self._step_h
 
@@ -580,7 +777,7 @@ class GenerationResult:
     def perplexity(self) -> float:
         if not self.logprobs:
             return 1.0
-        return math.exp(-self.mean_logprob)
+        return _math.exp(-self.mean_logprob)
 
     @property
     def tokens_per_second(self) -> float:
@@ -597,8 +794,9 @@ def generate(
     temperature: float = 0.7,
     top_k: int = 40,
     seed: int | None = None,
+    sparse_width: int | None = None,
 ) -> GenerationResult:
-    """Generate text with optional GyroLabe coordination."""
+    """Generate text with optional GyroLabe coordination and sparse MLP."""
     if seed is not None:
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -617,7 +815,7 @@ def generate(
     t0 = time.perf_counter()
     for step in range(max_new_tokens):
         if labe is not None:
-            labe.begin_step()
+            labe.begin_step(sparse_width=sparse_width)
 
         out = model(input_ids, use_cache=True, past_key_values=past)
         past = getattr(out, "past_key_values", None)

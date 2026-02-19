@@ -3,10 +3,11 @@
 Check the actual index of GENE_Mac_S in the current ontology.
 """
 
-import numpy as np
 from pathlib import Path
-from baby.kernel.governance import GENE_Mac_S
+
+import numpy as np
 from baby.information import InformationEngine
+from baby.kernel.governance import GENE_Mac_S
 
 
 def check_gene_mac_s_index():
@@ -25,7 +26,7 @@ def check_gene_mac_s_index():
     # Convert GENE_Mac_S to integer
     archetypal_int = InformationEngine.tensor_to_int(GENE_Mac_S)
 
-    print(f"📊 GENE_Mac_S Analysis:")
+    print("📊 GENE_Mac_S Analysis:")
     print(f"   Tensor shape: {GENE_Mac_S.shape}")
     print(f"   Integer value: {archetypal_int} (0x{archetypal_int:012X})")
 
@@ -63,8 +64,8 @@ def check_gene_mac_s_index():
 
         return {"archetypal_int": archetypal_int, "archetypal_index": index, "total_states": len(ontology)}
     else:
-        print(f"   ❌ GENE_Mac_S not found in ontology!")
-        print(f"   This indicates a serious problem with the ontology.")
+        print("   ❌ GENE_Mac_S not found in ontology!")
+        print("   This indicates a serious problem with the ontology.")
         return None
 
 
@@ -73,4 +74,4 @@ if __name__ == "__main__":
     if result:
         print(f"\n✅ GENE_Mac_S found at index {result['archetypal_index']}")
     else:
-        print(f"\n❌ GENE_Mac_S not found in ontology")
+        print("\n❌ GENE_Mac_S not found in ontology")

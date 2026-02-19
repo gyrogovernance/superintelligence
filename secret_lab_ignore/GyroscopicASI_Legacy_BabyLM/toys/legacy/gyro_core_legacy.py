@@ -16,14 +16,14 @@
         #                 coherently from the set of keys; emit from its bucket.
 #   No scoring, no admissibility filters, no recovery ladders.
 
-import numpy as np
-import pickle
 import os
+import pickle
 import threading
 import time
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 from math import gcd
+from pathlib import Path
+
+import numpy as np
 
 # ---------- ψ boundary ----------
 
@@ -36,7 +36,7 @@ def intron_to_byte(i: int) -> int:  # ψ⁻¹
     return (i & 0xFF) ^ 0xAA
 
 
-def token_to_introns(token_id: int) -> List[int]:
+def token_to_introns(token_id: int) -> list[int]:
     """
     Harmony ids are integers; represent in big-endian bytes, then apply ψ.
     """
@@ -61,10 +61,10 @@ class GyroEngine:
 
     def __init__(
         self,
-        atlas_paths: Dict[str, str],
-        store_paths: Optional[Dict[str, str]] = None,
-        runtime: Optional[Dict[str, str]] = None,
-        version_info: Optional[Dict[str, str]] = None,
+        atlas_paths: dict[str, str],
+        store_paths: dict[str, str] | None = None,
+        runtime: dict[str, str] | None = None,
+        version_info: dict[str, str] | None = None,
         vocab_size: int = 201_088,
         # Core physics switches - disable all secondary heuristics for testing
         enable_slab_routing: bool = False,
@@ -79,25 +79,25 @@ class GyroEngine:
         self.orbit_sizes = np.load(atlas_paths["orbit_sizes"], mmap_mode="r")  # uint32[N]
 
         # Reverse index: state_int → index (canonical)
-        self.state_to_index: Dict[int, int] = {int(s): int(i) for i, s in enumerate(self.keys)}
+        self.state_to_index: dict[int, int] = {int(s): int(i) for i, s in enumerate(self.keys)}
 
         # Canonical orbit representatives (indices)
         reps = np.unique(self.pheno)
-        self.orbit_reps: List[int] = [int(r) for r in reps]  # typically 256
+        self.orbit_reps: list[int] = [int(r) for r in reps]  # typically 256
 
         # --- Pure monodromic BU-In state ---
         # Per-orbit phase accumulator (updated only when user speaks)
-        self.rep_phase: Dict[int, int] = {}  # rep_idx -> 8-bit phase (0..255)
+        self.rep_phase: dict[int, int] = {}  # rep_idx -> 8-bit phase (0..255)
         # Token channels per orbit keyed by CUMULATIVE phase reached after learning
         # Now supports slab-specific channels: (rep_idx, slab_idx) -> { phase -> [token_id, ...] }
-        self.rep_channel: Dict[Tuple[int, int], Dict[int, List[int]]] = (
+        self.rep_channel: dict[tuple[int, int], dict[int, list[int]]] = (
             {}
         )  # (rep_idx, slab_idx) -> { phase_after_learning (0..255) -> [token_id, ...] }
 
         # --- Emission hygiene (path-native, non-competitive) ---
-        self.emit_gate: Dict[int, int] = {}        # per-rep monodromic refractory gate (8-bit)
-        self.last_token: Dict[int, int] = {}       # last emitted token per rep
-        self.last_emit_tick: Dict[int, int] = {}   # last free_tick per rep
+        self.emit_gate: dict[int, int] = {}        # per-rep monodromic refractory gate (8-bit)
+        self.last_token: dict[int, int] = {}       # last emitted token per rep
+        self.last_emit_tick: dict[int, int] = {}   # last free_tick per rep
 
         # --- Phase-Propagating Emission (PPE) state ---
         # PPE state is now managed at session level to prevent concurrent session bleeding
@@ -131,7 +131,7 @@ class GyroEngine:
 
         # Extended switches (read from runtime to avoid changing constructor signature)
         # Phase alignment is now intrinsic - no longer optional
-        
+
         # Override core gate from runtime if specified
         if "enable_core_gate" in (self.runtime or {}):
             self.enable_core_gate = bool(self.runtime["enable_core_gate"])
@@ -157,16 +157,16 @@ class GyroEngine:
     def apply_intron_index(self, idx: int, intron: int) -> int:
         if not (0 <= intron <= 255):
             raise ValueError("intron out of range")
-        
+
         new_idx = int(self.ep[idx, intron])
 
         # --- Chirality Guard is now a physical law, not an option ---
         state_before = int(self.keys[idx])
         state_after = int(self.keys[new_idx])
-        
+
         # Parity of state change (number of bit flips)
         parity = bin(state_before ^ state_after).count("1") & 1
-        
+
         # An even parity (0) represents a symmetric, non-chiral transition.
         # The physical law of CGM rejects this and applies a corrective gyration.
         if parity == 0:
@@ -174,7 +174,7 @@ class GyroEngine:
             # which is the simplest chiral correction.
             recovery_intron = intron ^ 0xAA
             return int(self.ep[idx, recovery_intron])
-            
+
         return new_idx
 
     def _coprime_stride(self, seed: int, n: int) -> int:
@@ -207,7 +207,7 @@ class GyroEngine:
         b = intron & 0xFF
         return (a ^ (b ^ (a & (~b & 0xFF)))) & 0xFF
 
-    def fold_sequence(self, introns: List[int], acc: int = 0) -> Tuple[int, int]:
+    def fold_sequence(self, introns: list[int], acc: int = 0) -> tuple[int, int]:
         """Fold sequence returning (phase, amplitude) for interference analysis."""
         m = acc & 0xFF
         amp = 0
@@ -218,7 +218,7 @@ class GyroEngine:
     # ---------- Pure monodromic unfold helpers ----------
 
     @staticmethod
-    def _fold8(a: int, b: int) -> Tuple[int, int]:
+    def _fold8(a: int, b: int) -> tuple[int, int]:
         """Fold operation returning (phase, amplitude) for interference analysis."""
         a &= 0xFF
         b &= 0xFF
@@ -226,7 +226,7 @@ class GyroEngine:
         amp = bin(res).count('1')  # Non-zero bits as "coherence strength"
         return res, amp
 
-    def _state_phase(self, state_int: int) -> Tuple[int, int]:
+    def _state_phase(self, state_int: int) -> tuple[int, int]:
         """
         Project the 48-bit state into an 8-bit phase and velocity by folding its 6 bytes
         after ψ (XOR 0xAA). Returns (phase, velocity) for interference analysis.
@@ -250,12 +250,12 @@ class GyroEngine:
         comp, _ = self._fold8(a, b)
         return self._bitcount8(comp)
 
-    def _state_phase_components(self, state_int: int) -> Tuple[int, int, int]:
+    def _state_phase_components(self, state_int: int) -> tuple[int, int, int]:
         """
         Compute LI/FG/BG components of the live phase using EXON masks.
         Returns (sp_li, sp_fg, sp_bg) as 8-bit values.
         """
-        from baby.kernel.governance import EXON_LI_MASK, EXON_FG_MASK, EXON_BG_MASK
+        from baby.kernel.governance import EXON_BG_MASK, EXON_FG_MASK, EXON_LI_MASK
 
         # Extract 6 bytes from state
         bs = int(state_int).to_bytes(6, "big")
@@ -273,7 +273,7 @@ class GyroEngine:
 
         return acc_li, acc_fg, acc_bg
 
-    def token_phase(self, token_id: int) -> Tuple[int, int]:
+    def token_phase(self, token_id: int) -> tuple[int, int]:
         """Compute token phase and amplitude for interference analysis."""
         return self.fold_sequence(token_to_introns(token_id), 0)
 
@@ -302,7 +302,7 @@ class GyroEngine:
         timed, _ = self._fold8(phase, tick)
         return timed
 
-    def _row_parity_fold(self, state_int: int, row: int, frame: Optional[int] = None) -> int:
+    def _row_parity_fold(self, state_int: int, row: int, frame: int | None = None) -> int:
         """
         Fold parity of a given tensor row across all (layer, [frame], col).
         If frame is None, both frames contribute; otherwise only that frame.
@@ -317,7 +317,7 @@ class GyroEngine:
                     acc, _ = self._fold8(acc, (bit & 1) * 0x01)  # compress parity into 8-bit phase
         return acc
 
-    def _six_dof(self, state_int: int) -> Tuple[int, int, int, int, int, int]:
+    def _six_dof(self, state_int: int) -> tuple[int, int, int, int, int, int]:
         """
         Six freedoms (3 rotational + 3 translational) as 8-bit phases:
 
@@ -439,13 +439,13 @@ class GyroEngine:
         # Store content using the FINAL state's representation index
         final_rep_cur = self.orbit_rep_index(new_idx)
         final_state_int = int(self.keys[new_idx])
-        
+
         # Re-store content in the final state's representation using same context computation
         for slab_idx in range(8):
             # Use the same context computation as the initial storage (pure context)
             slab_byte = self._slab_byte(final_state_int, slab_idx)
             ctx, _ = self._fold8(cur_phase, slab_byte)
-            
+
             slab_chan = self.rep_channel.setdefault((final_rep_cur, slab_idx), {})
             bucket = slab_chan.setdefault(ctx, [])
             if token_id not in bucket:
@@ -478,13 +478,13 @@ class GyroEngine:
     # ---------- Ingress (BU-In): pure monodromic unfold ----------
 
     def emit_next(self, idx: int,
-                  session_omega: Optional[Dict[Tuple[int,int], int]] = None,
-                  session_bucket_key: Optional[Dict[Tuple[int,int], int]] = None,
-                  session_bucket_pos: Optional[Dict[Tuple[int,int], Dict[int, int]]] = None,
-                  session_monodromy: Optional[Dict[Tuple[int,int], int]] = None,
-                  recent_egress_phases: Optional[List[int]] = None,
-                  session_slab_cursor: Optional[Dict[int, int]] = None
-) -> Optional[Tuple[int, int, Dict[Tuple[int,int], int], Dict[Tuple[int,int], int], Dict[Tuple[int,int], Dict[int, int]], Dict[Tuple[int,int], int], Dict[int,int]]]:
+                  session_omega: dict[tuple[int, int], int] | None = None,
+                  session_bucket_key: dict[tuple[int, int], int] | None = None,
+                  session_bucket_pos: dict[tuple[int, int], dict[int, int]] | None = None,
+                  session_monodromy: dict[tuple[int, int], int] | None = None,
+                  recent_egress_phases: list[int] | None = None,
+                  session_slab_cursor: dict[int, int] | None = None
+) -> tuple[int, int, dict[tuple[int, int], int], dict[tuple[int, int], int], dict[tuple[int, int], dict[int, int]], dict[tuple[int, int], int], dict[int, int]] | None:
         """
         Pure gyro-walk: BU-In selects the next token by continuing the monodromic path.
         No ranking, no scores, no thresholds - just traceable walking.
@@ -635,7 +635,7 @@ class GyroEngine:
     def should_learn_from_token(self, token_id: int, role: str) -> bool:
         return role == "user" and not self.is_harmony_control_token(token_id) and 0 <= token_id < self.vocab_max
 
-    def process_harmony_message(self, tokens: List[int], roles: List[str]) -> int:
+    def process_harmony_message(self, tokens: list[int], roles: list[str]) -> int:
         state = self.start_state()
         for token_id, role in zip(tokens, roles):
             if self.should_learn_from_token(token_id, role):
@@ -651,13 +651,13 @@ class GyroEngine:
         return self.transit_on_assistant(state, token_id)
 
     def emit_next_from_state(self, state_int: int,
-                            session_omega: Optional[Dict[Tuple[int,int], int]] = None,
-                            session_bucket_key: Optional[Dict[Tuple[int,int], int]] = None,
-                            session_bucket_pos: Optional[Dict[Tuple[int,int], Dict[int, int]]] = None,
-                            session_monodromy: Optional[Dict[Tuple[int,int], int]] = None,
-                            recent_egress_phases: Optional[List[int]] = None,
-                            session_slab_cursor: Optional[Dict[int, int]] = None
-) -> Optional[Tuple[int, int, Dict[Tuple[int,int], int], Dict[Tuple[int,int], int], Dict[Tuple[int,int], Dict[int, int]], Dict[Tuple[int,int], int], Dict[int,int]]]:
+                            session_omega: dict[tuple[int, int], int] | None = None,
+                            session_bucket_key: dict[tuple[int, int], int] | None = None,
+                            session_bucket_pos: dict[tuple[int, int], dict[int, int]] | None = None,
+                            session_monodromy: dict[tuple[int, int], int] | None = None,
+                            recent_egress_phases: list[int] | None = None,
+                            session_slab_cursor: dict[int, int] | None = None
+) -> tuple[int, int, dict[tuple[int, int], int], dict[tuple[int, int], int], dict[tuple[int, int], dict[int, int]], dict[tuple[int, int], int], dict[int, int]] | None:
         if state_int not in self.state_to_index:
             raise KeyError(f"Unknown state: 0x{state_int:012X}")
         idx = self.state_to_index[state_int]
@@ -667,11 +667,11 @@ class GyroEngine:
         tok, new_idx, omega, bucket_key, bucket_pos, monodromy, slab_cursor = res
         return tok, int(self.keys[new_idx]), omega, bucket_key, bucket_pos, monodromy, slab_cursor
 
-    def next_token_aligned(self, state: int) -> Optional[int]:
+    def next_token_aligned(self, state: int) -> int | None:
         out = self.emit_next_from_state(state)
         return None if out is None else out[0]
 
-    def next_token(self, state: int) -> Optional[int]:
+    def next_token(self, state: int) -> int | None:
         out = self.emit_next_from_state(state)
         return None if out is None else out[0]
 
@@ -704,7 +704,7 @@ class GyroEngine:
         new_idx = self.apply_intron_index(idx, intron)
         return int(self.keys[new_idx])
 
-    def micro_path(self, start_state: int, introns: List[int]) -> List[int]:
+    def micro_path(self, start_state: int, introns: list[int]) -> list[int]:
         if start_state not in self.state_to_index:
             raise KeyError(f"Unknown state: 0x{start_state:012X}")
         idx = self.state_to_index[start_state]

@@ -15,6 +15,82 @@
 
 ---
 
+## [v1.3.3-GyroLabe] – 2026-02-19
+
+**Topic:** Stabilization of the Projection Mask Layer via CGM Invariants and Dynamic Focusing
+
+---
+
+### 1. Implemented Changes (Promoted to `gyrolabe.py`)
+
+We finalized two major structural upgrades to the GyroLabe projection mechanism. These are now live in the codebase.
+
+#### A. CGM-Grounded Sigma Scaling
+**Change:** Replaced empirical sigma values `{2.0, 4.0, 3.0, 2.5}` with values derived strictly from the CGM stage actions relative to the aperture scale.
+- **New Values:**
+  - $\chi=0$ (CS): $\sigma \approx 3.94$ (Tight coupling)
+  - $\chi=1$ (UNA): $\sigma \approx 3.55$ (Orthogonal split)
+  - $\chi=2$ (ONA): $\sigma \approx 3.94$ (Diagonal activation)
+  - $\chi=3$ (BU): $\sigma = 24.0$ (Near-uniform balance)
+- **Why:** The previous empirical values were miscalibrated for the actual geometry of the kernel states. The CGM values immediately improved perplexity on all three prompts (Governance, Geometry, Math) in the first experimental round.
+
+#### B. `sigma_focus` Dynamics
+**Change:** Added a dynamic modulation to the mask width based on kernel motion.
+- **Logic:** $\sigma_{eff} = \sigma_{base} \times (1.0 - 0.4 \times (D_t - 0.5))$
+- **Where:** $D_t$ is the normalized Hamming distance between the previous horizon $h_{t-1}$ and current horizon $h_t$.
+- **Why:** Experiments showed a clean separation: narrowing the mask when the kernel makes large jumps in code space consistently improves coherence. Widening it (defocusing) consistently hurts.
+- **Theoretical Justification:** Large transport in the kernel's code space corresponds to a larger geometric transformation. To maintain alignment during high-transport events, the model requires a sharper, more precise boundary signal.
+
+---
+
+### 2. Experimental Arc & Findings
+
+We conducted two rounds of rigorous testing using `run_gyrolabe_experiments.py` to isolate the behavior of the **mask layer** (the radial function on Hamming geometry).
+
+#### Round 1: Broad Search
+*Tested:* Krawtchouk basis, predictive coding, fiber masks, phase blending, global regulators.
+* **Findings:**
+    *   **Success:** CGM sigma (promoted immediately).
+    *   **Failure:** `pred_coding` caused instability due to sparse energy feedback. `sparse_64` failed due to CPU overhead and aggressive cutoffs.
+    *   **Signal:** `fiber_k43` (algebraic mask) improved Math prompts significantly but hurt Governance. This confirmed that algebraic structure resonates with formal content, while directional structure resonates with governance.
+
+#### Round 2: Refinement (The "Narrow Surface")
+*Tested:* Krawtchouk J=4 (corrected), Sigma Focus vs Defocus, Alpha Regulators (Correlation/Entropy), Horizon Smoothing (EMA).
+* **Findings:**
+    *   **Best Single Improver:** `sigma_focus` (Avg $\Delta$std: -0.133). It aligns the mask precision with the kernel's transport magnitude.
+    *   **Universally Safe:** `kraw_J4` (Avg $\Delta$std: -0.071). A low-pass spectral filter on the Hamming sphere works better than a raw Gaussian LUT.
+    *   **Unstable:** `alpha_CH` (Correlation+Entropy regulator). While theoretically sound, the closed-loop feedback created instability in the trajectory.
+    *   **Negative Result:** `ema_h` (Horizon Smoothing). Smoothing the horizon index destroys necessary high-frequency information about the kernel's state.
+
+---
+
+### 3. Theoretical Alignment (Physics & CGM)
+
+**1. The Nature of the Mask Layer**
+We concluded that this layer has a single nature: it is a **radial filter on a discrete Hamming geometry**. All experiments were simply competing methods to define the optimal profile $F(d)$ for this filter.
+
+**2. Monodromy & Empirical Baselines**
+We measured the natural monodromy of LLM token streams to be $\approx 0.53$, far higher than the CGM equilibrium target of $\approx 0.06$.
+*   **Implication:** We cannot force the system to the theoretical target immediately without breaking text generation. We must respect the empirical baseline and apply gentle pressure, or find the correct scale where the $0.06$ invariant applies (likely aggregated over longer windows).
+
+**3. Invariants Preserved**
+Throughout all tests, including those that failed on perplexity, the kernel's structural invariants held firm:
+*   `grammaticality = 1.0` (Code integrity)
+*   `code_dist` $\approx 6.0$ (Topological alignment)
+*   `h_entropy` $\approx 6.8$ bits (Exploration)
+
+This confirms that GyroLabe is operating safely within the geometric bounds of the router kernel.
+
+---
+
+### 4. Deferred / Future Paths
+
+*   **Krawtchouk J=4:** Validated as a superior radial profile. Kept in reserve to potentially replace the Gaussian LUT entirely in a future update.
+*   **Fiber K43:** Validated as a domain-sensitive tool. Currently deferred because it requires a "soft blend" mechanism to be safe for non-mathematical content.
+*   **Active Inference:** We identified that we are currently doing "Perception" (masking) and "Action" (token $\to$ byte), but not **Active Inference** (choosing tokens *to minimize* divergence). This remains a major unexploited opportunity at the token selection layer.
+
+---
+
 ## [v1.3.2-GyroLabe] – 2026-02-16
 
 Removed logit re-ranking from GyroLabe. Added differential mask modulation based on gauge transport distance. The kernel now steers only through activation masking.

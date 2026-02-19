@@ -18,9 +18,9 @@ import argparse
 import logging
 import math
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Sequence
 
 import numpy as np
 import torch
@@ -29,11 +29,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.tools.gyrolabe import (
-    GyroLabe,
     CouplingConfig,
     GenerationResult,
-    detect_device,
+    GyroLabe,
     choose_dtype,
+    detect_device,
     generate,
 )
 
@@ -95,13 +95,13 @@ class CoordinationDiagnostics:
 
     n_layers_routed: int = 0
     n_fibers: int = 0
-    
+
     mean_dist_to_mu: float = float("nan")
     std_dist_to_mu: float = float("nan")
-    
+
     mean_dist_to_qturn: float = float("nan")
     std_dist_to_qturn: float = float("nan")
-    
+
     mean_code_dist: float = float("nan")
     std_code_dist: float = float("nan")
 
@@ -129,7 +129,7 @@ class CoordinationDiagnostics:
 
 def extract_diagnostics(
     labe: GyroLabe,
-    result: Optional[GenerationResult] = None,
+    result: GenerationResult | None = None,
 ) -> CoordinationDiagnostics:
     diag = CoordinationDiagnostics()
     s = labe.stats()
@@ -281,7 +281,7 @@ def print_diagnostics(diag: CoordinationDiagnostics) -> None:
         hist_str = " ".join(f"w{w}:{c}" for w, c in nonzero)
         print(f"  Weights:      {hist_str}")
 
-    print(f"  Alignment:")
+    print("  Alignment:")
     print(f"    to μ:       mean={fmt(diag.mean_dist_to_mu, 1)}  std={fmt(diag.std_dist_to_mu, 1)}")
     print(f"    to μ+π/2:   mean={fmt(diag.mean_dist_to_qturn, 1)}  std={fmt(diag.std_dist_to_qturn, 1)}  (quarter-turn)")
     print(f"    code dist:  mean={fmt(diag.mean_code_dist, 1)}  std={fmt(diag.std_code_dist, 1)}  (Hamming on masks)")
@@ -290,17 +290,17 @@ def print_diagnostics(diag: CoordinationDiagnostics) -> None:
         print(f"    peaks:      μ_circ={fmt(diag.circ_mean_peak, 1)}  σ_circ={fmt(diag.circ_std_peak, 1)}  "
               f"({len(diag.layer_h_peaks)} samples)")
 
-    print(f"  Mask gain:")
+    print("  Mask gain:")
     print(f"    at peaks:   mean={fmt(diag.gain_peak_mean)}  std={fmt(diag.gain_peak_std)}")
     print(f"    at μ:       {fmt(diag.gain_at_mu_mean)}  |  at μ+π/2: {fmt(diag.gain_at_qturn_mean)}")
 
     if not math.isnan(diag.gain_peak_mean):
         if diag.gain_peak_mean > 1.05:
-            print(f"    → extraction IS tracking mask emphasis (gain > 1)")
+            print("    → extraction IS tracking mask emphasis (gain > 1)")
         elif diag.gain_peak_mean < 0.95:
-            print(f"    → extraction NOT tracking mask emphasis (gain < 1)")
+            print("    → extraction NOT tracking mask emphasis (gain < 1)")
         else:
-            print(f"    → extraction neutral relative to mask (gain ≈ 1)")
+            print("    → extraction neutral relative to mask (gain ≈ 1)")
 
     if not math.isnan(diag.correlation_mean):
         print(f"  Correlation:  mean={fmt(diag.correlation_mean)}  std={fmt(diag.correlation_std)}")
@@ -332,7 +332,7 @@ def run_prompts(
 ) -> None:
     """Run predefined prompts with baseline vs coordinated."""
     config = CouplingConfig()
-    
+
     for prompt in PROMPTS:
         print("=" * 72)
         print(f"PROMPT: {prompt}\n")
@@ -371,7 +371,7 @@ def run_prompts(
             sign_lp = "+" if delta_lp >= 0 else ""
             print(f"  Δlogprob: {sign_lp}{delta_lp:.3f}")
 
-        print(f"\nDIAGNOSTICS:")
+        print("\nDIAGNOSTICS:")
         print_diagnostics(coord_diag)
         print()
 
@@ -388,7 +388,7 @@ def run_chat(
     print("GyroLabe Chat")
     print(f"  Routed layers: {labe.routed_layers}")
     print(f"  d_model={labe.d_model}, fibers={labe.n_fiber}")
-    print(f"  Commands: 'quit', 'reset', 'stats'\n")
+    print("  Commands: 'quit', 'reset', 'stats'\n")
 
     try:
         while True:
@@ -400,9 +400,9 @@ def run_chat(
 
             if not prompt:
                 continue
-            
+
             cmd = prompt.lower()
-            
+
             if cmd == "quit":
                 break
             if cmd == "reset":
@@ -462,4 +462,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()  
+    main()

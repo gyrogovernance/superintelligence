@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Iterator, Mapping, Sequence
 from pathlib import Path
-from typing import Any, Iterator, Mapping, Optional, Sequence, Tuple, Union, overload, Literal
+from typing import (
+    Any,
+    Literal,
+    overload,
+)
 
 import torch
 
@@ -14,10 +19,10 @@ class ModelOutput(dict[str, Any]):
     - attribute access (logits, hidden_states, ...)
     - dict-like indexing
     """
-    logits: Optional[Tensor]
-    hidden_states: Optional[Tuple[Tensor, ...]]
-    attentions: Optional[Tuple[Tensor, ...]]
-    past_key_values: Optional[Any]
+    logits: Tensor | None
+    hidden_states: tuple[Tensor, ...] | None
+    attentions: tuple[Tensor, ...] | None
+    past_key_values: Any | None
 
     def __getattr__(self, name: str) -> Any: ...
     def __getitem__(self, key: Any) -> Any: ...
@@ -33,7 +38,7 @@ class BatchEncoding(dict[str, Any]):
     attention_mask: Tensor
 
     def __getattr__(self, name: str) -> Any: ...
-    def to(self, device: Union[str, torch.device]) -> BatchEncoding: ...
+    def to(self, device: str | torch.device) -> BatchEncoding: ...
 
 
 class EmbeddingLayer:
@@ -49,7 +54,7 @@ class PreTrainedTokenizerBase:
     @classmethod
     def from_pretrained(
         cls,
-        pretrained_model_name_or_path: Union[str, Path],
+        pretrained_model_name_or_path: str | Path,
         *model_args: Any,
         trust_remote_code: bool = False,
         **kwargs: Any,
@@ -58,7 +63,7 @@ class PreTrainedTokenizerBase:
     def encode(self, text: str, add_special_tokens: bool = True, **kwargs: Any) -> list[int]: ...
     def decode(
         self,
-        token_ids: Union[int, Sequence[int]],
+        token_ids: int | Sequence[int],
         skip_special_tokens: bool = False,
         **kwargs: Any,
     ) -> str: ...
@@ -69,9 +74,9 @@ class PreTrainedTokenizerBase:
         text: str,
         *,
         add_special_tokens: bool = True,
-        padding: Union[bool, str] = False,
-        truncation: Union[bool, str] = False,
-        max_length: Optional[int] = None,
+        padding: bool | str = False,
+        truncation: bool | str = False,
+        max_length: int | None = None,
         return_tensors: Literal["pt"] = "pt",
         **kwargs: Any,
     ) -> BatchEncoding: ...
@@ -81,31 +86,31 @@ class PreTrainedTokenizerBase:
         text: Sequence[str],
         *,
         add_special_tokens: bool = True,
-        padding: Union[bool, str] = False,
-        truncation: Union[bool, str] = False,
-        max_length: Optional[int] = None,
+        padding: bool | str = False,
+        truncation: bool | str = False,
+        max_length: int | None = None,
         return_tensors: Literal["pt"] = "pt",
         **kwargs: Any,
     ) -> BatchEncoding: ...
     @overload
     def __call__(
         self,
-        text: Union[str, Sequence[str]],
+        text: str | Sequence[str],
         *,
         add_special_tokens: bool = True,
-        padding: Union[bool, str] = False,
-        truncation: Union[bool, str] = False,
-        max_length: Optional[int] = None,
-        return_tensors: Optional[str] = None,
+        padding: bool | str = False,
+        truncation: bool | str = False,
+        max_length: int | None = None,
+        return_tensors: str | None = None,
         **kwargs: Any,
     ) -> Any: ...
 
     @property
     def vocab_size(self) -> int: ...
     @property
-    def eos_token_id(self) -> Optional[int]: ...
+    def eos_token_id(self) -> int | None: ...
     @property
-    def pad_token_id(self) -> Optional[int]: ...
+    def pad_token_id(self) -> int | None: ...
 
 
 class AutoTokenizer(PreTrainedTokenizerBase):
@@ -118,7 +123,7 @@ class PreTrainedModel(torch.nn.Module):
     @classmethod
     def from_pretrained(
         cls,
-        pretrained_model_name_or_path: Union[str, Path],
+        pretrained_model_name_or_path: str | Path,
         *model_args: Any,
         trust_remote_code: bool = False,
         **kwargs: Any,
@@ -133,31 +138,31 @@ class AutoModelForCausalLM(PreTrainedModel):
     @classmethod
     def from_pretrained(
         cls,
-        pretrained_model_name_or_path: Union[str, Path],
+        pretrained_model_name_or_path: str | Path,
         *model_args: Any,
-        torch_dtype: Optional[Union[torch.dtype, str]] = None,
-        dtype: Optional[Union[torch.dtype, str]] = None,
-        device_map: Optional[Union[str, Mapping[str, Any]]] = None,
+        torch_dtype: torch.dtype | str | None = None,
+        dtype: torch.dtype | str | None = None,
+        device_map: str | Mapping[str, Any] | None = None,
         trust_remote_code: bool = False,
-        attn_implementation: Optional[str] = None,
+        attn_implementation: str | None = None,
         **kwargs: Any,
     ) -> AutoModelForCausalLM: ...
 
     def __call__(
         self,
-        input_ids: Optional[Tensor] = None,
-        attention_mask: Optional[Tensor] = None,
-        output_hidden_states: Optional[bool] = None,
-        output_attentions: Optional[bool] = None,
-        return_dict: Optional[bool] = None,
+        input_ids: Tensor | None = None,
+        attention_mask: Tensor | None = None,
+        output_hidden_states: bool | None = None,
+        output_attentions: bool | None = None,
+        return_dict: bool | None = None,
         **kwargs: Any,
     ) -> ModelOutput: ...
 
     def generate(
         self,
-        inputs: Optional[Tensor] = None,
-        max_length: Optional[int] = None,
-        max_new_tokens: Optional[int] = None,
+        inputs: Tensor | None = None,
+        max_length: int | None = None,
+        max_new_tokens: int | None = None,
         do_sample: bool = False,
         temperature: float = 1.0,
         top_k: int = 50,

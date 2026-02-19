@@ -14,7 +14,7 @@ DATASET_PATH = "gyrogem_chat_qa_dataset.jsonl"
 
 def load_dataset(path):
     entries = []
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line_num, line in enumerate(f, 1):
             line = line.strip()
             if not line:
@@ -105,7 +105,7 @@ def print_section(title):
 def main():
     if not os.path.exists(DATASET_PATH):
         print(f"ERROR: {DATASET_PATH} not found.")
-        print(f"Run this script from the directory containing the dataset.")
+        print("Run this script from the directory containing the dataset.")
         return
 
     print(f"Loading {DATASET_PATH}...")
@@ -177,7 +177,7 @@ def main():
     print(f"  Without system prompt: {no_system_count} ({100.0*no_system_count/len(entries):.1f}%)")
 
     turn_counts = Counter(a["num_turns"] for a in analyses)
-    print(f"\n  Turn count distribution:")
+    print("\n  Turn count distribution:")
     for turns, count in sorted(turn_counts.items()):
         print(f"    {turns} turns: {count}")
 
@@ -270,11 +270,11 @@ def main():
             for issue in issues:
                 issue_type_counts[issue] += 1
 
-        print(f"\n  Issue type summary:")
+        print("\n  Issue type summary:")
         for issue, count in issue_type_counts.most_common():
             print(f"    {issue}: {count}")
 
-        print(f"\n  First 10 entries with issues:")
+        print("\n  First 10 entries with issues:")
         for i, (entry_id, issues) in enumerate(issues_by_entry.items()):
             if i >= 10:
                 print(f"    ... and {len(issues_by_entry) - 10} more")
@@ -307,8 +307,8 @@ def main():
 
     print(f"  Entries containing anchor keywords: {anchor_count} ({100.0*anchor_count/len(entries):.1f}%)")
     print(f"  Entries without anchor keywords: {len(entries) - anchor_count}")
-    print(f"  NOTE: If oversampling anchors at high multiplier,")
-    print(f"  effective training set will be heavily skewed.")
+    print("  NOTE: If oversampling anchors at high multiplier,")
+    print("  effective training set will be heavily skewed.")
 
     # =============================================
     # SUMMARY

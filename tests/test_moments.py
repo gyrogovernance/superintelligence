@@ -45,10 +45,9 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
-
 
 PROGRAM_ROOT = Path(__file__).parent.parent
 if str(PROGRAM_ROOT) not in sys.path:
@@ -63,7 +62,7 @@ def format_large_number(num: float) -> str:
         integer_part = int(float(parts[0]))
         decimal_part = parts[1] if len(parts) > 1 else "00"
         return f"{integer_part:,}.{decimal_part}"
-    
+
     if num >= 1_000_000_000_000_000_000:
         return f"{format_decimal(num / 1_000_000_000_000_000_000)} quintillion ({num:,.0f})"
     elif num >= 1_000_000_000_000_000:
@@ -88,7 +87,7 @@ def format_currency(num: float) -> str:
         integer_part = int(float(parts[0]))
         decimal_part = parts[1] if len(parts) > 1 else "00"
         return f"{integer_part:,}.{decimal_part}"
-    
+
     if num >= 1_000_000_000_000_000_000:
         return f"${format_decimal(num / 1_000_000_000_000_000_000)} quintillion (${num:,.0f})"
     elif num >= 1_000_000_000_000_000:
@@ -339,7 +338,7 @@ def test_tier_multipliers_from_uhi():
     Tier 4: 60× UHI
     """
     uhi = compute_uhi_mu_per_year()
-    tiers: Dict[str, int] = {
+    tiers: dict[str, int] = {
         "tier_1": 1,
         "tier_2": 2,
         "tier_3": 3,
@@ -515,37 +514,37 @@ def test_resilience_margin_and_adversarial_threshold():
     them.
     """
     population = 8_100_000_000
-    
+
     uhi_mu_year = compute_uhi_mu_per_year()
     CSM_total = csm_total_capacity()
-    
+
     coverage = CapacityCoverage(
         total_capacity_mu=CSM_total,
         population=population,
         uhi_mu_per_person_per_year=uhi_mu_year,
         mapping_note="CSM = N_phys / |Ω| (fixed total capacity)",
     )
-    
+
     # What multiple of annual demand equals 1% of total capacity?
     target_fraction = 0.01  # 1% of total capacity
     adversarial_threshold_mu = target_fraction * CSM_total
     adversarial_multiplier = adversarial_threshold_mu / coverage.annual_demand_mu
-    
+
     print("\n----------")
     print("Adversarial Resilience (CSM Total Capacity)")
     print("----------")
     print(f"CSM total capacity:              {format_large_number(CSM_total)}")
     print(f"Global UHI demand per year:      {format_large_number(coverage.annual_demand_mu)}")
     print(f"Annual usage (% of total):       {format_float(coverage.usage_percent, 2)}%")
-    print(f"\nAdversarial threshold (1% of total capacity):")
+    print("\nAdversarial threshold (1% of total capacity):")
     print(f"  Required fraudulent demand:    {format_large_number(adversarial_threshold_mu)} MU")
     print(f"  Multiple of annual demand:     {format_float(adversarial_multiplier, 2)}×")
-    print(f"\nInterpretation:")
-    print(f"  An adversary would need to successfully issue approximately")
+    print("\nInterpretation:")
+    print("  An adversary would need to successfully issue approximately")
     print(f"  {format_int(int(round(adversarial_multiplier)))}× the entire global annual UHI")
     print(f"  to consume just {format_pct(target_fraction * 100.0, 0)} of total capacity.")
-    print(f"  This is operationally impossible.")
-    
+    print("  This is operationally impossible.")
+
     # Adversarial multiplier should be on the order of 10^4 (tens of thousands)
     assert adversarial_multiplier > 10_000  # At least 10,000 times annual demand
 
@@ -615,7 +614,7 @@ def test_realistic_tier_distribution_capacity_under_csm():
     print(f"CSM total capacity (MU): {format_large_number(CSM_total)}")
     print(f"UHI baseline (MU/year): {format_int(uhi_mu_year)}\n")
 
-    results: Dict[str, Dict[str, Any]] = {}
+    results: dict[str, dict[str, Any]] = {}
 
     for scenario_name, dist in distributions.items():
         # Calculate weighted average multiplier
@@ -673,7 +672,7 @@ def test_realistic_tier_distribution_capacity_under_csm():
     # Generous should have higher demand than conservative
     assert generous["annual_demand"] > conservative["annual_demand"], \
         "Generous distribution should have higher demand than conservative"
-    
+
     # Plausible should be between conservative and generous
     plausible = results["Plausible"]
     assert conservative["annual_demand"] < plausible["annual_demand"] < generous["annual_demand"], \
@@ -699,11 +698,11 @@ def test_notional_surplus_allocation_12_divisions():
 
     uhi_mu_year = compute_uhi_mu_per_year()
     CSM_total = csm_total_capacity()
-    
+
     # Calculate what portion of CSM is reserved for global UHI over 1000 years
     horizon_years = 1_000
     uhi_reserved = uhi_mu_year * population * horizon_years
-    
+
     # The "surplus" is what remains after reserving for 1000 years of UHI
     surplus = CSM_total - uhi_reserved
 

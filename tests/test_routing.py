@@ -9,12 +9,13 @@ Tests the routing system:
 - Signature generation
 """
 
-import pytest
-import numpy as np
 from pathlib import Path
 
-from src.router.kernel import RouterKernel
+import numpy as np
+import pytest
+
 from src.router.constants import ARCHETYPE_STATE24, unpack_state
+from src.router.kernel import RouterKernel
 
 
 # Fixture: Kernel loaded from atlas
@@ -24,7 +25,7 @@ def kernel():
     atlas_dir = Path("data/atlas")
     if not atlas_dir.exists():
         pytest.skip("Atlas not built. Run: python -m src.router.atlas")
-    
+
     return RouterKernel(atlas_dir)
 
 
@@ -67,12 +68,12 @@ class TestAtlasLoading:
         # The ontology is sorted, so archetype may not be at index 0
         # Verify the kernel found it correctly
         archetype_state = int(kernel.ontology[kernel.archetype_index])
-        
+
         assert archetype_state == ARCHETYPE_STATE24
-        
+
         # Verify ontology is sorted (this is the actual convention)
         assert np.all(kernel.ontology[:-1] <= kernel.ontology[1:]), "Ontology not sorted"
-        
+
         # Document where archetype actually is
         print(f"\n  Archetype at index {kernel.archetype_index:,} / {len(kernel.ontology):,}")
 
@@ -91,14 +92,14 @@ class TestStateTransitions:
         """Single byte should change state."""
         kernel.reset()
         initial_idx = kernel.state_index
-        
+
         kernel.step_byte(0x42)
         assert kernel.state_index != initial_idx
 
     def test_all_bytes_produce_transitions(self, kernel):
         """All 256 bytes should produce valid transitions."""
         kernel.reset()
-        
+
         for byte in range(256):
             kernel.reset()
             kernel.step_byte(byte)
@@ -107,16 +108,16 @@ class TestStateTransitions:
     def test_transitions_deterministic(self, kernel):
         """Same byte from same state must produce same result."""
         test_bytes = [0x00, 0x42, 0xAA, 0xFF]
-        
+
         for byte in test_bytes:
             kernel.reset()
             kernel.step_byte(byte)
             idx1 = kernel.state_index
-            
+
             kernel.reset()
             kernel.step_byte(byte)
             idx2 = kernel.state_index
-            
+
             assert idx1 == idx2, f"Byte {hex(byte)} not deterministic"
 
     def test_reset_returns_to_archetype(self, kernel):
@@ -124,7 +125,7 @@ class TestStateTransitions:
         kernel.step_byte(0x12)
         kernel.step_byte(0x34)
         kernel.reset()
-        
+
         assert kernel.state_index == kernel.archetype_index
 
     def test_step_counter_increments_and_resets(self, kernel):
@@ -148,12 +149,12 @@ class TestMultiStepRouting:
         kernel.step_byte(0x12)
         kernel.step_byte(0x34)
         idx1 = kernel.state_index
-        
+
         kernel.reset()
         kernel.step_byte(0x12)
         kernel.step_byte(0x34)
         idx2 = kernel.state_index
-        
+
         assert idx1 == idx2
 
     def test_payload_routing(self, kernel):
@@ -161,13 +162,13 @@ class TestMultiStepRouting:
         payload = b"Hello"
         kernel.reset()
         sig = kernel.step_payload(payload)
-        
+
         # Manually apply each byte
         kernel.reset()
         for byte in payload:
             kernel.step_byte(byte)
         manual_idx = kernel.state_index
-        
+
         assert sig.state_index == manual_idx
         assert sig.step == len(payload)
 
@@ -178,13 +179,13 @@ class TestMultiStepRouting:
         kernel.step_byte(0x12)
         kernel.step_byte(0x34)
         forward_idx = kernel.state_index
-        
+
         # Reverse
         kernel.reset()
         kernel.step_byte(0x34)
         kernel.step_byte(0x12)
         reverse_idx = kernel.state_index
-        
+
         # Should differ (non-commutative)
         assert forward_idx != reverse_idx
 
@@ -196,7 +197,7 @@ class TestSignatureProperties:
         """Signature should have all required fields."""
         kernel.reset()
         sig = kernel.signature()
-        
+
         assert hasattr(sig, 'step')
         assert hasattr(sig, 'state_index')
         assert hasattr(sig, 'state_hex')
@@ -207,7 +208,7 @@ class TestSignatureProperties:
         """Hex strings should have correct length."""
         kernel.reset()
         sig = kernel.signature()
-        
+
         assert len(sig.state_hex) == 6  # 24 bits = 6 hex chars
         assert len(sig.a_hex) == 3      # 12 bits = 3 hex chars
         assert len(sig.b_hex) == 3      # 12 bits = 3 hex chars
@@ -217,10 +218,10 @@ class TestSignatureProperties:
         kernel.reset()
         kernel.step_byte(0x42)
         sig = kernel.signature()
-        
+
         state_int = int(kernel.ontology[sig.state_index])
         a, b = unpack_state(state_int)
-        
+
         assert f"{a:03x}" == sig.a_hex
         assert f"{b:03x}" == sig.b_hex
 
@@ -232,12 +233,12 @@ class TestReachability:
         """Archetype should be in its own orbit."""
         kernel.reset()
         visited = {kernel.state_index}
-        
+
         for byte in range(256):
             kernel.reset()
             kernel.step_byte(byte)
             visited.add(kernel.state_index)
-        
+
         # Should reach multiple states
         assert len(visited) > 1
 
@@ -245,7 +246,7 @@ class TestReachability:
         """Random byte sequence should never leave ontology."""
         kernel.reset()
         np.random.seed(42)
-        
+
         for _ in range(100):
             byte = np.random.randint(0, 256)
             kernel.step_byte(byte)
@@ -305,14 +306,14 @@ class TestAtlasGlobalGroupFacts:
 def print_routing_summary(request):
     """Print routing statistics after all tests."""
     yield
-    
+
     # Load kernel for stats
     atlas_dir = Path("data/atlas")
     if not atlas_dir.exists():
         return
-    
+
     kernel = RouterKernel(atlas_dir)
-    
+
     print("\n" + "="*10)
     print("ROUTING TEST SUMMARY")
     print("="*10)

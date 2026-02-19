@@ -1,14 +1,14 @@
 import os
 from collections import defaultdict
+from collections.abc import Callable
 from multiprocessing.pool import ThreadPool
-from typing import Any, Callable
+from typing import Any
 
 import jinja2
 import numpy as np
 from tqdm import tqdm
 
 from .types import EvalResult, Message, SingleEvalResult
-
 
 HTML_JINJA = """
 <h3>Prompt conversation</h3>

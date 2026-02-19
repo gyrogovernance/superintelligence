@@ -23,10 +23,9 @@ The system implements the CGM 8-fold path through recursive alignment:
 Pure physics implementation with holographic compression and minimal complexity.
 """
 
-import numpy as np
-from typing import List, Optional, Dict, Set
 from pathlib import Path
 
+import numpy as np
 
 # Core Constants
 GENE_Mic_S = 0xAA  # Holographic topology constant (ψ seed)
@@ -83,7 +82,7 @@ def fold(a: int, b: int) -> int:
     return (a ^ gyration) & 0xFF
 
 
-def fold_sequence(values: List[int], start_state: int = 0) -> int:
+def fold_sequence(values: list[int], start_state: int = 0) -> int:
     """Apply Monodromic Fold left-to-right over a sequence."""
     result = start_state & 0xFF
     for value in values:
@@ -101,7 +100,7 @@ def transcribe_byte(byte: int) -> int:
     return (byte ^ GENE_Mic_S) & 0xFF
 
 
-def token_id_to_leb128(token_id: int) -> List[int]:
+def token_id_to_leb128(token_id: int) -> list[int]:
     """Convert token ID to LEB128 bytes."""
     if token_id < 0:
         raise ValueError("Token ID must be non-negative")
@@ -117,7 +116,7 @@ def token_id_to_leb128(token_id: int) -> List[int]:
     return bytes_list
 
 
-def token_to_introns(token_id: int) -> List[int]:
+def token_to_introns(token_id: int) -> list[int]:
     """Convert token ID to intron sequence via ψ isomorphism."""
     leb_bytes = token_id_to_leb128(token_id)
     return [transcribe_byte(b) for b in leb_bytes]
@@ -143,7 +142,7 @@ class GyroKernel:
     - No arbitrary rules or thresholds
     """
 
-    def __init__(self, base_path: Optional[Path] = None, verbose: bool = True):
+    def __init__(self, base_path: Path | None = None, verbose: bool = True):
         """Initialise kernel with physics tables."""
         if base_path is None:
             base_path = Path(__file__).parents[1] / "memories"
@@ -160,20 +159,20 @@ class GyroKernel:
 
         # Build orbit mapping
         unique_reps = np.unique(self.phenomenology)
-        self.rep_to_orbit_id: Dict[int, int] = {int(rep): int(i) for i, rep in enumerate(unique_reps)}
+        self.rep_to_orbit_id: dict[int, int] = {int(rep): int(i) for i, rep in enumerate(unique_reps)}
 
         # Holographic storage: orbit -> token -> delta (compressed)
-        self.orbit_deltas: Dict[int, Dict[int, int]] = {}
+        self.orbit_deltas: dict[int, dict[int, int]] = {}
 
         # Per-orbit path memory for local context
-        self.orbit_memories: Dict[int, int] = {}
+        self.orbit_memories: dict[int, int] = {}
 
         # Context window (6-bit diameter)
-        self.context_window: List[int] = []
+        self.context_window: list[int] = []
         self.window_size = 6
 
         # Valid tokens
-        self.valid_tokens: Set[int] = set()
+        self.valid_tokens: set[int] = set()
 
         # Load tokenizer
         self.tokenizer = self._load_tokenizer()
@@ -416,13 +415,13 @@ class GyroKernel:
         self.current_state_index = self.cs_index
         self.context_window = []
 
-    def text_to_tokens(self, text: str) -> List[int]:
+    def text_to_tokens(self, text: str) -> list[int]:
         """Convert text to token IDs."""
         assert self.tokenizer is not None
         encoding = self.tokenizer.encode(text)
         return [t for t in encoding.ids if t in self.valid_tokens]
 
-    def tokens_to_text(self, token_ids: List[int]) -> str:
+    def tokens_to_text(self, token_ids: list[int]) -> str:
         """Convert token IDs to text."""
         filtered = [t for t in token_ids if t not in [CLS_TOKEN, SEP_TOKEN, PAD_TOKEN]]
         if not filtered:
@@ -433,7 +432,7 @@ class GyroKernel:
         except:
             return " ".join(f"[{t}]" for t in filtered)
 
-    def generate_text(self, max_tokens: int = 50, debug: bool = False, prompt: Optional[str] = None) -> str:
+    def generate_text(self, max_tokens: int = 50, debug: bool = False, prompt: str | None = None) -> str:
         """Generate text using pure physics-based resonance."""
         # Process prompt to evolve state and learn
         if prompt:
@@ -515,7 +514,7 @@ def demo_kernel():
     # Load wiki text as prompt
     wiki_file = "toys/training/wiki_test.txt"
     try:
-        with open(wiki_file, "r", encoding="utf-8") as f:
+        with open(wiki_file, encoding="utf-8") as f:
             wiki_text = f.read()
         sample_text = wiki_text[:100] + "..." if len(wiki_text) > 100 else wiki_text
         print(f"\nWiki text prompt (sample): '{sample_text}'")

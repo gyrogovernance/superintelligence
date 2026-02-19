@@ -14,19 +14,19 @@ import numpy as np
 import pytest
 import torch
 
+from src.router.kernel import RouterKernel
 from src.tools.gyrolabe import (
     N_BOUNDARY,
     QUARTER_TURN,
     CouplingConfig,
     RoutedMLP,
-    compute_mask,
-    extract_byte,
     _detect_routed_layers,
     _entropy,
-    get_mask12_table,
+    compute_mask,
+    extract_byte,
     get_code_distance_matrix,
+    get_mask12_table,
 )
-from src.router.kernel import RouterKernel
 
 
 @pytest.fixture

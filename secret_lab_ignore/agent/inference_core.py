@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,10 +14,10 @@ class InferenceState:
     last_h: int = 0
     last_p: int = 0
     last_chi: int = 0
-    last_o: Optional[NDArray[np.float32]] = None
+    last_o: NDArray[np.float32] | None = None
 
     @classmethod
-    def create(cls, K: int) -> "InferenceState":
+    def create(cls, K: int) -> InferenceState:
         return cls(M=np.zeros((256, 4, K), dtype=np.float32))
 
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import os, sys
+import os
+import sys
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
 
 import numpy as np
 import torch
@@ -104,7 +104,7 @@ class WedgeLabeler:
     def __init__(self, kernel: RouterKernel, embed_weight: torch.Tensor):
         self.kernel = kernel
         self.embed = embed_weight
-        self.chi_hist: List[int] = []
+        self.chi_hist: list[int] = []
 
     def consume_token(self, token_id: int) -> None:
         b = embed_to_byte(self.embed[int(token_id)])
@@ -114,10 +114,10 @@ class WedgeLabeler:
 
 def wedge_masses_past_only(
     attn_heads_k: torch.Tensor,  # [heads,k]
-    chi_hist: List[int],
+    chi_hist: list[int],
     key_start: int,
     abs_pos_count: int,
-) -> Tuple[np.ndarray, float]:
+) -> tuple[np.ndarray, float]:
     A = attn_heads_k.float().mean(dim=0)  # [k]
     k_len = int(A.shape[0])
 
@@ -155,7 +155,7 @@ def choose_wedges(m: np.ndarray) -> set[int]:
 def build_mask_top_wedges_plus_infoset(
     *,
     attn_heads_k: torch.Tensor,   # [heads,k]
-    chi_hist: List[int],
+    chi_hist: list[int],
     key_start: int,
     abs_pos_count: int,
     keep_wedges: set[int],
@@ -180,8 +180,8 @@ def build_mask_top_wedges_plus_infoset(
         mask[j_self] = True
 
     # First pass: mark wedge-kept keys; collect candidates outside wedges
-    outside_idxs: List[int] = []
-    outside_scores: List[float] = []
+    outside_idxs: list[int] = []
+    outside_scores: list[float] = []
 
     for j in range(k_len):
         if j == j_self:
@@ -212,7 +212,7 @@ def oracle_context_error(
     attn_heads_k: torch.Tensor,  # [heads,k]
     V_bhkd: torch.Tensor,        # [1,heads,k,dh]
     mask_k: torch.Tensor,        # [k] bool
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     w = attn_heads_k.float()
     V = V_bhkd.float()[0]  # [h,k,dh]
 
@@ -246,7 +246,7 @@ def run_prompt(model: AutoModelForCausalLM, tok: PreTrainedTokenizerBase, prompt
         return
 
     past = None
-    logits_last: Optional[torch.Tensor] = None
+    logits_last: torch.Tensor | None = None
 
     # consume prompt token-by-token
     for tid in prompt_ids:
@@ -260,9 +260,9 @@ def run_prompt(model: AutoModelForCausalLM, tok: PreTrainedTokenizerBase, prompt
     next_tok = sample_topk(logits_last)
 
     # policy metrics
-    kept: Dict[int, List[float]] = {M: [] for M in M_GUARD_LIST}
-    cosv: Dict[int, List[float]] = {M: [] for M in M_GUARD_LIST}
-    relv: Dict[int, List[float]] = {M: [] for M in M_GUARD_LIST}
+    kept: dict[int, list[float]] = {M: [] for M in M_GUARD_LIST}
+    cosv: dict[int, list[float]] = {M: [] for M in M_GUARD_LIST}
+    relv: dict[int, list[float]] = {M: [] for M in M_GUARD_LIST}
 
     for t in range(MAX_NEW_TOKENS):
         x = torch.tensor([[int(next_tok)]], device=device, dtype=torch.long)

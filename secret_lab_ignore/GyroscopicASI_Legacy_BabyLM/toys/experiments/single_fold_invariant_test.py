@@ -1,7 +1,8 @@
 import sys
-from pathlib import Path
-import numpy as np
 from collections import Counter
+from pathlib import Path
+
+import numpy as np
 
 # Ensure project root is on sys.path so 'baby' package can be imported when run directly
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

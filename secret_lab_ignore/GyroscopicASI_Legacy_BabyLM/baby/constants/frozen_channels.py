@@ -10,9 +10,9 @@ FROZEN - These definitions are immutable and used across the entire system.
 Validated at import time with comprehensive integrity checks.
 """
 
-from typing import List, Tuple, Dict, Any
-import sys
 import hashlib
+import sys
+from typing import Any
 
 # === FROZEN CONSTANTS ===
 
@@ -97,7 +97,7 @@ class FROZEN_CHANNELS:
         return (layer * 12) + (frame * 6) + (row * 2) + col
 
     @staticmethod
-    def get_tensor_coords(bit_index: int) -> Tuple[int, int, int, int]:
+    def get_tensor_coords(bit_index: int) -> tuple[int, int, int, int]:
         """Convert bit index to tensor coordinates.
 
         Args:
@@ -119,7 +119,7 @@ class FROZEN_CHANNELS:
         return (layer, frame, row, col)
 
     @staticmethod
-    def get_slab_bit_indices(slab_idx: int) -> List[int]:
+    def get_slab_bit_indices(slab_idx: int) -> list[int]:
         """Get bit indices for a specific slab.
 
         Args:
@@ -158,7 +158,7 @@ class FROZEN_CHANNELS:
         return mask
 
     @staticmethod
-    def get_all_slab_masks() -> List[int]:
+    def get_all_slab_masks() -> list[int]:
         """Get bitmasks for all slabs.
 
         Returns:
@@ -320,12 +320,12 @@ class FROZEN_CHANNELS:
 
             # Log successful validation (only in debug mode to avoid spam)
             if __debug__:
-                print(f"[FROZEN_CHANNELS] Integrity validated successfully.", file=sys.stderr)
+                print("[FROZEN_CHANNELS] Integrity validated successfully.", file=sys.stderr)
 
         except Exception as e:
             print(f"[FROZEN_CHANNELS] CRITICAL: Channel integrity validation failed: {e}", file=sys.stderr)
             print(
-                f"[FROZEN_CHANNELS] This indicates corrupted channel definitions. System cannot continue.",
+                "[FROZEN_CHANNELS] This indicates corrupted channel definitions. System cannot continue.",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -350,7 +350,7 @@ def get_slab_name(slab_idx: int) -> str:
     return f"Layer×Frame[{layer},{frame}]"
 
 
-def get_channel_summary() -> Dict[str, Any]:
+def get_channel_summary() -> dict[str, Any]:
     """Get summary of all channel definitions.
 
     Returns:

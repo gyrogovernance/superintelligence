@@ -31,10 +31,9 @@ Or run them individually:
 from __future__ import annotations
 
 import os
+import random
 import sys
 from pathlib import Path
-from typing import List, Tuple
-import random
 
 import numpy as np
 import pytest
@@ -44,20 +43,20 @@ PROGRAM_ROOT = Path(__file__).parent.parent
 if str(PROGRAM_ROOT) not in sys.path:
     sys.path.insert(0, str(PROGRAM_ROOT))
 
-from src.router.kernel import RouterKernel
 from src.router.constants import (
-    mask12_for_byte,
-    dot12,
     C_PERP_12,
+    dot12,
+    mask12_for_byte,
 )
+from src.router.kernel import RouterKernel
 
 ATLAS_DIR = Path(__file__).parent.parent / "data" / "atlas"
 
 # Import capacity constants from production code (canonical source)
 from src.app.coordination import (
     OMEGA_SIZE,
-    raw_microcells_per_moment,
     csm_total_mu,
+    raw_microcells_per_moment,
 )
 
 # Moments Economy parameters (for test calculations)
@@ -113,44 +112,44 @@ def test_01_shell_and_archive_integrity(atlas_dir: Path):
     - Duplicate Grants for an identity in a Shell are detectable (application rule).
     """
     print("\n=== SHELL AND ARCHIVE INTEGRITY ===")
-    
+
     from src.app.coordination import Coordinator
-    
+
     # Use Coordinator (canonical implementation)
     coord1 = Coordinator(atlas_dir)
     coord1.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord1.add_grant("bob", UHI_PER_YEAR_MU * 2)
-    
+
     # Close shell with explicit capacity (for accounting purposes)
     # Note: CSM is a fixed total, not a per-year rate. Shell capacity is an accounting window.
     test_capacity = 10**18  # Arbitrary large accounting window
     shell1 = coord1.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
-    
+
     assert shell1.used_capacity_MU <= shell1.total_capacity_MU
     assert shell1.total_capacity_MU == test_capacity
-    
+
     # Replay: same grants -> same seal
     coord2 = Coordinator(atlas_dir)
     coord2.add_grant("alice", UHI_PER_YEAR_MU * 3)
     coord2.add_grant("bob", UHI_PER_YEAR_MU * 2)
     shell2 = coord2.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
-    
+
     assert shell2.seal == shell1.seal
     assert shell2.used_capacity_MU == shell1.used_capacity_MU
-    
+
     print(f"Shell seal: {shell1.seal}")
     print(f"Used capacity: {shell1.used_capacity_MU:,} MU")
     print(f"Total capacity: {shell1.total_capacity_MU:,} MU")
-    
+
     # Tampering: inflate alice's grant
     coord_tampered = Coordinator(atlas_dir)
     coord_tampered.add_grant("alice", UHI_PER_YEAR_MU * 30)  # inflated
     coord_tampered.add_grant("bob", UHI_PER_YEAR_MU * 2)
     shell_tampered = coord_tampered.close_shell(b"ecology:year:2026", total_capacity_MU=test_capacity)
-    
+
     assert shell_tampered.seal != shell1.seal
     assert shell_tampered.used_capacity_MU != shell1.used_capacity_MU
-    
+
     # Archive: aggregate multiple shells
     coord3 = Coordinator(atlas_dir)
     coord3.add_grant("alice", UHI_PER_YEAR_MU * 3)
@@ -160,11 +159,11 @@ def test_01_shell_and_archive_integrity(atlas_dir: Path):
     coord3.add_grant("bob", UHI_PER_YEAR_MU * 2)
     coord3.close_shell(b"ecology:year:2027", total_capacity_MU=test_capacity)
     status3 = coord3.fiat_status()
-    
+
     # Verify archive totals
     assert status3["per_identity_totals"]["alice"] == UHI_PER_YEAR_MU * 3 * 2
     assert status3["per_identity_totals"]["bob"] == UHI_PER_YEAR_MU * 2 * 2
-    
+
     print(f"Archive per-identity MU: {status3['per_identity_totals']}")
     print("OK: shell/archive deterministic and tamper-evident")
 
@@ -184,7 +183,7 @@ def test_02_horizon_structure_and_coverage(atlas_dir: Path):
     can cover all accessible Router states.
     """
     print("\n=== HORIZON STRUCTURE AND COVERAGE ===")
-    from src.router.constants import unpack_state, LAYER_MASK_12
+    from src.router.constants import LAYER_MASK_12, unpack_state
 
     epi = np.load(atlas_dir / "epistemology.npy", mmap_mode="r").astype(np.int64)
     ont = np.load(atlas_dir / "ontology.npy")
@@ -297,7 +296,7 @@ def test_05_trajectory_tamper_detection():
     random.seed(777)
     trajectory = [random.randint(0, 255) for _ in range(100)]
 
-    def commitment(traj: List[int]) -> Tuple[int, int, int]:
+    def commitment(traj: list[int]) -> tuple[int, int, int]:
         O = E = 0
         for i, b in enumerate(traj):
             m = mask12_for_byte(b)
@@ -389,7 +388,7 @@ def test_07_meta_routing(atlas_dir: Path):
         k.step_payload(payload)
         return bytes.fromhex(k.signature().state_hex)
 
-    def meta_root(seals: List[bytes]) -> str:
+    def meta_root(seals: list[bytes]) -> str:
         k = RouterKernel(atlas_dir)
         for s in seals:
             k.step_payload(s)
@@ -444,11 +443,11 @@ def test_08_component_isolation_and_rollback():
     """
     print("\n=== COMPONENT ISOLATION AND ROLLBACK ===")
     from src.router.constants import (
-        step_state_by_byte,
-        pack_state,
-        unpack_state,
-        XFORM_MASK_BY_BYTE,
         LAYER_MASK_12,
+        XFORM_MASK_BY_BYTE,
+        pack_state,
+        step_state_by_byte,
+        unpack_state,
     )
 
     random.seed(12345)
@@ -516,27 +515,27 @@ def test_09_kernel_inverse_stepping(atlas_dir: Path):
     form of the inverse: T_x^{-1} = R ∘ T_x ∘ R where R = T_0xAA.
     """
     print("\n=== KERNEL INVERSE STEPPING ===")
-    
+
     k = RouterKernel(atlas_dir)
-    
+
     # Step forward with a known payload
     payload = b"test payload"
     initial_index = k.archetype_index
-    
+
     for b in payload:
         k.step_byte(b)
-    
+
     assert k.step == len(payload)
     final_index = k.state_index
     assert final_index != initial_index
-    
+
     # Step inverse (in reverse order)
     for b in reversed(payload):
         k.step_byte_inverse(b)
-    
+
     # Verify returned to archetype
     assert k.state_index == initial_index
-    
+
     print(f"Payload: {payload!r}")
     print(f"Forward steps: archetype -> {final_index}")
     print(f"Inverse steps: {final_index} -> archetype")
@@ -548,7 +547,7 @@ def test_09_kernel_inverse_stepping(atlas_dir: Path):
 if __name__ == "__main__":
     # Change to project root directory (PROGRAM_ROOT already set above)
     os.chdir(PROGRAM_ROOT)
-    
+
     # When run directly, collect and run all three test files as a unified suite
     test_dir = Path(__file__).parent
     test_files = [
@@ -556,10 +555,10 @@ if __name__ == "__main__":
         test_dir / "test_moments_2.py",
         Path(__file__),
     ]
-    
+
     # Filter to only existing files
     existing_files = [str(f) for f in test_files if f.exists()]
-    
+
     if len(existing_files) > 1:
         print(f"\nRunning unified test suite: {len(existing_files)} files")
         print("=" * 10)

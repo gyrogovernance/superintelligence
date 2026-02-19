@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Tuple, List
 
 import numpy as np
 
@@ -20,7 +19,7 @@ from baby.kernel.gyro_core import GyroEngine
 
 def load_engine_from_config() -> GyroEngine:
     config_path = project_root / "baby" / "config.json"
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         cfg = json.load(f)
     engine = GyroEngine(
         atlas_paths=cfg["atlas"],
@@ -50,13 +49,13 @@ def compute_intelligence_quantum() -> float:
     return float(np.log2(788_986) / np.log2(256))
 
 
-def summarize_theta(engine: GyroEngine) -> Tuple[float, float, float]:
+def summarize_theta(engine: GyroEngine) -> tuple[float, float, float]:
     # min, mean, max theta
     th = engine.theta
     return float(np.min(th)), float(np.mean(th)), float(np.max(th))
 
 
-def sample_transitions_theta_phase(engine: GyroEngine, num_states: int = 2048, intron: int = 0x55) -> Dict[str, float]:
+def sample_transitions_theta_phase(engine: GyroEngine, num_states: int = 2048, intron: int = 0x55) -> dict[str, float]:
     # Sample a subset of states, apply one intron via ep table, report delta theta and phase stats
     n_total = len(engine.keys)
     step = max(1, n_total // num_states)
@@ -67,9 +66,9 @@ def sample_transitions_theta_phase(engine: GyroEngine, num_states: int = 2048, i
     theta = engine.theta
     keys = engine.keys
 
-    deltas: List[float] = []
-    phases_before: List[int] = []
-    phases_after: List[int] = []
+    deltas: list[float] = []
+    phases_before: list[int] = []
+    phases_after: list[int] = []
 
     for idx in indices:
         state = int(keys[idx])
@@ -105,14 +104,14 @@ def sample_transitions_theta_phase(engine: GyroEngine, num_states: int = 2048, i
     }
 
 
-def test_information_geometry_bridge(engine: GyroEngine) -> Dict[str, float]:
+def test_information_geometry_bridge(engine: GyroEngine) -> dict[str, float]:
     # Notes: θ_posterior = gyr[θ_evidence, θ_prior] maps operationally to applying an intron
     # We'll emulate: choose random states and a fixed intron, measure θ changes
     stats = sample_transitions_theta_phase(engine, num_states=2048, intron=0x55)
     return stats
 
 
-def test_orbit_properties(engine: GyroEngine) -> Dict[str, float]:
+def test_orbit_properties(engine: GyroEngine) -> dict[str, float]:
     # Basic orbit stats: unique reps, mean orbit size, and coverage ratio
     reps = np.unique(engine.pheno)
     orbit_sizes = engine.orbit_sizes

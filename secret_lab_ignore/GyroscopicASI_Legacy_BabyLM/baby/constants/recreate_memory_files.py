@@ -18,7 +18,7 @@ def recreate_memory_files():
         # Write empty content - the system will initialise it properly
         f.write(b"")
 
-    print(f"✅ Created empty address_memory.dat")
+    print("✅ Created empty address_memory.dat")
 
     # 2. Create basic address_memory.json metadata
     address_metadata_path = memory_dir / "address_memory.json"
@@ -34,7 +34,7 @@ def recreate_memory_files():
     with open(address_metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
 
-    print(f"✅ Created address_memory.json")
+    print("✅ Created address_memory.json")
 
     # 3. Create empty passive_memory.bin
     passive_memory_path = memory_dir / "passive_memory.bin"
@@ -42,11 +42,11 @@ def recreate_memory_files():
         # Write empty content - the system will initialise it properly
         f.write(b"")
 
-    print(f"✅ Created empty passive_memory.bin")
+    print("✅ Created empty passive_memory.bin")
 
-    print(f"\n🎉 Memory files recreated successfully!")
+    print("\n🎉 Memory files recreated successfully!")
     print(f"📁 Location: {memory_dir.absolute()}")
-    print(f"\nYou can now run the knowledge test with fresh memory.")
+    print("\nYou can now run the knowledge test with fresh memory.")
 
 
 if __name__ == "__main__":

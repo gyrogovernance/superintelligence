@@ -3,20 +3,19 @@ from __future__ import annotations
 
 from itertools import combinations
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
-from src.router.kernel import RouterKernel
 from src.router.constants import (
     ARCHETYPE_A12,
     LAYER_MASK_12,
-    mask12_for_byte,
-    unpack_state,
     byte_to_intron,
     expand_intron_to_mask24,
+    mask12_for_byte,
+    unpack_state,
 )
+from src.router.kernel import RouterKernel
 
 SEP = "=========="
 
@@ -30,7 +29,7 @@ def popcount12(x: int) -> int:
 def dot_parity(x: int, y: int) -> int:
     return bin(x & y).count("1") & 1
 
-def horizon_indices(ont: NDArray[np.uint32]) -> List[int]:
+def horizon_indices(ont: NDArray[np.uint32]) -> list[int]:
     out = []
     for i, s in enumerate(ont):
         a, b = unpack_state(int(s))
@@ -38,12 +37,12 @@ def horizon_indices(ont: NDArray[np.uint32]) -> List[int]:
             out.append(i)
     return out
 
-def build_vertex_map(ont: NDArray[np.uint32], h_idxs: List[int]) -> Dict[int, int]:
+def build_vertex_map(ont: NDArray[np.uint32], h_idxs: list[int]) -> dict[int, int]:
     """
     Same vertex map as holography_2:
     horizon A -> vertex in {0,1,2,3}.
     """
-    vertex_map: Dict[int, int] = {}
+    vertex_map: dict[int, int] = {}
     for h_idx in h_idxs:
         a, _ = unpack_state(int(ont[h_idx]))
         frame0 = a & 0x3F
@@ -63,17 +62,17 @@ def build_vertex_map(ont: NDArray[np.uint32], h_idxs: List[int]) -> Dict[int, in
 def build_charge_by_mask(
     ont: NDArray[np.uint32],
     epi: NDArray[np.uint32],
-    h_idxs: List[int],
-    vertex_map: Dict[int, int],
-) -> Dict[int, int]:
+    h_idxs: list[int],
+    vertex_map: dict[int, int],
+) -> dict[int, int]:
     """
     Same as holography_2: charge_by_mask[m] is the 2-bit vertex XOR shift induced by byte^2 on horizon.
     """
     from collections import Counter
 
-    charge_by_mask: Dict[int, int] = {}
+    charge_by_mask: dict[int, int] = {}
     unique_masks = set(mask12_for_byte(b) for b in range(256))
-    mask_to_any_byte: Dict[int, int] = {}
+    mask_to_any_byte: dict[int, int] = {}
     for b in range(256):
         m = mask12_for_byte(b)
         if m not in mask_to_any_byte:
@@ -100,7 +99,7 @@ def build_charge_by_mask(
 
     return charge_by_mask
 
-def solve_q0_q1(charge_by_mask: Dict[int, int]) -> tuple[int, int]:
+def solve_q0_q1(charge_by_mask: dict[int, int]) -> tuple[int, int]:
     """
     Solve parity checks q0,q1 such that for all m in C:
       chi(m) = (<q0,m>, <q1,m>)
@@ -115,7 +114,7 @@ def solve_q0_q1(charge_by_mask: Dict[int, int]) -> tuple[int, int]:
     rhs0 = [t0[m] for m in C_list]
     rhs1 = [t1[m] for m in C_list]
 
-    def solve_one(rhs: List[int]) -> int:
+    def solve_one(rhs: list[int]) -> int:
         for q in range(4096):
             ok = True
             for m, bit in zip(C_list, rhs):
@@ -173,14 +172,14 @@ def build_generator_matrix_G() -> NDArray[np.uint8]:
                 G[bit, col] = 1
     return G
 
-def ambiguity_subcode_from_erasure(G: NDArray[np.uint8], erased_bits: Set[int]) -> Set[int]:
+def ambiguity_subcode_from_erasure(G: NDArray[np.uint8], erased_bits: set[int]) -> set[int]:
     """
     Compute ambiguity subcode E_S:
       E_S = { c in C : c has zeros on all observed positions }
     by enumerating message vectors x in F2^8 and mapping to codewords c=Gx.
     """
     observed = [i for i in range(12) if i not in erased_bits]
-    E: Set[int] = set()
+    E: set[int] = set()
     for x_msg in range(256):
         c = 0
         for i in range(8):
@@ -214,7 +213,7 @@ def test_h3_frame0_projection_uniform_4_to_1():
     This is the cleanest single-step formalization of "6-bit lossy micro-reference".
     """
     C = sorted({mask12_for_byte(b) for b in range(256)})
-    buckets: Dict[int, List[int]] = {}
+    buckets: dict[int, list[int]] = {}
     for m in C:
         f0 = m & 0x3F
         buckets.setdefault(f0, []).append(m)
@@ -263,10 +262,10 @@ def test_h3_exhaustive_erasure_taxonomy_size4():
     def chi(m: int) -> int:
         return chi_from_q(q0, q1, m)
 
-    def chi_rank(chis: Set[int]) -> int:
+    def chi_rank(chis: set[int]) -> int:
         return {1: 0, 2: 1, 4: 2}[len(chis)]
 
-    counts: Dict[Tuple[int, int, int], int] = {}
+    counts: dict[tuple[int, int, int], int] = {}
     # key = (rank_GS, ambiguity_size, chi_rank)
 
     all_bits = list(range(12))
@@ -380,7 +379,7 @@ def test_h3_boundary_stabilizer_subgroup_and_vertex_cosets():
     assert rank_D0 == 6, f"expected rank(D0)=6, got {rank_D0}"
 
     # Build horizon u-sets per vertex
-    U_by_v: Dict[int, Set[int]] = {0: set(), 1: set(), 2: set(), 3: set()}
+    U_by_v: dict[int, set[int]] = {0: set(), 1: set(), 2: set(), 3: set()}
     for h_idx in h_idxs:
         a, _ = unpack_state(int(ont[h_idx]))
         vtx = vertex_map[a]

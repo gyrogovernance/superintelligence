@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import requests
+import argparse
+import json
+import signal
+import socket
 import subprocess
 import sys
 import time
-import signal
-import socket
-import json
-import argparse
 from pathlib import Path
+
+import requests
 
 
 class GyroChat:
@@ -16,7 +17,7 @@ class GyroChat:
         self.url = f"http://localhost:{port}/v1/responses"
         self.server_process = None
         self.project_root = Path(__file__).parent.parent
-        
+
         # Setup signal handlers for cleanup
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -41,28 +42,28 @@ class GyroChat:
             config_path = self.project_root / "baby" / "config.json"
             with open(config_path) as f:
                 config = json.load(f)
-            
+
             runtime = config.get("runtime", {})
             print("🔧 Configuration Flags:")
-            
+
             # Core physics switches
             flags = [
                 ("Core gate", runtime.get("enable_core_gate", "not set")),
             ]
-            
+
             # Configuration values
             config_values = [
                 ("Anchor prefix tokens", runtime.get("anchor_prefix_tokens", "not set")),
             ]
-            
+
             for flag_name, value in flags:
                 status = "✅ ENABLED" if value else "❌ DISABLED"
                 print(f"  {flag_name}: {status}")
-            
+
             print("\n🔧 Configuration Values:")
             for config_name, value in config_values:
                 print(f"  {config_name}: {value}")
-            
+
             print()
         except Exception as e:
             print(f"⚠️  Could not load config flags: {e}")
@@ -76,7 +77,7 @@ class GyroChat:
             return True
 
         print("🚀 Starting server...")
-        
+
         # Build command
         cmd = [
             sys.executable,
@@ -146,11 +147,11 @@ class GyroChat:
         """Main chat loop."""
         print("Type 'quit' to exit, 'clear' to start new conversation")
         print()
-        
+
         while True:
             try:
                 user_input = input("You: ").strip()
-                
+
                 if user_input.lower() == 'quit':
                     print("Goodbye!")
                     break
@@ -159,15 +160,15 @@ class GyroChat:
                     continue
                 elif not user_input:
                     continue
-                
+
                 self.send_message(user_input, show_user_input=False)
-                    
+
             except KeyboardInterrupt:
                 print("\nGoodbye!")
                 break
             except Exception as e:
                 print(f"Error: {e}")
-            
+
             print()
 
     def send_message(self, message, show_user_input=True):
@@ -175,17 +176,17 @@ class GyroChat:
         if show_user_input:
             print(f"You: {message}")
         print("GyroASI: ", end="", flush=True)
-        
+
         payload = {
             "input": message,
             "stream": False,
             "store": False,
             "max_output_tokens": 50,
         }
-        
+
         try:
             response = requests.post(self.url, json=payload, timeout=(5, 300))
-            
+
             if response.status_code == 200:
                 data = response.json()
 
@@ -224,7 +225,7 @@ class GyroChat:
                 print(f"Error: HTTP {response.status_code}")
                 print(response.text)
                 return None
-                
+
         except Exception as e:
             print(f"Error: {e}")
             return None
@@ -235,40 +236,40 @@ class GyroChat:
         print("=" * 5)
         print("Running automated prompts...")
         print()
-        
+
         prompts = ["How are you?", "Algorithms are"]
-        
+
         for i, prompt in enumerate(prompts, 1):
             print(f"\n--- Prompt {i} ---")
             self.send_message(prompt)
             print()
-        
+
         print("Automated prompts completed. Exiting.")
 
 
 def main():
     parser = argparse.ArgumentParser(description="GyroASI BabyLM Chat Interface")
     parser.add_argument(
-        "--auto", 
-        action="store_true", 
+        "--auto",
+        action="store_true",
         help="Automatically run option 1 (automated prompts) without showing menu"
     )
     parser.add_argument(
-        "--port", 
-        type=int, 
-        default=9000, 
+        "--port",
+        type=int,
+        default=9000,
         help="Port to run the server on (default: 9000)"
     )
-    
+
     args = parser.parse_args()
-    
+
     chat = GyroChat(port=args.port)
-    
+
     try:
         if not chat.start_server():
             print("Failed to start server. Exiting.")
             return
-        
+
         if args.auto:
             # Run automated prompts directly
             chat.run_automated_prompts()
@@ -280,11 +281,11 @@ def main():
             print("1. Run automated prompts (How are you? + Algorithms are)")
             print("2. Start manual chat")
             print()
-            
+
             while True:
                 try:
                     choice = input("Enter your choice (1 or 2): ").strip()
-                    
+
                     if choice == "1":
                         chat.run_automated_prompts()
                         break
@@ -294,14 +295,14 @@ def main():
                     else:
                         print("Please enter 1 or 2.")
                         continue
-                        
+
                 except KeyboardInterrupt:
                     print("\nGoodbye!")
                     break
                 except Exception as e:
                     print(f"Error: {e}")
                     break
-                
+
     finally:
         chat.cleanup()
 

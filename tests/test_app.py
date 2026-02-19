@@ -7,13 +7,13 @@ Tests the app-layer coordination system:
 - Event binding to kernel moments
 """
 
-import numpy as np
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from src.app.coordination import Coordinator
-from src.app.events import Domain, EdgeID, GovernanceEvent, MICRO
+from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 from src.app.ledger import DomainLedgers, get_incidence_matrix, get_projections
 
 
@@ -199,7 +199,7 @@ class TestHodgeProjections:
 
     def test_cycle_basis_is_in_kernel_and_unit_norm(self):
         """Cycle basis columns must be in ker(B) and have unit norm."""
-        from src.app.ledger import get_incidence_matrix, get_cycle_basis
+        from src.app.ledger import get_cycle_basis, get_incidence_matrix
 
         B = get_incidence_matrix()
         basis = get_cycle_basis()  # (6,3)

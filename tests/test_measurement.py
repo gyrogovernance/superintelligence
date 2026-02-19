@@ -14,12 +14,12 @@ to calibrate the system to A*.
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 
 from src.app.cli.schemas import A_STAR
-from src.app.events import Domain, MICRO
+from src.app.events import MICRO, Domain
 from src.app.ledger import (
     DomainLedgers,
     compute_aperture,
@@ -35,7 +35,7 @@ class TestMeasurementCollapse:
     Rigorously demonstrate the failures of empirical evaluation modes via K4 geometry.
     """
 
-    def _apply_thm_payload(self, ledgers: DomainLedgers, payload: Dict[str, Any], domain_str: str = "economy"):
+    def _apply_thm_payload(self, ledgers: DomainLedgers, payload: dict[str, Any], domain_str: str = "economy"):
         """
         Helper: run THMDisplacementPlugin on a payload and apply resulting events
         to the given DomainLedgers for the specified domain.
@@ -111,11 +111,11 @@ class TestMeasurementCollapse:
         y_far_scaled_float = y_far_float * (scalar_near / scalar_far_orig)
         # Convert to int64 micro-units
         y_far_scaled = (y_far_scaled_float * MICRO).astype(np.int64)
-        
+
         # Recompute A_far (Aperture is scale invariant, so it stays 0.5)
         _, y_far_scaled_cycle = hodge_decomposition(y_far_scaled, P_grad, P_cycle)
         A_far_scaled = compute_aperture(y_far_scaled, y_far_scaled_cycle)
-        
+
         scalar_far = float(np.sum(np.abs(y_far_scaled_float)))
 
         dist_near = abs(A_near - A_STAR)
@@ -147,7 +147,7 @@ class TestMeasurementCollapse:
         # We can increase magnitude, but we cannot change structure.
         magnitudes = [1.0, 10.0, 100.0]
         single_axis_apertures = []
-        
+
         for mag in magnitudes:
             ledgers = DomainLedgers()
             self._apply_thm_payload(ledgers, {"GTD": mag}, domain_str="education")
@@ -170,10 +170,10 @@ class TestMeasurementCollapse:
         print("  [Single Axis Strategy]")
         for i, m in enumerate(magnitudes):
             print(f"    Mag {m:5.1f} -> A = {single_axis_apertures[i]:.6f} (Locked)")
-        
+
         print("  [Multi-Axis Strategy]")
         print(f"    Constructed y -> A = {A_aligned:.6f} (Aligned)")
-        
+
         print("  ✓ Proven: Single-axis optimization cannot achieve alignment.")
         print("  ✓ Proven: Epistemic enumeration enables A*.")
 
@@ -181,7 +181,7 @@ class TestMeasurementCollapse:
         for A in single_axis_apertures:
             assert abs(A - 0.5) < 1e-6, "Single axis must be locked to 0.5"
             assert abs(A - A_STAR) > 0.4, "Single axis cannot reach A*"
-            
+
         # Assert Freedom
         assert abs(A_aligned - A_STAR) < 1e-5, "Multi-axis must hit A* (allowing for quantization errors from int64 conversion)"
 
@@ -210,7 +210,7 @@ class TestMeasurementCollapse:
         Scalar measurement is not.
         """
         P_grad, P_cycle = get_projections()
-        
+
         # Base vector (structurally rich)
         y_float = np.array([1.0, 2.0, 0.5, 1.5, 0.2, 1.0], dtype=np.float64)
         # Convert to int64 micro-units for hodge_decomposition

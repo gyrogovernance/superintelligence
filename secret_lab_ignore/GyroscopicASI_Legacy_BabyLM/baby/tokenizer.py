@@ -1,4 +1,4 @@
-from openai_harmony import load_harmony_encoding, HarmonyEncodingName
+from openai_harmony import HarmonyEncodingName, load_harmony_encoding
 
 _encoding = None
 

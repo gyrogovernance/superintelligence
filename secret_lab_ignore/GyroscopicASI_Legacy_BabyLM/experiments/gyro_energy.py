@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
-from typing import Dict, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -59,7 +58,7 @@ zeta = Q_G / S_geo                       # gravitational prefactor from geometry
 # -----------------------------
 # CS anchor (Planck units only)
 # -----------------------------
-def planck_anchor_cs() -> Dict[str, float]:
+def planck_anchor_cs() -> dict[str, float]:
     # Standard Planck units from {ħ,c,G}
     T_pl = math.sqrt(HBAR * G / (C**5))
     L_pl = math.sqrt(HBAR * G / (C**3))
@@ -78,7 +77,7 @@ def planck_anchor_cs() -> Dict[str, float]:
 # -----------------------------
 def sector_anchors(E_GUT_GeV: float = 1.0e16,
                    E_EW_GeV: float = 246.0,
-                   sector_lock: bool = False) -> Dict[str, float]:
+                   sector_lock: bool = False) -> dict[str, float]:
     # UNA+ONA share the GUT sector if sector_lock=True
     E_UNA_GeV = E_GUT_GeV
     E_ONA_GeV = E_GUT_GeV if sector_lock else (E_GUT_GeV / math.sqrt(3.0))
@@ -97,7 +96,7 @@ def sector_anchors(E_GUT_GeV: float = 1.0e16,
 # -----------------------------
 def free_anchor_calibration(anchor_stage: str,
                             anchor_energy_GeV: float,
-                            predict: str = "zeta") -> Dict[str, float | str]:
+                            predict: str = "zeta") -> dict[str, float | str]:
     """
     Diagnostic: if you force a stage to a target energy, what ζ or G would be implied?
     """
@@ -182,7 +181,7 @@ def estimate_lambda2_and_tau(
     batch: int = 20000,
     lazy_eps: float = 0.05,
     seed: int = 42,
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     epi = np.load(epi_path, mmap_mode="r")
     N = epi.shape[0]
 
@@ -214,7 +213,7 @@ def estimate_lambda2_and_tau(
     tau = 1.0 / gap
     return lam2, tau
 
-def compute_atlas_corrections() -> Dict[str, float | str]:
+def compute_atlas_corrections() -> dict[str, float | str]:
     epi_path = PATH_EPI
     if not epi_path.exists():
         return {"status": "skipped", "reason": "atlas data not found"}

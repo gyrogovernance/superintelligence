@@ -13,13 +13,13 @@ from pathlib import Path
 def check_imports(root_dir: Path) -> list[str]:
     """Check for forbidden 'from router' or 'import router' patterns."""
     errors = []
-    
+
     # Patterns to check
     forbidden_patterns = [
         (r'^from router\.', 'from router.'),
         (r'^import router\.', 'import router.'),
     ]
-    
+
     # Files to check
     for py_file in root_dir.rglob('*.py'):
         # Skip excluded directories
@@ -32,11 +32,11 @@ def check_imports(root_dir: Path) -> list[str]:
             '.git',
         ]):
             continue
-        
+
         try:
             content = py_file.read_text(encoding='utf-8')
             lines = content.split('\n')
-            
+
             for line_num, line in enumerate(lines, 1):
                 for pattern, description in forbidden_patterns:
                     if re.search(pattern, line):
@@ -46,16 +46,16 @@ def check_imports(root_dir: Path) -> list[str]:
                         )
         except Exception as e:
             errors.append(f"{py_file}: Error reading file: {e}")
-    
+
     return errors
 
 
 def main():
     """Run import check and exit with error code if violations found."""
     root_dir = Path(__file__).parent.parent
-    
+
     errors = check_imports(root_dir)
-    
+
     if errors:
         print("ERROR: Found imports using 'router' instead of 'src.router':")
         print()

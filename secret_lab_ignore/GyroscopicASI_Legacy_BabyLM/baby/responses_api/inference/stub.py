@@ -1,6 +1,7 @@
 import time
-from typing import Callable
-from baby.constants.harmony_tokens import CHANNEL, MESSAGE, END, START, CALL, RETURN
+from collections.abc import Callable
+
+from baby.constants.harmony_tokens import CALL, CHANNEL, END, MESSAGE, RETURN, START
 
 fake_tokens = [
     CHANNEL,

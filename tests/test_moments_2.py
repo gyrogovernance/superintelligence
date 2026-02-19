@@ -57,7 +57,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tests._physics_utils import table
+# --- Physical constants ---
+# Import canonical constants from production code
+from src.app.coordination import ATOMIC_HZ_CS133, OMEGA_SIZE
 from src.router.constants import (
     ARCHETYPE_A12,
     ARCHETYPE_B12,
@@ -65,11 +67,7 @@ from src.router.constants import (
     mask12_for_byte,
 )
 from src.router.kernel import RouterKernel
-
-
-# --- Physical constants ---
-# Import canonical constants from production code
-from src.app.coordination import ATOMIC_HZ_CS133, OMEGA_SIZE
+from tests._physics_utils import table
 
 SPEED_OF_LIGHT = 299_792_458  # m/s (used only for c-cancellation stress test)
 SECONDS_PER_YEAR = 365 * 24 * 10 * 10  # Used for coverage calculations

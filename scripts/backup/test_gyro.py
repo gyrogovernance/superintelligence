@@ -4,7 +4,6 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -38,7 +37,7 @@ def circular_dist(idx: Tensor, center: int, n: int) -> Tensor:
 class DynMaskParams:
     base_sigma: float = 48.0          # your experiments: 48/64 were best
     phase_shift: int = 8              # shift center by p*8
-    vertex_scale: Tuple[float, float, float, float] = (0.75, 0.9, 1.0, 1.25)
+    vertex_scale: tuple[float, float, float, float] = (0.75, 0.9, 1.0, 1.25)
 
 
 class TokenCoupler:
@@ -148,12 +147,12 @@ class DynamicRouter:
         self.kernel = kernel
         self.params = params
         self.coupler = TokenCoupler()
-        self.original_mlps: Dict[int, nn.Module] = {}
-        self.routed_layers: List[int] = []
+        self.original_mlps: dict[int, nn.Module] = {}
+        self.routed_layers: list[int] = []
 
-    def schedule_layers(self) -> List[int]:
+    def schedule_layers(self) -> list[int]:
         # Same schedule you used, but explicit
-        out: List[int] = []
+        out: list[int] = []
         for i in range(N_LAYERS):
             if i < 8 and i % 2 == 0:
                 out.append(i)
@@ -198,7 +197,7 @@ def generate_dynamic(
     prompt: str,
     max_new_tokens: int,
     seed: int,
-) -> Tuple[str, Dict[str, List[int]]]:
+) -> tuple[str, dict[str, list[int]]]:
     device = next(model.parameters()).device
     input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to(device)
 
@@ -245,7 +244,7 @@ def generate_dynamic(
     return text, traj
 
 
-def analyze_traj(traj: Dict[str, List[int]]) -> None:
+def analyze_traj(traj: dict[str, list[int]]) -> None:
     h = np.array(traj["h"], dtype=np.int64)
     chi = np.array(traj["chi"], dtype=np.int64)
     p = np.array(traj["p"], dtype=np.int64)

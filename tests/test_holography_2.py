@@ -3,12 +3,11 @@ from __future__ import annotations
 
 import random
 from pathlib import Path
-from typing import Dict, List, Set
 
 import numpy as np
 from numpy.typing import NDArray
 
-from src.router.kernel import RouterKernel
+from src.app.ledger import get_cycle_basis
 from src.router.constants import (
     ARCHETYPE_A12,
     ARCHETYPE_B12,
@@ -17,7 +16,7 @@ from src.router.constants import (
     pack_state,
     unpack_state,
 )
-from src.app.ledger import get_cycle_basis
+from src.router.kernel import RouterKernel
 
 SEP = "=========="
 
@@ -40,7 +39,7 @@ def popcount12(x: int) -> int:
     return bin(x & 0xFFF).count("1")
 
 
-def horizon_indices(ont: NDArray[np.uint32]) -> List[int]:
+def horizon_indices(ont: NDArray[np.uint32]) -> list[int]:
     out = []
     for i, s in enumerate(ont):
         a, b = unpack_state(int(s))
@@ -49,9 +48,9 @@ def horizon_indices(ont: NDArray[np.uint32]) -> List[int]:
     return out
 
 
-def build_vertex_map(ont: NDArray[np.uint32], h_idxs: List[int]) -> Dict[int, int]:
+def build_vertex_map(ont: NDArray[np.uint32], h_idxs: list[int]) -> dict[int, int]:
     """Build vertex map: horizon A -> K4 vertex (0-3)."""
-    vertex_map: Dict[int, int] = {}
+    vertex_map: dict[int, int] = {}
     for h_idx in h_idxs:
         a, _ = unpack_state(int(ont[h_idx]))
         frame0 = a & 0x3F
@@ -70,13 +69,13 @@ def build_vertex_map(ont: NDArray[np.uint32], h_idxs: List[int]) -> Dict[int, in
 def build_charge_by_mask(
     ont: NDArray[np.uint32],
     epi: NDArray[np.uint32],
-    h_idxs: List[int],
-    vertex_map: Dict[int, int],
-) -> Dict[int, int]:
+    h_idxs: list[int],
+    vertex_map: dict[int, int],
+) -> dict[int, int]:
     """Build charge_by_mask: mask -> vertex charge (2-bit) from byte² action."""
-    charge_by_mask: Dict[int, int] = {}
+    charge_by_mask: dict[int, int] = {}
     unique_masks = set(mask12_for_byte(b) for b in range(256))
-    mask_to_any_byte: Dict[int, int] = {}
+    mask_to_any_byte: dict[int, int] = {}
     for b in range(256):
         m = mask12_for_byte(b)
         if m not in mask_to_any_byte:
@@ -107,11 +106,11 @@ def build_charge_by_mask(
     return charge_by_mask
 
 
-def solve_q0_q1(charge_by_mask: Dict[int, int]) -> tuple[int, int]:
+def solve_q0_q1(charge_by_mask: dict[int, int]) -> tuple[int, int]:
     """Solve for parity checks q0, q1 from charge_by_mask using brute force."""
     C = {mask12_for_byte(b) for b in range(256)}
     C_list = sorted(C)
-    
+
     def solve_q_by_bruteforce(C_list: list[int], rhs: list[int]) -> int:
         for q in range(4096):
             ok = True
@@ -122,15 +121,15 @@ def solve_q0_q1(charge_by_mask: Dict[int, int]) -> tuple[int, int]:
             if ok:
                 return q
         raise AssertionError("No q satisfies dot(q,m)=rhs on C")
-    
+
     t0 = {m: charge_by_mask[m] & 1 for m in C}
     t1 = {m: (charge_by_mask[m] >> 1) & 1 for m in C}
-    
+
     rhs0 = [t0[m] for m in C_list]
     rhs1 = [t1[m] for m in C_list]
     q0 = solve_q_by_bruteforce(C_list, rhs0)
     q1 = solve_q_by_bruteforce(C_list, rhs1)
-    
+
     return q0, q1
 
 
@@ -154,27 +153,27 @@ def test_vertex_wedges_tile_bulk_subregion_duality():
     K = RouterKernel(atlas_dir)
     ont = K.ontology
     epi = K.epistemology
-    
+
     h_idxs = horizon_indices(ont)
     assert len(h_idxs) == 256
-    
+
     # Build vertex map
     vertex_map = build_vertex_map(ont, h_idxs)
-    
+
     # Build mask code C
     C = sorted({mask12_for_byte(b) for b in range(256)})
     assert len(C) == 256
-    
+
     # Build horizon A -> horizon_idx lookup
-    horizon_A_to_idx: Dict[int, int] = {}
+    horizon_A_to_idx: dict[int, int] = {}
     for idx in h_idxs:
         a, _ = unpack_state(int(ont[idx]))
         horizon_A_to_idx[a] = idx
-    
+
     # For each vertex v=0..3, build wedge
-    all_wedge_indices: List[Set[int]] = []
-    all_wedge_u_coords: List[Set[int]] = []
-    
+    all_wedge_indices: list[set[int]] = []
+    all_wedge_u_coords: list[set[int]] = []
+
     for v in range(4):
         # Collect horizon indices with vertex v
         h_indices_v = []
@@ -182,57 +181,57 @@ def test_vertex_wedges_tile_bulk_subregion_duality():
             a, _ = unpack_state(int(ont[h_idx]))
             if vertex_map[a] == v:
                 h_indices_v.append(h_idx)
-        
+
         assert len(h_indices_v) == 64, f"Vertex {v} must have 64 horizon states"
-        
+
         # Compute reachable set by one step from these horizon states
-        wedge_indices: Set[int] = set()
-        wedge_u_coords: Set[int] = set()
-        
+        wedge_indices: set[int] = set()
+        wedge_u_coords: set[int] = set()
+
         for h_idx in h_indices_v:
             # All states reachable in one step from this horizon state
             for b in range(256):
                 next_idx = int(epi[h_idx, b])
                 wedge_indices.add(next_idx)
-                
+
                 # Compute u-coordinate
                 a_next, _ = unpack_state(int(ont[next_idx]))
                 u = (a_next ^ ARCHETYPE_A12) & 0xFFF
                 if u in C:
                     wedge_u_coords.add(u)
-        
+
         all_wedge_indices.append(wedge_indices)
         all_wedge_u_coords.append(wedge_u_coords)
-        
+
         # Verify wedge size is exactly 16384
         assert len(wedge_indices) == 16384, f"Wedge {v} must have size 16384, got {len(wedge_indices)}"
-        
+
         # Verify u-coordinates of reached states exactly equal vertex u-set
         # On horizon, one step preserves A, so wedge u-coords must equal vertex u-set exactly
         vertex_u_set = {((unpack_state(int(ont[h_idx]))[0] ^ ARCHETYPE_A12) & 0xFFF) for h_idx in h_indices_v}
         assert wedge_u_coords == vertex_u_set, f"Wedge u-coords must exactly equal vertex {v} u-set"
-    
+
     # Verify wedges are disjoint
     for i in range(4):
         for j in range(i + 1, 4):
             intersection = all_wedge_indices[i] & all_wedge_indices[j]
             assert len(intersection) == 0, f"Wedges {i} and {j} must be disjoint, but intersect in {len(intersection)} states"
-    
+
     # Verify union of all wedges equals all Ω indices
     union_all = set()
     for wedge_set in all_wedge_indices:
         union_all |= wedge_set
-    
+
     all_omega_indices = set(range(len(ont)))
     assert union_all == all_omega_indices, f"Union of wedges must equal all Ω indices. Missing: {len(all_omega_indices - union_all)}, extra: {len(union_all - all_omega_indices)}"
-    
+
     print(SEP)
     print("Vertex-wedges tile the bulk (subregion duality)")
     print(SEP)
     for v in range(4):
         print(f"  wedge {v}: size={len(all_wedge_indices[v])}, u-coords={len(all_wedge_u_coords[v])}")
     print(f"  union size: {len(union_all)} (expected: {len(ont)})")
-    print(f"  wedges are disjoint: True")
+    print("  wedges are disjoint: True")
 
 
 # ==========
@@ -265,74 +264,74 @@ def test_meta_hodge_ecology_18d_cross_domain_cycle_projector():
         [ 1,  0, -1],  # Emp
         [ 0,  1,  1],  # Edu
     ], dtype=float)
-    
+
     # Build meta-edge cycle projector on 3D edge space
     L = B_meta @ B_meta.T
     L_pinv = np.linalg.pinv(L, rcond=1e-12)
     P_grad_edges = B_meta.T @ L_pinv @ B_meta  # (3,3)
     P_cycle_edges = np.eye(3) - P_grad_edges   # (3,3)
-    
+
     # Lift to 18D: kron with I6 acts independently on each K4-edge channel
     P_cycle_18 = np.kron(P_cycle_edges, np.eye(6))  # (18,18)
-    
+
     # Verify projector properties: idempotent and symmetric
     P_cycle_squared = P_cycle_18 @ P_cycle_18
     idempotent_diff = np.max(np.abs(P_cycle_squared - P_cycle_18))
     symmetric_diff = np.max(np.abs(P_cycle_18.T - P_cycle_18))
-    
+
     assert idempotent_diff < 1e-10, f"P_cycle must be idempotent, max diff: {idempotent_diff:.2e}"
     assert symmetric_diff < 1e-10, f"P_cycle must be symmetric, max diff: {symmetric_diff:.2e}"
-    
+
     # Verify rank: K3 edge-cycle space has dim 1, with 6 independent channels → rank 6
     rank_P_cycle_edges = int(np.linalg.matrix_rank(P_cycle_edges, tol=1e-9))
     rank_P_cycle_18 = int(np.linalg.matrix_rank(P_cycle_18, tol=1e-9))
     assert rank_P_cycle_edges == 1, f"P_cycle_edges must have rank 1, got {rank_P_cycle_edges}"
     assert rank_P_cycle_18 == 6, f"P_cycle_18 must have rank 6, got {rank_P_cycle_18}"
-    
+
     # Get cycle basis from ledger (6D for K4)
     cycle_basis = get_cycle_basis()  # Shape (6, 3)
     assert cycle_basis.shape == (6, 3), f"Cycle basis must be 6×3, got {cycle_basis.shape}"
-    
+
     # Use first column as unit-norm cycle vector
     u = cycle_basis[:, 0]  # Shape (6,)
     assert abs(np.linalg.norm(u) - 1.0) < 1e-10, "Cycle vector must be unit norm"
-    
+
     # Build domain ledgers
     # Correlated: y0 = y1 = y2 = u
     y0_corr = u
     y1_corr = u
     y2_corr = u
-    
+
     # Anti-correlated: y0 = u, y1 = -u, y2 = 0
     y0_anti = u
     y1_anti = -u
     y2_anti = np.zeros(6)
-    
+
     # Build meta-edge signals Z = [y_econ, y_emp, y_edu]
     # Treat three domain ledgers as three meta-edges of K3 (Holant edge-signature viewpoint)
     # Stacking order: Econ ledger, Emp ledger, Edu ledger
     Z_correlated = np.concatenate((y0_corr, y1_corr, y2_corr))
     assert Z_correlated.shape == (18,), f"Z_correlated must be 18D, got {Z_correlated.shape}"
-    
+
     Z_anti = np.concatenate((y0_anti, y1_anti, y2_anti))
     assert Z_anti.shape == (18,), f"Z_anti must be 18D, got {Z_anti.shape}"
-    
+
     # Project
     Z_correlated_cross = P_cycle_18 @ Z_correlated
     Z_anti_cross = P_cycle_18 @ Z_anti
-    
+
     # Verify correlated has nonzero cycle component
     # For single channel, edge vector (1,1,1) → aperture exactly 1/9
     # Extends channel-wise to 18D, so A_cross(correlated) ≈ 1/9
     norm_correlated = np.linalg.norm(Z_correlated_cross)
     assert norm_correlated > 0, f"Correlated Z must have nonzero cycle component, norm: {norm_correlated:.2e}"
-    
+
     # Verify anti-correlated has nonzero cycle component
     # For single channel, edge vector (1,-1,0) → aperture exactly 2/3
     # Extends channel-wise to 18D, so A_cross(anti) ≈ 2/3
     norm_anti = np.linalg.norm(Z_anti_cross)
     assert norm_anti > 0, f"Anti-correlated Z must have nonzero cycle component, norm: {norm_anti:.4f}"
-    
+
     # Compute cross-domain aperture
     def compute_aperture(Z: np.ndarray) -> float:
         Z_cross = P_cycle_18 @ Z
@@ -341,24 +340,24 @@ def test_meta_hodge_ecology_18d_cross_domain_cycle_projector():
             return 0.0
         norm_Z_cross = float(np.linalg.norm(Z_cross))
         return float((norm_Z_cross / norm_Z) ** 2)
-    
+
     A_correlated = compute_aperture(Z_correlated)
     A_anti = compute_aperture(Z_anti)
-    
+
     # Verify exact rational aperture values
     # Correlated: (u,u,u) → channel-wise (1,1,1) → aperture exactly 1/9
     expected_A_corr = 1.0 / 9.0
     assert abs(A_correlated - expected_A_corr) < 1e-12, f"Correlated aperture must be 1/9, got {A_correlated:.10f}"
-    
+
     # Anti-correlated: (u,-u,0) → channel-wise (1,-1,0) → aperture exactly 2/3
     expected_A_anti = 2.0 / 3.0
     assert abs(A_anti - expected_A_anti) < 1e-12, f"Anti-correlated aperture must be 2/3, got {A_anti:.10f}"
-    
+
     # Verify scale invariance: A_cross(Z) == A_cross(2Z)
     A_anti_scaled = compute_aperture(2.0 * Z_anti)
     scale_inv_diff = abs(A_anti - A_anti_scaled)
     assert scale_inv_diff < 1e-12, f"Aperture must be scale-invariant, diff: {scale_inv_diff:.2e}"
-    
+
     print(SEP)
     print("Meta-Hodge ecology (18D cross-domain cycle projector)")
     print(SEP)
@@ -397,13 +396,13 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
     
     Trace: Error-correction / information sets in [12,8] linear code.
     """
-    from src.router.constants import expand_intron_to_mask24, byte_to_intron
-    
+    from src.router.constants import byte_to_intron, expand_intron_to_mask24
+
     # Build generator matrix G (12×8) from intron basis
     # Basis: e_i for i=0..7, mapped to bytes via b = 0xAA XOR (1<<i)
     gen_bytes = [((1 << i) ^ 0xAA) & 0xFF for i in range(8)]
     G = np.zeros((12, 8), dtype=np.uint8)
-    
+
     for col in range(8):
         intron = byte_to_intron(gen_bytes[col])
         mask24 = expand_intron_to_mask24(intron)
@@ -411,7 +410,7 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
         for bit in range(12):
             if (mask12 >> bit) & 1:
                 G[bit, col] = np.uint8(1)
-    
+
     # GF(2) rank function (Gaussian elimination over GF(2))
     def gf2_rank_matrix(M: np.ndarray) -> int:
         """GF(2) rank by Gaussian elimination (row swaps, column pivots)."""
@@ -438,7 +437,7 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
             if r == rows:
                 break
         return r
-    
+
     # Define 2×3×2 geometry: rows span both frames
     # Row 0: bits {0,1,6,7}
     # Row 1: bits {2,3,8,9}
@@ -447,31 +446,31 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
     erased_frame0 = {0, 1, 2, 3, 4, 5}  # 6 bits
     erased_edges = {0, 5, 6, 11}  # 4 bits
     erased_dup = {8, 9, 10, 11}  # 4 bits - duplicate bits only
-    
-    def compute_consistent_count_for_observed_pattern(erased_bits: Set[int]) -> int:
+
+    def compute_consistent_count_for_observed_pattern(erased_bits: set[int]) -> int:
         """Compute consistent codewords = 2^(8 - rank(G_S)) for observed set S."""
         observed_bits_list = [i for i in range(12) if i not in erased_bits]
         observed_bits_arr = np.array(observed_bits_list, dtype=np.intp)
         G_S = G[observed_bits_arr, :]  # Punctured generator matrix
         rank_G_S = gf2_rank_matrix(G_S)
         return 2 ** (8 - rank_G_S)
-    
+
     consistent_row0 = compute_consistent_count_for_observed_pattern(erased_row0)
     consistent_frame0 = compute_consistent_count_for_observed_pattern(erased_frame0)
     consistent_edges = compute_consistent_count_for_observed_pattern(erased_edges)
     consistent_dup = compute_consistent_count_for_observed_pattern(erased_dup)
-    
+
     # Compute ranks for each pattern
     row0_observed = np.array([i for i in range(12) if i not in erased_row0], dtype=np.intp)
     frame0_observed = np.array([i for i in range(12) if i not in erased_frame0], dtype=np.intp)
     edges_observed = np.array([i for i in range(12) if i not in erased_edges], dtype=np.intp)
     dup_observed = np.array([i for i in range(12) if i not in erased_dup], dtype=np.intp)
-    
+
     rank_row0 = gf2_rank_matrix(G[row0_observed, :])
     rank_frame0 = gf2_rank_matrix(G[frame0_observed, :])
     rank_edges = gf2_rank_matrix(G[edges_observed, :])
     rank_dup = gf2_rank_matrix(G[dup_observed, :])
-    
+
     print(SEP)
     print("Erasure reconstruction thresholds (2×3×2 geometry)")
     print(SEP)
@@ -479,21 +478,21 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
     print(f"  erase frame0 (6 bits {sorted(erased_frame0)}): consistent={consistent_frame0}, rank={rank_frame0}")
     print(f"  erase edges (4 bits {sorted(erased_edges)}): consistent={consistent_edges}, rank={rank_edges}")
     print(f"  erase dup (4 bits {sorted(erased_dup)}): consistent={consistent_dup}, rank={rank_dup}, unique={rank_dup == 8}")
-    
+
     # These three specific erasures each leave exactly 2 bits undetermined -> 4-fold ambiguity
     # This collapses the code from 8 degrees to 6 degrees, matching K₄ quotient size
     assert consistent_row0 == 4 and rank_row0 == 6, f"Row0 erasure should give 4-fold ambiguity (rank 6), got consistent={consistent_row0}, rank={rank_row0}"
     assert consistent_frame0 == 4 and rank_frame0 == 6, f"Frame0 erasure should give 4-fold ambiguity (rank 6), got consistent={consistent_frame0}, rank={rank_frame0}"
     assert consistent_edges == 4 and rank_edges == 6, f"Edges erasure should give 4-fold ambiguity (rank 6), got consistent={consistent_edges}, rank={rank_edges}"
-    
+
     # Erasing duplicate bits (8-11) should allow unique reconstruction (information set)
     assert rank_dup == 8, f"Duplicate bit erasure should give rank 8 (information set), got rank={rank_dup}"
     assert consistent_dup == 1, f"Duplicate bit erasure should give unique reconstruction, got consistent={consistent_dup}"
-    
+
     # ============================================================
     # Flagship extension: Erasure ambiguity subspace equals loss of χ charge
     # ============================================================
-    
+
     # Load kernel to build charge_by_mask and recover q0, q1
     atlas_dir = Path("data/atlas")
     K = RouterKernel(atlas_dir)
@@ -503,24 +502,24 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
     vertex_map = build_vertex_map(ont, h_idxs)
     charge_by_mask = build_charge_by_mask(ont, epi, h_idxs, vertex_map)
     q0, q1 = solve_q0_q1(charge_by_mask)
-    
+
     def chi(m: int) -> int:
         """Vertex charge: χ(m) = (<q0,m>, <q1,m>)."""
         b0 = dot_parity(q0, m)
         b1 = dot_parity(q1, m)
         return b0 + (b1 << 1)
-    
+
     # For each erasure pattern, compute the ambiguity subspace E_S
     # E_S = {codewords c in C such that c agrees on all observed bits (i.e., G_S c = observed pattern)}
     # For simplicity, compute E_S as: all codewords c where c|S = some fixed pattern
     # Actually: ambiguity = kernel of G_S projection, i.e., codewords that are 0 on observed bits
-    
-    def compute_ambiguity_subcode(erased_bits: Set[int]) -> Set[int]:
+
+    def compute_ambiguity_subcode(erased_bits: set[int]) -> set[int]:
         """Compute ambiguity subcode E_S: codewords that are 0 on all observed bits."""
         observed_bits_list = [i for i in range(12) if i not in erased_bits]
         observed_bits_arr = np.array(observed_bits_list, dtype=np.intp)
         _G_S = G[observed_bits_arr, :]  # Punctured generator matrix (for reference, not directly used)
-        
+
         # Find all message vectors x such that codeword c = G @ x is 0 on all observed bits
         # Then map to codewords: c = G x
         E_S = set()
@@ -532,51 +531,51 @@ def test_erasure_reconstruction_thresholds_2x3x2_geometry():
                     for bit in range(12):
                         if G[bit, i]:
                             c ^= (1 << bit)
-            
+
             # Check if c is 0 on all observed bits (codeword is 0 on observed positions)
             is_zero_on_observed = True
             for bit_pos in observed_bits_list:
                 if (c >> bit_pos) & 1:
                     is_zero_on_observed = False
                     break
-            
+
             if is_zero_on_observed:
                 E_S.add(c & 0xFFF)
-        
+
         return E_S
-    
+
     E_row0 = compute_ambiguity_subcode(erased_row0)
     E_frame0 = compute_ambiguity_subcode(erased_frame0)
     E_edges = compute_ambiguity_subcode(erased_edges)
     E_dup = compute_ambiguity_subcode(erased_dup)
-    
+
     # Compute χ(E_S) = {χ(e) : e in E_S}
     chi_row0 = {chi(e) for e in E_row0}
     chi_frame0 = {chi(e) for e in E_frame0}
     chi_edges = {chi(e) for e in E_edges}
     chi_dup = {chi(e) for e in E_dup}
-    
-    def chi_rank(chis: Set[int]) -> int:
+
+    def chi_rank(chis: set[int]) -> int:
         """Subgroup rank of χ-image: size 1→rank 0, size 2→rank 1, size 4→rank 2."""
         size_to_rank = {1: 0, 2: 1, 4: 2}
         return size_to_rank[len(chis)]
-    
-    print(f"\n  Erasure ambiguity ↔ χ charge loss:")
+
+    print("\n  Erasure ambiguity ↔ χ charge loss:")
     print(f"    row0: |E_S|={len(E_row0)}, |χ(E_S)|={len(chi_row0)}, rank={chi_rank(chi_row0)}")
     print(f"    frame0: |E_S|={len(E_frame0)}, |χ(E_S)|={len(chi_frame0)}, rank={chi_rank(chi_frame0)}")
     print(f"    edges: |E_S|={len(E_edges)}, |χ(E_S)|={len(chi_edges)}, rank={chi_rank(chi_edges)}")
     print(f"    dup: |E_S|={len(E_dup)}, |χ(E_S)|={len(chi_dup)}, rank={chi_rank(chi_dup)}")
-    
+
     # row0/frame0: ambiguity is 4 codewords but only 1 quotient bit varies (χ-image size 2)
     assert len(chi_row0) == 2, f"row0 expected χ-image size 2, got {chi_row0}"
     assert len(chi_frame0) == 2, f"frame0 expected χ-image size 2, got {chi_frame0}"
     assert chi_rank(chi_row0) == 1, f"row0 χ-image should have rank 1, got {chi_rank(chi_row0)}"
     assert chi_rank(chi_frame0) == 1, f"frame0 χ-image should have rank 1, got {chi_rank(chi_frame0)}"
-    
+
     # edges: ambiguity spans both quotient bits (χ-image size 4)
     assert len(chi_edges) == 4, f"edges expected χ-image size 4, got {chi_edges}"
     assert chi_rank(chi_edges) == 2, f"edges χ-image should have rank 2, got {chi_rank(chi_edges)}"
-    
+
     # dup: no ambiguity
     assert chi_dup == {0}, f"dup expected χ-image {{0}}, got {chi_dup}"
     assert chi_rank(chi_dup) == 0, f"dup χ-image should have rank 0, got {chi_rank(chi_dup)}"
@@ -602,7 +601,7 @@ def test_minimum_distance_and_decoding_ambiguity():
     C = {mask12_for_byte(b) for b in range(256)}
     C_list = sorted(C)
     assert len(C) == 256
-    
+
     # Compute minimum distance: min Hamming distance between distinct codewords
     d_min = 12
     closest_pair = None
@@ -616,36 +615,36 @@ def test_minimum_distance_and_decoding_ambiguity():
                 break
         if d_min == 1:
             break
-    
+
     print(SEP)
     print("Minimum distance and decoding ambiguity")
     print(SEP)
     print(f"  d_min(C) = {d_min}")
     if closest_pair:
         print(f"  closest pair: 0x{closest_pair[0]:03x}, 0x{closest_pair[1]:03x}")
-    
+
     # Minimum distance should be 1 (weight-1 primitives exist in mask code)
     assert d_min == 1, f"Minimum distance should be 1 (weight-1 primitives exist), got {d_min}"
-    
+
     # Build list of weight-1 codewords (primitives)
     w1 = [c for c in C_list if popcount12(c) == 1]
     assert len(w1) == 4, f"Expected 4 weight-1 primitives, got {len(w1)}"
-    
+
     # Construct explicit ambiguity witness
     # Since this is a linear code, c1 ^ c2 is itself a codeword (so distance 0)
     # Need to find a NON-codeword that has multiple nearest codewords
     # Strategy: systematically search for words not in C that have ≥2 nearest neighbors
-    
+
     ambiguity_found = False
     witness_received: int = 0
     witness_nearest: list[int] = []
     witness_dist: int = 0
-    
+
     # Search all 12-bit words (only need to check non-codewords)
     for candidate in range(4096):
         if candidate in C:
             continue  # Skip codewords
-        
+
         # Find all codewords at minimum distance
         min_dist = 12
         nearest: list[int] = []
@@ -656,7 +655,7 @@ def test_minimum_distance_and_decoding_ambiguity():
                 nearest = [c]
             elif dist == min_dist:
                 nearest.append(c)
-        
+
         # If we have at least 2 nearest codewords at distance ≥1, we have an ambiguity witness
         if len(nearest) >= 2 and min_dist >= 1:
             ambiguity_found = True
@@ -664,14 +663,14 @@ def test_minimum_distance_and_decoding_ambiguity():
             witness_nearest = nearest
             witness_dist = min_dist
             break  # Found one, we're done
-    
+
     print(f"  weight-1 primitives: {[f'0x{c:03x}' for c in w1]}")
-    
+
     # Assert we found an ambiguity witness
     assert ambiguity_found, "Should find a decoding ambiguity witness (non-codeword with ≥2 nearest codewords)"
     assert witness_dist >= 1, f"Received word should be at distance ≥1 from nearest codewords, got {witness_dist}"
     assert len(witness_nearest) >= 2, f"Should have ≥2 nearest codewords, got {len(witness_nearest)}"
-    
+
     print(f"  ambiguity witness: r=0x{witness_received:03x} (not a codeword)")
     print(f"  min_dist={witness_dist}, nearest={len(witness_nearest)} codewords")
     print(f"  nearest codewords: {[f'0x{c:03x}' for c in witness_nearest[:5]]}")
@@ -702,7 +701,7 @@ def test_non_cloning_provenance_word_history_degeneracy():
     K = RouterKernel(atlas_dir)
     ont = K.ontology
     epi = K.epistemology
-    
+
     # Find archetype state index
     archetype_state = pack_state(ARCHETYPE_A12, ARCHETYPE_B12 ^ LAYER_MASK_12)
     archetype_idx = None
@@ -711,27 +710,27 @@ def test_non_cloning_provenance_word_history_degeneracy():
             archetype_idx = i
             break
     assert archetype_idx is not None, "Archetype state must exist"
-    
+
     # Restricted alphabet: intron basis bytes
     # b = 0xAA XOR (1<<i) for i=0..7
     restricted_bytes = [((1 << i) ^ 0xAA) & 0xFF for i in range(8)]
     assert len(restricted_bytes) == 8
-    
-    def apply_word(state_idx: int, word: List[int]) -> int:
+
+    def apply_word(state_idx: int, word: list[int]) -> int:
         """Apply word (list of bytes) to state."""
         current = state_idx
         for b in word:
             current = int(epi[current, b])
         return current
-    
-    def compute_conditional_entropy(final_to_words: Dict[int, List[tuple[int, ...]]]) -> float:
+
+    def compute_conditional_entropy(final_to_words: dict[int, list[tuple[int, ...]]]) -> float:
         """Compute H(word | final_state) = -Σ p(final) Σ p(word|final) log p(word|final)."""
         from collections import Counter
-        
+
         total_words = sum(len(words) for words in final_to_words.values())
         if total_words == 0:
             return 0.0
-        
+
         entropy = 0.0
         for _final_idx, words in final_to_words.items():
             if not words:
@@ -745,36 +744,36 @@ def test_non_cloning_provenance_word_history_degeneracy():
                     cond_entropy -= p_word_given_final * np.log2(p_word_given_final)
             entropy += p_final * cond_entropy
         return entropy
-    
+
     # Enumerate all words of length 6 over restricted alphabet
     L = 6
-    final_to_words: Dict[int, List[tuple[int, ...]]] = {}
-    
+    final_to_words: dict[int, list[tuple[int, ...]]] = {}
+
     # Generate all 8^6 words
-    def generate_words(length: int, alphabet: List[int]) -> List[tuple[int, ...]]:
+    def generate_words(length: int, alphabet: list[int]) -> list[tuple[int, ...]]:
         if length == 0:
             return [()]
         shorter = generate_words(length - 1, alphabet)
         return [w + (b,) for w in shorter for b in alphabet]
-    
+
     all_words = generate_words(L, restricted_bytes)
     assert len(all_words) == 8 ** 6, f"Must have 8^6 = {8**6} words, got {len(all_words)}"
-    
+
     # Apply all words and collect collisions
     for word_tuple in all_words:
         final_idx = apply_word(archetype_idx, list(word_tuple))
         if final_idx not in final_to_words:
             final_to_words[final_idx] = []
         final_to_words[final_idx].append(word_tuple)
-    
+
     # Compute statistics
     collisions = [len(words) for words in final_to_words.values() if len(words) > 1]
     avg_preimage = sum(len(words) for words in final_to_words.values()) / len(final_to_words) if final_to_words else 0
     collision_rate = len(collisions) / len(final_to_words) if final_to_words else 0
     max_collision = max(collisions) if collisions else 1
-    
+
     cond_entropy = compute_conditional_entropy(final_to_words)
-    
+
     print(SEP)
     print("Non-cloning / provenance (word history degeneracy)")
     print(SEP)
@@ -785,22 +784,22 @@ def test_non_cloning_provenance_word_history_degeneracy():
     print(f"  collisions: {len(collisions)}, max={max_collision}, avg preimage={avg_preimage:.2f}")
     print(f"  collision rate: {collision_rate:.2%}")
     print(f"  H(word|final) = {cond_entropy:.4f} bits")
-    
+
     # Must have collisions (words > states)
     assert len(collisions) > 0, "Must have collisions when words > states"
     assert cond_entropy > 0, f"Must have positive conditional entropy, got {cond_entropy}"
     assert avg_preimage > 1.0, f"Average preimage size must be > 1, got {avg_preimage}"
-    
+
     # ============================================================
     # Flagship extension: Reachable set has structured 64×64 phase-space image
     # ============================================================
-    
+
     # Compute theoretical reachable sets from generator masks
     # For length-3 XOR combinations over 8 generator masks, we get 2^(3*rank) reachable masks
     # But since we're using restricted alphabet of 8 bytes, each step applies one generator mask
-    
-    from src.router.constants import expand_intron_to_mask24, byte_to_intron
-    
+
+    from src.router.constants import byte_to_intron, expand_intron_to_mask24
+
     # Generator masks from intron basis
     gen_bytes = [((1 << i) ^ 0xAA) & 0xFF for i in range(8)]
     gen_masks = []
@@ -809,7 +808,7 @@ def test_non_cloning_provenance_word_history_degeneracy():
         mask24 = expand_intron_to_mask24(intron)
         mask12 = (mask24 >> 12) & 0xFFF
         gen_masks.append(mask12)
-    
+
     # Compute O_set: all masks reachable by XOR of 3 generator masks (odd positions)
     # This simulates the first 3 steps of a 6-step word
     O_set = set()
@@ -818,7 +817,7 @@ def test_non_cloning_provenance_word_history_degeneracy():
             for k in range(8):
                 mask = gen_masks[i] ^ gen_masks[j] ^ gen_masks[k]
                 O_set.add(mask & 0xFFF)
-    
+
     # Compute E_set: same but for even positions (last 3 steps)
     E_set = set()
     for i in range(8):
@@ -826,7 +825,7 @@ def test_non_cloning_provenance_word_history_degeneracy():
             for k in range(8):
                 mask = gen_masks[i] ^ gen_masks[j] ^ gen_masks[k]
                 E_set.add(mask & 0xFFF)
-    
+
     # Extract u and v coordinates from reached final states
     mask_code_C = {mask12_for_byte(b) for b in range(256)}
     reached_u_set = set()
@@ -839,13 +838,13 @@ def test_non_cloning_provenance_word_history_degeneracy():
             reached_u_set.add(u)
         if v in mask_code_C:
             reached_v_set.add(v)
-    
-    print(f"\n  Reachable set structure:")
+
+    print("\n  Reachable set structure:")
     print(f"    |O_set| (3-step generator span): {len(O_set)}")
     print(f"    |E_set| (3-step generator span): {len(E_set)}")
     print(f"    |reached_u_set|: {len(reached_u_set)}")
     print(f"    |reached_v_set|: {len(reached_v_set)}")
-    
+
     # Assert structured phase-space image: 64×64 Cartesian product
     assert len(O_set) == 64, f"O_set should have size 64 (2^6 from rank structure), got {len(O_set)}"
     assert len(E_set) == 64, f"E_set should have size 64 (2^6 from rank structure), got {len(E_set)}"
@@ -880,69 +879,69 @@ def test_k4_quotient_dynamics_theorem():
     K = RouterKernel(atlas_dir)
     ont = K.ontology
     epi = K.epistemology
-    
+
     h_idxs = horizon_indices(ont)
     assert len(h_idxs) == 256
-    
+
     # Build vertex map
     vertex_map = build_vertex_map(ont, h_idxs)
-    
+
     # Build charge_by_mask and recover q0, q1 using shared helpers
     charge_by_mask = build_charge_by_mask(ont, epi, h_idxs, vertex_map)
     q0, q1 = solve_q0_q1(charge_by_mask)
-    
+
     def chi(m: int) -> int:
         """Vertex charge: χ(m) = (<q0,m>, <q1,m>)."""
         b0 = dot_parity(q0, m)
         b1 = dot_parity(q1, m)
         return b0 + (b1 << 1)
-    
+
     # Test quotient dynamics on random states
     violations = 0
     test_samples = 100
-    
+
     print(SEP)
     print("K₄ quotient dynamics theorem")
     print(SEP)
-    
+
     for _ in range(test_samples):
         # Pick random state index
         state_idx = random.randint(0, len(ont) - 1)
         a, b = unpack_state(int(ont[state_idx]))
-        
+
         # Pick random byte
         byte_val = random.randint(0, 255)
         m_b = mask12_for_byte(byte_val)
-        
+
         # Compute coarse coordinates
         u = (a ^ ARCHETYPE_A12) & 0xFFF
         v = (b ^ ARCHETYPE_B12) & 0xFFF
-        
+
         U = chi(u)
         V = chi(v)
         M = chi(m_b)
-        
+
         # Apply transition
         next_idx = int(epi[state_idx, byte_val])
         a_next, b_next = unpack_state(int(ont[next_idx]))
         u_next = (a_next ^ ARCHETYPE_A12) & 0xFFF
         v_next = (b_next ^ ARCHETYPE_B12) & 0xFFF
-        
+
         U_next = chi(u_next)
         V_next = chi(v_next)
-        
+
         # Verify coarse dynamics: U' = V, V' = U ⊕ M
         if U_next != V:
             violations += 1
         if V_next != (U ^ M):
             violations += 1
-    
+
     print(f"  q0 = 0x{q0:03x}, q1 = 0x{q1:03x}")
     print(f"  quotient dynamics violations: {violations}/{test_samples * 2}")
-    
+
     # Coarse dynamics must hold exactly
     assert violations == 0, f"Quotient dynamics must hold exactly, but {violations} violations"
-    
+
     # Verify quotient space size: should be 16 states (4×4)
     all_coarse_states = set()
     for state_idx in range(len(ont)):
@@ -952,7 +951,7 @@ def test_k4_quotient_dynamics_theorem():
         U = chi(u)
         V = chi(v)
         all_coarse_states.add((U, V))
-    
+
     assert len(all_coarse_states) == 16, f"Quotient space should have 16 states, got {len(all_coarse_states)}"
 
 
@@ -983,16 +982,16 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
     K = RouterKernel(atlas_dir)
     ont = K.ontology
     epi = K.epistemology
-    
+
     h_idxs = horizon_indices(ont)
     assert len(h_idxs) == 256
-    
+
     # Build vertex map and mask code C
     vertex_map = build_vertex_map(ont, h_idxs)
     C = {mask12_for_byte(b) for b in range(256)}
     C_list = sorted(C)
     idx = {m: i for i, m in enumerate(C_list)}
-    
+
     # Find archetype state index
     archetype_state = pack_state(ARCHETYPE_A12, ARCHETYPE_B12 ^ LAYER_MASK_12)
     archetype_idx = None
@@ -1001,11 +1000,11 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
             archetype_idx = i
             break
     assert archetype_idx is not None, "Archetype state must exist"
-    
+
     # Build non-diagonal subset Σ: wedge from vertex 0, one step forward
     # This gives pairs (u, v) where u is horizon mask and v is reached mask
-    sigma_pairs: Set[tuple[int, int]] = set()
-    
+    sigma_pairs: set[tuple[int, int]] = set()
+
     # Get vertex 0 horizon states
     vertex_0_horizons = []
     for h_idx in h_idxs:
@@ -1014,7 +1013,7 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
             u = (a ^ ARCHETYPE_A12) & 0xFFF
             if u in C:
                 vertex_0_horizons.append((h_idx, u))
-    
+
     # Apply one random byte to each horizon state
     test_byte = 42  # Fixed byte for determinism
     for h_idx, u in vertex_0_horizons[:32]:  # Sample 32 for efficiency
@@ -1023,19 +1022,19 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
         v = (a_next ^ ARCHETYPE_A12) & 0xFFF
         if v in C:
             sigma_pairs.add((u, v))
-    
+
     assert len(sigma_pairs) > 0, "Must have non-empty Σ"
-    
+
     # Test cases: separable and graph (exact, textbook quantum-information results)
     N = len(C_list)
-    
-    def compute_entropy_for_sigma(sigma: Set[tuple[int, int]]) -> float:
+
+    def compute_entropy_for_sigma(sigma: set[tuple[int, int]]) -> float:
         """Compute von Neumann entropy of reduced density matrix for subset Σ."""
         sigma_list = sorted(sigma)
         sigma_size = len(sigma_list)
         if sigma_size == 0:
             return 0.0
-        
+
         rho_u = np.zeros((N, N), dtype=complex)
         for u, v in sigma_list:
             i = idx[u]
@@ -1043,39 +1042,39 @@ def test_entanglement_superposition_hilbert_space_reduced_density():
                 if v == v2:  # Trace over v
                     i2 = idx[u2]
                     rho_u[i, i2] += 1.0 / sigma_size
-        
+
         # Normalise
         trace = np.trace(rho_u)
         if abs(trace) > 1e-12:
             rho_u = rho_u / trace
-        
+
         eigenvals = np.linalg.eigvalsh(rho_u)
         eigenvals = eigenvals[eigenvals > 1e-12]
         entropy = -sum(v * np.log2(v) for v in eigenvals if v > 0)
         return entropy
-    
+
     # Case 1: Separable subset Σ = U×V (Cartesian product)
     # Pick disjoint subsets U, V of size 16 each
     U_sep = sorted(C_list)[:16]
     V_sep = sorted(C_list)[16:32]
     sigma_separable = {(u, v) for u in U_sep for v in V_sep}
     entropy_separable = compute_entropy_for_sigma(sigma_separable)
-    
+
     # Case 2: Graph subset Σ = {(u, u⊕t)} for fixed translation t
     # This is a bijection graph, should be maximally entangled
     t_val = mask12_for_byte(42)  # Fixed translation
     sigma_graph = {(u, (u ^ t_val) & 0xFFF) for u in C_list if (u ^ t_val) & 0xFFF in C}
     entropy_graph = compute_entropy_for_sigma(sigma_graph)
-    
+
     print(SEP)
     print("Entanglement & superposition (Hilbert space reduced density)")
     print(SEP)
     print(f"  separable Σ (U×V, |Σ|={len(sigma_separable)}): S = {entropy_separable:.4f} bits")
     print(f"  graph Σ (bijection, |Σ|={len(sigma_graph)}): S = {entropy_graph:.4f} bits")
-    
+
     # Separable should have zero entropy (product state)
     assert abs(entropy_separable - 0.0) < 1e-10, f"Separable Σ should have entropy 0, got {entropy_separable:.4f}"
-    
+
     # Graph (bijection) should be maximally entangled: S = log₂|C| = 8
     expected_graph_entropy = np.log2(len(C_list))
     assert abs(entropy_graph - expected_graph_entropy) < 0.1, f"Graph Σ should have entropy ≈{expected_graph_entropy:.1f}, got {entropy_graph:.4f}"

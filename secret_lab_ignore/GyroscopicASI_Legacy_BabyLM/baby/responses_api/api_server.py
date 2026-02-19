@@ -1,9 +1,12 @@
 import datetime
 import uuid
-from typing import AsyncGenerator, Callable, Literal, Optional, Union
+from collections.abc import AsyncGenerator, Callable
+from typing import Literal
 
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
+from gpt_oss.tools.simple_browser import SimpleBrowserTool
+from gpt_oss.tools.simple_browser.backend import ExaBackend
 from openai_harmony import (
     Author,
     Conversation,
@@ -18,29 +21,25 @@ from openai_harmony import (
     ToolDescription,
 )
 
-from gpt_oss.tools.simple_browser import SimpleBrowserTool
-from gpt_oss.tools.simple_browser.backend import ExaBackend
-
 from .events import (
     ResponseCompletedEvent,
-    ResponseCreatedEvent,
-    ResponseInProgressEvent,
-    ResponseEvent,
-    ResponseOutputItemAdded,
-    ResponseOutputItemDone,
     ResponseContentPartAdded,
     ResponseContentPartDone,
-    ResponseOutputTextDone,
+    ResponseCreatedEvent,
+    ResponseEvent,
+    ResponseInProgressEvent,
+    ResponseOutputItemAdded,
+    ResponseOutputItemDone,
+    ResponseOutputTextAnnotationAdded,
     ResponseOutputTextDelta,
-    ResponseReasoningTextDone,
+    ResponseOutputTextDone,
     ResponseReasoningTextDelta,
+    ResponseReasoningTextDone,
+    ResponseWebSearchCallCompleted,
     ResponseWebSearchCallInProgress,
     ResponseWebSearchCallSearching,
-    ResponseWebSearchCallCompleted,
-    ResponseOutputTextAnnotationAdded,
 )
 from .response_types import (
-    UrlCitation,
     Error,
     FunctionCallItem,
     Item,
@@ -49,11 +48,12 @@ from .response_types import (
     ResponseObject,
     ResponsesRequest,
     TextContentItem,
+    UrlCitation,
     Usage,
-    WebSearchCallItem,
-    WebSearchActionSearch,
-    WebSearchActionOpenPage,
     WebSearchActionFind,
+    WebSearchActionOpenPage,
+    WebSearchActionSearch,
+    WebSearchCallItem,
 )
 
 DEFAULT_TEMPERATURE = 0.0
@@ -73,7 +73,7 @@ def is_not_builtin_tool(recipient: str) -> bool:
     return not recipient.startswith("browser.") and not recipient == "python" and not recipient == "assistant"
 
 
-def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: HarmonyEncoding) -> FastAPI:
+def create_api_server(infer_next_token: Callable[..., int | None], encoding: HarmonyEncoding) -> FastAPI:
     app = FastAPI()
     responses_store: dict[str, tuple[ResponsesRequest, ResponseObject]] = {}
 
@@ -82,11 +82,11 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
         output_tokens: list[int],
         request_body: ResponsesRequest,
         debug_mode: bool = False,
-        function_call_ids: Optional[list[tuple[str, str]]] = None,
-        response_id: Optional[str] = None,
-        previous_response_id: Optional[str] = None,
-        browser_tool: Optional[SimpleBrowserTool] = None,
-        browser_call_ids: Optional[list[str]] = None,
+        function_call_ids: list[tuple[str, str]] | None = None,
+        response_id: str | None = None,
+        previous_response_id: str | None = None,
+        browser_tool: SimpleBrowserTool | None = None,
+        browser_call_ids: list[str] | None = None,
     ) -> ResponseObject:
         output = []
         error = None
@@ -293,7 +293,7 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
         output_tokens: list[int]
         output_text: str
         request_body: ResponsesRequest
-        request: Optional[Request]
+        request: Request | None
         sequence_number: int
 
         def __init__(
@@ -301,10 +301,10 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
             initial_tokens,
             request_body: ResponsesRequest,
             as_sse: bool = False,
-            request: Optional[Request] = None,
-            response_id: Optional[str] = None,
-            store_callback: Optional[Callable[[str, ResponsesRequest, ResponseObject], None]] = None,
-            browser_tool: Optional[SimpleBrowserTool] = None,
+            request: Request | None = None,
+            response_id: str | None = None,
+            store_callback: Callable[[str, ResponsesRequest, ResponseObject], None] | None = None,
+            browser_tool: SimpleBrowserTool | None = None,
         ):
             self.initial_tokens = initial_tokens
             self.tokens = initial_tokens.copy()
@@ -342,7 +342,7 @@ def create_api_server(infer_next_token: Callable[..., Optional[int]], encoding: 
             else:
                 return event
 
-        async def run(self) -> AsyncGenerator[Union[str, ResponseEvent], None]:
+        async def run(self) -> AsyncGenerator[str | ResponseEvent, None]:
             print(
                 f"[DEBUG] API server run() called with {len(self.initial_tokens)} initial tokens, max_output_tokens={self.request_body.max_output_tokens}"
             )

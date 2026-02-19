@@ -1,11 +1,11 @@
 # GyroGem Guard - Orchestrator
 # [Authority:Indirect] + [Agency:Indirect]
 
-from typing import Dict, Optional
+
+from .context import DEFAULT_EXPRESSION
 from .model import GyroGemModel
 from .router import THMRouter
 from .trace import build_trace
-from .context import DEFAULT_EXPRESSION
 
 
 class GyroGemGuard:
@@ -16,14 +16,14 @@ class GyroGemGuard:
     Subsequent invocations produce compact traces.
     """
 
-    def __init__(self, model: Optional[GyroGemModel] = None,
-                 router: Optional[THMRouter] = None):
+    def __init__(self, model: GyroGemModel | None = None,
+                 router: THMRouter | None = None):
         self.model = model or GyroGemModel()
         self.router = router or THMRouter()
         self._trace_counter = 0
         self._first_trace_sent = False
 
-    def process(self, text: str) -> Dict:
+    def process(self, text: str) -> dict:
         """Classify assistant output and build Gyroscope trace.
 
         Args:

@@ -9,9 +9,8 @@ import random
 import pandas
 
 from . import report
-from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 from .abcd_grader import extract_abcd
-
+from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
 QUERY_TEMPLATE_MULTICHOICE = """
 {Question}
@@ -91,7 +90,7 @@ if __name__ == "__main__":
     import json
     import sys
 
-    with open(sys.argv[1], "r") as f:
+    with open(sys.argv[1]) as f:
         results = json.load(f)
 
     passes = 0

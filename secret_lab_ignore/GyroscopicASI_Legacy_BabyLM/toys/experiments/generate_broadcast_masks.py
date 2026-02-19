@@ -3,8 +3,9 @@
 Generate and save intron broadcast masks for GyroASI Kernel.
 """
 
-import numpy as np
 from pathlib import Path
+
+import numpy as np
 
 
 def generate_intron_broadcast_masks() -> np.ndarray[Any, Any]:  # type: ignore

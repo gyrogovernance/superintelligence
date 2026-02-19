@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+
 import numpy as np
 from numpy.typing import NDArray
 
@@ -20,9 +21,9 @@ from .constants import (
     ARCHETYPE_STATE24,
     GENE_MIC_S,
     LAYER_MASK_12,
+    mask12_for_byte,
     pack_state,
     unpack_state,
-    mask12_for_byte,
 )
 
 

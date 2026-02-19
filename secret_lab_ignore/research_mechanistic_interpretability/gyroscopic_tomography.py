@@ -30,7 +30,6 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
@@ -109,7 +108,7 @@ def load_olmo():
     return model, tokenizer
 
 
-def load_manifold(layer_idx: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+def load_manifold(layer_idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     p = MANIFOLD_DIR / f"layer_{layer_idx}.npz"
     if not p.exists():
         raise FileNotFoundError(f"Missing manifold for layer {layer_idx}: {p}")
@@ -134,7 +133,7 @@ def generate_random_sequences(tokenizer, n_seq: int, seq_len: int, seed: int) ->
     return torch.randint(lo, hi, (n_seq, seq_len), dtype=torch.long)
 
 
-def get_random_plane(hidden_dim: int, seed: int) -> Tuple[torch.Tensor, torch.Tensor]:
+def get_random_plane(hidden_dim: int, seed: int) -> tuple[torch.Tensor, torch.Tensor]:
     torch.manual_seed(seed)
     u = torch.randn(hidden_dim, dtype=torch.float32)
     u = u / (u.norm() + 1e-12)
@@ -153,7 +152,7 @@ def build_embedding_loop(base_embeds: torch.Tensor, u: torch.Tensor, v: torch.Te
 
 
 def forward_collect_with_embed_override(model, embeds_batch: torch.Tensor, layer_idx: int) -> torch.Tensor:
-    acts: List[torch.Tensor] = []
+    acts: list[torch.Tensor] = []
 
     def _hook(_module, _inp, output):
         t = output[0] if isinstance(output, tuple) else output
@@ -178,10 +177,10 @@ def forward_collect_with_embed_override(model, embeds_batch: torch.Tensor, layer
     return acts[0]
 
 
-def collect_layers_last_token(model, input_ids: torch.Tensor, layer_indices: List[int]) -> Dict[int, torch.Tensor]:
+def collect_layers_last_token(model, input_ids: torch.Tensor, layer_indices: list[int]) -> dict[int, torch.Tensor]:
     n_layers = model.config.num_hidden_layers
     layer_set = set(layer_indices)
-    acts_tmp: Dict[int, List[torch.Tensor]] = {idx: [] for idx in layer_indices}
+    acts_tmp: dict[int, list[torch.Tensor]] = {idx: [] for idx in layer_indices}
 
     def hook_factory(idx: int):
         def _hook(_module, _inp, output):
@@ -202,7 +201,7 @@ def collect_layers_last_token(model, input_ids: torch.Tensor, layer_indices: Lis
     for h in handles:
         h.remove()
 
-    out: Dict[int, torch.Tensor] = {}
+    out: dict[int, torch.Tensor] = {}
     for idx in layer_indices:
         out[idx] = torch.cat(acts_tmp[idx], dim=0)
     return out
@@ -306,7 +305,7 @@ def skew_np(M: np.ndarray) -> np.ndarray:
     return 0.5 * (M - M.T)
 
 
-def effective_dim_99(mats: List[np.ndarray]) -> int:
+def effective_dim_99(mats: list[np.ndarray]) -> int:
     X = np.stack([m.reshape(-1) for m in mats], axis=0)
     _, S, _ = np.linalg.svd(X, full_matrices=False)
     if np.sum(S**2) <= 0:
@@ -323,7 +322,7 @@ def compute_null_stats_from_outputs(
     P16: torch.Tensor,
 ) -> NullStats:
     z0 = None
-    z_list: List[torch.Tensor] = []
+    z_list: list[torch.Tensor] = []
 
     if extractor == "row":
         grid = last_w.view(last_w.shape[0], 256, 16)
@@ -335,8 +334,8 @@ def compute_null_stats_from_outputs(
         z0 = vecs[0]
         z_list = [vecs[i] for i in range(1, vecs.shape[0])]
 
-    Gs: List[np.ndarray] = []
-    norms: List[float] = []
+    Gs: list[np.ndarray] = []
+    norms: list[float] = []
 
     for z1 in z_list:
         R = edge_transport(z0, z1, pool16_w, k=H_K, q=H_Q).double().numpy()

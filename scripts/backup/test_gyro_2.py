@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-import os, sys, time
+import os
+import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any
 
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch import nn, Tensor
+from torch import Tensor, nn
 from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedTokenizerBase
 
 sys.path.insert(0, os.getcwd())
@@ -148,7 +150,7 @@ class DynamicRoutedMLP(nn.Module):
         return out_flat.view(*shape[:-1], D_MODEL)
 
 
-def full_attention_layers_from_config(model: Any) -> List[int]:
+def full_attention_layers_from_config(model: Any) -> list[int]:
     """
     OLMo3 config.json contains layer_types with 'full_attention' markers.
     Use that as the routing lattice (principled).
@@ -167,9 +169,9 @@ class DynamicRouter:
         self.kernel = kernel
         self.params = params
         self.coupler = TokenCoupler()
-        self.original_mlps: Dict[int, nn.Module] = {}
-        self.routed_mlps: Dict[int, DynamicRoutedMLP] = {}
-        self.routed_layers: List[int] = []
+        self.original_mlps: dict[int, nn.Module] = {}
+        self.routed_mlps: dict[int, DynamicRoutedMLP] = {}
+        self.routed_layers: list[int] = []
 
     def install(self) -> None:
         layers = full_attention_layers_from_config(self.model)
@@ -203,11 +205,11 @@ class DynamicRouter:
     def end_token(self) -> int:
         return self.coupler.commit(self.kernel)
 
-    def sigma_stats(self) -> Tuple[float, Dict[float, int]]:
+    def sigma_stats(self) -> tuple[float, dict[float, int]]:
         sigmas = [m.last_sigma for m in self.routed_mlps.values() if np.isfinite(m.last_sigma)]
         if not sigmas:
             return float("nan"), {}
-        counts: Dict[float, int] = {}
+        counts: dict[float, int] = {}
         for s in sigmas:
             counts[float(s)] = counts.get(float(s), 0) + 1
         return float(np.mean(sigmas)), counts
@@ -224,12 +226,12 @@ def entropy(counts: np.ndarray) -> float:
 def generate_stepwise_cached(
     model: AutoModelForCausalLM,
     tokenizer: PreTrainedTokenizerBase,
-    router: Optional[DynamicRouter],
+    router: DynamicRouter | None,
     prompt: str,
     max_new_tokens: int,
     temperature: float = 0.7,
     top_k: int = 40,
-) -> Tuple[str, Dict[str, List[int]], float]:
+) -> tuple[str, dict[str, list[int]], float]:
     """
     Token-by-token generation using past_key_values if supported.
 

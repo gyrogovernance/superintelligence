@@ -8,22 +8,22 @@ Usage:
 Press Ctrl+C to stop both servers.
 """
 
+import os
+import shutil
+import signal
 import subprocess
 import sys
-import signal
 import time
-import shutil
-import os
 import types
 from pathlib import Path
-from typing import List, NoReturn
+from typing import NoReturn
 
 # Get program root
 ROOT = Path(__file__).parent.absolute()
 UI_DIR = ROOT / "src" / "app" / "console" / "ui"
 
 # Store process references
-processes: List[subprocess.Popen[bytes]] = []
+processes: list[subprocess.Popen[bytes]] = []
 
 
 def cleanup():
@@ -77,10 +77,10 @@ def run_backend():
 def run_frontend():
     """Run Vite frontend dev server."""
     print("Starting frontend dev server on http://localhost:5173...")
-    
+
     # Check npm is available
     npm = shutil.which("npm")
-    
+
     # On Windows, check common installation paths
     if sys.platform == "win32" and not npm:
         common_npm_paths = [
@@ -103,7 +103,7 @@ def run_frontend():
                 Path(user_profile) / "AppData" / "Roaming" / "npm" / "npm.cmd",
                 Path(user_profile) / "AppData" / "Local" / "Programs" / "nodejs" / "npm.cmd",
             ])
-        
+
         for path in common_npm_paths:
             if path.exists():
                 npm = str(path)
@@ -115,12 +115,12 @@ def run_frontend():
                 # Re-check with shutil.which after PATH update
                 npm = shutil.which("npm") or npm
                 break
-    
+
     if not npm:
         raise FileNotFoundError(
             "npm not found. Please run 'python air_installer.py' first."
         )
-    
+
     # Check node_modules exists
     if not (UI_DIR / "node_modules").exists():
         raise FileNotFoundError(

@@ -127,6 +127,20 @@ The 2×3×2 geometry maps to bit positions as follows:
 
 This mapping is fixed and MUST be used consistently for mask expansion, archetype definition, and all geometric operations.
 
+**Topology semantics (normative):**
+
+For every 12-bit component, indices MUST be interpreted in the order `[frame][row][col]` with the following meaning:
+
+- `row` identifies axis family: row 0 = X, row 1 = Y, row 2 = Z.
+- `col` identifies oriented side of the axis: col 0 = negative side, col 1 = positive side.
+- `frame` identifies chirality layer: frame 0 and frame 1 are opposing orientation layers of the same 3-axis structure.
+
+Under this convention:
+
+- "3D" means three axis families (X, Y, Z).
+- "6DoF" means six oriented axis sides `{X-, X+, Y-, Y+, Z-, Z+}` represented by the row/col pairs.
+- Frames do not add spatial dimensions; they encode opposing chirality layers used by kernel dynamics.
+
 This geometry is the shared substrate for:
 - the archetype
 - the expansion masks

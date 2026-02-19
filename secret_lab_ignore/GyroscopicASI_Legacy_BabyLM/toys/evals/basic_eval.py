@@ -3,7 +3,6 @@ Basic eval
 """
 
 from . import report
-
 from .types import Eval, EvalResult, SamplerBase, SingleEvalResult
 
 
