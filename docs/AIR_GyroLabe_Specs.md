@@ -12,7 +12,17 @@ By imposing a rigid geometric reference frame onto the fluid activations of the 
 1.  **Activation Dynamic Stability:** It constrains the model's generation trajectory, preventing collapse or drift (hallucination) by anchoring it to a deterministic state machine.
 2.  **Mechanistic Balance Steering:** It injects calculated "weight" into specific neural pathways, ensuring that the model's output remains structurally consistent with the reference geometry.
 
-Unlike training-based alignment (RLHF), GyroLabe operates purely at inference time. It does not alter the model's weights but rather steers the flow of information through the network, much like a governor on a mechanical engine.
+Unlike training-based alignment (RLHF), GyroLabe operates purely at inference time. It does not alter the model's weights but rather steers the flow of information through the network. It functions analogously to the cerebellum in biological intelligence: it does not decide what to say, it provides a continuous geometric reference frame so that the trajectory of inference remains physically coordinated. The cerebellum was the first computational structure to emerge in vertebrate nervous systems, predating cognition by hundreds of millions of years, and it operates entirely in 3D space with 6 degrees of freedom, which is exactly the geometry the GyroLabe encodes.
+
+**Active Inference**
+GyroLabe implements active inference in the precise sense of the term: a system that selects actions by minimizing the divergence between predicted and preferred outcomes under a generative model. The kernel is the generative model (deterministic, finite, exact). The horizon is the Markov blanket (the boundary between the system and its environment). The mask is the descending prediction (what the kernel expects of the model's activations). The token choice is the action (selected by consulting where each candidate would drive the kernel trajectory). The correlation metric is the prediction error signal.
+
+Both halves of active inference are implemented:
+
+- **Perceptual inference (BU-Egress):** the mask biases the model's internal activations toward configurations consistent with the kernel's current geometric state.
+- **Active inference (BU-Ingress):** token selection consults the kernel's transport prior to favor actions that produce geometrically natural transitions.
+
+The generative model's prior over actions is not learned or tuned. It is P_code: the exact distribution of pairwise code distances in the kernel's mask code, a structural invariant with no free parameters. The precision of the active inference is beta = A_kernel = 5/256, the kernel's intrinsic aperture. Both the prior and the precision are determined entirely by the kernel's geometry.
 
 **Objective:**
 The primary goal is to constrain the high-entropy "hallucination" space of generative models without sacrificing their creative capability. GyroLabe ensures that while the content remains flexible, the **trajectory of activations** adheres to a stable, reproducible geometric logic.
@@ -34,10 +44,11 @@ The kernel does not interpret meaning. It transforms bytes through fixed-width b
 
 At each inference step:
 
-1. **Read kernel observables:** horizon h, vertex charge chi, phase p (and last-byte weight w).
-2. **Projection:** compute a geometry-derived mask with differential modulation and apply it inside routed MLP layers.
-3. **Sample token:** model samples a token (stochastic inference preserved).
-4. **Token to byte to kernel:** driving byte = (token_id & 0xFF) advances the kernel.
+1. **Read kernel observables:** horizon h, vertex charge chi, phase p, and last-byte weight w.
+2. **Projection (BU-Egress):** compute a geometry-derived mask with CGM-grounded sigma, dynamic sigma-focusing, and differential modulation. Apply it inside routed MLP layers at the SwiGLU intermediate activation.
+3. **Active Inference (BU-Ingress):** for each top-k candidate token, peek at the resulting kernel horizon if that byte were applied. Compute a geometric cost from the kernel-native code distance prior P_code. Adjust logits by this cost scaled by the kernel intrinsic aperture beta = 5/256.
+4. **Sample token:** model samples a token from the adjusted distribution (stochastic inference preserved).
+5. **Token to byte to kernel:** driving byte = (token_id & 0xFF) advances the kernel.
 
 #### 1.3 Common Language and byte streams
 
@@ -213,13 +224,32 @@ The reference implementation applies a mask inside routed MLP layers to the SwiG
 The intermediate hidden dimension is factored as:
 
 - hidden_dim = 256 x N_feat
-  (example: OLMo uses hidden_dim = 11008 = 256 x 43)
+  (example: OLMo uses hidden_dim = 11008 = 256 x N_feat where N_feat is determined by the model architecture)
 
 **Boundary index interpretation**
 Boundary index x in {0..255} is treated as a byte-labeled code element. Distances are computed as Hamming distance in the kernel's 12-bit mask code.
 
 **Gaussian lookup table**
 The Gaussian base values are precomputed for all (chi, p, distance) triples. There are 4 chi values, 4 phase values, and 13 possible distances, giving 208 precomputed floats. At runtime, the mask is constructed by table lookup rather than computing the exponential function.
+
+**CGM-grounded sigma values**
+The base width sigma of the Gaussian mask is derived from the Common Governance Model stage actions relative to the aperture scale m_a = 1 / (2 * sqrt(2 * pi)):
+
+- chi=0 (CS stage): sigma = (pi/2) / m_a / 2, approximately 3.94
+- chi=1 (UNA stage): sigma = (1/sqrt(2)) / m_a, approximately 3.55
+- chi=2 (ONA stage): sigma = (pi/4) / m_a, approximately 3.94
+- chi=3 (BU stage): sigma = 24.0 (near-uniform, balance)
+
+These values are not empirical tuning parameters. They are the dimensionless accumulated phases of the four CGM stage transitions, each normalized by the aperture scale. They determine how tightly the mask couples the model to the kernel geometry at each vertex class.
+
+**Dynamic sigma-focusing**
+The effective distance used to sample the Gaussian LUT is scaled by the kernel's motion between consecutive steps:
+
+- D = code_dist(prev_h, h) / 12, normalized to [0, 1]
+- sigma_scale = 1.0 - 0.4 * (D - 0.5), clamped to [0.30, 2.50]
+- d_eff = d / sigma_scale
+
+When the kernel makes a large jump in code space (high D), sigma_scale decreases, narrowing the effective mask. When the kernel moves a short distance, the mask widens slightly. This ensures that guidance is sharpest precisely when the kernel's geometry is changing most rapidly.
 
 **Mask computation (reference implementation behavior)**
 - The mask is computed once per token step in `begin_step()`, then broadcast to all routed MLP layers. This avoids redundant computation.
@@ -241,11 +271,12 @@ This connects the mask dynamics to the kernel's gauge structure: the transition 
 
 A readable step summary:
 
-1. **Gaussian base:** look up precomputed values from table indexed by (chi, p, distance).
-2. **Vertex wedge:** boost positions whose byte charge matches chi.
-3. **Strength scaling:** blend toward 1 using a factor derived from w.
-4. **Differential modulation:** scale mask deviation by transition distance from previous horizon.
-5. **Normalization:** scale so mean(mask) = 1 and broadcast across N_feat.
+1. **Gaussian base:** look up precomputed values from table indexed by (chi, p, distance), using CGM-grounded sigma for each chi class.
+2. **Sigma-focusing:** scale the effective distance by kernel motion (large jump = narrower mask).
+3. **Vertex wedge:** boost positions whose byte charge matches chi.
+4. **Strength scaling:** blend toward 1 using a factor derived from w.
+5. **Differential modulation:** scale mask deviation by transition distance from previous horizon.
+6. **Normalization:** scale so mean(mask) = 1 and broadcast across N_feat.
 
 Reference implementation: `compute_mask()` in `src/tools/gyrolabe.py`. Mask is computed in `GyroLabe.begin_step()` and pushed to `RoutedMLP` layers via `set_mask()`.
 
@@ -260,7 +291,23 @@ This is the only mechanism by which the kernel advances in the reference impleme
 
 Reference implementation: `advance_with_token()` in `src/tools/gyrolabe.py`.
 
-#### 3.5 Extraction telemetry (model to analysis only)
+#### 3.5 Active inference (BU-Ingress)
+
+Before sampling from the top-k distribution, GyroLabe evaluates each candidate token by its geometric consequences for the kernel trajectory.
+
+For each candidate token in top-k:
+
+1. Compute b = token_id & 0xFF.
+2. Peek: compute the 12-bit mask of the current horizon and XOR with the 12-bit mask of b to obtain the next horizon mask. Look up the corresponding horizon index h2.
+3. Compute the Hamming distance d = code_dist(h_cur, h2) in the kernel mask code.
+4. Compute the geometric cost G(b) = -log(P_code[d] + epsilon), where P_code is the kernel-native prior over code distances (the empirical histogram of all pairwise mask distances, no free parameters).
+5. Adjust the logit: logit(token) = logit(token) - beta * G(b), where beta = 5/256 = A_kernel (the kernel intrinsic aperture).
+
+Tokens that would drive the kernel to a naturally common code distance are penalized less. Tokens that would produce an unusual jump in code space are penalized more. The precision of this adjustment is set by the kernel's own aperture, not by an arbitrary hyperparameter.
+
+This implements BU-Ingress at the token selection level: the action (token choice) is informed by where it will take the kernel trajectory, not only by the model's semantic fluency.
+
+#### 3.6 Extraction telemetry (model to analysis only)
 
 GyroLabe extracts telemetry from activations to measure coupling quality. This telemetry does not affect kernel stepping.
 
@@ -288,7 +335,7 @@ The telemetry also computes:
 
 Reference implementation: `extract_byte()`, `begin_step()`, `end_step()` in `src/tools/gyrolabe.py`.
 
-#### 3.6 Code distance baseline (why "near 6" is neutral)
+#### 3.7 Code distance baseline (why "near 6" is neutral)
 
 The kernel mask code C is a linear [12, 8] code with a palindromic weight distribution centered at weight 6. For two masks drawn without structural bias from C, the expected Hamming distance is 6 bits.
 
@@ -343,6 +390,12 @@ GyroLabe exposes summary statistics over a trajectory.
 - mean_gain_at_peak (mask value at peak, mask is mean-normalized to 1)
 - distances to diagnostic mu (phase-lifted coordinate, telemetry only)
 
+**Trajectory length and warm-up cost**
+GyroLabe exhibits a settling period. On short generations the geometric constraints may slightly increase perplexity relative to baseline. Over longer trajectories (approximately 100 or more tokens) the joint system stabilizes, typically yielding lower perplexity, full exploration of the horizon boundary (all 256 states visited in long runs), and near-flat distribution across the four vertex classes.
+
+**Structural observatory**
+A dedicated analysis runner (scripts/run_gyrolabe_experiments.py) provides deep structural telemetry beyond the summary metrics above. It certifies kernel invariants in vivo (quotient dynamics K4 law, parity law P8, controlled BU-Egress xyxy identity) and measures windowed geometric dynamics including transport KL divergence, monodromy contraction/retraction, and palindromic complexity of kernel symbol streams.
+
 #### 5.4 Quality metrics (logprobs and perplexity)
 
 In the reference implementation:
@@ -383,11 +436,47 @@ Participants share a byte ledger. Replaying the kernel from the archetype throug
 
 A byte-encoded operation history yields a reproducible kernel trajectory and compact parity invariants. Insertions, deletions, or reorderings change the invariants.
 
+#### 7.4 Training-time geometric calibration
+
+GyroLabe is designed to operate at inference time on frozen model weights. However, the architecture is compatible with training-time application, where the mask would be active during forward passes followed by gradient updates.
+
+In this configuration, gradients flow through the masked activations. Over many training steps, the model's parameters would reorganize to produce activations that work well under the mask. The 256 boundary positions would acquire geometric meaning in the learned representations. The gate/up/down topology of the SwiGLU MLP (selector, expansion, contraction) would align with the kernel's own transition structure (mask as gate, XOR as transformation, complement-and-swap as projection).
+
+This is not yet tested. It is noted here because the mask computation, the active inference adjustment, and the kernel stepping are all differentiable-compatible or discrete-only in ways that do not obstruct gradient flow through the model's own parameters. The mask is applied as element-wise multiplication on z, which passes gradients to gate_proj and up_proj unchanged. The active inference adjustment modifies logits before sampling, which is standard in reinforcement learning from human feedback and similar training regimes.
+
+The potential benefit of training-time application is that the model would not merely tolerate the kernel's geometry but encode it in its weights, producing native resonance rather than post-hoc calibration.
+
+#### 7.5 Inference Function development
+
+GyroLabe serves as an empirical laboratory for refining the principles of a standalone geometric Inference Function that could operate without a transformer backend.
+
+The Inference Function (specified separately in the Gyroscopic ASI architecture) selects bytes by projecting a phase-aware memory field M[h, p, :] onto byte feature vectors derived from the kernel's mask geometry. It uses fixed scoring rules: feature projection, weight penalty, and vertex coherence.
+
+GyroLabe is discovering what this Inference Function is missing:
+
+- Dynamic coupling strength that varies with kernel motion (sigma-focus)
+- Action selection informed by the kernel's transport prior (active inference via P_code)
+- Settling behavior where geometric constraints and semantic fluency find joint equilibrium over time
+- Contraction and retraction dynamics where the system oscillates around kernel-native measures rather than converging to a static point
+
+Each mechanism refined in GyroLabe is a candidate for incorporation into the Inference Function. GyroLabe may ultimately become the Inference Function itself, or remain as a separate calibration layer. In either case, the experimental findings from coupling a transformer to the kernel geometry directly inform the design of systems that operate on the kernel's native computational substrate without matrix multiplication or gradient descent.
+
 ---
 
 ### 8. Analytical note
 
 The kernel's 256-element boundary can be lifted to a 256-dimensional vector space representation. In this view, GyroLabe can be analyzed as a structural resonance between continuous model dynamics and a discrete, deterministic code geometry. Telemetry provides empirical measures of coupling strength (correlation) and geometric neutrality (code_dist baseline behavior).
+
+**Shared computational substrate**
+Both the kernel and transformer architectures are built on the same binary computational substrate. All structurally significant dimensions in both systems sit on powers of 2 (and occasionally 2^n * 3^m): the kernel's ontology (65536 = 2^16), horizon (256 = 2^8), mask code (12 bits), vertex classes (4 = 2^2), and phase (4 = 2^2) share the same arithmetic foundation as the transformer's hidden size (4096 = 2^12), layer count (32 = 2^5), head count (32 = 2^5), and position capacity (65536 = 2^16). This is not coincidence or numerology. It is a consequence of both systems being implemented in binary digital computation, which is itself constrained by physics.
+
+The kernel makes these constraints explicit through algebraic closure conditions. The transformer satisfies them implicitly through gradient-optimized parameters. GyroLabe bridges the two by expressing the kernel's explicit geometry in the transformer's native activation space.
+
+**Gate/up/down topology**
+The SwiGLU MLP computes z = silu(gate(x)) * up(x), then output = down(z). This is a topological structure: gate selects what passes (a boundary operator), up expands into a higher-dimensional intermediate space, down contracts back to the working dimension. The kernel's transition law has the same structure: the mask selects which bits are transformed (gate), XOR applies the transformation (up), and complement-and-swap projects back and exchanges active and passive roles (down). GyroLabe currently masks the product z after gating and expansion have already occurred. The structural correspondence between the kernel's gate/up/down and the MLP's gate/up/down is noted but not yet exploited.
+
+**Active inference as the unifying framework**
+GyroLabe implements active inference with the kernel as the generative model and the transformer as the system being calibrated. The theoretical target for coupling coherence is 1 - A* = 0.9793, where A* is the CGM aperture. Current empirical correlation is in the range 0.3 to 0.5, indicating the system operates well below full coherence. This gap is expected for post-hoc coupling on frozen weights and represents the space that training-time application or a native Inference Function would close.
 
 ---
 

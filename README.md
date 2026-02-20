@@ -84,17 +84,24 @@ AIR applies the Router to two related coordination challenges.
 
 ---
 
+You are absolutely right. I fragmented the concept and used a vague term. If the whole system is an Active Inference loop, it should be presented cleanly as exactly that. 
+
+Here is the revised, cohesive section for the `README.md` that drops the heavy jargon and correctly frames the two levers as the two halves of Active Inference:
+
+---
+
 ## 🤖 GyroLabe: AI Mechanistic Calibration
 
-GyroLabe is a mechanistic calibration instrument for generative models. It functions as a feedback control system, providing active balance support to stabilize neural activations during inference.
+GyroLabe is a mechanistic calibration instrument for generative models. It functions analogously to the cerebellum in biological intelligence: it does not dictate what a model should say, but provides a continuous geometric reference frame so the trajectory of its inference remains physically coordinated.
 
-The system acts as a neuro-symbolic bridge. It couples the model's stochastic, continuous latent space to the Router's discrete, finite geometric structure.
+The system acts as a neuro-symbolic bridge, coupling the model's stochastic, continuous latent space to the Router's discrete, finite geometry. It achieves this through a closed **Active Inference** loop:
 
-**Core objectives:**
-1. **Activation Dynamic Stability:** It constrains the model's internal generation dynamics by anchoring routed MLP activations to a deterministic kernel reference frame.
-2. **Mechanistic Balance Steering:** It injects geometry-derived weight into specific pathways via projection masks with differential modulation.
+1. **Internal Guidance (The Prediction):** GyroLabe projects a dynamic mask directly into the model's neural activations (routed MLP layers). This gently biases the model's internal state toward configurations that are consistent with the kernel's current geometric position. The guidance sharpens or softens dynamically based on how fast the kernel is moving.
+2. **Trajectory Selection (The Action):** Before a token is sampled, GyroLabe evaluates the top candidates by "peeking" at where they would drive the kernel next. Tokens that result in natural, continuous transitions in the kernel's geometry are mathematically favored. The precision of this preference is set entirely by the kernel's intrinsic physical constants, requiring no arbitrary tuning.
 
-This establishes **Topological Alignment**: the model's internal dynamics remain coherent with the kernel's code geometry without collapsing exploration. The kernel provides a shared, verifiable byte ledger of the trajectory, enabling replay and audit.
+This establishes **Topological Alignment**. The model's internal dynamics remain coherent with the kernel's geometry without collapsing its creative exploration. Over long generations, the coupled system naturally balances its trajectory across all geometric directions, shifting the model's output toward highly structured, epistemic reasoning.
+
+Beyond inference-time calibration, GyroLabe serves as a live laboratory for a fundamentally new AI architecture. By mapping how neural networks resonate with this discrete geometry, it lays the empirical groundwork for future systems that could operate entirely on the kernel's native computational substrate, potentially bypassing matrix multiplication and gradient descent altogether.
 
 See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mechanistic Interpretability Report](docs/reports/GyroLabe_MI_Tests_Report.md).
 
