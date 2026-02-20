@@ -109,6 +109,9 @@ def build_code_distance_matrix(mask12_table: np.ndarray) -> np.ndarray:
 
 _MASK12_TABLE: np.ndarray | None = None
 _CODE_DISTANCE_MATRIX: np.ndarray | None = None
+_P_CODE_PRIOR: np.ndarray | None = None
+_MASK12_TO_BYTE: dict[int, int] | None = None
+ACTIVE_BETA: float = 5.0 / 256.0
 
 
 def get_mask12_table() -> np.ndarray:
@@ -123,6 +126,22 @@ def get_code_distance_matrix() -> np.ndarray:
     if _CODE_DISTANCE_MATRIX is None:
         _CODE_DISTANCE_MATRIX = build_code_distance_matrix(get_mask12_table())
     return _CODE_DISTANCE_MATRIX
+
+
+def get_code_prior() -> tuple[np.ndarray, dict[int, int]]:
+    """Return (P_code, mask12_to_byte) for action-cost computation."""
+    global _P_CODE_PRIOR, _MASK12_TO_BYTE
+    if _P_CODE_PRIOR is None or _MASK12_TO_BYTE is None:
+        mask_table = get_mask12_table()
+        cdm = get_code_distance_matrix()
+        counts = np.bincount(cdm.flatten(), minlength=13).astype(np.float64)
+        P_code = counts / counts.sum()
+        mask12_to_byte = {int(mask_table[b]): b for b in range(256)}
+        _P_CODE_PRIOR = P_code
+        _MASK12_TO_BYTE = mask12_to_byte
+    assert _P_CODE_PRIOR is not None
+    assert _MASK12_TO_BYTE is not None
+    return _P_CODE_PRIOR, _MASK12_TO_BYTE
 
 
 def _build_gaussian_lut() -> np.ndarray:
@@ -499,6 +518,13 @@ class GyroLabe:
         self._wrapped.clear()
         self._installed = False
 
+    def override_mask(self, mask: Tensor | None, mask_boundary: np.ndarray | None = None) -> None:
+        """Override the mask on all routed layers."""
+        for w in self._wrapped.values():
+            w.set_mask(mask)
+        if mask_boundary is not None:
+            self._mask_boundary = mask_boundary
+
     def _select_positions(self, h: int, width: int) -> Tensor:
         """
         Select which boundary positions to compute, centered on horizon h.
@@ -837,7 +863,30 @@ def generate(
         if top_k > 0:
             k = min(top_k, scaled_logits.size(-1))
             topv, topi = torch.topk(scaled_logits, k=k)
-            probs = torch.softmax(topv, dim=-1)
+            if labe is not None:
+                h_cur = int(labe.kernel.current_horizon[0])
+                mask_table = get_mask12_table()
+                mh = int(mask_table[h_cur])
+
+                P_code, mask12_to_byte = get_code_prior()
+                cdm = get_code_distance_matrix()
+
+                topv_adj = topv.clone()
+                for j in range(k):
+                    token_id = int(topi[j].item())
+                    b = token_id & 0xFF
+                    m_b = int(mask_table[b])
+                    m2 = mh ^ m_b
+                    h2 = mask12_to_byte.get(m2)
+                    if h2 is None:
+                        continue
+                    d = int(cdm[h_cur, h2])
+                    G = -_math.log(P_code[d] + 1e-12)
+                    topv_adj[j] = topv_adj[j] - ACTIVE_BETA * G
+
+                probs = torch.softmax(topv_adj, dim=-1)
+            else:
+                probs = torch.softmax(topv, dim=-1)
             sample_idx = torch.multinomial(probs, 1)
             next_tok = int(topi[sample_idx].item())
         else:

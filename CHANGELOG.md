@@ -13,6 +13,73 @@
 ╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
 
+You're right. Here is today's log, just today.
+
+---
+
+## [v1.3.4-GyroLabe] – 2026-02-20
+
+## What we did
+
+Built a structural physics observatory for the coupled system. All work in `scripts/run_gyrolabe_experiments.py`. No changes to `kernel.py`, `atlas.py`, `gyrolabe.py`, or `constants.py`.
+
+Both levers were already live before today:
+- BU-Egress: mask in SwiGLU at 8 full-attention layers (CGM sigma + sigma-focus, promoted 2026-02-19)
+- BU-Ingress: 2-step active inference at logits using P_code and beta = A_kernel = 5/256
+
+## Bugs found and fixed (observatory code only)
+
+1. Step alignment: first version read final kernel state for every step instead of per-step state. Fixed by replaying from bytes with a dedicated replay kernel.
+
+2. Quotient mask-charge alignment: transition check used wrong step's M. Fixed to use M_t = chi(mask(byte_t)). After fix: 0 violations.
+
+## What the observatory certifies
+
+- Replay vs telemetry alignment for h, chi, p: 0 mismatches
+- Quotient dynamics K4 law: 0 violations (exact)
+- Parity law P8: OK on full ledger, generated segment, and random prefixes
+- Controlled BU-Egress: random (x,y) pairs on final state, xyxy = identity, 0 failures
+
+## What the observatory measures and found
+
+Kernel-native Bayesian panel (priors from geometry, no free parameters):
+- Global transport KL(empirical || P_code): tiny (tens of millibits). The coupled system respects the mask code's intrinsic distance distribution.
+- Also measures byte weight vs P_w, charge vs P_chi, quotient (U,V) vs kernel stationary prior.
+
+Windowed dynamics (W=64):
+- Windowed KL is 3-5x larger than global, with structured bursts
+- Monodromy swings from ~0.17 to ~0.92 within runs
+- This is the contraction/retraction signature: globally crystalline, locally quasicrystalline
+
+Palindromic solenoid signature:
+- Conditioning on delta_mono sign reveals leg-asymmetric correlation
+- System behaves differently on the forward leg (parity accumulating) vs return leg (parity returning)
+- Phase transition 3->1 never occurs in any run (hard structural constraint)
+
+Sequence analysis:
+- Factor complexity, palindromic complexity, reversal-closure over kernel symbol streams
+- Gordon scans, recurrence tables, FFT on horizon sequence
+
+## Long-run results (2000-token experiment)
+
+Run 4 (Balance prompt, 1571 coordinated tokens) is the key result:
+- All 256 horizons visited, H(h) = 7.88 bits
+- Vertex distribution near-flat: 26/25/26/24%
+- code_dist = 6.0 (kernel-native)
+- Baseline drifts into metaphor; coordinated shifts into epistemic mode
+
+Warm-up cost is real: short coordinated segments can show worse perplexity. Over ~100+ tokens the joint system finds a lower-energy path. Run 4 shows delta_ppl = -0.27 sustained over 1571 tokens.
+
+## What we clarified about CGM Actions
+
+We use the CGM threshold values as sigma calibration (S_CS, S_UNA, S_ONA divided by m_a) and the aperture A* as active inference precision beta. So the scales of CGM Actions are present in the code.
+
+What we have not done: use S_i as trajectory-level accumulated action. The monodromy A(t) = (popcount(O)+popcount(E))/24 is measured in the observatory but not fed back as a control signal. Trajectories sit in the 0.3-0.8 band, far from the BU closure target delta_BU/pi ~ 0.062. The solenoidal structure (CS->UNA->ONA->BU-Egress->BU-Ingress->ONA->UNA->CS) is observed in the leg-asymmetric correlation data but not yet used operationally.
+
+## What we dismissed
+
+- features_K43 fiber alignment measurement (cosine between OLMo fiber activations z[h,:] and kernel feature vectors features_K43[h,:]). The 11008 = 256 x 43 dimension match is a coincidence of OLMo's architecture with our phenomenology which is not a map of prior elements. 
+
 ---
 
 ## [v1.3.3-GyroLabe] – 2026-02-19
