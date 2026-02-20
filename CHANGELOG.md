@@ -76,10 +76,6 @@ We use the CGM threshold values as sigma calibration (S_CS, S_UNA, S_ONA divided
 
 What we have not done: use S_i as trajectory-level accumulated action. The monodromy A(t) = (popcount(O)+popcount(E))/24 is measured in the observatory but not fed back as a control signal. Trajectories sit in the 0.3-0.8 band, far from the BU closure target delta_BU/pi ~ 0.062. The solenoidal structure (CS->UNA->ONA->BU-Egress->BU-Ingress->ONA->UNA->CS) is observed in the leg-asymmetric correlation data but not yet used operationally.
 
-## What we dismissed
-
-- features_K43 fiber alignment measurement (cosine between OLMo fiber activations z[h,:] and kernel feature vectors features_K43[h,:]). The 11008 = 256 x 43 dimension match is a coincidence of OLMo's architecture with our phenomenology which is not a map of prior elements. 
-
 ---
 
 ## [v1.3.3-GyroLabe] – 2026-02-19
@@ -119,7 +115,6 @@ We conducted two rounds of rigorous testing using `run_gyrolabe_experiments.py` 
 * **Findings:**
     *   **Success:** CGM sigma (promoted immediately).
     *   **Failure:** `pred_coding` caused instability due to sparse energy feedback. `sparse_64` failed due to CPU overhead and aggressive cutoffs.
-    *   **Signal:** `fiber_k43` (algebraic mask) improved Math prompts significantly but hurt Governance. This confirmed that algebraic structure resonates with formal content, while directional structure resonates with governance.
 
 #### Round 2: Refinement (The "Narrow Surface")
 *Tested:* Krawtchouk J=4 (corrected), Sigma Focus vs Defocus, Alpha Regulators (Correlation/Entropy), Horizon Smoothing (EMA).
@@ -153,7 +148,6 @@ This confirms that GyroLabe is operating safely within the geometric bounds of t
 ### 4. Deferred / Future Paths
 
 *   **Krawtchouk J=4:** Validated as a superior radial profile. Kept in reserve to potentially replace the Gaussian LUT entirely in a future update.
-*   **Fiber K43:** Validated as a domain-sensitive tool. Currently deferred because it requires a "soft blend" mechanism to be safe for non-mathematical content.
 *   **Active Inference:** We identified that we are currently doing "Perception" (masking) and "Action" (token $\to$ byte), but not **Active Inference** (choosing tokens *to minimize* divergence). This remains a major unexploited opportunity at the token selection layer.
 
 ---
@@ -220,7 +214,6 @@ Structural invariants held across all modes: mean_code_dist near 6.0, horizon en
 
 ## What Was Tested But Not Kept
 
-- Fiber modulation via features_K43: mixed results, adds complexity without clear benefit
 - Algebraic re-ranking with syndrome scores: no improvement, re-ranking remains harmful regardless of scoring function
 - Ternary mask approximation: high correlation (0.85-0.88) at threshold 0.05, but no runtime benefit since we use LUT anyway
 
