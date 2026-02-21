@@ -23,7 +23,7 @@ import time
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Tuple
 
 import numpy as np
 import torch
@@ -60,6 +60,8 @@ class CouplingConfig:
     """Configuration for GyroLabe model coupling."""
     routed_layers: list[int] | None = None
     store_layer_telemetry: bool = True
+    couple_local_decoder: bool = False
+    couple_local_encoder: bool = False
 
 
 def detect_device() -> torch.device:
@@ -436,6 +438,7 @@ class GyroLabe:
         model: Any,
         atlas_dir: str | Path,
         config: CouplingConfig | None = None,
+        token_offset: int = 0,
     ):
         if not hasattr(model, "model") or not hasattr(model.model, "layers"):
             raise TypeError(
@@ -446,6 +449,7 @@ class GyroLabe:
         self.model = model
         self.config = config or CouplingConfig()
         self.kernel = RouterKernel(atlas_dir=Path(atlas_dir))
+        self.token_offset = token_offset
 
         self.d_model: int = model.config.hidden_size
         if self.d_model % N_BOUNDARY != 0:
@@ -459,8 +463,8 @@ class GyroLabe:
         else:
             self.routed_layers = _detect_routed_layers(model)
 
-        self._originals: dict[int, nn.Module] = {}
-        self._wrapped: dict[int, RoutedMLP | SparseRoutedMLP] = {}
+        self._originals: dict[Tuple[str, int], nn.Module] = {}
+        self._wrapped: dict[Tuple[str, int], RoutedMLP | SparseRoutedMLP] = {}
         self._installed = False
         self._collector: list[tuple[int, int, int, float, Tensor]] | None = None
         self._device: torch.device = torch.device("cpu")
@@ -492,16 +496,40 @@ class GyroLabe:
         self._dtype = next(self.model.parameters()).dtype
         self._sparse_width = sparse_width
 
+        def wrap_mlp(orig: nn.Module, layer_idx: int) -> RoutedMLP | SparseRoutedMLP:
+            if sparse_width is not None:
+                return SparseRoutedMLP(orig, layer_idx, self.n_fiber, width=sparse_width)
+            return RoutedMLP(orig, layer_idx, self.n_fiber)
+
         layers = self.model.model.layers
         for i in self.routed_layers:
             orig = layers[i].mlp
-            self._originals[i] = orig
-            if sparse_width is not None:
-                wrapped = SparseRoutedMLP(orig, i, self.n_fiber, width=sparse_width)
-            else:
-                wrapped = RoutedMLP(orig, i, self.n_fiber)
-            self._wrapped[i] = wrapped
-            layers[i].mlp = wrapped
+            key = ("layers", i)
+            self._originals[key] = orig
+            self._wrapped[key] = wrap_mlp(orig, i)
+            layers[i].mlp = self._wrapped[key]
+
+        if self.config.couple_local_decoder:
+            local_decoder = getattr(self.model.model, "local_decoder", None)
+            if local_decoder is not None and hasattr(local_decoder, "layers"):
+                ld_layers = local_decoder.layers
+                for i in range(len(ld_layers)):
+                    orig = ld_layers[i].mlp
+                    key = ("local_decoder", i)
+                    self._originals[key] = orig
+                    self._wrapped[key] = wrap_mlp(orig, 1000 + i)
+                    ld_layers[i].mlp = self._wrapped[key]
+
+        if self.config.couple_local_encoder:
+            local_encoder = getattr(self.model.model, "local_encoder", None)
+            if local_encoder is not None and hasattr(local_encoder, "layers"):
+                le_layers = local_encoder.layers
+                for i in range(len(le_layers)):
+                    orig = le_layers[i].mlp
+                    key = ("local_encoder", i)
+                    self._originals[key] = orig
+                    self._wrapped[key] = wrap_mlp(orig, 2000 + i)
+                    le_layers[i].mlp = self._wrapped[key]
 
         self._installed = True
 
@@ -511,8 +539,13 @@ class GyroLabe:
             return
 
         layers = self.model.model.layers
-        for i, orig in self._originals.items():
-            layers[i].mlp = orig
+        for (path, i), orig in self._originals.items():
+            if path == "layers":
+                layers[i].mlp = orig
+            elif path == "local_decoder":
+                self.model.model.local_decoder.layers[i].mlp = orig
+            elif path == "local_encoder":
+                self.model.model.local_encoder.layers[i].mlp = orig
 
         self._originals.clear()
         self._wrapped.clear()
@@ -665,9 +698,38 @@ class GyroLabe:
 
         return step_record
 
+    def token_to_byte(self, token_id: int) -> int:
+        raw = int(token_id)
+        if raw >= self.token_offset + 256:
+            return raw - self.token_offset - 256
+        if raw >= self.token_offset:
+            return raw - self.token_offset
+        return raw & 0xFF
+
+    def adjust_logits_bu_ingress(self, token_ids: Tensor, logits: Tensor) -> Tensor:
+        h_cur = int(self.kernel.current_horizon[0])
+        mask_table = get_mask12_table()
+        mh = int(mask_table[h_cur])
+        P_code, mask12_to_byte = get_code_prior()
+        cdm = get_code_distance_matrix()
+
+        out = logits.clone()
+        for j in range(int(token_ids.numel())):
+            tok = int(token_ids[j].item())
+            b = self.token_to_byte(tok)
+            m_b = int(mask_table[b])
+            m2 = mh ^ m_b
+            h2 = mask12_to_byte.get(m2)
+            if h2 is None:
+                continue
+            d = int(cdm[h_cur, h2])
+            G = -_math.log(P_code[d] + 1e-12)
+            out[j] = out[j] - ACTIVE_BETA * G
+        return out
+
     def advance_with_token(self, token_id: int) -> int:
         """Advance the kernel using token ID as the byte source."""
-        byte = int(token_id) & 0xFF
+        byte = self.token_to_byte(token_id)
         self.kernel.step_byte(byte)
         self.byte_log.append(byte)
 
@@ -679,7 +741,7 @@ class GyroLabe:
     def prime_from_tokens(self, token_ids: list[int]) -> None:
         """Prime the kernel from prompt tokens."""
         for tid in token_ids:
-            byte = int(tid) & 0xFF
+            byte = self.token_to_byte(tid)
             self.kernel.step_byte(byte)
             self.byte_log.append(byte)
 
@@ -823,6 +885,7 @@ def generate(
     sparse_width: int | None = None,
 ) -> GenerationResult:
     """Generate text with optional GyroLabe coordination and sparse MLP."""
+    is_bolmo = hasattr(model, "model") and hasattr(model.model, "local_encoder")
     if seed is not None:
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -831,6 +894,31 @@ def generate(
     enc = tokenizer(prompt, return_tensors="pt")
     input_ids = enc.input_ids.to(device)
     prompt_ids = input_ids[0].tolist()
+
+    if is_bolmo and hasattr(model, "generate"):
+        if labe is not None:
+            labe.prime_from_tokens(prompt_ids)
+        t0 = time.perf_counter()
+        output = model.generate(
+            input_ids,
+            max_new_tokens=max_new_tokens,
+            do_sample=True,
+            temperature=temperature,
+            top_k=top_k,
+            labe=labe,
+        )
+        elapsed = time.perf_counter() - t0
+        output_ids = output[0].tolist()
+        gen_ids = output_ids[len(prompt_ids):]
+        text = tokenizer.decode(output_ids, skip_special_tokens=True)
+        return GenerationResult(
+            text=text,
+            elapsed=elapsed,
+            n_tokens=len(gen_ids),
+            logprobs=[],
+        )
+
+    use_cache = True
     generated: list[int] = []
     logprobs: list[float] = []
     past = None
@@ -843,10 +931,14 @@ def generate(
         if labe is not None:
             labe.begin_step(sparse_width=sparse_width)
 
-        out = model(input_ids, use_cache=True, past_key_values=past)
-        past = getattr(out, "past_key_values", None)
+        out = model(
+            input_ids,
+            use_cache=use_cache,
+            past_key_values=past if use_cache else None,
+        )
+        past = getattr(out, "past_key_values", None) if use_cache else None
 
-        if past is None and step == 0:
+        if use_cache and past is None and step == 0:
             warnings.warn(
                 "Model did not return past_key_values. "
                 "Generation will run without KV cache (slower).",
@@ -864,26 +956,7 @@ def generate(
             k = min(top_k, scaled_logits.size(-1))
             topv, topi = torch.topk(scaled_logits, k=k)
             if labe is not None:
-                h_cur = int(labe.kernel.current_horizon[0])
-                mask_table = get_mask12_table()
-                mh = int(mask_table[h_cur])
-
-                P_code, mask12_to_byte = get_code_prior()
-                cdm = get_code_distance_matrix()
-
-                topv_adj = topv.clone()
-                for j in range(k):
-                    token_id = int(topi[j].item())
-                    b = token_id & 0xFF
-                    m_b = int(mask_table[b])
-                    m2 = mh ^ m_b
-                    h2 = mask12_to_byte.get(m2)
-                    if h2 is None:
-                        continue
-                    d = int(cdm[h_cur, h2])
-                    G = -_math.log(P_code[d] + 1e-12)
-                    topv_adj[j] = topv_adj[j] - ACTIVE_BETA * G
-
+                topv_adj = labe.adjust_logits_bu_ingress(topi, topv)
                 probs = torch.softmax(topv_adj, dim=-1)
             else:
                 probs = torch.softmax(topv, dim=-1)
@@ -903,7 +976,7 @@ def generate(
         if tokenizer.eos_token_id is not None and next_tok == tokenizer.eos_token_id:
             break
 
-        if past is not None:
+        if use_cache and past is not None:
             input_ids = torch.tensor(
                 [[next_tok]], device=device, dtype=input_ids.dtype,
             )

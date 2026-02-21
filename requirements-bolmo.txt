@@ -1,0 +1,15 @@
+# Bolmo model (AllenAI byte-level LM) - install in addition to requirements.txt
+# Bolmo uses xLSTM local encoder/decoder; xlstm pulls in mlstm_kernels which
+# requires triton at import time.
+#
+# Linux / CUDA: triton is usually available (e.g. with PyTorch or pip install triton).
+# Windows: official triton does not support Windows; options are:
+#   - Use WSL2 + Linux for Bolmo experiments, or
+#   - Try: pip install triton-windows  (community fork; may work with mlstm_kernels)
+#
+# If you only use OLMo (no Bolmo), you do not need this file.
+
+xlstm>=2.0.4
+# triton is required by mlstm_kernels (dependency of xlstm).
+# On Linux: pip install triton  (or use a PyTorch env that includes it).
+# On Windows: pip install triton-windows  (optional; Bolmo may still fail without CUDA).

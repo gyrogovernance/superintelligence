@@ -1,4 +1,5 @@
 # Gyroscopic ASI Agent - Python 3.11+ (tested on 3.14)
+# For Bolmo experiments (byte-level LM): also install requirements-bolmo.txt
 
 # Core dependencies
 numpy>=2.4.0

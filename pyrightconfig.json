@@ -167,6 +167,10 @@
     "last-test-run.txt",
     "last_test_run.txt",
 
+    "data/models/Bolmo-1B",
+    "data/models/Bolmo-1B-vendor",
+    "data/models/Bolmo-7B",
+
     "typings/stubs"
   ]
 }

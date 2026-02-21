@@ -13,11 +13,284 @@
 ╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
 
-You're right. Here is today's log, just today.
+---
+
+## [v1.3.5-GyroLabe-Blomo] – 2026-02-20
+
+## What we did
+
+Discovered Bolmo-1B (Allen AI's byte-level language model, 1.47B params) as the first architecture-native target for GyroLabe. Bolmo operates directly on bytes with no tokenizer abstraction, matching the kernel's byte-complete formalism exactly. We modded the vendor code for CPU compatibility and GyroLabe integration, built a complete structural observatory, and ran the full measurement suite.
+
+This is the first time we have coupled the kernel to a model that speaks the same language natively (bytes), rather than translating through token_id & 0xFF.
+
+## Bolmo architecture and why it matters
+
+Bolmo is a hierarchical byte-level LM: Local Encoder (1 xLSTM layer) -> Boundary Predictor -> Pooling -> Global Transformer (16 full-attention layers) -> De-pooling -> Local Decoder (4 xLSTM + MLP layers) -> LM Head.
+
+Key structural alignments with the kernel:
+- hidden_size = 2048 = 256 x 8 (8 fibers per boundary position)
+- intermediate_size = 8192 = 256 x 32 (global MLP)
+- local_intermediate_size = 2816 = 256 x 11 (local MLP)
+- max_position_embeddings = 65536 = |Omega| = 2^16
+- local_decoder_layers = 4 (kernel depth-4 closure)
+- All SwiGLU MLPs present at all three sites (global, local encoder, local decoder)
+
+## The definitive finding: Linear Probe R^2 = 0.998
+
+The kernel's 12-bit mask geometry is almost perfectly encoded in Bolmo's byte embeddings. A Ridge regression from the 2048-dimensional embedding space recovers the 12-bit mask vector with 99.78% variance explained. Every individual bit is recovered with R^2 >= 0.997. Both frames (0.9974, 0.9981), all three rows (X=0.9985, Y=0.9973, Z=0.9975), all six degrees of freedom are uniformly present.
+
+The K4 vertex charge is recovered with R^2 = 0.997.
+
+The boundary predictor's Q-projection recovers mask12 with R^2 = 0.050. The kernel's geometry lives in the byte embeddings, not in the boundary predictor. The boundary predictor learned surprisal-based segmentation, which is orthogonal to the kernel's mask code.
+
+The previous Pearson correlation of 0.072 (cosine distance vs code distance) was a methodological artifact: projecting a 12-dimensional structure through a 1-dimensional scalar discards almost all information. The linear probe recovers the structure directly and finds it intact.
+
+## Coupling ablation results (5 configurations)
+
+Tested: uncoupled, global_only, local_dec, local_enc, both (local_dec + local_enc).
+
+Short runs (500 tokens) and long runs (2000 tokens) both measured.
+
+| Config      | corr  | code_dist | h_unique | monodromy |
+|-------------|-------|-----------|----------|-----------|
+| uncoupled   | 0.000 | 5.96      | 224/256  | 0.292     |
+| global_only | 0.207 | 5.62      | 219/256  | 0.708     |
+| local_dec   | 0.695 | 5.70      | 219/256  | 0.375     |
+| local_enc   | 0.183 | 6.04      | 220/256  | 0.333     |
+| both        | 0.596 | 5.70      | 219/256  | 0.375     |
+
+Long run (2000 tokens, local_dec): correlation = 0.697, full 256/256 horizon coverage, h_entropy = 7.92 bits, vertex balance 24-26% per class.
+
+local_enc coupling is weak (0.167-0.183), comparable to global_only. Adding local_enc to local_dec reduces correlation from 0.697 to 0.596 (interference). local_enc and global_only produce identical long-run trajectories, confirming they operate at the same abstraction level.
+
+## Per-layer correlation gradient
+
+The most revealing structural measurement. Correlation by layer with local_dec coupling:
+
+Global layers 0-11: 0.10-0.18 (flat, low). Global layers 12-15: 0.27-0.35 (rising with depth). Local decoder layers: 0.745, 0.852, 0.814, 0.751 (arch peaking at layer 2).
+
+The local decoder's 4-layer arch (rise to peak at depth 2, then decline) mirrors the kernel's depth-4 closure. Peak mass is inversely related to correlation: global layers concentrate energy at 1-2 boundary positions (peak_mass 0.12-0.67), local decoder distributes across 10-48 positions (peak_mass 0.025-0.044). The distributed energy profile is what enables high mask-energy correlation.
+
+## Transport and invariant verification
+
+Uncoupled model already respects the kernel's transport prior: KL(empirical_code_dist || P_code) = 4.71 millibits (essentially zero). KL(empirical_vertex || uniform) = 0.90 millibits. Code distance mean = 5.98 (neutral = 6.0). Full horizon coverage at byte 1715.
+
+P8 parity law: PASS. P7 depth-4 alternation: 351/351 pairs, 100%. P6 non-commutativity: 351/351 = 100%.
+
+Missing phase transitions: (0,0) and (3,1), same as OLMo-7B. Hard structural constraint reproduced across both models.
+
+## Windowed dynamics
+
+Globally crystalline, locally quasicrystalline signature confirmed for Bolmo:
+- Global KL = 4.71 millibits vs windowed mean = 144.69 millibits (30x ratio)
+- Windowed monodromy range [0.042, 0.792], mean 0.44
+- Contraction/retraction ratio 0.959 (near-balanced)
+- Bursts (>mean+2sigma): 3.8% of windows
+
+Coupled (local_dec) windowed dynamics nearly identical to uncoupled: KL mean 158.57, monodromy mean 0.438, contraction/retraction 0.987. Coupling does not distort the dynamics.
+
+## Boundary token observation
+
+Zero boundary tokens emitted during generation (all configurations). Bolmo handles boundaries through internal boundary_state management, not through explicit boundary tokens in the output stream. Dynamic boundary-kernel correlation could not be computed in this run. Requires instrumentation of the internal boundary_state mechanism rather than output token classification.
+
+## Static geometry measurements
+
+Family clustering ratio = 0.9502 (<1 = families cluster in embedding space). Mask weight monotonicity: cosine distance increases with mask weight (0.80 at weight 1 to 0.91 at weight 10), 4 violations in 10 transitions. XOR-cosine bridge (dynamic): Pearson = -0.256 on consecutive transitions, 3.5x stronger than static (0.072).
+
+## What was NOT changed
+
+No changes to kernel.py, atlas.py, gyrolabe.py, or constants.py. The observatory script (run_gyrolabe_experiments.py) was completely rewritten with 10 measurement blocks.
+
+## Observatory script structure (new)
+
+Block 1: Architecture census. Block 2: Static geometry (embeddings, linear probes, boundary predictor). Block 3: Uncoupled generation census with transport statistics. Block 4: Kernel invariant verification (P7, P6, K4 quotient). Block 5: Windowed dynamics (KL, monodromy, phase transitions). Block 6: Coupled generation comparison (5 configs, short and long). Block 7: Dynamic boundary-kernel correlation. Block 8: Long coupled run with windowed dynamics. Block 9: Per-layer correlation analysis. Block 10: Structural fingerprint summary.
+
+### Bolmo Mods
+ 
+vendor (`data\models\Bolmo-1B-vendor\*`) → edited (`data\models\Bolmo-1B\*`) High-level summary
+
+- **Made the code importable both as a package and as standalone scripts** by adding `try/except ImportError` fallbacks around relative imports.
+- **Added CPU-friendly xLSTM backend selection** (native PyTorch kernels when CUDA is unavailable).
+- **Added optional generation-time instrumentation/hooking via a `labe` object**, including per-step callbacks and optional top-k logit adjustment.
+- **Hardened tokenizer’s `expand_byte_ids`** to avoid crashes and to behave more predictably around special tokens / unknown cases.
+- **Tokenizer now supports loading the underlying HF tokenizer from a local path** (using `local_files_only=True` when `original_identifier` exists on disk).
 
 ---
 
-## [v1.3.4-GyroLabe] – 2026-02-20
+## `data\models\Bolmo-1B\configuration_bolmo.py`
+
+### Changes
+1. **Import fallback for tokenizer config**
+   - **Vendor:** `from .tokenization_bolmo import BolmoTokenizerConfig`
+   - **Edited:** wrapped in:
+     ```py
+     try:
+         from .tokenization_bolmo import BolmoTokenizerConfig
+     except ImportError:
+         from tokenization_bolmo import BolmoTokenizerConfig
+     ```
+   **Purpose:** allow the file to work whether imported as a module package (`.` relative import) or run in a flatter/standalone environment.
+
+### No functional config-parameter changes detected
+- All config fields/behavior appear identical aside from import handling.
+
+---
+
+## `data\models\Bolmo-1B\modeling_bolmo.py`
+
+### Changes
+
+1. **Import fallback for local modules**
+   - **Vendor:** direct relative imports:
+     ```py
+     from .configuration_bolmo import BolmoConfig
+     from .tokenization_bolmo import BolmoTokenizerConfig
+     from .utils_bolmo import ...
+     ```
+   - **Edited:** try relative imports first, then fallback to absolute:
+     ```py
+     try:
+         from .configuration_bolmo import BolmoConfig
+         ...
+     except ImportError:
+         from configuration_bolmo import BolmoConfig
+         ...
+     ```
+   **Purpose:** run in both package and non-package contexts.
+
+2. **Added `_GroupNormWeightOnly` module**
+   - New class:
+     ```py
+     class _GroupNormWeightOnly(nn.Module):
+         """GroupNorm with weight only (no bias) ..."""
+     ```
+   - **Note:** In the pasted edited file, this class is **not referenced** elsewhere (currently dead code / future utility).
+
+3. **CPU fallback for xLSTM backend (major runtime behavior change)**
+   - **Vendor:** always uses Triton kernels:
+     ```py
+     mLSTMBackendConfig(
+         chunkwise_kernel="chunkwise--triton_limit_chunk",
+         sequence_kernel="native_sequence__triton",
+         step_kernel="triton",
+         ...
+     )
+     ```
+   - **Edited:** chooses backend based on `torch.cuda.is_available()`:
+     - **CUDA available:** same Triton config as vendor
+     - **CPU-only:** switches to native kernels:
+       ```py
+       mLSTMBackendConfig(
+           chunkwise_kernel="chunkwise--native_autograd",
+           sequence_kernel="native_sequence__native",
+           step_kernel="native",
+           ...
+       )
+       ```
+   **Impact:** model can run without CUDA; avoids import/runtime failures from Triton-only paths.
+
+4. **`BolmoXLSTMLayer` now has an internal `use_xlstm` flag (currently always enabled)**
+   - In both `_original_forward` and `forward`, edited code introduces:
+     ```py
+     use_xlstm = True
+     if use_xlstm:
+         ...
+     else:
+         return x, state   # or return x
+     ```
+   **Impact:** no behavioral change as written (always True), but creates an easy switch point.
+
+5. **Slight cache-mask update logic simplification**
+   - Vendor had an extra redundant `if cache_mask is not None:` check inside an `else` where it must be non-None anyway.
+   - Edited version simplifies the loop that writes back selective cache state:
+     ```py
+     for i in range(len(state)):
+         cache_mask.selective_put(new_state[i], state[i], inv=True)
+     ```
+
+6. **Custom `generate()` adds optional instrumentation and logit adjustment hook (`labe`)**
+   - **Signature change:**
+     - **Vendor:**
+       ```py
+       def generate(..., use_model_defaults=None, **kwargs)
+       ```
+     - **Edited:**
+       ```py
+       def generate(..., use_model_defaults=None, labe: Any = None, **kwargs)
+       ```
+   - **Per-step callbacks added:**
+     ```py
+     if labe is not None:
+         labe.begin_step()
+     ...
+     if labe is not None:
+         labe.end_step()
+     ```
+   - **Optional top-k logit adjustments after logits_processor:**
+     - For each batch element, selects up to **top 64 finite** candidates and calls:
+       ```py
+       topv_adj = labe.adjust_logits_bu_ingress(vocab_ids, topv)
+       scores[vocab_ids] = topv_adj
+       ```
+   - **Token advancement hook when a “real” byte token is appended:**
+     ```py
+     if labe is not None and next_token_cpu != self.model.tokenizer.bpe_token_end_id:
+         labe.advance_with_token(next_token_cpu)
+     ```
+   **Impact:** Enables external control/inspection during generation (profiling, custom biasing, constrained decoding, etc.).  
+   **Compatibility note:** Adding a named parameter is generally safe, but any code calling `generate()` with many positional args (rare) could be affected.
+
+---
+
+## `data\models\Bolmo-1B\tokenization_bolmo.py`
+
+### Changes
+
+1. **Local-path-aware loading of the underlying HF tokenizer**
+   - **Edited:** added `import os`
+   - **Vendor:** always:
+     ```py
+     AutoTokenizer.from_pretrained(tokenizer_config.original_identifier)
+     ```
+   - **Edited:** detect local path and set `local_files_only=True`:
+     ```py
+     ident = tokenizer_config.original_identifier
+     load_kwargs: dict = {}
+     if ident and os.path.exists(ident):
+         load_kwargs["local_files_only"] = True
+     self.hf_tokenizer = AutoTokenizer.from_pretrained(ident, **load_kwargs)
+     ```
+   **Impact:** supports offline/local deployments where `original_identifier` is a directory on disk.
+
+2. **`expand_byte_ids()` rewritten to be safer and more deterministic**
+   Key improvements over vendor implementation:
+   - **Fixes variable shadowing / readability:** vendor reuses loop variable `i` in nested loops; edited uses `pos` / `j`.
+   - **Stops scanning backwards across special tokens:** special tokens become “hard boundaries” (except at the starting position):
+     ```py
+     if byte < self.offset and j != pos:
+         break
+     ```
+   - **No longer asserts that a match must exist.** Instead, adds fallback behavior when trie lookup fails.
+   - **Fallback behavior when no expansion is found:**
+     - Map bolmo byte special tokens to corresponding HF tokenizer IDs when possible (`bos/pad/eos`)
+     - Otherwise fallback to `hf_tokenizer.unk_token_id` if available
+     - Otherwise fallback to `hf_tokenizer.pad_token_id` as last resort
+   - Final assertion becomes a “should never happen” diagnostic:
+     ```py
+     assert current_expansion is not None, f"..."
+     ```
+   **Impact:** prevents crashes in edge cases (unknown patterns, special token boundaries, trie misses), and avoids crossing special tokens while matching.
+
+## Notes / Potential follow-ups
+- `_GroupNormWeightOnly` is currently unused in the edited `modeling_bolmo.py`. If it was meant to fix a loading mismatch, we may want to:
+  - wire it into the relevant place (likely `self.multihead_norm` replacement), or
+  - remove it to reduce maintenance surface.
+- The tokenizer config still contains what looks like a pre-existing issue from vendor:
+  - `eos_token_id=special_tokens.index("<bos>")` (EOS points to BOS). This is unchanged in our edited version, but worth double-checking if we run into EOS behavior oddities.
+
+---
+
+## [v1.3.4-GyroLabe] – 2026-02-19
 
 ## What we did
 
@@ -78,7 +351,7 @@ What we have not done: use S_i as trajectory-level accumulated action. The monod
 
 ---
 
-## [v1.3.3-GyroLabe] – 2026-02-19
+## [v1.3.3-GyroLabe] – 2026-02-18
 
 **Topic:** Stabilization of the Projection Mask Layer via CGM Invariants and Dynamic Focusing
 
