@@ -175,9 +175,9 @@ def horizon(atlas):
     return {"mask": horizon_mask, "idxs": horizon_idxs}
 
 
-# =============================================================================
+# ========
 # 1) Complement symmetry: C(s)=~s commutes with all byte actions
-# =============================================================================
+# ========
 
 class TestComplementSymmetryKernelWide:
     def test_complement_symmetry_commutes_with_byte_actions(self, atlas):
@@ -222,9 +222,9 @@ class TestComplementSymmetryKernelWide:
         print("  ✓ Verified: Complement symmetry commutes with sampled byte actions on all Ω states.")
 
 
-# =============================================================================
+# ========
 # 5) Intrinsic (u,v) phase-space closed-form dynamics (exhaustive)
-# =============================================================================
+# ========
 
 class TestKernelIntrinsicMaskCoordinates:
     def test_exhaustive_step_law_in_mask_coordinates_all_states_all_bytes(self, atlas):
@@ -295,9 +295,9 @@ class TestKernelIntrinsicMaskCoordinates:
         print("  ✓ Verified: Kernel dynamics is exactly (u_next, v_next) = (v, u XOR m_b) on real atlas.")
 
 
-# =============================================================================
+# ========
 # 6) Commutator as global translation (exhaustive + A*-search)
-# =============================================================================
+# ========
 
 class TestKernelCommutatorAsTranslation:
     def test_exhaustive_commutator_translation_all_byte_pairs(self, atlas):
@@ -457,9 +457,9 @@ class TestKernelCommutatorAsTranslation:
         assert counts_dist.sum() == 256 * 256
 
 
-# =============================================================================
+# ========
 # 7) Kernel monodromy: base closure, fiber defect (CGM-anchored)
-# =============================================================================
+# ========
 
 class TestKernelMonodromyBaseFiber:
     def test_bu_dual_pole_monodromy_base_closure_fiber_defect(self, atlas):
@@ -585,9 +585,9 @@ class TestKernelMonodromyBaseFiber:
         print(f"    Var(w)/256 = {var_w/256.0:.9f} (compare A*={A_star:.9f})")
 
 
-# =============================================================================
+# ========
 # 4) CGM THRESHOLD ANATOMY IN KERNEL: mask code cartography (2×3×2)
-# =============================================================================
+# ========
 
 class TestCGMThresholdAnatomyInKernel:
     """
@@ -735,20 +735,20 @@ class TestCGMThresholdAnatomyInKernel:
         print("  ✓ Verified: exactly 4 primitive directions exist, each is a single anatomical bit.")
 
 
-# =============================================================================
+# ========
 
-# =============================================================================
+# ========
 # 5) Kernel -> CGM invariant reconstruction (kernel-only)
-# =============================================================================
+# ========
 
 # NOTE: CGM Units bridge moved to test_physics_3.py (TestCGMUnitsBridgeDiagnostics)
 # The reconstruction test has been removed from Physics 2 to avoid duplication.
 # Physics 3 includes Walsh duality and polynomial derivations that make the bridge easier to justify.
 
 
-# =============================================================================
+# ========
 # 6) CGM threshold anchors & hierarchy extraction (kernel-only)
-# =============================================================================
+# ========
 
 class TestKernelCGMThresholdAnchors:
     """
@@ -928,9 +928,9 @@ class TestKernelCGMThresholdAnchors:
         print("  ✓ Verified: kernel has an intrinsic discrete small-openness constant A_kernel=5/256.")
 
 
-# =============================================================================
+# ========
 # Session dashboard
-# =============================================================================
+# ========
 
 @pytest.fixture(scope="session", autouse=True)
 def print_kernel_quantum_dashboard():

@@ -53,9 +53,9 @@ def atlas():
     }
 
 
-# =============================================================================
+# ========
 # CGM Fundamental Constraints and Kernel Structure
-# =============================================================================
+# ========
 
 
 class TestApertureConstraintHalfInteger:
@@ -632,9 +632,9 @@ class TestRestrictedAlphabetPhaseTransition:
         assert combined_rank == 8
 
 
-# =============================================================================
+# ========
 # Session dashboard
-# =============================================================================
+# ========
 
 @pytest.fixture(scope="session", autouse=True)
 def print_physics_4_dashboard():

@@ -484,9 +484,9 @@ class TestInverseConjugationForm:
             assert s_back == s, f"Conjugation inverse failed for byte {x} at state {hex(s)}"
 
 
-# =============================================================================
+# ========
 # PILLAR 2: QUANTUM GRAVITY MANIFOLD (HOLOGRAPHIC SCALING)
-# =============================================================================
+# ========
 
 class TestQuantumGravityManifold:
     """

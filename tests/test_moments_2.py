@@ -82,9 +82,9 @@ UHI_PER_YEAR_MU = 87_600  # 240 MU/day × 365
 REQUIRED_CAPACITY_PER_YEAR = WORLD_POP * UHI_PER_YEAR_MU
 
 
-# =============================================================================
+# ========
 # Fixtures / helpers
-# =============================================================================
+# ========
 
 @pytest.fixture(scope="module")
 def kernel():
@@ -101,9 +101,9 @@ def _mask_code_set() -> set[int]:
 
 
 
-# =============================================================================
+# ========
 # Test 1: Physical microcell count and c-cancellation (stress)
-# =============================================================================
+# ========
 
 def test_physical_microcell_count_closed_form_and_c_cancellation():
     """
@@ -152,9 +152,9 @@ def test_physical_microcell_count_closed_form_and_c_cancellation():
     assert rel3 < 1e-14
 
 
-# =============================================================================
+# ========
 # Test 2: Ω = C × C in (u,v) coordinates (conversion lattice)
-# =============================================================================
+# ========
 
 def test_router_omega_is_cartesian_product_CxC(kernel: RouterKernel):
     """
@@ -199,9 +199,9 @@ def test_router_omega_is_cartesian_product_CxC(kernel: RouterKernel):
     assert v_set == C
 
 
-# =============================================================================
+# ========
 # Test 3: Strong isotropy inside Ω via uniform d = u⊕v distribution
-# =============================================================================
+# ========
 
 def test_difference_distribution_is_exactly_uniform_over_C(kernel: RouterKernel):
     """
@@ -249,9 +249,9 @@ def test_difference_distribution_is_exactly_uniform_over_C(kernel: RouterKernel)
     assert len(bad_counts) == 0
 
 
-# =============================================================================
+# ========
 # Test 4: Regular action of 2-byte words from ANY start state (bijection)
-# =============================================================================
+# ========
 
 def test_two_byte_words_form_bijection_to_omega_from_any_start(kernel: RouterKernel):
     """
@@ -311,9 +311,9 @@ def test_two_byte_words_form_bijection_to_omega_from_any_start(kernel: RouterKer
         assert int(uniq.size) == OMEGA_SIZE
 
 
-# =============================================================================
+# ========
 # Test 5: Holographic boundary-to-bulk conversion (H -> Ω in one step)
-# =============================================================================
+# ========
 
 def test_horizon_one_step_neighborhood_covers_full_bulk(kernel: RouterKernel):
     """
@@ -354,9 +354,9 @@ def test_horizon_one_step_neighborhood_covers_full_bulk(kernel: RouterKernel):
     assert int(uniq.size) == OMEGA_SIZE
 
 
-# =============================================================================
+# ========
 # Final: CSM capacity and UHI margin (no extra physics claims)
-# =============================================================================
+# ========
 
 def test_csm_capacity_and_uhi_margin():
     """

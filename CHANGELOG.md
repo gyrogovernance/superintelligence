@@ -15,6 +15,103 @@
 
 ---
 
+## [v1.4-ASI_Router&Bolmo_Port] – 2026-02-20
+
+## Bolmo Boundary Logic × Router Kernel
+
+### Context
+Goal: understand Bolmo’s **byte-boundary behavior** using the Router’s **finite byte physics** (ontology/epistemology), and determine whether the boundary mechanism can be expressed as a **kernel-native** structural object (i.e., not “mysterious context,” but composition of priors over bytes).
+
+Scope kept intentionally narrow:
+- Only the **boundary predictor** surface on the full **256×256 byte-pair space** (BOS + b1 + b2).
+- No modifications to Bolmo generation; kernel runs as analysis substrate.
+
+---
+
+### Overall Process (High-level)
+1. **Extracted Bolmo boundary surface** on all 256×256 byte pairs:
+   - Boundary probabilities and corresponding logit surface.
+2. **Mapped byte pairs to kernel states** using the Router’s deterministic physics:
+   - Verified the bijection: \((b_1,b_2)\leftrightarrow s\in\Omega\) (65,536 states exactly).
+3. **Used kernel closed-form dynamics (P5)** to separate boundary surface into:
+   - additive component (row+col effects)
+   - interaction residual (true pair coupling)
+4. **Tested multiple kernel-algebra feature sets** against the surface:
+   - intron priors, family/micro decomposition, mask features, horizon/vertex/phase, etc.
+5. Identified that the correct mathematical basis for “composition of priors” over bytes is the **2D Walsh/Fourier basis on introns**.
+6. **Computed 2D Walsh transforms** of both:
+   - full logit surface
+   - residual (interaction-only) surface
+7. Built a reusable adaptor artifact (`bolmo_adaptor.npz`) storing:
+   - additive part exactly
+   - ranked Walsh coefficients of residual for controllable truncation (Top‑K slicing)
+
+---
+
+### What We Tested and Disregarded (Briefly)
+- **Direct linear probes on 2048-d encoder states** from 12-bit mask features: rejected as the wrong object to probe (dimensional mismatch).
+- **Static XOR-popcount / Hamming distance alone**: insufficient explanation of boundary structure.
+- **6DoF/cube-style geometric features** built from mask anatomy: largely redundant with simpler bilinear/XOR features; didn’t improve predictive power in this regime.
+- **“Boundary = function only of byte xor (delta-byte)”**: proved to be a minor component only (measured precisely via Walsh diagonal energy).
+
+---
+
+### Key Conclusions
+- The Router’s **ontology/epistemology fully covers** the Bolmo 256×256 boundary surface in this regime:
+  - the mapping from byte pairs to ontology states is exact and exhaustive.
+- The kernel’s **depth‑2 closed form** cleanly explains:
+  - why additive structure is separable (A depends only on b1, B only on b2)
+  - why interaction lives entirely in the residual.
+- The interaction residual is **not “missing memory”**; it is **higher-order parity composition** over intron bits.
+- The correct universal representation of Bolmo’s boundary logic on this surface is the **Walsh decomposition** on intron coordinates.
+
+---
+
+### Where We Concluded
+We completed the lab objective by producing a **portable, sliceable representation** of Bolmo’s boundary logic:
+
+- **`bolmo_adaptor.npz`** exported with:
+  - exact additive terms (`grand_mean`, `row_effects`, `col_effects`)
+  - full ranked residual Walsh spectrum (`u`, `v`, `coeffs`) enabling Top‑K truncation at runtime.
+
+Empirical fidelity (example slices):
+- K=2048 → residual R² ≈ 0.55, full-logit R² ≈ 0.74  
+- K=16384 → residual R² ≈ 0.87, full-logit R² ≈ 0.92  
+- K=32768 → residual R² ≈ 0.97, full-logit R² ≈ 0.98  
+
+This establishes that Bolmo’s boundary logic (for the 256×256 byte-pair regime) is **fully deciphered** as a finite, kernel-addressable, parity-composable object, with a tunable compression knob (K).
+
+### Atlas Version 2.2.0 - GENE_Mic/GENE_Mac Architecture Clarification
+
+**Core Architecture**
+- Clarified the distinction between GENE_Mic (0xAA, the 8-bit archetype) and GENE_Mac (0xAAA555, the 24-bit topological manifold)
+- GENE_Mic is now properly identified as the singular holographic seed that mutates via transcription
+- GENE_Mac is the topology where intron trajectories are recorded, with its default state derived from the archetype's pattern
+
+**Atlas Enhancements**
+- Added intron-stage priors to phenomenology (Category 2), preserving the byte's constitutional structure before mask expansion:
+  - 6-bit micro-reference and 2-bit family decomposition
+  - CGM stage parities (L0, LI, FG, BG) from the palindromic byte structure
+  - Structured intron feature matrix [256, 10]
+- Phenomenology now explicitly organized into 6 categories with clear stage separation
+- Atlas version bumped to 2.2
+
+**Kernel API**
+- New intron-stage prior access methods: `get_intron()`, `get_micro_ref()`, `get_family()`, `get_cgm_parities()`, `get_intron_feature_vector()`
+- Added `has_intron_priors` property for capability detection
+- Improved module docstrings throughout to clarify the kernel's role as a runtime engine
+
+**Documentation**
+- Updated specification (GGG_ASI_AR_Specs.md) Section 2.2 to properly distinguish between the micro archetype and macro topology
+- Added comprehensive documentation of the byte boundary formalism in Appendix G
+- Clarified that the 65,536-element ontology is the reachable state space in GENE_Mac, not a confusion with the 256 transformations
+
+**Backward Compatibility**
+- Maintained `ARCHETYPE_A12`, `ARCHETYPE_B12`, `ARCHETYPE_STATE24` as aliases for existing code
+- Older atlas versions (pre-2.x) will trigger clear rebuild messages
+
+---
+
 ## [v1.3.5-GyroLabe-Blomo] – 2026-02-20
 
 ## What we did

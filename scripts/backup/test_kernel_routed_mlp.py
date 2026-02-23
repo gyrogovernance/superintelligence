@@ -36,9 +36,9 @@ def set_seed(seed: int) -> None:
     torch.manual_seed(seed)
 
 
-# =============================================================================
+# ========
 # Mask Strategies
-# =============================================================================
+# ========
 
 class MaskStrategy(Enum):
     HARD_WINDOW = "hard_window"
@@ -94,9 +94,9 @@ MASK_FNS = {
 }
 
 
-# =============================================================================
+# ========
 # Semantic Byte Methods
-# =============================================================================
+# ========
 
 class SemanticByteMethod(Enum):
     SIGN_PROBE = "sign_probe"
@@ -149,9 +149,9 @@ BYTE_FNS = {
 }
 
 
-# =============================================================================
+# ========
 # Layer Strategies
-# =============================================================================
+# ========
 
 class LayerStrategy(Enum):
     EVERY_NTH = "every_nth"
@@ -201,9 +201,9 @@ def window_for_layer(i: int, base: int, strat: str) -> int:
     return base
 
 
-# =============================================================================
+# ========
 # Routed MLP
-# =============================================================================
+# ========
 
 class BoundaryRoutedMLP(nn.Module):
     def __init__(self, mlp, kernel, mask_strat, byte_method, window, sigma):
@@ -235,9 +235,9 @@ class BoundaryRoutedMLP(nn.Module):
         return out.view(*shape[:-1], D_MODEL)
 
 
-# =============================================================================
+# ========
 # Experiment Config
-# =============================================================================
+# ========
 
 @dataclass
 class Config:
@@ -253,9 +253,9 @@ class Config:
     gen_tokens: int = 30
 
 
-# =============================================================================
+# ========
 # Runner
-# =============================================================================
+# ========
 
 class Runner:
     def __init__(self, model, tokenizer, prompts: list[str]):
@@ -369,9 +369,9 @@ class Runner:
         }
 
 
-# =============================================================================
+# ========
 # Experiments
-# =============================================================================
+# ========
 
 def get_experiments() -> list[Config]:
     exps = []
@@ -405,9 +405,9 @@ def get_experiments() -> list[Config]:
     return exps
 
 
-# =============================================================================
+# ========
 # Main
-# =============================================================================
+# ========
 
 def main():
     print("=" * 80)
@@ -460,7 +460,7 @@ def main():
 
     hdr = f"{'Experiment':<30} {'#Layers':>7} {'CosRtd':>8} {'CosAll':>8} {'CosFin':>8} {'Speed':>7}"
     print(hdr)
-    print("-" * 80)
+    print("-" * 5)
 
     for r in sorted(results, key=lambda x: -x["avg_cos_routed"]):
         print(
@@ -475,7 +475,7 @@ def main():
         f.write("KERNEL ROUTING EXPERIMENTS SUMMARY\n")
         f.write("=" * 80 + "\n\n")
         f.write(hdr + "\n")
-        f.write("-" * 80 + "\n")
+        f.write("-" * 5 + "\n")
         for r in sorted(results, key=lambda x: -x["avg_cos_routed"]):
             f.write(
                 f"{r['name']:<30} {r['routed_layers']:>7} "
@@ -483,7 +483,7 @@ def main():
                 f"{r['cos_final']:>8.4f} {r['speedup']:>6.2f}x\n"
             )
         f.write("\n\nBEST GENERATIONS:\n")
-        f.write("-" * 80 + "\n")
+        f.write("-" * 5 + "\n")
         if results:
             best = max(results, key=lambda x: x["avg_cos_routed"])
             f.write(f"Config: {best['name']}\n\n")

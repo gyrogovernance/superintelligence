@@ -1,12 +1,50 @@
 """
 Router constants and core physics.
 
-Defines:
-- 24-bit state: (A12, B12)
-- transcription: intron = byte XOR 0xAA
-- pure XOR transformation
-- FIFO gyration (A↔B swap with flip)
-- K₄ vertex charge computation
+This module defines the foundational objects of the kernel: the state
+representation, the transcription rule, the transition law, and the
+algebraic integrity primitives. Everything else in the router is derived
+from what is defined here.
+
+GENE_Mic - the archetype (§2.2, Appendix G):
+    GENE_MIC_S = 0xAA is the singular holographic seed, the micro gene.
+    It is the universal reference from which all kernel objects derive.
+    Transcription mutates it: intron = byte ^ GENE_MIC_S.
+    Byte 0xAA produces the zero intron (identity action).
+
+GENE_Mac - the topological manifold (§2.1):
+    A 24-bit state composed of two 12-bit components:
+        Type A (bits 23-12): active phase
+        Type B (bits 11-0):  passive phase
+    Each 12-bit component is a 2×3×2 binary grid
+    (2 frames × 3 rows × 2 columns = 12 bits).
+
+    At rest (before any mutation), GENE_Mac has the default state:
+        GENE_MAC_A12      = 0xAAA  (active phase at rest)
+        GENE_MAC_B12      = 0x555  (passive phase at rest)
+        GENE_MAC_STATE24  = 0xAAA555
+
+    This is the topology where expanded introns record their
+    trajectories. It is derived from the archetype's alternating
+    pattern projected across the 2×3×2 geometry.
+
+Transcription (§2.3):
+    Each input byte is XORed with GENE_MIC_S to produce an intron.
+    The intron is expanded into a 12-bit Type A mask via the canonical
+    expansion function (§2.5.2). Type B receives no direct mask.
+
+Transition law (§2.6):
+    1. Mutate Type A only:  A' = A ^ mask_a
+    2. FIFO gyration with complement:
+           A_next = B ^ 0xFFF
+           B_next = A' ^ 0xFFF
+
+Algebraic integrity:
+    - K4 vertex charge via parity checks Q0, Q1
+    - Dual code C_PERP_12 for syndrome-based corruption detection
+    - Trajectory parity commitments for fast ledger integrity checks
+
+See GGG_ASI_AR_Specs.md for the full normative specification.
 """
 
 from __future__ import annotations
@@ -17,20 +55,11 @@ from typing import Union
 import numpy as np
 from numpy.typing import NDArray
 
-GENE_MIC_S: int = 0xAA
+# ========
+# Layer geometry
+# ========
 
 LAYER_MASK_12: int = 0xFFF
-
-ARCHETYPE_A12: int = 0xAAA
-ARCHETYPE_B12: int = 0x555
-
-
-# =============================================================================
-# K₄ Parity Check Vectors
-# =============================================================================
-
-Q0: int = 0x033
-Q1: int = 0x0F0
 
 
 def pack_state(a12: int, b12: int) -> int:
@@ -45,7 +74,35 @@ def unpack_state(state24: int) -> tuple[int, int]:
     return a12, b12
 
 
-ARCHETYPE_STATE24: int = pack_state(ARCHETYPE_A12, ARCHETYPE_B12)
+# ========
+# GENE_Mic: the archetype — the singular holographic seed
+# ========
+
+GENE_MIC_S: int = 0xAA
+
+# ========
+# GENE_Mac: the topological manifold at rest
+# These are the default state of GENE_Mac, not the archetype itself.
+# The archetype is GENE_MIC_S. These are its topological projection.
+# ========
+
+GENE_MAC_A12: int = 0xAAA
+GENE_MAC_B12: int = 0x555
+GENE_MAC_STATE24: int = pack_state(GENE_MAC_A12, GENE_MAC_B12)
+
+# Backward-compatible aliases (used throughout codebase and spec)
+ARCHETYPE_A12: int = GENE_MAC_A12
+ARCHETYPE_B12: int = GENE_MAC_B12
+ARCHETYPE_STATE24: int = GENE_MAC_STATE24
+
+# ========
+# K₄ Parity Check Vectors
+# ========
+
+Q0: int = 0x033
+Q1: int = 0x0F0
+
+
 
 
 def byte_to_intron(byte: int) -> int:

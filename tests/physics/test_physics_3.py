@@ -126,9 +126,9 @@ def parity12_arr(x: NDArray[np.uint16]) -> NDArray[np.uint8]:
     return _parity12_arr(x)
 
 
-# =============================================================================
+# ========
 # A) Byte-action cycle structure and implied eigenphases
-# =============================================================================
+# ========
 
 class TestKernelByteCyclesAndEigenphases:
     def test_reference_byte_cycle_decomposition_and_eigenphases(self, atlas):
@@ -254,9 +254,9 @@ class TestKernelByteCyclesAndEigenphases:
         )
 
 
-# =============================================================================
+# ========
 # B) Code duality and Walsh spectrum support theorem
-# =============================================================================
+# ========
 
 class TestMaskCodeDualityAndFourierSupport:
     def test_generator_bytes_span_all_masks_and_print(self, atlas):
@@ -423,9 +423,9 @@ class TestMaskCodeDualityAndFourierSupport:
         assert support == dual_set
 
 
-# =============================================================================
+# ========
 # C) Atlas distributions forced by the code enumerator
-# =============================================================================
+# ========
 
 class TestAtlasShellDistributionsFromCodeEnumerator:
     def test_horizon_distance_shells_equal_256_times_code_enumerator(self, atlas):
@@ -496,9 +496,9 @@ class TestAtlasShellDistributionsFromCodeEnumerator:
                 print(f"  dist={d:2d} : count={c:6d}  prob={p:.6f}")
 
 
-# =============================================================================
+# ========
 # D) CGM Units bridge - diagnostics printed, minimal hard asserts
-# =============================================================================
+# ========
 
 class TestCGMUnitsBridgeDiagnostics:
     def test_kernel_to_cgm_units_bridge_prints(self, atlas):
@@ -592,9 +592,9 @@ class TestCGMUnitsBridgeDiagnostics:
         assert 0.0 < alpha_kernel < 1.0
 
 
-# =============================================================================
+# ========
 # E) Group presentation on (u,v) coordinates
-# =============================================================================
+# ========
 
 class TestActionGroupPresentationInUV:
     """
@@ -732,9 +732,9 @@ class TestActionGroupPresentationInUV:
                 assert du1 == dv0 and dv1 == du0, "Odd word did not preserve linear part as swap"
 
 
-# =============================================================================
+# ========
 # F) Closed-form polynomial derivations for shell distributions
-# =============================================================================
+# ========
 
 class TestClosedFormShellPolynomials:
     """
@@ -824,9 +824,9 @@ class TestClosedFormShellPolynomials:
         assert max_abs == 0
 
 
-# =============================================================================
+# ========
 # Session dashboard
-# =============================================================================
+# ========
 
 @pytest.fixture(scope="session", autouse=True)
 def print_physics_3_dashboard():

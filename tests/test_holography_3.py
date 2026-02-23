@@ -196,9 +196,9 @@ def ambiguity_subcode_from_erasure(G: NDArray[np.uint8], erased_bits: set[int]) 
             E.add(c & 0xFFF)
     return E
 
-# =============================================================================
+# ========
 # H3-1: Frame0 projection is uniform 4-to-1 over the mask code C
-# =============================================================================
+# ========
 
 def test_h3_frame0_projection_uniform_4_to_1():
     """
@@ -232,9 +232,9 @@ def test_h3_frame0_projection_uniform_4_to_1():
     print(SEP)
     print("  verified: 64 buckets × 4 masks each, differences only in bits 6 and 7")
 
-# =============================================================================
+# ========
 # H3-2: Exhaustive erasure taxonomy (size-4 erasures) by (rank, ambiguity, chi-rank)
-# =============================================================================
+# ========
 
 def test_h3_exhaustive_erasure_taxonomy_size4():
     """
@@ -292,9 +292,9 @@ def test_h3_exhaustive_erasure_taxonomy_size4():
         r, amb, cr = key
         print(f"  rank(G_S)={r}, ambiguity={amb:3d}, chi-rank={cr} : count={counts[key]}")
 
-# =============================================================================
+# ========
 # H3-3: Minimal information-set size (how many observed bits are needed for unique decode)
-# =============================================================================
+# ========
 
 def test_h3_min_information_set_size_is_8():
     """
@@ -332,9 +332,9 @@ def test_h3_min_information_set_size_is_8():
 
     assert min_s == 8, f"expected threshold 8, got {min_s}"
 
-# =============================================================================
+# ========
 # H3-4: Boundary stabilizer subgroup D0 = ker(chi) and vertex coset reconstruction
-# =============================================================================
+# ========
 
 def test_h3_boundary_stabilizer_subgroup_and_vertex_cosets():
     """

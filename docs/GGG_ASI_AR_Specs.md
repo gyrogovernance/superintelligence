@@ -19,7 +19,7 @@ The GGG ASI Alignment Router represents a different paradigm. It treats intellig
 
 The GGG ASI Alignment Router is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
-Operationally, the Router is a deterministic finite-state coordination kernel. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space. A kernel instance starts from a universal reference state called the archetype and applies a fixed transition rule to each byte. This process yields a deterministic state at each step together with a compact routing signature and canonical governance observables that any party can recompute.
+Operationally, the Router is a deterministic finite-state coordination kernel. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space. A kernel instance begins its trajectory from a universal, unconditioned spatial configuration known as the Macro Archetype (the GENE_Mac topology at rest). From this perfectly symmetric 24-bit canvas, it applies a fixed transition rule to each incoming byte, expanding the 8-bit signals into geometric transformations. This process yields a deterministic state at each step together with a compact routing signature and canonical governance observables that any party can recompute.
 
 The kernel is designed to support governance-grade coordination across the GGG domains of Economy, Employment, Education, and Ecology. It does not interpret the empirical meaning of the input bytes. Instead, it performs structural transformations that make results reproducible, comparable, and auditable, while keeping authorization and accountability under Direct human agency at the application layer.
 
@@ -72,6 +72,21 @@ A conforming kernel satisfies the following structural requirements:
 *   **Nonsemantic:** The kernel does not parse language or apply policy. It transforms bytes structurally.
 *   **Portable:** The transition rule is defined using fixed-width bit operations such as XOR, shifts, and masking.
 *   **Auditable:** Trajectories and signatures can be reproduced and verified by any independent party.
+
+## 1.8 The Universal Byte Formalism
+
+The byte is the fundamental unit of the kernel's input alphabet. Its internal structure is not a design choice but a consequence of discrete information at 8-bit resolution.
+
+Every byte decomposes into two constitutive layers:
+
+- A 6-bit micro-reference (64 values): the dynamic payload that drives transformation
+- A 2-bit family index (4 values): the boundary anchor that determines structural frame
+
+The total space is the Cartesian product: 64 micro-references x 4 families = 256. This IS the byte. There is nothing outside it, and there is no alternative decomposition at this resolution.
+
+This structure is palindromic. The 8 bit positions of the byte (after transcription) group into four paired families that align with the CGM stage structure: structural anchors at the boundaries, chirality next, then dynamics and balance in the middle. This palindromic pattern is not imposed by the kernel. It is revealed by the transcription rule (§2.3) and documented in Appendix G.
+
+Any system that processes bytes must handle this structure, whether it makes the decomposition explicit (as the Router does) or absorbs it implicitly into learned parameters (as neural language models do). The Router's contribution is to make the constitutional structure of the byte visible, auditable, and available as a first-class computational object at every stage of processing.
 
 ---
 
@@ -146,36 +161,75 @@ This geometry is the shared substrate for:
 - the expansion masks
 - structural observables (such as horizon distance)
 
-## 2.2 The Archetype
+## 2.2 GENE_Mic and GENE_Mac
 
-### 2.2.1 Definition
+The kernel has two fundamental reference objects: the micro archetype (GENE_Mic) and the macro topology (GENE_Mac). These are distinct objects at different levels of the architecture.
 
-The archetype is the universal reference state from which all router-valid states derive:
+### 2.2.1 GENE_Mic: The Archetype
+
+The archetype is the singular 8-bit holographic seed:
 
 ```python
-ARCHETYPE_A12 = 0xAAA
-ARCHETYPE_B12 = 0x555
-ARCHETYPE_STATE24 = 0xAAA555
+GENE_MIC_S = 0xAA
 ```
 
-### 2.2.2 Structural properties
+This constant is the universal reference from which all kernel dynamics derive. Transcription mutates it:
 
-The archetype has three structural properties that are used throughout the kernel:
+```python
+intron = byte ^ GENE_MIC_S
+```
 
-1. Complement relation  
-   `ARCHETYPE_A12 XOR 0xFFF = ARCHETYPE_B12`
+Byte `0xAA` produces intron `0x00`, the zero mutation. This makes `0xAA` the reference byte (identity action).
 
-2. Maximal symmetry  
+### 2.2.2 GENE_Mac: The Topological Manifold
+
+GENE_Mac is the 24-bit state space where intron trajectories are recorded. At rest (before any mutation), GENE_Mac has the default state:
+
+```python
+GENE_MAC_A12 = 0xAAA      # active phase at rest
+GENE_MAC_B12 = 0x555      # passive phase at rest
+GENE_MAC_STATE24 = 0xAAA555
+```
+
+This default state is derived from the archetype's alternating bit pattern (0xAA) projected across the 2x3x2 geometry of each 12-bit component. It is the topology itself, not the archetype.
+
+For backward compatibility, these values are also available as:
+
+```python
+ARCHETYPE_A12 = GENE_MAC_A12
+ARCHETYPE_B12 = GENE_MAC_B12
+ARCHETYPE_STATE24 = GENE_MAC_STATE24
+```
+
+### 2.2.3 Structural properties
+
+The default GENE_Mac state has three structural properties:
+
+1. Complement relation
+   `GENE_MAC_A12 XOR 0xFFF = GENE_MAC_B12`
+
+2. Maximal symmetry
    The alternating pattern distributes bits evenly across the dual-frame geometry.
 
-3. Universal reference role  
-   All ontology states are reachable from the archetype under the kernel transition physics.
+3. Universal reference role
+   All ontology states are reachable from the default GENE_Mac state under the kernel transition physics.
 
-### 2.2.3 Common source role
+### 2.2.4 Relationship between GENE_Mic and GENE_Mac
 
-The archetype is a common source in the strict operational sense: it is a universal reference point in state space, not an entity or institution. The kernel does not embed ownership. Participants adopt the archetype as the reference so that their computations share a common origin.
+The relationship is:
 
-## 2.2.4 Canonical Derived Observables
+- GENE_Mic (0xAA) is the archetype, the holographic seed
+- Bytes mutate GENE_Mic via transcription to produce introns
+- Introns expand into 12-bit masks
+- Masks act on GENE_Mac (the 24-bit topology) to record trajectories
+
+GENE_Mic is 8 bits. GENE_Mac is 24 bits. The expansion from intron to mask is the projection that bridges them.
+
+### 2.2.5 Common source role
+
+The archetype (GENE_Mic) is a common source in the strict operational sense: it is a universal reference point, not an entity or institution. The kernel does not embed ownership. Participants adopt GENE_MIC_S as the transcription constant so that their computations share a common origin.
+
+### 2.2.6 Canonical Derived Observables
 
 From the 24-bit state `s_t = (A12, B12)`, the following observables are defined as deterministic functions. These are the canonical constitutional observables exported by the kernel.
 
@@ -185,9 +239,9 @@ A12 = (state24 >> 12) & 0xFFF
 B12 = state24 & 0xFFF
 ```
 
-**2. Hamming distance to archetype:**
+**2. Hamming distance to default GENE_Mac:**
 ```python
-archetype_distance = popcount(state24 ^ ARCHETYPE_STATE24)
+archetype_distance = popcount(state24 ^ GENE_MAC_STATE24)
 ```
 where `popcount(x)` returns the number of set bits in `x`.
 
@@ -220,9 +274,9 @@ The kernel input alphabet is the full set of bytes:
 
 There are no reserved bytes and no invalid bytes.
 
-### 2.3.2 Transcription constant
+### 2.3.2 Transcription
 
-The kernel uses a fixed constant:
+The kernel transcribes input bytes using the archetype constant:
 
 ```python
 GENE_MIC_S = 0xAA
@@ -231,12 +285,14 @@ GENE_MIC_S = 0xAA
 Given an input byte `byte`, the kernel computes an intron:
 
 ```python
-intron = byte ^ 0xAA
+intron = byte ^ GENE_MIC_S
 ```
 
 This XOR mapping is a bijection on 8-bit values. Every input byte maps to exactly one intron and every intron corresponds to exactly one byte.
 
-The constant fixes a convention for mapping external bytes into the internal action space. Conforming implementations must use the same constant.
+The intron is the mutation of the archetype. Byte `0xAA` produces intron `0x00` (no mutation). All other bytes produce nonzero introns that drive state transformation.
+
+Conforming implementations MUST use `GENE_MIC_S = 0xAA` for transcription.
 
 ## 2.4 The Reference Byte and the Horizon
 
@@ -318,6 +374,36 @@ XFORM_MASK_BY_BYTE[byte] = expand_intron_to_mask24(byte ^ 0xAA)
 
 The table has exactly 256 entries.
 
+### 2.5.4 The expansion as lossy projection
+
+The canonical expansion function (§2.5.2) maps the 8-bit intron into a 12-bit Type A mask. This mapping is injective (256 distinct introns produce 256 distinct masks), but it is a projection in the following sense:
+
+The intron has a clean constitutional decomposition:
+- micro-reference = intron & 0x3F (6-bit dynamic payload)
+- family = (intron >> 6) & 0x3 (2-bit boundary anchor)
+
+These two fields are independent and separable at the intron stage. After expansion, the family bits and the micro-reference bits are entangled across the 12 positions of the mask. The expansion mixes intron bits 6 and 7 (the family) into frame 1 positions 0 and 1, while intron bits 0 through 3 (part of the micro-reference) fill frame 1 positions 2 through 5.
+
+Once this entanglement occurs, the original 6+2 decomposition cannot be recovered from the mask alone without knowledge of the expansion function. The mask is the byte's geometric shadow on the 2x3x2 topology. It is complete (injective) but structurally entangled.
+
+This is why the phenomenology artifact preserves both stages:
+
+- **Category 2 (intron-stage priors):** The byte's constitutional structure before projection. The 6-bit micro-reference, the 2-bit family, and the CGM stage parities are cleanly separable here. These are the byte's genetics.
+
+- **Category 6 (mask-stage helpers):** The byte's geometric form after projection into GENE_Mac space. The mask12 bits, weights, vertex charges, and feature vectors live here. These are the byte's appearances.
+
+The distinction matters because different computations benefit from different stages. Algorithms that need the byte's structural identity (family membership, CGM stage alignment, boundary vs. payload separation) should use intron-stage priors. Algorithms that need geometric compatibility with the 24-bit state space (XOR interference, phase transitions, holographic reconstruction) should use mask-stage helpers.
+
+For external models that learn byte representations (such as embedding-based language models), the cosine similarity between learned byte vectors relates exactly to XOR popcount between mask vectors:
+
+```
+cos(q, k) = 1 - 2 * popcount(q XOR k) / D
+```
+
+This identity holds for vectors in the {-1, +1} basis. It means that any bilinear form on byte pairs (such as an attention mechanism's Q*K product) can be decomposed in the kernel's native coordinates: mask XOR bits for content interference, family pair structure for boundary alignment, and phase transitions for spectral dynamics.
+
+The kernel does not prescribe which mathematical coupling to use between bytes. XOR masks, cosine similarities, and attention scores are all valid mathematical choices for computing byte-pair interactions. What the kernel provides is the algebraic decomposition that makes any such coupling interpretable in terms of the universal byte structure.
+
 ## 2.6 Transition Law
 
 The transition law specifies the single-step update from `(A12, B12)` under a byte input.
@@ -387,7 +473,9 @@ The kernel uses a 24-bit carrier state, so the theoretical state space contains 
 
 ### 3.1.1 Ontology definition
 
-The ontology Ω is the set of all states reachable from the archetype under the 256 byte actions.
+The ontology Ω is the complete set of spatial configurations reachable from the Macro Archetype under the full alphabet of 256 byte actions. It represents the finite, fully closed phase space that unfolds when the unmutated GENE_Mac topology is subjected to the kernel's transition rule.
+
+(Note: The Macro Archetype is the 24-bit state `0xAAA555`, establishing the foundational origin of Ω).
 
 In this specification, Ω has exactly:
 
@@ -413,7 +501,9 @@ The closure to exactly 65,536 states and the “no new states after step 2” re
 
 ### 3.2.1 One step from archetype
 
-Let the archetype be `(A0, B0) = (0xAAA, 0x555)`.
+Let the starting configuration be the Macro Archetype, where the active and passive phases of the GENE_Mac topology sit in perfect, alternating symmetry:
+
+`(A0, B0) = (0xAAA, 0x555)`
 
 For any byte with Type A mask `M`:
 
@@ -665,16 +755,51 @@ Notes on permitted epistemology construction procedures are provided in Appendix
 ### 4.1.3 Phenomenology artifact
 
 File: `phenomenology.npz`  
-Content: constants required for stepping
+Content: compiled spectral atlas
 
-Phenomenology includes these normative arrays and constants:
-- `archetype_state24`
-- `archetype_a12`
-- `archetype_b12`
+Phenomenology is a structured archive containing six categories:
+
+**Category 1: Kernel constants**
+- `archetype_state24`, `archetype_a12`, `archetype_b12`
 - `gene_mic_s`
 - `xform_mask_by_byte`
+- `c_perp_12`, `q0`, `q1`
 
-The kernel does not include governance measurement scaffolding. Governance measurement is application-layer and specified in Sections 4.4–4.11.
+**Category 2: Intron-stage priors**
+
+These preserve the byte's constitutional structure BEFORE expansion into mask_12:
+- `intron_by_byte[256]`: raw intron values (byte ^ GENE_MIC_S)
+- `micro_ref_by_byte[256]`: 6-bit dynamic payload
+- `family_by_byte[256]`: 2-bit boundary family index
+- `L0_parity[256]`, `LI_parity[256]`, `FG_parity[256]`, `BG_parity[256]`: CGM stage parities
+- `intron_features[256, 10]`: structured feature matrix
+
+See Appendix G for the byte boundary formalism that defines these priors.
+
+**Category 3: Per-state observables**
+- `state_horizon[N]`: horizon byte for each state
+- `state_vertex[N]`: K4 vertex charge for each state
+
+**Category 4: Spectral phase cube**
+- `phase[N, 256]`: cycle position of each state under each byte permutation
+
+**Category 5: Backward-pass observables**
+- `next_horizon[N, 256]`
+- `next_vertex[N, 256]`
+- `next_phase[N, 256]`
+
+**Category 6: Mask-stage helpers**
+
+These are derived from the 12-bit projected masks (post-expansion):
+- `mask12_by_byte[256]`
+- `byte_weight[256]`, `byte_charge[256]`
+- `features_K1`, `features_K2`, ..., `features_K16`
+
+Categories 2 and 6 both describe bytes but from different stages:
+- Category 2: byte BEFORE projection (intron space, CGM priors preserved)
+- Category 6: byte AFTER projection (mask space, geometry-compatible with 24-bit state)
+
+Both are needed. The intron stage carries the CGM constitutional priors. The mask stage carries the geometric compatibility with GENE_Mac.
 
 ## 4.2 Kernel Runtime and Routing Signature
 
@@ -702,7 +827,7 @@ The kernel is deterministic. Given the same archetype and the same byte ledger, 
 ### 4.3.1 Forward replay
 
 Given:
-- start state `s_0` (the archetype)
+- start state `s_0` (the Macro Archetype `0xAAA555`, representing the unconditioned GENE_Mac topology)
 - ledger bytes `b_1…b_t`
 
 any participant computes `s_t` by repeated stepping.
@@ -1005,10 +1130,18 @@ A conforming kernel implementation MUST satisfy:
 
 Representation:
 - state packing and unpacking MUST follow `state24 = (A12 << 12) | B12` with 12-bit masking
-- archetype MUST equal `0xAAA555`
+- the Macro Archetype (the initial unmutated topological state) MUST equal `0xAAA555`
+  *(Note: Exported in the reference implementation as `ARCHETYPE_STATE24` for backward compatibility).*
 
 Transcription:
 - for all bytes, `intron = byte ^ 0xAA` MUST be used
+
+Intron decomposition:
+- the intron MUST decompose as 6-bit micro-reference plus 2-bit family index
+- `micro_ref = intron & 0x3F` (64 unique values)
+- `family = (intron >> 6) & 0x3` (4 values: 0, 1, 2, 3)
+- each micro-reference MUST appear with exactly 4 distinct families
+- the 256 introns MUST be the Cartesian product of 64 micro-references and 4 families
 
 Expansion:
 - expansion function MUST match the canonical definition in §2.5.2
@@ -1458,9 +1591,9 @@ So: "save only the boundaries of a byte (0 and 7) into families" is the design c
 
 ---
 
-## 3. How This Mutates GENE_Mic and Produces the 12-Bit Mask
+## 3. Transcription and Mask Expansion
 
-**GENE_Mic** is the 8-bit holographic archetype `0xAA`. Mutation is transcription:
+**GENE_Mic** (the archetype) is the 8-bit holographic seed `0xAA`. Transcription mutates it:
 
 - `intron = byte ^ 0xAA`
 
@@ -1488,13 +1621,15 @@ This is how "save boundaries into families" appears in the **current** design: t
 
 ---
 
-## 4. How the Mask Affects the GENE_Mac Tensor (24-Bit State)
+## 4. How the Mask Acts on GENE_Mac (24-Bit State)
 
-In the **current** architecture there is no 48-bit tensor. The "macro" state is the **24-bit GENE_Mac**: two 12-bit components (A12, B12), with archetype:
+In the **current** architecture there is no 48-bit tensor. The "macro" state is the **24-bit GENE_Mac**: two 12-bit components (A12, B12), with default state:
 
-- `ARCHETYPE_A12 = 0xAAA`
-- `ARCHETYPE_B12 = 0x555`
-- `ARCHETYPE_STATE24 = 0xAAA555`
+- `GENE_MAC_A12 = 0xAAA`
+- `GENE_MAC_B12 = 0x555`
+- `GENE_MAC_STATE24 = 0xAAA555`
+
+(Also available as `ARCHETYPE_A12`, `ARCHETYPE_B12`, `ARCHETYPE_STATE24` for backward compatibility.)
 
 The 12-bit mask acts **only on the A component**:
 
@@ -1517,10 +1652,35 @@ The 2x3x2 geometry of each 12-bit component (2 frames, 3 rows, 2 cols) is the sa
 
 | Concept | Role in current design |
 |--------|-------------------------|
+| GENE_Mic (0xAA) | The archetype. The singular 8-bit holographic seed. Transcription: `intron = byte ^ 0xAA`. |
 | Byte boundaries (bits 0, 7) | L0 anchors; assigned to families so that only **6 bits** need to drive transformation. |
-| GENE_Mic (0xAA) | Micro archetype; mutation = `intron = byte ^ 0xAA`. |
-| 6-bit payload | Low 6 bits of intron -> frame 0 of 12-bit mask (micro-reference). |
-| 2-bit family index | Intron bits 6,7 (and boundary neighborhood) -> frame 1 of mask; 4 families per micro-reference. |
-| GENE_Mac (24-bit) | Two 12-bit components; archetype `0xAAA555`; mask applies only to A, then gyration updates B. |
+| 6-bit micro-reference | Low 6 bits of intron -> frame 0 of 12-bit mask. The dynamic payload. |
+| 2-bit family index | Intron bits 6,7 -> frame 1 positions 0,1 of mask. The boundary identity. |
+| GENE_Mac (24-bit) | The topological manifold. Two 12-bit components; default state `0xAAA555`; mask applies only to A, then gyration updates B. Introns record their trajectories here. |
 
 So: **byte boundaries (0 and 7) are fixed as structural anchors and folded into a 2-bit family index; the kernel organizes processing so that at runtime the effective transformation content is 6 bits, expanded into a 12-bit mask that mutates the 24-bit state (2 x 12) via the single A-mask and the fixed gyration rule.**
+
+---
+
+## 6. Intron-Stage Priors in the Atlas
+
+The phenomenology artifact (§4.1.3) preserves the intron-stage decomposition in Category 2:
+
+| Array | Content |
+|-------|---------|
+| `intron_by_byte[256]` | Raw intron values: `byte ^ GENE_MIC_S` |
+| `micro_ref_by_byte[256]` | 6-bit micro-reference: `intron & 0x3F` |
+| `family_by_byte[256]` | 2-bit family index: `(intron >> 6) & 0x3` |
+| `L0_parity[256]` | Parity of bits 0 and 7 (CS anchors) |
+| `LI_parity[256]` | Parity of bits 1 and 6 (UNA chirality) |
+| `FG_parity[256]` | Parity of bits 2 and 5 (ONA dynamics) |
+| `BG_parity[256]` | Parity of bits 3 and 4 (BU balance) |
+| `intron_features[256, 10]` | Structured feature matrix (see below) |
+
+The `intron_features` matrix has 10 columns:
+- Columns 0-5: 6-bit micro-reference as +/- 1
+- Columns 6-7: 2-bit family index as +/- 1
+- Column 8: cross-parity (family XOR micro_ref low 2 bits)
+- Column 9: total intron weight normalized to [-1, +1]
+
+These priors are available to any computation that benefits from the byte's constitutional structure before it gets projected into mask_12 geometry. The mask-stage helpers in Category 6 (`mask12_by_byte`, `features_K*`) are the post-projection representations.
