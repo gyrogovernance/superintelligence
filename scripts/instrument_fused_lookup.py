@@ -22,7 +22,7 @@ from typing import Any
 import torch
 import numpy as np
 
-from common import PROJECT_ROOT, bolmo_reset_local_caches, load_bolmo, token_to_byte_and_fused
+from secret_lab_ignore.blomo_port.common import PROJECT_ROOT, bolmo_reset_local_caches, load_bolmo, token_to_byte_and_fused
 
 
 @dataclass
