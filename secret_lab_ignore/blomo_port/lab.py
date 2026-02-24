@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 
 import common
-from common import PROJECT_ROOT, load_bolmo
+from common import PROJECT_ROOT, load_bolmo, maybe_patch_expand_byte_ids
 from module_0_baseline import baseline_generate
 from module_1_observer import (
     ByteObservation,
@@ -25,8 +25,12 @@ from module_1_observer import (
     ObservationLog,
     print_observation_summary,
 )
-from bolmo_adaptor import build_and_save_default_adaptor
-
+from adaptors.boundary_adaptor import build_and_save_default_adaptor
+from module_3_prefill_eval import evaluate_prompt_prefill
+from module_4_patch_stats import patch_stats_for_prompt
+from module_5_prefill_replace import run_module_5_porting_suite
+from module_6_prefill_fast_port import run_module_6_prefill_fast_port
+from module_7 import run_module_7
 
 def _run_module_0(model, tokenizer, prompts, max_new_tokens: int = 200) -> None:
     print("\n--- Module 0: Baseline Generation ---")
@@ -59,9 +63,51 @@ def _run_module_1(model, tokenizer, atlas_dir, prompts, max_new_tokens: int = 20
 
 
 def _run_module_2(model, tokenizer, device, atlas_dir, model_dir, chunk_size: int) -> None:
-    print("\n--- Module 2: Build bolmo_adaptor.npz ---")
+    print("\n--- Module 2: Build boundary_adaptor.npz ---")
     build_and_save_default_adaptor(model, tokenizer, device, model_dir, chunk_size=chunk_size)
 
+def _run_module_3(model, tokenizer, model_dir):
+    print("\n--- Module 3: Prefill boundary eval (adaptor vs Bolmo) ---")
+    adaptor_path = PROJECT_ROOT / "data" / "cache" / "blomo_port" / "analysis" / "boundary_adaptor.npz"
+    prompts = [
+        "Language modeling is ",
+        "The quick brown fox ",
+        "def fibonacci(n):\n",
+        "Hello world! This is a test of boundaries.\n",
+    ]
+    for K in (2048, 8192, 16384, 32768):
+        print(f"\nK={K}:")
+        for p in prompts:
+            r = evaluate_prompt_prefill(model, tokenizer, adaptor_path, p, K=K)
+            print(f"  prompt={p!r}")
+            print(f"    compared={r.n_compared}/{r.n_positions}  R2={r.r2:.4f}  pearson={r.pearson:.4f}  MAE={r.mean_abs_err:.4f}  agree@0.5={r.agree_at_0p5:.3f}")
+
+def _run_module_4(model, tokenizer, model_dir) -> None:
+    print("\n--- Module 4: Patch stats (Bolmo vs Adaptor) ---")
+
+    adaptor_path = PROJECT_ROOT / "data" / "cache" / "blomo_port" / "analysis" / "boundary_adaptor.npz"
+    if not adaptor_path.exists():
+        raise RuntimeError(
+            f"Adaptor not found: {adaptor_path}\n"
+            "Run module 2 first:\n"
+            "  python secret_lab_ignore/blomo_port/lab.py --module 2"
+        )
+
+    prompts = [
+        "Language modeling is ",
+        "The quick brown fox ",
+        "def fibonacci(n):\n",
+    ]
+
+    K = 16384
+    thr = 0.5
+    print(f"Using K={K}, threshold={thr}")
+
+    for p in prompts:
+        out = patch_stats_for_prompt(model, tokenizer, adaptor_path, p, K=K, threshold=thr)
+        print(f"\nprompt={p!r}")
+        print(f"  bolmo:   {out['bolmo']}")
+        print(f"  adaptor: {out['adaptor']}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -69,7 +115,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--module", "-m", type=int, action="append", default=[],
-        choices=[0, 1, 2],
+        choices=[0, 1, 2, 3, 4, 5, 6, 7],
         help="Module to run (repeat for multiple). Default: 0 1.",
     )
     parser.add_argument(
@@ -94,6 +140,7 @@ def main() -> None:
     from src.tools.gyrolabe import detect_device
     device = detect_device()
     model, tokenizer = load_bolmo(model_dir, device)
+    maybe_patch_expand_byte_ids(tokenizer)
 
     prompts = [
         "Language modeling is ",
@@ -113,9 +160,39 @@ def main() -> None:
             model, tokenizer, device, atlas_dir, model_dir,
             chunk_size=args.chunk_size,
         )
+    if 3 in modules:
+        _run_module_3(model, tokenizer, model_dir)
+        
+    if 4 in modules:
+        _run_module_4(model, tokenizer, model_dir)
+
+    if 5 in modules:
+        print("\n--- Module 5: Porting suite (analysis + 512 token A/B + deterministic equivalence) ---")
+        run_module_5_porting_suite(
+            model, tokenizer,
+            prompts=[
+                "Language modeling is ",
+                "The quick brown fox ",
+                "def fibonacci(n):\n",
+            ],
+            K=16384,
+            max_new_tokens=max(512, args.max_tokens),
+            preview_chars=1200,
+        )
+    if 6 in modules:
+        print("\n--- Module 6: Prefill fast port (compute removal) ---")
+        run_module_6_prefill_fast_port(
+            model, tokenizer,
+            prompt="Language modeling is ",
+            K=16384,
+            max_new_tokens=max(512, args.max_tokens),
+        )
+
+    if 7 in modules:
+        print("\n--- Module 7: Suffix Residual Router / Embedding Analysis ---")
+        run_module_7(model, tokenizer)
 
     print("\nDone.")
-
 
 if __name__ == "__main__":
     main()

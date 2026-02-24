@@ -9,7 +9,7 @@ Purpose:
 - Express residual in intron-indexed 2D Walsh basis and export a ranked spectrum.
 
 Output:
-- data/cache/blomo_port/analysis/bolmo_adaptor.npz
+- data/cache/blomo_port/analysis/boundary_adaptor.npz
   Contains:
     grand_mean, row_effects, col_effects,
     u[65536], v[65536], coeffs[65536]  (ranked by |coeff|)
@@ -299,7 +299,7 @@ def predict_residual_walsh_bytes(
     return out.astype(np.float32)
 
 
-def build_bolmo_adaptor(
+def build_boundary_adaptor(
     scores: np.ndarray,
     meta: CacheMeta,
     out_path: Path,
@@ -307,7 +307,7 @@ def build_bolmo_adaptor(
     eval_Ks: tuple[int, ...] = (2048, 4096, 8192, 16384, 32768),
 ) -> dict[str, Any]:
     """
-    Build bolmo_adaptor.npz:
+    Build boundary_adaptor.npz:
       - additive (grand_mean, row_effects, col_effects)
       - ranked residual Walsh spectrum (u,v,coeffs)
     """

@@ -25,6 +25,9 @@ PROJECT_ROOT = _THIS_DIR.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+# Suffix automaton cache (optional global speedup for expand_byte_ids)
+SUFFIX_AUTOMATON_PATH = PROJECT_ROOT / "data" / "cache" / "blomo_port" / "suffix_automaton.npz"
+
 import torch
 
 from src.router.constants import mask12_for_byte, popcount, unpack_state, vertex_charge_from_mask
@@ -185,6 +188,29 @@ def token_to_byte_and_fused(token_id: int, token_offset: int) -> tuple[Optional[
     if token_offset + 256 <= t < token_offset + 512:
         return (t - (token_offset + 256), True)
     return (None, False)
+
+
+def maybe_patch_expand_byte_ids(tokenizer: Any) -> None:
+    """
+    If suffix_automaton.npz exists, patch tokenizer.expand_byte_ids to use the
+    automaton (same semantics, ~4x faster). All modules using expand_byte_ids
+    then benefit transparently. Build the npz with module 8 or adaptors/suffix_adaptor.py.
+    """
+    if not SUFFIX_AUTOMATON_PATH.exists():
+        return
+    try:
+        from adaptors.suffix_adaptor import SuffixAutomaton, expand_byte_ids_with_automaton
+    except Exception:
+        return
+    automaton = SuffixAutomaton.load(SUFFIX_AUTOMATON_PATH)
+    orig = tokenizer.expand_byte_ids
+
+    def fast_expand(byte_ids: list[int], n_last: Optional[int] = None) -> list[int]:
+        if n_last is not None:
+            return orig(byte_ids, n_last=n_last)
+        return expand_byte_ids_with_automaton(byte_ids, automaton, tokenizer)
+
+    tokenizer.expand_byte_ids = fast_expand
 
 
 def encode_no_specials(tokenizer: Any, text: str) -> list[int]:

@@ -15,7 +15,168 @@
 
 ---
 
-## [v1.4-ASI_Router&Bolmo_Port] – 2026-02-20
+## [v1.4.1-ASI_Router&Bolmo_Port] – 2026-02-23
+
+### New adaptor artifacts
+
+- **Boundary adaptor (`adaptors/boundary_adaptor.py`)**
+  - Extracts Bolmo’s full 256×256 prefill boundary probability surface (BOS + b1 + b2).
+  - Converts probabilities to logits and decomposes:
+    - `L[b1,b2] = grand_mean + row_effects[b1] + col_effects[b2] + residual[b1,b2]`.
+  - Expresses `residual` in the intron-indexed 2D Walsh basis:
+    - Saves ranked spectrum as `u[65536], v[65536], coeffs[65536]`.
+  - Exports a single, sliceable adaptor artifact:
+    - `data/cache/blomo_port/analysis/boundary_adaptor.npz`.
+  - Includes basic stats and R² reports for various K (e.g. 2048, 8192, 16384, 32768).
+
+- **Suffix adaptor (`adaptors/suffix_adaptor.py`)**
+  - Builds an Aho–Corasick automaton over `tokenizer.byte_trie`:
+    - Normalizes trie keys from Bolmo token IDs to byte values 0..255 (handles offset and fused variants).
+    - Reverses stored sequences to forward byte sequences.
+    - Tracks the **longest** token per state (by pattern length) via `best_eid`.
+    - Constructs dense `next_state[num_states,256]` and `best_eid[num_states]`.
+  - Provides:
+    - `build_suffix_automaton(tokenizer)` → `SuffixAutomaton`.
+    - `expand_byte_ids_with_automaton(byte_ids, automaton, tokenizer)` with **identical semantics** to `tokenizer.expand_byte_ids`.
+  - Verified on multiple test strings (`Hello world`, `The quick brown fox`, `aaaaaa`, code-like snippets, etc.); all tests passed (exact equality of expanded IDs).
+  - Benchmarks show ~**3.9–4.0× speedup** vs the original `expand_byte_ids` for 4500-byte sequences (reference ~5.4 ms; automaton ~1.4 ms).
+  - Automaton is saved as `data/cache/blomo_port/suffix_automaton.npz` (~200 MB, depending on model).
+
+### Global lab integration
+
+- **`common.maybe_patch_expand_byte_ids`**
+  - If `suffix_automaton.npz` exists, patches `tokenizer.expand_byte_ids` to call `expand_byte_ids_with_automaton` for the full sequence (keeps original behavior when `n_last` is used).
+  - Ensures all lab modules that rely on `expand_byte_ids` transparently benefit from the automaton’s speedup without changing semantics.
+
+- **`lab.py`**
+  - After `load_bolmo`, now calls:
+    ```python
+    model, tokenizer = load_bolmo(model_dir, device)
+    maybe_patch_expand_byte_ids(tokenizer)
+    ```
+  - Modules 2–7 now run with the suffix automaton when available.
+
+### Boundary port (Modules 2–6, updated to new adaptor)
+
+- **Module 2 (boundary surface extraction → adaptor build)**
+  - Ported to use `adaptors.boundary_adaptor` as the normative builder:
+    - Caches raw scores in `scores.npy` + `meta.json`.
+    - Builds `boundary_adaptor.npz` with additive + Walsh residual.
+  - Basic stats and R² slice evaluation are printed on completion.
+
+- **Module 3 (`module_3_prefill_eval.py`)**
+  - Uses `boundary_adaptor.npz` via `load_boundary_adaptor`.
+  - Evaluates adaptor vs Bolmo prefill boundary probabilities on real prompts:
+    - Reports: compared positions, R², Pearson, MAE, and `agree@0.5`.
+  - Confirms earlier results: high R² and near-perfect `agree@0.5` for moderate K (e.g. 16k, 32k).
+
+- **Module 4 (`module_4_patch_stats.py`)**
+  - Also moved to `boundary_adaptor.npz`.
+  - Compares patch statistics under:
+    - Bolmo prefill boundaries vs adaptor-based boundaries at threshold 0.5.
+  - Shows matching boundary rates and patch length distributions on tested prompts.
+
+- **Module 5 (`module_5_prefill_replace.py`)**
+  - Updated to use `boundary_adaptor` loader and functions.
+  - Still runs the full porting suite:
+    - A/B prefill comparison on prompts.
+    - Patch stats (deterministic + sampled with shared RNG).
+    - 512-token generation in four modes:
+      - [A] Baseline (Bolmo sampled boundaries)
+      - [B] Patched (adaptor sampled boundaries)
+      - [C] Baseline deterministic (Bolmo mask = p>0.5)
+      - [D] Patched deterministic (adaptor mask = p>0.5)
+  - Confirms **deterministic equivalence** in the C vs D case (token-id match 1.000 over 512 tokens in prior runs), strengthening confidence in the boundary adaptor.
+
+- **Module 6 (`module_6_prefill_fast_port.py`)**
+  - Uses `boundary_adaptor` for prefill fast port:
+    - Patches `model.model.prefill_boundary_prediction_forward` to compute boundary masks from the adaptor instead of the local encoder’s boundary head.
+  - Instruments `boundary_predictor_module.forward` call counts:
+    - Baseline deterministic prefill: 2 calls.
+    - Patched deterministic: 1 call (prefill compute removal).
+  - Verifies deterministic 512-token equivalence as in Module 5.
+
+### Suffix / embedding work (Module 7 and diagnostics)
+
+- **Suffix automaton + fused lookup instrumentation**
+  - `instrument_fused_lookup.py`:
+    - Patches `byte_embedding.forward` to count how often token IDs fall in:
+      - base range `[offset, offset+255]`;
+      - fused range `[offset+256, offset+511]`;
+      - specials `[0..offset-1]`.
+    - On a 300-token generation:
+      - `base_lookups ≈ 409`, `fused_lookups = 0`, specials small, no out-of-range.
+    - Confirms that, for the tested decoding path:
+      - `byte_embedding` rows `256..511` (fused) appear **unused** at runtime.
+    - This suggests these rows are safe candidates for pruning in inference, but we have **not** yet changed the model weights; the finding is observational.
+
+- **Suffix automaton as a lab-level adaptor**
+  - `adaptors/suffix_adaptor.py` is now the canonical builder for `suffix_automaton.npz`:
+    - Integrates the earlier stand-alone `suffix_automaton_adaptor.py` into the adaptors namespace.
+    - Tests and benchmarks are part of this adaptor script.
+  - `common.maybe_patch_expand_byte_ids` uses it as a global speed optimization when present.
+
+- **Module 7: Suffix Residual Router Port (current state)**
+  - Extraction:
+    - Uses the fast suffix automaton if available to obtain `expanded_ids` (suffix IDs) during a baseline generation run.
+    - Simultaneously steps the Router kernel to record `(state_index, horizon, vertex, phase)` per byte.
+    - Builds backoff tables:
+      - `state_to_eid[sidx] → mode(expanded_id | that state)`.
+      - `hvp_to_eid[h,v,p]` and `horizon_to_eid[h]`, with a global default.
+  - Patch:
+    - `RouterSuffixPatch` replaces `local_encoder._embed`:
+      - Computes byte-embedding as usual.
+      - Either uses original `subword_embedding(expanded_input_ids)` (Trie-based suffix) for `orig_suffix`,
+      - Or looks up Router-predicted suffix IDs via the backoff tables and applies those embeddings (`router_suffix`).
+      - Blends: `(1−blend)*orig_suffix + blend*router_suffix`.
+  - Experimental results (on a representative prompt, 300 tokens):
+    - Baseline / Blend 0.0: exact match, as expected.
+    - Blend 0.5: partially coherent but noisy text (neologisms, broken word forms).
+    - Blend 1.0 (PURE ROUTER): severe degradation into nonlinguistic byte noise.
+  - Interpretation:
+    - This particular mapping `(state,horizon,vertex,phase) → suffix ID` is **not yet sufficient** to replace the subword Trie search.
+    - The Router kernel is clearly not being used in its full expressive capacity here; the negative result is about this MODE-table construction, not about the core Router formalism.
+    - The module is being retained as an exploration stub; no strong theoretical claims are made from its failure.
+
+### Decode-boundary investigation (not yet ported)
+
+- A dedicated investigation script (`investigate_decode_boundary.py`, not shown above but run during this cycle) probed the decode-side boundary mechanism:
+  - `prefill_boundary_prediction_forward` is only used on prefill.
+  - At decode time, boundaries are inferred from **fused vocab logits**:
+    - tokens in `[offset+0..offset+255]` = byte w/o boundary,
+    - tokens in `[offset+256..offset+511]` = byte+boundary.
+  - `generate()` strips the boundary bit in returned output IDs; fused tokens are used internally but not exposed.
+- We attempted decode-boundary replacement, but:
+  - A clean, kernel-based replacement that preserves sampling behavior at decode remains **unsolved**.
+  - Decision: pause decode-boundary porting and focus on
+    - prefill boundary (which is already ported),
+    - suffix automaton, and
+    - embedding analysis, before returning with a better-informed design.
+
+### Embedding port / analysis (status)
+
+- Several embedding experiments were conducted (Walsh-based spectral ports, algebraic bases, low-rank SVD approximations).
+  - These showed that **aggressive approximation of the 256×2048 base byte embeddings** leads to rapid degradation in generation quality, even when R² on the embedding matrix is moderate.
+  - Together with fused-lookup instrumentation, this suggests:
+    - The lower 256 rows carry rich distributional structure that is not yet well-captured by small, simple Router-aligned bases.
+    - The upper 256 rows appear unused at decode, and are good future candidates for pruning or repurposing.
+- For this release, embeddings remain intact; Module 7 focuses on the suffix / Router attempt and will likely be refactored into a more purely analytical “embedding vs Router geometry” module in a future iteration.
+
+### Summary of today’s direction
+
+- Established **two strong, concrete adaptors**:
+  - `boundary_adaptor.npz` (Walsh-decomposed prefill boundary surface).
+  - `suffix_automaton.npz` (Aho–Corasick suffix automaton matching `expand_byte_ids` exactly and ~4× faster).
+- Integrated the suffix automaton globally into the lab via `maybe_patch_expand_byte_ids`.
+- Confirmed that fused embedding rows are unused in the current decode path (instrumented), but did not yet prune them.
+- Made an initial, MODE-table-style attempt at porting the suffix residual via Router state, which currently degrades output when blended strongly; more work is needed to design a better adaptor for suffix semantics.
+- Attempted to port decode-boundary behavior; clarified how it is implemented (via fused logits), but a robust Router-based replacement was not yet found, so this remains open.
+
+No underlying hypothesis (e.g. Router expressivity) is taken as disproven by these experiments; instead, today’s work narrows down which constructions are promising (boundary adaptor, suffix automaton) and which require deeper rethinking (Router→suffix adaptor, decode-side boundary port, embedding compression) before another serious attempt.
+
+---
+
+## [v1.4-ASI_Router&Bolmo_Port] – 2026-02-22
 
 ## Bolmo Boundary Logic × Router Kernel
 
@@ -42,7 +203,7 @@ Scope kept intentionally narrow:
 6. **Computed 2D Walsh transforms** of both:
    - full logit surface
    - residual (interaction-only) surface
-7. Built a reusable adaptor artifact (`bolmo_adaptor.npz`) storing:
+7. Built a reusable adaptor artifact (`boundary_adaptor.npz`) storing:
    - additive part exactly
    - ranked Walsh coefficients of residual for controllable truncation (Top‑K slicing)
 
@@ -70,7 +231,7 @@ Scope kept intentionally narrow:
 ### Where We Concluded
 We completed the lab objective by producing a **portable, sliceable representation** of Bolmo’s boundary logic:
 
-- **`bolmo_adaptor.npz`** exported with:
+- **`boundary_adaptor.npz`** exported with:
   - exact additive terms (`grand_mean`, `row_effects`, `col_effects`)
   - full ranked residual Walsh spectrum (`u`, `v`, `coeffs`) enabling Top‑K truncation at runtime.
 
@@ -589,7 +750,7 @@ Structural invariants held across all modes: mean_code_dist near 6.0, horizon en
 
 ### Future Directions (Not Implemented Today)
 - Walsh spectrum on byte-domain:
-  A clean next step is to compute the 256-point Walsh-Hadamard transform of the mask profiles on the byte group directly (GF(2)^8), aligning exactly with your mask12_for_byte map, and then possibly designing masks by selecting low-frequency components.
+  A clean next step is to compute the 256-point Walsh-Hadamard transform of the mask profiles on the byte group directly (GF(2)^8), aligning exactly with our mask12_for_byte map, and then possibly designing masks by selecting low-frequency components.
 
 - Fiber-aware modulation revisited:
   Now that the base architecture is stable, we can re-introduce a carefully scaled [256, 43] fiber mask on top of the D5 scalar mask and test again.
@@ -1414,7 +1575,7 @@ Still working on the Specs and cleaning up the old codebase.
 ADDED: guides\GyroASI_Substrate_Specs.md
 This is a revision of an old study, and a refinement so it can match the overal GyroASI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
 
-> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. You may read our latest specs draft here: 
+> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. We may read our latest specs draft here: 
 
 📖 [GGG ASI Alignment Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
 
@@ -1528,7 +1689,7 @@ Began implementing a walking model of GyroASI, transforming the system from disc
 
 * **Natural Boundaries**: Words end when local amplitude drops (like a step completes), sentences end when momentum dissipates (like coming to a stop). No thresholds needed - it's endogenous physics.
 
-* **Sensitivity Through Holography**: Each byte transforms all 48 bits simultaneously, like how shifting weight affects your entire body posture. The input genuinely guides the walk.
+* **Sensitivity Through Holography**: Each byte transforms all 48 bits simultaneously, like how shifting weight affects our entire body posture. The input genuinely guides the walk.
 
 **Code Architecture Changes**
 
@@ -1722,7 +1883,7 @@ Today’s work completed a significant set of architectural, algorithmic, and pe
 For the past two days, I've been expanding and contracting gyro_core.py - our main logic to understand what works and what not. It managed to reached a state of over 2500 LOC, and after not getting anywhere, I stipped it down to less than 200 LOC to discover the foundations of my architecture.
 
 Our Atlas (5 States Maps):
-Theta (CS): establishes the orthogonality ground, the π/2 chirality that defines emergence. It tells you how far any state is from the archetypal source.
+Theta (CS): establishes the orthogonality ground, the π/2 chirality that defines emergence. It tells us how far any state is from the archetypal source.
 
 Ontology (UNA): defines the raw atlas of discoverable states. This is the space of all possible identities.
 
@@ -3485,7 +3646,7 @@ All changes work seamlessly with **pause/resume**:
 *   Ensured Python 3.10 compatibility across packages.
 
 **Net Effect:**  
-Training now hopefully will run at hardware‑limited throughput. Storage is portable, readable, and consistent with the GyroASI theory. No artificial bottlenecks remain between your ontology–phenomenology–epistemology pipeline and the disk.
+Training now hopefully will run at hardware‑limited throughput. Storage is portable, readable, and consistent with the GyroASI theory. No artificial bottlenecks remain between our ontology–phenomenology–epistemology pipeline and the disk.
 
 ## \[0.9.6.3\] – 2025-07-23
 
@@ -3495,7 +3656,7 @@ Training now hopefully will run at hardware‑limited throughput. Storage is por
 
 *   `AgentPool.ensure_triad()` creates (and guarantees presence of) the canonical trio.
 *   New `AgentPool.get()` to fetch an agent _without_ creating it (raises `KeyError` if missing).
-*   `AgentPool.create_agent()` explicit creation API when you _do_ want a new id.
+*   `AgentPool.create_agent()` explicit creation API when we _do_ want a new id.
 
 **Creation policy controls**
 
@@ -3699,7 +3860,7 @@ All prior variants (e.g. OR-based `coadd`) were removed as physically invalid.
 
 **7\. Designed Physical Non-Associativity Experiment**
 
-*   Prepared a plan to empirically test physical path dependence using your actual state transition maps.
+*   Prepared a plan to empirically test physical path dependence using our actual state transition maps.
 *   Confirms that associativity violations are not algebraic artifacts, but grounded in state evolution.
 
 **8\. Genetics**

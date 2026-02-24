@@ -1,10 +1,9 @@
-# secret_lab_ignore/blomo_port/bolmo_adaptor.py
 """
-Bolmo Adaptor Builder (Lab Utility)
+Boundary Adaptor (Lab Utility)
 
 Purpose
 -------
-Extract Bolmo's 256×256 boundary probability surface (BOS + b1 + b2),
+Extract Bolmo's 256x256 boundary probability surface (BOS + b1 + b2),
 convert it to a logit surface L[b1,b2], decompose:
 
     L = grand_mean + row_effects[b1] + col_effects[b2] + residual[b1,b2]
@@ -12,7 +11,7 @@ convert it to a logit surface L[b1,b2], decompose:
 Then represent residual in intron-indexed 2D Walsh basis and export a single,
 sliceable adaptor artifact:
 
-    data/cache/blomo_port/analysis/bolmo_adaptor.npz
+    data/cache/blomo_port/analysis/boundary_adaptor.npz
 
 This file contains:
   - grand_mean (float32)
@@ -44,18 +43,12 @@ import torch
 from common import PROJECT_ROOT, bolmo_reset_local_caches
 
 
-# -----------------------------------------------------------------------------
 # Paths
-# -----------------------------------------------------------------------------
-
 CACHE_DIR = PROJECT_ROOT / "data" / "cache" / "blomo_port"
 ANALYSIS_DIR = CACHE_DIR / "analysis"
 
 
-# -----------------------------------------------------------------------------
 # Cache metadata
-# -----------------------------------------------------------------------------
-
 @dataclass(frozen=True)
 class ScoresCacheMeta:
     model_key: str
@@ -109,10 +102,7 @@ def _save_scores_cache(cache_subdir: Path, scores: np.ndarray, meta: ScoresCache
     (cache_subdir / "meta.json").write_text(json.dumps(asdict(meta), indent=2), encoding="utf-8")
 
 
-# -----------------------------------------------------------------------------
 # Extraction: scores[b1,b2] only
-# -----------------------------------------------------------------------------
-
 @torch.inference_mode()
 def extract_scores_256x256(
     model: Any,
@@ -158,7 +148,6 @@ def extract_scores_256x256(
 
             model.model.local_encoder.free_inference_cache()
 
-            # We only need bnd_logprobs
             _, _, bnd_logprobs, _ = model.model.local_encoder(
                 batch,
                 expanded_input_ids=expanded,
@@ -189,9 +178,7 @@ def get_scores_cached_or_extract(
     model_dir: Path,
     chunk_size: int = 16,
 ) -> tuple[np.ndarray, ScoresCacheMeta]:
-    """
-    Loads cache if available; otherwise extracts and writes cache.
-    """
+    """Loads cache if available; otherwise extracts and writes cache."""
     subdir = _cache_subdir(model, model_dir)
     cached = _load_scores_cache(subdir)
     meta = _load_meta(subdir)
@@ -250,10 +237,7 @@ def analyze_scores_basic(scores: np.ndarray) -> dict[str, float]:
     }
 
 
-# -----------------------------------------------------------------------------
-# Walsh utilities (256×256)
-# -----------------------------------------------------------------------------
-
+# Walsh utilities (256x256)
 def _r2_scalar(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     y_true = y_true.astype(np.float64, copy=False)
     y_pred = y_pred.astype(np.float64, copy=False)
@@ -263,7 +247,7 @@ def _r2_scalar(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 
 def _wht_axis(a: np.ndarray, axis: int) -> np.ndarray:
-    """Unnormalized Walsh–Hadamard transform along `axis` (length must be 256)."""
+    """Unnormalized Walsh-Hadamard transform along axis (length must be 256)."""
     x = np.swapaxes(a, axis, -1).copy()
     n = x.shape[-1]
     assert n == 256
@@ -291,10 +275,7 @@ def wht2_256(mat: np.ndarray) -> np.ndarray:
     return out
 
 
-# -----------------------------------------------------------------------------
 # Adaptor build + (analysis-only) evaluator
-# -----------------------------------------------------------------------------
-
 _POP8 = np.array([int(i).bit_count() for i in range(256)], dtype=np.int32)
 
 
@@ -328,7 +309,7 @@ def predict_residual_walsh(
     return out.astype(np.float32)
 
 
-def build_bolmo_adaptor(
+def build_boundary_adaptor(
     scores: np.ndarray,
     meta: ScoresCacheMeta,
     out_path: Path,
@@ -336,7 +317,7 @@ def build_bolmo_adaptor(
     eval_Ks: tuple[int, ...] = (2048, 4096, 8192, 16384, 32768),
 ) -> dict[str, Any]:
     """
-    Export bolmo_adaptor.npz with:
+    Export boundary_adaptor.npz with:
       - additive: grand_mean, row_effects, col_effects
       - residual Walsh spectrum ranked by |coeff|: u,v,coeffs
     """
@@ -353,14 +334,11 @@ def build_bolmo_adaptor(
     additive = grand_mean + row_effects[:, None] + col_effects[None, :]
     residual = logits - additive
 
-    # intron indexing
     perm = np.arange(256, dtype=np.int64) ^ 0xAA
     Rx = residual[perm][:, perm].astype(np.float32, copy=True)
 
-    # Walsh spectrum
     F_res = wht2_256(Rx)
 
-    # Rank all coefficients by magnitude
     absF = np.abs(F_res).reshape(-1)
     order = np.argsort(-absF)
 
@@ -372,7 +350,6 @@ def build_bolmo_adaptor(
         out_path,
         adaptor_version=np.bytes_(b"1.0"),
         atlas_version=np.bytes_(atlas_version.encode("utf-8")),
-        # provenance
         model_key=np.bytes_(meta.model_key.encode("utf-8")),
         model_dir=np.bytes_(meta.model_dir.encode("utf-8")),
         tokenizer_id=np.bytes_(meta.tokenizer_id.encode("utf-8")),
@@ -382,17 +359,14 @@ def build_bolmo_adaptor(
         offset=np.int32(meta.offset),
         bos_id=np.int32(meta.bos_id),
         eps=np.float32(eps),
-        # additive
         grand_mean=np.float32(grand_mean),
         row_effects=row_effects.astype(np.float32),
         col_effects=col_effects.astype(np.float32),
-        # ranked residual spectrum
         u=u_all,
         v=v_all,
         coeffs=c_all,
     )
 
-    # --- analysis report ---
     flat_logits = logits.flatten().astype(np.float64)
     flat_resid = residual.flatten().astype(np.float64)
 
@@ -424,9 +398,7 @@ def build_and_save_default_adaptor(
     model_dir: Path,
     chunk_size: int = 16,
 ) -> None:
-    """
-    Convenience function for lab.py: load cached scores or extract, then export adaptor.
-    """
+    """Convenience for lab.py: load cached scores or extract, then export adaptor."""
     scores, meta = get_scores_cached_or_extract(
         model, tokenizer, device, model_dir=model_dir, chunk_size=chunk_size
     )
@@ -437,10 +409,10 @@ def build_and_save_default_adaptor(
         print(f"  {k}: {v:.4f}")
 
     ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = ANALYSIS_DIR / "bolmo_adaptor.npz"
+    out_path = ANALYSIS_DIR / "boundary_adaptor.npz"
 
-    rep = build_bolmo_adaptor(scores, meta, out_path)
-    print(f"\nExported bolmo_adaptor.npz -> {rep['out_path']}")
+    rep = build_boundary_adaptor(scores, meta, out_path)
+    print(f"\nExported boundary_adaptor.npz -> {rep['out_path']}")
     print(f"frac_residual: {rep['frac_residual']:.6f}")
     for K, r in rep["K_report"].items():
-        print(f"  K={K}: residual R²={r['residual_r2']:.6f}  full-logit R²={r['full_logit_r2']:.6f}")
+        print(f"  K={K}: residual R2={r['residual_r2']:.6f}  full-logit R2={r['full_logit_r2']:.6f}")
