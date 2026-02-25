@@ -54,7 +54,7 @@ No CGM naming here; only L1/L2/L3/L4.
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, Optional, Tuple
 
@@ -608,7 +608,7 @@ class LayerRegisters:
     l1_state8: int = L1_ARCHETYPE_STATE8
     l2_state16: int = L2_ARCHETYPE_STATE16
     l3_state24: int = L3_ARCHETYPE_STATE24
-    l4: L4State = L4State()
+    l4: L4State = field(default_factory=L4State)
 
     def reset(self) -> None:
         self.l1_state8 = L1_ARCHETYPE_STATE8

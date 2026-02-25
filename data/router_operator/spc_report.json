@@ -1,0 +1,30 @@
+{
+  "metrics": {
+    "top1_match": 0.3757528409090909,
+    "top5_match": 0.6437642045454546,
+    "top10_match": 0.7320454545454546,
+    "top1_base_rate": 0.5852274027787315,
+    "ce": 5.109042982920535,
+    "kl": 1.3101883227295998,
+    "cond": 9668.761311861797,
+    "N": 70400,
+    "D": 2048,
+    "V": 520,
+    "family_breakdown": {
+      "byte1": 0.5078125,
+      "pair": 0.3896636962890625,
+      "sep_ax": 0.2109375,
+      "sep_xa": 0.2890625,
+      "alt4": 0.16064453125
+    }
+  },
+  "probe_manifest": {
+    "pairs_max": 65536,
+    "pairs_added": 65536,
+    "separator": true,
+    "alternation_size": 4096,
+    "byte1": true,
+    "total": 70400,
+    "hash": "9244faf3d81508c9"
+  }
+}

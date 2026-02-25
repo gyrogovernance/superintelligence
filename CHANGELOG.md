@@ -15,7 +15,7 @@
 
 ---
 
-## [v1.4.2-Gyroscopic_ASI] – 2026-02-24
+## [v1.4.2-Gyroscopic_ASI] – 2026-02-25
 
 ### New 4-Layer FSM Memory Substrate (Independent of Router Atlas)
 

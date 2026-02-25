@@ -3,7 +3,7 @@
   "venv": ".venv",
   "pythonVersion": "3.14",
   "stubPath": "typings/stubs",
-  "extraPaths": ["research", "src"],
+  "extraPaths": [".", "research", "src"],
   "typeCheckingMode": "strict",
   "reportMissingTypeStubs": false,
   "reportMissingModuleSource": "none",
