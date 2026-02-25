@@ -32,15 +32,27 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Optional
 
+# Allow running as script from any cwd: blomo_port must be on path for common
+_adaptors_dir = Path(__file__).resolve().parent
+_blomo_port = _adaptors_dir.parent
+if str(_blomo_port) not in sys.path:
+    sys.path.insert(0, str(_blomo_port))
+
 import numpy as np
 import torch
 
-from common import PROJECT_ROOT, bolmo_reset_local_caches
+from common import (
+    PROJECT_ROOT,
+    bolmo_reset_local_caches,
+    load_bolmo,
+    maybe_patch_expand_byte_ids,
+)
 
 
 # Paths
@@ -416,3 +428,14 @@ def build_and_save_default_adaptor(
     print(f"frac_residual: {rep['frac_residual']:.6f}")
     for K, r in rep["K_report"].items():
         print(f"  K={K}: residual R2={r['residual_r2']:.6f}  full-logit R2={r['full_logit_r2']:.6f}")
+
+
+if __name__ == "__main__":
+    model_dir = PROJECT_ROOT / "data" / "models" / "Bolmo-1B"
+    if not model_dir.exists():
+        raise SystemExit(f"Model not found: {model_dir}")
+    from src.tools.gyrolabe import detect_device
+    device = detect_device()
+    model, tokenizer = load_bolmo(model_dir, device)
+    maybe_patch_expand_byte_ids(tokenizer)
+    build_and_save_default_adaptor(model, tokenizer, device, model_dir, chunk_size=16)

@@ -4,10 +4,10 @@ Internal connectors: CGM / Gyroscope / THM.
 Goal:
 - Convert domain-specific internal signals (employment categories, THM displacement tags, etc.)
   into GovernanceEvents that update the App ledgers.
-- No semantics in the kernel. Plugins live here.
+- No semantics in the kernel. Tools live here.
 
 This file provides:
-- a minimal plugin interface
+- a minimal tool interface
 - a few conservative, explicit mapping helpers
 
 NOTE:
@@ -24,22 +24,22 @@ from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 
 
 @dataclass(frozen=True)
-class PluginContext:
+class ToolContext:
     """
-    Minimal context plugins might use.
+    Minimal context tools might use.
     """
     actor_id: str | None = None
     session_id: str | None = None
     meta: dict[str, Any] | None = None
 
 
-class FrameworkPlugin:
+class FrameworkTool:
     """
-    Base class for internal framework plugins.
+    Base class for internal framework tools.
     """
-    name: str = "framework_plugin"
+    name: str = "framework_tool"
 
-    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
         """
         Convert a payload into 0..N GovernanceEvents.
         Must be deterministic for a given payload.
@@ -51,14 +51,14 @@ class FrameworkPlugin:
 # Example connectors (minimal)
 # -------------------------
 
-class THMDisplacementPlugin(FrameworkPlugin):
+class THMDisplacementTool(FrameworkTool):
     """
     Convert THM displacement signals into edge updates.
     
     THM displacements (GTD, IVD, IAD, IID) are measurements of risk signatures.
     Per GGG hierarchy: THM = Education domain (measurements/displacements).
     
-    All events from this plugin are emitted to EDUCATION domain regardless of payload.
+    All events from this tool are emitted to EDUCATION domain regardless of payload.
     
     Payload example:
       {
@@ -70,7 +70,7 @@ class THMDisplacementPlugin(FrameworkPlugin):
     """
     name = "thm_displacement"
 
-    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
         # THM displacements always go to Education domain (measurements level)
         dom = Domain.EDUCATION
 
@@ -100,7 +100,7 @@ class THMDisplacementPlugin(FrameworkPlugin):
                     magnitude_micro = int(round(val * MICRO))
                     confidence_micro = int(round(confidence * MICRO))
 
-                    meta_dict = {"plugin": self.name, "signal": key}
+                    meta_dict = {"tool": self.name, "signal": key}
                     if ctx.meta:
                         meta_dict.update(ctx.meta)
                     events.append(
@@ -115,14 +115,14 @@ class THMDisplacementPlugin(FrameworkPlugin):
         return events
 
 
-class GyroscopeWorkMixPlugin(FrameworkPlugin):
+class GyroscopeWorkMixTool(FrameworkTool):
     """
     Convert Gyroscope work-mix shifts into edge updates.
     
     Gyroscope alignment work (GMT, ICV, IIA, ICI) represents active principles.
     Per GGG hierarchy: Gyroscope = Employment domain (active work/principles).
     
-    All events from this plugin are emitted to EMPLOYMENT domain regardless of payload.
+    All events from this tool are emitted to EMPLOYMENT domain regardless of payload.
     
     Payload example:
       {
@@ -131,7 +131,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
     """
     name = "gyroscope_workmix"
 
-    def emit_events(self, payload: dict[str, Any], ctx: PluginContext) -> list[GovernanceEvent]:
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
         # Gyroscope alignment work always goes to Employment domain (work level)
         dom = Domain.EMPLOYMENT
 
@@ -151,7 +151,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             icu_conf = float(payload.get("ICu_confidence", payload.get("confidence", 1.0)))
             confidence = min(gm_conf, icu_conf)
 
-            meta_dict = {"plugin": self.name, "metric": "GM-ICu"}
+            meta_dict = {"tool": self.name, "metric": "GM-ICu"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
             # Convert to micro-units
@@ -177,7 +177,7 @@ class GyroscopeWorkMixPlugin(FrameworkPlugin):
             ico_conf = float(payload.get("ICo_confidence", payload.get("confidence", 1.0)))
             confidence = min(iinter_conf, ico_conf)
 
-            meta_dict = {"plugin": self.name, "metric": "IInter-ICo"}
+            meta_dict = {"tool": self.name, "metric": "IInter-ICo"}
             if ctx.meta:
                 meta_dict.update(ctx.meta)
             # Convert to micro-units

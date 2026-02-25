@@ -180,7 +180,7 @@ If you're evaluating this work for research, policy, or implementation:
 - `src/router/` kernel physics, atlas builder, kernel runtime
 - `src/app/` coordinator, governance events, domain ledgers, aperture
 - `src/tools/` GyroLabe coordination system and analysis tools
-- `src/plugins/` analytics helpers, adapters, framework connectors
+- `src/tools/` analytics helpers, adapters, framework connectors
 - `docs/` specifications and notes
 - `tests/` exhaustive kernel and measurement verification
 

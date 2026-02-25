@@ -1,1 +1,2 @@
-# tools package
+"""Tool connectors for external frameworks and APIs."""
+

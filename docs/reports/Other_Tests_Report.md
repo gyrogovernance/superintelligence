@@ -310,7 +310,7 @@ Test Categories:
   - Domain Ledgers & Coordinator: 10/10 ✅
   - Atlas Building Validation: 17/17 ✅
   - Physics Tests: 19/19 ✅
-  - Plugin Framework: 11/11 ✅
+  - Tool Framework: 11/11 ✅
   - Routing & State Transitions: 25/25 ✅
   - Atlas Global Properties: 19/19 ✅
 ```

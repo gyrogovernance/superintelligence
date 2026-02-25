@@ -938,25 +938,25 @@ A Coordinator MUST provide a status report that includes at minimum:
 
 The status report enables external systems to query the current state of the coordination substrate.
 
-## 4.6 Plugin Architecture
+## 4.6 Tool Architecture
 
-The application layer uses a plugin architecture to convert domain-specific signals into GovernanceEvents. This keeps edge mappings explicit, auditable, and editable.
+The application layer uses a tool architecture to convert domain-specific signals into GovernanceEvents. This keeps edge mappings explicit, auditable, and editable.
 
-### 4.6.1 Plugin interface
+### 4.6.1 Tool interface
 
-A plugin is a component that:
+A tool is a component that:
 - accepts domain-specific payloads (e.g., THM displacement signals, work-mix metrics)
 - converts them deterministically into zero or more GovernanceEvents
 - maintains explicit, auditable mappings from signals to edge updates
 
-**Minimal plugin interface:**
+**Minimal tool interface:**
 
-A conforming plugin MUST:
+A conforming tool MUST:
 - implement an `emit_events(payload, context)` method that returns a list of GovernanceEvents
 - be deterministic: the same payload MUST produce the same events
 - record its identity and mapping policy in event metadata for audit
 
-Plugins are application-layer components. The kernel does not interpret plugin outputs; it only processes GovernanceEvents.
+Tools are application-layer components. The kernel does not interpret tool outputs; it only processes GovernanceEvents.
 
 ### 4.6.2 Edge mapping policy
 
@@ -970,8 +970,8 @@ Example mappings are provided in Appendix D. These are illustrative, not normati
 ### 4.6.3 External adapters
 
 External systems (APIs, JSON inputs) MAY use adapter components that:
-- parse external formats into plugin payloads
-- route to appropriate plugins
+- parse external formats into tool payloads
+- route to appropriate tools
 - maintain provenance metadata
 
 Adapters are application-layer and remain accountable to Direct human agency.

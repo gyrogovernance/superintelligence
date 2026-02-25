@@ -15,6 +15,156 @@
 
 ---
 
+## [v1.4.2-Gyroscopic_ASI] – 2026-02-24
+
+### New 4-Layer FSM Memory Substrate (Independent of Router Atlas)
+
+Introduced a new, Router-independent agent memory architecture under `src/tools/` built entirely from first principles, without runtime use of `ontology.npy`, `epistemology.npy`, `phenomenology.npz`, or `RouterKernel`.
+
+#### 1. `src/tools/layers.py`
+
+Defines four structural layers for ASI agents:
+
+- **Layer 1 FSM (L1, 8-bit)**  
+  - 256 states × 256 input bytes = 65,536 transitions  
+  - Transition function:  
+    - `state8' = state8 XOR intron(byte)` where `intron = byte XOR 0xAA`  
+  - Table representation: `Layer1FSM.table[state, byte] -> next_state (uint8)`  
+  - Archetype: state `0x00` (no mutations)  
+  - Always built in RAM; ~64 KB of storage
+
+- **Layer 2 FSM (L2, 16-bit)**  
+  - 65,536 states × 256 input bytes = 16,777,216 transitions  
+  - State packs two 8-bit components `(A8, B8)` with chirality:  
+    - `A_mut  = A8 XOR intron`  
+    - `A_next = B8 XOR 0xFF`  
+    - `B_next = A_mut XOR 0xFF`  
+  - Table representation: `Layer2FSM.table[state16, byte] -> next_state16 (uint16)`  
+  - Archetype: `0xAA55` (A8 = 0xAA, B8 = 0x55)  
+  - Built in RAM; ~32 MB of storage
+
+- **Layer 3 FSM (L3, 24-bit)**  
+  - 16,777,216 states × 256 input bytes = 4,294,967,296 transitions  
+  - State is the full 24-bit GENE_Mac carrier `(A12, B12)` using the spec-aligned transition law:  
+    - `mask12 = mask12_for_byte(byte)`  
+    - `A_mut  = A12 XOR mask12`  
+    - `A'     = B12 XOR 0xFFF`  
+    - `B'     = A_mut XOR 0xFFF`  
+  - Table representation: `Layer3FSM.table[state24, byte] -> next_state24 (uint32)`  
+  - Archetype: `0xAAA555` (ARCHETYPE_STATE24)  
+  - Implemented as a **memmapped** table on disk via `Layer3FSM.build_memmap(path)`  
+    - Size ≈ 16.8 GB (uint32 indices)  
+    - Build is chunked over state-space; finite but long-running
+
+- **Layer 4 BU (Balance Universal) – Holographic Closure (No Table)**  
+  - Not a state machine; no transition table.  
+  - Provides holographic compression and equivalence over byte sequences in mask-space:  
+    - Maintains `(O, E, parity, length)` where:  
+      - `O = XOR` of masks at odd positions  
+      - `E = XOR` of masks at even positions  
+      - `parity = length % 2`  
+    - Functions:  
+      - `egress_update(bu_state, byte)`  
+      - `commitment(bytes) -> (O, E, parity)`  
+      - `equivalent(seq_a, seq_b)` (P8-equivalence)  
+      - `inverse_step_state24(state24, byte)` (exact inverse of L3 step)
+  - Uses only `mask12_for_byte` and `LAYER_MASK_12`; no atlas use.
+
+- **LayerRegisters / FourFSMs bundle**  
+  - `LayerRegisters` holds per-agent registers:  
+    - `l1_state8`, `l2_state16`, `l3_state24`, `BUState`  
+  - `FourFSMs` combines `Layer1FSM`, `Layer2FSM`, `Layer3FSM`, `BULayer`, and the registers:  
+    - `FourFSMs.ingest_byte(byte)` steps all three FSMs and updates BU.  
+  - Helper:  
+    - `create_default_four_fsms(l3_path, build_l3_if_missing=False)` builds L1/L2 and loads or builds L3 from a memmap path.
+
+> These layers are **self-contained memory surfaces** for agents: three explicit finite-state machines (L1/L2/L3) plus one holographic closure layer (BU). No references to the legacy Router atlas appear in this module.
+
+---
+
+#### 2. `src/tools/agents.py`
+
+Introduces an **agent framework** built on the new four-layer memory:
+
+- **SharedLayers**  
+  - Lightweight wrapper over `Layer1FSM`, `Layer2FSM`, `Layer3FSM`, `BULayer`.  
+  - Ensures L1/L2 tables and L3 memmap live once per process and are shared by all agents.
+
+- **ByteObservation**  
+  - Per-step record of agent state across all layers:  
+    - `step`, `byte`,  
+    - `l1_state8`, `l2_state16`, `l3_state24`,  
+    - `bu_O`, `bu_E`, `bu_parity`, `bu_length`,  
+    - optional `meta`.
+
+- **Agent**  
+  - Owns:  
+    - Its own `LayerRegisters` (per-layer state registers)  
+    - Its own `byte_log` and `observations`  
+  - Shares:  
+    - The FSM tables + BU operator (`SharedLayers`)  
+  - Core methods:  
+    - `ingest_byte(byte, meta=None)`  
+      - Updates L1/L2/L3 state registers via the shared FSMs  
+      - Updates BU holographic commitments  
+      - Appends to `byte_log` and `observations`  
+    - `ingest_bytes(payload)`  
+    - `current_states()` → snapshot of FSM & BU registers  
+    - `holographic_commitment()` → `(O, E, parity)` over `byte_log`  
+    - `path_equivalent_to(other_agent)` → P8-equivalence of histories  
+    - `observation_summary()` → minimal structural status
+
+- **AgentPool**  
+  - Holds multiple `Agent` instances over the same `SharedLayers`.  
+  - Methods:  
+    - `add_agent(name)` → new agent  
+    - `get_agent(name)`  
+    - `ingest_byte(byte)` → steps **all** agents for one byte  
+    - `ingest_bytes(payload)` → steps all agents over a sequence  
+    - `summary()` → global_step + per-agent summaries  
+    - `reset()` → resets all agents (logs + registers)
+
+- **Convenience factory**  
+  - `create_default_pool(l3_path, build_l3_if_missing=False)`  
+    - Calls `create_default_four_fsms(...)` to build L1/L2/L3 + BU  
+    - Wraps into `SharedLayers` and returns an `AgentPool`  
+    - L3 is memmapped from `l3_path` (built if missing and allowed).
+
+> Agents are completely independent of the Router’s atlas and kernel. Their “memory” is the 3 FSM tables + BU state, not a Transformer or the legacy state space.
+
+---
+
+#### 3. `src/tools/api.py`
+
+Public tooling API that wires layers and agents into a **process-global default pool**:
+
+- Module-level globals:
+  - `_DEFAULT_FSMS: Optional[FourFSMs]`
+  - `_DEFAULT_SHARED: Optional[SharedLayers]`
+  - `_DEFAULT_POOL: Optional[AgentPool]`
+
+- Functions:
+  - `init_default_pool(l3_path: Path, build_l3_if_missing: bool = False) -> AgentPool`
+    - Builds L1/L2/L3 FSMs via `create_default_four_fsms`
+    - Wraps into `SharedLayers`
+    - Instantiates a process-global `AgentPool`
+  - `get_default_pool() -> AgentPool`
+  - `new_agent(name: str) -> Agent`
+    - Adds a named agent to the default pool
+  - `ingest_bytes_for_agent(agent_name: str, payload: bytes | list[int], meta: Optional[dict] = None) -> list[ByteObservation]`
+    - Steps only the named agent over `payload`
+  - `ingest_bytes_all_agents(payload: bytes | list[int]) -> list[dict[str, ByteObservation]]`
+    - Steps all agents in the default pool over `payload`
+  - `reset_all_agents() -> None`
+  - `api_summary() -> dict[str, Any]`
+    - Reports:
+      - Pool summary (global_step, agents, per-agent state snapshots)
+      - FSM summary (states, parameters, storage bytes for L1/L2/L3)
+
+> This API provides the minimal ergonomic surface to experiment with multi-agent, 4-layer FSM-based ASI behavior without touching the Router kernel.
+
+---
+
 ## [v1.4.1-ASI_Router&Bolmo_Port] – 2026-02-23
 
 ### New adaptor artifacts
@@ -1264,7 +1414,7 @@ Revisiting equations for the Moments Economy.
 
 ### Moments Economy Implementation
 
-- Implemented the full Moments Economy runtime: Coordinator spine (RouterKernel, DomainLedgers and fiat substrate), ecology capacity ledger (Identity identifiers and anchors, Grants, Shells, Archives), and the THM and Gyroscope framework plugins.
+- Implemented the full Moments Economy runtime: Coordinator spine (RouterKernel, DomainLedgers and fiat substrate), ecology capacity ledger (Identity identifiers and anchors, Grants, Shells, Archives), and the THM and Gyroscope framework tools.
 - Introduced collision resistant identity identifiers (SHA-256) combined with kernel anchors as phase space bindings, and updated Grant and Shell receipts to use these pairs.
 
 ### Fiat Substrate and Bundling
@@ -1346,7 +1496,7 @@ The test suite validates kernel physics, governance measurement, application wor
 - **Governance Measurement** (test_measurement.py): Validated aperture computation, Hodge decomposition, and structural displacement detection
 - **Application Layer** (test_app.py): Confirmed Coordinator orchestration, event binding, and ledger replay integrity
 - **CLI Workflow** (test_aci_cli.py): Verified project compilation, bundle generation, and tamper detection
-- **Routing & Plugins** (test_routing.py, test_plugins.py): Validated atlas operations and plugin determinism
+- **Routing & Tools** (test_routing.py, test_tools.py): Validated atlas operations and tool determinism
 
 All 135 tests pass, providing exhaustive verification of the kernel's structural properties and the application layer's governance measurement substrate.
 
@@ -1431,7 +1581,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 - **Alignment Infrastructure Routing (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the ASI Alignment Router.
 
 ### Development Planning
-- **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routing. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, plugin integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
+- **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routing. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, tool integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
 
 ---
 
@@ -1458,19 +1608,19 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 
 **Application Infrastructure & Specification Refinement**
 
-**Application & Plugin Infrastructure**
+**Application & Tool Infrastructure**
 * Implemented Coordinator orchestration layer with byte log and event log for deterministic replay
-* Established plugin architecture with explicit edge mapping policies and audit metadata
+* Established tool architecture with explicit edge mapping policies and audit metadata
 * Added status reporting with kernel signature, ledger state, and aperture metrics
 
 **Test Suite Expansion**
 * Expanded test coverage to 101 tests, all passing
-* Added tests for Coordinator workflow, event binding, and plugin determinism
+* Added tests for Coordinator workflow, event binding, and tool determinism
 
 **Specification Improvements**
 * Restructured specification into stable conformance profiles (Kernel, Measurement, Runtime)
 * Added normative language conventions (MUST/SHOULD/MAY) and bit indexing specifications
-* Documented complete operational runtime including Coordinator, plugins, and audit logs
+* Documented complete operational runtime including Coordinator, tools, and audit logs
 * Consolidated build procedures and reference helpers into appendices
 * Fixed section numbering and cross-references throughout
 * See [GGG ASI Alignment Router - Kernel Specification](/docs/GGG_ASI_AR_Specs.md) for complete normative specification

@@ -27,7 +27,7 @@ from src.app.ledger import (
     get_projections,
     hodge_decomposition,
 )
-from src.plugins.frameworks import PluginContext, THMDisplacementPlugin
+from src.tools.frameworks import ToolContext, THMDisplacementTool
 
 
 class TestMeasurementCollapse:
@@ -37,12 +37,12 @@ class TestMeasurementCollapse:
 
     def _apply_thm_payload(self, ledgers: DomainLedgers, payload: dict[str, Any], domain_str: str = "economy"):
         """
-        Helper: run THMDisplacementPlugin on a payload and apply resulting events
+        Helper: run THMDisplacementTool on a payload and apply resulting events
         to the given DomainLedgers for the specified domain.
         """
-        plugin = THMDisplacementPlugin()
-        ctx = PluginContext(meta={"test": "measurement"})
-        events = plugin.emit_events({**payload, "domain": domain_str}, ctx)
+        tool = THMDisplacementTool()
+        ctx = ToolContext(meta={"test": "measurement"})
+        events = tool.emit_events({**payload, "domain": domain_str}, ctx)
         for ev in events:
             ledgers.apply_event(ev)
 

@@ -134,11 +134,11 @@ This approach addresses AI safety at the coordination layer rather than at the m
 
 The Console exposes a Holographic API for developers building applications on the Holographic Web. Applications built on this API do not manage their own databases, authentication systems, or coordination protocols. They define mappings from user actions to bytes and from bytes to visual outputs.
 
-A plugin for the Console is a module that specifies two things. First, it specifies a policy for translating application-level events into kernel bytes and governance events. Second, it specifies a projection function for rendering kernel states into visual interfaces.
+A tool for the Console is a module that specifies two things. First, it specifies a policy for translating application-level events into kernel bytes and governance events. Second, it specifies a projection function for rendering kernel states into visual interfaces.
 
 This architecture enables applications that are serverless and databaseless in the coordination sense. The state lives in the kernel. The history lives in the Genealogy. The application is a pure transformation layer.
 
-Developers can test their plugins by replaying Genealogies. Any bug report can include the Genealogy that triggered the bug. The developer replays the Genealogy and observes the exact sequence of states that led to the problem. Debugging becomes deterministic.
+Developers can test their tools by replaying Genealogies. Any bug report can include the Genealogy that triggered the bug. The developer replays the Genealogy and observes the exact sequence of states that led to the problem. Debugging becomes deterministic.
 
 ---
 

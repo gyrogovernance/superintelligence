@@ -400,7 +400,7 @@ def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
         coord.step_byte(b)
 
     # Replay events
-    from src.plugins.api import event_from_dict
+    from src.tools.api import event_from_dict
     for ev_dict in read_events(events_path):
         ev = event_from_dict(ev_dict)
         coord.apply_event(ev, bind_to_kernel_moment=False)
@@ -899,7 +899,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
     Following GGG methodology: all terms are used to sustain balance.
     """
     from src.app.coordination import Coordinator
-    from src.plugins.frameworks import PluginContext, THMDisplacementPlugin
+    from src.tools.frameworks import ToolContext, THMDisplacementTool
 
     # Parse from markdown body with bracket notation
     program_slug, domain_counts, principle_counts, unit, _, agents, agencies = parse_program_from_markdown(program_md_path)
@@ -1051,13 +1051,13 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
                 thm_by_domain[domain][thm_abbrev] += unit_wt
 
                 # Emit ledger event (THM-only) with weighted magnitude
-                # Note: domain in payload is ignored - THM plugin always emits to EDUCATION domain
+                # Note: domain in payload is ignored - THM tool always emits to EDUCATION domain
                 # This is kept for backward compatibility and accounting purposes
                 payload = {thm_abbrev: float(unit_wt), "confidence": 1.0}
 
-                plugin = THMDisplacementPlugin()
-                ctx = PluginContext(meta=att_meta)
-                events = plugin.emit_events(payload, ctx)
+                tool = THMDisplacementTool()
+                ctx = ToolContext(meta=att_meta)
+                events = tool.emit_events(payload, ctx)
 
                 # Apply events immediately so they bind to the current kernel state
                 for event in events:

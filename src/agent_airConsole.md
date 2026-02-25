@@ -699,7 +699,7 @@ export default {
       },
     },
   },
-  plugins: [],
+  tools: [],
 };
 ```
 
@@ -1089,10 +1089,10 @@ Vite config:
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import react from '@vitejs/tool-react';
 
 export default defineConfig({
-  plugins: [react()],
+  tools: [react()],
   server: {
     proxy: {
       '/api': 'http://localhost:8000',

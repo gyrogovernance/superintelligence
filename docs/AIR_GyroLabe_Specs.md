@@ -63,7 +63,7 @@ At each inference step:
 
 #### 1.4 Scope
 
-GyroLabe uses only the kernel physics layer of the router system. It does not include application governance components such as domain ledgers, governance events, coordinator plugins, or external Hodge decompositions.
+GyroLabe uses only the kernel physics layer of the router system. It does not include application governance components such as domain ledgers, governance events, coordinator tools, or external Hodge decompositions.
 
 #### 1.5 Model compatibility (reference implementation)
 

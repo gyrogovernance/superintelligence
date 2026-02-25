@@ -3,7 +3,7 @@
 platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- F:\Development\superintelligence\.venv\Scripts\python.exe
 cachedir: .pytest_cache
 rootdir: F:\Development\superintelligence
-plugins: anyio-4.12.0
+tools: anyio-4.12.0
 collected 146 items                                                     
 
 tests/physics/test_physics_1.py::TestStateRepresentation::test_pack_unpack_archetype PASSED
@@ -722,18 +722,18 @@ PASSED
 tests/test_others.py::TestInvariantValidation::test_unique_mask_count PASSED
 tests/test_others.py::TestInvariantValidation::test_all_b_masks_zero PASSED
 tests/test_others.py::TestInvariantValidation::test_a_mask_coverage PASSED
-tests/test_plugins.py::TestAnalytics::test_plugins_analytics_matches_domainledger_aperture PASSED
-tests/test_plugins.py::TestAnalytics::test_hodge_decompose_reconstruction PASSED
-tests/test_plugins.py::TestAnalytics::test_hodge_decompose_zero_vector PASSED
-tests/test_plugins.py::TestAPIAdapters::test_parse_domain PASSED        
-tests/test_plugins.py::TestAPIAdapters::test_parse_edge_id PASSED       
-tests/test_plugins.py::TestAPIAdapters::test_event_from_dict PASSED     
-tests/test_plugins.py::TestAPIAdapters::test_event_to_dict PASSED       
-tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_thm_displacement_plugin_ignores_domain_parameter PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_gyroscope_workmix_plugin PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_gyroscope_workmix_plugin_infer_intel PASSED
-tests/test_plugins.py::TestFrameworkPlugins::test_plugin_context_meta PASSED
+tests/test_tools.py::TestAnalytics::test_tools_analytics_matches_domainledger_aperture PASSED
+tests/test_tools.py::TestAnalytics::test_hodge_decompose_reconstruction PASSED
+tests/test_tools.py::TestAnalytics::test_hodge_decompose_zero_vector PASSED
+tests/test_tools.py::TestAPIAdapters::test_parse_domain PASSED        
+tests/test_tools.py::TestAPIAdapters::test_parse_edge_id PASSED       
+tests/test_tools.py::TestAPIAdapters::test_event_from_dict PASSED     
+tests/test_tools.py::TestAPIAdapters::test_event_to_dict PASSED       
+tests/test_tools.py::TestFrameworkTools::test_thm_displacement_tool PASSED
+tests/test_tools.py::TestFrameworkTools::test_thm_displacement_tool_ignores_domain_parameter PASSED
+tests/test_tools.py::TestFrameworkTools::test_gyroscope_workmix_tool PASSED
+tests/test_tools.py::TestFrameworkTools::test_gyroscope_workmix_tool_infer_intel PASSED
+tests/test_tools.py::TestFrameworkTools::test_tool_context_meta PASSED
 tests/test_routing.py::TestAtlasLoading::test_ontology_loaded PASSED
 tests/test_routing.py::TestAtlasLoading::test_epistemology_loaded PASSED
 tests/test_routing.py::TestAtlasLoading::test_phenomenology_loaded PASSED

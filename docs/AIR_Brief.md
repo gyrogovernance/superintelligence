@@ -83,18 +83,18 @@ A contributor defines their task, performs the work, and submits the deliverable
 - Inference Interaction Accountability
 - Intelligence Cooperation Integrity
 
-### 3. Plugins
+### 3. Tools
 
-Plugins connect the App to tools people already use, such as GitHub, notebooks, shared documents, and model evaluation harnesses.
+Tools connect the App to tools people already use, such as GitHub, notebooks, shared documents, and model evaluation harnesses.
 
-**Risk classification:** Plugins use **The Human Mark** to tag work outputs by the safety risk they address:
+**Risk classification:** Tools use **The Human Mark** to tag work outputs by the safety risk they address:
 
 - Governance Traceability Displacement
 - Information Variety Displacement
 - Inference Accountability Displacement
 - Intelligence Integrity Displacement
 
-Plugins are optional. The platform works if contributors submit outputs manually.
+Tools are optional. The platform works if contributors submit outputs manually.
 
 ---
 
@@ -103,7 +103,7 @@ Plugins are optional. The platform works if contributors submit outputs manually
 Alignment Infrastructure Routing projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
 1. **AIR provides the technical infrastructure.**
-   This includes the Router, the App workflow, and optional Plugins for tracking and verifying deliverables.
+   This includes the Router, the App workflow, and optional Tools for tracking and verifying deliverables.
 
 2. **A Project Sponsor administers funds.**
    The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains full authority over acceptance criteria and payment decisions.

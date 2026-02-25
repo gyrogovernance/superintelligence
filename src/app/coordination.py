@@ -1,11 +1,11 @@
 """
-Coordinator: Kernel + App ledgers + plugins.
+Coordinator: Kernel + App ledgers + tools.
 
 This is the "spine" that a future UI (React, CLI, etc.) will call.
 
 Responsibilities:
 - advance kernel state (shared moment) by bytes
-- accept governance events from plugins/app
+- accept governance events from tools/app
 - update domain ledgers deterministically
 - expose GGG apertures (ledger-based), plus kernel signature
 """

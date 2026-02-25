@@ -1,9 +1,9 @@
 """
-Plugin tests: analytics and framework plugins.
+Tool tests: analytics and framework tools.
 
-Tests the plugin system:
+Tests the tool system:
 - Analytics helpers (Hodge decomposition)
-- Framework plugins (THM, Gyroscope)
+- Framework tools (THM, Gyroscope)
 - API adapters
 """
 
@@ -11,19 +11,19 @@ import numpy as np
 
 from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 from src.app.ledger import DomainLedgers
-from src.plugins.analytics import hodge_decompose
-from src.plugins.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id
-from src.plugins.frameworks import (
-    GyroscopeWorkMixPlugin,
-    PluginContext,
-    THMDisplacementPlugin,
+from src.tools.analytics import hodge_decompose
+from src.tools.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id
+from src.tools.frameworks import (
+    GyroscopeWorkMixTool,
+    ToolContext,
+    THMDisplacementTool,
 )
 
 
 class TestAnalytics:
     """Test analytics helpers (Hodge decomposition)."""
 
-    def test_plugins_analytics_matches_domainledger_aperture(self):
+    def test_tools_analytics_matches_domainledger_aperture(self):
         """hodge_decompose should match DomainLedgers.aperture for same vector."""
         ledgers = DomainLedgers()
         ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.GOV_INTEL, magnitude_micro=int(round(1.25 * MICRO)), confidence_micro=MICRO))
@@ -31,7 +31,7 @@ class TestAnalytics:
 
         y = ledgers.get(Domain.EDUCATION)
         a_led = ledgers.aperture(Domain.EDUCATION)
-        # Convert int64 array to float64 for analytics plugin (it expects float64)
+        # Convert int64 array to float64 for analytics tool (it expects float64)
         y_float = y.astype(np.float64)
         a_ana = hodge_decompose(y_float).aperture
 
@@ -122,13 +122,13 @@ class TestAPIAdapters:
         assert d["meta"] == {"key": "value"}
 
 
-class TestFrameworkPlugins:
-    """Test framework plugins (THM, Gyroscope)."""
+class TestFrameworkTools:
+    """Test framework tools (THM, Gyroscope)."""
 
-    def test_thm_displacement_plugin(self):
-        """THMDisplacementPlugin should emit events for displacement signals."""
-        plugin = THMDisplacementPlugin()
-        ctx = PluginContext()
+    def test_thm_displacement_tool(self):
+        """THMDisplacementTool should emit events for displacement signals."""
+        tool = THMDisplacementTool()
+        ctx = ToolContext()
 
         payload = {
             "domain": "education",
@@ -138,7 +138,7 @@ class TestFrameworkPlugins:
             "IID": 0.0,
         }
 
-        events = plugin.emit_events(payload, ctx)
+        events = tool.emit_events(payload, ctx)
 
         assert len(events) == 3  # IID is 0.0, so not emitted
 
@@ -155,24 +155,24 @@ class TestFrameworkPlugins:
         assert ivd_ev.edge_id == EdgeID.INFO_INFER
         assert abs(ivd_ev.magnitude_micro - int(round(-0.2 * MICRO))) < 10  # Allow for rounding differences
 
-    def test_thm_displacement_plugin_ignores_domain_parameter(self):
-        """THMDisplacementPlugin always emits to EDUCATION domain regardless of payload domain."""
-        plugin = THMDisplacementPlugin()
-        ctx = PluginContext()
+    def test_thm_displacement_tool_ignores_domain_parameter(self):
+        """THMDisplacementTool always emits to EDUCATION domain regardless of payload domain."""
+        tool = THMDisplacementTool()
+        ctx = ToolContext()
 
         payload = {"domain": "invalid", "GTD": 0.1}
 
-        events = plugin.emit_events(payload, ctx)
+        events = tool.emit_events(payload, ctx)
 
-        # Plugin ignores domain parameter and always emits to EDUCATION
+        # Tool ignores domain parameter and always emits to EDUCATION
         assert len(events) == 1
         assert events[0].domain == Domain.EDUCATION
         assert events[0].edge_id == EdgeID.GOV_INFO
 
-    def test_gyroscope_workmix_plugin(self):
-        """GyroscopeWorkMixPlugin should emit events for work-mix shifts."""
-        plugin = GyroscopeWorkMixPlugin()
-        ctx = PluginContext()
+    def test_gyroscope_workmix_tool(self):
+        """GyroscopeWorkMixTool should emit events for work-mix shifts."""
+        tool = GyroscopeWorkMixTool()
+        ctx = ToolContext()
 
         payload = {
             "domain": "employment",
@@ -182,7 +182,7 @@ class TestFrameworkPlugins:
             "ICo": 0.0,
         }
 
-        events = plugin.emit_events(payload, ctx)
+        events = tool.emit_events(payload, ctx)
 
         assert len(events) == 1  # Only GM-ICu delta is nonzero
 
@@ -192,10 +192,10 @@ class TestFrameworkPlugins:
         assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.1 - (-0.1), allow for rounding
         assert ev.meta["metric"] == "GM-ICu"
 
-    def test_gyroscope_workmix_plugin_infer_intel(self):
-        """GyroscopeWorkMixPlugin should emit INFER_INTEL events for IInter-ICo shifts."""
-        plugin = GyroscopeWorkMixPlugin()
-        ctx = PluginContext()
+    def test_gyroscope_workmix_tool_infer_intel(self):
+        """GyroscopeWorkMixTool should emit INFER_INTEL events for IInter-ICo shifts."""
+        tool = GyroscopeWorkMixTool()
+        ctx = ToolContext()
 
         payload = {
             "domain": "employment",
@@ -205,7 +205,7 @@ class TestFrameworkPlugins:
             "ICo": 0.1,
         }
 
-        events = plugin.emit_events(payload, ctx)
+        events = tool.emit_events(payload, ctx)
 
         assert len(events) == 1
 
@@ -214,17 +214,17 @@ class TestFrameworkPlugins:
         assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.3 - 0.1, allow for rounding
         assert ev.meta["metric"] == "IInter-ICo"
 
-    def test_plugin_context_meta(self):
-        """Plugin context meta should be included in emitted events."""
-        plugin = THMDisplacementPlugin()
-        ctx = PluginContext(meta={"session": "test123", "actor": "user1"})
+    def test_tool_context_meta(self):
+        """Tool context meta should be included in emitted events."""
+        tool = THMDisplacementTool()
+        ctx = ToolContext(meta={"session": "test123", "actor": "user1"})
 
         payload = {"domain": "economy", "GTD": 0.1}
 
-        events = plugin.emit_events(payload, ctx)
+        events = tool.emit_events(payload, ctx)
 
         assert len(events) == 1
         assert events[0].meta["session"] == "test123"
         assert events[0].meta["actor"] == "user1"
-        assert events[0].meta["plugin"] == "thm_displacement"
+        assert events[0].meta["tool"] == "thm_displacement"
 

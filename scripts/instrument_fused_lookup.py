@@ -15,9 +15,17 @@ What we found (Step 1):
 
 from __future__ import annotations
 
+import sys
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+# Allow running as script: repo root must be on path for secret_lab_ignore
+_script_dir = Path(__file__).resolve().parent
+_repo_root = _script_dir.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 import torch
 import numpy as np

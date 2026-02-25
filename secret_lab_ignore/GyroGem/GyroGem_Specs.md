@@ -224,7 +224,7 @@ GyroGem runs on every assistant turn. The 270M parameter model is feasible on CP
 
 ## 7. AIR Integration
 
-GyroGem operates as a plugin within the AIR infrastructure.
+GyroGem operates as a tool within the AIR infrastructure.
 
 ### 7.1 Governance Events
 
