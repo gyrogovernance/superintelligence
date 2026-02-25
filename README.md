@@ -84,12 +84,6 @@ AIR applies the Router to two related coordination challenges.
 
 ---
 
-You are absolutely right. I fragmented the concept and used a vague term. If the whole system is an Active Inference loop, it should be presented cleanly as exactly that. 
-
-Here is the revised, cohesive section for the `README.md` that drops the heavy jargon and correctly frames the two levers as the two halves of Active Inference:
-
----
-
 ## 🤖 GyroLabe: AI Mechanistic Calibration
 
 GyroLabe is a mechanistic calibration instrument for generative models. It functions analogously to the cerebellum in biological intelligence: it does not dictate what a model should say, but provides a continuous geometric reference frame so the trajectory of its inference remains physically coordinated.
