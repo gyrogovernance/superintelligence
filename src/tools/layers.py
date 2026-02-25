@@ -2,55 +2,69 @@
 src.tools.layers
 ================
 
-Three NEW finite state machine layers plus one holographic closure
-layer, independent of the legacy Router atlas.
+Multi-resolution agent memory substrate (NEW), independent from the legacy Router atlas.
 
-They do NOT touch:
-    - ontology.npy
-    - epistemology.npy
-    - phenomenology.npz
-or RouterKernel at runtime.
+IMPORTANT
+---------
+These layers:
+  - DO NOT use ontology.npy / epistemology.npy / phenomenology.npz
+  - DO NOT use RouterKernel at runtime
+  - DO reuse FIRST-PRINCIPLES physics primitives/constants from src.router.constants
+    (GENE_MIC_S, mask12_for_byte, pack/unpack, etc.)
 
-Each of L1, L2, L3 is a true state machine:
+Design
+------
+L1/L2/L3 are true finite-state machines (FSMs) with explicit transition tables:
 
-    Layer 1 (L1):  8-bit state
-        256 states  × 256 input bytes  = 65,536 transitions
+  L1:  8-bit state   -> 256 states × 256 bytes = 65,536 transitions
+  L2: 16-bit state   -> 65,536 states × 256    = 16,777,216 transitions
+  L3: 24-bit state   -> 16,777,216 × 256       = 4,294,967,296 transitions
 
-    Layer 2 (L2): 16-bit state
-        65,536 states × 256 input bytes = 16,777,216 transitions
+L4 is NOT a table. It is a dual operator over the stream:
+  - maintains a tiny holographic register (O/E parity commitments)
+  - provides closure/identity-cycle signals
+  - provides exact inverse stepping for L3
 
-    Layer 3 (L3): 24-bit state
-        16,777,216 states × 256 input bytes = 4,294,967,296 transitions
+Table semantics
+--------------
+The FSM tables store next_state = table[state, byte]. Transitions are "parameters".
 
-Each transition table stores the next state as an integer index.
-State-update functions are derived from GENE_Mac physics but scaled
-to the appropriate bit-width.
+Function face
+-------------
+Each FSM also has a function face (fixed-width bit ops). Tables are caches/artifacts
+that can be verified against the function face.
 
-Layer 4 (BU) is NOT a table. It is a small holographic closure
-operator over byte sequences and 24-bit states (trajectory parity,
-inverse stepping, etc).
+Storage
+-------
+- L1 table: uint8[256,256]      = 64 KB
+- L2 table: uint16[65536,256]   = 32 MB
+- L3 table: packed uint24 next states:
+    uint8[2^24, 256, 3] = 12.9 GB  (disk-backed memmap recommended)
+  (uint32 form would be ~16.8 GB; packed is preferred)
 
-These are the “4 layers” that agents can use as structural memory.
+Performance notes
+-----------------
+- L2 build is vectorized (fast).
+- L3 build is chunked + vectorized per byte; still heavy (writes 12.9 GB).
+  Use only if you truly want the table. Otherwise use function face for L3.
 
-Design:
-    - L1/L2 fully in RAM by default.
-    - L3 is large; usually created as a memmap (on disk), but it is
-      still a real table with a real byte size.
+No CGM naming here; only L1/L2/L3/L4.
 """
 
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
+# First-principles physics primitives/constants are allowed.
+# (But: no atlas artifacts, no RouterKernel.)
 from src.router.constants import (
     ARCHETYPE_A12,
-    ARCHETYPE_B12,
     ARCHETYPE_STATE24,
     GENE_MIC_S,
     LAYER_MASK_12,
@@ -60,104 +74,118 @@ from src.router.constants import (
     unpack_state,
 )
 
-# ---------------------------------------------------------------------
-# Shared physics primitives
-# ---------------------------------------------------------------------
+# =============================================================================
+# Shared primitives
+# =============================================================================
 
 
 def intron(byte_val: int) -> int:
-    """Transcription intron = byte XOR 0xAA."""
+    """Transcription: intron = byte XOR 0xAA."""
     return (int(byte_val) & 0xFF) ^ GENE_MIC_S
 
 
-# --------------- L1: 8-bit state update ------------------------------
+def _u24(x: int) -> int:
+    return int(x) & 0xFFFFFF
+
+
+def _u16(x: int) -> int:
+    return int(x) & 0xFFFF
+
+
+def _u8(x: int) -> int:
+    return int(x) & 0xFF
+
+
+# =============================================================================
+# Function-face state update rules (first principles)
+# =============================================================================
 
 
 def step_state_l1(state8: int, byte_val: int) -> int:
-    """
-    L1 state update: XOR parity in intron space.
-
-    This is the minimal CS-level “memory” of the byte history.
-    """
-    return (int(state8) ^ intron(byte_val)) & 0xFF
-
-
-# --------------- L2: 16-bit state update -----------------------------
+    """L1 (8-bit) state update: XOR parity accumulation in intron space."""
+    return _u8(state8) ^ _u8(intron(byte_val))
 
 
 def step_state_l2(state16: int, byte_val: int) -> int:
     """
-    L2 state update: 16-bit chirality analogue of GENE_Mac.
+    L2 (16-bit) state update with chirality.
 
-    State is (A8,B8), packed into 16 bits:
+    state16 = (A8<<8) | B8
 
-        state16 = (A8 << 8) | B8
-
-    Update rule (same pattern as 24-bit GENE_Mac, but on 8 bits):
-        x      = intron(byte)
-        A_mut  = A8 XOR x
-        A_next = B8 XOR 0xFF
-        B_next = A_mut XOR 0xFF
+    x      = intron(byte)
+    A_mut  = A8 XOR x
+    A_next = B8 XOR 0xFF
+    B_next = A_mut XOR 0xFF
     """
-    s = int(state16) & 0xFFFF
+    s = _u16(state16)
     a8 = (s >> 8) & 0xFF
     b8 = s & 0xFF
 
-    x = intron(byte_val) & 0xFF
+    x = _u8(intron(byte_val))
     a_mut = (a8 ^ x) & 0xFF
     a_next = (b8 ^ 0xFF) & 0xFF
     b_next = (a_mut ^ 0xFF) & 0xFF
 
-    return ((a_next << 8) | b_next) & 0xFFFF
+    return _u16((a_next << 8) | b_next)
 
 
-# --------------- L3: 24-bit state update -----------------------------
+def inverse_step_state_l2(state16: int, byte_val: int) -> int:
+    """Exact inverse of L2 step."""
+    s = _u16(state16)
+    a_p = (s >> 8) & 0xFF
+    b_p = s & 0xFF
+
+    x = _u8(intron(byte_val))
+
+    # predecessor:
+    # B = A' XOR 0xFF
+    # A = (B' XOR x) XOR 0xFF
+    b = (a_p ^ 0xFF) & 0xFF
+    a = ((b_p ^ x) ^ 0xFF) & 0xFF
+    return _u16((a << 8) | b)
 
 
 def step_state_l3(state24: int, byte_val: int) -> int:
     """
-    L3 state update: full GENE_Mac physics on (A12, B12).
+    L3 (24-bit) update: full GENE_Mac physics on (A12,B12), applied over full 2^24.
 
-        intron = byte XOR 0xAA
-        mask12 = expand(intron)   # via mask12_for_byte
-        A_mut  = A12 XOR mask12
-        A'     = B12 XOR 0xFFF
-        B'     = A_mut XOR 0xFFF
-
-    Here we reuse mask12_for_byte, which already encodes the canonical
-    intron → mask expansion.
+    m12   = mask12_for_byte(byte)
+    A_mut = A12 XOR m12
+    A'    = B12 XOR 0xFFF
+    B'    = A_mut XOR 0xFFF
     """
-    s = int(state24) & 0xFFFFFF
+    s = _u24(state24)
     a12, b12 = unpack_state(s)
 
-    m12 = mask12_for_byte(byte_val & 0xFF) & LAYER_MASK_12
+    m12 = mask12_for_byte(_u8(byte_val)) & LAYER_MASK_12
     a_mut = (a12 ^ m12) & LAYER_MASK_12
 
     a_next = (b12 ^ LAYER_MASK_12) & LAYER_MASK_12
     b_next = (a_mut ^ LAYER_MASK_12) & LAYER_MASK_12
 
-    return pack_state(a_next, b_next) & 0xFFFFFF
+    return _u24(pack_state(a_next, b_next))
 
 
 def inverse_step_state_l3(state24: int, byte_val: int) -> int:
     """
-    Exact inverse of L3 step (P9 form):
+    Exact inverse of L3 step, valid over full 24-bit carrier.
 
-        B = A' XOR 0xFFF
-        A = (B' XOR mask12) XOR 0xFFF
+    Given (A',B') and byte b with mask m:
+      B = A' XOR 0xFFF
+      A = (B' XOR m) XOR 0xFFF
     """
-    s = int(state24) & 0xFFFFFF
+    s = _u24(state24)
     a_p, b_p = unpack_state(s)
-    m12 = mask12_for_byte(byte_val & 0xFF) & LAYER_MASK_12
+    m12 = mask12_for_byte(_u8(byte_val)) & LAYER_MASK_12
 
-    B = (a_p ^ LAYER_MASK_12) & LAYER_MASK_12
-    A = ((b_p ^ m12) ^ LAYER_MASK_12) & LAYER_MASK_12
-    return pack_state(A, B) & 0xFFFFFF
+    b = (a_p ^ LAYER_MASK_12) & LAYER_MASK_12
+    a = ((b_p ^ m12) ^ LAYER_MASK_12) & LAYER_MASK_12
+    return _u24(pack_state(a, b))
 
 
-# ---------------------------------------------------------------------
-# Table specs
-# ---------------------------------------------------------------------
+# =============================================================================
+# Specs
+# =============================================================================
 
 
 @dataclass(frozen=True)
@@ -171,266 +199,339 @@ class FSMSpec:
     def shape(self) -> tuple[int, int]:
         return (self.num_states, self.num_actions)
 
+    @property
     def nparams(self) -> int:
         return self.num_states * self.num_actions
 
-    def nbytes(self, dtype: np.dtype) -> int:
-        return int(self.nparams() * np.dtype(dtype).itemsize)
+    def table_bytes(self, dtype: np.dtype) -> int:
+        return int(self.nparams * np.dtype(dtype).itemsize)
 
-    def nbytes_gb(self, dtype: np.dtype) -> float:
-        return self.nbytes(dtype) / (1024.0**3)
-
-
-L1_SPEC = FSMSpec(name="L1", state_bits=8, num_states=1 << 8)
-L2_SPEC = FSMSpec(name="L2", state_bits=16, num_states=1 << 16)
-L3_SPEC = FSMSpec(name="L3", state_bits=24, num_states=1 << 24)
+    def table_gib(self, dtype: np.dtype) -> float:
+        return self.table_bytes(dtype) / (1024.0**3)
 
 
-# ---------------------------------------------------------------------
-# FSM layers: each holds a transition table next_state[state, byte]
-# ---------------------------------------------------------------------
+L1_SPEC = FSMSpec("L1", 8, 1 << 8)
+L2_SPEC = FSMSpec("L2", 16, 1 << 16)
+L3_SPEC = FSMSpec("L3", 24, 1 << 24)
+
+L2_ARCHETYPE_STATE16 = 0xAA55
+L1_ARCHETYPE_STATE8 = 0x00
+L3_ARCHETYPE_STATE24 = ARCHETYPE_STATE24  # 0xAAA555
+
+
+# =============================================================================
+# L1 FSM (uint8 table)
+# =============================================================================
 
 
 class Layer1FSM:
-    """
-    Layer 1 (L1): 8-bit FSM
-
-    - 256 states
-    - Transition table: 256 × 256
-    - Each entry is a uint8 next-state.
-
-    State semantics: cumulative XOR parity of introns so far.
-    Archetype state: 0x00 (no mutations).
-    """
+    """L1: 256x256 uint8 transition table."""
 
     spec = L1_SPEC
+    archetype_state8 = L1_ARCHETYPE_STATE8
 
     def __init__(self, table: NDArray[np.uint8]):
-        table = np.asarray(table, dtype=np.uint8)
-        if table.shape != self.spec.shape:
-            raise ValueError(f"L1 table shape {table.shape}, expected {self.spec.shape}")
-        self.table: NDArray[np.uint8] = table
+        tab = np.asarray(table, dtype=np.uint8)
+        if tab.shape != self.spec.shape:
+            raise ValueError(f"L1 table shape {tab.shape}, expected {self.spec.shape}")
+        self.table = tab
 
     @classmethod
     def build(cls) -> "Layer1FSM":
-        """
-        Build the full 256×256 table via step_state_l1.
-        This is cheap and can be done eagerly in RAM.
-        """
-        tab = np.empty(cls.spec.shape, dtype=np.uint8)
-        for s in range(cls.spec.num_states):
-            for b in range(256):
-                tab[s, b] = step_state_l1(s, b)
+        # Vectorized build:
+        # next[s,b] = s XOR intron(b), with intron(b) = b XOR 0xAA
+        s = np.arange(256, dtype=np.uint16)[:, None]              # [256,1]
+        intr = (np.arange(256, dtype=np.uint16) ^ GENE_MIC_S)[None, :]  # [1,256]
+        tab = (s ^ intr).astype(np.uint8)                         # [256,256]
         return cls(tab)
 
-    def next_state(self, state: int, byte_val: int) -> int:
-        return int(self.table[state & 0xFF, byte_val & 0xFF])
+    def next_state(self, state8: int, byte_val: int) -> int:
+        return int(self.table[_u8(state8), _u8(byte_val)])
 
-    def run(self, byte_sequence: bytes | list[int], start_state: int = 0) -> list[int]:
-        """Return the L1 state trajectory for a byte sequence."""
-        s = start_state & 0xFF
-        traj = [s]
-        for b in byte_sequence:
-            s = self.next_state(s, b)
-            traj.append(s)
-        return traj
+    def next_state_batch(self, states8: NDArray[np.uint8], byte_val: int) -> NDArray[np.uint8]:
+        b = _u8(byte_val)
+        return self.table[np.asarray(states8, dtype=np.uint8), b]
 
-    @property
-    def nparams(self) -> int:
-        return self.spec.nparams()
+    def verify_matches_function(self) -> None:
+        s = np.arange(256, dtype=np.uint16)[:, None]
+        intr = (np.arange(256, dtype=np.uint16) ^ GENE_MIC_S)[None, :]
+        expected = (s ^ intr).astype(np.uint8)
+        if not np.array_equal(self.table, expected):
+            raise AssertionError("L1 table does not match function face")
 
-    @property
-    def nbytes(self) -> int:
-        return int(self.table.nbytes)
+    def verify_columns_are_permutations(self) -> None:
+        # For each byte b, mapping s->next is XOR with constant intron(b), hence a permutation.
+        # Still, verify explicitly once.
+        for b in range(256):
+            col = self.table[:, b]
+            if np.unique(col).size != 256:
+                raise AssertionError(f"L1 byte {b} column is not a permutation")
+
+
+# =============================================================================
+# L2 FSM (uint16 table, vectorized build)
+# =============================================================================
 
 
 class Layer2FSM:
-    """
-    Layer 2 (L2): 16-bit FSM
-
-    - 65,536 states
-    - Transition table: 65,536 × 256
-    - Each entry is a uint16 next-state.
-
-    State semantics: (A8,B8) with chirality:
-      A_next = B8 XOR 0xFF
-      B_next = (A8 XOR intron) XOR 0xFF
-
-    Archetype: A8=0xAA, B8=0x55 → 0xAA55.
-    """
+    """L2: 65536x256 uint16 transition table."""
 
     spec = L2_SPEC
-    ARCHETYPE_STATE16: int = 0xAA55
+    archetype_state16 = L2_ARCHETYPE_STATE16
 
     def __init__(self, table: NDArray[np.uint16]):
-        table = np.asarray(table, dtype=np.uint16)
-        if table.shape != self.spec.shape:
-            raise ValueError(f"L2 table shape {table.shape}, expected {self.spec.shape}")
-        self.table: NDArray[np.uint16] = table
+        tab = np.asarray(table, dtype=np.uint16)
+        if tab.shape != self.spec.shape:
+            raise ValueError(f"L2 table shape {tab.shape}, expected {self.spec.shape}")
+        self.table = tab
 
     @classmethod
-    def build(cls, tqdm: bool = False) -> "Layer2FSM":
+    def build(cls) -> "Layer2FSM":
         """
-        Build the full 65,536×256 table via step_state_l2.
+        Vectorized build.
 
-        Naive double loop; for production, vectorisation over chunks
-        is recommended, but this is correct and finite.
+        Uses:
+          states: 0..65535
+          a8 = states>>8, b8 = states&0xFF
+          for each byte b:
+            x = intron(b)
+            a_mut = a8 ^ x
+            a_next = b8 ^ 0xFF
+            b_next = a_mut ^ 0xFF
+            next = (a_next<<8) | b_next
         """
-        tab = np.empty(cls.spec.shape, dtype=np.uint16)
-        rng = range(cls.spec.num_states)
-        if tqdm:
-            try:
-                from tqdm import tqdm as _tqdm
-                rng = _tqdm(rng)
-            except Exception:
-                pass
+        states = np.arange(1 << 16, dtype=np.uint32)
+        a8 = ((states >> 8) & 0xFF).astype(np.uint8)
+        b8 = (states & 0xFF).astype(np.uint8)
 
-        for s in rng:
-            for b in range(256):
-                tab[s, b] = step_state_l2(s, b)
+        intr_by_byte = (np.arange(256, dtype=np.uint16) ^ GENE_MIC_S).astype(np.uint8)
+
+        tab = np.empty((1 << 16, 256), dtype=np.uint16)
+        a_next = (b8 ^ 0xFF).astype(np.uint8)  # independent of byte
+
+        for b in range(256):
+            x = intr_by_byte[b]
+            a_mut = (a8 ^ x).astype(np.uint8)
+            b_next = (a_mut ^ 0xFF).astype(np.uint8)
+            tab[:, b] = ((a_next.astype(np.uint16) << 8) | b_next.astype(np.uint16))
+
         return cls(tab)
 
-    def next_state(self, state: int, byte_val: int) -> int:
-        return int(self.table[state & 0xFFFF, byte_val & 0xFF])
+    def next_state(self, state16: int, byte_val: int) -> int:
+        return int(self.table[_u16(state16), _u8(byte_val)])
 
-    def run(self, byte_sequence: bytes | list[int], start_state: Optional[int] = None) -> list[int]:
-        s = self.ARCHETYPE_STATE16 if start_state is None else (start_state & 0xFFFF)
-        traj = [s]
-        for b in byte_sequence:
-            s = self.next_state(s, b)
-            traj.append(s)
-        return traj
+    def next_state_batch(self, states16: NDArray[np.uint16], byte_val: int) -> NDArray[np.uint16]:
+        b = _u8(byte_val)
+        return self.table[np.asarray(states16, dtype=np.uint16), b]
 
-    @property
-    def nparams(self) -> int:
-        return self.spec.nparams()
+    def verify_matches_function(self, samples: int = 200_000, seed: int = 0) -> None:
+        rng = np.random.default_rng(seed)
+        s = rng.integers(0, 1 << 16, size=samples, dtype=np.uint32)
+        b = rng.integers(0, 256, size=samples, dtype=np.uint32)
+        tab_next = self.table[s.astype(np.uint16), b.astype(np.uint8)].astype(np.uint16)
 
-    @property
-    def nbytes(self) -> int:
-        return int(self.table.nbytes)
+        fn_next = np.empty(samples, dtype=np.uint16)
+        for i in range(samples):
+            fn_next[i] = step_state_l2(int(s[i]), int(b[i]))
+
+        if not np.array_equal(tab_next, fn_next):
+            raise AssertionError("L2 table does not match function face on samples")
+
+    def verify_inverse(self, samples: int = 200_000, seed: int = 0) -> None:
+        rng = np.random.default_rng(seed)
+        s = rng.integers(0, 1 << 16, size=samples, dtype=np.uint32)
+        b = rng.integers(0, 256, size=samples, dtype=np.uint32)
+        s_next = self.table[s.astype(np.uint16), b.astype(np.uint8)].astype(np.uint16)
+
+        s_pred = np.empty(samples, dtype=np.uint16)
+        for i in range(samples):
+            s_pred[i] = inverse_step_state_l2(int(s_next[i]), int(b[i]))
+
+        if not np.array_equal(s.astype(np.uint16), s_pred):
+            raise AssertionError("L2 inverse_step failed on samples")
+
+
+# =============================================================================
+# L3 FSM (packed uint24 table, memmap recommended)
+# =============================================================================
 
 
 class Layer3FSM:
     """
-    Layer 3 (L3): 24-bit FSM
-
-    - 16,777,216 states
-    - Transition table: 16,777,216 × 256
-    - Each entry is a uint32 next-state (0..2^24-1).
-
-    This is large: 16,777,216 × 256 × 4 bytes ≈ 16.8 GB.
-
-    Typically, you will memory-map it to disk (np.memmap) so that
-    it has real storage but does not need to be fully in RAM.
+    L3 packed table:
+      file-backed uint8 array of shape (2^24, 256, 3)
+    where the 3 bytes encode next_state24 in little-endian:
+      lo = x & 0xFF
+      mi = (x >> 8) & 0xFF
+      hi = (x >> 16) & 0xFF
     """
 
     spec = L3_SPEC
-    ARCHETYPE_STATE24: int = ARCHETYPE_STATE24  # 0xAAA555
+    archetype_state24 = L3_ARCHETYPE_STATE24
 
-    def __init__(self, table: NDArray[np.uint32]):
-        table = np.asarray(table, dtype=np.uint32)
-        if table.shape != self.spec.shape:
-            raise ValueError(f"L3 table shape {table.shape}, expected {self.spec.shape}")
-        self.table: NDArray[np.uint32] = table
+    def __init__(self, table_u8: NDArray[np.uint8]):
+        tab = np.asarray(table_u8, dtype=np.uint8)
+        if tab.shape != (self.spec.num_states, 256, 3):
+            raise ValueError(
+                f"L3 packed table shape {tab.shape}, expected {(self.spec.num_states, 256, 3)}"
+            )
+        self.table = tab
+
+        # precompute masks (fast build and fast function face)
+        self.mask12_by_byte = np.array([mask12_for_byte(b) & 0xFFF for b in range(256)], dtype=np.uint16)
 
     @classmethod
-    def build_memmap(cls, path: Path) -> "Layer3FSM":
+    def from_memmap(
+        cls, path: Path, mode: Literal["r", "r+", "c"] = "r"
+    ) -> "Layer3FSM":
+        path = Path(path)
+        tab: NDArray[np.uint8] = np.memmap(
+            str(path),
+            dtype=np.uint8,
+            mode=mode,
+            shape=(1 << 24, 256, 3),
+        )  # type: ignore[call-overload]
+        return cls(tab)
+
+    @staticmethod
+    def _pack_u24_le(x: NDArray[np.uint32]) -> NDArray[np.uint8]:
+        """Pack uint32 array (values < 2^24) into bytes [*,3] little-endian."""
+        out = np.empty((x.size, 3), dtype=np.uint8)
+        out[:, 0] = (x & 0xFF).astype(np.uint8)
+        out[:, 1] = ((x >> 8) & 0xFF).astype(np.uint8)
+        out[:, 2] = ((x >> 16) & 0xFF).astype(np.uint8)
+        return out
+
+    @staticmethod
+    def _unpack_u24_le(b3: NDArray[np.uint8]) -> NDArray[np.uint32]:
+        """Unpack bytes [*,3] little-endian into uint32."""
+        b3 = np.asarray(b3, dtype=np.uint8)
+        raw = (
+            b3[:, 0].astype(np.uint32)
+            | (b3[:, 1].astype(np.uint32) << 8)
+            | (b3[:, 2].astype(np.uint32) << 16)
+        )
+        return raw.astype(np.uint32)
+
+    @classmethod
+    def build_memmap_packed(
+        cls,
+        path: Path,
+        chunk_states: int = 1 << 16,
+        progress_every_chunks: int = 64,
+    ) -> "Layer3FSM":
         """
-        Build the full 24-bit transition table as a memmap on disk.
+        Build packed L3 transition table as uint8 memmap [2^24,256,3].
 
-        WARNING: ~16.8 GB file. This is finite, but slow to build.
+        This writes 12.9 GiB of transition data. It is finite but heavy.
+        Use only if you truly want table-face speed for L3.
 
-        Strategy:
-          - Use open_memmap with shape (2^24, 256)
-          - Chunk the state space (e.g., 2^16 per chunk)
-          - Vectorise where possible
+        The build is chunked over state space; within each chunk we vectorize over states.
         """
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        from numpy.lib.format import open_memmap
-
-        n_states = cls.spec.num_states
-        tab = open_memmap(
+        tab = np.memmap(
             str(path),
+            dtype=np.uint8,
             mode="w+",
-            dtype=np.uint32,
-            shape=cls.spec.shape,
+            shape=(1 << 24, 256, 3),
         )
 
-        chunk = 1 << 16  # 65,536 states at a time
+        # precompute masks for 256 bytes
+        mask12_by_byte = np.array([mask12_for_byte(b) & 0xFFF for b in range(256)], dtype=np.uint16)
+
+        n_states = 1 << 24
         t0 = time.time()
 
-        for start in range(0, n_states, chunk):
-            end = min(start + chunk, n_states)
-            state_block = np.arange(start, end, dtype=np.uint32)
+        for chunk_idx, start in enumerate(range(0, n_states, chunk_states)):
+            end = min(start + chunk_states, n_states)
+            states = np.arange(start, end, dtype=np.uint32)
 
-            # Decompose into A12,B12 for this block
-            a_block = (state_block >> 12) & 0xFFF
-            b_block = state_block & 0xFFF
+            a = (states >> 12) & 0xFFF
+            b = states & 0xFFF
 
-            for b in range(256):
-                # Step all states in this block with byte b
-                m12 = mask12_for_byte(b) & LAYER_MASK_12
-                a_mut = (a_block ^ m12) & LAYER_MASK_12
-                a_next = (b_block ^ LAYER_MASK_12) & LAYER_MASK_12
-                b_next = (a_mut ^ LAYER_MASK_12) & LAYER_MASK_12
-                tab[start:end, b] = ((a_next << 12) | b_next).astype(np.uint32)
+            # a_next is independent of byte: A_next = B ^ 0xFFF
+            a_next = (b ^ 0xFFF).astype(np.uint32)
 
-            if (end - start) >= chunk and (start // chunk) % 64 == 0:
+            for byte_val in range(256):
+                m = np.uint32(mask12_by_byte[byte_val])
+                a_mut = (a ^ m) & 0xFFF
+                b_next = (a_mut ^ 0xFFF).astype(np.uint32)
+                ns = ((a_next << 12) | b_next).astype(np.uint32)
+
+                packed = cls._pack_u24_le(ns)  # [block,3]
+                tab[start:end, byte_val, :] = packed
+
+            if (chunk_idx % progress_every_chunks) == 0:
                 elapsed = time.time() - t0
                 pct = 100.0 * end / n_states
-                print(f"L3 build: {end:,}/{n_states:,} ({pct:.1f}%) in {elapsed:.1f}s")
+                print(f"L3 build: {end:,}/{n_states:,} ({pct:.1f}%) elapsed={elapsed:.1f}s")
+                tab.flush()
 
-            tab.flush()
-
-        size_gb = path.stat().st_size / (1024.0**3)
-        print(f"L3 table built at {path} ({size_gb:.2f} GB)")
+        tab.flush()
+        size_gib = path.stat().st_size / (1024.0**3)
+        print(f"L3 packed table built at {path} ({size_gib:.2f} GiB)")
         return cls(tab)
 
-    @classmethod
-    def from_memmap(cls, path: Path) -> "Layer3FSM":
-        path = Path(path)
-        arr = np.memmap(str(path), dtype=np.uint32, mode="r", shape=cls.spec.shape)
-        return cls(arr)
+    # ----- table face -----
 
     def next_state(self, state24: int, byte_val: int) -> int:
-        return int(self.table[state24 & 0xFFFFFF, byte_val & 0xFF])
+        b3 = self.table[_u24(state24), _u8(byte_val), :]  # [3]
+        return int(b3[0]) | (int(b3[1]) << 8) | (int(b3[2]) << 16)
 
-    def run(self, byte_sequence: bytes | list[int], start_state: Optional[int] = None) -> list[int]:
-        s = self.ARCHETYPE_STATE24 if start_state is None else (start_state & 0xFFFFFF)
-        traj = [s]
-        for b in byte_sequence:
-            s = self.next_state(s, b)
-            traj.append(s)
-        return traj
+    def fanout(self, state24: int) -> NDArray[np.uint32]:
+        b3 = self.table[_u24(state24), :, :]  # [256,3]
+        return self._unpack_u24_le(b3)
 
-    @property
-    def nparams(self) -> int:
-        return self.spec.nparams()
+    # ----- function face -----
 
-    @property
-    def nbytes(self) -> int:
-        return int(self.table.nbytes)
+    def next_state_functional(self, state24: int, byte_val: int) -> int:
+        return step_state_l3(state24, byte_val)
+
+    def inverse_state_functional(self, state24: int, byte_val: int) -> int:
+        return inverse_step_state_l3(state24, byte_val)
+
+    def verify_inverse_samples(self, samples: int = 200_000, seed: int = 0) -> None:
+        rng = np.random.default_rng(seed)
+        s = rng.integers(0, 1 << 24, size=samples, dtype=np.uint32)
+        b = rng.integers(0, 256, size=samples, dtype=np.uint32)
+        for i in range(samples):
+            s0 = int(s[i])
+            bb = int(b[i])
+            s1 = self.next_state(s0, bb)
+            sp = inverse_step_state_l3(s1, bb)
+            if sp != (s0 & 0xFFFFFF):
+                raise AssertionError("L3 inverse check failed")
+
+    def verify_table_matches_function_samples(self, samples: int = 200_000, seed: int = 0) -> None:
+        rng = np.random.default_rng(seed)
+        s = rng.integers(0, 1 << 24, size=samples, dtype=np.uint32)
+        b = rng.integers(0, 256, size=samples, dtype=np.uint32)
+        for i in range(samples):
+            s0 = int(s[i])
+            bb = int(b[i])
+            t_next = self.next_state(s0, bb)
+            f_next = step_state_l3(s0, bb)
+            if t_next != f_next:
+                raise AssertionError("L3 table != function on samples")
 
 
-# ---------------------------------------------------------------------
-# Layer 4 — BU: holographic closure (no table)
-# ---------------------------------------------------------------------
+# =============================================================================
+# L4 dual operator (small holographic register + helpers)
+# =============================================================================
 
 
 @dataclass
-class BUState:
+class L4State:
     """
-    Small holographic compression of a byte path in mask-space.
+    Tiny holographic register over the byte stream (12-bit mask space).
 
-    Stores:
-        O = XOR of 12-bit masks at odd positions
-        E = XOR of 12-bit masks at even positions
-        parity = length mod 2
-        length = number of bytes seen
+    O: XOR of mask12 at positions 0,2,4,... (even index / "odd slot" in prior naming)
+    E: XOR of mask12 at positions 1,3,5,...
+    parity: length % 2
+    length: number of bytes processed
     """
-
     O: int = 0
     E: int = 0
     parity: int = 0
@@ -443,150 +544,135 @@ class BUState:
         self.length = 0
 
 
-class BULayer:
+class Layer4:
     """
-    Balance Universal (BU) holography layer.
+    Dual operator: stream closure + reconstruction utilities.
+    Not a table.
 
-    - No parameter table.
-    - Provides:
-        * egress_update: update (O,E,parity,length) given a new byte
-        * commitment: compute (O,E,parity) for a whole sequence
-        * equivalent: P8-style path equivalence
-        * inverse_step_state_l3: exact inverse at 24-bit
+    Provided:
+      - update(state, byte): update O/E commitments
+      - commitment(seq): compute (O,E,parity) for a sequence
+      - equivalent(seq_a, seq_b): P8 equivalence check
+      - identity_cycle(state): check O==0 and E==0 and parity==0
+      - closure_score(state): graded closure 0..1 from popcount(O)+popcount(E)
+      - inverse_l3(state24, byte): exact inverse stepping (function face)
     """
 
     def __init__(self) -> None:
-        self.mask12_by_byte = np.array(
-            [mask12_for_byte(b) & LAYER_MASK_12 for b in range(256)],
-            dtype=np.uint16,
-        )
+        self.mask12_by_byte = np.array([mask12_for_byte(b) & 0xFFF for b in range(256)], dtype=np.uint16)
 
-    def egress_update(self, bu: BUState, byte_val: int) -> None:
-        """Update (O,E,parity,length) with a new byte."""
-        b = int(byte_val) & 0xFF
+    def update(self, st: L4State, byte_val: int) -> None:
+        b = _u8(byte_val)
         m = int(self.mask12_by_byte[b])
-
-        if bu.length % 2 == 0:
-            bu.O ^= m
+        if (st.length & 1) == 0:
+            st.O ^= m
         else:
-            bu.E ^= m
+            st.E ^= m
+        st.length += 1
+        st.parity = st.length & 1
 
-        bu.length += 1
-        bu.parity = bu.length & 1
-
-    def commitment(self, byte_sequence: bytes | list[int]) -> tuple[int, int, int]:
-        """Return (O,E,parity) without mutating a BUState."""
+    def commitment(self, seq: bytes | list[int]) -> Tuple[int, int, int]:
         O = 0
         E = 0
-        for i, b in enumerate(byte_sequence):
-            m = int(self.mask12_by_byte[int(b) & 0xFF])
-            if i % 2 == 0:
+        for i, bb in enumerate(seq):
+            m = int(self.mask12_by_byte[_u8(bb)])
+            if (i & 1) == 0:
                 O ^= m
             else:
                 E ^= m
-        return O, E, (len(byte_sequence) & 1)
+        return O, E, (len(seq) & 1)
 
     def equivalent(self, seq_a: bytes | list[int], seq_b: bytes | list[int]) -> bool:
-        """P8 path equivalence: same (O,E,parity) => same effect from any start."""
         return self.commitment(seq_a) == self.commitment(seq_b)
 
-    def inverse_step_state24(self, state24: int, byte_val: int) -> int:
-        """Exact inverse of L3 step (full 24-bit)."""
+    def identity_cycle(self, st: L4State) -> bool:
+        return (st.O == 0) and (st.E == 0) and (st.parity == 0)
+
+    def closure_score(self, st: L4State) -> float:
+        # 24 total bits of (O,E). Normalize to [0,1].
+        w = popcount(st.O & 0xFFF) + popcount(st.E & 0xFFF)
+        return float(w) / 24.0
+
+    def inverse_l3(self, state24: int, byte_val: int) -> int:
         return inverse_step_state_l3(state24, byte_val)
 
 
-# ---------------------------------------------------------------------
+# =============================================================================
 # Bundling for agents
-# ---------------------------------------------------------------------
+# =============================================================================
 
 
 @dataclass
 class LayerRegisters:
-    """Per-agent registers for the 3 FSM layers + BU commitments."""
-    l1_state8: int = 0x00
-    l2_state16: int = Layer2FSM.ARCHETYPE_STATE16
-    l3_state24: int = Layer3FSM.ARCHETYPE_STATE24
-    bu: BUState = field(default_factory=BUState)
+    """Per-agent registers for L1/L2/L3 + L4 holographic register."""
+    l1_state8: int = L1_ARCHETYPE_STATE8
+    l2_state16: int = L2_ARCHETYPE_STATE16
+    l3_state24: int = L3_ARCHETYPE_STATE24
+    l4: L4State = L4State()
 
     def reset(self) -> None:
-        self.l1_state8 = 0x00
-        self.l2_state16 = Layer2FSM.ARCHETYPE_STATE16
-        self.l3_state24 = Layer3FSM.ARCHETYPE_STATE24
-        self.bu.reset()
+        self.l1_state8 = L1_ARCHETYPE_STATE8
+        self.l2_state16 = L2_ARCHETYPE_STATE16
+        self.l3_state24 = L3_ARCHETYPE_STATE24
+        self.l4.reset()
 
 
 @dataclass
-class FourFSMs:
-    """
-    Concrete bundle of the 3 FSM layers + BU holography, plus registers.
-
-    This is what an agent can own as its structural memory substrate.
-    """
+class FourLayers:
+    """Concrete bundle of L1/L2/L3 FSMs + L4 dual operator, plus per-agent registers."""
     l1: Layer1FSM
     l2: Layer2FSM
     l3: Layer3FSM
-    bu: BULayer
+    l4: Layer4
     regs: LayerRegisters
 
     def reset(self) -> None:
         self.regs.reset()
 
     def ingest_byte(self, byte_val: int) -> None:
-        """Update all three FSM states + BU commitments."""
-        b = int(byte_val) & 0xFF
+        b = _u8(byte_val)
         self.regs.l1_state8 = self.l1.next_state(self.regs.l1_state8, b)
         self.regs.l2_state16 = self.l2.next_state(self.regs.l2_state16, b)
         self.regs.l3_state24 = self.l3.next_state(self.regs.l3_state24, b)
-        self.regs.bu.egress_update(self.regs.bu, b)
+        self.l4.update(self.regs.l4, b)
 
 
-def create_default_four_fsms(
+def create_default_four_layers(
     *,
     l3_path: Optional[Path] = None,
     build_l3_if_missing: bool = False,
-) -> FourFSMs:
+) -> FourLayers:
     """
     Convenience factory:
 
-        - Builds L1 and L2 tables in RAM.
-        - Loads L3 from memmap at l3_path, or builds it if requested.
-        - Creates BU operator and zeroed registers.
+      - builds L1 table in RAM (64 KB)
+      - builds L2 table in RAM (32 MB, vectorized)
+      - loads L3 packed memmap from l3_path, or builds it if requested
+      - creates L4 operator and per-agent registers
 
-    L3 is the heavy one (~16.8 GB). If you do not want to
-    materialise it yet, you can skip calling this or set
-    build_l3_if_missing=False and ensure l3_path exists.
+    L3 packed table file size: ~12.9 GiB.
     """
-    print("Building L1 FSM (256×256)...")
     l1 = Layer1FSM.build()
-    print(f"  L1 params: {l1.nparams:,}, bytes: {l1.nbytes:,}")
+    l1.verify_matches_function()
 
-    print("Building L2 FSM (65,536×256)...")
-    t0 = time.time()
-    l2 = Layer2FSM.build(tqdm=True)
-    print(
-        f"  L2 params: {l2.nparams:,}, bytes: {l2.nbytes / (1024**2):.1f} MB,"
-        f" built in {time.time() - t0:.1f}s"
-    )
+    l2 = Layer2FSM.build()
+    # Optional: spot-check correctness (fast enough to run once)
+    l2.verify_inverse(samples=50_000)
 
     if l3_path is None:
-        raise ValueError("l3_path is required to create/load L3 FSM")
+        raise ValueError("l3_path is required (packed L3 table lives on disk)")
 
     l3_path = Path(l3_path)
-
     if l3_path.exists():
-        print(f"Loading L3 FSM from {l3_path}...")
-        l3 = Layer3FSM.from_memmap(l3_path)
+        l3 = Layer3FSM.from_memmap(l3_path, mode="r")
     else:
         if not build_l3_if_missing:
-            raise FileNotFoundError(
-                f"L3 FSM file not found at {l3_path} and build_l3_if_missing=False"
-            )
-        print("Building L3 FSM (~16.8 GB) — this will take a while...")
-        l3 = Layer3FSM.build_memmap(l3_path)
+            raise FileNotFoundError(f"L3 packed table not found at {l3_path}")
+        l3 = Layer3FSM.build_memmap_packed(l3_path)
 
-    bu = BULayer()
+    l4 = Layer4()
     regs = LayerRegisters()
-    return FourFSMs(l1=l1, l2=l2, l3=l3, bu=bu, regs=regs)
+    return FourLayers(l1=l1, l2=l2, l3=l3, l4=l4, regs=regs)
 
 
 __all__ = [
@@ -594,16 +680,17 @@ __all__ = [
     "Layer1FSM",
     "Layer2FSM",
     "Layer3FSM",
-    "BULayer",
-    "BUState",
+    "Layer4",
+    "L4State",
     "LayerRegisters",
-    "FourFSMs",
+    "FourLayers",
     "L1_SPEC",
     "L2_SPEC",
     "L3_SPEC",
     "step_state_l1",
     "step_state_l2",
     "step_state_l3",
+    "inverse_step_state_l2",
     "inverse_step_state_l3",
-    "create_default_four_fsms",
+    "create_default_four_layers",
 ]
