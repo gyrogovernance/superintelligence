@@ -15,6 +15,42 @@
 
 ---
 
+## [v1.4.3-Autobots] – 2026-02-28
+
+### HGT Phase 1: Full Implementation and Test Suite
+
+Complete Holographic Grid Transformer (HGT) under `secret_lab_ignore/autobots/` with lossless physics, FSM curriculum, training pipeline, and comprehensive tests.
+
+#### Core Architecture
+
+- **physics.py** – Lossless FSM: intron, mask12, vertex charge; L1/L2/L3/L4 trajectories; horizon_distance, ab_distance, archetype_distance; step_state_l3_scalar. No src.* imports at runtime.
+- **config.py** – HGTConfig: physics constants (gene_mic_s, q0, q1, archetype_state24), resolution_dims (64/128/256), num_heads, ffn_multiplier.
+- **embeddings.py** – BL1 (byte+family+micro), TL1 (l1_state+vertex), L4PositionEncoding with learned gate.
+- **blocks.py** – ByteBlock, TensorBlock (causal), DirectionalAgentBlock (asymmetric cross-attn), TransitionBlock (L2/L3 state injection).
+- **head.py** – HeadAgent: 6+2 family/micro decomposition, vertex_head, intron-to-byte permutation buffer.
+- **model.py** – HGTForCausalLM: physics phase (detached) + neural phase; save_pretrained/from_pretrained; generate() with L3 state tracking.
+
+#### Curriculum and Training
+
+- **curriculum.py** – FSMCurriculum: random_walks, family_locked, micro_locked, vertex_locked, separator_patterns, horizon_walks, closure_walks, p7_contrastive, full_coverage. CurriculumDataset loads trajectories.bin + types.bin.
+- **train.py** – Generates curriculum, trains with AdamW, val split, label smoothing decay, physics preservation check.
+- **finetune_text.py** – UTF-8 text fine-tuning from FSM-pretrained weights.
+- **convert.py** – StructuralProjector: decompose external embeddings into E_structural + E_residual via BL1 basis.
+- **oracle_utils.py** – KeyB/KeyC histograms, oracle_metrics_with_min_count (entropy, Bayes acc, kept_frac).
+
+#### Tests
+
+- **test_physics.py** – intron, mask12, vertex_charge match src.router.constants; mask12_table shape; L1 trajectory.
+- **test_model.py** – Forward shape, labels, generate, gradient flow.
+- **test_lossless.py** – mask12_table unchanged after forward/backward.
+- **test_curriculum.py** – Full coverage 256 bytes; random walks (skips if L3 missing).
+- **test_convert.py** – Structural basis shape; project decomposition (E_struct + E_res = target).
+- **test_oracle_bounds.py** – Oracle conditional entropy, Bayes acc, per-type bounds, KeyB/KeyC collision stats.
+- **test_model_vs_oracle.py** – Model NLL/acc vs oracle KeyB/KeyC; per-curriculum-type comparison; policy baselines.
+- **test_post_training.py** – Output distribution, physics alignment (family/vertex/mask_weight), curriculum families, head decomposition, embedding structure, gradient diagnostics, generation samples, model summary.
+
+---
+
 ## [v1.4.2-Gyroscopic_ASI] – 2026-02-25
 
 ### New 4-Layer FSM Memory Substrate (Independent of Router Atlas)

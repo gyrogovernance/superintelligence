@@ -1,0 +1,5 @@
+# PyTorch DirectML - AMD iGPU acceleration (separate env)
+# Use with: .venv-dml (Python 3.11)
+# torch-directml pins torch==2.4.1, torchvision==0.19.1
+
+torch-directml

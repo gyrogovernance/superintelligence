@@ -57,6 +57,7 @@
     "research/memories/models",
 
     "**/__pycache__",
+    "**/backup",
     "**/*.py[cod]",
     "**/*$py.class",
     "**/*.so",
@@ -82,6 +83,7 @@
     "env",
     "ENV",
     ".venv",
+    ".venv-dml",
     "env.bak",
     "venv.bak",
 

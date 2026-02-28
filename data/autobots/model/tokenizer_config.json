@@ -1,0 +1,18 @@
+{
+  "added_tokens_decoder": {
+    "0": {
+      "content": "\u0000",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
+    }
+  },
+  "backend": "custom",
+  "bos_token": null,
+  "eos_token": null,
+  "model_max_length": 1000000000000000019884624838656,
+  "pad_token": "\u0000",
+  "tokenizer_class": "PhysicsTokenizer"
+}
