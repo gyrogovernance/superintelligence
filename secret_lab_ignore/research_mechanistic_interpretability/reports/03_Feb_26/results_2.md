@@ -63,7 +63,7 @@ Rigorous Mechanistic Analysis with Checkpointing
 [CHECKPOINT] Loaded existing progress: 1 parts completed
 
 [SETUP] Loading model...
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 3241.57it/s, Material
   Model: Olmo-3-7B-Instruct
   Layers: 32

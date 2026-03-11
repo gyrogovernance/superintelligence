@@ -1,4 +1,4 @@
-# Safe cache cleanup script for Router development
+# Safe cache cleanup script for aQPU Kernel development
 # This removes only cache/temp files, not source code
 # Run with: .\cleanup_cache.ps1
 
@@ -50,6 +50,4 @@ if (Test-Path ".git\index.lock") {
 }
 
 Write-Host "`nTotal space freed: $([math]::Round($freed/1GB,2)) GB" -ForegroundColor Cyan
-Write-Host "`nNote: Atlas files in data/atlas/ are build artifacts." -ForegroundColor Yellow
-Write-Host "They can be rebuilt with: python -m ggg_asi_router.physics.atlas_builder complete" -ForegroundColor Yellow
 

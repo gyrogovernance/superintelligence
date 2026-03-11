@@ -216,7 +216,7 @@ model_path = "data/models/Bolmo-1B"   # or Bolmo-7B
 bolmo = AutoModelForCausalLM.from_pretrained(
     model_path,
     trust_remote_code=True,
-    torch_dtype="auto",
+    dtype="auto",
 ).to("cuda")
 tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
 

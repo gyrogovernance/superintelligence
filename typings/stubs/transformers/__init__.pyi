@@ -140,7 +140,7 @@ class AutoModelForCausalLM(PreTrainedModel):
         cls,
         pretrained_model_name_or_path: str | Path,
         *model_args: Any,
-        torch_dtype: torch.dtype | str | None = None,
+        dtype: torch.dtype | str | None = None,
         dtype: torch.dtype | str | None = None,
         device_map: str | Mapping[str, Any] | None = None,
         trust_remote_code: bool = False,

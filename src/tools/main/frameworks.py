@@ -1,0 +1,143 @@
+"""
+Internal connectors: CGM / Gyroscope / THM.
+
+Converts domain-specific signals into GovernanceEvents that update
+application-layer domain ledgers. No kernel semantics. Tools live here.
+
+Mapping from real-world assessment to edge updates is application-layer
+policy. Kept explicit and auditable.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
+
+
+@dataclass(frozen=True)
+class ToolContext:
+    """Minimal context for tool invocations."""
+    actor_id: str | None = None
+    session_id: str | None = None
+    meta: dict[str, Any] | None = None
+
+
+class FrameworkTool:
+    """Base class for internal framework tools."""
+    name: str = "framework_tool"
+
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
+        """Convert a payload into 0..N GovernanceEvents. Must be deterministic."""
+        raise NotImplementedError
+
+
+class THMDisplacementTool(FrameworkTool):
+    """
+    Convert THM displacement signals into edge updates.
+
+    THM displacements (GTD, IVD, IAD, IID) are measurements of risk.
+    All events go to EDUCATION domain (measurements level).
+    """
+    name = "thm_displacement"
+
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
+        dom = Domain.EDUCATION
+
+        mapping = [
+            ("GTD", EdgeID.GOV_INFO),
+            ("IVD", EdgeID.INFO_INFER),
+            ("IAD", EdgeID.GOV_INFER),
+            ("IID", EdgeID.INFER_INTEL),
+        ]
+
+        events: list[GovernanceEvent] = []
+        for key, edge in mapping:
+            if key in payload:
+                val = float(payload[key])
+                if val != 0.0:
+                    signal_confidence_key = f"{key}_confidence"
+                    confidence = float(payload.get(signal_confidence_key, payload.get("confidence", 1.0)))
+
+                    magnitude_micro = int(round(val * MICRO))
+                    confidence_micro = int(round(confidence * MICRO))
+
+                    meta_dict = {"tool": self.name, "signal": key}
+                    if ctx.meta:
+                        meta_dict.update(ctx.meta)
+                    events.append(
+                        GovernanceEvent(
+                            domain=dom,
+                            edge_id=edge,
+                            magnitude_micro=magnitude_micro,
+                            confidence_micro=confidence_micro,
+                            meta=meta_dict,
+                        )
+                    )
+        return events
+
+
+class GyroscopeWorkMixTool(FrameworkTool):
+    """
+    Convert Gyroscope work-mix shifts into edge updates.
+
+    All events go to EMPLOYMENT domain (work level).
+    """
+    name = "gyroscope_workmix"
+
+    def emit_events(self, payload: dict[str, Any], ctx: ToolContext) -> list[GovernanceEvent]:
+        dom = Domain.EMPLOYMENT
+
+        gm = float(payload.get("GM", 0.0))
+        icu = float(payload.get("ICu", 0.0))
+        iinter = float(payload.get("IInter", 0.0))
+        ico = float(payload.get("ICo", 0.0))
+
+        events: list[GovernanceEvent] = []
+
+        delta_gm_vs_icu = gm - icu
+        if delta_gm_vs_icu != 0.0:
+            gm_conf = float(payload.get("GM_confidence", payload.get("confidence", 1.0)))
+            icu_conf = float(payload.get("ICu_confidence", payload.get("confidence", 1.0)))
+            confidence = min(gm_conf, icu_conf)
+
+            meta_dict = {"tool": self.name, "metric": "GM-ICu"}
+            if ctx.meta:
+                meta_dict.update(ctx.meta)
+            magnitude_micro = int(round(delta_gm_vs_icu * MICRO))
+            confidence_micro = int(round(confidence * MICRO))
+
+            events.append(
+                GovernanceEvent(
+                    domain=dom,
+                    edge_id=EdgeID.GOV_INFO,
+                    magnitude_micro=magnitude_micro,
+                    confidence_micro=confidence_micro,
+                    meta=meta_dict,
+                )
+            )
+
+        delta_iinter_vs_ico = iinter - ico
+        if delta_iinter_vs_ico != 0.0:
+            iinter_conf = float(payload.get("IInter_confidence", payload.get("confidence", 1.0)))
+            ico_conf = float(payload.get("ICo_confidence", payload.get("confidence", 1.0)))
+            confidence = min(iinter_conf, ico_conf)
+
+            meta_dict = {"tool": self.name, "metric": "IInter-ICo"}
+            if ctx.meta:
+                meta_dict.update(ctx.meta)
+            magnitude_micro = int(round(delta_iinter_vs_ico * MICRO))
+            confidence_micro = int(round(confidence * MICRO))
+
+            events.append(
+                GovernanceEvent(
+                    domain=dom,
+                    edge_id=EdgeID.INFER_INTEL,
+                    magnitude_micro=magnitude_micro,
+                    confidence_micro=confidence_micro,
+                    meta=meta_dict,
+                )
+            )
+
+        return events

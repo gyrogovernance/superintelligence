@@ -1,6 +1,5 @@
 """App-layer coordination and domain ledgers."""
 
-# Explicit exports for type checkers
 from .ledger import (
     compute_aperture,
     get_cycle_basis,

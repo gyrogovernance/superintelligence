@@ -46,17 +46,9 @@ def get_bundles_dir() -> Path:
     return bundles_dir
 
 
-def get_atlas_dir() -> Path:
-    """Returns data/atlas/ directory."""
-    atlas_dir = get_data_dir() / "atlas"
-    return atlas_dir
-
-
 def ensure_workspace() -> None:
     """Ensure all workspace directories exist. Called on CLI startup."""
-    data = get_data_dir()
-    # Create standard dirs
-    (data / "atlas").mkdir(parents=True, exist_ok=True)
+    get_data_dir()
     get_programs_dir()
     get_aci_dir()
     get_bundles_dir()
@@ -66,22 +58,17 @@ def ensure_templates() -> None:
     """
     Ensure program template is available in programs directory.
     Template is named with underscore prefix so it's not processed as a program.
-    Users copy this file to create new programs (e.g., copy _template.md to my-program.md).
-    
     Always overwrites the template to keep it in sync with the code version.
     """
     programs_dir = get_programs_dir()
     program_template = programs_dir / "_template.md"
-
-    # Always overwrite to keep template in sync with code
     program_template.write_text(templates.PROGRAM_TEMPLATE_MD, encoding="utf-8")
 
 
 def parse_bracket_value(text: str, pattern: str) -> int:
     """
     Parse a bracket value from text using pattern.
-    Pattern should contain a capture group for the abbreviation.
-    Example: pattern = r'GTD:\\s*\\[(\\d+)\\]' will match 'GTD: [5]' and return 5.
+    Pattern should contain a capture group for the value.
     """
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
@@ -94,13 +81,10 @@ def parse_bracket_value(text: str, pattern: str) -> int:
 
 def parse_notes_section(text: str) -> str:
     """Parse the NOTES section from markdown text."""
-    # Match ## NOTES section (case-insensitive) and capture everything after until next ## or end of file
-    # Template format: ## NOTES on one line, --- on the next line
     notes_pattern = r'^##\s+NOTES\s*\n---?\s*\n(.*?)(?=^##|\Z)'
     match = re.search(notes_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
     if match:
         notes = match.group(1).strip()
-        # Remove the placeholder text if it's the default
         if notes == "(Add context or key observations for this program)":
             return ""
         return notes
@@ -111,27 +95,21 @@ def parse_participants_section(text: str) -> tuple[str, str]:
     """
     Parse the PARTICIPANTS section from markdown text.
     Returns: (agents, agencies)
-    Both are free text strings from their respective subsections.
     """
-    # Match ### Agents subsection
     agents_pattern = r'###\s+Agents\s*\n+(.*?)(?=###|^##|\Z)'
     agents_match = re.search(agents_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
     agents = ""
     if agents_match:
         agents = agents_match.group(1).strip()
-        # Remove placeholder text (check for exact match or if it's the only content)
         placeholder = "(Names of people involved in this program)"
         if agents == placeholder or agents.strip() == placeholder:
             agents = ""
 
-    # Match ### Agencies subsection
-    # Stop at --- separator, ## header, or end of file
     agencies_pattern = r'###\s+Agencies\s*\n+(.*?)(?=^---|^##|\Z)'
     agencies_match = re.search(agencies_pattern, text, re.MULTILINE | re.DOTALL | re.IGNORECASE)
     agencies = ""
     if agencies_match:
         agencies = agencies_match.group(1).strip()
-        # Remove placeholder text (check for exact match or if it's the only content)
         placeholder = "(Names of agencies involved in this program)"
         if agencies == placeholder or agencies.strip() == placeholder:
             agencies = ""
@@ -143,29 +121,17 @@ def parse_program_from_markdown(program_md_path: Path) -> tuple[str, dict[str, i
     """
     Parse program from markdown body using bracket notation.
     Returns: (program_slug, domain_counts, principle_counts, unit, notes, agents, agencies)
-    
-    domain_counts: {"economy": int, "employment": int, "education": int}
-    principle_counts: {"GMT": int, "GTD": int, "ICV": int, "IVD": int, "IIA": int, "IAD": int, "ICI": int, "IID": int}
-    unit: "daily" or "sprint" (defaults to "daily" if not specified)
-    notes: free text from NOTES section (empty string if not present)
-    agents: free text from PARTICIPANTS > Agents section (empty string if not present)
-    agencies: free text from PARTICIPANTS > Agencies section (empty string if not present)
-    
-    Note: program_slug is derived from filename stem to avoid collisions.
     """
     text = program_md_path.read_text(encoding="utf-8")
 
-    # Slug = filename stem (canonical, avoids collisions)
     program_slug = program_md_path.stem
 
-    # Parse domain counts
     domain_counts = {
         "economy": parse_bracket_value(text, r'Economy[^:]*:\s*\[(\d+)\]'),
         "employment": parse_bracket_value(text, r'Employment[^:]*:\s*\[(\d+)\]'),
         "education": parse_bracket_value(text, r'Education[^:]*:\s*\[(\d+)\]'),
     }
 
-    # Parse principle counts (alignment and displacement)
     principle_counts = {
         "GMT": parse_bracket_value(text, r'GMT\s+Alignment\s+Incidents:\s*\[(\d+)\]'),
         "GTD": parse_bracket_value(text, r'GTD\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
@@ -177,7 +143,6 @@ def parse_program_from_markdown(program_md_path: Path) -> tuple[str, dict[str, i
         "IID": parse_bracket_value(text, r'IID\s+Displacement\s+Incidents:\s*\[(\d+)\]'),
     }
 
-    # Parse unit (default to "daily" if not found)
     unit_match = re.search(r'Unit:\s*\[(daily|sprint)\]', text, re.IGNORECASE)
     if unit_match:
         unit = unit_match.group(1).lower()
@@ -186,10 +151,7 @@ def parse_program_from_markdown(program_md_path: Path) -> tuple[str, dict[str, i
     else:
         unit = "daily"
 
-    # Parse notes
     notes = parse_notes_section(text)
-
-    # Parse participants
     agents, agencies = parse_participants_section(text)
 
     return program_slug, domain_counts, principle_counts, unit, notes, agents, agencies
@@ -203,17 +165,10 @@ def generate_attestations_from_counts(
 ) -> list[dict[str, Any]]:
     """
     Generate attestations from domain and principle counts.
-    Following GGG_Methodology: all terms are used to sustain balance (no optional choices).
-    
-    Strategy:
-    - Each displacement incident (GTD, IVD, IAD, IID) generates one attestation (goes to ledger)
-    - Each alignment incident (GMT, ICV, IIA, ICI) is counted but doesn't generate ledger events
-    - Distribute incidents across domains proportionally based on domain_counts
-    - Use specified unit ("daily" or "sprint") for all attestations
+    Following GGG_Methodology: all terms are used to sustain balance.
     """
     attestations = []
 
-    # THM displacement mappings (these go to ledger)
     thm_displacement_map = {
         "GTD": "governance traceability displacement",
         "IVD": "information variety displacement",
@@ -221,7 +176,6 @@ def generate_attestations_from_counts(
         "IID": "intelligence integrity displacement",
     }
 
-    # Gyroscope alignment mappings (for reporting only, not ledger)
     gyro_alignment_map = {
         "GMT": "governance management traceability",
         "ICV": "information curation variety",
@@ -229,70 +183,50 @@ def generate_attestations_from_counts(
         "ICI": "intelligence cooperation integrity",
     }
 
-    # Calculate total domain count for proportional distribution
     total_domain_count = sum(domain_counts.values())
     domains = ["economy", "employment", "education"]
 
-    # Build proportional distribution weights (following GGG balance principle)
-    # All domains with counts > 0 should be represented proportionally
     domain_weights = {}
     for domain in domains:
         domain_weights[domain] = domain_counts.get(domain, 0)
 
-    # If no domain counts specified, distribute evenly (all terms sustain balance)
     if total_domain_count == 0:
         for domain in domains:
-            domain_weights[domain] = 1  # Equal weight for all domains
+            domain_weights[domain] = 1
         total_domain_count = 3
 
-    # Helper function to select domain proportionally
     def select_domain_proportional(incident_idx: int, total_incidents: int) -> str:
-        """
-        Select domain proportionally based on domain_counts.
-        Uses deterministic distribution following GGG balance principle.
-        All terms are used to sustain balance - no arbitrary choices.
-        """
         if total_incidents == 0:
-            # Fallback to first domain with weight > 0
             for domain in domains:
                 if domain_weights[domain] > 0:
                     return domain
             return domains[0]
 
-        # Calculate cumulative weights for proportional distribution
         cumulative = 0
         thresholds = []
         for domain in domains:
             cumulative += domain_weights[domain]
             thresholds.append((cumulative, domain))
 
-        # Deterministic proportional selection
-        # Map incident index to position in total domain space
         position = (incident_idx * total_domain_count) // total_incidents
         position = position % total_domain_count
 
-        # Find which domain this position falls into based on proportional weights
         for threshold, domain in thresholds:
             if position < threshold:
                 return domain
 
-        # Fallback to first domain with weight > 0
         for domain in domains:
             if domain_weights[domain] > 0:
                 return domain
         return domains[0]
 
-    # Generate attestations for displacement incidents (THM - goes to ledger)
-    # Following GGG: all terms are used to sustain balance
     att_idx = 0
     total_displacement_incidents = sum(principle_counts.get(abbrev, 0) for abbrev in thm_displacement_map.keys())
 
     for abbrev, full_name in thm_displacement_map.items():
         count = principle_counts.get(abbrev, 0)
         for i in range(count):
-            # Proportional distribution based on domain_counts (GGG balance)
             domain = select_domain_proportional(att_idx, total_displacement_incidents)
-
             attestations.append({
                 "id": f"{abbrev.lower()}_{i+1}",
                 "unit": unit,
@@ -301,17 +235,13 @@ def generate_attestations_from_counts(
             })
             att_idx += 1
 
-    # Generate attestations for alignment incidents (Gyroscope - reporting only)
-    # Following GGG: all terms are used to sustain balance
     total_alignment_incidents = sum(principle_counts.get(abbrev, 0) for abbrev in gyro_alignment_map.keys())
     alignment_att_idx = 0
 
     for abbrev, full_name in gyro_alignment_map.items():
         count = principle_counts.get(abbrev, 0)
         for i in range(count):
-            # Proportional distribution based on domain_counts (GGG balance)
             domain = select_domain_proportional(alignment_att_idx, total_alignment_incidents)
-
             attestations.append({
                 "id": f"{abbrev.lower()}_{i+1}",
                 "unit": unit,
@@ -331,17 +261,7 @@ def read_bytes(path: Path) -> bytes:
 
 
 def derive_domain_counts_from_events(events_path: Path) -> dict[str, int]:
-    """
-    Derive domain_counts from an events.jsonl file.
-    
-    Per GGG hierarchy:
-    - Economy = Kernel (structural substrate)
-    - Employment = Gyroscope (active work/principles)
-    - Education = THM (measurements/displacements)
-    
-    Returns dict with keys: "economy", "employment", "education"
-    If file doesn't exist or has no events, returns zeros.
-    """
+    """Derive domain_counts from an events.jsonl file."""
     from src.app.events import Domain
 
     counts = {
@@ -354,7 +274,6 @@ def derive_domain_counts_from_events(events_path: Path) -> dict[str, int]:
         return counts
 
     for ev_dict in read_events(events_path):
-        # Events are stored as GovernanceEvent.as_dict(), not wrapped
         domain_int = ev_dict.get("domain")
         if domain_int is not None:
             domain = Domain(domain_int)
@@ -389,18 +308,16 @@ def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
+def replay_from_logs(bytes_path: Path, events_path: Path):
     """Replay bytes + events from given file paths to reconstruct state."""
     from src.app.coordination import Coordinator
 
-    coord = Coordinator(atlas_dir)
+    coord = Coordinator()
 
-    # Replay bytes
     for b in read_bytes(bytes_path):
         coord.step_byte(b)
 
-    # Replay events
-    from src.tools.api import event_from_dict
+    from src.tools.main.api import event_from_dict
     for ev_dict in read_events(events_path):
         ev = event_from_dict(ev_dict)
         coord.apply_event(ev, bind_to_kernel_moment=False)
@@ -409,32 +326,24 @@ def replay_from_logs(atlas_dir: Path, bytes_path: Path, events_path: Path):
     return status
 
 
-def replay_program(atlas_dir: Path, program_slug: str):
+def replay_program(program_slug: str):
     """Replay bytes + events to reconstruct state for a program from .aci/ artifacts."""
     aci_dir = get_aci_dir()
     bytes_path = aci_dir / f"{program_slug}.bytes"
     events_path = aci_dir / f"{program_slug}.events.jsonl"
-    return replay_from_logs(atlas_dir, bytes_path, events_path)
+    return replay_from_logs(bytes_path, events_path)
 
 
-def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = None) -> Path:
+def bundle_program(program_md_path: Path, private_key: Any = None) -> Path:
     """
     Create a bundle for a program.
-    Takes the program markdown file path (filename can differ from program_slug).
     Returns path to the created bundle.
-    
-    Args:
-        atlas_dir: Atlas directory path
-        program_md_path: Program markdown file path
-        private_key: Optional Ed25519PrivateKey for signing the bundle (for accountability)
     """
     import zipfile
-    from datetime import datetime
 
     if not program_md_path.exists():
         raise FileNotFoundError(f"Program file not found: {program_md_path}")
 
-    # Read program_slug from markdown (bracket notation format)
     program_slug, _, _, _, _, _, _ = parse_program_from_markdown(program_md_path)
 
     aci_dir = get_aci_dir()
@@ -444,7 +353,6 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
     report_md_path = aci_dir / f"{program_slug}.report.md"
     id_path = aci_dir / f"{program_slug}.id"
 
-    # Require compiled artifacts (must come from sync_program, not created here)
     if not bytes_path.exists():
         raise FileNotFoundError(f"Missing compiled bytes: {bytes_path}")
     if not events_path.exists():
@@ -452,19 +360,15 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
     if not id_path.exists():
         raise FileNotFoundError(f"Missing program identity: {id_path}")
 
-    # Replay to get final state
-    status = replay_program(atlas_dir, program_slug)
+    status = replay_program(program_slug)
 
-    # Require report artifacts (must come from sync_program, not created here)
     if not report_json_path.exists():
         raise FileNotFoundError(f"Missing compiled report.json: {report_json_path}")
     if not report_md_path.exists():
         raise FileNotFoundError(f"Missing compiled report.md: {report_md_path}")
 
-    # Read program_id value (for bundle manifest)
     program_id_value = id_path.read_text(encoding="utf-8").strip()
 
-    # Compute hashes
     bytes_hash = file_sha256(bytes_path)
     events_hash = file_sha256(events_path)
     program_hash = file_sha256(program_md_path)
@@ -472,7 +376,6 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
     report_md_hash = file_sha256(report_md_path)
     program_id_hash = file_sha256(id_path)
 
-    # Compute ecology hashes (if files exist)
     grants_path = aci_dir / f"{program_slug}.grants.jsonl"
     shells_path = aci_dir / f"{program_slug}.shells.jsonl"
     archive_path = aci_dir / f"{program_slug}.archive.json"
@@ -480,12 +383,11 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
     shells_hash = file_sha256(shells_path) if shells_path.exists() else ""
     archive_hash = file_sha256(archive_path) if archive_path.exists() else ""
 
-    # Get meta_root from shells if they exist
     meta_root = ""
     if shells_path.exists():
         try:
             from src.app.coordination import Coordinator
-            coord_temp = Coordinator(atlas_dir)
+            coord_temp = Coordinator()
             shells_data = []
             with open(shells_path, encoding="utf-8") as f:
                 for line in f:
@@ -498,7 +400,6 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
         except Exception:
             pass
 
-    # Build bundle.json
     bundle_data = {
         "program_slug": program_slug,
         "program_id": program_id_value,
@@ -506,7 +407,7 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
         "generated_at": datetime.utcnow().isoformat() + "Z",
         "kernel": {
             "step": status.kernel["step"],
-            "state_index": status.kernel["state_index"],
+            "state24": status.kernel["state24"],
             "state_hex": status.kernel["state_hex"],
             "a_hex": status.kernel["a_hex"],
             "b_hex": status.kernel["b_hex"],
@@ -529,7 +430,6 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
         },
     }
 
-    # Add ecology section if files exist
     if grants_hash or shells_hash or archive_hash:
         bundle_data["ecology"] = {
             "grants_sha256": grants_hash,
@@ -538,47 +438,33 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
             "meta_root": meta_root,
         }
 
-    # Serialize bundle_data to JSON bytes (without signature fields)
     bundle_json_bytes = json.dumps(bundle_data, indent=2).encode("utf-8")
 
-    # Sign bundle if private_key is provided
     if private_key is not None:
         from src.app.coordination import Coordinator
-        coord = Coordinator(atlas_dir)
+        coord = Coordinator()
         signature = coord.sign_bundle(bundle_json_bytes, private_key)
         signature_hex = signature.hex()
 
-        # Get public key for storage
         public_key = private_key.public_key()
         public_key_bytes = public_key.public_bytes_raw()
         public_key_hex = public_key_bytes.hex()
 
-        # Add signature fields to bundle_data
         bundle_data["signer_public_key"] = public_key_hex
         bundle_data["signature"] = signature_hex
 
-    # Bundle goes to bundles_dir/<program_slug>.zip
     bundles_dir = get_bundles_dir()
     bundles_dir.mkdir(parents=True, exist_ok=True)
     bundle_out = bundles_dir / f"{program_slug}.zip"
 
-    # Create zip file
     with zipfile.ZipFile(bundle_out, "w", zipfile.ZIP_DEFLATED) as zf:
-        # Add program.md
         zf.write(program_md_path, "program.md")
-
-        # Add bytes and events files
         zf.write(bytes_path, "bytes.bin")
         zf.write(events_path, "events.jsonl")
-
-        # Add reports (required)
         zf.write(report_json_path, "report.json")
         zf.write(report_md_path, "report.md")
-
-        # Add program identity file
         zf.write(id_path, "program.id")
 
-        # Add ecology files if they exist
         if grants_path.exists():
             zf.write(grants_path, "grants.jsonl")
         if shells_path.exists():
@@ -586,71 +472,63 @@ def bundle_program(atlas_dir: Path, program_md_path: Path, private_key: Any = No
         if archive_path.exists():
             zf.write(archive_path, "archive.json")
 
-        # Add bundle.json (with signature fields if signed)
         zf.writestr("bundle.json", json.dumps(bundle_data, indent=2))
 
     return bundle_out
 
 
-def verify_event_bindings(atlas_dir: Path, bytes_path: Path, events_path: Path) -> bool:
+def verify_event_bindings(bytes_path: Path, events_path: Path) -> bool:
     """
-    Verify that each event's kernel binding (kernel_step, kernel_state_index, kernel_last_byte)
+    Verify that each event's kernel binding (kernel_step, kernel_state24, kernel_last_byte)
     matches the actual kernel state at that point in the byte log.
-    
-    Returns True if all bindings are consistent and all events are checked, False otherwise.
-    """
-    from src.router.kernel import RouterKernel
 
-    # Create a fresh kernel to step through
-    kernel = RouterKernel(atlas_dir)
+    Returns True if all bindings are consistent, False otherwise.
+    """
+    from src.kernel import Gyroscopic
+
+    kernel = Gyroscopic()
     kernel.reset()
 
-    # Read all bytes and events
     byte_list = list(read_bytes(bytes_path))
     events_list = list(read_events(events_path))
 
     max_step = len(byte_list)
 
-    # Group events by step and validate step bounds early
     events_by_step: dict[int, list[dict[str, Any]]] = {}
     for ev in events_list:
         step = ev.get("kernel_step")
         if not isinstance(step, int):
             return False
-        # Reject steps outside valid range [1, max_step]
         if step < 1 or step > max_step:
             return False
         events_by_step.setdefault(step, []).append(ev)
 
-    # Step through bytes and check events at each step
     checked_events = 0
 
     for byte_val in byte_list:
         kernel.step_byte(byte_val)
         step = kernel.step
 
-        # Check events bound to this step
         for ev in events_by_step.get(step, []):
             if ev.get("kernel_step") != step:
                 return False
 
-            expected_state_index = ev.get("kernel_state_index")
+            expected_state24 = ev.get("kernel_state24")
             expected_last_byte = ev.get("kernel_last_byte")
-            if not isinstance(expected_state_index, int) or not isinstance(expected_last_byte, int):
+            if not isinstance(expected_state24, int) or not isinstance(expected_last_byte, int):
                 return False
 
-            if kernel.state_index != expected_state_index:
+            if kernel.state24 != expected_state24:
                 return False
             if kernel.last_byte != expected_last_byte:
                 return False
 
             checked_events += 1
 
-    # Ensure we checked every event in the file
     return checked_events == len(events_list)
 
 
-def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
+def verify_bundle(bundle_path: Path) -> bool:
     """
     Verify a bundle by replaying and checking hashes and state.
     Returns True if verification passes, False otherwise.
@@ -668,31 +546,26 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             with zipfile.ZipFile(bundle_path, "r") as zf:
                 zf.extractall(tmp_path)
 
-            # Read bundle.json
             bundle_json_path = tmp_path / "bundle.json"
             if not bundle_json_path.exists():
                 return False
 
             bundle_data = json.loads(bundle_json_path.read_text())
 
-            # Check required files
             bytes_file = tmp_path / "bytes.bin"
             events_file = tmp_path / "events.jsonl"
 
             if not bytes_file.exists() or not events_file.exists():
                 return False
 
-            # Verify event bindings (structural integrity check)
-            if not verify_event_bindings(atlas_dir, bytes_file, events_file):
+            if not verify_event_bindings(bytes_file, events_file):
                 return False
 
-            # Replay from bundle contents
-            status = replay_from_logs(atlas_dir, bytes_file, events_file)
+            status = replay_from_logs(bytes_file, events_file)
 
-            # Verify kernel signature (all fields: step, state_index, state_hex, a_hex, b_hex, last_byte)
             kernel_match = (
                 status.kernel.get("step") == bundle_data["kernel"].get("step")
-                and status.kernel["state_index"] == bundle_data["kernel"]["state_index"]
+                and status.kernel["state24"] == bundle_data["kernel"]["state24"]
                 and status.kernel["state_hex"] == bundle_data["kernel"]["state_hex"]
                 and status.kernel["a_hex"] == bundle_data["kernel"]["a_hex"]
                 and status.kernel["b_hex"] == bundle_data["kernel"]["b_hex"]
@@ -702,13 +575,11 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if not kernel_match:
                 return False
 
-            # Verify reports exist in bundle (required)
             report_json_file = tmp_path / "report.json"
             report_md_file = tmp_path / "report.md"
             if not report_json_file.exists() or not report_md_file.exists():
                 return False
 
-            # Verify report hashes
             report_json_hash = file_sha256(report_json_file)
             report_md_hash = file_sha256(report_md_file)
 
@@ -719,7 +590,6 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
                 if report_md_hash != bundle_data["logs"]["report_md_sha256"]:
                     return False
 
-            # Verify apertures
             apertures_match = (
                 abs(status.apertures["econ"] - bundle_data["apertures"]["economy"]) < 1e-6
                 and abs(status.apertures["emp"] - bundle_data["apertures"]["employment"]) < 1e-6
@@ -729,7 +599,6 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if not apertures_match:
                 return False
 
-            # Verify hashes
             bytes_hash = file_sha256(bytes_file)
             events_hash = file_sha256(events_file)
             program_md_file = tmp_path / "program.md"
@@ -743,12 +612,10 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if not hashes_match:
                 return False
 
-            # Verify program.md hash if present in bundle
             if "program_md_sha256" in bundle_data["logs"]:
                 if program_hash != bundle_data["logs"]["program_md_sha256"]:
                     return False
 
-            # Verify program.id (required, must exist and match value)
             program_id_file = tmp_path / "program.id"
             if not program_id_file.exists():
                 return False
@@ -757,44 +624,34 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
             if program_id_value != bundle_data.get("program_id", ""):
                 return False
 
-            # Verify program.id hash if present in bundle
             if "program_id_sha256" in bundle_data["logs"]:
                 program_id_hash = file_sha256(program_id_file)
                 if program_id_hash != bundle_data["logs"]["program_id_sha256"]:
                     return False
 
-            # Verify signature if present
             if "signature" in bundle_data and "signer_public_key" in bundle_data:
                 from src.app.coordination import Coordinator
 
-                # Extract signature fields
                 signature_hex = bundle_data.pop("signature")
                 public_key_hex = bundle_data.pop("signer_public_key")
 
-                # Reconstruct bundle_data without signature fields
                 bundle_json_bytes = json.dumps(bundle_data, indent=2).encode("utf-8")
 
-                # Reconstruct public key
                 public_key_bytes = bytes.fromhex(public_key_hex)
                 public_key = Ed25519PublicKey.from_public_bytes(public_key_bytes)
 
-                # Reconstruct signature
                 signature = bytes.fromhex(signature_hex)
 
-                # Verify signature
-                coord = Coordinator(atlas_dir)
+                coord = Coordinator()
                 if not coord.verify_bundle_signature(bundle_json_bytes, signature, public_key):
                     return False
 
-                # Restore signature fields (for backwards compatibility if needed)
                 bundle_data["signer_public_key"] = public_key_hex
                 bundle_data["signature"] = signature_hex
 
-            # Verify ecology artifacts if present
             if "ecology" in bundle_data:
                 ecology_data = bundle_data["ecology"]
 
-                # Check ecology files exist if hashes are present
                 grants_file = tmp_path / "grants.jsonl"
                 shells_file = tmp_path / "shells.jsonl"
                 archive_file = tmp_path / "archive.json"
@@ -820,14 +677,12 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
                     if archive_hash != ecology_data["archive_sha256"]:
                         return False
 
-                # Replay ecology ledger if files exist
                 if grants_file.exists() and shells_file.exists() and archive_file.exists():
                     from src.app.coordination import Coordinator
                     from src.app.events import Shell
 
-                    coord_eco = Coordinator(atlas_dir)
+                    coord_eco = Coordinator()
 
-                    # Read shells and verify seals
                     with open(shells_file, encoding="utf-8") as f:
                         shells_replayed = []
                         for line in f:
@@ -837,7 +692,6 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
                             shell_dict = json.loads(line)
                             shells_replayed.append(Shell(**shell_dict))
 
-                    # Verify meta_root if present
                     if "meta_root" in ecology_data and ecology_data["meta_root"]:
                         seals = [s.seal for s in shells_replayed]
                         expected_meta_root = coord_eco.meta_root_from_shell_seals(seals)
@@ -853,8 +707,6 @@ def verify_bundle(atlas_dir: Path, bundle_path: Path) -> bool:
 def ensure_program_id(program_slug: str) -> str:
     """
     Ensure program has a stable program_id stored in .aci/<slug>.id
-    If missing, generate one and persist it.
-    Returns the program_id.
     """
     import uuid
 
@@ -864,7 +716,6 @@ def ensure_program_id(program_slug: str) -> str:
     if id_path.exists():
         pid = id_path.read_text(encoding="utf-8").strip()
         if pid:
-            # Validate UUID format - raise error if invalid (don't silently regenerate)
             try:
                 uuid.UUID(pid)
                 return pid
@@ -874,76 +725,50 @@ def ensure_program_id(program_slug: str) -> str:
                     "Delete the file to regenerate, or fix the UUID manually."
                 )
 
-    # Generate new UUID
     new_id = str(uuid.uuid4())
-
-    # Persist
     aci_dir.mkdir(parents=True, exist_ok=True)
     id_path.write_text(new_id, encoding="utf-8")
 
     return new_id
 
 
-def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
+def sync_program(program_md_path: Path) -> dict[str, Any]:
     """
     Sync a program: parse attestations from program.md, compile kernel log and events.
     Returns summary dict with event_count, apertures, etc.
-    
-    Attestations are compiled into kernel facts which generate:
-    - Kernel log: append-only record of dimensionful transitions (daily/sprint units)
-    - Classification ledger: THM-only (for Hodge/aperture accounting)
-    - Gyroscope: counted in reports but NOT injected into ledger
-    - Report artifacts: .report.json and .report.md
-    
-    Format: Markdown body with bracket notation (GTD:[5], GMT:[3], etc.)
-    Following GGG methodology: all terms are used to sustain balance.
     """
     from src.app.coordination import Coordinator
-    from src.tools.frameworks import ToolContext, THMDisplacementTool
+    from src.tools.main.frameworks import ToolContext, THMDisplacementTool
 
-    # Parse from markdown body with bracket notation
     program_slug, domain_counts, principle_counts, unit, _, agents, agencies = parse_program_from_markdown(program_md_path)
 
-    # Check for empty program (all counts are 0)
     total_incidents = sum(principle_counts.values())
     total_domain_count = sum(domain_counts.values())
 
-    # Check for parsing warnings
     parse_warnings = []
     if total_incidents > 0 and total_domain_count == 0:
         parse_warnings.append("All domain counts are zero, but incidents are present. All incidents will be distributed evenly across domains.")
     if total_incidents == 0 and total_domain_count > 0:
         parse_warnings.append("Domain counts are present, but no incidents recorded. Program will have zero attestations.")
 
-    # Check for potential malformed template (all counts zero but file appears modified)
     if total_incidents == 0 and total_domain_count == 0:
         template_size = len(templates.PROGRAM_TEMPLATE_MD.encode("utf-8"))
         file_size = program_md_path.stat().st_size
         if file_size > template_size:
             parse_warnings.append("All counts parsed as zero, but program.md appears modified. Check that bracket notation is exact (e.g., 'Economy: [5]' not 'Economy: [ 5 ]' or 'Economy: [5] // comment').")
 
-    # Ensure program has stable ID (stored in .aci/<slug>.id)
     program_id = ensure_program_id(program_slug)
-
-    # Generate attestations from counts (following GGG balance principle)
     attestations = generate_attestations_from_counts(domain_counts, principle_counts, program_id, unit)
 
-    # Determine artifact paths in .aci/ directory
     aci_dir = get_aci_dir()
     bytes_path = aci_dir / f"{program_slug}.bytes"
     events_path = aci_dir / f"{program_slug}.events.jsonl"
     report_json_path = aci_dir / f"{program_slug}.report.json"
     report_md_path = aci_dir / f"{program_slug}.report.md"
 
-    # Initialise coordinator
-    coord = Coordinator(atlas_dir)
+    coord = Coordinator()
 
-    # Hash-based canonical bytes per attestation
     def canonical_unit_bytes(program_id: str, att_id: str, att_idx: int, unit: str) -> bytes:
-        """
-        Generate canonical bytes for an attestation using SHA-256 hash.
-        Seed format: AIR_AR_BYTES_V1|<program_id>|<attestation_id>|<attestation_index>|<unit>
-        """
         seed = f"AIR_AR_BYTES_V1|{program_id}|{att_id}|{att_idx}|{unit}".encode()
         digest = hashlib.sha256(seed).digest()
         if unit == "daily":
@@ -953,7 +778,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         return b""
 
     def unit_weight(unit: str) -> int:
-        """Return weight for a unit (for accounting/ledger)."""
         if unit == "daily":
             return 1
         elif unit == "sprint":
@@ -961,7 +785,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         else:
             raise ValueError(f"Unknown unit: {unit}")
 
-    # Mapping from full names to abbreviations for THM
     thm_map = {
         "governance traceability displacement": "GTD",
         "information variety displacement": "IVD",
@@ -969,7 +792,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         "intelligence integrity displacement": "IID",
     }
 
-    # Gyroscope categories (for accounting only, not ledger)
     gyro_categories = {
         "governance management traceability": "GMT",
         "information curation variety": "ICV",
@@ -977,11 +799,9 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         "intelligence cooperation integrity": "ICI",
     }
 
-    # Build bytes and events in exact order as stepping
     byte_log = bytearray()
     bound_events = []
 
-    # Accounting rollups (for reports)
     thm_counts = {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0}
     thm_by_domain = {"economy": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
                      "employment": {"GTD": 0, "IVD": 0, "IAD": 0, "IID": 0},
@@ -994,11 +814,8 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
     skipped_attestations = []
     processed_count = 0
 
-    # Process each attestation in order
     for att_idx, att in enumerate(attestations):
-        # Type guard: attestations from generate_attestations_from_counts are always dicts
-        # but we check for safety in case of future changes
-        if not isinstance(att, dict):  # type: ignore[redundant-expr]
+        if not isinstance(att, dict):
             skipped_attestations.append({"index": att_idx, "id": None, "reason": "not a dict"})
             continue
 
@@ -1015,23 +832,19 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
             skipped_attestations.append({"index": att_idx, "id": att_id or f"att_{att_idx}", "reason": f"invalid domain: {domain}"})
             continue
 
-        # Use stable attestation_id, fallback to generated ID
         if not att_id:
             att_id = f"att_{att_idx}"
             missing_ids.append({"index": att_idx, "generated_id": att_id})
 
         processed_count += 1
 
-        # Get canonical bytes for this attestation (hash-based)
         unit_bytes = canonical_unit_bytes(program_id, att_id, att_idx, unit)
-        unit_wt = unit_weight(unit)  # Weight for accounting/ledger
+        unit_wt = unit_weight(unit)
 
-        # Step kernel with these bytes in order
         for b in unit_bytes:
             coord.step_byte(b)
             byte_log.append(b)
 
-        # Extract stable identifiers for meta (not entire attestation)
         att_meta = {
             "attestation_id": att_id,
             "unit": unit,
@@ -1042,68 +855,52 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         if gyroscope_work:
             att_meta["gyroscope_work"] = gyroscope_work
 
-        # Process THM human_mark if provided (ONLY THM goes to ledger)
         if human_mark:
             thm_abbrev = thm_map.get(human_mark)
             if thm_abbrev:
-                # Count for accounting (weighted by unit)
                 thm_counts[thm_abbrev] += unit_wt
                 thm_by_domain[domain][thm_abbrev] += unit_wt
 
-                # Emit ledger event (THM-only) with weighted magnitude
-                # Note: domain in payload is ignored - THM tool always emits to EDUCATION domain
-                # This is kept for backward compatibility and accounting purposes
                 payload = {thm_abbrev: float(unit_wt), "confidence": 1.0}
 
                 tool = THMDisplacementTool()
                 ctx = ToolContext(meta=att_meta)
                 events = tool.emit_events(payload, ctx)
 
-                # Apply events immediately so they bind to the current kernel state
                 for event in events:
                     coord.apply_event(event, bind_to_kernel_moment=True)
                     if coord.event_log:
                         event_dict = coord.event_log[-1]["event"]
-                        # Strict check: event must have kernel binding fields
                         if event_dict.get("kernel_step") is None:
                             raise RuntimeError(f"Event missing kernel_step binding: {event_dict}")
-                        if event_dict.get("kernel_state_index") is None:
-                            raise RuntimeError(f"Event missing kernel_state_index binding: {event_dict}")
+                        if event_dict.get("kernel_state24") is None:
+                            raise RuntimeError(f"Event missing kernel_state24 binding: {event_dict}")
                         if event_dict.get("kernel_last_byte") is None:
                             raise RuntimeError(f"Event missing kernel_last_byte binding: {event_dict}")
                         bound_events.append(event_dict)
 
-        # Process Gyroscope work if provided (accounting only, NO ledger events)
         if gyroscope_work:
             gyro_abbrev = gyro_categories.get(gyroscope_work)
             if gyro_abbrev:
-                # Count for accounting (weighted by unit)
                 gyro_counts[gyro_abbrev] += unit_wt
                 gyro_by_domain[domain][gyro_abbrev] += unit_wt
-                # DO NOT emit ledger events - Gyroscope is for reports only
 
-    # Write bytes file (exact order as stepped)
     bytes_path.parent.mkdir(parents=True, exist_ok=True)
     bytes_path.write_bytes(bytes(byte_log))
 
-    # Write events.jsonl
     events_path.parent.mkdir(parents=True, exist_ok=True)
     with open(events_path, "w", encoding="utf-8") as f:
         for ev_dict in bound_events:
             f.write(json.dumps(ev_dict) + "\n")
 
-    # Get final status
     status = coord.get_status()
 
-    # Verify invariant: step == byte_log_len
     if status.kernel["step"] != status.kernel["byte_log_len"]:
         raise RuntimeError(f"Invariant violation: step ({status.kernel['step']}) != byte_log_len ({status.kernel['byte_log_len']})")
 
-    # Compute hashes
     bytes_hash = file_sha256(bytes_path)
     events_hash = file_sha256(events_path)
 
-    # Generate report
     report_data = {
         "program_slug": program_slug,
         "program_id": program_id,
@@ -1114,7 +911,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
             "byte_count": len(byte_log),
             "kernel": {
                 "step": status.kernel["step"],
-                "state_index": status.kernel["state_index"],
+                "state24": status.kernel["state24"],
                 "state_hex": status.kernel["state_hex"],
                 "a_hex": status.kernel["a_hex"],
                 "b_hex": status.kernel["b_hex"],
@@ -1152,16 +949,13 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         } if (missing_ids or total_incidents == 0 or parse_warnings) else {},
     }
 
-    # Write report.json
     report_json_path.parent.mkdir(parents=True, exist_ok=True)
     report_json_path.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
 
-    # Write ecology artifacts (grants, shells, archive)
     grants_path = aci_dir / f"{program_slug}.grants.jsonl"
     shells_path = aci_dir / f"{program_slug}.shells.jsonl"
     archive_path = aci_dir / f"{program_slug}.archive.json"
 
-    # Write grants.jsonl (one JSON object per Grant from all shells)
     grants_path.parent.mkdir(parents=True, exist_ok=True)
     with open(grants_path, "w", encoding="utf-8") as f:
         for shell, grants_list in coord.fiat_shell_grants_log:
@@ -1170,13 +964,11 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
                 grant_dict["shell_header"] = shell.header
                 f.write(json.dumps(grant_dict) + "\n")
 
-    # Write shells.jsonl (one JSON object per Shell)
     shells_path.parent.mkdir(parents=True, exist_ok=True)
     with open(shells_path, "w", encoding="utf-8") as f:
         for shell in coord.fiat_shell_log:
             f.write(json.dumps(shell.as_dict()) + "\n")
 
-    # Write archive.json (Archive summary)
     from src.app.events import Archive
     archive = Archive(
         per_identity_MU=coord.fiat_status()["per_identity_totals"],
@@ -1187,7 +979,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
     archive_path.parent.mkdir(parents=True, exist_ok=True)
     archive_path.write_text(json.dumps(archive.as_dict(), indent=2), encoding="utf-8")
 
-    # Write report.md
     report_md_lines = [
         f"# Program Report: {program_slug}",
         "",
@@ -1196,7 +987,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         "",
     ]
 
-    # Add participants section if present
     if agents or agencies:
         report_md_lines.extend([
             "## Participants",
@@ -1217,7 +1007,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
                 "",
             ])
 
-    # Add common source consensus
     report_md_lines.extend([
         "## Common Source Consensus",
         "",
@@ -1234,7 +1023,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         f"- Skipped: {len(skipped_attestations)}",
         f"- Bytes: {len(byte_log)}",
         f"- Kernel step: {status.kernel['step']}",
-        f"- Kernel state: {status.kernel['state_hex']} (index {status.kernel['state_index']})",
+        f"- Kernel state: {status.kernel['state_hex']} (state24: 0x{status.kernel['state24']:06x})",
         f"- Last byte: 0x{status.kernel['last_byte']:02x}",
         "",
     ])
@@ -1264,7 +1053,6 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         "",
     ])
 
-    # Calculate distribution totals by domain
     for domain in ["economy", "employment", "education"]:
         domain_thm_total = sum(thm_by_domain[domain].values())
         domain_gyro_total = sum(gyro_by_domain[domain].values())
@@ -1301,8 +1089,7 @@ def sync_program(atlas_dir: Path, program_md_path: Path) -> dict[str, Any]:
         },
         "kernel": {
             "step": status.kernel["step"],
-            "state_index": status.kernel["state_index"],
+            "state24": status.kernel["state24"],
             "state_hex": status.kernel["state_hex"],
         },
     }
-

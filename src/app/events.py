@@ -1,13 +1,15 @@
 """
 App-layer event types.
 
-These are nonsemantic structural events that update per-domain K4 edge ledgers.
+These are application-layer structural events that update per-domain edge ledgers.
 
 Key design choices:
-- Edges are indexed in the canonical K₄ edge order (see System_Architecture.md Section 9.2):
+- Edges are indexed in the canonical K4 edge order:
   (0,1),(0,2),(0,3),(1,2),(1,3),(2,3)
   where vertices are (Gov, Info, Infer, Intel) by convention of CGM/GGG.
-- Events do NOT change kernel physics; they are ordered by kernel "shared moment".
+- Events do NOT change kernel physics; they are ordered by kernel shared moments.
+- The K4 geometry is an application-layer governance measurement construct.
+  It does not depend on kernel state bits.
 """
 
 from __future__ import annotations
@@ -35,7 +37,6 @@ class Vertex(IntEnum):
 
 
 class EdgeID(IntEnum):
-    # Must match src.router.constants.K4.edges ordering
     GOV_INFO = 0   # (0,1)
     GOV_INFER = 1  # (0,2)
     GOV_INTEL = 2  # (0,3)
@@ -49,7 +50,7 @@ class GovernanceEvent:
     """
     A single ledger update.
 
-    magnitude_micro: signed integer (actual magnitude × MICRO).
+    magnitude_micro: signed integer (actual magnitude * MICRO).
     confidence_micro: integer from 0 to MICRO (0.0 to 1.0, typically MICRO for full confidence).
     meta: optional JSON-like dict for audit/debug (nonsemantic).
     """
@@ -59,10 +60,10 @@ class GovernanceEvent:
     confidence_micro: int = MICRO
     meta: dict[str, Any] = field(default_factory=dict)
 
-    # Optional: bind the event to a kernel "moment" (step, state_index, last_byte)
+    # Optional: bind the event to a kernel shared moment (step, state24, last_byte)
     # so the event log can be replayed deterministically.
     kernel_step: int | None = None
-    kernel_state_index: int | None = None
+    kernel_state24: int | None = None
     kernel_last_byte: int | None = None
 
     def signed_value_micro(self) -> int:
@@ -77,7 +78,7 @@ class GovernanceEvent:
             "confidence_micro": int(self.confidence_micro),
             "meta": dict(self.meta),
             "kernel_step": self.kernel_step,
-            "kernel_state_index": self.kernel_state_index,
+            "kernel_state24": self.kernel_state24,
             "kernel_last_byte": self.kernel_last_byte,
         }
 
@@ -85,8 +86,8 @@ class GovernanceEvent:
 @dataclass(frozen=True)
 class Grant:
     """
-    Fiat substrate grant: MU allocation to an identity in a Shell.
-    
+    Moment-Unit grant: MU allocation to an identity in a Shell.
+
     Fields:
     - identity: human-readable label (external identifier)
     - identity_id: SHA-256 hex (64 chars) - collision-resistant key
@@ -110,12 +111,12 @@ class Grant:
 @dataclass(frozen=True)
 class Shell:
     """
-    Fiat substrate Shell: time-bounded capacity window committed by the kernel.
-    
+    Shell: time-bounded capacity window committed by the kernel.
+
     Fields:
-    - header: contextual label (e.g. b"ecology:year:2026" as str)
-    - seal: kernel state_hex of (header || sorted receipts)
-    - total_capacity_MU: MU capacity available in this Shell (from physics)
+    - header: contextual label (e.g. "ecology:year:2026")
+    - seal: Router state_hex of (header || sorted receipts)
+    - total_capacity_MU: MU capacity available in this Shell
     - used_capacity_MU: sum of all MU allocations in Grants
     - free_capacity_MU: remaining MU capacity (total - used)
     """
@@ -138,8 +139,8 @@ class Shell:
 @dataclass(frozen=True)
 class Archive:
     """
-    Fiat substrate Archive: accumulated capacity allocations across Shells.
-    
+    Archive: accumulated capacity allocations across Shells.
+
     Fields:
     - per_identity_MU: total MU allocated per identity across all Shells
     - total_capacity_MU: sum of capacities in all Shells

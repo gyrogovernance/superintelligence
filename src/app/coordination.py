@@ -1,8 +1,6 @@
 """
 Coordinator: Kernel + App ledgers + tools.
 
-This is the "spine" that a future UI (React, CLI, etc.) will call.
-
 Responsibilities:
 - advance kernel state (shared moment) by bytes
 - accept governance events from tools/app
@@ -15,7 +13,6 @@ from __future__ import annotations
 import hashlib
 import math
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 try:
@@ -27,7 +24,7 @@ except ImportError:
     Ed25519PrivateKey = None  # type: ignore
     Ed25519PublicKey = None  # type: ignore
 
-from src.router.kernel import RouterKernel
+from src.kernel import Gyroscopic
 
 from .events import MICRO, Domain, EdgeID, GovernanceEvent, Grant, Shell
 from .ledger import DomainLedgers
@@ -42,22 +39,19 @@ class CoordinationStatus:
 
 
 # CSM (Common Source Moment) capacity constants
-# These are the canonical capacity standard derived from physics + Router structure
-# Proven in tests/test_moments_2.py
-
 # SI second definition: caesium-133 hyperfine transition frequency
 ATOMIC_HZ_CS133: int = 9_192_631_770
 
-# Router ontology size (proven as C x C where |C| = 256)
-OMEGA_SIZE: int = 65_536
+# Router reachable shared-moment space (BFS-verified from rest state)
+OMEGA_SIZE: int = 4_096
 
 
 def raw_microcells_per_moment() -> float:
     """
     N_phys = (4/3)pi f_Cs^3
-    
-    Raw physical microcells in 1-second light-sphere volume at atomic wavelength resolution.
-    The speed of light cancels exactly (proven in test_moments_2.py).
+
+    Raw physical microcells in 1-second light-sphere volume at atomic
+    wavelength resolution. The speed of light cancels exactly.
     """
     f = ATOMIC_HZ_CS133
     return (4.0 / 3.0) * math.pi * (f ** 3)
@@ -66,43 +60,29 @@ def raw_microcells_per_moment() -> float:
 def csm_total_mu() -> float:
     """
     CSM = N_phys / |Omega|
-    
+
     Total Common Source Moment capacity in MU.
-    
-    This is the TOTAL structural capacity, derived from the volume of a 1-second 
-    light-sphere at atomic resolution (N_phys), coarse-grained by the Router 
-    ontology size (|Omega| = 65,536).
-    
-    The "1 second" is consumed in the derivation of N_phys; CSM is not a rate 
-    and does not accumulate over time. It is a fixed total capacity.
-    
-    The uniform division by |Omega| is forced by symmetry: the Router's transitive 
-    group action plus physical isotropy of the light-sphere require uniform 
-    coarse-graining. This is the unique symmetry-invariant measure (proven in 
-    test_moments_2.py).
+    |Omega| = 4,096 (BFS-verified reachable shared-moment space).
     """
     return raw_microcells_per_moment() / float(OMEGA_SIZE)
 
 
-
-
 class Coordinator:
-    def __init__(self, atlas_dir: Path) -> None:
-        self.atlas_dir = atlas_dir
-        self.kernel = RouterKernel(atlas_dir)
+    def __init__(self) -> None:
+        self.kernel = Gyroscopic()
         self.ledgers = DomainLedgers()
 
-        # Audit logs (kept simple; you can persist externally)
+        # Audit logs
         self.byte_log: list[int] = []
         self.event_log: list[dict[str, Any]] = []
 
-        # Fiat substrate state
-        self.sealer = RouterKernel(atlas_dir)
+        # Settlement medium state
+        self.sealer = Gyroscopic()
         self.fiat_grants_current: dict[str, Grant] = {}  # key = identity_id
         self.fiat_shell_log: list[Shell] = []
         self.fiat_shell_grants_log: list[tuple[Shell, list[Grant]]] = []
-        self.fiat_archive_totals: dict[str, int] = {}  # key = identity_id (collision-resistant)
-        self.fiat_identity_id_to_identity: dict[str, str] = {}  # identity_id -> last seen identity label (for reporting)
+        self.fiat_archive_totals: dict[str, int] = {}  # key = identity_id
+        self.fiat_identity_id_to_identity: dict[str, str] = {}
         self.fiat_used_total: int = 0
         self.fiat_capacity_total: int = 0
 
@@ -112,8 +92,7 @@ class Coordinator:
     def step_byte(self, byte: int, emit_system_event: bool = True) -> None:
         """
         Step the kernel by one byte.
-        
-        Per GGG hierarchy: Kernel = Economy domain (structural substrate).
+
         If emit_system_event is True, emits a small Economy domain event
         representing the structural change.
         """
@@ -121,14 +100,11 @@ class Coordinator:
         self.kernel.step_byte(b)
         self.byte_log.append(b)
 
-        # Emit Economy domain event for kernel structural activity
         if emit_system_event:
-            # Small magnitude representing structural substrate evolution
-            # Using GOV_INFO edge as primary structural coupling
             system_event = GovernanceEvent(
                 domain=Domain.ECONOMY,
                 edge_id=EdgeID.GOV_INFO,
-                magnitude_micro=int(0.01 * MICRO),  # Small structural change per byte
+                magnitude_micro=int(0.01 * MICRO),
                 confidence_micro=MICRO,
                 meta={"type": "kernel_step", "byte": b},
             )
@@ -144,7 +120,7 @@ class Coordinator:
     def apply_event(self, ev: GovernanceEvent, bind_to_kernel_moment: bool = True) -> None:
         """
         Apply governance event to the appropriate domain ledger.
-        Optionally bind it to the current kernel moment for replay.
+        Optionally bind it to the current kernel shared moment for replay.
         """
         if bind_to_kernel_moment:
             ev = GovernanceEvent(
@@ -152,10 +128,10 @@ class Coordinator:
                 edge_id=ev.edge_id,
                 magnitude_micro=ev.magnitude_micro,
                 confidence_micro=ev.confidence_micro,
-                meta=dict(ev.meta),  # Copy dict to preserve audit trail immutability
+                meta=dict(ev.meta),
                 kernel_step=self.kernel.step,
-                kernel_state_index=int(self.kernel.state_index[0]),
-                kernel_last_byte=int(self.kernel.last_byte[0]),
+                kernel_state24=self.kernel.state24,
+                kernel_last_byte=int(self.kernel.last_byte),
             )
 
         self.ledgers.apply_event(ev)
@@ -164,7 +140,7 @@ class Coordinator:
             {
                 "event_index": len(self.event_log),
                 "kernel_step": ev.kernel_step,
-                "kernel_state_index": ev.kernel_state_index,
+                "kernel_state24": ev.kernel_state24,
                 "kernel_last_byte": ev.kernel_last_byte,
                 "event": ev.as_dict(),
             }
@@ -178,11 +154,11 @@ class Coordinator:
 
         kernel_info = {
             "step": sig.step,
-            "state_index": sig.state_index,
+            "state24": sig.state24,
             "state_hex": sig.state_hex,
             "a_hex": sig.a_hex,
             "b_hex": sig.b_hex,
-            "last_byte": int(self.kernel.last_byte[0]),
+            "last_byte": int(self.kernel.last_byte),
             "byte_log_len": len(self.byte_log),
             "event_log_len": len(self.event_log),
         }
@@ -207,31 +183,23 @@ class Coordinator:
     def anchor_identity(self, name: str) -> tuple[str, str]:
         """
         Compute identity_id and anchor for an identity name.
-        
+
         Returns:
-            (identity_id, anchor) tuple where:
-            - identity_id: SHA-256 hex of identity seed (64 hex chars, collision-resistant)
-            - anchor: Router state_hex (6 hex chars, structural coordinate)
-        
-        The identity_id provides collision resistance (256 bits).
-        The anchor provides structural meaning in kernel phase space.
+            (identity_id, anchor) where:
+            - identity_id: SHA-256 hex of identity seed (64 hex chars)
+            - anchor: Router state_hex (6 hex chars)
         """
         seed = f"identity:{name}".encode()
         h = hashlib.sha256(seed).digest()
-        identity_id = h.hex()  # Full 256-bit hash (64 hex chars)
+        identity_id = h.hex()
         sig = self.sealer.route_from_archetype(h)
-        anchor = sig.state_hex  # Structural coordinate (6 hex chars)
+        anchor = sig.state_hex
         return identity_id, anchor
 
     def add_grant(self, identity: str, mu_allocated: int, header: bytes | str | None = None) -> None:
         """
         Add a grant to the current shell.
-        
-        Args:
-            identity: human-readable label
-            mu_allocated: MU allocated to this identity
-            header: optional header (unused for grant, kept for API compatibility)
-        
+
         Raises:
             ValueError: if mu_allocated < 0 or identity already has a grant
         """
@@ -248,14 +216,10 @@ class Coordinator:
     def close_shell(self, header: bytes | str, total_capacity_MU: int) -> Shell:
         """
         Close the current shell by building receipts and sealing.
-        
-        Args:
-            header: contextual label (e.g. b"ecology:year:2026")
-            total_capacity_MU: total MU capacity for this shell (for accounting purposes)
-        
+
         Returns:
             Shell object with seal and capacity metrics
-        
+
         Raises:
             ValueError: if used capacity exceeds total capacity
         """
@@ -266,8 +230,6 @@ class Coordinator:
             header_str = str(header)
             header_bytes = header_str.encode("utf-8")
 
-        # Build receipts by sorting grants by identity_id (canonical ordering)
-        # Receipt = identity_id (32 bytes) || anchor (3 bytes) || mu (8 bytes)
         grants_list = list(self.fiat_grants_current.values())
         receipts: list[bytes] = []
         for g in sorted(grants_list, key=lambda gg: gg.identity_id):
@@ -275,19 +237,16 @@ class Coordinator:
             receipt = bytes.fromhex(g.identity_id) + bytes.fromhex(g.anchor) + mu_bytes
             receipts.append(receipt)
 
-        # Route header || receipts through sealer
         payload = header_bytes + b"".join(receipts)
         sig = self.sealer.route_from_archetype(payload)
         seal = sig.state_hex
 
-        # Compute used/free capacity
         used = sum(g.mu_allocated for g in grants_list)
         free = total_capacity_MU - used
 
         if used > total_capacity_MU:
             raise ValueError(f"Used capacity {used} exceeds total capacity {total_capacity_MU}")
 
-        # Create shell
         shell = Shell(
             header=header_str,
             seal=seal,
@@ -296,7 +255,6 @@ class Coordinator:
             free_capacity_MU=free,
         )
 
-        # Update state
         self.fiat_shell_log.append(shell)
         self.fiat_shell_grants_log.append((shell, grants_list))
         self.fiat_capacity_total += total_capacity_MU
@@ -305,27 +263,12 @@ class Coordinator:
             self.fiat_archive_totals[g.identity_id] = self.fiat_archive_totals.get(g.identity_id, 0) + g.mu_allocated
             self.fiat_identity_id_to_identity[g.identity_id] = g.identity
 
-        # Clear current grants
         self.fiat_grants_current.clear()
 
         return shell
 
     def fiat_status(self) -> dict[str, Any]:
-        """
-        Return fiat substrate status.
-        
-        Returns dict with:
-        - current_shell_header: header of last shell (if any)
-        - pending_grants_count: number of grants in current shell
-        - last_shell_seal: seal of last shell (if any)
-        - total_capacity_MU: sum of all shell capacities
-        - used_capacity_MU: sum of all used capacities
-        - free_capacity_MU: remaining capacity
-        - shell_count: number of closed shells
-        - per_identity_totals: per-identity MU totals (maybe truncated)
-        - meta_root: optional meta-root from shell seals
-        """
-        # Derive per-identity totals from identity_id totals (for reporting)
+        """Return settlement medium status."""
         per_identity_totals: dict[str, int] = {}
         for identity_id, total in self.fiat_archive_totals.items():
             identity = self.fiat_identity_id_to_identity.get(identity_id, identity_id)
@@ -355,30 +298,19 @@ class Coordinator:
         return status
 
     def meta_root_from_shell_seals(self, seals: list[str]) -> str:
-        """
-        Compute meta-root from list of shell seals.
-        
-        Args:
-            seals: list of seal hex strings
-        
-        Returns:
-            meta-root state_hex (canonical ordering: seals are sorted)
-        """
+        """Compute meta-root from list of shell seals (sorted)."""
         seals_sorted = sorted(seals)
         seal_bytes = [bytes.fromhex(s) for s in seals_sorted]
         sig = self.sealer.route_from_archetype(b"".join(seal_bytes))
         return sig.state_hex
 
     def rollback_last_shell(self) -> None:
-        """
-        Rollback the last shell: remove it and reverse archive totals.
-        """
+        """Rollback the last shell: remove it and reverse archive totals."""
         if not self.fiat_shell_grants_log:
             raise ValueError("No shells to rollback")
 
         shell, grants = self.fiat_shell_grants_log.pop()
 
-        # Remove from visible log too (keep both in sync)
         assert self.fiat_shell_log and self.fiat_shell_log[-1].seal == shell.seal
         self.fiat_shell_log.pop()
 
@@ -395,13 +327,8 @@ class Coordinator:
                 self.fiat_archive_totals[g.identity_id] = new
 
     def rollback_kernel_steps(self, n: int) -> None:
-        """
-        Rollback n kernel steps using inverse stepping.
-        
-        Args:
-            n: number of steps to rollback
-        """
-        from src.router.constants import GENE_MIC_S
+        """Rollback n kernel steps using inverse stepping."""
+        from src.constants import GENE_MIC_S
 
         n = min(n, self.kernel.step)
         for _ in range(n):
@@ -409,20 +336,11 @@ class Coordinator:
                 break
             b = self.byte_log.pop()
             self.kernel.step_byte_inverse(b)
-        self.kernel.last_byte[:] = self.byte_log[-1] if self.byte_log else GENE_MIC_S
+        self.kernel.last_byte = self.byte_log[-1] if self.byte_log else GENE_MIC_S
         assert self.kernel.step == len(self.byte_log)
 
     def sign_bundle(self, bundle_json_bytes: bytes, private_key: Any) -> bytes:
-        """
-        Sign bundle JSON bytes using Ed25519.
-        
-        Args:
-            bundle_json_bytes: JSON bytes of bundle (without signature fields)
-            private_key: Ed25519PrivateKey instance
-            
-        Returns:
-            Signature bytes
-        """
+        """Sign bundle JSON bytes using Ed25519."""
         if Ed25519PrivateKey is None:
             raise ImportError("cryptography package required for bundle signing")
         if not isinstance(private_key, Ed25519PrivateKey):
@@ -432,17 +350,7 @@ class Coordinator:
         return private_key.sign(digest)
 
     def verify_bundle_signature(self, bundle_json_bytes: bytes, signature: bytes, public_key: Any) -> bool:
-        """
-        Verify bundle JSON bytes signature using Ed25519.
-        
-        Args:
-            bundle_json_bytes: JSON bytes of bundle (without signature fields)
-            signature: Signature bytes
-            public_key: Ed25519PublicKey instance
-            
-        Returns:
-            True if signature is valid, False otherwise
-        """
+        """Verify bundle JSON bytes signature using Ed25519."""
         if Ed25519PublicKey is None:
             raise ImportError("cryptography package required for bundle signature verification")
         if not isinstance(public_key, Ed25519PublicKey):
@@ -461,8 +369,7 @@ class Coordinator:
         self.byte_log.clear()
         self.event_log.clear()
 
-        # Reset fiat substrate
-        self.sealer = RouterKernel(self.atlas_dir)
+        self.sealer = Gyroscopic()
         self.fiat_grants_current.clear()
         self.fiat_shell_log.clear()
         self.fiat_shell_grants_log.clear()
@@ -472,16 +379,7 @@ class Coordinator:
         self.fiat_capacity_total = 0
 
     def derive_domain_counts(self) -> dict[str, int]:
-        """
-        Derive domain_counts from the event log.
-        
-        Per GGG hierarchy:
-        - Economy = Kernel (structural substrate)
-        - Employment = Gyroscope (active work/principles)
-        - Education = THM (measurements/displacements)
-        
-        Returns dict with keys: "economy", "employment", "education"
-        """
+        """Derive domain_counts from the event log."""
         counts = {
             "economy": 0,
             "employment": 0,

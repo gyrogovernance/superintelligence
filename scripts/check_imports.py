@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Check that all imports use src.router, not router.
+Check that all imports use src.kernel, not router.
 
 This script enforces consistent import namespace across the codebase.
 """
@@ -42,7 +42,7 @@ def check_imports(root_dir: Path) -> list[str]:
                     if re.search(pattern, line):
                         errors.append(
                             f"{py_file.relative_to(root_dir)}:{line_num}: "
-                            f"Found '{description}' - use 'src.router' instead"
+                            f"Found '{description}' - use 'src.kernel' instead"
                         )
         except Exception as e:
             errors.append(f"{py_file}: Error reading file: {e}")
@@ -57,16 +57,16 @@ def main():
     errors = check_imports(root_dir)
 
     if errors:
-        print("ERROR: Found imports using 'router' instead of 'src.router':")
+        print("ERROR: Found imports using 'router' instead of 'src.kernel':")
         print()
         for error in errors:
             print(f"  {error}")
         print()
-        print("All imports must use 'src.router', not 'router'.")
+        print("All imports must use 'src.kernel', not 'router'.")
         print("This ensures consistent namespace across all environments.")
         sys.exit(1)
     else:
-        print("✓ All imports use 'src.router' namespace (consistent)")
+        print("✓ All imports use 'src.kernel' namespace (consistent)")
         sys.exit(0)
 
 

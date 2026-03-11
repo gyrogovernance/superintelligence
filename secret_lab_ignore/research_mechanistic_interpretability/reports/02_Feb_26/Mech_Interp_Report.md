@@ -3,7 +3,7 @@
 **Date**: 2026-02-02  
 **Model**: OLMo-3-7B-Instruct  
 **Framework**: Common Governance Model (CGM)  
-**Kernel**: GGG ASI Alignment Router (Atlas v2.x: `ontology.npy`, `epistemology.npy`, `phenomenology.npz`)  
+**Kernel**: Gyroscopic ASI aQPU Kernel (Atlas v2.x: `ontology.npy`, `epistemology.npy`, `phenomenology.npz`)  
 
 **Scripts used**  
 - Prompt-based: `research_mechanistic_interpretability/Olmo-3-tests.py` (earlier phase)  

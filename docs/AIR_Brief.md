@@ -1,7 +1,7 @@
 # Alignment Infrastructure Routing - AIR Brief
 > Trustworthy Distributed Human Workforce Coordination for AI Safety
 
-AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by an ASI algorithm designed to route and amplify multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
+AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by the aQPU Kernel, a deterministic coordination system that routes and amplifies multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
 
 ***AI’s rapid growth requires more humans to ensure automation risks do not escalate to dangerous thresholds. At the same time, millions of people are underemployed or unemployed and at risk of poverty as automation concentrates power and weakens accountability.***
 
@@ -45,7 +45,7 @@ AIR produces three kinds of outputs that are useful immediately:
     
 3. **Attested work receipts**
     
-    Each contribution produces a verifiable receipt derived from the Router's shared coordination state. These receipts enable sponsors and fiscal hosts to reconstruct what happened in a project through deterministic replay, without relying on informal narratives.
+    Each contribution produces a verifiable receipt bound to the kernel's coordination state at that moment. These receipts enable sponsors and fiscal hosts to reconstruct what happened in a project through deterministic replay of the 4,096-state trajectory, without relying on informal narratives.
     
 
 ---
@@ -54,13 +54,19 @@ AIR produces three kinds of outputs that are useful immediately:
 
 Alignment Infrastructure Routing has three layers.
 
-### 1. Router
+### 1. aQPU Kernel
 
-The Router is the coordination backbone. It is a deterministic kernel that turns a project's activity log into a **non-commutative sequence of shared coordination states**.
+The aQPU Kernel is the coordination backbone. It provides a finite space of 4,096 reachable states that serve as universal coordination points for distributed work.
 
-A shared state (or "Moment") is a reproducible coordinate in the kernel's fixed state space. Because the kernel's transition logic is non-commutative, the **order of events matters**: two projects with the same total counts of deliverables but different execution sequences will follow different trajectories through the state space.
+A shared state (or "Moment") is a reproducible coordinate that any participant can compute from the same activity log. The kernel's algebraic structure ensures that event order matters: two projects with identical deliverable counts but different execution sequences follow different trajectories through the state space. This non-commutativity provides structural provenance—proving not only *what* was done, but *how* the governance process unfolded over time.
 
-This provides structural provenance. It proves not only *what* was done (the counts), but *how* the governance process unfolded over time. All participants with the same log prefix compute the exact same state, providing a stable, entity-agnostic reference for "This is where we stand structurally right now."
+The kernel provides several structural guarantees:
+
+- **Exact convergence:** Any two consecutive byte steps from the rest state distribute coordination positions exactly uniformly across all 4,096 reachable states, with each state receiving exactly 16 of the 65,536 possible two-byte words.
+- **Tamper detection:** The self-dual [12,6,2] code structure detects corruption in coordination logs with mathematical certainty, catching almost all substitutions and deletions at the algebraic level.
+- **Holographic verification:** The 64-state boundary horizons encode the full 4,096-state space, allowing efficient verification of large project histories through small boundary checks.
+
+All participants with the same log prefix compute the exact same state, providing a stable, entity-agnostic reference for "This is where we stand structurally right now."
 
 **Moments as Genealogical Markers**
 
@@ -68,7 +74,7 @@ A Moment is not merely a coordinate or timestamp. It is a genealogical marker th
 
 **Why Genealogical Encoding**
 
-The Router implements the same structural principle that makes genetic information trustworthy: the encoding of lineage into state. In biological systems, a gene expressed at different points in developmental history produces different outcomes, because the cellular context encodes the accumulated memory of prior states. Similarly, a governance event recorded at different points in a project's history produces different Moments, because the Moment encodes the accumulated memory of prior operations. This genealogical structure is not an arbitrary design choice. It is the minimal architecture that makes distributed coordination trustworthy without requiring centralised authority. A memory without lineage is a claim. A memory with lineage is evidence.
+The aQPU Kernel implements the same structural principle that makes genetic information trustworthy: the encoding of lineage into state. In biological systems, a gene expressed at different points in developmental history produces different outcomes, because the cellular context encodes the accumulated memory of prior states. Similarly, a governance event recorded at different points in a project's history produces different Moments, because the Moment encodes the accumulated memory of prior operations. This genealogical structure is not an arbitrary design choice. It is the minimal architecture that makes distributed coordination trustworthy without requiring centralised authority. A memory without lineage is a claim. A memory with lineage is evidence.
 
 ### 2. App
 
@@ -103,7 +109,7 @@ Tools are optional. The platform works if contributors submit outputs manually.
 Alignment Infrastructure Routing projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
 1. **AIR provides the technical infrastructure.**
-   This includes the Router, the App workflow, and optional Tools for tracking and verifying deliverables.
+   This includes the aQPU Kernel, the App workflow, and optional Tools for tracking and verifying deliverables.
 
 2. **A Project Sponsor administers funds.**
    The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains full authority over acceptance criteria and payment decisions.
@@ -230,7 +236,7 @@ In this tier, fiscal hosts are most useful, because they already have the legal 
 
 ## The Complete Framework
 
-Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **GGG ASI Alignment Router** for coordination and replay.
+Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **Gyroscopic ASI aQPU Kernel** for coordination and replay.
 
 **The Human Mark** is an epistemic taxonomy classifying contributions by the displacement risk they address:
 
@@ -241,15 +247,16 @@ Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy 
 
 This gives fiscal hosts and funders a portfolio view. They can see what kinds of risks are being addressed and where funding is concentrated or missing.
 
-### Core Engine: GGG ASI Alignment Router
+### Core Engine: Gyroscopic ASI aQPU Kernel
 
-The GGG ASI Alignment Router is a deterministic coordination kernel. It maps a shared log of activity into a sequence of shared coordination states that can be verified by replay.
+The Gyroscopic ASI aQPU Kernel is an algebraic quantum processing unit that provides deterministic coordination through a finite state space. It maps activity logs into sequences of verifiable coordination states.
 
-The Router provides:
+The aQPU Kernel provides:
 
-- **Shared moments:** All participants with the same log prefix compute the same coordination state.
-- **Deterministic replay:** Any party can reconstruct the full sequence of states from the log.
-- **Attested work receipts:** Contributions are bound to specific coordination states, enabling audit-grade verification.
+- **4,096 shared moments:** A complete finite universe of coordination states reachable from a universal rest state.
+- **Dual horizons:** 64-state equality and complement boundaries that encode provenance and chirality, enabling efficient verification of complex histories.
+- **Single-step hidden patterns:** The kernel reveals organisational symmetries and invariances in one computational step via its algebraic invariants, allowing fast detection of coordination patterns that would take extensive analysis in traditional systems.
+- **Exact replay:** Every coordination trajectory can be reconstructed forward or reversed algebraically from the activity log, so any party can verify the full sequence of states.
 
 ### Theoretical Foundation: Gyroscopic Global Governance
 
@@ -261,15 +268,16 @@ Alignment Infrastructure Routing is the operational expression of Gyroscopic Glo
 
 AIR is coordination infrastructure for work receipts, classification, and replayable audit.
 
-Acceptance criteria, evaluation standards, payment decisions, and all policy judgments remain the responsibility of project sponsors and accountable human governance. AIR provides the shared coordination substrate that makes contributions verifiable and comparable. It does not evaluate, score, or approve contributions.
+Acceptance criteria, evaluation standards, payment decisions, and all policy judgments remain the responsibility of project sponsors and accountable human governance. AIR provides the shared coordination medium that makes contributions verifiable and comparable. It does not evaluate, score, or approve contributions.
 
 ---
 
 ## Documentation & Links
 
-### Router Specification
-- [**GGG ASI Alignment Router — Kernel Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Specs.md) — Complete technical specification for implementation
-- [**Router Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/GGG_ASI_AR_Implications.md) — Use cases and deployment scenarios
+### aQPU Kernel Specification
+- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md) — Complete technical specification of the aQPU Kernel
+- [**aQPU Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md) — Use cases and deployment scenarios
+- [**aQPU Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports) — Test results confirming the kernel's algebraic quantum properties and computational advantages
 
 ### Classification Framework (The Human Mark)
 - [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md) — Core taxonomy of four displacement risks

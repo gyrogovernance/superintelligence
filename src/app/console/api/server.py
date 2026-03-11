@@ -44,10 +44,6 @@ def bundles_dir() -> Path:
     return store.get_bundles_dir()
 
 
-def atlas_dir() -> Path:
-    return store.get_atlas_dir()
-
-
 # Governance helpers
 def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
     """
@@ -60,15 +56,12 @@ def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
     bundle_path = bundles_dir() / f"{slug}.zip"
     report_path = aci_dir() / f"{slug}.report.json"
 
-    # Check if report exists (Local status minimum)
     if not report_path.exists():
         return ("Local", False, None)
 
-    # Report exists but no bundle yet
     if not bundle_path.exists():
         return ("Local", False, None)
 
-    # Check signature in bundle
     signed = False
     signer_fingerprint = None
 
@@ -85,10 +78,9 @@ def get_bundle_status(slug: str) -> tuple[str, bool, str | None]:
     except Exception:
         pass
 
-    # Check if bundle is verified (try verification)
     verified = False
     try:
-        verified = store.verify_bundle(atlas_dir(), bundle_path)
+        verified = store.verify_bundle(bundle_path)
     except Exception:
         pass
 
@@ -140,8 +132,6 @@ def get_ecology_data(slug: str) -> tuple[dict[str, Any] | None, list[dict[str, A
     """
     Get ecology data for a program.
     Returns: (archive_data, shells_list)
-    archive_data: Archive summary dict or None if no archive
-    shells_list: List of Shell dicts (empty if no shells)
     """
     archive_path = aci_dir() / f"{slug}.archive.json"
     shells_path = aci_dir() / f"{slug}.shells.jsonl"
@@ -192,7 +182,6 @@ def list_programs():
         if id_path.exists():
             program_id = id_path.read_text(encoding="utf-8").strip()
 
-        # Get governance flags
         status, signed, _ = get_bundle_status(slug)
         verified = (status == "Verified")
 
@@ -214,7 +203,6 @@ class CreateProgramRequest(BaseModel):
 def create_program(req: CreateProgramRequest):
     slug = req.slug.strip().lower()
 
-    # Validate slug
     if not re.match(r"^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$", slug):
         raise HTTPException(
             400, "Invalid slug. Use lowercase letters, numbers, and hyphens."
@@ -224,14 +212,11 @@ def create_program(req: CreateProgramRequest):
     if program_path.exists():
         raise HTTPException(400, "Program already exists.")
 
-    # Write template
     program_path.write_text(templates.PROGRAM_TEMPLATE_MD, encoding="utf-8")
 
-    # Generate ID
     program_id = store.ensure_program_id(slug)
 
-    # Sync to create initial artifacts
-    store.sync_program(atlas_dir(), program_path)
+    store.sync_program(program_path)
 
     return {"status": "created", "slug": slug, "program_id": program_id}
 
@@ -243,12 +228,10 @@ def get_program(slug: str):
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
 
-    # Parse editable fields from markdown
     parsed_slug, domain_counts, principle_counts, unit, notes, agents, agencies = (
         store.parse_program_from_markdown(program_path)
     )
 
-    # Check if we have event log (real mode) vs simulation mode
     events_path = aci_dir() / f"{slug}.events.jsonl"
     has_event_log = False
     if events_path.exists():
@@ -258,7 +241,6 @@ def get_program(slug: str):
             domain_counts = derived_counts
             has_event_log = True
 
-    # Read computed report
     report_path = aci_dir() / f"{slug}.report.json"
     report = None
     last_synced = None
@@ -267,11 +249,9 @@ def get_program(slug: str):
         mtime = report_path.stat().st_mtime
         last_synced = datetime.fromtimestamp(mtime).isoformat()
 
-    # Get governance status
     bundle_status, signed, signer_fingerprint = get_bundle_status(slug)
     verified = (bundle_status == "Verified")
 
-    # Get ecology data
     archive_data, shells_list = get_ecology_data(slug)
 
     ecology = None
@@ -295,7 +275,7 @@ def get_program(slug: str):
         },
         "report": report,
         "last_synced": last_synced,
-        "has_event_log": has_event_log,  # Flag for UI to show read-only mode
+        "has_event_log": has_event_log,
         "governance": {
             "status": bundle_status,
             "signed": signed,
@@ -341,7 +321,6 @@ def update_program(slug: str, req: UpdateProgramRequest):
 
     content = program_path.read_text(encoding="utf-8")
 
-    # Update domain counts
     content = re.sub(
         r"(Economy[^:]*:\s*)\[(\d+)\]",
         rf'\g<1>[{req.domain_counts.economy}]',
@@ -358,7 +337,6 @@ def update_program(slug: str, req: UpdateProgramRequest):
         content,
     )
 
-    # Update unit
     content = re.sub(
         r"(Unit:\s*)\[(daily|sprint)\]",
         rf"\g<1>[{req.unit}]",
@@ -366,13 +344,11 @@ def update_program(slug: str, req: UpdateProgramRequest):
         flags=re.IGNORECASE,
     )
 
-    # Update principle counts
     for abbrev in ["GMT", "GTD", "ICV", "IVD", "IIA", "IAD", "ICI", "IID"]:
         if abbrev in ["GMT", "ICV", "IIA", "ICI"]:
             pattern = rf"({abbrev}\s+Alignment\s+Incidents:\s*)\[(\d+)\]"
         else:
             pattern = rf"({abbrev}\s+Displacement\s+Incidents:\s*)\[(\d+)\]"
-        # Get value from Pydantic model using getattr
         value = getattr(req.principle_counts, abbrev)
         content = re.sub(
             pattern,
@@ -381,7 +357,6 @@ def update_program(slug: str, req: UpdateProgramRequest):
             flags=re.IGNORECASE,
         )
 
-    # Update participants (agents) section
     agents_pattern = r'(###\s+Agents\s*\n+)(.*?)(?=###|^##|\Z)'
     agents_content = req.agents if req.agents.strip() else "(Names of people involved in this program)"
     if re.search(agents_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
@@ -392,7 +367,6 @@ def update_program(slug: str, req: UpdateProgramRequest):
             flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
         )
 
-    # Update participants (agencies) section
     agencies_pattern = r'(###\s+Agencies\s*\n+)(.*?)(?=^##|\Z)'
     agencies_content = req.agencies if req.agencies.strip() else "(Names of agencies involved in this program)"
     if re.search(agencies_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
@@ -403,12 +377,9 @@ def update_program(slug: str, req: UpdateProgramRequest):
             flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
         )
 
-    # Update notes section
-    # Template format: ## NOTES on one line, --- on the next line
     notes_pattern = r'(^##\s+NOTES\s*\n---?\s*\n)(.*?)(?=^##|\Z)'
 
     if re.search(notes_pattern, content, re.MULTILINE | re.DOTALL | re.IGNORECASE):
-        # Replace existing NOTES section
         def replace_notes(match):
             if req.notes.strip():
                 return match.group(1) + req.notes + "\n"
@@ -421,18 +392,14 @@ def update_program(slug: str, req: UpdateProgramRequest):
             flags=re.MULTILINE | re.DOTALL | re.IGNORECASE,
         )
     else:
-        # Append NOTES section at the end
         notes_content = req.notes if req.notes.strip() else "(Add context or key observations for this program)"
         notes_section = f"\n\n## NOTES\n---\n\n{notes_content}\n"
         content = content.rstrip() + notes_section
 
-    # Write updated content
     program_path.write_text(content, encoding="utf-8")
 
-    # Sync immediately
-    store.sync_program(atlas_dir(), program_path)
+    store.sync_program(program_path)
 
-    # Return updated state
     return get_program(slug)
 
 
@@ -443,14 +410,11 @@ def sync_program_endpoint(slug: str):
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
 
-    # Sync the program
-    store.sync_program(atlas_dir(), program_path)
+    store.sync_program(program_path)
 
-    # Sign bundle if enabled
     if get_sign_bundle_on_sync():
         from cryptography.hazmat.primitives import serialization
 
-        # Try to load private key from config
         private_key = None
         config_path = aci_dir() / ".config.json"
         if config_path.exists():
@@ -464,13 +428,11 @@ def sync_program_endpoint(slug: str):
             except Exception:
                 pass
 
-        # Bundle will be signed if key is available
         try:
-            store.bundle_program(atlas_dir(), program_path, private_key)
+            store.bundle_program(program_path, private_key)
         except Exception:
             pass
 
-    # Return updated state
     return get_program(slug)
 
 
@@ -481,10 +443,8 @@ def delete_program(slug: str):
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
 
-    # Remove markdown
     program_path.unlink()
 
-    # Remove artifacts
     for ext in [
         ".bytes", ".events.jsonl", ".report.json", ".report.md", ".id",
         ".grants.jsonl", ".shells.jsonl", ".archive.json",
@@ -493,7 +453,6 @@ def delete_program(slug: str):
         if artifact.exists():
             artifact.unlink()
 
-    # Remove bundle
     bundle = bundles_dir() / f"{slug}.zip"
     if bundle.exists():
         bundle.unlink()
@@ -504,12 +463,10 @@ def delete_program(slug: str):
 # ---- Download Bundle ----
 @app.get("/api/programs/{slug}/bundle")
 def download_bundle(slug: str):
-    # Ensure bundle exists by creating it
     program_path = programs_dir() / f"{slug}.md"
     if not program_path.exists():
         raise HTTPException(404, "Program not found.")
 
-    # Create/update bundle (with signing if enabled)
     private_key = None
     if get_sign_bundle_on_sync():
         from cryptography.hazmat.primitives import serialization
@@ -527,7 +484,7 @@ def download_bundle(slug: str):
                 pass
 
     try:
-        store.bundle_program(atlas_dir(), program_path, private_key)
+        store.bundle_program(program_path, private_key)
     except FileNotFoundError as e:
         raise HTTPException(404, str(e))
 
@@ -548,7 +505,7 @@ def verify_bundle_endpoint(slug: str):
         raise HTTPException(404, "Bundle not found. Export a bundle first.")
 
     try:
-        verified = store.verify_bundle(atlas_dir(), bundle_path)
+        verified = store.verify_bundle(bundle_path)
         if verified:
             return {"status": "Verified", "verified": True}
         else:
@@ -584,7 +541,7 @@ def set_sign_bundle_on_sync_endpoint(req: SignBundleOnSyncRequest):
 # ---- Get Annual Capacity ----
 @app.get("/api/capacity/annual")
 def get_annual_capacity_endpoint():
-    """Get annual capacity in MU from physics constants."""
+    """Get total CSM capacity in MU (fixed total, not per year)."""
     return {"annual_capacity_MU": _get_annual_capacity()}
 
 
@@ -651,8 +608,6 @@ def get_glossary():
 
 
 # ---- Serve Static Files (for production) ----
-# Check if dist folder exists
 ui_dist = Path(__file__).parent.parent / "ui" / "dist"
 if ui_dist.exists():
     app.mount("/", StaticFiles(directory=str(ui_dist), html=True), name="static")
-

@@ -21,7 +21,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - **Gyroscopic Global Governance** provides the domain architecture. It applies the governance capacities across four coupled domains: economy, employment, education, and ecology.
 
-- The **GGG ASI Alignment Router** provides the coordination kernel. It is a deterministic finite-state system that routes coordination events through a closed space of possibilities, enabling replay and verification.
+- The **Gyroscopic ASI aQPU Kernel** provides the coordination kernel. It is a deterministic finite-state system that routes coordination events through a closed space of possibilities, enabling replay and verification.
 
 - The **Moments Economy** provides the economic architecture. It grounds capacity allocation in physical constants rather than institutional policy, and implements distribution through verifiable records.
 
@@ -88,7 +88,7 @@ Each of the four displacement risks identified by The Human Mark corresponds to 
 
 Gyroscopic Global Governance applies the four capacities across four coupled domains:
 
-- **Economy** concerns the allocation of resources and the settlement of value. It provides the material substrate for coordination.
+- **Economy** concerns the allocation of resources and the settlement of value. It provides the material medium for coordination.
 
 - **Employment** concerns human work and contribution. It is where the four capacities are actively maintained through labour.
 
@@ -106,60 +106,58 @@ AIR operates across all four domains. It provides the routing and recording mech
 
 AIR implements the canonical ontology through a set of concrete mechanisms. These mechanisms translate governance requirements into verifiable artefacts.
 
-#### 4.1 The Alignment Router
+#### 4.1 The Gyroscopic ASI Kernel
 
-At the core of AIR is the GGG ASI Alignment Router. This is a deterministic finite-state coordination kernel with the following properties:
+At the core of AIR is the Gyroscopic ASI aQPU Kernel. This is a deterministic finite-state coordination kernel with the following properties:
 
-- It represents coordination as a sequence of states within a closed space of exactly 65,536 possibilities.
+- It represents coordination as a sequence of states on a deterministic 24-bit carrier. From the rest condition, the shared-moment reachable space used operationally has 4,096 states, with two 64-state boundary horizons (the equality horizon where A = B, and the complement horizon where A = B XOR 0xFFF).
 - It updates its state in response to single-byte inputs, with 256 possible input values.
 - Given the same starting state and the same sequence of bytes, any conforming implementation will compute exactly the same trajectory of states.
-- Every transition is reversible: given a final state and the bytes that led to it, the direct state can be reconstructed.
+- Every transition is reversible: given a final state and the bytes that led to it, the predecessor state can be reconstructed.
 
-The router does not interpret what the input bytes mean. It applies fixed transformation rules to move from one state to another. This property is essential for governance. Because the router does not embed interpretation, it cannot introduce hidden bias or drift. Interpretation happens at the application layer, where it is visible and governable. The router provides a neutral substrate that records and routes without distortion.
+From any fixed state, the 256-byte alphabet produces 128 distinct next states with exact 2-to-1 multiplicity, reflecting the SO(3)/SU(2) double cover at the discrete level; full history is preserved byte-complete through replay.
+
+The router does not interpret what the input bytes mean. It applies fixed transformation rules to move from one state to another. This property is essential for governance. Because the router does not embed interpretation, it cannot introduce hidden bias or drift. Interpretation happens at the application layer, where it is visible and governable. The router provides a neutral medium that records and routes without distortion.
 
 In practical terms, the router provides a canonical coordination log. Each governance event corresponds to one or more bytes. The history of a project, organisation, or system corresponds to a sequence of bytes applied to the router. Anyone with access to that sequence can replay it from the starting state and arrive at exactly the same final state. This eliminates dependence on trusted intermediaries: verification is a matter of computation, not testimony.
 
+The kernel's coordination medium has structural properties that strengthen its governance role. The self-dual [12,6,2] mask code detects all odd-weight bit errors in states unconditionally, providing intrinsic tamper detection. From any starting state, two consecutive byte steps distribute the coordination state exactly uniformly across all 4,096 reachable states, ensuring rapid structural convergence without central orchestration. The kernel also supports a 6-bit chirality register that tracks structural divergence between parties through an exact transport law, enabling early detection of coordination drift before full state disagreement becomes visible.
+
 #### 4.2 Genealogies
 
-A **Genealogy** is the complete recorded history of coordination for an actor, project, or system. It consists of two parts:
-
-- A **byte log** recording each input applied to the router in sequence. This log is sufficient to reconstruct the exact trajectory of coordination states.
-
-- An **event log** recording application-level events such as model evaluations, human approvals, data transfers, or policy decisions. Each event can be bound to a specific router state, establishing precisely when it occurred in the coordination sequence.
+A **Genealogy** is a byte-complete replay record for an actor, project, or system. Its canonical kernel-native core is the byte log. Application-layer event logs may be bound to aQPU Kernel states or depth-4 frames, but they are not part of the kernel-native definition.
 
 Because the router is deterministic, the genealogy can be replayed at any time. An auditor, regulator, or third party can load the byte log, run it through a conforming router implementation, and verify that the claimed trajectory is accurate. The event log can then be checked against this trajectory to confirm that events are correctly bound.
 
+For stronger certification, genealogies SHOULD be segmented into depth-4 frames. Each frame yields a deterministic record (mask48, φ_a, φ_b). These frame records are strictly stronger than final-state-only certification, because different byte histories can collapse to the same final state while retaining different frame records.
+
 Genealogies replace informal histories and narrative accounts with replayable records. They are portable: any system running the same router implementation can load a genealogy and reproduce its coordination history. They are also durable: because they consist only of byte sequences and event records, they can be stored indefinitely and verified at any future time.
 
-When two parties share the same byte log prefix, they necessarily occupy the same router state. This provides a mechanism for coordination without centralised authority. Parties can verify that they are "at the same point" by comparing router states, without needing to trust a third party's claim about the current state of affairs.
+When two parties share the same byte-log prefix, they compute the same aQPU Kernel state and therefore share the same moment. When they diverge, frame comparison localizes the divergence to the affected 4-byte frame. This gives AIR both shared coordination and precise fork localization.
 
 #### 4.3 Physical Grounding of Capacity
 
 The Moments Economy grounds coordination capacity in physical constants rather than institutional policy. The foundation is the caesium-133 hyperfine transition frequency, which defines the SI second. This frequency establishes the finest temporal resolution at which coordination events can be physically distinguished.
 
-From this frequency, the framework derives a quantity called the **Common Source Moment**. This represents the total coordination capacity of a one-second causal region at atomic resolution, divided by the number of states in the router. The result is a fixed total capacity of approximately 4.96 times ten to the twenty-fifth power coordination moments.
+From this frequency, the framework derives a quantity called the **Common Source Moment**. This represents the total coordination capacity of a one-second causal region at atomic resolution, divided by the number of reachable states in the router. The result is a fixed total capacity of approximately 7.94 times ten to the twenty-sixth power coordination moments.
 
 This grounding matters because it removes capacity from institutional discretion. In conventional systems, the authority to issue currency or allocate resources rests with institutions whose decisions cannot be independently verified. In the Moments Economy, capacity is derived from physical constants that anyone can check. The total available capacity is fixed by physics, not policy.
 
-In practice, this capacity is inexhaustible on any human timescale. The Common Source Moment can support global distribution for billions of years. The constraint on governance is therefore not capacity but quality: whether coordination events are correctly classified, properly routed, and coherently integrated.
+In practice, this capacity is inexhaustible on any human timescale. The Common Source Moment can support global baseline distribution for approximately 1.12 trillion years at current population and base-rate assumptions. The constraint on governance is therefore not capacity but quality: whether coordination events are correctly classified, properly routed, and coherently integrated.
 
-#### 4.4 Domain Ledgers and Coherence Measurement
+#### 4.4 Shared Moments, Frame Commitments, and Divergence Detection
 
-For each of the three active domains (economy, employment, and education), AIR maintains a **domain ledger**. Each ledger is a six-component numerical record that tracks governance activity across the interactions between the four capacities.
+AIR uses three operational certification layers.
 
-The four capacities form the vertices of a complete graph on four points. This graph has six edges, each representing an interaction between two capacities. The domain ledger records activity along each of these edges. When a governance event occurs, it is classified according to which capacities it engages, and the corresponding ledger entries are updated.
+First, the aQPU Kernel state gives a shared moment for coordination. When two parties share the same byte-log prefix, they compute the same aQPU Kernel state and therefore share a structural "now."
 
-From each ledger, AIR computes a scalar quantity called **aperture**. Aperture is a ratio that measures the balance between two components of activity:
+Second, depth-4 frame records (mask48, φ_a, φ_b) give stronger provenance and exact divergence localization. Each frame is computed from four consecutive bytes and is deterministic. Different byte histories can collapse to the same final aQPU Kernel state, but they produce different frame records. Frame comparison localizes divergence to the affected 4-byte frame.
 
-- The **gradient component** represents activity that can be explained by a consistent configuration of the four capacities. It indicates coherent governance where the capacities are working together.
+Third, parity commitments provide compact algebraic integrity checks over longer trajectories. A trajectory parity commitment is a triple (O, E, parity), where O and E are 12-bit XOR sums of masks at even and odd byte positions, and parity is the trajectory length modulo 2.
 
-- The **cycle component** represents activity that circulates locally without resolving into a consistent global pattern. It indicates unresolved tensions or conflicts between capacities.
+These layers are replayable from the byte log and do not require an external ledger geometry to operate. Because each certification layer is computed from exact integer arithmetic on the byte log, verification is portable across implementations and platforms without numerical precision concerns.
 
-Aperture is the proportion of total activity that lies in the cycle component. The Common Governance Model identifies a specific aperture value (approximately 0.0207) at which governance is optimally balanced: coherent enough to maintain direction, but flexible enough to adapt to local conditions. Deviation from this value indicates that governance is either too rigid (low aperture) or too fragmented (high aperture).
-
-In practical terms, aperture functions as a quality metric. Organisations can track aperture over time to detect drift. Auditors can compare aperture across projects to identify which are well-governed and which show signs of degradation. The metric is computed from the ledger, which is derived from the genealogy, which is replayable from the byte log. The entire chain is verifiable.
-
-Ecology does not maintain its own ledger. Instead, it is computed from the combined state of the three domain ledgers. It measures how the cycles of different domains interact: whether they reinforce coherence or amplify conflict. Ecology thus provides a system-level view of governance quality.
+The four-domain AIR organisation remains valid, but AIR no longer depends on an externally imposed K₄ measurement layer or aperture computation for operational verification.
 
 #### 4.5 Classification Protocols
 
@@ -183,11 +181,11 @@ Every contribution can be classified according to which of these capacities it s
 
 For economic and resource allocations, AIR uses three constructs:
 
-A **Grant** is a record of a single allocation: a payment, a capacity assignment, or a resource transfer. It includes the identity of the recipient (linked to a router state via an identity anchor), the quantity allocated, and the genealogical binding that establishes when the allocation occurred.
+A **Grant** is a record of a single allocation: a payment, a capacity assignment, or a resource transfer. It includes the identity of the recipient (linked to a router state via an identity anchor), the quantity allocated, and the genealogical binding that establishes when the allocation occurred. In canonical serialization, a Grant receipt is encoded as identity_id || kernel_anchor || amount_mu.
 
-A **Shell** is a container that groups grants over a defined scope, such as a time period or a programme. It carries a cryptographic seal computed by routing its contents through the alignment router. This seal binds the shell to a specific coordination state, making it tamper-evident. Anyone can verify a shell by replaying its contents and checking that the computed seal matches.
+A **Shell** is a container that groups grants over a defined scope, such as a time period or a programme. It carries a cryptographic seal computed by routing its contents through the alignment router. This seal binds the shell to a specific coordination state, making it tamper-evident. Anyone can verify a shell by replaying its contents and checking that the computed seal matches. Shell seals are computed over canonically sorted Grant receipts. Grant insertion order does not affect the seal.
 
-A **Moment** is a complete snapshot of governance state at a point in a genealogy. It includes the router state, the domain ledgers, and the derived metrics including aperture and ecology. Moments provide reference points for auditing and comparison.
+A **Moment** is a reproducible aQPU Kernel state at a specific byte-log prefix. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. Moments are the shared temporal anchors of AIR replay.
 
 These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moments provide anchors for before-and-after comparisons. The entire system operates without requiring trust in any particular institution: verification is computational.
 
@@ -195,7 +193,7 @@ These constructs enable verifiable settlement. Payments can be traced through ge
 
 ### 5. Relation to Existing Standards and Regulations
 
-AIR does not replace existing standards for quality, security, or risk management. It provides a substrate that makes compliance with such standards verifiable rather than merely procedural.
+AIR does not replace existing standards for quality, security, or risk management. It provides a medium that makes compliance with such standards verifiable rather than merely procedural.
 
 Consider the difference between procedural and verifiable compliance:
 
@@ -207,9 +205,9 @@ AIR enables the second form. By routing governance events through the alignment 
 
 Examples of how AIR supports specific standards:
 
-**Quality management (such as ISO 9001):** The standard requires documented processes and evidence of their execution. AIR provides genealogies that record exactly how processes ran, not just how they were specified. Aperture metrics provide quantitative evidence of governance quality over time.
+**Quality management (such as ISO 9001):** The standard requires documented processes and evidence of their execution. AIR provides genealogies that record exactly how processes ran, not just how they were specified. Replayable genealogies, deterministic shell seals, and frame-level divergence localization provide quantitative and inspectable evidence of governance process integrity over time.
 
-**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. The closed router state space means that any invalid state can be immediately identified.
+**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. A claimed state, seal, or history can be independently checked by replay from rest under the public transition law and canonical serialization rules.
 
 **Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear classification of Direct and Indirect sources through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
 
@@ -253,11 +251,11 @@ AIR is a general framework applicable wherever human and artificial systems must
 
 AIR is designed for organisations that deploy or regulate artificial intelligence and that need governance to be demonstrable rather than merely claimed. Adoption can proceed incrementally.
 
-**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track aperture over time. Publish shells and genealogies for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
+**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track replayable genealogies, shell seals, and frame commitments over time. Publish shells and genealogies for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
 
-**For regulators and auditors:** Request genealogies from regulated organisations. Replay them using conforming router implementations. Verify that classifications are consistent with claims. Compare aperture across organisations to identify outliers. This shifts regulatory practice from reviewing documents to verifying computations.
+**For regulators and auditors:** Request genealogies from regulated organisations. Replay them using conforming router implementations. Verify that classifications are consistent with claims. Compare replay integrity, shell verification results, and frame-localized divergences across organisations to identify outliers. This shifts regulatory practice from reviewing documents to verifying computations.
 
-**For researchers and developers:** Extend the framework to new domains. Develop tools for genealogy analysis. Investigate the relationship between aperture and governance outcomes. Contribute to the open specifications.
+**For researchers and developers:** Extend the framework to new domains. Develop tools for genealogy analysis. Investigate the relationship between coordination structure and governance outcomes. Contribute to the open specifications.
 
 The technical specifications for all components are published through the Gyro Governance repository. The alignment router specification, The Human Mark classification system, the Gyroscope Protocol, and the Moments Economy architecture are documented in detail. Reference implementations are available for testing and integration.
 
@@ -269,6 +267,8 @@ The integration of artificial intelligence into institutions and infrastructure 
 
 Alignment Infrastructure Routing addresses this challenge by treating governance as logistics. It provides the routing kernel, the classification protocols, the recording mechanisms, and the verification procedures necessary to make the movement of information and authority visible and auditable. By grounding capacity in physical constants and recording events in replayable genealogies, it removes dependence on institutional trust and enables verification by computation.
 
-The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that their information sources are correctly classified, that their coordination maintains coherence, and that their claims about compliance can be independently verified.
+The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that their information sources are correctly classified, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
+
+In AIR, replayable byte logs establish shared moments, and depth-4 frame commitments provide the stronger provenance needed when final-state agreement alone is insufficient.
 
 In this way, AIR provides the logistical infrastructure for artificial intelligence governance: the rigorous planning, tracking, and verification that allows complex systems to operate transparently and accountably.

@@ -1,8 +1,8 @@
 """
 Shared utility functions for physics tests.
 
-This module centralizes common helpers used across test_physics_2.py and test_physics_3.py
-to reduce duplication and improve maintainability.
+Popcount, weight enumerators, polynomial convolve, Krawtchouk, etc.
+Legacy Omega/atlas helpers moved to tests._research_utils.
 """
 
 from __future__ import annotations
@@ -11,8 +11,6 @@ from math import comb
 
 import numpy as np
 from numpy.typing import NDArray
-
-from src.router.constants import ARCHETYPE_A12, ARCHETYPE_B12
 
 # Popcount and parity LUTs for 12-bit values
 _POP12 = np.array([bin(i).count("1") for i in range(4096)], dtype=np.uint8)
@@ -47,76 +45,6 @@ def weight_enumerator_counts(codewords12: NDArray[np.uint16]) -> NDArray[np.int6
     return counts
 
 
-def cycle_lengths_of_permutation(perm: NDArray[np.int64]) -> list[int]:
-    """
-    Return sorted list of cycle lengths for a permutation.
-
-    Perm must be an array of shape (n,) of indices.
-    """
-    n = int(perm.size)
-    visited = np.zeros(n, dtype=np.bool_)
-    lengths: list[int] = []
-    for start in range(n):
-        if visited[start]:
-            continue
-        length = 0
-        idx = start
-        while not visited[idx]:
-            visited[idx] = True
-            idx = int(perm[idx])
-            length += 1
-        lengths.append(length)
-    return sorted(lengths, reverse=True)
-
-
-def uv_from_state24(state24: int) -> tuple[int, int]:
-    """Extract (u,v) coordinates from a 24-bit state."""
-    a = (int(state24) >> 12) & 0xFFF
-    b = int(state24) & 0xFFF
-    u = a ^ ARCHETYPE_A12
-    v = b ^ ARCHETYPE_B12
-    return u & 0xFFF, v & 0xFFF
-
-
-def apply_word_to_indices(epi: NDArray[np.uint32], idxs: NDArray[np.int64], bytes_seq: list[int]) -> NDArray[np.int64]:
-    """
-    Apply a byte word to state indices using epistemology.
-
-    Equivalent to compose_epi but with different naming convention.
-    """
-    cur = idxs
-    for b in bytes_seq:
-        cur = epi[cur, int(b) & 0xFF].astype(np.int64)
-    return cur
-
-
-def compose_epi(epi: NDArray[np.uint32], idxs: NDArray[np.int64], bytes_seq: list[int]) -> NDArray[np.int64]:
-    """
-    Compose atlas transitions using epistemology.
-
-    Alias for apply_word_to_indices (kept for backward compatibility).
-    """
-    return apply_word_to_indices(epi, idxs, bytes_seq)
-
-
-def word_odd_even_xors(bytes_seq: list[int], masks_a12: NDArray[np.uint16]) -> tuple[int, int, int]:
-    """
-    Return (parity, O, E) for a byte sequence:
-      O = XOR of masks at odd positions (1-indexed): 1,3,5,...
-      E = XOR of masks at even positions (1-indexed): 2,4,6,...
-      parity = len(seq) mod 2
-    """
-    O = 0
-    E = 0
-    for i, b in enumerate(bytes_seq):
-        m = int(masks_a12[int(b) & 0xFF])
-        if (i % 2) == 0:
-            O ^= m
-        else:
-            E ^= m
-    return (len(bytes_seq) & 1), (O & 0xFFF), (E & 0xFFF)
-
-
 def coeffs_poly_1_plus_z_pow_k(k: int) -> list[int]:
     """Coefficients of (1 + z)^k."""
     return [comb(k, j) for j in range(k + 1)]
@@ -137,23 +65,6 @@ def poly_convolve(a: list[int], b: list[int]) -> list[int]:
         for j, bj in enumerate(b):
             out[i + j] += ai * bj
     return out
-
-
-def coeffs_mask_weight_enumerator_closed_form() -> list[int]:
-    """
-    Exact coefficients for the kernel mask code weight distribution:
-      (1 + z^2)^4 (1 + z)^4
-    """
-    return poly_convolve(coeffs_poly_1_plus_z2_pow_k(4), coeffs_poly_1_plus_z_pow_k(4))
-
-
-def coeffs_archetype_distance_enumerator_closed_form() -> list[int]:
-    """
-    Exact coefficients for the 24-bit archetype distance distribution over Ω:
-      ( (1 + z^2)^4 (1 + z)^4 )^2 = (1 + z^2)^8 (1 + z)^8
-    This matches the fact Ω = C × C.
-    """
-    return poly_convolve(coeffs_poly_1_plus_z2_pow_k(8), coeffs_poly_1_plus_z_pow_k(8))
 
 
 def dual_code_from_parity_checks(parity_checks: list[int]) -> NDArray[np.uint16]:

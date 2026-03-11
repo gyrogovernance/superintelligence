@@ -1,32 +1,35 @@
 """
-Physics tests: Core router constants and state transitions.
+Physics tests 1: Conformance and correctness of the kernel physics.
 
-Tests the fundamental physics:
+Strict baseline for:
 - State representation (pack/unpack)
-- Transcription (byte → intron)
-- Expansion (intron → mask)
-- FIFO gyration
-- Non-commutativity
-- Invariant preservation
+- Transcription (byte -> intron)
+- Intron decomposition (family, micro_ref)
+- 64-mask expansion + dipole flip
+- Spinorial step and inverse
+- Reference byte is pure swap
+- Depth-4 alternation identity
 
-HOW TO RUN ALL PHYSICS TESTS: 
-python -m pytest -v -s tests/test_physics_1.py tests/test_physics_2.py tests/test_physics_3.py tests/test_physics_4.py
+No atlas, no XFORM_MASK_BY_BYTE, no ARCHETYPE_* names.
 """
 
-from pathlib import Path
+from __future__ import annotations
 
 import numpy as np
 import pytest
 
-from src.router.constants import (
-    ARCHETYPE_A12,
-    ARCHETYPE_B12,
-    ARCHETYPE_STATE24,
+from src.api import mask12_for_byte, MASK12_BY_BYTE, so3_shadow_count
+from src.constants import (
+    GENE_MAC_A12,
+    GENE_MAC_B12,
+    GENE_MAC_REST,
     GENE_MIC_S,
     LAYER_MASK_12,
-    XFORM_MASK_BY_BYTE,
     byte_to_intron,
-    expand_intron_to_mask24,
+    expand_intron_to_mask12,
+    intron_family,
+    intron_micro_ref,
+    inverse_step_by_byte,
     pack_state,
     step_state_by_byte,
     unpack_state,
@@ -36,519 +39,326 @@ from src.router.constants import (
 class TestStateRepresentation:
     """Test 24-bit state packing and unpacking."""
 
-    def test_pack_unpack_archetype(self):
-        """Archetype should round-trip correctly."""
-        a, b = unpack_state(ARCHETYPE_STATE24)
-        assert a == ARCHETYPE_A12, f"A component: expected {hex(ARCHETYPE_A12)}, got {hex(a)}"
-        assert b == ARCHETYPE_B12, f"B component: expected {hex(ARCHETYPE_B12)}, got {hex(b)}"
-
-        reconstructed = pack_state(a, b)
-        assert reconstructed == ARCHETYPE_STATE24
+    def test_pack_unpack_rest_state(self):
+        """GENE_Mac rest state should round-trip correctly."""
+        a, b = unpack_state(GENE_MAC_REST)
+        assert a == GENE_MAC_A12
+        assert b == GENE_MAC_B12
+        assert pack_state(a, b) == GENE_MAC_REST
 
     def test_pack_unpack_invertible(self):
         """Pack/unpack must be invertible for all valid components."""
-        test_cases = [
-            (0x000, 0x000),
-            (0xFFF, 0xFFF),
-            (0xAAA, 0x555),
-            (0x123, 0x456),
-        ]
-
-        for a_in, b_in in test_cases:
+        for a_in, b_in in [(0x000, 0x000), (0xFFF, 0xFFF), (0xAAA, 0x555), (0x123, 0x456)]:
             packed = pack_state(a_in, b_in)
             a_out, b_out = unpack_state(packed)
-            assert a_out == a_in, f"A: {hex(a_in)} → {hex(a_out)}"
-            assert b_out == b_in, f"B: {hex(b_in)} → {hex(b_out)}"
+            assert a_out == a_in and b_out == b_in
 
     def test_component_isolation(self):
         """A and B components should not interfere."""
-        # Set A = all ones, B = all zeros
         s1 = pack_state(0xFFF, 0x000)
         a1, b1 = unpack_state(s1)
         assert a1 == 0xFFF and b1 == 0x000
-
-        # Set A = all zeros, B = all ones
         s2 = pack_state(0x000, 0xFFF)
         a2, b2 = unpack_state(s2)
         assert a2 == 0x000 and b2 == 0xFFF
 
 
 class TestTranscription:
-    """Test byte → intron transcription (XOR with 0xAA)."""
+    """Test byte -> intron transcription (XOR with 0xAA)."""
 
     def test_gene_mic_s_constant(self):
-        """GENE_MIC_S must be 0xAA."""
         assert GENE_MIC_S == 0xAA
 
     def test_transcription_involution(self):
-        """Applying transcription twice returns direct byte."""
         for byte in range(256):
-            intron = byte_to_intron(byte)
-            recovered = byte_to_intron(intron)
-            assert recovered == byte, f"Byte {hex(byte)} did not round-trip"
+            assert byte_to_intron(byte_to_intron(byte)) == byte
 
     def test_transcription_bijective(self):
-        """All 256 bytes must produce 256 distinct introns."""
         introns = set(byte_to_intron(b) for b in range(256))
         assert len(introns) == 256
 
     def test_specific_transcriptions(self):
-        """Verify known transcription cases."""
-        cases = [
-            (0x00, 0xAA),  # 0x00 XOR 0xAA = 0xAA
-            (0xAA, 0x00),  # 0xAA XOR 0xAA = 0x00
-            (0xFF, 0x55),  # 0xFF XOR 0xAA = 0x55
-            (0x55, 0xFF),  # 0x55 XOR 0xAA = 0xFF
-        ]
+        cases = [(0x00, 0xAA), (0xAA, 0x00), (0xFF, 0x55), (0x55, 0xFF)]
         for byte, expected_intron in cases:
             assert byte_to_intron(byte) == expected_intron
 
 
-class TestExpansion:
-    """Test intron → mask expansion (8 → 12 bits for Type A)."""
+class TestIntronDecomposition:
+    """Family = L0 bits (0,7); micro_ref = payload bits (1-6)."""
 
-    def test_expansion_deterministic(self):
-        """Same intron must always produce same mask."""
-        for intron in range(256):
-            mask1 = expand_intron_to_mask24(intron)
-            mask2 = expand_intron_to_mask24(intron)
-            assert mask1 == mask2
+    def test_family_uses_L0_bits_0_and_7(self):
+        """Family index must come from intron bits 0 and 7 (L0 boundary), not bit 6."""
+        intron_bit7_zero = 0x00
+        intron_bit7_one = 0x80
+        f0 = intron_family(intron_bit7_zero)
+        f1 = intron_family(intron_bit7_one)
+        assert f0 != f1, "Changing bit 7 must change family (L0 = bits 0,7)"
+        intron_bit6_zero = 0x00
+        intron_bit6_one = 0x40
+        f0b = intron_family(intron_bit6_zero)
+        f1b = intron_family(intron_bit6_one)
+        assert f0b == f1b, "Changing only bit 6 must not change family (payload bit)"
 
-    def test_expansion_injective(self):
-        """All 256 introns must produce distinct masks."""
-        masks = set(expand_intron_to_mask24(i) for i in range(256))
-        assert len(masks) == 256, f"Only {len(masks)} unique masks (expected 256)"
-
-    def test_type_b_mask_always_zero(self):
-        """Bottom 12 bits (Type B mask) must always be 0."""
-        for intron in range(256):
-            mask24 = expand_intron_to_mask24(intron)
-            mask_b = mask24 & LAYER_MASK_12
-            assert mask_b == 0, f"Intron {hex(intron)} has non-zero B mask: {hex(mask_b)}"
-
-    def test_precomputed_table_matches(self):
-        """XFORM_MASK_BY_BYTE must match expand_intron_to_mask24."""
+    def test_family_in_range(self):
         for byte in range(256):
-            intron = byte_to_intron(byte)
-            expected = expand_intron_to_mask24(intron)
-            actual = int(XFORM_MASK_BY_BYTE[byte])
-            assert actual == expected, f"Byte {hex(byte)}: table={hex(actual)}, computed={hex(expected)}"
+            f = intron_family(byte_to_intron(byte))
+            assert 0 <= f <= 3
+
+    def test_four_families_of_64(self):
+        families = [intron_family(byte_to_intron(b)) for b in range(256)]
+        for f in range(4):
+            assert families.count(f) == 64
+
+    def test_micro_ref_in_range(self):
+        for byte in range(256):
+            m = intron_micro_ref(byte_to_intron(byte))
+            assert 0 <= m <= 63
 
 
-class TestFIFOGyration:
-    """Test FIFO gyration properties."""
+class TestFamilyActsOnlyThroughComplementPhase:
+    """Family bits control only complement phase; same micro_ref -> same mask and a_mut."""
 
-    def test_gyration_is_asymmetric(self):
-        """new_A depends on old_B (not on mask), new_B depends on mutated_A."""
+    def test_family_phase_only_differentiates_a_next_b_next(self):
+        """Four bytes sharing same micro_ref: same mask12, same a_mut; only (a_next,b_next) differ by complements."""
+        from src.constants import LAYER_MASK_12
+
+        # Four introns with same payload (micro_ref 0): bits 1-6 = 0; bits 0,7 vary -> families 0,1,2,3
+        introns_same_payload = [0x00, 0x01, 0x80, 0x81]
+        bytes_same_micro = [0xAA ^ i for i in introns_same_payload]
+        masks = [mask12_for_byte(b) for b in bytes_same_micro]
+        assert len(set(masks)) == 1, "same micro_ref implies same mask12"
+        m12 = masks[0]
+
+        a12, b12 = 0x100, 0x200
+        state = pack_state(a12, b12)
+        a_mut = (a12 ^ m12) & LAYER_MASK_12
+
+        seen_next = set()
+        for b in bytes_same_micro:
+            next_state = step_state_by_byte(state, b)
+            an, bn = unpack_state(next_state)
+            seen_next.add((an, bn))
+        assert len(seen_next) == 4, "four families -> four distinct (a_next, b_next)"
+        expected = {
+            (b12, a_mut),
+            (b12 ^ LAYER_MASK_12, a_mut),
+            (b12, a_mut ^ LAYER_MASK_12),
+            (b12 ^ LAYER_MASK_12, a_mut ^ LAYER_MASK_12),
+        }
+        assert seen_next == expected, "only complement phase differs"
+
+
+class TestExpansion:
+    """64 distinct masks; 256 distinct (family, mask12) pairs; dipole flip."""
+
+    def test_exactly_64_distinct_masks(self):
+        masks = set(mask12_for_byte(b) for b in range(256))
+        assert len(masks) == 64
+
+    def test_256_distinct_family_mask_pairs(self):
+        pairs = set()
+        for b in range(256):
+            intron = byte_to_intron(b)
+            f = intron_family(intron)
+            m = mask12_for_byte(b)
+            pairs.add((f, m))
+        assert len(pairs) == 256
+
+    def test_dipole_flip(self):
+        """Toggling payload bit i changes exactly one 2-bit pair in the mask."""
+        for base_payload in range(64):
+            for bit in range(6):
+                flipped = base_payload ^ (1 << bit)
+                intron_a = (base_payload << 1) & 0x7E
+                intron_b = (flipped << 1) & 0x7E
+                mask_a = expand_intron_to_mask12(intron_a)
+                mask_b = expand_intron_to_mask12(intron_b)
+                diff = mask_a ^ mask_b
+                expected_pair = 0x3 << (2 * bit)
+                assert diff == expected_pair
+
+
+class TestFIFOGyrationSpinorial:
+    """Spinorial gyration: invert_a from intron bit 0, invert_b from intron bit 7."""
+
+    def test_gyration_uses_spinorial_complement(self):
+        state = GENE_MAC_REST
         byte = 0x42
-        state = ARCHETYPE_STATE24
-        _, b = unpack_state(state)
+        intron = byte_to_intron(byte)
+        a, b = unpack_state(state)
+        m12 = mask12_for_byte(byte)
+        invert_a = LAYER_MASK_12 if (intron & 0x01) else 0
+        invert_b = LAYER_MASK_12 if (intron & 0x80) else 0
 
         next_state = step_state_by_byte(state, byte)
-        new_a, _ = unpack_state(next_state)
-
-        # new_A should equal ~old_B
-        expected_new_a = b ^ LAYER_MASK_12
-        assert new_a == expected_new_a, f"new_A = {hex(new_a)}, expected {hex(expected_new_a)}"
-
-class TestCGMChirality:
-    """Test CS axiom: gyration provides fundamental chirality."""
-
-    def test_gyration_not_pure_swap(self):
-        """Gyration must not be a simple A↔B swap (needs the flip)."""
-        state = pack_state(0x123, 0x456)
-        # Apply identity mask (byte 0xAA → intron 0x00 → mask_a ≈ 0)
-        next_state = step_state_by_byte(state, 0xAA)
-
-        a, b = unpack_state(state)
         new_a, new_b = unpack_state(next_state)
 
-        # If it were pure swap: new_a == b and new_b == a
-        # But we have flip, so:
-        assert new_a == (b ^ LAYER_MASK_12)
-        assert new_b == (a ^ LAYER_MASK_12)
+        assert new_a == (b ^ invert_a) & LAYER_MASK_12
+        assert new_b == ((a ^ m12) ^ invert_b) & LAYER_MASK_12
 
-        # Not pure swap
-        assert new_a != b or new_b != a, "Gyration is pure swap (missing flip)"
 
-    def test_gyration_asymmetry(self):
-        """new_A depends only on old_B; new_B depends on mutated_A."""
-        # This is the CS chirality: right (B→A) preserves horizon structure,
-        # left (A→B) incorporates mutation
+class TestReferenceByteIsPureSwap:
+    """Byte 0xAA: intron 0 -> mask 0, invert_a=0, invert_b=0 -> (A,B) -> (B,A)."""
 
-        state = pack_state(0xAAA, 0x555)
-        byte = 0x42
+    def test_reference_byte_is_pure_swap(self):
+        """0xAA swaps A and B with no complement."""
+        state = pack_state(0x123, 0x456)
+        next_state = step_state_by_byte(state, 0xAA)
+        new_a, new_b = unpack_state(next_state)
+        assert new_a == 0x456 and new_b == 0x123
 
-        mask24 = int(XFORM_MASK_BY_BYTE[byte])
-        mask_a = (mask24 >> 12) & LAYER_MASK_12
+    def test_reference_byte_fixed_points_are_a_eq_b(self):
+        """Fixed points of 0xAA are exactly states where A == B."""
+        for _ in range(500):
+            v = np.random.randint(0, 4096)
+            state = pack_state(v, v)
+            next_state = step_state_by_byte(state, 0xAA)
+            assert next_state == state
 
-        a, b = unpack_state(state)
+    def test_nonreference_bytes_are_not_all_pure_swap(self):
+        """Some bytes have non-zero mask or invert -> not pure swap."""
+        state = pack_state(0x123, 0x456)
+        next_aa = step_state_by_byte(state, 0xAA)
+        for byte in [0x00, 0x42, 0xFF]:
+            if byte == 0xAA:
+                continue
+            next_b = step_state_by_byte(state, byte)
+            assert next_b != next_aa or byte == 0xAA
 
-        # Expected behavior
-        expected_new_a = b ^ LAYER_MASK_12  # Right: B → A (preserving)
-        expected_new_b = (a ^ mask_a) ^ LAYER_MASK_12  # Left: A mutation → B (altering)
 
-        next_state = step_state_by_byte(state, byte)
-        actual_new_a, actual_new_b = unpack_state(next_state)
+class TestInverseStep:
+    """Inverse of spinorial step."""
 
-        assert actual_new_a == expected_new_a, "Right transition broken"
-        assert actual_new_b == expected_new_b, "Left transition broken"
+    def test_inverse_roundtrip(self):
+        np.random.seed(0)
+        for _ in range(2000):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            s = pack_state(a, b)
+            byte = int(np.random.randint(0, 256))
+            t = step_state_by_byte(s, byte)
+            s_back = inverse_step_by_byte(t, byte)
+            assert s_back == s
+
+
+class TestShadowCount:
+    """so3_shadow_count = 128: native holography anchor (SO(3)/SU(2) 2-to-1)."""
+
+    def test_shadow_count_is_128_at_rest(self):
+        assert so3_shadow_count(GENE_MAC_REST) == 128
+
+    def test_shadow_count_is_128_on_sampled_states(self):
+        np.random.seed(99)
+        for _ in range(50):
+            a = int(np.random.randint(0, 4096))
+            b = int(np.random.randint(0, 4096))
+            state = pack_state(a, b)
+            assert so3_shadow_count(state) == 128
+
+    def test_shadow_multitude_is_exactly_2_to_1(self):
+        """Each of the 128 distinct next states from a given state has exactly 2 preimage bytes."""
+        for state in [GENE_MAC_REST, pack_state(0x123, 0x456), pack_state(0xAAA, 0x555)]:
+            next_from_b: dict[int, list[int]] = {}
+            for b in range(256):
+                t = step_state_by_byte(state, b)
+                next_from_b.setdefault(t, []).append(b)
+            assert len(next_from_b) == 128, f"Expected 128 distinct next states, got {len(next_from_b)}"
+            for t, preimages in next_from_b.items():
+                assert len(preimages) == 2, (
+                    f"Expected exactly 2 preimages per next state, got {len(preimages)} for {t}"
+                )
 
 
 class TestInvariants:
-    """Test fundamental physics invariants."""
-
-    def test_state_space_boundedness(self):
-        """All states must fit in 24 bits."""
-        for _ in range(100):
-            a = np.random.randint(0, 4096)
-            b = np.random.randint(0, 4096)
-            state = pack_state(a, b)
-            assert state < (1 << 24), f"State {hex(state)} exceeds 24 bits"
+    """Determinism and valid outputs."""
 
     def test_determinism(self):
-        """Same (state, byte) must always produce same next state."""
-        test_states = [ARCHETYPE_STATE24, 0x123456, 0xABC555]
+        test_states = [GENE_MAC_REST, 0x123456, 0xABC555]
         test_bytes = [0x00, 0x42, 0xAA, 0xFF]
-
         for state in test_states:
             for byte in test_bytes:
                 s1 = step_state_by_byte(state, byte)
                 s2 = step_state_by_byte(state, byte)
                 assert s1 == s2
 
-    def test_all_bytes_are_operations(self):
-        """All 256 bytes must produce valid state transitions."""
-        state = ARCHETYPE_STATE24
+    def test_all_bytes_produce_valid_state(self):
+        state = GENE_MAC_REST
         for byte in range(256):
-            try:
-                next_state = step_state_by_byte(state, byte)
-                a, b = unpack_state(next_state)
-                assert 0 <= a <= LAYER_MASK_12
-                assert 0 <= b <= LAYER_MASK_12
-            except Exception as e:
-                pytest.fail(f"Byte {hex(byte)} failed: {e}")
+            next_state = step_state_by_byte(state, byte)
+            a, b = unpack_state(next_state)
+            assert 0 <= a <= LAYER_MASK_12 and 0 <= b <= LAYER_MASK_12
 
 
-class TestClosedFormDepthLaws:
-    """Exhaustive algebraic properties implied by the transition law."""
+class TestDepth4AlternationIdentity:
+    """Depth-4 alternation: xyxy = id (affine action with swap; translation cancels)."""
 
-    def _mask_a(self, byte: int) -> int:
-        mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
-        return (mask24 >> 12) & LAYER_MASK_12
-
-    def _inverse_step(self, next_state24: int, byte: int) -> int:
-        """
-        Explicit inverse of step_state_by_byte for a given byte.
-
-        Forward:
-          A1 = ~B0
-          B1 = ~(A0 ^ m)
-
-        Inverse:
-          B0 = ~A1
-          A0 = ~(B1 ^ m)
-        """
-        a1, b1 = unpack_state(next_state24)
-        m = self._mask_a(byte)
-
-        b0 = a1 ^ LAYER_MASK_12
-        a0 = (b1 ^ m) ^ LAYER_MASK_12
-        return pack_state(a0, b0)
-
-    def test_step_is_bijective_with_explicit_inverse(self):
-        """For each byte, step must be invertible with the explicit inverse."""
-        np.random.seed(0)
-        for _ in range(5000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            s = pack_state(a, b)
-            byte = int(np.random.randint(0, 256))
-
-            t = step_state_by_byte(s, byte)
-            s_back = self._inverse_step(t, byte)
-            assert s_back == s
-
-    def test_depth2_decoupling_closed_form(self):
-        """
-        For any state (A,B) and bytes x,y with masks mx,my:
-
-          step(step((A,B), x), y) = (A ^ mx, B ^ my)
-
-        This is the kernel's exact depth-2 law.
-        """
-        np.random.seed(1)
-        for _ in range(2000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            s = pack_state(a, b)
-
-            x = int(np.random.randint(0, 256))
-            y = int(np.random.randint(0, 256))
-
-            mx = self._mask_a(x)
-            my = self._mask_a(y)
-
-            s2 = step_state_by_byte(step_state_by_byte(s, x), y)
-            expected = pack_state(a ^ mx, b ^ my)
-
-            assert s2 == expected
-
-    def test_depth2_commutes_iff_same_byte(self):
-        """
-        For this kernel: step(step(s,x),y) == step(step(s,y),x) iff x==y.
-        """
-        s = ARCHETYPE_STATE24  # any state works; archetype is fine
-        for x in range(256):
-            for y in range(256):
-                s_xy = step_state_by_byte(step_state_by_byte(s, x), y)
-                s_yx = step_state_by_byte(step_state_by_byte(s, y), x)
-                if x == y:
-                    assert s_xy == s_yx
-                else:
-                    assert s_xy != s_yx
-
-    def test_trajectory_closed_form_arbitrary_length(self):
-        """
-        Trajectory closed form for arbitrary byte sequences.
-
-        For byte sequence b_1...b_n with masks m_i:
-        - O = m_1 ⊕ m_3 ⊕ m_5 ⊕ ... (odd positions)
-        - E = m_2 ⊕ m_4 ⊕ m_6 ⊕ ... (even positions)
-
-        Then:
-        - if n is even: (A_n, B_n) = (A_0 ⊕ O, B_0 ⊕ E)
-        - if n is odd: (A_n, B_n) = (~B_0 ⊕ E, ~A_0 ⊕ O)
-        """
-        np.random.seed(3)
-        for _ in range(1000):
-            a0 = int(np.random.randint(0, 4096))
-            b0 = int(np.random.randint(0, 4096))
-            s0 = pack_state(a0, b0)
-
-            # Generate random byte sequence of length 1-10
-            n = int(np.random.randint(1, 11))
-            bytes_seq = [int(np.random.randint(0, 256)) for _ in range(n)]
-            masks = [self._mask_a(b) for b in bytes_seq]
-
-            # Compute O and E
-            O = 0
-            E = 0
-            for i in range(n):
-                if (i + 1) % 2 == 1:  # odd position (1-indexed)
-                    O ^= masks[i]
-                else:  # even position
-                    E ^= masks[i]
-
-            # Apply steps manually
-            s = s0
-            for b in bytes_seq:
-                s = step_state_by_byte(s, b)
-            an_actual, bn_actual = unpack_state(s)
-
-            # Compute expected using closed form
-            if n % 2 == 0:  # even length
-                an_expected = a0 ^ O
-                bn_expected = b0 ^ E
-            else:  # odd length
-                an_expected = (b0 ^ LAYER_MASK_12) ^ E
-                bn_expected = (a0 ^ LAYER_MASK_12) ^ O
-
-            assert an_actual == an_expected, f"n={n}: A mismatch at step {n}"
-            assert bn_actual == bn_expected, f"n={n}: B mismatch at step {n}"
-
-
-# Statistics summary fixture
-@pytest.fixture(scope="session", autouse=True)
-def print_physics_summary(request):
-    """Print summary statistics after all tests."""
-    yield
-
-    print("\n" + "="*10)
-    print("PHYSICS TEST SUMMARY")
-    print("="*10)
-
-    # Count unique masks
-    unique_masks = len(set(int(XFORM_MASK_BY_BYTE[b]) for b in range(256)))
-    print(f"Unique masks: {unique_masks} / 256")
-
-    # Count non-zero A masks
-    nonzero_a = sum(1 for b in range(256) if (int(XFORM_MASK_BY_BYTE[b]) >> 12) != 0)
-    print(f"Non-zero A masks: {nonzero_a} / 256")
-
-    # Check B masks (should all be zero)
-    nonzero_b = sum(1 for b in range(256) if (int(XFORM_MASK_BY_BYTE[b]) & LAYER_MASK_12) != 0)
-    print(f"Non-zero B masks: {nonzero_b} / 256 (expected 0)")
-
-    print("="*10)
-
-
-class TestCSOperatorAndSeparatorLemmas:
-    """
-    Certify the CS-style separator behavior of byte 0xAA and the A/B chirality
-    using exact algebra, without relying on atlas artifacts.
-    """
-
-    def _mask_a(self, byte: int) -> int:
-        mask24 = int(XFORM_MASK_BY_BYTE[int(byte) & 0xFF])
-        return (mask24 >> 12) & LAYER_MASK_12
-
-    def test_separator_lemma_x_then_AA_updates_A_only(self):
-        """
-        Exact lemma:
-          T_AA(T_x(A,B)) = (A XOR m_x, B)
-
-        i.e. inserting the separator after x writes the mask effect into A only.
-        """
-        np.random.seed(124)
-        for _ in range(2000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            x = int(np.random.randint(0, 256))
-            mx = self._mask_a(x)
-
-            s0 = pack_state(a, b)
-            s2 = step_state_by_byte(step_state_by_byte(s0, x), 0xAA)
-
-            a2, b2 = unpack_state(s2)
-            assert a2 == (a ^ mx), f"A mismatch: got {hex(a2)} expected {hex(a ^ mx)}"
-            assert b2 == b, f"B mismatch: got {hex(b2)} expected {hex(b)}"
-
-    def test_separator_lemma_AA_then_x_updates_B_only(self):
-        """
-        Exact lemma:
-          T_x(T_AA(A,B)) = (A, B XOR m_x)
-
-        i.e. inserting the separator before x writes the mask effect into B only.
-        """
-        np.random.seed(125)
-        for _ in range(2000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            x = int(np.random.randint(0, 256))
-            mx = self._mask_a(x)
-
-            s0 = pack_state(a, b)
-            s2 = step_state_by_byte(step_state_by_byte(s0, 0xAA), x)
-
-            a2, b2 = unpack_state(s2)
-            assert a2 == a, f"A mismatch: got {hex(a2)} expected {hex(a)}"
-            assert b2 == (b ^ mx), f"B mismatch: got {hex(b2)} expected {hex(b ^ mx)}"
-
-    def test_depth4_alternation_identity_all_pairs_on_archetype(self):
-        """
-        Strengthen P7 beyond sampling: for the archetype, verify XYXY = id for all x,y.
-        This is 256^2 pairs and is cheap.
-        """
-        s0 = ARCHETYPE_STATE24
+    def test_depth4_alternation_identity_all_pairs(self):
+        """For GENE_Mac rest, XYXY = id for all byte pairs x,y."""
+        s0 = GENE_MAC_REST
         for x in range(256):
             sx = step_state_by_byte(s0, x)
             for y in range(256):
                 s_xy = step_state_by_byte(sx, y)
                 s_xyx = step_state_by_byte(s_xy, x)
                 s_xyxy = step_state_by_byte(s_xyx, y)
-                assert s_xyxy == s0, f"XYXY != id at archetype for x={x}, y={y}"
+                assert s_xyxy == s0, f"XYXY != id for x={x}, y={y}"
 
 
-class TestInverseConjugationForm:
+def _bfs_omega() -> tuple[set[int], int, set[int]]:
+    """BFS from GENE_MAC_REST. Returns (omega, radius, horizon_states)."""
+    visited = {GENE_MAC_REST}
+    frontier = {GENE_MAC_REST}
+    depth = 0
+    while frontier:
+        next_frontier = set()
+        for s in frontier:
+            for b in range(256):
+                s_next = step_state_by_byte(s, b)
+                if s_next not in visited:
+                    visited.add(s_next)
+                    next_frontier.add(s_next)
+        frontier = next_frontier
+        depth += 1
+    radius = depth - 1
+    horizon = {
+        s for s in visited
+        if unpack_state(s)[0] == (unpack_state(s)[1] ^ 0xFFF)
+    }
+    return visited, radius, horizon
+
+
+class TestExactOmegaTheorems:
     """
-    Certify the spec claim: T_x^{-1} = R ∘ T_x ∘ R, where R = T_0xAA.
-    
-    This shows that reversal can be expressed as a word over the same action alphabet,
-    strengthening the "ledger as reversible coordination substrate" story.
-    """
-
-    def test_inverse_is_conjugation_by_R(self):
-        """
-        For any state s and byte x:
-          T_x^{-1}(T_x(s)) = R ∘ T_x ∘ R(T_x(s)) = s
-        
-        where R = T_0xAA.
-        """
-        np.random.seed(314)
-        for _ in range(5000):
-            a = int(np.random.randint(0, 4096))
-            b = int(np.random.randint(0, 4096))
-            s = pack_state(a, b)
-
-            x = int(np.random.randint(0, 256))
-
-            # Forward: apply T_x
-            t = step_state_by_byte(s, x)
-
-            # Apply R ∘ T_x ∘ R to t (i.e., apply the inverse using only forward steps)
-            t1 = step_state_by_byte(t, 0xAA)   # R
-            t2 = step_state_by_byte(t1, x)     # T_x
-            s_back = step_state_by_byte(t2, 0xAA)  # R
-
-            assert s_back == s, f"Conjugation inverse failed for byte {x} at state {hex(s)}"
-
-
-# ========
-# PILLAR 2: QUANTUM GRAVITY MANIFOLD (HOLOGRAPHIC SCALING)
-# ========
-
-class TestQuantumGravityManifold:
-    """
-    Pillar 2: Holographic Bulk/Boundary scaling.
-    
-    Tests that the horizon forms a perfect 2D boundary encoding the 3D bulk.
+    New reachable universe (Omega) is 4096 states, radius 2, 64 horizon.
+    Holographic ratio exact: 64^2 = 4096. One-step from horizon covers Omega 4-to-1.
     """
 
-    def test_holographic_area_scaling(self, capsys):
-        """
-        Bekenstein-Hawking Analog: S = Area / 4.
-        Tests if the Horizon (256 states) forms a perfect 2D boundary
-        that holographically encodes the entire 3D bulk (65,536 states).
-        """
-        print("\n" + "="*10)
-        print("PILLAR 2: Holographic Area/Entropy Scaling")
-        print("="*10)
+    def test_omega_size_radius_horizon_and_holographic_ratio(self):
+        """|Omega| = 4096, radius = 2, horizon = 64, Area^2 = Volume."""
+        omega, radius, horizon = _bfs_omega()
+        assert len(omega) == 4096, f"|Omega| must be 4096, got {len(omega)}"
+        assert radius == 2, f"Radius must be 2, got {radius}"
+        assert len(horizon) == 64, f"Horizon in Omega must be 64, got {len(horizon)}"
+        assert len(horizon) ** 2 == len(omega), "Holographic ratio: 64^2 = 4096"
 
-        # Horizon Area = 256 states.
-        # We measure the "Atmosphere" (states 1-step away from Horizon).
-        atlas_dir = Path("data/atlas")
-        if not atlas_dir.exists():
-            pytest.skip("No Atlas")
+    def test_holographic_dictionary_4_to_1(self):
+        """From 64 horizon states and all 256 bytes, one-step map covers Omega exactly 4-to-1."""
+        omega, _, horizon = _bfs_omega()
+        next_states = [
+            step_state_by_byte(h, b) for h in horizon for b in range(256)
+        ]
+        assert set(next_states) == omega, "One-step from horizon must cover Omega"
+        for s in omega:
+            assert next_states.count(s) == 4, (
+                f"Each state in Omega must be hit exactly 4 times, got {next_states.count(s)} for {s}"
+            )
 
-        epistemology = np.load(atlas_dir / "epistemology.npy")
-        ontology = np.load(atlas_dir / "ontology.npy")
-
-        # Identify horizon indices: A = ~B
-        horizon_indices = []
-        for i, s in enumerate(ontology):
-            s = int(s)
-            a, b = unpack_state(s)
-            if a == (b ^ LAYER_MASK_12):
-                horizon_indices.append(i)
-
-        horizon_set = set(horizon_indices)
-
-        # Atmosphere: The boundary layer of the Horizon
-        atmosphere = set()
-        for idx in horizon_indices:
-            # Every byte applied to a horizon state creates an 'excitation'
-            for byte in range(256):
-                next_idx = int(epistemology[idx, byte])
-                atmosphere.add(next_idx)
-
-        # Remove the horizon states themselves to get the pure boundary layer
-        boundary_layer = atmosphere - horizon_set
-
-        print(f"  Horizon Area (States): {len(horizon_indices)}")
-        print(f"  Boundary Layer Volume: {len(boundary_layer)}")
-        print(f"  Total Atmosphere (Horizon + Boundary): {len(atmosphere)}")
-
-        # Holographic Check:
-        # In a 3D system, Boundary (Area) should scale as Volume^(2/3).
-        # Here, we check the ratio.
-        ratio = len(boundary_layer) / len(horizon_indices) if len(horizon_indices) > 0 else 0
-        print(f"  Expansion Ratio (Boundary/Area): {ratio:.2f}")
-
-        # 256 * 256 = 65536.
-        # If the Boundary Layer captures the whole ontology, the Horizon
-        # is a 'Maximal Observer' (Holographic Principle).
-        assert len(atmosphere) == 65536, (
-            f"Expected atmosphere to cover entire ontology (65536), got {len(atmosphere)}"
-        )
-        print("  ✓ Verified: The Horizon is holographically complete (Boundary = Bulk).")
+    def test_omega_equals_U_cross_V(self):
+        """BFS Omega equals the Cartesian product U x V (A_rest xor C64) x (B_rest xor C64)."""
+        omega, _, _ = _bfs_omega()
+        a_rest, b_rest = unpack_state(GENE_MAC_REST)
+        c64 = set(int(m) & 0xFFF for m in MASK12_BY_BYTE)
+        U = {a_rest ^ c for c in c64}
+        V = {b_rest ^ c for c in c64}
+        uv = {pack_state(u, v) for u in U for v in V}
+        assert omega == uv, "Omega must equal U x V"

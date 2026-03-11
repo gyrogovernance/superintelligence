@@ -1,7 +1,7 @@
 """
 CSM (Common Source Moment) derivation and storage model analysis.
 
-Computes physical information capacity, CSM for k-byte Router states,
+Computes physical information capacity, CSM for k-byte aQPU Kernel states,
 and storage requirements for various encoding models.
 """
 
@@ -13,7 +13,7 @@ N_PHYS = 3.25e30
 
 
 def csm(k_bytes: int) -> float:
-    """Common Source Moment: microcells per Router state for k-byte keys."""
+    """Common Source Moment: microcells per aQPU Kernel state for k-byte keys."""
     return N_PHYS / (2 ** (8 * k_bytes))
 
 
@@ -43,7 +43,7 @@ def total_bytes_for_s(s_bits: float) -> float:
 
 
 def bytes_backing_per_router_state(k_bytes: int, s_bits: float) -> float:
-    """Bytes needed per Router state when backing with s bits per microcell."""
+    """Bytes needed per aQPU Kernel state when backing with s bits per microcell."""
     return csm(k_bytes) * (s_bits / 8.0)
 
 
@@ -67,7 +67,7 @@ def run_full_report(k_range: range = range(1, 17), s_values: dict | None = None)
     print()
 
     # CSM table
-    print("CSM (microcells per Router state):")
+    print("CSM (microcells per aQPU Kernel state):")
     for k in k_range:
         omega = 2 ** (8 * k)
         print(f"  k={k} bytes: |Omega|={omega:,}  CSM={csm(k):.3e}")
@@ -102,9 +102,9 @@ def run_full_report(k_range: range = range(1, 17), s_values: dict | None = None)
         print(f"  {name}: {B:.6e} bytes ({human_bytes(B)}), {w32:.6e} 32-bit words")
     print()
 
-    # Router backing
+    # aQPU Kernel backing
     for k in (2, 4):
-        print(f"Router k={k} bytes (CSM={csm(k):.6e} cells/state):")
+        print(f"aQPU Kernel k={k} bytes (CSM={csm(k):.6e} cells/state):")
         for name, s in s_values.items():
             bp = bytes_backing_per_router_state(k, s)
             print(f"  {name}: {bp:.6e} bytes ({human_bytes(bp)})")

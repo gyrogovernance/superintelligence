@@ -1,5 +1,5 @@
 # Artificial Superintelligence Architecture (ASI/AGI)
-> **Gyroscopic Alignment Models Lab**
+> **Gyroscopic Alignment Models Lab** – research and tooling for governance-ready AI coordination
 
 <div align="center">
 
@@ -22,82 +22,108 @@
 
 ---
 
-# GGG ASI Alignment Router
-Alignment Infrastructure Routing for Post‑AGI Coordination
+# Gyroscopic ASI aQPU Kernel
+
+A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
+
+> **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require of a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 
+The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns an append-only log of bytes into a single, reproducible state. Two parties with the same log always get the same state; no trusted server or timestamp is required. It runs on standard CPUs using exact integer arithmetic (no qubits, no probabilistic hardware). Its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), which have been verified by exhaustive tests over its full 4,096-state space. The result is a coordination substrate that scales by fixed geometry rather than learned approximation.
+
 ## 🌐 Overview
 
-GGG ASI Alignment Router is a holographic algorithm for multi-domain network coordination that establishes the structural conditions for a collective superintelligence governance regime of humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025). It is designed for focused and well-distributed coordination of contributions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
+In this project, **Artificial Superintelligence (ASI)** is not an autonomous agent. It denotes a regime where humans and AI together sustain coherent governance: who decides what, and how it is recorded. The aQPU kernel is a building block for that regime.
 
-Artificial intelligence systems act as logistical networks that route information, authority, and decisions. When this routing is invisible, governance becomes unverifiable. The GGG ASI Alignment Router makes these logistics visible and auditable by providing a deterministic substrate for tracking how governance events move through human and AI systems.
+Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable. Given a published event log, anyone can recompute the same state and verify claims about what happened.
 
-Intelligence is often framed as a matter of context, yet complex systems in physics and biology function without cognitive intent. They operate through precise trajectories in three-dimensional space with six degrees of freedom. The GGG ASI Router embeds this geometry into a discrete computational kernel. It uses 24-bit tensors to model the minimal structural conditions required for intelligence. This architecture derives from the project's research into mathematical physics.
+The kernel does not use learned models. Its state space is fixed and small: **4,096 states**, determined by a compact representation (three axes, left/right “handedness,” and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path. The kernel is part of the broader **Gyroscopic Global Governance (GGG)** framework (Economy, Employment, Education, Ecology) and underpins **Alignment Infrastructure Routing (AIR)**, which tracks safety-related work and funding.
 
-The Router is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon the Common Governance Model (theoretical foundation), The Human Mark (classification of human and artificial sources), and the Gyroscope Protocol (work classification). Alignment Infrastructure Routing (AIR) uses this Router as its backbone for coordinating human safety work and funding flows across projects. Together these components amplify human agency rather than replacing it, providing the coordination infrastructure for AI governance at scale.
+The kernel does not interpret content or set policy. It only provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
 
-The algorithm is a deterministic finite-state coordination system for routing and audit in human–AI governance settings. It maps a sequence of governance events (recorded as bytes) to a reproducible trajectory through a closed space of 65,536 coordination states. Given the same starting point and the same event sequence, any implementation computes the same trajectory. This enables independent verification without relying on trusted intermediaries.
-
-The Router does not interpret content and does not decide policy. It provides shared coordination states, verifiable provenance, and replayable measurement. Authorisation and accountability remain with human agents at the application layer, classified as Direct Agency under The Human Mark.
-
-> **Why This Matters:** Modern AI scales by approximation. This kernel scales by geometry. We replace learned routing with exact physics.
+> **Why it matters:** Typical AI scales by approximation. This kernel scales by fixed geometry: same log always yields the same state, so coordination can be verified without trust.
 
 ---
 
-## 🗝️ Key Ideas
+## 🗝️ Core Capabilities
 
-- **Shared moments:** If two parties have the same starting reference and the same log of governance events, they compute the same Router state. This provides a shared coordination point based on replay, not on timestamps or trusted authorities.
+- **Exact integer compute:** The kernel and SDK work in 64-dimensional state spaces using packed integer arithmetic (no floating point). That keeps results deterministic and avoids rounding issues for the workloads it targets.
+- **Shared coordination state:** Two parties with the same event log always compute the same state. Coordination is based on replay, not on timestamps or a trusted central authority.
+- **Verifiable provenance:** The state space is finite and enumerable. Any claimed history can be checked by replaying the published log and comparing the final state, so provenance is computational rather than testimonial.
 
-- **Verifiable provenance:** Router states belong to a fixed, fully enumerated set. Anyone can verify that a claimed state is valid by replaying the published event log. Provenance becomes computational, not testimonial.
+---
 
-- **Governance measurement:** Governance events update domain ledgers across Economy, Employment, and Education. From these ledgers, the system computes aperture, a metric indicating whether coordination is balanced or degraded. This measurement is stable, replayable, and independent of model internals.
+## 🧠 SDK and Native Compute
+
+The repository includes an SDK that turns the kernel from a specification into runnable code. It gives three views of the same machine: state trajectories (replay and shared moments), a 6-bit “chirality” register with a fixed orthogonal transform (Walsh-Hadamard), and matrix-vector operations over the 64-dimensional state.
+
+**GyroLabe** is the low-level execution layer. It provides byte- and state-level primitives on CPU, 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and an OpenCL backend for batched linear algebra (GEMV/GEMM). See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [aQPU Verification Report](docs/reports/aQPU_Tests_Report.md) for full details.
+
+---
+
+## 🔭 GyroLabe: Calibration for Auditable Inference
+
+GyroLabe is the native compute backend and neural model bridge for the aQPU kernel. It connects language models to the kernel's algebraic structure, turning opaque byte-level inference into a process that any party can replay, verify, and audit.
+
+**The Trust Problem in AI:** When a language model generates text, nobody outside the operator can verify what the inference process actually did. Current safety approaches (RLHF, red-teaming, interpretability) work on outputs or weights. None of them produce a verifiable record of the inference computation itself.
+
+**What GyroLabe provides:**
+- **Algebraic byte annotation:** Every byte in the model's input and output is decomposed into its exact structural components (commutation class, family phase, operational payload) using the aQPU kernel.
+- **Inference audit trail:** The kernel state at each byte position is determined entirely by the public transition law. Any party with the same bytes computes the same states. The audit trail requires no trust in the model operator and no access to proprietary model weights.
+- **Trainable structural bias:** Small embedding biases based on the algebraic decomposition let the model learn to use the structural properties of bytes. The wrapped model is mathematically identical to the base model before training.
+- **Bitplane compute engine:** A C/OpenCL backend that decomposes dense matrix-vector multiplication into Boolean operations, providing a path toward structurally transparent linear algebra.
+
+**Current status:** GyroLabe is actively tested on Bolmo-1B (a byte-level language model). The algebraic annotation and embedding biases are operational. Dimensional scaling and full operator decomposition are in active development. 
+
+Read the [GyroLabe Brief](docs/GyroLabe_Brief.md) for full details on its architecture and performance.
 
 ---
 
 ## 🔮 Holographic Architecture
 
-The Router's 65,536-state space has a specific geometry: a 256-state boundary (the horizon) that encodes the entire bulk through exact mathematical relationships. This is not a design choice but a consequence of the kernel physics.
+The 4,096-state space has a rigid structure: two small **boundary sets** of 64 states each (called “horizons”) encode the full space in a precise way (**|H|² = |Ω|**, where Ω is the full state set). That is a consequence of the kernel’s transition rules, not an extra design choice.
 
-**Practical implications:**
+**What that gives you:**
+- **Compression:** Checking the small boundary sets is enough to guarantee consistency of the whole state space; you do not need to store or verify all 4,096 states explicitly.
+- **Partitioning:** The space splits into four symmetric regions (each 2,048 states), which supports natural boundaries for distributed coordination.
+- **History equivalence:** The geometry defines which different event sequences lead to the same effective outcome, so you can reason about trajectories without training a model.
 
-- **Compression without loss:** Any coordination state can be represented as a boundary anchor plus a single byte. Verification of the 256 boundary states guarantees the integrity of the full state space.
+The [SDK Network Specification](docs/Gyroscopic_ASI_SDK_Network.md) describes testing AI models against this geometry (“oracles”); the [Holographic Web Specification](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) extends the same ideas to internet-scale coordination.
 
-- **Partition structure:** The state space partitions into four disjoint regions of 16,384 states each, generated by four vertex classes on the horizon. Each region corresponds to one vertex of the K₄ tetrahedral geometry. This partition provides natural boundaries for organising distributed coordination.
+---
 
-- **History equivalence:** Many different event sequences lead to the same final state. The geometry determines which micro-histories are equivalent at the macro level, without requiring learning or training.
+## ⚛️ Proven Computational Advantages
 
-These properties enable a new approach to multi-agent coordination. The [SDK Network Specification](docs/GGG_ASI_AR_SDK_Network.md) provides the framework for distributed experiments, treating existing AI models as oracles that can be tested against the kernel's geometry. The [Holographic Web Specification](docs/GGG_ASI_AR_SDK_Holographic_Web.md) extends these ideas to internet coordination architecture.
+The kernel’s internal algebra uses binary arithmetic (bits) and satisfies properties analogous to quantum mechanics. Exhaustive tests over all 4,096 states confirm this.
 
-See the [Holographic Algorithm Formalization](docs/GGG_ASI_AR_Holography.md) and [Holography Tests Report](docs/reports/Holography_Tests_Report.md) for complete details.
+**Structural properties:**
+- **Reversibility (unitarity):** Every byte induces a one-to-one map on the full state; no information is lost or invented.
+- **Order 4:** Applying the same byte four times always returns to the starting state.
+- **No cloning:** One special byte (archetype 0xAA) is the unique “source” that all state paths can trace back to; no other byte can play that role.
+- **Complementarity:** From any state, the 256 possible bytes lead to exactly 128 distinct next states (each reachable by two bytes), giving a symmetric branching structure.
+
+**Concrete advantages over naive classical approaches:**
+
+| Task | aQPU | Naive classical |
+|------|------|------------------|
+| Resolving hidden structure in the transition graph | 1 step (single lookup on 6-bit register) | Up to 64 steps |
+| Exact uniform mixing | 2 steps, integer exact | ~12 steps for approximate mixing |
+| Testing whether two operations commute | O(1), 6-bit compare | 4 kernel steps |
+| Compressing state to a boundary + index | 8 bits | 24 bits |
+
+**Error detection:** A built-in code ([12,6,2] over the state bits) detects all odd-weight bit errors. Tampering with a byte in the log is detected unless the replacement is an exact phase match (probability 1/255). 
 
 ---
 
 ## 🚛 Alignment Infrastructure Routing (AIR)
 
-AIR applies the Router to two related coordination challenges.
+**AIR** applies the kernel to two coordination problems.
 
-**Workforce coordination for AI safety:** AIR helps AI safety labs, fiscal hosts, and individual contributors turn distributed work into paid, verifiable contributions. It provides structured workflows for safety work (evaluations, red-teaming, interpretability studies, documentation), a shared classification language using the Gyroscope Protocol and The Human Mark, and attested work receipts that enable sponsors to verify what was done without relying on informal narratives. See the [AIR Brief](docs/AIR_Brief.md) for the operating model and program structure.
+**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
 
-**Governance logistics:** The movement of information and authority through decision systems is a logistics problem requiring the same rigour as physical supply chains. AIR provides genealogies (complete, replayable coordination histories), classification protocols that distinguish human from artificial sources, and coherence metrics that measure governance quality over time. This infrastructure supports verifiable compliance with standards such as ISO 42001 and the EU AI Act. See the [AIR Logistics Framework](docs/AIR_Logistics.md) for the complete specification.
-
----
-
-## 🤖 GyroLabe: AI Mechanistic Calibration
-
-GyroLabe is a mechanistic calibration instrument for generative models. It functions analogously to the cerebellum in biological intelligence: it does not dictate what a model should say, but provides a continuous geometric reference frame so the trajectory of its inference remains physically coordinated.
-
-The system acts as a neuro-symbolic bridge, coupling the model's stochastic, continuous latent space to the Router's discrete, finite geometry. It achieves this through a closed **Active Inference** loop:
-
-1. **Internal Guidance (The Prediction):** GyroLabe projects a dynamic mask directly into the model's neural activations (routed MLP layers). This gently biases the model's internal state toward configurations that are consistent with the kernel's current geometric position. The guidance sharpens or softens dynamically based on how fast the kernel is moving.
-2. **Trajectory Selection (The Action):** Before a token is sampled, GyroLabe evaluates the top candidates by "peeking" at where they would drive the kernel next. Tokens that result in natural, continuous transitions in the kernel's geometry are mathematically favored. The precision of this preference is set entirely by the kernel's intrinsic physical constants, requiring no arbitrary tuning.
-
-This establishes **Topological Alignment**. The model's internal dynamics remain coherent with the kernel's geometry without collapsing its creative exploration. Over long generations, the coupled system naturally balances its trajectory across all geometric directions, shifting the model's output toward highly structured, epistemic reasoning.
-
-Beyond inference-time calibration, GyroLabe serves as a live laboratory for a fundamentally new AI architecture. By mapping how neural networks resonate with this discrete geometry, it lays the empirical groundwork for future systems that could operate entirely on the kernel's native computational substrate, potentially bypassing matrix multiplication and gradient descent altogether.
-
-See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mechanistic Interpretability Report](docs/reports/GyroLabe_MI_Tests_Report.md).
+**Governance logistics:** Tracking how information and authority move through decision systems is treated with the same rigour as supply chains. AIR provides full replayable histories (“genealogies”) and coherence metrics for governance quality, and supports verifiable compliance with standards such as ISO 42001 and the EU AI Act.
 
 ---
 
@@ -105,78 +131,68 @@ See the [GyroLabe Technical Specification](docs/AIR_GyroLabe_Specs.md) and [Mech
 
 ## 💰 Moments Economy
 
-Moments Economy is a monetary architecture where money represents verified coordination grounded in physical capacity rather than debt. A fixed total coordination volume, the Common Source Moment (CSM), is derived once from the caesium-133 atomic standard and the Router's finite state space.
+Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel’s finite state space (so the “budget” is physically anchored).
 
-CSM is large enough to support a global Unconditional High Income (UHI), realistic tiered distributions, and complete governance records for many billions of years, far beyond any human planning horizon. Within this finite capacity, all settlements become replayable, cryptographically verifiable histories rather than updates on a central ledger or trust in institutional custodians.
-
-See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md) for complete details.
+CSM is large enough to support a global **Unconditional High Income (UHI)**-style allocation, tiered distributions, and full governance records for billions of years. Within this cap, every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
 
 ---
 
-
-
 ## 📚 Documentation
 
-### If You Are Here For...
+### Start Here
+- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
+- 🧠 [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) - Three computational surfaces
+- 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
+- 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
+- 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Money from coordination
+- 📜 [Moments Genealogies Specification](docs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
 
-- **Understanding the kernel physics:** Start with [Kernel Specifications](docs/GGG_ASI_AR_Specs.md) and [Physics Tests Report](docs/reports/Physics_Tests_Report.md)
-- **Running the console:** Go to [AIR Console](#-quick-start) section below
-- **Exploring holography:** Start with [Holographic Algorithm Formalization](docs/GGG_ASI_AR_Holography.md) and [Holography Tests Report](docs/reports/Holography_Tests_Report.md)
-- **Coordinating LLMs:** See [GyroLabe: AI Coordination](docs/AIR_GyroLabe_Specs.md)
-- **Multi-agent experiments:** See the [SDK Network Specification](docs/GGG_ASI_AR_SDK_Network.md)
-- **Moments Economy:** See the [Moments Economy Architecture Specification](docs/AIR_Moments_Economy_Specs.md)
+### Core Specifications
+- 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Math notation and proofs
+- 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
+- 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 
-### Getting Started
-- 📋 [**Alignment Infrastructure Routing (AIR) Brief**](docs/AIR_Brief.md) - Overview of AIR, workforce coordination, and operating model
-- 🚛 [**AIR Logistics Framework**](docs/AIR_Logistics.md) - Complete logistics framework for governance as a coordination discipline
+### SDK Specifications
+- 🔗 [SDK: Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) - Distributed model testing
+- 🌐 [SDK: The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) - Internet coordination layer
 
-### Technical Specifications
-- 📖 [**GGG ASI Alignment Router: Kernel Specifications**](docs/GGG_ASI_AR_Specs.md) - Complete technical specification for implementation
-- 🔮 [**Router Implications and Potential**](docs/GGG_ASI_AR_Implications.md) - Use cases and deployment scenarios
-- 🧬 [**Substrate: Physical Memory Specification**](docs/GGG_ASI_AR_Substrate_Specs.md) - Future development: physical memory architecture
-- 🌐 [**Holographic Algorithm Formalization**](docs/GGG_ASI_AR_Holography.md) - Holographic architecture and boundary-to-bulk scaling
-- 🔗 [**SDK: Multi-Agent Holographic Networks**](docs/GGG_ASI_AR_SDK_Network.md) - Distributed coordination and experimentation specification
-- 🌐 [**SDK: The Holographic Web**](docs/GGG_ASI_AR_SDK_Holographic_Web.md) - Internet coordination architecture specification
-- 🤖 [**GyroLabe: AI Coordination Specs**](docs/AIR_GyroLabe_Specs.md) - Holographic coordination for LLMs
-
-### Economic Architecture
-- 💰 [**Moments Economy Architecture Specification**](docs/AIR_Moments_Economy_Specs.md) - Monetary system based on physical capacity of the atomic standard
+### Experimental
+- 🧬 [Substrate: Physical Memory Specification](docs/Gyroscopic_ASI_Substrate_Specs.md) - Memory and carrier layout
 
 ### Test Reports
-- 📊 [**Physics Tests Report**](docs/reports/Physics_Tests_Report.md) - Verified structural properties and CGM-linked invariants
-- 📊 [**Alignment Measurement Report**](docs/reports/Alignment_Measurement_Report.md) - Governance measurement substrate verification
-- 📊 [**Moments Economy Tests Report**](docs/reports/Moments_Tests_Report.md) - Verified capacity derivation and economic parameter validation
-- 📊 [**Holography Tests Report**](docs/reports/Holography_Tests_Report.md) - Verified holographic structure and boundary-to-bulk scaling
-- 📊 [**All Tests Results**](docs/reports/All_Tests_Results.md) - Comprehensive test suite results
-- 📊 [**Other Tests Report**](docs/reports/Other_Tests_Report.md) - Additional test coverage and validation
-- 📊 [**GyroLabe: Mechanistic Interpretability Report**](docs/reports/GyroLabe_MI_Tests_Report.md) - Empirical results on topological alignment and coupling
+- 📊 [Physics Tests Report](docs/reports/Physics_Tests_Report.md) - Kernel state verification
+- 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
+- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report.md) - Algebraic properties verified
+- 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
 ### Supporting Theory
-- 📖 [**Common Governance Model (CGM)**](docs/references/CGM_Paper.md) - Theoretical foundations
-- 📖 [**The Human Mark (THM)**](docs/references/THM.md) - Source-type ontology overview
-- 📖 [**The Human Mark: Paper**](docs/references/THM_Paper.md) - Complete THM specification
-- 📖 [**The Human Mark: Grammar**](docs/references/THM_Grammar.md) - PEG specification for tagging and validation
-- 📖 [**Gyroscopic Global Governance (GGG)**](docs/references/GGG_Paper.md) - Four-domain coupling framework
+- 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) - Shared coordination theory
+- 📖 [The Human Mark (THM)](docs/references/THM.md) - Human vs machine tagging
+- 📖 [The Human Mark: Paper](docs/references/THM_Paper.md) - Full tagging specification
+- 📖 [The Human Mark: Grammar](docs/references/THM_Grammar.md) - Parser and validation rules
+- 📖 [Gyroscopic Global Governance (GGG)](docs/references/GGG_Paper.md) - Four domains framework
 
 ---
 
 ## 🤝 Collaboration
 
-If you're evaluating this work for research, policy, or implementation:
+If you are evaluating this work for research, policy, or implementation:
 - Open an issue to discuss
 - Email: basilkorompilias@gmail.com
-- I'm actively seeking collaborators and roles in AI governance/safety
+- I am actively seeking collaborators and roles in AI governance and safety.
 
 ---
 
 ## Repository Structure
 
-- `src/router/` kernel physics, atlas builder, kernel runtime
-- `src/app/` coordinator, governance events, domain ledgers, aperture
-- `src/tools/` GyroLabe coordination system and analysis tools
-- `src/tools/` analytics helpers, adapters, framework connectors
-- `docs/` specifications and notes
-- `tests/` exhaustive kernel and measurement verification
+- `src/constants.py` : Transition law, kernel constants, horizons, gates, and observables
+- `src/api.py` : Precomputed tables, chirality register, word signatures, Walsh helpers, and public algebra API
+- `src/kernel.py` : Reference kernel execution and replay surfaces
+- `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
+- `src/tools/gyrolabe/` : Native CPU/OpenCL backend, packed tensor engine, Bolmo bridge, and benchmarks
+- `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
+- `docs/` : Specifications, reports, architecture notes, and supporting theory
+- `tests/` : Exhaustive verification suites for kernel physics, aQPU properties, SDK surfaces, and governance measurement
 
 ---
 
@@ -185,20 +201,21 @@ If you're evaluating this work for research, policy, or implementation:
 ### Install
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
+### SDK and Native Backend
+The public SDK surface is exposed through `src/sdk.py`. The native compute backend lives in `src/tools/gyrolabe/` and is used automatically when available to accelerate algebraic workloads.
+
 ### AIR Console (Browser-based UI)
 The Console provides a browser-based interface for managing project contracts:
 
 ```bash
-# First-time setup: install dependencies and build atlas
+# First-time setup: install dependencies and initialise the kernel transition table
 python air_installer.py
 
 # Run the console (starts both backend and frontend)
 python air_console.py
 ```
 
-The console will be available at `http://localhost:5173` (frontend proxies API requests to backend on port 8000).
-
-The installer automatically builds the atlas and initialises the project structure, so you are ready to start creating projects immediately.
+The console will be available at `http://localhost:5173` (frontend proxies API requests to backend on port 8000). The installer automatically initialises the kernel transition table and project structure, so you are ready to start creating projects immediately.
 
 See the [Console README](src/app/console/README.md) for detailed architecture, API endpoints, and development information.
 
@@ -209,16 +226,9 @@ The CLI provides a command-line workflow for syncing and verifying projects:
 python air_cli.py
 ```
 
-This runs: **Auto-build Atlas → Compile Projects → Generate Reports → Verify Bundles**. 
+This runs: **Compile Projects -> Generate Reports -> Verify Bundles**. 
 
 The CLI is optional if you are using the Console, but useful for batch operations, automation, or when working without a browser interface.
-
-### Build the Atlas (Manual)
-The atlas compiles the kernel physics into three artefacts: ontology, epistemology, and phenomenology.
-
-```bash
-python -m src.router.atlas --out data/atlas
-```
 
 ### Run Tests
 ```bash
@@ -228,11 +238,10 @@ python -m pytest -v -s tests/
 ### Programmatic Usage
 
 ```python
-from pathlib import Path
 from src.app.coordination import Coordinator
 from src.app.events import Domain, EdgeID, GovernanceEvent
 
-c = Coordinator(Path("data/atlas"))
+c = Coordinator()
 
 # Shared-moment stepping
 c.step_bytes(b"Hello world")
@@ -253,8 +262,8 @@ c.apply_event(
 )
 
 status = c.get_status()
-print(status.kernel)
-print(status.apertures)
+print(status.kernel)      # current kernel state
+print(status.apertures)   # per-domain balance (cycle vs gradient) for Economy, Employment, Education
 ```
 
 ---
@@ -268,9 +277,9 @@ MIT Licence - see [LICENSE](LICENSE) for details.
 ## 📖 Citation
 
 ```bibtex
-@software{GGG_ASI_AR_2026,
+@software{Gyroscopic_ASI_2026,
   author = {Basil Korompilias},
-  title = {GGG ASI Alignment Router},
+  title = {Gyroscopic ASI aQPU Kernel},
   year = {2026},
   url = {https://github.com/gyrogovernance/superintelligence},
   note = {Deterministic routing kernel for Post-AGI coordination through physics-based state transitions and canonical observables}
@@ -296,4 +305,3 @@ MIT Licence - see [LICENSE](LICENSE) for details.
   <p>Responsibility for the validity, coherence, and ethical direction of this project remains fully human.</p>
   <p><strong>Acknowledgements:</strong><br>
   This project benefited from AI language model services accessed through LMArena, Cursor IDE, OpenAI (ChatGPT), Anthropic (Opus), and Google (Gemini).</p>
-

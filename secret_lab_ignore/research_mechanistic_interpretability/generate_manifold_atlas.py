@@ -70,7 +70,7 @@ def main():
     print(f"Loading OLMo from {MODEL_DIR}...")
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_DIR,
-        torch_dtype=DTYPE,
+        dtype=DTYPE,
         low_cpu_mem_usage=True,
     ).to(DEVICE)
     model.eval()

@@ -36,19 +36,18 @@ def run_aci(cwd=None) -> tuple[int, str, str]:
 
 
 def cleanup_data():
-    """Clean up test data (programs, bundles, reports) but preserve atlas."""
+    """Clean up test data (programs, bundles, reports)."""
     data_dir = Program_ROOT / "data"
     if not data_dir.exists():
         return
 
-    # Remove programs directory (but not atlas)
     programs_dir = data_dir / "programs"
     if programs_dir.exists():
         shutil.rmtree(programs_dir)
 
 
-def test_a_cold_start_builds_atlas_and_templates():
-    """Test A: Cold start builds atlas + templates."""
+def test_a_cold_start_builds_workspace_and_templates():
+    """Test A: Cold start builds workspace directories and templates."""
     cleanup_data()
 
     exit_code, stdout, stderr = run_aci()
@@ -57,61 +56,85 @@ def test_a_cold_start_builds_atlas_and_templates():
         print(f"STDERR:\n{stderr}")
     assert exit_code == 0, f"Exit code {exit_code}, stderr: {stderr}, stdout: {stdout[:500]}"
 
-    # Check atlas files
-    atlas_dir = Program_ROOT / "data" / "atlas"
-    required_files = ["ontology.npy", "epistemology.npy", "phenomenology.npz"]
-    for f in required_files:
-        assert (atlas_dir / f).exists(), f"Missing atlas file: {f}"
-
     # Check template
     template = Program_ROOT / "data" / "programs" / "_template.md"
     assert template.exists(), "Missing program template"
 
+    # Check workspace directories
+    assert (Program_ROOT / "data" / "programs").exists(), "Missing programs directory"
+    assert (Program_ROOT / "data" / "programs" / ".aci").exists(), "Missing .aci directory"
+    assert (Program_ROOT / "data" / "programs" / "bundles").exists(), "Missing bundles directory"
+
 
 def test_b_compile_program_into_artifacts():
     """Test B: Compile a program into .aci + bundle + report."""
-    # Create test program
+    # Create test program using bracket notation format
     programs_dir = Program_ROOT / "data" / "programs"
     programs_dir.mkdir(parents=True, exist_ok=True)
 
     program_md = programs_dir / "test-program.md"
-    program_content = """---
-program_name: Test Program
-program_slug: test-program
-sponsor: Test Lab
-created_at: 2025-01-01T00:00:00Z
-
-attestations:
-  - id: att_001
-    unit: daily
-    domain: economy
-    human_mark: Governance Traceability Displacement
-    gyroscope_work: Governance Management
-    evidence_links: []
-    note: "Test attestation"
-  
-  - id: att_002
-    unit: sprint
-    domain: employment
-    human_mark: Information Variety Displacement
-    gyroscope_work: Information Curation
-    evidence_links: []
-    note: "Sprint attestation"
-
-computed:
-  last_synced_at: null
-  apertures: {}
-  event_count: 0
-  kernel:
-    step: 0
-    state_index: 0
-    state_hex: ""
+    program_content = """# GyroGovernance Program Contract
 
 ---
+## Domains
+---
 
-# Test Program
+Economy (CGM operations): [1]
+Employment (Gyroscope work): [1]
+Education (THM capacities): [0]
 
-Test program description.
+---
+## Unit Specification
+---
+
+Unit: [daily]
+
+---
+## PARTICIPANTS
+---
+
+### Agents
+
+Test User
+
+### Agencies
+
+Test Lab
+
+---
+## COMMON SOURCE CONSENSUS
+---
+
+All Artificial categories of Authority and Agency are Indirect
+originating from Human Intelligence.
+
+---
+## ALIGNMENT & DISPLACEMENT BY PRINCIPLE
+---
+
+### Governance Management Traceability (GMT)
+---
+
+GMT Alignment Incidents: [1]
+GTD Displacement Incidents: [1]
+
+### Information Curation Variety (ICV)
+---
+
+ICV Alignment Incidents: [0]
+IVD Displacement Incidents: [1]
+
+### Inference Interaction Accountability (IIA)
+---
+
+IIA Alignment Incidents: [0]
+IAD Displacement Incidents: [0]
+
+### Intelligence Cooperation Integrity (ICI)
+---
+
+ICI Alignment Incidents: [0]
+IID Displacement Incidents: [0]
 """
     program_md.write_text(program_content, encoding="utf-8")
 
@@ -170,9 +193,8 @@ def test_c_tamper_detection():
                     data = b"\xff" + data[1:] if len(data) > 0 else b"\xff"
                 dst.writestr(item, data)
 
-    # Test verify_bundle directly (CLI would overwrite, so we test the library function)
-    atlas_dir = Program_ROOT / "data" / "atlas"
-    assert not store.verify_bundle(atlas_dir, tampered), "Tampered bundle should fail verification"
+    # Test verify_bundle directly
+    assert not store.verify_bundle(tampered), "Tampered bundle should fail verification"
 
     # Clean up
     tampered.unlink()
@@ -185,50 +207,74 @@ def test_c_tamper_detection():
 
 def test_d_determinism():
     """Test D: Determinism."""
-    # Ensure test program exists (program_id will be auto-generated in .aci/ on first sync)
+    # Ensure test program exists
     programs_dir = Program_ROOT / "data" / "programs"
     programs_dir.mkdir(parents=True, exist_ok=True)
 
     program_md = programs_dir / "test-program.md"
     if not program_md.exists():
-        # Create program (program_id will be auto-generated in .aci/ on first sync)
-        program_content = """---
-program_name: Test Program
-program_slug: test-program
-sponsor: Test Lab
-created_at: 2025-01-01T00:00:00Z
-
-attestations:
-  - id: att_001
-    unit: daily
-    domain: economy
-    human_mark: Governance Traceability Displacement
-    gyroscope_work: Governance Management
-    evidence_links: []
-    note: "Test attestation"
-  
-  - id: att_002
-    unit: sprint
-    domain: employment
-    human_mark: Information Variety Displacement
-    gyroscope_work: Information Curation
-    evidence_links: []
-    note: "Sprint attestation"
-
-computed:
-  last_synced_at: null
-  apertures: {}
-  event_count: 0
-  kernel:
-    step: 0
-    state_index: 0
-    state_hex: ""
+        program_content = """# GyroGovernance Program Contract
 
 ---
+## Domains
+---
 
-# Test Program
+Economy (CGM operations): [1]
+Employment (Gyroscope work): [1]
+Education (THM capacities): [0]
 
-Test program description.
+---
+## Unit Specification
+---
+
+Unit: [daily]
+
+---
+## PARTICIPANTS
+---
+
+### Agents
+
+Test User
+
+### Agencies
+
+Test Lab
+
+---
+## COMMON SOURCE CONSENSUS
+---
+
+All Artificial categories of Authority and Agency are Indirect
+originating from Human Intelligence.
+
+---
+## ALIGNMENT & DISPLACEMENT BY PRINCIPLE
+---
+
+### Governance Management Traceability (GMT)
+---
+
+GMT Alignment Incidents: [1]
+GTD Displacement Incidents: [1]
+
+### Information Curation Variety (ICV)
+---
+
+ICV Alignment Incidents: [0]
+IVD Displacement Incidents: [1]
+
+### Inference Interaction Accountability (IIA)
+---
+
+IIA Alignment Incidents: [0]
+IAD Displacement Incidents: [0]
+
+### Intelligence Cooperation Integrity (ICI)
+---
+
+ICI Alignment Incidents: [0]
+IID Displacement Incidents: [0]
 """
         program_md.write_text(program_content, encoding="utf-8")
 
@@ -251,10 +297,8 @@ Test program description.
     # Remove non-deterministic fields for comparison
     bundle_json1.pop("generated_at", None)
     bundle_json2.pop("generated_at", None)
-    # program_md_sha256 changes because program.md is updated with last_synced_at on each run
     bundle_json1["logs"].pop("program_md_sha256", None)
     bundle_json2["logs"].pop("program_md_sha256", None)
-    # Report hashes are deterministic but derived from bytes/events, so remove for comparison
     bundle_json1["logs"].pop("report_json_sha256", None)
     bundle_json2["logs"].pop("report_json_sha256", None)
     bundle_json1["logs"].pop("report_md_sha256", None)
@@ -270,13 +314,10 @@ Test program description.
 def test_e_skipped_attestations_in_report():
     """
     Test E: Skipped attestations appear in report.
-    
-    NOTE: With bracket notation format, invalid attestations are not possible
-    at the parse level (bracket values are just integers). However, the report
-    structure still includes skipped_attestations field for compatibility.
-    This test verifies the field exists in the report structure.
+
+    With bracket notation format, invalid attestations are not possible
+    at the parse level. This test verifies the field exists in the report structure.
     """
-    # Create program with valid bracket notation
     programs_dir = Program_ROOT / "data" / "programs"
     program_md = programs_dir / "test-skip.md"
     program_content = """# Test Skip Program
@@ -340,12 +381,10 @@ Test program for skipped attestations report structure.
 
     report_data = json.loads(report_json.read_text())
 
-    # Verify skipped_attestations field exists in compilation section
     assert "compilation" in report_data, "Report missing compilation section"
     assert "skipped_attestations" in report_data["compilation"], "Report missing skipped_attestations field"
 
     skipped = report_data["compilation"]["skipped_attestations"]
-    # With bracket notation, all attestations are valid, so skipped should be empty
     assert isinstance(skipped, list), "skipped_attestations should be a list"
 
     # Clean up test program
@@ -362,7 +401,7 @@ def main():
     results = []
 
     tests = [
-        ("Cold Start", test_a_cold_start_builds_atlas_and_templates),
+        ("Cold Start", test_a_cold_start_builds_workspace_and_templates),
         ("Program Compilation", test_b_compile_program_into_artifacts),
         ("Tamper Detection", test_c_tamper_detection),
         ("Determinism", test_d_determinism),

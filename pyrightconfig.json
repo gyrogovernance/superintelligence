@@ -57,7 +57,7 @@
     "research/memories/models",
 
     "**/__pycache__",
-    "**/backup",
+    "**/_backup",
     "**/*.py[cod]",
     "**/*$py.class",
     "**/*.so",
@@ -168,6 +168,8 @@
     
     "last-test-run.txt",
     "last_test_run.txt",
+
+    "data/models",
 
     "data/models/Bolmo-1B",
     "data/models/Bolmo-1B-vendor",

@@ -1,6 +1,6 @@
 (.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/research_mechanistic_interpretability/gyroscopic_tomography.py
 Loading OLMo from data\models\Olmo-3-7B-Instruct...
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 2785.21it/s, Materializin
 Loaded in 1.0s  hidden=4096  layers=32  heads=32
 =====
@@ -37,7 +37,7 @@ Total time: 23.0 min
 (.venv) PS F:\Development\superintelligence> 
 
 (.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/research_mechanistic_interpretability/gyroscopic_tomography.py
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 3244.70it/s, Materializin
 Loaded OLMo in 0.8s  hidden=4096  layers=32  heads=32
 =====

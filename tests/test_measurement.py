@@ -27,7 +27,7 @@ from src.app.ledger import (
     get_projections,
     hodge_decomposition,
 )
-from src.tools.frameworks import ToolContext, THMDisplacementTool
+from src.tools.main.frameworks import ToolContext, THMDisplacementTool
 
 
 class TestMeasurementCollapse:

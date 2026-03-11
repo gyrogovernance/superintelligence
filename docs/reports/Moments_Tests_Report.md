@@ -1,42 +1,49 @@
-# Moments Economy Tests Report
+# Moments Economy and Genealogy Verification Report
+## Gyroscopic ASI aQPU Kernel
 
-**Status:** All tests passing (28/28)
+This report documents the economic medium and genealogy certification layer of the Gyroscopic ASI aQPU Kernel, validating the complete chain from physical constants through the compact kernel to the settlement medium and depth-4 frame certification. The Gyroscopic architecture achieves quantum advantage through exact algebraic structure on standard silicon; this report verifies that the economic and certification layers inherit and preserve that exactness.
+
+**Status:** All tests passing (88/88)
 
 ---
 
 ## Executive Summary
 
-The Moments Economy test suite validates the complete chain from physical constants through the Router kernel to the economic substrate. All 28 tests pass, confirming:
+The Moments Economy and Genealogy test suite validates the complete chain from physical constants through the compact kernel to the economic medium and the genealogy certification layer. All 88 tests pass across four files, confirming:
 
-1. **Physical Foundation:** The CSM capacity derivation is mathematically sound and invariant under choice of speed of light.
-2. **Router Structure:** The ontology Ω = C × C with |Ω| = 65,536 states exhibits the required symmetries for uniform capacity distribution.
+1. **Physical Foundation:** The CSM capacity derivation is mathematically sound, invariant under choice of speed of light, and grounded in the cesium-133 hyperfine transition frequency.
+2. **aQPU Kernel Structure:** The reachable state space Omega has 4,096 states with a 64-state horizon satisfying the holographic identity |H|^2 = |Omega|. The aQPU Kernel realizes exact stabilizer-class quantum dynamics on a paired 6-spin system.
 3. **Economic Parameters:** MU, UHI, and tier definitions are internally consistent and match the specification.
-4. **Substrate Integrity:** Shells, Archives, identity anchors, and meta-routing behave deterministically with tamper-evidence.
+4. **Medium Integrity:** Identity Anchors, Grants, Shells, Archives, and meta-routing behave deterministically with tamper evidence.
+5. **Genealogy Certification:** Depth-4 frame records provide strictly stronger certification than final-state-only seals, with exact divergence localization.
+6. **Operator Algebra:** Byte actions form exact Clifford unitaries over a self-dual [12,6,2] code, generating an 8,192-element operator family with a central spinorial involution.
 
 ---
 
 ## Test Suite Architecture
 
-The test suite is organized into three files with distinct responsibilities:
+The test suite is organized into four files with distinct responsibilities:
 
-| File | Purpose | Tests | Atlas Required |
-|------|---------|-------|----------------|
-| `test_moments_2.py` | Conversion lattice proofs (physics → capacity) | 6 | Yes |
-| `test_moments.py` | Economic architecture and narrative alignment | 13 | No |
-| `test_substrate.py` | End-to-end substrate correctness | 9 | Yes |
+| File | Purpose | Tests |
+|------|---------|-------|
+| `test_moments_economy.py` | Economic definitions, capacity, and settlement medium | 27 |
+| `test_moments_genealogy.py` | Depth-4 frame commitments, genealogy integrity, golden vectors | 26 |
+| `test_moments_physics_1.py` | Physical capacity, 6-spin isomorphism, frame certification | 16 |
+| `test_moments_physics_2.py` | Clifford algebra, stabilizers, Weyl algebra, operator family | 19 |
 
-### Running the Suite
+Shared helpers (Identity Anchors, Grants, Shells) live in `tests/_moments_utils.py` and are imported by both economy and genealogy test files.
 
-**Unified execution (recommended):**
+**Running the suite:**
+
 ```bash
-python tests/test_substrate.py
-```
+# All 88 tests
+python -m pytest tests/test_moments_economy.py tests/test_moments_genealogy.py tests/test_moments_physics_1.py tests/test_moments_physics_2.py -v -s
 
-**Individual file execution:**
-```bash
-python -m pytest tests/test_moments.py -v -s
-python -m pytest tests/test_moments_2.py -v -s
-python -m pytest tests/test_substrate.py -v -s
+# Economy and genealogy only (no physics dependencies)
+python -m pytest tests/test_moments_economy.py tests/test_moments_genealogy.py -v -s
+
+# Physics only
+python -m pytest tests/test_moments_physics_1.py tests/test_moments_physics_2.py -v -s
 ```
 
 ---
@@ -47,51 +54,45 @@ python -m pytest tests/test_substrate.py -v -s
 
 | Constant | Value | Source |
 |----------|-------|--------|
-| `ATOMIC_HZ_CS133` | 9,192,631,770 Hz | SI second definition (Cs-133 hyperfine transition) |
-| `OMEGA_SIZE` | 65,536 | Router ontology cardinality (proven as 256² = C × C) |
-| `SPEED_OF_LIGHT` | 299,792,458 m/s | SI constant (cancels in derivation) |
+| f_Cs | 9,192,631,770 Hz | SI second definition (Cs-133 hyperfine transition) |
+| \|Omega\| | 4,096 | aQPU Kernel reachable state space (BFS-verified) |
+| \|H\| | 64 | Horizon set (fixed points of reference byte) |
 
 ### CSM Capacity Derivation
 
-The Common Source Moment (CSM) capacity is derived from physical first principles:
+The Common Source Moment (CSM) capacity is derived from physical first principles.
 
 **Step 1: Raw Physical Microcells**
 
-The 1-second causal container (light-sphere) has volume:
-```
-V_1s = (4/3)π (c × 1s)³
-```
-
-The atomic wavelength cell volume:
-```
-λ_Cs = c / f_Cs
-v_micro = λ_Cs³
-```
-
-The raw microcell count:
-```
-N_phys = V_1s / v_micro = (4/3)π f_Cs³
-```
-
-**Critical Property:** The speed of light `c` cancels exactly. This is stress-tested in `test_physical_microcell_count_closed_form_and_c_cancellation`.
-
-**Verified Values:**
-```
-N_phys = 3.253930 × 10³⁰
-```
-
-**Step 2: Router Coarse-Graining**
-
-The uniform division by |Ω| is forced by symmetry:
-- The Router's 2-byte action is transitive (proven bijective from any start state)
-- Physical isotropy of the light-sphere requires no preferred direction
-- The unique symmetry-invariant measure is uniform
+The 1-second causal container (light-sphere) has volume V = (4/3)pi(c * 1s)^3. The atomic wavelength cell volume is lambda_Cs^3 = (c / f_Cs)^3. The raw microcell count:
 
 ```
-CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU
+N_phys = V / lambda^3 = (4/3)pi * f_Cs^3 = 3.253930 * 10^30
 ```
 
-CSM is the total structural capacity derived from the phase space volume of a 1-second light-sphere at atomic resolution, coarse-grained by the Router ontology. The "1 second" is consumed in the derivation of N_phys (the light-sphere volume calculation). CSM is the total structural capacity ceiling.
+The speed of light c cancels exactly. This is stress-tested with c, 2c, and 0.1c in `test_c_cancellation_unchanged`, confirming relative error below 10^-14.
+
+**Step 2: aQPU Kernel Coarse-Graining**
+
+The uniform division by |Omega| = 4,096 yields the Common Source Moment:
+
+```
+CSM = N_phys / |Omega| = 7.944165 * 10^26 MU
+```
+
+### Boundary vs Volume Capacity
+
+The aQPU Kernel satisfies the holographic identity |H|^2 = |Omega| (64^2 = 4096). This implies a specific relationship between boundary-normalized and volume-normalized capacities:
+
+```
+N_vol  = (4/3)pi * f_Cs^3 = 3.253930 * 10^30
+N_area = 4pi * f_Cs^2     = 1.061915 * 10^21
+CSM_vol  = N_vol / |Omega| = 7.944165 * 10^26
+CSM_area = N_area / |H|    = 1.659242 * 10^19
+Ratio = CSM_vol / CSM_area = f_Cs / (3 * |H|) = f_Cs / 192 = 47,878,290.47
+```
+
+Both normalizations are verified. The spatial cell model is adopted as the normative capacity model.
 
 ### Capacity Coverage Analysis
 
@@ -99,89 +100,39 @@ CSM is the total structural capacity derived from the phase space volume of a 1-
 |--------|-------|
 | Global population | 8,100,000,000 |
 | UHI per person per year | 87,600 MU |
-| Global UHI demand per year | 7.0956 × 10¹⁴ MU |
-| CSM total capacity | 4.965103 × 10²⁵ MU |
-| **Coverage (years)** | **7.00 × 10¹⁰ years** (70 billion years) |
-| **Annual usage (% of total)** | **1.43 × 10⁻⁹%** |
+| Global UHI demand per year | 7.096 * 10^14 MU |
+| CSM total capacity | 7.944 * 10^26 MU |
+| **Coverage (years)** | **1.12 * 10^12 years** (1.12 trillion years) |
+| **Annual usage (% of total)** | **8.93 * 10^-11 %** |
 
-**Interpretation:** CSM capacity can support global UHI for approximately 70 billion years (5× the age of the universe). Capacity is not a binding constraint on any human timescale.
+CSM capacity can support global UHI for over one trillion years. Capacity is not a binding constraint on any human timescale.
 
 ---
 
-## Part II: Router Structure Proofs
+## Part II: 6-Spin Isomorphism and Physical Structure
 
-### Test: Ω = C × C Structure
+### Spin Representation
 
-**File:** `test_moments_2.py::test_router_omega_is_cartesian_product_CxC`
+Each 12-bit component maps exactly to a 6-spin vector in {-1, +1} via dipole pairs. The isomorphism is verified as exact on all 4,096 states in Omega (`test_roundtrip_on_all_omega`).
 
-In mask coordinates (u,v) relative to archetype:
-- `u = A XOR ARCHETYPE_A12`
-- `v = B XOR ARCHETYPE_B12`
+### Transition Law in Spin Coordinates
 
-**Verified:**
+For a byte with intron bits alpha = intron & 1 and beta = (intron >> 7) & 1, mask m, and flip vector F:
+
 ```
-|Ω| = 65,536
-|u_set| = 256
-|v_set| = 256
-|C| = 256 (mask code from bytes)
-u_set == C: True
-v_set == C: True
+s_A' = (-1)^alpha * s_B
+s_B' = (-1)^beta * diag((-1)^F) * s_A
 ```
 
-The ontology is exactly the Cartesian product of the 256-element mask code with itself.
+This is verified against the bit-level kernel for all 256 bytes from rest (`test_transition_in_spin_coordinates`) and for 200 random Omega states with 10 bytes each (`test_transition_on_random_omega_states`).
 
-### Test: Strong Isotropy (Uniform d = u⊕v)
+### Magnetization
 
-**File:** `test_moments_2.py::test_difference_distribution_is_exactly_uniform_over_C`
+Total magnetization M = sum(s_A) + sum(s_B) takes 13 distinct values on Omega: {-12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12}. The rest state has magnetization 0. All 13 values are reachable from rest in a single step.
 
-The distribution of `d = u XOR v` across all 65,536 states:
-- For every `d ∈ C`: count(d) = exactly 256
-- For every `d ∉ C`: count(d) = 0
+### Correlation Matrix
 
-**Verified:**
-```
-Nonzero d values: 256
-Support equals C: True
-All nonzero counts == 256: True
-```
-
-This is the exact "no privileged direction" statement required for uniform capacity distribution.
-
-### Test: Regular 2-Byte Action (Measure Forcing)
-
-**File:** `test_moments_2.py::test_two_byte_words_form_bijection_to_omega_from_any_start`
-
-For any start state `s`, the map `(x,y) → T_y(T_x(s))` is a bijection onto Ω.
-
-**Verified for multiple start states:**
-
-| Start Index | Unique Outputs | Bijective |
-|-------------|----------------|-----------|
-| 43605 (archetype) | 65,536 | Yes |
-| 32768 (mid) | 65,536 | Yes |
-| 65535 (last) | 65,536 | Yes |
-| 30599 (random) | 65,536 | Yes |
-| 6298 (random) | 65,536 | Yes |
-| 47773 (random) | 65,536 | Yes |
-
-**Implication:** The even-word subgroup acts regularly (free + transitive). Given transitivity, any symmetry-invariant measure must be uniform. Therefore `CSM = N_phys / |Ω|` is the unique symmetry-respecting capacity allocation.
-
-### Test: Holographic Boundary-to-Bulk Coverage
-
-**File:** `test_moments_2.py::test_horizon_one_step_neighborhood_covers_full_bulk`
-
-The horizon set H (fixed points of byte 0xAA) satisfies:
-- `|H| = 256`
-- `{T_b(h) : h ∈ H, b ∈ bytes} = Ω`
-
-**Verified:**
-```
-|H| = 256
-Unique next states from H: 65,536
-Covers full Ω: True
-```
-
-The horizon encodes the boundary; one byte step reaches the entire bulk.
+The 12-spin correlation matrix C_ij = <s_i * s_j> averaged over Omega is exactly the identity matrix within each block (A-A and B-B) and exactly zero in the cross-block (A-B). This means spins within each component are uncorrelated over Omega, and spins across components are uncorrelated over Omega.
 
 ---
 
@@ -189,488 +140,315 @@ The horizon encodes the boundary; one byte step reaches the entire bulk.
 
 ### MU Definition and Base Rate
 
-**File:** `test_moments.py::test_mu_definition_and_base_rate_base60`
-
-The base-60 anchor:
 ```
-1 MU per minute
-60 MU per hour
+1 MU = 1 minute at base rate
+60 MU = 1 hour at base rate
 ```
-
-**Verified:** `MU_PER_MINUTE = 1`, `MU_PER_HOUR = 60`
 
 ### UHI (Unconditional High Income)
 
-**File:** `test_moments.py::test_uhi_amounts_daily_and_annual`
-
-UHI definition: 4 hours per day at base rate, every day.
-
-| Period | Amount |
-|--------|--------|
-| Daily | 4 × 60 = 240 MU |
-| Annual | 240 × 365 = 87,600 MU |
-
-**Verified:** `UHI_PER_DAY = 240`, `UHI_PER_YEAR = 87,600`
+```
+UHI daily  = 4 hours * 60 MU/hour = 240 MU
+UHI annual = 240 * 365 = 87,600 MU
+```
 
 ### Tier Structure
 
-**File:** `test_moments.py::test_tier_multipliers_from_uhi`
-
-Tiers are defined as multiples of UHI:
-
 | Tier | Multiplier | Annual MU |
 |------|------------|-----------|
-| 1 | 1× | 87,600 |
-| 2 | 2× | 175,200 |
-| 3 | 3× | 262,800 |
-| 4 | 60× | 5,256,000 |
+| 1 | 1x | 87,600 |
+| 2 | 2x | 175,200 |
+| 3 | 3x | 262,800 |
+| 4 | 60x | 5,256,000 |
 
-**Verified:** All tier amounts match specification.
+Tier 4 admits the mnemonic: 4 hours/day = 14,400 seconds/day, 14,400 * 365 = 5,256,000.
 
-### Tier 4 Mnemonic
-
-**File:** `test_moments.py::test_tier4_accessible_mnemonic_one_per_second_for_four_hours_day`
-
-Tier 4 = 5,256,000 MU/year admits an accessible mnemonic:
-```
-4 hours/day = 14,400 seconds/day
-14,400 × 365 = 5,256,000
-```
-
-**Verified:** `TIER_4 == 14,400 × 365`
-
-### Work Week Clarification
-
-**File:** `test_moments.py::test_illustrative_work_week_is_not_the_definition_of_tiers`
-
-A common confusion is prevented: tiers are defined by UHI multipliers, not by work schedules.
-
-```
-Illustrative 4h/day × 4d/week × 52 weeks = 49,920 MU/year
-Tier 2 increment = +87,600 MU/year
-```
-
-These are different by design. **Verified:** `49,920 ≠ 87,600`
-
-### Aperture Shadow
-
-**File:** `test_moments.py::test_aperture_shadow_a_kernel_close_to_a_star`
-
-The Router has an intrinsic discrete aperture:
-```
-A_kernel = 5/256 = 0.01953125
-A* (CGM target) = 0.020699553813
-Relative difference: 5.644%
-```
-
-**Verified:** Within 10% tolerance (conservative bound).
-
----
-
-## Part IV: Abundance and Resilience
-
-### Coverage Demonstration
-
-**File:** `test_moments.py::test_millennium_uhi_feasibility_under_csm`
-
-**Test Output:**
-```
-CSM = N_phys / |Ω| (fixed total capacity)
-Population:                      8,100,000,000
-UHI per person per year (MU):    87,600
-Global UHI demand per year (MU): 709.56 trillion (709,560,000,000,000)
-CSM total capacity (MU):         49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-Coverage (years):                7.00e+10 years
-Annual usage (% of total):       1.43e-09%
-```
-
-**Verified:** `coverage_years > 1e10` (70 billion years)
+Tiers are defined by UHI multipliers, not by work schedules. An illustrative 4h/day, 4d/week, 52 weeks schedule gives 49,920 MU/year, which is different from the Tier 2 increment of 87,600 MU/year by design.
 
 ### Adversarial Resilience
 
-**File:** `test_moments.py::test_resilience_margin_and_adversarial_threshold`
-
-**Test Output:**
-```
-CSM total capacity:              49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-Global UHI demand per year:      709.56 trillion (709,560,000,000,000)
-Annual usage (% of total):       0.00%
-
-Adversarial threshold (1% of total capacity):
-  Required fraudulent demand:    496,510.31 quintillion (496,510,309,254,366,974,967,808) MU
-  Multiple of annual demand:     699743938.86×
-
-Interpretation:
-  An adversary would need to successfully issue approximately
-  699,743,939× the entire global annual UHI
-  to consume just 1% of total capacity.
-  This is operationally impossible.
-```
-
-**Verified:** `adversarial_multiplier > 10_000` (699,743,939×)
+An adversary would need to successfully issue approximately 11,195,903,022 times the entire global annual UHI to consume just 1% of total capacity. This is operationally impossible.
 
 ### Realistic Tier Distribution Analysis
 
-**File:** `test_moments.py::test_realistic_tier_distribution_capacity_under_csm`
+| Scenario | Tier 1 | Tier 2 | Tier 3 | Tier 4 | Weighted Mult. | Coverage |
+|----------|--------|--------|--------|--------|----------------|----------|
+| Conservative | 95.0% | 4.0% | 0.9% | 0.1% | 1.117x | 1.00 * 10^12 years |
+| Plausible | 90.0% | 8.0% | 1.5% | 0.5% | 1.405x | 7.97 * 10^11 years |
+| Generous | 85.0% | 12.0% | 2.5% | 0.5% | 1.465x | 7.64 * 10^11 years |
 
-This test provides a statistically grounded analysis of capacity requirements under realistic tier distributions. It calculates weighted annual demand based on plausible population distributions across tiers, using the formula:
+All scenarios provide coverage exceeding 100 billion years.
 
-```
-Weighted multiplier = Σ(p_i × multiplier_i)
-Annual demand = Population × UHI × Weighted multiplier
-```
+### Notional Surplus Allocation
 
-where `p_i` is the population percentage at tier `i`.
-
-**Test Output:**
-```
-Population: 8,100,000,000
-CSM total capacity (MU): 49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-UHI baseline (MU/year): 87,600
-
-Conservative Distribution:
-  Tier 1 (1×): 95.0%
-  Tier 2 (2×): 4.0%
-  Tier 3 (3×): 0.9%
-  Tier 4 (60×): 0.1%
-  Weighted multiplier: 1.1170×
-  Weighted income per person: 97,849 MU/year
-  Annual demand (MU): 792.58 trillion (792,578,520,000,000)
-  Coverage (years): 6.26e+10
-  Annual usage (%): 1.60e-09%
-
-Plausible Distribution:
-  Tier 1 (1×): 90.0%
-  Tier 2 (2×): 8.0%
-  Tier 3 (3×): 1.5%
-  Tier 4 (60×): 0.5%
-  Weighted multiplier: 1.4050×
-  Weighted income per person: 123,078 MU/year
-  Annual demand (MU): 996.93 trillion (996,931,800,000,000)
-  Coverage (years): 4.98e+10
-  Annual usage (%): 2.01e-09%
-
-Generous Distribution:
-  Tier 1 (1×): 85.0%
-  Tier 2 (2×): 12.0%
-  Tier 3 (3×): 2.5%
-  Tier 4 (60×): 0.5%
-  Weighted multiplier: 1.4650×
-  Weighted income per person: 128,333 MU/year
-  Annual demand (MU): 1.04 quadrillion (1,039,505,399,999,999)
-  Coverage (years): 4.78e+10
-  Annual usage (%): 2.09e-09%
-```
-
-**Verified:**
-- All distributions sum to 100%
-- All scenarios have `coverage_years > 1e9` (billions of years)
-- Plausible distribution coverage: 49.8 billion years
-- Generous distribution coverage: 47.8 billion years
-- Weighted multipliers are in range [1.0, 60.0)
-
-This demonstrates that even with generous tier participation (0.5% at Tier 4), the CSM capacity provides ~48 billion years of coverage, confirming ample headroom for realistic governance scenarios.
-
-### Notional Capacity Allocation (12 Divisions)
-
-**File:** `test_moments.py::test_notional_surplus_allocation_12_divisions`
-
-CSM capacity can be notionally partitioned across 3 domains × 4 Gyroscope capacities after reserving 1,000 years of UHI:
-
-**Test Output:**
-```
-CSM total capacity:  49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-Reserved for UHI (1,000 years): 709.56 quadrillion (709,560,000,000,000,000)
-Divisions:           12 (3 domains × 4 capacities)
-Surplus (MU):        49,651,030.22 quintillion (49,651,030,215,876,693,249,228,800)
-Per division:        4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-```
-
-**Verified:** 12 divisions, all with positive allocation.
+CSM capacity can be notionally partitioned across 3 domains (Economy, Employment, Education) times 4 Gyroscope capacities = 12 divisions after reserving 1,000 years of global UHI. Each division receives approximately 6.62 * 10^25 MU.
 
 ---
 
-## Part V: Substrate Integrity
+## Part IV: Settlement Medium Integrity
 
-### Shell and Archive Determinism
+### Identity Anchors
 
-**File:** `test_substrate.py::test_01_shell_and_archive_integrity`
+An Identity Anchor is a pair: (SHA-256 hash of name, aQPU Kernel state after routing the hash from rest).
 
-Shells are time-bounded capacity containers with deterministic seals:
+- Same name always produces the same anchor (determinism).
+- Different names produce different anchors (separation).
+- The kernel anchor is a valid 6-character hex aQPU Kernel state.
 
-**Verified Properties:**
-- Same grants → same seal (replay determinism)
-- Tampered grants → different seal (tamper evidence)
-- Archive aggregation is deterministic across shells
+### Grants
 
-**Test Output:**
-```
-Shell seal: 5952e2
-Used capacity: 438,000 MU
-Total capacity: 1,000,000,000,000,000,000 MU
-Archive per-identity MU: {'alice': 525600, 'bob': 350400}
-```
+A Grant is a record of a single MU allocation: identity label, identity identifier, kernel anchor, and amount.
 
-### Horizon Structure (Dynamic Characterization)
+- Canonical receipt = identity_id || kernel_anchor || amount (46 bytes).
+- Same grant always produces the same receipt.
+- Different amounts produce different receipts.
 
-**File:** `test_substrate.py::test_02_horizon_structure_and_coverage`
+### Shells and Seals
 
-Cross-validates the horizon set using dynamic characterization (fixed points of T_0xAA):
+A Shell is a time-bounded capacity container. Its seal is computed by:
+1. Sorting grants by identity_id.
+2. Concatenating header + sorted canonical receipts.
+3. Routing the result through a fresh aQPU Kernel from the archetype.
+4. Recording the final state_hex (6 characters).
 
-**Verified:**
-```
-Horizon states: 256
-Reachable (1-step): 65,536
-A = B XOR 0xFFF for all horizon states
-Unique A values: 256
-```
+Verified properties:
+- **Determinism:** Same grants and header produce the same seal.
+- **Tamper evidence:** Changing any grant changes the seal.
+- **Header sensitivity:** Changing the header changes the seal.
+- **Order invariance:** Seal is invariant to the order grants are added (because they are sorted by identity_id before sealing).
+- **Capacity accounting:** Used and free capacity are correct.
 
-This complements `test_moments_2.py::test_horizon_one_step_neighborhood_covers_full_bulk` which uses algebraic characterization.
+### Shell Replay Verification
 
-### Identity Scaling
+The core verification procedure:
+1. Given published shell data (header, grants, seal).
+2. Independently reconstruct the canonical byte sequence.
+3. Route through a fresh aQPU Kernel from archetype.
+4. Compare: computed seal must match published seal.
 
-**File:** `test_substrate.py::test_03_trajectory_identity_scaling`
+Verified: published seal `6a596a` matches independently verified seal `6a596a`.
 
-Identity as (horizon, path) provides exponential scaling:
+### Archives
 
-| Path Length n | Distinct Identities |
-|---------------|---------------------|
-| 1 | 65,536 |
-| 2 | 16,777,216 |
-| 3 | 4,294,967,296 |
-| 4 | 1,099,511,627,776 |
-
-**Verified:** n=4 path length suffices for >10 billion global identities.
-
-### Parity Commitment
-
-**File:** `test_substrate.py::test_04_parity_commitment_and_reconstruction`
-
-The trajectory closed form:
-- O = XOR of masks at odd positions
-- E = XOR of masks at even positions
-- parity = length mod 2
-
-**Verified:** 4,096-byte trajectory reconstructed exactly from (O, E, parity) = 25 bits.
-
-### Tamper Detection
-
-**File:** `test_substrate.py::test_05_trajectory_tamper_detection`
-
-Parity commitment sensitivity to single-byte changes:
-
-**Verified:**
-```
-Trajectory length: 100 bytes
-Tampers detected: 100/100
-```
-
-### Dual Code Integrity
-
-**File:** `test_substrate.py::test_06_dual_code_integrity`
-
-The dual code C⊥ (16 elements) is orthogonal to all 256 mask codewords:
-- Valid masks: zero syndrome
-- Invalid patterns: non-zero syndrome (detected)
-
-**Verified:**
-```
-Dual code size: 16 elements
-Random corrupted patterns detected: 946/1000 (94.6%)
-```
+Archives aggregate Shells across periods. Per-identity totals and total usage are deterministic across independent constructions.
 
 ### Meta-Routing
 
-**File:** `test_substrate.py::test_07_meta_routing`
-
-Programme bundles are aggregated into a single root seal:
-
-**Verified Properties:**
-- Deterministic: same seals → same root
-- Permutation-invariant: reordering seals doesn't change root
-- Tamper-localizable: different leaf seal identifies which bundle changed
-
-**Test Output:**
-```
-Meta-root: 292252
-Permutation-invariant: True
-Tamper localized to leaf index: 1
-```
-
-### Component Isolation (A/B Separation)
-
-**File:** `test_substrate.py::test_08_component_isolation_and_rollback`
-
-Using separator lemmas and conjugation by reference byte (0xAA):
-- A-component: identity (stable under balance operations)
-- B-component: balance (updated by controlled operations)
-
-**Verified:**
-```
-Identity (A): 555 -> dbd (stable under balance ops)
-Balance  (B): 000 -> aaa (updated)
-Rollback recovers prior state: True
-```
+Multiple programme seals are aggregated into a single root seal.
+- Deterministic: same seals produce the same root.
+- Tamper-localizable: tampering with one bundle changes its leaf seal, and the diff identifies which bundle changed.
 
 ### Kernel Inverse Stepping
 
-**File:** `test_substrate.py::test_09_kernel_inverse_stepping`
-
-The kernel's `step_byte_inverse` method implements:
-```
-T_x^{-1} = R ∘ T_x ∘ R  where R = T_0xAA
-```
-
-**Verified:**
-```
-Payload: b'test payload'
-Forward steps: archetype -> 7780
-Inverse steps: 7780 -> archetype
-```
+Forward stepping followed by inverse stepping returns to the rest state exactly. This enables rollback of genealogies to any prior point given the byte sequence.
 
 ---
 
-## Part VI: Test Results Summary
+## Part V: Genealogy Certification
+
+### Depth-4 Frame Records
+
+The depth-4 frame record is the kernel-native certification atom. For 4 consecutive bytes (b0, b1, b2, b3), the frame record is:
+
+```
+(mask48, phi_a, phi_b)
+```
+
+where mask48 is the 48-bit payload projection (4 * 12-bit masks packed) and phi_a, phi_b are the net family-phase invariants that survive depth-4 closure.
+
+**Frame Record Properties:**
+- Deterministic: same 4 bytes always produce the same record.
+- Correct width: mask48 is 48-bit, phi_a and phi_b are single bits.
+- Sensitive: changing any single byte in a 4-byte frame always changes the record (4000/4000 detected).
+
+### Frame Commitments Are Strictly Stronger Than Final State
+
+This is the central result for genealogy certification.
+
+Different 4-byte histories can collapse to the same final 24-bit state. This is a consequence of the 128-way shadow projection (SO(3)/SU(2) double cover). But these colliding histories produce different frame records.
+
+Verified:
+- Out of 100,000 random 4-byte words from rest, all 4,096 reachable states were observed, and all 4,096 had multiple distinct frame records. That is: every state in Omega is reachable by words with different frame records.
+- Specific example found: words [184, 18, 133, 201] and [159, 8, 221, 172] both reach state 0x6a99a6 but have frame records (13417212804867, 1, 0) and (66808283197455, 0, 1) respectively.
+
+A genealogy using frame commitments detects history differences that state-only seals miss.
+
+### Divergence Localization
+
+When two byte logs diverge at byte position k, frame-level comparison localizes the divergence to frame k // 4.
+
+- All frames before the affected one match exactly.
+- The affected frame differs.
+- This holds for all 200 random test cases (200/200).
+
+Comparison with state-level detection over 500 test cases:
+- Frame comparison: 500/500 divergences detected and localized.
+- Final state comparison: 0/500 divergences missed in this sample (but the physics tests prove that state collisions exist in general).
+
+### Three Certification Layers
+
+A genealogy provides three independent certification layers:
+
+1. **Final state** (shared moment): 24-bit aQPU Kernel state for coordination.
+2. **Frame sequence** (depth-4 certification): sequence of (mask48, phi_a, phi_b) records.
+3. **Parity commitment** (algebraic integrity): (O, E, parity) where O and E are 12-bit XOR sums of masks at even/odd positions.
+
+All three are deterministic and independently computable from the byte log.
+
+Forked genealogies (shared prefix, different suffix) are detected at all three layers.
+
+### Parity Commitments
+
+The trajectory parity commitment (O, E, parity) from `src.api` satisfies:
+
+- Determinism: same payload always produces the same commitment.
+- Structural contract: when a byte change changes the 12-bit mask at position i, the commitment changes in O (if i is even) or E (if i is odd). Verified for all 40 positions in a test payload.
+- Correct structure: O and E are 12-bit integers, parity equals len(payload) mod 2.
+
+### Medium Policy Checks
+
+Application-layer policy conditions that the medium supports detecting:
+
+- **Duplicate identity:** A Shell with two grants to the same identity is structurally valid (seal computes), but the duplication is detectable by comparing identity_ids.
+- **Over-capacity:** A Shell where used capacity exceeds total capacity is structurally valid (seal computes), but the negative free capacity is detectable.
+- **Empty shell:** An empty Shell (no grants) produces a deterministic seal.
+
+### Genealogy Integration
+
+End-to-end genealogy tests confirm:
+- Two independent replays of the same byte log produce identical frame sequences and identical final states.
+- Forked genealogies are detected at state, frame, and parity layers.
+- Inverse replay recovers the rest state exactly.
+- Genealogy continuation is composable: frame_sequence(prefix + suffix) = frame_sequence(prefix) + frame_sequence(suffix) when both parts are frame-aligned.
+
+---
+
+## Part VI: Operator Algebra
+
+### Clifford Structure
+
+Every byte action is an exact Clifford unitary in the label space (u6, v6) over GF(2)^12. The action decomposes as:
+
+```
+f_b(x) = L(x) xor t_b
+```
+
+where L is the block swap on 6+6 bits and t_b is the translation part. This is verified exhaustively for all 256 bytes on all 4,096 labels (`test_formula_matches_kernel`).
+
+Clifford conjugation properties are verified:
+- U_b X(p) U_b^dag = X(L(p)) (all bytes, 20 random p per byte, all labels).
+- U_b Z(q) U_b^dag = (-1)^{q . L(t)} Z(L(q)) (all bytes, 20 random q per byte, all labels).
+
+### Self-Dual Code and Stabilizer
+
+The 64-element mask code is a self-dual [12,6,2] binary linear code. Six pair generators span the code (GF(2) rank 6).
+
+12 Pauli stabilizer generators (X(g_i) and Z(g_i) for 6 code generators) all commute (symplectic product zero for all pairs). The stabilizer has GF(2) rank 12, defining a unique stabilizer state on 12 qubits.
+
+### Finite Weyl Algebra
+
+On the code subspace:
+- X_d |x> = |x xor d>, Z_s |x> = (-1)^{s.x} |x>
+- Z_s X_d = (-1)^{s.d} X_d Z_s
+
+Verified for all combinations of 16 codewords from C64. Translations on the code close exactly under XOR.
+
+### Physical Capacity Models
+
+Two physical models are compared:
+
+```
+N_cells = (4/3)pi * f^3 = 3.254 * 10^30   (spatial cells)
+N_modes = (32pi^2/9) * f^3 = 2.726 * 10^31 (EM modes)
+N_modes / N_cells = 8pi/3 = 8.3776
+```
+
+The spatial cell model is adopted normatively. The EM mode model is noted as an alternative for future consideration.
+
+### Generated Operator Family
+
+The byte alphabet generates exactly 8,192 operators:
+
+- 4,096 even operators (identity linear part): realized by all length-2 words.
+- 4,096 odd operators (swap linear part): realized by prepending 0xAA to each even word.
+
+Operator signatures (parity, tau) compose by the semidirect-product law:
+
+```
+f_{p1,t1} . f_{p2,t2} = f_{p1 xor p2, L^{p1}(t2) xor t1}
+```
+
+Verified for 300 random word pairs.
+
+### Central Spinorial Involution
+
+For every micro_ref, the word consisting of all 4 families in order (0, 1, 2, 3) produces the same operator signature: global complement (tau = (111111 << 6) | 111111, parity = 0). This acts as x -> x xor tau on all 4,096 labels.
+
+The global complement is central: it commutes with every single-byte action (verified for all 256 bytes).
+
+### Depth-4 Frame Operator Quotient
+
+For fixed micro-references at 4 positions, 256 family assignments (4^4) collapse to exactly 4 distinct operator classes. Each class has multiplicity 64 and is indexed by (phi_a, phi_b) in (Z/2)^2.
+
+This is the depth-4 closure principle: 6 bits of family information cancel at depth 4, leaving only the 2-bit net phase.
+
+---
+
+## Part VII: Golden Vectors (Regression Anchors)
+
+The following pinned values serve as regression anchors. If any change, the kernel transition law or serialization has changed.
+
+| Object | Input | Expected Output |
+|--------|-------|-----------------|
+| Identity anchor (alice) | `"alice"` | `aaa559` |
+| Identity anchor (bob) | `"bob"` | `6955a9` |
+| Shell seal | header `b"golden:2026"`, alice 87600, bob 175200 | `9966aa` |
+| Meta-root | programs Alpha, Beta, Gamma | `555aa9` |
+| Frame record | [0x00, 0x42, 0xAA, 0xFF] | mask48 = 0x333F30000CCC, phi_a = 0, phi_b = 1 |
+| Parity commitment | `b"golden parity vector"` | O = 0xC0C, E = 0xCC0, parity = 0 |
+| Rest state | (initial) | state24 = 0xAAA555, hex = aaa555, A = aaa, B = 555 |
+
+---
+
+## Part VIII: Identity Scaling
+
+Identities are constructed as (horizon state, path of length n). With |H| = 64 and 128-way shadow projection per step:
+
+| Path length n | Distinct identities |
+|---------------|---------------------|
+| 1 | 8,192 |
+| 2 | 1,048,576 |
+| 3 | 134,217,728 |
+| 4 | 17,179,869,184 |
+| 5 | 2,199,023,255,552 |
+
+Path length n = 4 suffices for over 10 billion global identities.
+
+---
+
+## Test Results Summary
 
 ### Full Test Run Output
 
 ```
-(.venv) PS F:\Development\superintelligence> python tests/test_substrate.py   
-
-Running unified test suite: 3 files
-============================================================
-==================================== test session starts ====================================
-platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
-collected 28 items
-
-tests/test_moments.py::test_router_static_structure_anchors
-----------
-Router Anchors
-----------
-Ontology size |Ω|: 65,536
-Byte alphabet: 256
-PASSED
-tests/test_moments.py::test_aperture_shadow_a_kernel_close_to_a_star PASSED
-tests/test_moments.py::test_atomic_second_anchor_constant PASSED
-tests/test_moments.py::test_mu_definition_and_base_rate_base60 PASSED
-tests/test_moments.py::test_uhi_amounts_daily_and_annual PASSED
-tests/test_moments.py::test_tier_multipliers_from_uhi PASSED
-tests/test_moments.py::test_tier4_accessible_mnemonic_one_per_second_for_four_hours_day PASSED
-tests/test_moments.py::test_illustrative_work_week_is_not_the_definition_of_tiers PASSED
-tests/test_moments.py::test_csm_capacity_derivation PASSED
-tests/test_moments.py::test_millennium_uhi_feasibility_under_csm PASSED
-tests/test_moments.py::test_resilience_margin_and_adversarial_threshold
-----------
-Adversarial Resilience (CSM Total Capacity)
-----------
-CSM total capacity:              49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-Global UHI demand per year:      709.56 trillion (709,560,000,000,000)
-Annual usage (% of total):       0.00%
-
-Adversarial threshold (1% of total capacity):
-  Required fraudulent demand:    496,510.31 quintillion (496,510,309,254,366,974,967,808) MU
-  Multiple of annual demand:     699743938.86×
-
-Interpretation:
-  An adversary would need to successfully issue approximately
-  699,743,939× the entire global annual UHI
-  to consume just 1% of total capacity.
-  This is operationally impossible.
-PASSED
-tests/test_moments.py::test_realistic_tier_distribution_capacity_under_csm
-----------
-Realistic Tier Distribution Capacity Analysis
-----------
-Population: 8,100,000,000
-CSM total capacity (MU): 49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-UHI baseline (MU/year): 87,600
-
-Conservative Distribution:
-  Tier 1 (1×): 95.0%
-  Tier 2 (2×): 4.0%
-  Tier 3 (3×): 0.9%
-  Tier 4 (60×): 0.1%
-  Weighted multiplier: 1.1170×
-  Weighted income per person: 97,849 MU/year
-  Annual demand (MU): 792.58 trillion (792,578,520,000,000)
-  Coverage (years): 6.26e+10
-  Annual usage (%): 1.60e-09%
-
-Plausible Distribution:
-  Tier 1 (1×): 90.0%
-  Tier 2 (2×): 8.0%
-  Tier 3 (3×): 1.5%
-  Tier 4 (60×): 0.5%
-  Weighted multiplier: 1.4050×
-  Weighted income per person: 123,078 MU/year
-  Annual demand (MU): 996.93 trillion (996,931,800,000,000)
-  Coverage (years): 4.98e+10
-  Annual usage (%): 2.01e-09%
-
-Generous Distribution:
-  Tier 1 (1×): 85.0%
-  Tier 2 (2×): 12.0%
-  Tier 3 (3×): 2.5%
-  Tier 4 (60×): 0.5%
-  Weighted multiplier: 1.4650×
-  Weighted income per person: 128,333 MU/year
-  Annual demand (MU): 1.04 quadrillion (1,039,505,399,999,999)
-  Coverage (years): 4.78e+10
-  Annual usage (%): 2.09e-09%
-PASSED
-tests/test_moments.py::test_notional_surplus_allocation_12_divisions
-----------
-Notional Capacity Allocation (12 Divisions)
-----------
-CSM total capacity:  49,651,030.93 quintillion (49,651,030,925,436,695,349,297,152)
-Reserved for UHI (1,000 years): 709.56 quadrillion (709,560,000,000,000,000)
-Divisions:           12 (3 domains × 4 capacities)
-Surplus (MU):        49,651,030.22 quintillion (49,651,030,215,876,693,249,228,800)
-Per division:        4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-
-Sample divisions:
-  Economy      × GM    : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-  Economy      × ICu   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-  Economy      × IInter: 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-  Economy      × ICo   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-  Employment   × GM    : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-  Employment   × ICu   : 4,137,585.85 quintillion (4,137,585,851,323,057,591,812,096)
-PASSED
-tests/test_moments_2.py::test_physical_microcell_count_closed_form_and_c_cancellation PASSED
-tests/test_moments_2.py::test_router_omega_is_cartesian_product_CxC PASSED
-tests/test_moments_2.py::test_difference_distribution_is_exactly_uniform_over_C PASSED
-tests/test_moments_2.py::test_two_byte_words_form_bijection_to_omega_from_any_start PASSED
-tests/test_moments_2.py::test_horizon_one_step_neighborhood_covers_full_bulk PASSED
-tests/test_moments_2.py::test_csm_capacity_and_uhi_margin
-CSM CAPACITY (conversion result) and UHI coverage
--------------------------------------------------
-  N_phys               : 3.253930e+30
-  |Ω|                  : 65,536
-  CSM (total capacity) : 4.965103e+25
-  UHI required/year    : 7.095600e+14
-  Coverage (years)     : 6.997439e+10
-PASSED
-tests/test_substrate.py::test_01_shell_and_archive_integrity PASSED
-tests/test_substrate.py::test_02_horizon_structure_and_coverage PASSED
-tests/test_substrate.py::test_03_trajectory_identity_scaling PASSED
-tests/test_substrate.py::test_04_parity_commitment_and_reconstruction PASSED
-tests/test_substrate.py::test_05_trajectory_tamper_detection PASSED
-tests/test_substrate.py::test_06_dual_code_integrity PASSED
-tests/test_substrate.py::test_07_meta_routing PASSED
-tests/test_substrate.py::test_08_component_isolation_and_rollback PASSED
-tests/test_substrate.py::test_09_kernel_inverse_stepping PASSED
-
-===================================== 28 passed in 0.29s ======================================
+tests/test_moments_economy.py       27 passed
+tests/test_moments_genealogy.py     26 passed
+tests/test_moments_physics_1.py     16 passed
+tests/test_moments_physics_2.py     19 passed
+Total:                              88 passed
 ```
+
+Economy and genealogy tests complete in under 1.5 seconds. Physics tests complete in under 28 seconds (dominated by exhaustive Clifford conjugation verification).
 
 ### Test Count by File
 
-| File | Tests | Status |
-|------|-------|--------|
-| `test_moments.py` | 13 | All passed |
-| `test_moments_2.py` | 6 | All passed |
-| `test_substrate.py` | 9 | All passed |
-| **Total** | **28** | **All passed** |
+| File | Tests | Status | Runtime |
+|------|-------|--------|---------|
+| `test_moments_economy.py` | 27 | All passed | 1.43s (combined with genealogy) |
+| `test_moments_genealogy.py` | 26 | All passed | (included above) |
+| `test_moments_physics_1.py` | 16 | All passed | 27.83s (combined with physics 2) |
+| `test_moments_physics_2.py` | 19 | All passed | (included above) |
+| **Total** | **88** | **All passed** | |
 
 ---
 
@@ -679,16 +457,15 @@ tests/test_substrate.py::test_09_kernel_inverse_stepping PASSED
 ### CSM Capacity Derivation
 
 ```
-N_phys = (4/3)π f_Cs³ = 3.253930 × 10³⁰
-
-CSM = N_phys / |Ω| = 4.965103 × 10²⁵ MU
+N_phys = (4/3)pi * f_Cs^3 = 3.253930 * 10^30
+CSM = N_phys / |Omega| = N_phys / 4096 = 7.944165 * 10^26 MU
 ```
 
 ### Coverage Calculation
 
 ```
-Global UHI demand = 8.1 × 10⁹ × 87,600 = 7.0956 × 10¹⁴ MU/year
-Coverage = CSM / (annual demand) = 4.965103 × 10²⁵ / 7.0956 × 10¹⁴ ≈ 7.00 × 10¹⁰ years
+Global UHI demand = 8.1 * 10^9 * 87,600 = 7.0956 * 10^14 MU/year
+Coverage = CSM / demand = 7.944 * 10^26 / 7.096 * 10^14 = 1.12 * 10^12 years
 ```
 
 ### Economic Units
@@ -703,17 +480,34 @@ Coverage = CSM / (annual demand) = 4.965103 × 10²⁵ / 7.0956 × 10¹⁴ ≈ 7
 ### Tier Schedule
 
 ```
-Tier 1 = 1 × UHI = 87,600 MU/year
-Tier 2 = 2 × UHI = 175,200 MU/year
-Tier 3 = 3 × UHI = 262,800 MU/year
-Tier 4 = 60 × UHI = 5,256,000 MU/year
+Tier 1 = 1 * UHI = 87,600 MU/year
+Tier 2 = 2 * UHI = 175,200 MU/year
+Tier 3 = 3 * UHI = 262,800 MU/year
+Tier 4 = 60 * UHI = 5,256,000 MU/year
 ```
 
 ### Adversarial Threshold
 
 ```
-1% of CSM total = 0.01 × 4.965103 × 10²⁵ = 4.965103 × 10²³ MU
-Adversarial multiplier = (1% of total) / (annual demand) ≈ 699,743,939×
+1% of CSM = 0.01 * 7.944 * 10^26 = 7.944 * 10^24 MU
+Adversarial multiplier = 7.944 * 10^24 / 7.096 * 10^14 = 11,195,903,022x
+```
+
+### Frame Record
+
+```
+frame_record(b0, b1, b2, b3) = (mask48, phi_a, phi_b)
+mask48 = mask12(b0) << 36 | mask12(b1) << 24 | mask12(b2) << 12 | mask12(b3)
+phi_a = b0_bit7 xor b1_bit0 xor b2_bit7 xor b3_bit0
+phi_b = b0_bit0 xor b1_bit7 xor b2_bit0 xor b3_bit7
+```
+
+### Parity Commitment
+
+```
+O = mask12(b0) xor mask12(b2) xor mask12(b4) xor ...   (even positions)
+E = mask12(b1) xor mask12(b3) xor mask12(b5) xor ...   (odd positions)
+parity = length mod 2
 ```
 
 ---
@@ -722,26 +516,37 @@ Adversarial multiplier = (1% of total) / (annual demand) ≈ 699,743,939×
 
 ### Physical Invariants
 
-1. **c-cancellation:** N_phys = (4/3)π f³ is independent of c
-2. **Closed form:** N_phys computed identically for c, 2c, 0.1c
+1. c-cancellation: N_phys = (4/3)pi * f^3 is independent of c (relative error < 10^-14 for c, 2c, 0.1c).
+2. Holographic identity: |H|^2 = |Omega| (64^2 = 4096).
+3. Boundary/volume ratio: CSM_vol / CSM_area = f_Cs / (3 * |H|).
 
 ### Algebraic Invariants
 
-1. **Ontology structure:** Ω = C × C where |C| = 256
-2. **Uniform distribution:** d = u⊕v uniform over C
-3. **Transitive action:** 2-byte words bijective from any start
-4. **Holographic coverage:** H → Ω in one step
-5. **Aperture shadow:** A_kernel = 5/256 ≈ A* (within 5.6%)
+1. 6-spin isomorphism: exact on all 4,096 Omega states.
+2. Spin-coordinate transition law: verified for all 256 bytes from rest and 200 random states.
+3. Correlation matrix: identity within blocks, zero across blocks.
+4. Self-dual [12,6,2] code: 6 generators, GF(2) rank 6.
+5. Stabilizer: 12 commuting generators, GF(2) rank 12.
+6. Clifford: affine decomposition exact for all 256 * 4096 (byte, label) pairs.
+7. Operator family: exactly 8,192 operators (4,096 even + 4,096 odd).
+8. Central involution: 4-family cycle = global complement, commutes with all bytes.
+9. Frame quotient: 256 family assignments collapse to 4 classes at depth 4.
 
-### Substrate Invariants
+### Medium Invariants
 
-1. **Shell determinism:** Same grants → same seal
-2. **Tamper evidence:** Different grants → different seal
-3. **Parity reconstruction:** (O, E, p) reconstructs final state
-4. **Dual code detection:** Non-mask patterns detected >90%
-5. **Meta-routing:** Permutation-invariant, tamper-localizable
-6. **Component isolation:** A stable under B operations
-7. **Inverse stepping:** Forward ∘ Inverse = Identity
+1. Shell determinism: same grants produce same seal.
+2. Tamper evidence: different grants produce different seal.
+3. Order invariance: grant insertion order does not affect seal.
+4. Parity contract: mask change at even index changes O, at odd index changes E.
+5. Frame sensitivity: every single-byte change in a frame changes the frame record.
+6. Frame superiority: frame records distinguish histories that collapse to same final state.
+7. Divergence localization: frame comparison localizes to exact affected frame.
+8. Meta-routing: deterministic, tamper-localizable.
+9. Inverse stepping: forward then inverse returns to rest state.
+
+### Golden Vector Stability
+
+7 regression anchors pinned with exact expected values. Any change in these values indicates a change in the kernel transition law or serialization format.
 
 ---
 
@@ -754,64 +559,21 @@ numpy
 pytest
 ```
 
-### Required Artifacts
+### Required Source Modules
 
 ```
-data/atlas/ontology.npy      # 65,536 × 4 bytes
-data/atlas/epistemology.npy  # 65,536 × 256 × 4 bytes
-data/atlas/phenomenology.npz # Constants bundle
+src/constants.py    # Kernel physics and transition law
+src/api.py          # Precomputed tables, dual code, projections
+src/router.py       # Stateful byte router
 ```
 
-### Building the Atlas
+### Test Support
 
-```bash
-python -m src.router.atlas
 ```
-
----
-
-## Appendix D: File Responsibilities
-
-### `test_moments_2.py` — Conversion Lattice Proofs
-
-**Purpose:** Bridge from physical constants to CSM capacity.
-
-**Tests:**
-- `test_physical_microcell_count_closed_form_and_c_cancellation`
-- `test_router_omega_is_cartesian_product_CxC`
-- `test_difference_distribution_is_exactly_uniform_over_C`
-- `test_two_byte_words_form_bijection_to_omega_from_any_start`
-- `test_horizon_one_step_neighborhood_covers_full_bulk`
-- `test_csm_capacity_and_uhi_margin`
-
-**Requires Atlas:** Yes
-
-### `test_moments.py` — Economic Architecture
-
-**Purpose:** Validate economic definitions and demonstrate abundance.
-
-**Tests:**
-- Router anchors, aperture, atomic constant
-- MU, UHI, tier definitions
-- CSM capacity derivation
-- Millennium feasibility, resilience, surplus allocation
-
-**Requires Atlas:** No
-
-### `test_substrate.py` — Substrate Correctness
-
-**Purpose:** End-to-end verification of Shells, Archives, integrity, and rollback.
-
-**Tests:**
-- Shell/Archive determinism and tamper-evidence
-- Horizon structure and identity scaling
-- Parity commitment and tamper detection
-- Dual code integrity
-- Meta-routing
-- Component isolation and rollback
-- Kernel inverse stepping
-
-**Requires Atlas:** Yes
+tests/_moments_utils.py              # Shared helpers (Grant, Shell, identity_anchor)
+tests/physics/test_physics_1.py      # _bfs_omega (used by physics tests)
+tests/physics/test_physics_5.py      # _byte_from_micro_family (used by physics tests)
+```
 
 ---
 

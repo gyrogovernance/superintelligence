@@ -118,3 +118,5 @@ data/**/*.id
 # Project-specific exclusions
 # Exclude all contents of research/ directory but keep the folder itself
 research/*
+
+*/_backup/

@@ -155,7 +155,7 @@ Sum vs δ_BU: -1.56×
 (.venv) PS F:\Development\superintelligence> 
 (.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/research_mechanistic_interpretability/test_3.py
 Loading model...
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 3344.60it/s, Materializin
 === Principal Angle Structure ===
 Per-head angle sum range: [87.7333, 180.7601] rad
@@ -194,7 +194,7 @@ L31: <π/8: 0.0%, π/8-3π/8: 25.0%, >3π/8: 75.0%
 (.venv) PS F:\Development\superintelligence> 
 
 (.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/research_mechanistic_interpretability/test_3.py
-`torch_dtype` is deprecated! Use `dtype` instead!
+`dtype` is deprecated! Use `dtype` instead!
 Loading weights: 100%|█| 355/355 [00:00<00:00, 2944.93it/s, Materializin
 === CGM Structure Test ===
 Constants: π/8=0.392699, δ_BU/2=0.097671, m_a=0.199471

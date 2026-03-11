@@ -1,5 +1,5 @@
 
-💫 GGG ASI Alignment Router, Alignment Routing Infrastructure - CHANGELOG
+💫 Gyroscopic ASI aQPU Kernel, Alignment Routing Infrastructure - CHANGELOG
 
 ```            
 ┏━┓╻  ╻┏━╸┏┓╻┏┳┓┏━╸┏┓╻╺┳╸               
@@ -15,20 +15,246 @@
 
 ---
 
+## [v2.0-Gyroscopic_ASI_Quantum] – 2026-03-01 → 2026-03-11
+
+### Summary
+
+Major architecture revision. The kernel transitions from a 65,536-state ontology with 256 distinct masks and precomputed atlas artifacts to a compact 4,096-state spinorial kernel with 64 masks, 4 family-controlled complement phases, dual horizons, intrinsic K₄ gate geometry, and a full algebraic quantum processing unit (aQPU) SDK. The governance measurement layer, AIR program format, and application runtime are preserved and updated for the new kernel physics. All prior test suites are replaced by a unified verification chain of 185 aQPU tests, 6 physics test files, and 4 moments test files: all passing.
+
+---
+
+### Breaking Changes
+
+- **Ontology reduced from 65,536 to 4,096 states.** The reachable shared-moment space Ω is now 64 × 64 (product of two C64 cosets), not 256 × 256. All code and documentation referencing `|Ω| = 65536` or `2^16` is superseded.
+- **Mask space reduced from 256 to 64 distinct masks.** The expansion function now maps the 6-bit micro-reference to a 12-bit dipole-pair mask; each payload bit flips exactly one dipole pair. The previous expansion function (§2.5.2 of legacy spec) is removed.
+- **Transition law changed to spinorial form.** Family bits (intron bits 0 and 7) now control per-component complement phases (`invert_a`, `invert_b`) during gyration, replacing the unconditional `^ 0xFFF` complement on both components. The legacy transition `A_next = B ^ 0xFFF; B_next = A_mut ^ 0xFFF` is no longer valid.
+- **Atlas artifacts removed as normative requirement.** `ontology.npy`, `epistemology.npy`, and `phenomenology.npz` are no longer required for conformance. The kernel operates directly from the transition law and rest state without precomputed lookup tables.
+- **Family extraction corrected.** Family is now extracted from L0 boundary bits (positions 0 and 7): `family = ((intron >> 7) & 1) << 1 | (intron & 1)`. The legacy extraction from bits 6 and 7 (`(intron >> 6) & 0x3`) is removed. This resolves the `REVIEW NEEDED` note in the legacy spec §2.5.2.
+- **Rest state constant renamed.** `GENE_MAC_STATE24` / `ARCHETYPE_STATE24` → `GENE_MAC_REST`. Value unchanged (`0xAAA555`).
+- **Shadow projection: 128, not 256.** From any fixed state, 256 bytes yield exactly 128 distinct next states (uniform 2-to-1), not 256. Property P13 (full 256-way fanout) from the legacy spec is superseded.
+- **AIR "project" renamed to "program."** Profile P now specifies "Program Format Conformance." Section headers, template structure, and slug derivation updated accordingly.
+- **Routing signature field changes.** `state_index` removed (no ontology index). `state24` and `last_byte` are now primary fields. Kernel binding uses `(step, state24, last_byte)` instead of `(step, state_index, last_byte)`.
+
+---
+
+### Kernel Physics
+
+#### Added
+- **Spinorial transition law** (§2.6): family bit 0 controls `invert_a` (complement on `A_next`); family bit 7 controls `invert_b` (complement on `B_next`). Four families produce four distinct complement-phase configurations for the same mask.
+- **Dipole-pair mask expansion** (§2.5): each of 6 payload bits independently flips one dipole pair (2 adjacent bits) in the 12-bit mask. 64 distinct masks forming a self-dual [12,6,2] linear code over GF(2).
+- **Intron decomposition** (§2.3.3): normative formula for family (bits 0, 7) and micro-reference (bits 1–6), replacing the legacy extraction.
+- **CGM stage parities** (§2.3.4): L0, LI, FG, BG parity definitions promoted to normative.
+- **Single-step trace contract** (§2.6.3): `{cs, una, ona, bu, state24}` — the four CGM-stage intermediates plus output state.
+- **Shadow projection property** (§2.6.4): 256 bytes → 128 distinct next states from any fixed state.
+- **Non-cloning property** (§2.2.6): GENE_MIC_S is the unique common source; no byte produces a second independent archetype.
+- **Complementarity invariant** (§2.2.7): `horizon_distance + ab_distance = 12` for all states universally.
+- **`is_on_horizon` observable** (§2.2.7): boolean for S-sector membership.
+
+#### Changed
+- **Expansion function** completely replaced. Legacy bit-mixing expansion (§2.5.2 of old spec) replaced by clean dipole-pair projection from 6-bit payload.
+- **Transition law** rewritten. Legacy unconditional complement replaced by family-controlled conditional complements.
+- **Observables**: `archetype_distance` renamed to `rest_distance`; computed against `GENE_MAC_REST`.
+- **Horizon definition** updated. The S-sector (complement horizon, `A = B ^ 0xFFF`) contains 64 states including rest. A second boundary set, the equality horizon (`A = B`), is identified with 64 states. Both are structurally necessary.
+- **Design requirements** (§1.7): `Finite` removed as a listed requirement (finiteness is a consequence, not a separate axiom). `Invertible` added.
+
+#### Removed
+- **Ontology artifact** (`ontology.npy`): no longer normative. Membership checking is replaced by replay-based provenance verification.
+- **Epistemology artifact** (`epistemology.npy`): no longer normative. Stepping uses the transition law directly.
+- **Phenomenology artifact** (`phenomenology.npz`): no longer normative.
+- **Legacy expansion function** and its `REVIEW NEEDED` note.
+- **Properties P1–P13** from legacy §3.4. Replaced by the verified structural properties listed in §3.2 and the test reports.
+- **Backward-compatibility aliases** (`ARCHETYPE_A12`, `ARCHETYPE_B12`, `ARCHETYPE_STATE24`): removed from spec. Implementation may retain them internally.
+- **§3.1 "Ontology definition"** (finite enumerated set with membership checking): replaced by §3.3 "Operational Reachable Shared-Moment Space" defined by BFS from rest.
+
+---
+
+### Reachable Space and Verified Properties
+
+#### Added
+- **Ω = 4,096 states** at radius 2 from rest, with product form U × V (64 × 64).
+- **Dual horizons**: complement horizon (64 states, `A = B ^ 0xFFF`, maximal chirality) and equality horizon (64 states, `A = B`, zero chirality). Disjoint, antipodal, union = 128-state boundary.
+- **Holographic identity**: `|H|² = |Ω|` → `64² = 4096`. Verified by 4-to-1 holographic dictionary.
+- **Chirality transport law**: `χ(T_b(s)) = χ(s) ⊕ q6(b)`, exact on all 4096 × 256 state-byte pairs.
+- **Chirality spectrum**: binomial distribution `C(6, (12−d)/2) × 64` at ab_distance d.
+- **K₄ gate group** {id, S, C, F}: four horizon-preserving bytes, Klein four-group structure, gate action census on both horizons, orbit stratification (32 + 32 + 992 orbits).
+- **Commutativity rate**: 1/64 = 2⁻⁶. Each byte commutes with exactly 4 others.
+- **Permutation census on Ω**: 128 distinct permutations (uniform 2-to-1), 2 of order 2 (S-gate), 126 of order 4.
+- **Row-class theorem**: uniform transition matrix has exactly 32 distinct rows and rank 32.
+- **Exact 2-step uniformization**: from rest, all 256² length-2 words distribute exactly uniformly over Ω (each state reached exactly 16 times).
+- **Per-byte channel capacity**: 7.0 bits Shannon = min-entropy, zero variance.
+- **Exact tamper detection** with algebraic miss characterization: substitution (1/255 via shadow partner), adjacent swap (~3/255 via q-class), deletion (gate stabilizer on horizon only).
+- **Constant density**: every Ω state has component popcount exactly 6/12 = 0.5.
+- **Parity commitment**: adds exactly 1 bit of provenance beyond final state at length 2.
+- **Trajectory parity commitment** (§3.4): `O`, `E`, `parity` as compact integrity checks.
+
+#### Changed
+- **Closure derivation** rewritten for 4,096 states (§3.2 of legacy replaced by §3.3 of new spec).
+- **Reachability radius** remains 2, but from 65,536 to 4,096 states.
+
+#### Removed
+- **Properties P1–P13** superseded. P5 (depth-2 decoupling) holds in modified form. P6 (commutation iff same byte) replaced by q-class condition. P7 (XYXY = id) verified on Ω. P8 (arbitrary-length closed form) updated for spinorial law. P13 (256-way fanout) replaced by 128-way shadow.
+- **Atlas exactness** property (P12): no atlas to verify.
+
+---
+
+### Algebraic Quantum Structure (New Appendix G)
+
+#### Added
+- **§G.1 – aQPU definition**: unitarity, spinorial closure (order 4), non-cloning, complementarity (128-way shadow as SO(3)/SU(2) double cover), entanglement compatibility, constant density.
+- **§G.2 – Dual horizons**: full specification of complement and equality horizons, structural necessity, holographic ratio, chirality transport law, chirality spectrum with binomial distribution.
+- **§G.3 – Four intrinsic gates**: horizon-preserving condition, gate bytes, gate definitions (S, C, F, id), K₄ Cayley table, gate action on horizons with fixed-point/two-cycle census, CGM stage correspondence, K₄ orbit stratification on Ω.
+- **§G.4 – Hidden variable and observability**: archetype as structural hidden variable, visibility at complement horizon, concealment at equality horizon.
+- **§G.5 – Toroidal monodromy**: K₄ as H₁(T², ℤ/2), meridional/longitudinal/diagonal cycles, δ_BU as holonomy, aperture as normalized residual.
+- **§G.6 – Horizon Lemma connection**: gate orbit counts, predecessor horizons, 2/3 chirality-to-space ratio.
+- **§G.7 – Hardware correspondence**: register/cache/RAM/disk mapping of gates and intron decomposition.
+- **§G.8 – Processing model**: input → decomposition → mutation → gyration → closure pipeline.
+
+---
+
+### Byte Formalism (Specs_Formalism.md — new document)
+
+#### Added
+- **Depth-4 closure and 48-bit projection** (§1): 4-byte frame (Prefix/Present/Past/Future), discrete BCH expansion.
+- **Palindromic byte structure** (§2): L0/LI/FG/BG bit-pair roles, family extraction from bits 0 and 7, verified mask properties (dipole flip, uniqueness, family invariance).
+- **Boundary bits and 6-bit runtime** (§3): structural anchor vs dynamic content separation.
+- **Mask-to-tensor mapping** (§4–5): families as complement phase selectors (720° spinorial closure), [L]/[R] operator decomposition, se(3) Lie algebra correspondence.
+- **Depth-4 objects** (§6): 48-bit manifold projection vs 128-bit atom frame, 128-way SO(3) shadow, depth-4 bijectivity in 32-bit intron sequence.
+- **Aperture quantization** (§7): `Δ ≈ 0.0207`, byte-scale `5/256`, depth-4 scale `1/48`, 2/3 chirality-to-space ratio, Horizon Lemma, kernel state-space horizons.
+- **Hardware alignment** (§8): intron as L1 cache address, 6-bit offset + 2-bit tag, CS generatedness enforcement.
+
+---
+
+### Quantum Computing SDK (SDK_Quantum_Computing.md — new document)
+
+#### Added
+- **Moments ontology** (§1): Moment, Shared Moment, QuBEC (Quantum Bose-Einstein Computational Condensate), Moment Unit (MU), Common Source Moment (CSM).
+- **Gyrostate** (§2): 24-bit carrier with six oriented dipole DoF, four-phase temporal gauge, five exact charts (carrier, spin, chirality, spectral, constitutional).
+- **Reachable manifold and horizons** (§3): Ω = 4096, dual horizons, holographic identity, chirality spectrum.
+- **Three computational spaces** (§4): Moment space, Chirality space (GF(2)⁶), Tensor space (64-dimensional register).
+- **Primitives** (§5): byte transition, intrinsic gates, word actions with affine signatures, Walsh-Hadamard transform, topological charges (q-class, family, chirality word, parity commitment), observables, Result structure, exact structural derivatives (directional derivative, future-cone expectation, entropic drift).
+- **Circuits** (§6): abstract/compiled/annotated-ledger levels, ByteOp/GateOp/WHT/Observe/Condition/SubCircuit operations, compilation pipeline, depth structure (reachability vs closure).
+- **Runtime** (§7): targets and TargetProfile, single/batch/checkpoint execution, Moments API, provenance and replay, hybrid classical-quantum loops, future-cone entropy (H₁ = 7 bits, H_{n≥2} = 12 bits exactly).
+- **Verified computational advantages** (§8): hidden subgroup (1 vs 64), Deutsch-Jozsa (1 vs 33), Bernstein-Vazirani (1 vs 6), exact 2-step uniformization (2 vs ~12), holographic compression (8 vs 12 bits, 33.3%), commutativity decision (O(1) vs O(4)), exact tamper detection.
+- **Non-Clifford resource and universality** (§9): δ_BU monodromy defect, four independent non-Clifford certifications (Clifford distance, aperiodicity, equidistribution, Wigner negativity), universality ingredients (Clifford backbone, non-Clifford resource, entangling gates).
+- **Conformance** (§10): SDK, target, and QuBEC conformance requirements.
+- **SDK Reference** (§11): five public namespaces (StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps), exactness classes, future-cone uniformity theorem, native parallelism, signature application semantics, state scan, state preparation and targeting, GyroLabe native ALU, chirality distance, tensor surfaces (GEMV, packed GEMV), runtime namespace, theorem-backed witness synthesis.
+
+---
+
+### Implementation
+
+#### Added
+- **`src/constants.py`**: spinorial transition constants, dipole-pair masks, C64 code, C_PERP_12, horizon sets, gate constants, q-map, family/micro-ref extraction.
+- **`src/api.py`**: precomputed tables for all 256 bytes, chirality register helpers, q-class computation, word signatures, Walsh helpers.
+- **`src/kernel.py`**: reference kernel with spinorial transition law, forward/inverse stepping, single-step trace, depth-4 projections.
+- **`src/sdk.py`**: public SDK surface with StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps namespaces.
+- **`src/tools/gyrolabe/gyrolabe.c`**: native C backend — signature scan, chirality distance, qmap extraction, WHT64, bitplane GEMV (unpacked and packed), signature application.
+- **`src/tools/gyrolabe/gyrolabe_opencl.c`**: OpenCL backend — batched GEMM, integer-native i32 path.
+- **`src/tools/gyrolabe/ops.py`**: Python wrapper for GyroLabe C/OpenCL surfaces.
+- **`src/tools/gyrolabe/opencl_backend.py`**: OpenCL device management and kernel compilation.
+- **`src/tools/gyrolabe/bolmo_bridge.py`**: bridge for external model weight loading (Bolmo).
+- **`src/tools/gyrolabe/chat_gyrolabe.py`**: chat interface using GyroLabe backend.
+- **`src/tools/gyrolabe/run_gyrolabe.py`**: CLI runner for GyroLabe operations.
+- **AIR Console** (`src/app/console/`): browser-based UI for program contract management (backend + frontend).
+
+#### Changed
+- **`src/app/`**: coordinator, events, domain ledgers, aperture computation updated for spinorial kernel. `state_index` references replaced by `state24`. Event binding uses `(step, state24, last_byte)`.
+
+#### Removed
+- **Atlas build pipeline**: `ontology.npy`, `epistemology.npy`, `phenomenology.npz` generation code removed from normative path.
+- **Legacy expansion function** in constants/kernel.
+
+---
+
+### Tests
+
+#### Added
+- **Physics test chain** (6 files): `test_physics_1.py` through `test_physics_6.py` — state representation, transcription, intron decomposition, mask expansion, self-dual [12,6,2] code, spinorial transition, bijectivity, shadow count, BFS/Ω topology, holographic ratio, affine algebra, spinorial 4-cycle, commutator holonomy, CGM constants bridge, DOF doubling law, depth-4 fiber bundle, intrinsic K₄ emergence.
+- **aQPU test chain** (5 files): `test_aQPU_1.py` through `test_aQPU_4.py`, `test_aQPU_SDK_1.py` — dual horizons, K₄ gates, chirality transport, commutativity rate, Hilbert lift (Bell pairs, CHSH at Tsirelson bound, teleportation, stabilizers, contextuality, MUBs), permutation structure, row-class theorem, channel capacity, exact uniformization, error/tamper detection, six-qubit register, operator family, non-Clifford certification, computational advantages, SDK/GyroLabe C engine verification.
+- **Moments tests** (4 files): `test_moments_physics_1.py`, `test_moments_physics_2.py`, `test_moments_economy.py`, `test_moments_genealogy.py` — 6-spin isomorphism, exact Clifford unitaries, 8192-element operator family, depth-4 frame quotient, stabilizer structure, economic/genealogy certification.
+- **Holography tests** (3 files): `test_holography.py`, `test_holography_2.py`, `test_holography_3.py`.
+- **Measurement tests**: `test_measurement.py` — governance ledgers, Hodge decomposition, aperture.
+- **App/CLI tests**: `test_app.py`, `test_aci_cli.py`, `test_tools.py`.
+- **Test utilities**: `_physics_utils.py`, `_moments_utils.py`, `_research_utils.py`, `conftest.py`.
+- **Test status**: **all tests passing** (185 aQPU + physics suite + moments suite + holography + measurement + app).
+
+#### Removed
+- Legacy test references to `ontology.npy`, `epistemology.npy`, `phenomenology.npz`.
+- Legacy property tests P1–P13.
+
+---
+
+### Documentation
+
+#### Changed
+- `docs/Gyroscopic_ASI_Specs.md` — current kernel specification (replaces legacy spec).
+- `docs/Gyroscopic_ASI_Specs_Formalism.md` — byte formalism, depth-4 closure, aperture quantization, hardware alignment.
+- `docs/Gyroscopic_ASI_SDK_Quantum_Computing.md` — Quantum Computing SDK specification.
+- `docs/Gyroscopic_ASI_Holography.md` — holographic algorithm formalization.
+- `docs/Gyroscopic_ASI_Implications.md` — aQPU implications and potential.
+- `docs/Gyroscopic_ASI_SDK_Network.md` — multi-agent holographic network SDK.
+- `docs/Gyroscopic_ASI_SDK_Holographic_Web.md` — holographic web SDK.
+- `docs/Gyroscopic_ASI_Substrate_Specs.md` — physical memory/substrate specification.
+- `docs/AIR_Brief.md` — AIR overview.
+- `docs/AIR_Logistics.md` — governance logistics framework.
+- `docs/AIR_Moments_Economy_Specs.md` — Moments Economy architecture.
+- `docs/AIR_Moments_Genealogies_Specs.md` — Moments Genealogies specification.
+- `docs/reports/Physics_Tests_Report.md` — physics verification report.
+- `docs/reports/aQPU_Tests_Report.md` — aQPU verification report (185 tests).
+- `docs/reports/Moments_Tests_Report.md` — moments verification report (88 tests).
+- `docs/reports/Alignment_Measurement_Report.md` — governance balance metrics.
+- `docs/reports/GyroLabe_Generation_Report.md` — native backend verification and benchmarks.
+
+---
+
+### Performance (GyroLabe Benchmarks)
+
+- **Signature scan**: up to 3,376× speedup over Python at n=65536.
+- **Chirality distance**: up to 1,568× speedup, 161M pairs/sec at n=262144.
+- **Chirality vs cosine similarity** (2048-dim): up to 353× speedup at n=16384.
+- **Q-map extraction**: up to 8,222× speedup at n=65536.
+- **Bitplane GEMV (OpenCL)**: 1.5× vs PyTorch at batch=4096; integer-native i32 path available.
+- **Bitplane matmul precision**: max error ~1e-5 (random), ~8e-7 (real Bolmo weights), ~3.5e-5 (identity).
+
+---
+
+### Conformance Profile Changes
+
+| Profile | v1.x | v2.0 |
+|---------|------|------|
+| **K (Kernel)** | 256 masks, unconditional complement, atlas required, 65536 states, 256-way fanout | 64 masks, spinorial complement, no atlas, 4096 states, 128-way shadow |
+| **M (Measurement)** | Unchanged | Unchanged (K₄ geometry, Hodge, aperture) |
+| **R (Runtime)** | `state_index`-based routing, atlas lookup | `state24`-based routing, direct transition, single-step trace + depth-4 projections required |
+| **P (Program)** | "Project" format | "Program" format, unit specification added (`daily`/`sprint`), updated section names |
+
+---
+
+### Migration Notes
+
+1. **Atlas artifacts**: any code loading `ontology.npy`, `epistemology.npy`, or `phenomenology.npz` must be updated to use the transition law directly. The kernel no longer requires or produces these files.
+2. **Expansion function**: replace the legacy bit-mixing expansion with the dipole-pair expansion. The mask table shrinks from 256 to 64 entries (family does not affect mask).
+3. **Transition law**: replace `A_next = B ^ 0xFFF; B_next = A_mut ^ 0xFFF` with the family-controlled form using `invert_a` and `invert_b`.
+4. **State indexing**: replace all `state_index` / ontology-index references with direct `state24` values.
+5. **Family extraction**: replace `(intron >> 6) & 0x3` with `((intron >> 7) & 1) << 1 | (intron & 1)`.
+6. **Fanout expectations**: update any code assuming 256 distinct next states per state to expect 128.
+7. **AIR projects → programs**: rename project directories, templates, and slug references.
+
+---
+
 ## [v1.4.3-Autobots] – 2026-02-28
 
-### HGT Phase 1: Full Implementation and Test Suite
+### Gyroscopic Neural Network (GyroNN) Model Phase 1: Full Implementation and Test Suite
 
-Complete Holographic Grid Transformer (HGT) under `secret_lab_ignore/autobots/` with lossless physics, FSM curriculum, training pipeline, and comprehensive tests.
+Complete Gyroscopic Neural Network (GyroNN) (Gyroscopic Neural Network (GyroNN) Model) under `secret_lab_ignore/autobots/` with lossless physics, FSM curriculum, training pipeline, and comprehensive tests.
 
 #### Core Architecture
 
 - **physics.py** – Lossless FSM: intron, mask12, vertex charge; L1/L2/L3/L4 trajectories; horizon_distance, ab_distance, archetype_distance; step_state_l3_scalar. No src.* imports at runtime.
-- **config.py** – HGTConfig: physics constants (gene_mic_s, q0, q1, archetype_state24), resolution_dims (64/128/256), num_heads, ffn_multiplier.
+- **config.py** – Gyroscopic Neural Network (GyroNN) ModelConfig: physics constants (gene_mic_s, q0, q1, archetype_state24), resolution_dims (64/128/256), num_heads, ffn_multiplier.
 - **embeddings.py** – BL1 (byte+family+micro), TL1 (l1_state+vertex), L4PositionEncoding with learned gate.
 - **blocks.py** – ByteBlock, TensorBlock (causal), DirectionalAgentBlock (asymmetric cross-attn), TransitionBlock (L2/L3 state injection).
 - **head.py** – HeadAgent: 6+2 family/micro decomposition, vertex_head, intron-to-byte permutation buffer.
-- **model.py** – HGTForCausalLM: physics phase (detached) + neural phase; save_pretrained/from_pretrained; generate() with L3 state tracking.
+- **model.py** – Gyroscopic Neural Network (GyroNN) ModelForCausalLM: physics phase (detached) + neural phase; save_pretrained/from_pretrained; generate() with L3 state tracking.
 
 #### Curriculum and Training
 
@@ -40,7 +266,7 @@ Complete Holographic Grid Transformer (HGT) under `secret_lab_ignore/autobots/` 
 
 #### Tests
 
-- **test_physics.py** – intron, mask12, vertex_charge match src.router.constants; mask12_table shape; L1 trajectory.
+- **test_physics.py** – intron, mask12, vertex_charge match src.kernel.constants; mask12_table shape; L1 trajectory.
 - **test_model.py** – Forward shape, labels, generate, gradient flow.
 - **test_lossless.py** – mask12_table unchanged after forward/backward.
 - **test_curriculum.py** – Full coverage 256 bytes; random walks (skips if L3 missing).
@@ -449,7 +675,7 @@ This establishes that Bolmo’s boundary logic (for the 256×256 byte-pair regim
 - Improved module docstrings throughout to clarify the kernel's role as a runtime engine
 
 **Documentation**
-- Updated specification (GGG_ASI_AR_Specs.md) Section 2.2 to properly distinguish between the micro archetype and macro topology
+- Updated specification (Gyroscopic_ASI_Specs.md) Section 2.2 to properly distinguish between the micro archetype and macro topology
 - Added comprehensive documentation of the byte boundary formalism in Appendix G
 - Clarified that the 65,536-element ontology is the reachable state space in GENE_Mac, not a confusion with the 256 transformations
 
@@ -955,7 +1181,7 @@ This release marks the formal consolidation of the **GyroLabe Holographic Coordi
 We established a "common language" protocol where the kernel and model communicate via discrete bytes rather than arbitrary activation energies. The result is a closed-loop system where the kernel's geometry steers inference without destroying fluency, backed by extensive testing and 66 passing pytests.
 
 ### Starting Point
-We began with `test_gyro_2.py`, an experimental script coupling the GGG ASI Router kernel to a transformer. The kernel produced masks over hidden dimensions, applied them to token representations, and extracted bytes from activations to advance kernel state. Multiple projection modes existed (circular, code, wedge, holographic, dynamic), but the coupling was ad-hoc and the two systems lacked a shared protocol.
+We began with `test_gyro_2.py`, an experimental script coupling the Gyroscopic ASI aQPU Kernel kernel to a transformer. The kernel produced masks over hidden dimensions, applied them to token representations, and extracted bytes from activations to advance kernel state. Multiple projection modes existed (circular, code, wedge, holographic, dynamic), but the coupling was ad-hoc and the two systems lacked a shared protocol.
 
 ### What Failed
 
@@ -1381,20 +1607,20 @@ Revived and Updated Gyroscopic.
 ## [v1.2.2-SDK] – 2026-01-20
 
 ### Added
-- Added `docs\GGG_ASI_AR_SDK_Holographic_Web.md` - The Holographic Web architecture specification for internet coordination. The document presents an alternative architecture where all internet coordination is expressed as paths through a finite, pre-computed geometric structure (the GGG ASI Alignment Router kernel), inverting the conventional relationship between applications and state to transform coordination into a closed mathematical structure with exact properties: determinism, reversibility, finite bounds, and intrinsic verifiability.
+- Added `docs\Gyroscopic_ASI_SDK_Holographic_Web.md` - The Holographic Web architecture specification for internet coordination. The document presents an alternative architecture where all internet coordination is expressed as paths through a finite, pre-computed geometric structure (the Gyroscopic ASI aQPU Kernel kernel), inverting the conventional relationship between applications and state to transform coordination into a closed mathematical structure with exact properties: determinism, reversibility, finite bounds, and intrinsic verifiability.
 
 ---
 ## [v1.2.2-SDK] – 2026-01-17
 
 ### Added
-- Added `docs\GGG_ASI_AR_SDK_Network.md` - Multi-Agent Holographic Networks specification for distributed coordination and experimentation. The document provides a structured guide for researchers and developers to understand, experiment with, and extend the system, presenting the architecture as a coherent stack grounded in mathematical physics with all components mapped to canonical models derived from the CGM constraint set.
+- Added `docs\Gyroscopic_ASI_SDK_Network.md` - Multi-Agent Holographic Networks specification for distributed coordination and experimentation. The document provides a structured guide for researchers and developers to understand, experiment with, and extend the system, presenting the architecture as a coherent stack grounded in mathematical physics with all components mapped to canonical models derived from the CGM constraint set.
 
 ---
 
 ## [v1.2.2-Holography] – 2026-01-15 / 2026-01-16
 
 ### Added
-- Added `docs\GGG_ASI_AR_Holography.md` to formalize the Router as a holographic algorithm (boundary, bulk, K4 structure, quotient dynamics, erasure geometry, and cross-domain coherence).
+- Added `docs\Gyroscopic_ASI_Holography.md` to formalize the Router as a holographic algorithm (boundary, bulk, K4 structure, quotient dynamics, erasure geometry, and cross-domain coherence).
 - Added `docs\reports\Holography_Tests_Report.md` summarizing verified holography results across the three holography test suites.
 
 ### Updated
@@ -1512,7 +1738,7 @@ Revisiting equations for the Moments Economy.
 
 # v1.0 Release: Production-Ready Alignment Infrastructure Routing
 
-This release marks the first stable version of the GGG ASI Alignment Router, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
+This release marks the first stable version of the Gyroscopic ASI aQPU Kernel, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
 
 ## Core Achievement: Verified Deterministic Coordination
 
@@ -1539,9 +1765,9 @@ All 135 tests pass, providing exhaustive verification of the kernel's structural
 ## Complete Documentation Suite
 
 ### Technical Specifications
-- **GGG ASI Alignment Router - Kernel Specifications** (`docs/GGG_ASI_AR_Specs.md`): Complete normative specification with conformance profiles, kernel physics, atlas artifacts, and governance measurement substrate
-- **Router Implications & Potential** (`docs/GGG_ASI_AR_Implications.md`): Use cases, deployment scenarios, and technical research directions
-- **Substrate: Physical Memory Specification** (`docs/GGG_ASI_AR_Substrate_Specs.md`): Future development architecture for physical memory implementation
+- **Gyroscopic ASI aQPU Kernel - Kernel Specifications** (`docs/Gyroscopic_ASI_Specs.md`): Complete normative specification with conformance profiles, kernel physics, atlas artifacts, and governance measurement substrate
+- **Router Implications & Potential** (`docs/Gyroscopic_ASI_Implications.md`): Use cases, deployment scenarios, and technical research directions
+- **Substrate: Physical Memory Specification** (`docs/Gyroscopic_ASI_Substrate_Specs.md`): Future development architecture for physical memory implementation
 
 ### Operational Documentation
 - **Alignment Infrastructure Routing (AIR) Brief** (`docs/AIR_Brief.md`): Complete overview of AIR's workforce coordination model, operating units, and program structure
@@ -1614,7 +1840,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 ## [v0.9.9.5-AIR-CLI] – 2025-12-29
 
 ### Documentation
-- **Alignment Infrastructure Routing (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the ASI Alignment Router.
+- **Alignment Infrastructure Routing (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the Gyroscopic ASI Kernel.
 
 ### Development Planning
 - **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routing. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, tool integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
@@ -1635,7 +1861,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 - **Test Coverage:** Achieved 100% pass rate (120/120 tests) across core routing, geometry, and physics suites.
 
 ### Documentation
-- **Potential Analysis:** Updated `docs/GGG_ASI_AR_Potential.md` to integrate implications from physics tests, reframing ASI as a geometric attractor.
+- **Potential Analysis:** Updated `docs/Gyroscopic_ASI_Potential.md` to integrate implications from physics tests, reframing ASI as a geometric attractor.
 - **Test Certification:** Merged and consolidated all test outputs into `docs/physics_tests_results.md` for a single source of truth.
 
 ---
@@ -1659,7 +1885,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 * Documented complete operational runtime including Coordinator, tools, and audit logs
 * Consolidated build procedures and reference helpers into appendices
 * Fixed section numbering and cross-references throughout
-* See [GGG ASI Alignment Router - Kernel Specification](/docs/GGG_ASI_AR_Specs.md) for complete normative specification
+* See [Gyroscopic ASI aQPU Kernel - Kernel Specification](/docs/Gyroscopic_ASI_Specs.md) for complete normative specification
 
 **General Corrections & Improvements**
 * Improved integration between specification and implementation
@@ -1761,9 +1987,9 @@ Still working on the Specs and cleaning up the old codebase.
 ADDED: guides\GyroASI_Substrate_Specs.md
 This is a revision of an old study, and a refinement so it can match the overal GyroASI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
 
-> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to GGG ASI Alignment Router. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. We may read our latest specs draft here: 
+> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to Gyroscopic ASI aQPU Kernel. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. We may read our latest specs draft here: 
 
-📖 [GGG ASI Alignment Router - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
+📖 [Gyroscopic ASI aQPU Kernel - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
 
 ---
 

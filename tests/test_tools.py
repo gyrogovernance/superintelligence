@@ -11,9 +11,9 @@ import numpy as np
 
 from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 from src.app.ledger import DomainLedgers
-from src.tools.analytics import hodge_decompose
-from src.tools.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id
-from src.tools.frameworks import (
+from src.tools.main.analytics import hodge_decompose
+from src.tools.main.api import event_from_dict, event_to_dict, parse_domain, parse_edge_id
+from src.tools.main.frameworks import (
     GyroscopeWorkMixTool,
     ToolContext,
     THMDisplacementTool,
@@ -26,12 +26,21 @@ class TestAnalytics:
     def test_tools_analytics_matches_domainledger_aperture(self):
         """hodge_decompose should match DomainLedgers.aperture for same vector."""
         ledgers = DomainLedgers()
-        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.GOV_INTEL, magnitude_micro=int(round(1.25 * MICRO)), confidence_micro=MICRO))
-        ledgers.apply_event(GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFER_INTEL, magnitude_micro=int(round(-0.75 * MICRO)), confidence_micro=MICRO))
+        ledgers.apply_event(GovernanceEvent(
+            domain=Domain.EDUCATION,
+            edge_id=EdgeID.GOV_INTEL,
+            magnitude_micro=int(round(1.25 * MICRO)),
+            confidence_micro=MICRO,
+        ))
+        ledgers.apply_event(GovernanceEvent(
+            domain=Domain.EDUCATION,
+            edge_id=EdgeID.INFER_INTEL,
+            magnitude_micro=int(round(-0.75 * MICRO)),
+            confidence_micro=MICRO,
+        ))
 
         y = ledgers.get(Domain.EDUCATION)
         a_led = ledgers.aperture(Domain.EDUCATION)
-        # Convert int64 array to float64 for analytics tool (it expects float64)
         y_float = y.astype(np.float64)
         a_ana = hodge_decompose(y_float).aperture
 
@@ -98,7 +107,6 @@ class TestAPIAdapters:
 
         assert ev.domain == Domain.ECONOMY
         assert ev.edge_id == EdgeID.GOV_INFO
-        # event_from_dict converts legacy float format to micro-units
         assert ev.magnitude_micro == int(round(1.5 * MICRO))
         assert ev.confidence_micro == int(round(0.8 * MICRO))
         assert ev.meta == {"test": "value"}
@@ -142,18 +150,16 @@ class TestFrameworkTools:
 
         assert len(events) == 3  # IID is 0.0, so not emitted
 
-        # Check GTD -> GOV_INFO
         gtd_ev = next((e for e in events if e.meta.get("signal") == "GTD"), None)
         assert gtd_ev is not None
         assert gtd_ev.domain == Domain.EDUCATION
         assert gtd_ev.edge_id == EdgeID.GOV_INFO
-        assert abs(gtd_ev.magnitude_micro - int(round(0.1 * MICRO))) < 10  # Allow for rounding differences
+        assert abs(gtd_ev.magnitude_micro - int(round(0.1 * MICRO))) < 10
 
-        # Check IVD -> INFO_INFER
         ivd_ev = next((e for e in events if e.meta.get("signal") == "IVD"), None)
         assert ivd_ev is not None
         assert ivd_ev.edge_id == EdgeID.INFO_INFER
-        assert abs(ivd_ev.magnitude_micro - int(round(-0.2 * MICRO))) < 10  # Allow for rounding differences
+        assert abs(ivd_ev.magnitude_micro - int(round(-0.2 * MICRO))) < 10
 
     def test_thm_displacement_tool_ignores_domain_parameter(self):
         """THMDisplacementTool always emits to EDUCATION domain regardless of payload domain."""
@@ -164,7 +170,6 @@ class TestFrameworkTools:
 
         events = tool.emit_events(payload, ctx)
 
-        # Tool ignores domain parameter and always emits to EDUCATION
         assert len(events) == 1
         assert events[0].domain == Domain.EDUCATION
         assert events[0].edge_id == EdgeID.GOV_INFO
@@ -184,12 +189,12 @@ class TestFrameworkTools:
 
         events = tool.emit_events(payload, ctx)
 
-        assert len(events) == 1  # Only GM-ICu delta is nonzero
+        assert len(events) == 1
 
         ev = events[0]
         assert ev.domain == Domain.EMPLOYMENT
         assert ev.edge_id == EdgeID.GOV_INFO
-        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.1 - (-0.1), allow for rounding
+        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10
         assert ev.meta["metric"] == "GM-ICu"
 
     def test_gyroscope_workmix_tool_infer_intel(self):
@@ -211,7 +216,7 @@ class TestFrameworkTools:
 
         ev = events[0]
         assert ev.edge_id == EdgeID.INFER_INTEL
-        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10  # 0.3 - 0.1, allow for rounding
+        assert abs(ev.magnitude_micro - int(round(0.2 * MICRO))) < 10
         assert ev.meta["metric"] == "IInter-ICo"
 
     def test_tool_context_meta(self):
@@ -227,4 +232,3 @@ class TestFrameworkTools:
         assert events[0].meta["session"] == "test123"
         assert events[0].meta["actor"] == "user1"
         assert events[0].meta["tool"] == "thm_displacement"
-

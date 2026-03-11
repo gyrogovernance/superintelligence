@@ -23,7 +23,7 @@
 
 Traditional artificial intelligence systems operate through statistical approximation, predicting outputs based on patterns learned from data in unbounded high-dimensional spaces. This approach permits the generation of invalid states and requires continuous external correction to maintain coherence. Gyroscopic Artificial Superintelligence takes a fundamental departure from this paradigm by operating through geometric realisation.
 
-The architecture is built upon a deterministic finite-state coordination kernel. This kernel, specified in the GGG ASI Alignment Router document and referred to throughout this specification simply as "the kernel", enforces a strict separation between coordination physics and semantic interpretation. The physics are handled by the kernel, which transforms input bytes into discrete states within a closed, finite manifold. Interpretation is handled by the agent, which uses a deterministic operator to select traversal paths based on external context.
+The architecture is built upon a deterministic finite-state coordination kernel. This kernel, specified in the Gyroscopic ASI aQPU Kernel document and referred to throughout this specification simply as "the kernel", enforces a strict separation between coordination physics and semantic interpretation. The physics are handled by the kernel, which transforms input bytes into discrete states within a closed, finite manifold. Interpretation is handled by the agent, which uses a deterministic operator to select traversal paths based on external context.
 
 The curriculum that shapes the agent before deployment, including language model weights, training data, tokeniser definitions, and the token-to-byte mapping, is fixed once the agent begins operation. The agent does not modify its weights during operation. All adaptation occurs through trajectory in the kernel state space, recorded in the Genealogy.
 
@@ -307,7 +307,7 @@ The 16-state quotient system (derived from vertex charge pairs) provides a macro
 
 ### Dependencies
 
-Gyroscopic ASI requires the Router substrate and an embedding function. A language model is one possible source of embeddings but is not required at runtime:
+Gyroscopic ASI requires the aQPU Kernel medium and an embedding function. A language model is one possible source of embeddings but is not required at runtime:
 
 ```python
 from src.agent.intelligence import GyroscopicAgent, AgentConfig
@@ -350,7 +350,7 @@ state = InferenceState.create(K=3)
 
 The field M initialises to zero. The learning rate η defaults to the Aperture gap.
 
-The Inference Function obtains its kernel-dependent tables (byte weights, byte charges, direction factors, and feature matrices) indirectly via the `RouterKernel` and the spectral atlas (`phenomenology.npz`), using:
+The Inference Function obtains its kernel-dependent tables (byte weights, byte charges, direction factors, and feature matrices) indirectly via the `aQPU KernelKernel` and the spectral atlas (`phenomenology.npz`), using:
 
 ```python
 inference.set_kernel_tables(
@@ -550,7 +550,7 @@ The architecture admits a mapping to Beer's Viable System Model for organisation
 
 ## 11. Conclusion
 
-Gyroscopic ASI specifies an agent architecture in which a deterministic kernel provides a reproducible coordination substrate and an append-only byte history provides the basis for replay and reconstruction. Interpretation is constrained to the agent layer through a deterministic **Inference Function** and its spectral atlas (Phenomenology), which consume external embeddings and kernel observables to select output bytes.
+Gyroscopic ASI specifies an agent architecture in which a deterministic kernel provides a reproducible coordination medium and an append-only byte history provides the basis for replay and reconstruction. Interpretation is constrained to the agent layer through a deterministic **Inference Function** and its spectral atlas (Phenomenology), which consume external embeddings and kernel observables to select output bytes.
 
 These embeddings may be constructed from pre-trained open model parameters without executing forward passes at inference time.
 
@@ -635,6 +635,6 @@ The implementation supports K = 1, 2, 3, 4, 6, 8, 12, and 16 (see Section 4).
 ---
 
 **Repository:** github.com/gyrogovernance/superintelligence  
-**Kernel Specification:** docs/GGG_ASI_AR_Specs.md  
+**Kernel Specification:** docs/Gyroscopic_ASI_Specs.md  
 **Contact:** basilkorompilias@gmail.com
 

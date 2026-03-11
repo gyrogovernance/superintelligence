@@ -1,5 +1,5 @@
 # Ruff configuration for superintelligence project
-# Enforces consistent import namespace: use src.router, not router
+# Enforces consistent import namespace: use src.kernel, not router
 
 [lint]
 # Select rules
@@ -35,7 +35,7 @@ exclude = [
 "__init__.py" = ["F401"]
 
 [lint.isort]
-# Enforce src.router imports (not router)
+# Enforce src.kernel imports (not router)
 known-first-party = ["src"]
 
 [lint.flake8-tidy-imports]

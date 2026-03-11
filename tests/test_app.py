@@ -7,22 +7,13 @@ Tests the app-layer coordination system:
 - Event binding to kernel moments
 """
 
-from pathlib import Path
-
 import numpy as np
 import pytest
 
 from src.app.coordination import Coordinator
 from src.app.events import MICRO, Domain, EdgeID, GovernanceEvent
 from src.app.ledger import DomainLedgers, get_incidence_matrix, get_projections
-
-
-@pytest.fixture(scope="module")
-def atlas_dir():
-    p = Path("data/atlas")
-    if not p.exists():
-        pytest.skip("Atlas not built. Run: python -m src.router.atlas")
-    return p
+from src.constants import GENE_MAC_REST
 
 
 class TestDomainLedgers:
@@ -38,9 +29,13 @@ class TestDomainLedgers:
         """Hodge decomposition should reconstruct: y = y_grad + y_cycle."""
         ledgers = DomainLedgers()
 
-        # Put a nontrivial vector into Economy ledger via events
         for e, v in enumerate([1.0, -2.0, 0.5, 3.0, -1.5, 2.5]):
-            ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID(e), magnitude_micro=int(round(v * MICRO)), confidence_micro=MICRO))
+            ledgers.apply_event(GovernanceEvent(
+                domain=Domain.ECONOMY,
+                edge_id=EdgeID(e),
+                magnitude_micro=int(round(v * MICRO)),
+                confidence_micro=MICRO,
+            ))
 
         y = ledgers.get(Domain.ECONOMY)
         y_grad, y_cycle = ledgers.decompose(Domain.ECONOMY)
@@ -48,24 +43,43 @@ class TestDomainLedgers:
         # Reconstruction
         assert np.allclose(y, y_grad + y_cycle, atol=1e-12)
 
-        # Orthogonality in the unweighted inner product (should hold for your programor)
+        # Orthogonality
         assert abs(float(y_grad @ y_cycle)) < 1e-10
 
     def test_aperture_scale_invariant(self):
         """Aperture should be scale-invariant (ratio property)."""
         ledgers = DomainLedgers()
 
-        # Build a nonzero y
-        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
-        ledgers.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=MICRO))
+        ledgers.apply_event(GovernanceEvent(
+            domain=Domain.ECONOMY,
+            edge_id=EdgeID.GOV_INFO,
+            magnitude_micro=MICRO,
+            confidence_micro=MICRO,
+        ))
+        ledgers.apply_event(GovernanceEvent(
+            domain=Domain.ECONOMY,
+            edge_id=EdgeID.INFO_INFER,
+            magnitude_micro=2 * MICRO,
+            confidence_micro=MICRO,
+        ))
 
         a1 = ledgers.aperture(Domain.ECONOMY)
 
-        # Scale y by 7 via replaying same events * 7 times
+        # Scale y by 7 via replaying same events 7 times
         ledgers2 = DomainLedgers()
         for _ in range(7):
-            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
-            ledgers2.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=MICRO))
+            ledgers2.apply_event(GovernanceEvent(
+                domain=Domain.ECONOMY,
+                edge_id=EdgeID.GOV_INFO,
+                magnitude_micro=MICRO,
+                confidence_micro=MICRO,
+            ))
+            ledgers2.apply_event(GovernanceEvent(
+                domain=Domain.ECONOMY,
+                edge_id=EdgeID.INFO_INFER,
+                magnitude_micro=2 * MICRO,
+                confidence_micro=MICRO,
+            ))
 
         a2 = ledgers2.aperture(Domain.ECONOMY)
 
@@ -75,19 +89,34 @@ class TestDomainLedgers:
 class TestCoordinator:
     """Test Coordinator determinism and event handling."""
 
-    def test_coordinator_replay_determinism(self, atlas_dir):
+    def test_coordinator_replay_determinism(self):
         """Two coordinators with same bytes and events should produce identical state."""
-        c1 = Coordinator(atlas_dir)
-        c2 = Coordinator(atlas_dir)
+        c1 = Coordinator()
+        c2 = Coordinator()
 
         payload = b"Hello world"
         c1.step_bytes(payload)
         c2.step_bytes(payload)
 
         evs = [
-            GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=int(round(0.8 * MICRO))),
-            GovernanceEvent(domain=Domain.EMPLOYMENT, edge_id=EdgeID.INFER_INTEL, magnitude_micro=int(round(-0.5 * MICRO)), confidence_micro=MICRO),
-            GovernanceEvent(domain=Domain.EDUCATION, edge_id=EdgeID.INFO_INFER, magnitude_micro=2 * MICRO, confidence_micro=int(round(0.6 * MICRO))),
+            GovernanceEvent(
+                domain=Domain.ECONOMY,
+                edge_id=EdgeID.GOV_INFO,
+                magnitude_micro=MICRO,
+                confidence_micro=int(round(0.8 * MICRO)),
+            ),
+            GovernanceEvent(
+                domain=Domain.EMPLOYMENT,
+                edge_id=EdgeID.INFER_INTEL,
+                magnitude_micro=int(round(-0.5 * MICRO)),
+                confidence_micro=MICRO,
+            ),
+            GovernanceEvent(
+                domain=Domain.EDUCATION,
+                edge_id=EdgeID.INFO_INFER,
+                magnitude_micro=2 * MICRO,
+                confidence_micro=int(round(0.6 * MICRO)),
+            ),
         ]
 
         for ev in evs:
@@ -97,7 +126,7 @@ class TestCoordinator:
         s1 = c1.get_status()
         s2 = c2.get_status()
 
-        assert s1.kernel["state_index"] == s2.kernel["state_index"]
+        assert s1.kernel["state24"] == s2.kernel["state24"]
         assert s1.kernel["state_hex"] == s2.kernel["state_hex"]
 
         assert np.allclose(np.array(s1.ledgers["y_econ"]), np.array(s2.ledgers["y_econ"]))
@@ -108,41 +137,56 @@ class TestCoordinator:
         assert abs(s1.apertures["emp"] - s2.apertures["emp"]) < 1e-12
         assert abs(s1.apertures["edu"] - s2.apertures["edu"]) < 1e-12
 
-    def test_event_binding_records_kernel_moment(self, atlas_dir):
-        """Events bound to kernel moment should record step, state_index and last_byte."""
-        c = Coordinator(atlas_dir)
+    def test_event_binding_records_kernel_moment(self):
+        """Events bound to kernel moment should record step, state24, and last_byte."""
+        c = Coordinator()
         c.step_bytes(b"\x12\x34")  # advance kernel
 
-        ev = GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO)
+        ev = GovernanceEvent(
+            domain=Domain.ECONOMY,
+            edge_id=EdgeID.GOV_INFO,
+            magnitude_micro=MICRO,
+            confidence_micro=MICRO,
+        )
         c.apply_event(ev, bind_to_kernel_moment=True)
 
         last = c.event_log[-1]["event"]
-        assert last["kernel_step"] == len(c.byte_log)  # should be 2 here
-        assert last["kernel_state_index"] == c.kernel.state_index
+        assert last["kernel_step"] == len(c.byte_log)
+        assert last["kernel_state24"] == c.kernel.state24
         assert last["kernel_last_byte"] == c.kernel.last_byte
 
-    def test_coordinator_reset(self, atlas_dir):
+    def test_coordinator_reset(self):
         """Reset should restore initial state and clear logs."""
-        c = Coordinator(atlas_dir)
+        c = Coordinator()
         c.step_bytes(b"test")
-        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
+        c.apply_event(GovernanceEvent(
+            domain=Domain.ECONOMY,
+            edge_id=EdgeID.GOV_INFO,
+            magnitude_micro=MICRO,
+            confidence_micro=MICRO,
+        ))
 
         assert len(c.byte_log) > 0
         assert len(c.event_log) > 0
 
         c.reset()
 
-        assert c.kernel.state_index == c.kernel.archetype_index
+        assert c.kernel.state24 == GENE_MAC_REST
         assert c.kernel.step == 0
         assert len(c.byte_log) == 0
         assert len(c.event_log) == 0
         assert c.ledgers.event_count == 0
 
-    def test_coordinator_status_structure(self, atlas_dir):
+    def test_coordinator_status_structure(self):
         """get_status() should return properly structured CoordinationStatus."""
-        c = Coordinator(atlas_dir)
+        c = Coordinator()
         c.step_bytes(b"test")
-        c.apply_event(GovernanceEvent(domain=Domain.ECONOMY, edge_id=EdgeID.GOV_INFO, magnitude_micro=MICRO, confidence_micro=MICRO))
+        c.apply_event(GovernanceEvent(
+            domain=Domain.ECONOMY,
+            edge_id=EdgeID.GOV_INFO,
+            magnitude_micro=MICRO,
+            confidence_micro=MICRO,
+        ))
 
         status = c.get_status()
 
@@ -152,7 +196,7 @@ class TestCoordinator:
 
         assert "step" in status.kernel
         assert status.kernel["step"] == status.kernel["byte_log_len"]
-        assert "state_index" in status.kernel
+        assert "state24" in status.kernel
         assert "state_hex" in status.kernel
         assert "a_hex" in status.kernel
         assert "b_hex" in status.kernel
@@ -167,10 +211,10 @@ class TestCoordinator:
 
 
 class TestHodgeProjections:
-    """Test Hodge programion matrix invariants (audit-grade)."""
+    """Test Hodge projection matrix invariants (audit-grade)."""
 
-    def test_programor_identities(self):
-        """Programors must satisfy idempotence, symmetry, complementarity, and orthogonality."""
+    def test_projector_identities(self):
+        """Projectors must satisfy idempotence, symmetry, complementarity, and orthogonality."""
         P_grad, P_cycle = get_projections()
         I = np.eye(6)
 
@@ -194,7 +238,6 @@ class TestHodgeProjections:
         y = np.array([1.0, -2.0, 0.5, 3.0, -1.5, 2.5])
         y_cycle = P_cycle @ y
 
-        # ker(B) check: B @ y_cycle must be zero
         assert np.allclose(B @ y_cycle, np.zeros(4), atol=1e-15)
 
     def test_cycle_basis_is_in_kernel_and_unit_norm(self):
@@ -207,8 +250,5 @@ class TestHodgeProjections:
         assert basis.shape == (6, 3)
         for j in range(3):
             v = basis[:, j]
-            # In kernel of B
             assert np.allclose(B @ v, np.zeros(4), atol=1e-15)
-            # Unit norm
             assert abs(float(v @ v) - 1.0) < 1e-15
-
