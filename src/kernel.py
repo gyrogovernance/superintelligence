@@ -15,10 +15,13 @@ not a special stepping mode.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from fractions import Fraction
 
 from src.api import (
+    OmegaState12,
     depth4_intron_sequence32,
     depth4_mask_projection48,
+    try_state24_to_omega12,
 )
 from src.constants import (
     GENE_MAC_REST,
@@ -134,6 +137,24 @@ class Gyroscopic:
         """(a_density, b_density) of current state."""
         a, b = unpack_state(self.state24)
         return component_density(a), component_density(b)
+
+    @property
+    def current_omega12(self) -> OmegaState12 | None:
+        return try_state24_to_omega12(self.state24)
+
+    @property
+    def current_optical_shell(self) -> int | None:
+        omega = try_state24_to_omega12(self.state24)
+        return None if omega is None else omega.shell
+
+    @property
+    def current_optical_coordinates(
+        self,
+    ) -> tuple[Fraction, Fraction, Fraction] | None:
+        omega = try_state24_to_omega12(self.state24)
+        if omega is None:
+            return None
+        return (omega.optical_eq, omega.optical_comp, omega.optical_mu)
 
     # ---- depth-4 observables ----
 

@@ -49,6 +49,7 @@
 #define LAYER_MASK_12   0x0FFFu
 #define GENE_MAC_A12    0x0AAAu
 #define GENE_MAC_B12    0x0555u
+#define EPSILON_6       0x3Fu
 
 static uint16_t MASK12_BY_BYTE[256];
 static uint8_t  FAMILY_BY_BYTE[256];
@@ -56,6 +57,8 @@ static uint8_t  MICRO_BY_BYTE[256];
 static uint8_t  Q6_BY_BYTE[256];
 static uint16_t INVERT_A_BY_BYTE[256];
 static uint16_t INVERT_B_BY_BYTE[256];
+static uint8_t  EPS_A6_BY_BYTE[256];
+static uint8_t  EPS_B6_BY_BYTE[256];
 static int      TABLES_READY = 0;
 
 static inline uint8_t intron_of_byte(uint8_t b) {
@@ -106,6 +109,8 @@ static void gyro_init_tables(void) {
         INVERT_A_BY_BYTE[b] = invert_a;
         INVERT_B_BY_BYTE[b] = invert_b;
         Q6_BY_BYTE[b] = q6;
+        EPS_A6_BY_BYTE[b] = (uint8_t)((intron & 0x01u) ? EPSILON_6 : 0u);
+        EPS_B6_BY_BYTE[b] = (uint8_t)((intron & 0x80u) ? EPSILON_6 : 0u);
     }
 
     TABLES_READY = 1;
@@ -426,6 +431,317 @@ GYRO_EXPORT void gyro_step_byte_batch(
             (uint32_t)states_in[i],
             byte
         );
+    }
+}
+
+/* -------------------------------------------------------------------------
+   Omega (Omega) packed 12-bit chart - batch conversions and stepping
+   ------------------------------------------------------------------------- */
+
+static inline uint32_t gyro_pack_omega12(uint8_t u6, uint8_t v6) {
+    return (((uint32_t)(u6 & 0x3Fu)) << 6u) | ((uint32_t)(v6 & 0x3Fu));
+}
+
+static inline void gyro_unpack_omega12(uint32_t omega12, uint8_t* u6, uint8_t* v6) {
+    *u6 = (uint8_t)((omega12 >> 6u) & 0x3Fu);
+    *v6 = (uint8_t)(omega12 & 0x3Fu);
+}
+
+static inline uint32_t gyro_pack_omega_sig12(uint8_t parity, uint8_t tau_u6, uint8_t tau_v6) {
+    return (((uint32_t)(parity & 1u)) << 12u)
+         | (((uint32_t)(tau_u6 & 0x3Fu)) << 6u)
+         | ((uint32_t)(tau_v6 & 0x3Fu));
+}
+
+static inline void gyro_unpack_omega_sig12(uint32_t sig, uint8_t* parity, uint8_t* tau_u6, uint8_t* tau_v6) {
+    *parity = (uint8_t)((sig >> 12u) & 1u);
+    *tau_u6 = (uint8_t)((sig >> 6u) & 0x3Fu);
+    *tau_v6 = (uint8_t)(sig & 0x3Fu);
+}
+
+static inline uint32_t omega_sig_pack(uint8_t parity, uint8_t tau_u6, uint8_t tau_v6) {
+    return gyro_pack_omega_sig12(parity, tau_u6, tau_v6);
+}
+
+static inline uint32_t omega_byte_signature(uint8_t b) {
+    return omega_sig_pack(
+        1u,
+        EPS_A6_BY_BYTE[b],
+        (uint8_t)(MICRO_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b])
+    );
+}
+
+static inline uint32_t compose_omega_signatures(uint32_t left, uint32_t right) {
+    uint8_t lp, rp, ltu, ltv, rtu, rtv, ru, rv;
+
+    gyro_unpack_omega_sig12(left, &lp, &ltu, &ltv);
+    gyro_unpack_omega_sig12(right, &rp, &rtu, &rtv);
+
+    if (lp == 0u) {
+        ru = rtu;
+        rv = rtv;
+    } else {
+        ru = rtv;
+        rv = rtu;
+    }
+
+    return omega_sig_pack(
+        (uint8_t)(lp ^ rp),
+        (uint8_t)(ru ^ ltu),
+        (uint8_t)(rv ^ ltv)
+    );
+}
+
+static inline int is_pair_diagonal12(uint16_t x) {
+    for (uint8_t i = 0u; i < 6u; ++i) {
+        uint16_t pair = (uint16_t)((x >> (2u * i)) & 0x3u);
+        if (pair != 0u && pair != 0x3u) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static inline int gyro_try_state24_to_omega12(uint32_t state24, uint32_t* out_omega12) {
+    uint16_t a12 = (uint16_t)((state24 >> 12u) & LAYER_MASK_12);
+    uint16_t b12 = (uint16_t)(state24 & LAYER_MASK_12);
+
+    uint16_t ua = (uint16_t)(a12 ^ GENE_MAC_A12);
+    uint16_t vb = (uint16_t)(b12 ^ GENE_MAC_A12);
+
+    if (!is_pair_diagonal12(ua) || !is_pair_diagonal12(vb)) {
+        return 0;
+    }
+
+    uint8_t u6 = collapse_pairdiag12_to_word6(ua);
+    uint8_t v6 = collapse_pairdiag12_to_word6(vb);
+    *out_omega12 = gyro_pack_omega12(u6, v6);
+    return 1;
+}
+
+GYRO_EXPORT void gyro_state24_to_omega12_batch(
+    const int32_t* states_in,
+    int64_t n,
+    int32_t* omega12_out,
+    uint8_t* valid_out
+) {
+    if (states_in == NULL || omega12_out == NULL || valid_out == NULL || n < 0) {
+        return;
+    }
+    gyro_init_tables();
+    for (int64_t i = 0; i < n; ++i) {
+        uint32_t packed = 0u;
+        int ok = gyro_try_state24_to_omega12((uint32_t)states_in[i], &packed);
+        omega12_out[i] = (int32_t)packed;
+        valid_out[i] = (uint8_t)(ok ? 1u : 0u);
+    }
+}
+
+GYRO_EXPORT void gyro_omega12_to_state24_batch(
+    const int32_t* omega12_in,
+    int64_t n,
+    int32_t* states_out
+) {
+    if (omega12_in == NULL || states_out == NULL || n < 0) {
+        return;
+    }
+    for (int64_t i = 0; i < n; ++i) {
+        uint8_t u6, v6;
+        gyro_unpack_omega12((uint32_t)omega12_in[i], &u6, &v6);
+        uint16_t a12 = (uint16_t)(GENE_MAC_A12 ^ mask12_from_micro_ref(u6));
+        uint16_t b12 = (uint16_t)(GENE_MAC_A12 ^ mask12_from_micro_ref(v6));
+        states_out[i] = (int32_t)((((uint32_t)a12) << 12u) | (uint32_t)b12);
+    }
+}
+
+static inline uint32_t gyro_step_omega12_by_byte(uint32_t omega12, uint8_t b) {
+    uint8_t u6, v6;
+    gyro_unpack_omega12(omega12, &u6, &v6);
+    uint8_t u_next = (uint8_t)((v6 ^ EPS_A6_BY_BYTE[b]) & 0x3Fu);
+    uint8_t v_next = (uint8_t)((u6 ^ MICRO_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b]) & 0x3Fu);
+    return gyro_pack_omega12(u_next, v_next);
+}
+
+GYRO_EXPORT void gyro_step_omega12_batch(
+    const int32_t* omega12_in,
+    int64_t n,
+    uint8_t byte,
+    int32_t* omega12_out
+) {
+    if (omega12_in == NULL || omega12_out == NULL || n < 0) {
+        return;
+    }
+    gyro_init_tables();
+    for (int64_t i = 0; i < n; ++i) {
+        omega12_out[i] = (int32_t)gyro_step_omega12_by_byte((uint32_t)omega12_in[i], byte);
+    }
+}
+
+GYRO_EXPORT void gyro_apply_omega_signature_batch(
+    const int32_t* omega12_in,
+    const int32_t* omega_sig_in,
+    int64_t n,
+    int32_t* omega12_out
+) {
+    if (omega12_in == NULL || omega_sig_in == NULL || omega12_out == NULL || n < 0) {
+        return;
+    }
+    for (int64_t i = 0; i < n; ++i) {
+        uint8_t u6, v6, parity, tau_u6, tau_v6;
+        gyro_unpack_omega12((uint32_t)omega12_in[i], &u6, &v6);
+        gyro_unpack_omega_sig12((uint32_t)omega_sig_in[i], &parity, &tau_u6, &tau_v6);
+
+        if (parity == 0u) {
+            omega12_out[i] = (int32_t)gyro_pack_omega12(
+                (uint8_t)(u6 ^ tau_u6),
+                (uint8_t)(v6 ^ tau_v6)
+            );
+        } else {
+            omega12_out[i] = (int32_t)gyro_pack_omega12(
+                (uint8_t)(v6 ^ tau_u6),
+                (uint8_t)(u6 ^ tau_v6)
+            );
+        }
+    }
+}
+
+GYRO_EXPORT void gyro_shell_histogram_state24(
+    const int32_t* states,
+    int64_t n,
+    int32_t* hist_out
+) {
+    if (states == NULL || hist_out == NULL || n < 0) {
+        return;
+    }
+    for (int i = 0; i < 7; ++i) hist_out[i] = 0;
+    for (int64_t i = 0; i < n; ++i) {
+        uint8_t chi = chirality_word6_from_state24((uint32_t)states[i]);
+        uint8_t w = (uint8_t)gyro_popcnt32((uint32_t)chi);
+        if (w < 7u) hist_out[w] += 1;
+    }
+}
+
+GYRO_EXPORT void gyro_shell_histogram_omega12(
+    const int32_t* omega12_in,
+    int64_t n,
+    int32_t* hist_out
+) {
+    if (omega12_in == NULL || hist_out == NULL || n < 0) {
+        return;
+    }
+    for (int i = 0; i < 7; ++i) hist_out[i] = 0;
+    for (int64_t i = 0; i < n; ++i) {
+        uint8_t u6, v6;
+        gyro_unpack_omega12((uint32_t)omega12_in[i], &u6, &v6);
+        uint8_t w = (uint8_t)gyro_popcnt32((uint32_t)(u6 ^ v6));
+        if (w < 7u) hist_out[w] += 1;
+    }
+}
+
+GYRO_EXPORT void gyro_omega_signature_scan(
+    const uint8_t* bytes,
+    int64_t len,
+    int32_t* omega_signatures_out
+) {
+    if (bytes == NULL || omega_signatures_out == NULL || len < 0) {
+        return;
+    }
+
+    gyro_init_tables();
+
+    uint32_t accum = 0u;
+
+    for (int64_t i = 0; i < len; ++i) {
+        uint32_t sig_b = omega_byte_signature(bytes[i]);
+        accum = compose_omega_signatures(sig_b, accum);
+        omega_signatures_out[i] = (int32_t)accum;
+    }
+}
+
+GYRO_EXPORT void gyro_omega12_scan_from_omega12(
+    const uint8_t* bytes,
+    int64_t len,
+    int32_t start_omega12,
+    int32_t* omega12_out
+) {
+    if (bytes == NULL || omega12_out == NULL || len < 0) {
+        return;
+    }
+
+    gyro_init_tables();
+
+    uint32_t s = (uint32_t)start_omega12 & 0x0FFFu;
+    for (int64_t i = 0; i < len; ++i) {
+        s = gyro_step_omega12_by_byte(s, bytes[i]);
+        omega12_out[i] = (int32_t)s;
+    }
+}
+
+GYRO_EXPORT int64_t gyro_shell_histogram_state24_checked(
+    const int32_t* states,
+    int64_t n,
+    int32_t* hist_out
+) {
+    if (states == NULL || hist_out == NULL || n < 0) {
+        return -1;
+    }
+
+    for (int i = 0; i < 7; ++i) hist_out[i] = 0;
+
+    int64_t invalid = 0;
+    for (int64_t i = 0; i < n; ++i) {
+        uint32_t packed = 0u;
+        if (!gyro_try_state24_to_omega12((uint32_t)states[i], &packed)) {
+            invalid++;
+            continue;
+        }
+
+        uint8_t u6, v6;
+        gyro_unpack_omega12(packed, &u6, &v6);
+        uint8_t w = (uint8_t)gyro_popcnt32((uint32_t)(u6 ^ v6));
+        if (w < 7u) hist_out[w] += 1;
+    }
+
+    return invalid;
+}
+
+GYRO_EXPORT void gyro_apply_omega_gate_batch(
+    const int32_t* omega12_in,
+    int64_t n,
+    uint8_t gate_code,
+    int32_t* omega12_out
+) {
+    if (omega12_in == NULL || omega12_out == NULL || n < 0) {
+        return;
+    }
+
+    for (int64_t i = 0; i < n; ++i) {
+        uint8_t u6, v6;
+        gyro_unpack_omega12((uint32_t)omega12_in[i], &u6, &v6);
+
+        switch (gate_code) {
+            case 0:
+                omega12_out[i] = (int32_t)gyro_pack_omega12(u6, v6);
+                break;
+            case 1:
+                omega12_out[i] = (int32_t)gyro_pack_omega12(v6, u6);
+                break;
+            case 2:
+                omega12_out[i] = (int32_t)gyro_pack_omega12(
+                    (uint8_t)(v6 ^ EPSILON_6),
+                    (uint8_t)(u6 ^ EPSILON_6)
+                );
+                break;
+            case 3:
+                omega12_out[i] = (int32_t)gyro_pack_omega12(
+                    (uint8_t)(u6 ^ EPSILON_6),
+                    (uint8_t)(v6 ^ EPSILON_6)
+                );
+                break;
+            default:
+                omega12_out[i] = 0;
+                break;
+        }
     }
 }
 

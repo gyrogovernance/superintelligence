@@ -388,6 +388,81 @@ def _setup_lib_argtypes(lib: ctypes.CDLL) -> None:
             ctypes.c_void_p,
         ]
         lib.gyro_state_scan_from_state.restype = None
+    if hasattr(lib, "gyro_state24_to_omega12_batch"):
+        lib.gyro_state24_to_omega12_batch.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_state24_to_omega12_batch.restype = None
+    if hasattr(lib, "gyro_omega12_to_state24_batch"):
+        lib.gyro_omega12_to_state24_batch.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_omega12_to_state24_batch.restype = None
+    if hasattr(lib, "gyro_step_omega12_batch"):
+        lib.gyro_step_omega12_batch.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_uint8,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_step_omega12_batch.restype = None
+    if hasattr(lib, "gyro_apply_omega_signature_batch"):
+        lib.gyro_apply_omega_signature_batch.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_apply_omega_signature_batch.restype = None
+    if hasattr(lib, "gyro_shell_histogram_state24"):
+        lib.gyro_shell_histogram_state24.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_shell_histogram_state24.restype = None
+    if hasattr(lib, "gyro_shell_histogram_omega12"):
+        lib.gyro_shell_histogram_omega12.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_shell_histogram_omega12.restype = None
+    if hasattr(lib, "gyro_omega_signature_scan"):
+        lib.gyro_omega_signature_scan.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_omega_signature_scan.restype = None
+    if hasattr(lib, "gyro_omega12_scan_from_omega12"):
+        lib.gyro_omega12_scan_from_omega12.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_int32,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_omega12_scan_from_omega12.restype = None
+    if hasattr(lib, "gyro_shell_histogram_state24_checked"):
+        lib.gyro_shell_histogram_state24_checked.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_shell_histogram_state24_checked.restype = ctypes.c_int64
+    if hasattr(lib, "gyro_apply_omega_gate_batch"):
+        lib.gyro_apply_omega_gate_batch.argtypes = [
+            ctypes.c_void_p,
+            ctypes.c_int64,
+            ctypes.c_uint8,
+            ctypes.c_void_p,
+        ]
+        lib.gyro_apply_omega_gate_batch.restype = None
     if hasattr(lib, "gyro_bitplane_gemv_f32"):
         lib.gyro_bitplane_gemv_f32.argtypes = [
             ctypes.c_void_p,
@@ -991,6 +1066,311 @@ def step_byte_batch(states: torch.Tensor, byte: int) -> torch.Tensor:
         )
 
     return out.reshape(s.shape)
+
+
+def state24_to_omega12_batch(states: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Convert state24 batch to packed omega12. Returns (omega12, valid).
+
+    For non-Omega (invalid) inputs, the packed value is a placeholder (e.g. 0)
+    and must not be inverted; only valid entries may be inverted meaningfully.
+    """
+    lib = _get_lib()
+    s = _ensure_cpu_contiguous(states, dtype=torch.int32, name="states")
+    flat = s.reshape(-1)
+    omega = torch.empty_like(flat, dtype=torch.int32)
+    valid = torch.empty(flat.shape, dtype=torch.uint8, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_state24_to_omega12_batch"):
+        from src.api import try_state24_to_omega12, pack_omega12
+        for i in range(flat.numel()):
+            o = try_state24_to_omega12(int(flat[i].item()))
+            if o is not None:
+                omega[i] = pack_omega12(o)
+                valid[i] = 1
+            else:
+                omega[i] = 0
+                valid[i] = 0
+    else:
+        lib.gyro_state24_to_omega12_batch(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_void_p(omega.data_ptr()),
+            ctypes.c_void_p(valid.data_ptr()),
+        )
+
+    return omega.reshape(s.shape), valid.reshape(s.shape)
+
+
+def omega12_to_state24_batch(omega12: torch.Tensor) -> torch.Tensor:
+    """
+    Convert packed omega12 batch to state24.
+
+    Input must be from valid Omega states; packed values from invalid state24
+    conversions are placeholders and produce undefined results when inverted.
+    """
+    lib = _get_lib()
+    o = _ensure_cpu_contiguous(omega12, dtype=torch.int32, name="omega12")
+    flat = o.reshape(-1)
+    out = torch.empty_like(flat, dtype=torch.int32)
+
+    if lib is None or not hasattr(lib, "gyro_omega12_to_state24_batch"):
+        from src.api import unpack_omega12, omega12_to_state24
+        for i in range(flat.numel()):
+            out[i] = omega12_to_state24(unpack_omega12(int(flat[i].item())))
+    else:
+        lib.gyro_omega12_to_state24_batch(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(o.shape)
+
+
+def step_omega12_batch(omega12: torch.Tensor, byte: int) -> torch.Tensor:
+    """Step packed omega12 batch by one byte."""
+    lib = _get_lib()
+    o = _ensure_cpu_contiguous(omega12, dtype=torch.int32, name="omega12")
+    flat = o.reshape(-1)
+    out = torch.empty_like(flat, dtype=torch.int32)
+    b = int(byte) & 0xFF
+
+    if lib is None or not hasattr(lib, "gyro_step_omega12_batch"):
+        from src.api import unpack_omega12, step_omega12_by_byte, pack_omega12
+        for i in range(flat.numel()):
+            out[i] = pack_omega12(step_omega12_by_byte(unpack_omega12(int(flat[i].item())), b))
+    else:
+        lib.gyro_step_omega12_batch(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_uint8(b),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(o.shape)
+
+
+def apply_omega_signature_batch(
+    omega12: torch.Tensor,
+    signatures: torch.Tensor,
+) -> torch.Tensor:
+    """Apply omega signatures to packed omega12 batch."""
+    lib = _get_lib()
+    o = _ensure_cpu_contiguous(omega12, dtype=torch.int32, name="omega12")
+    sig = _ensure_cpu_contiguous(signatures, dtype=torch.int32, name="signatures")
+    if o.numel() != sig.numel():
+        raise ValueError(
+            f"omega12 and signatures must have same size, got {o.numel()} vs {sig.numel()}"
+        )
+    flat_o = o.reshape(-1)
+    flat_sig = sig.reshape(-1)
+    out = torch.empty_like(flat_o, dtype=torch.int32)
+
+    if lib is None or not hasattr(lib, "gyro_apply_omega_signature_batch"):
+        from src.api import unpack_omega12, unpack_omega_signature12, apply_omega_signature, pack_omega12
+        for i in range(flat_o.numel()):
+            om = unpack_omega12(int(flat_o[i].item()))
+            sg = unpack_omega_signature12(int(flat_sig[i].item()))
+            out[i] = pack_omega12(apply_omega_signature(om, sg))
+    else:
+        lib.gyro_apply_omega_signature_batch(
+            ctypes.c_void_p(flat_o.data_ptr()),
+            ctypes.c_void_p(flat_sig.data_ptr()),
+            ctypes.c_int64(flat_o.numel()),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(o.shape)
+
+
+def shell_histogram_state24(states: torch.Tensor) -> torch.Tensor:
+    """Shell histogram from state24 batch. Returns length-7 int32 tensor."""
+    lib = _get_lib()
+    s = _ensure_cpu_contiguous(states, dtype=torch.int32, name="states")
+    flat = s.reshape(-1)
+    out = torch.zeros(7, dtype=torch.int32, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_shell_histogram_state24"):
+        from src.api import chirality_word6
+        for i in range(flat.numel()):
+            w = chirality_word6(int(flat[i].item())).bit_count()
+            out[w] += 1
+    else:
+        lib.gyro_shell_histogram_state24(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out
+
+
+def shell_histogram_omega12(omega12: torch.Tensor) -> torch.Tensor:
+    """Shell histogram from packed omega12 batch. Returns length-7 int32 tensor.
+    Assumes values are valid packed Omega states."""
+    lib = _get_lib()
+    o = _ensure_cpu_contiguous(omega12, dtype=torch.int32, name="omega12")
+    flat = o.reshape(-1)
+    out = torch.zeros(7, dtype=torch.int32, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_shell_histogram_omega12"):
+        from src.api import unpack_omega12
+        for i in range(flat.numel()):
+            om = unpack_omega12(int(flat[i].item()))
+            out[om.shell] += 1
+    else:
+        lib.gyro_shell_histogram_omega12(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out
+
+
+def omega_signature_scan(
+    bytes_tensor: torch.Tensor | bytes | bytearray | memoryview,
+) -> torch.Tensor:
+    """Scan byte stream to produce packed omega signatures. Returns int32 tensor of same length."""
+    lib = _get_lib()
+    if isinstance(bytes_tensor, torch.Tensor):
+        x = _ensure_cpu_contiguous(bytes_tensor, dtype=torch.uint8, name="bytes")
+        if x.ndim != 1:
+            raise ValueError(f"bytes must be 1D for omega_signature_scan, got shape {tuple(x.shape)}")
+        flat = x
+        shape = x.shape
+    else:
+        flat = torch.tensor(list(bytes(bytes_tensor)), dtype=torch.uint8, device="cpu")
+        shape = (flat.numel(),)
+
+    n = flat.numel()
+    out = torch.empty(n, dtype=torch.int32, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_omega_signature_scan"):
+        from src.api import (
+            EPS_A6_BY_BYTE,
+            EPS_B6_BY_BYTE,
+            MICRO_REF_BY_BYTE,
+            OmegaSignature12,
+            compose_omega_signatures,
+            pack_omega_signature12,
+        )
+
+        acc = OmegaSignature12(parity=0, tau_u6=0, tau_v6=0)
+        for i in range(n):
+            b = int(flat[i].item()) & 0xFF
+            sig_b = OmegaSignature12(
+                parity=1,
+                tau_u6=EPS_A6_BY_BYTE[b],
+                tau_v6=MICRO_REF_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b],
+            )
+            acc = compose_omega_signatures(sig_b, acc)
+            out[i] = pack_omega_signature12(acc)
+    else:
+        lib.gyro_omega_signature_scan(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(n),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(shape)
+
+
+def omega12_scan_from_omega12(
+    payload: torch.Tensor | bytes | bytearray | memoryview,
+    start_omega12: int,
+) -> torch.Tensor:
+    """Omega-native continuation scan. Returns int32 tensor of omega12 states."""
+    lib = _get_lib()
+    if isinstance(payload, torch.Tensor):
+        x = _ensure_cpu_contiguous(payload, dtype=torch.uint8, name="payload")
+        if x.ndim != 1:
+            raise ValueError(f"payload must be 1D for omega12_scan_from_omega12, got shape {tuple(x.shape)}")
+        flat_bytes = x
+        shape = x.shape
+    else:
+        flat_bytes = torch.tensor(list(bytes(payload)), dtype=torch.uint8, device="cpu")
+        shape = (flat_bytes.numel(),)
+
+    n = flat_bytes.numel()
+    out = torch.empty(n, dtype=torch.int32, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_omega12_scan_from_omega12"):
+        from src.api import unpack_omega12, step_omega12_by_byte, pack_omega12
+        s = unpack_omega12(int(start_omega12) & 0xFFF)
+        for i in range(n):
+            s = step_omega12_by_byte(s, int(flat_bytes[i].item()) & 0xFF)
+            out[i] = pack_omega12(s)
+    else:
+        lib.gyro_omega12_scan_from_omega12(
+            ctypes.c_void_p(flat_bytes.data_ptr()),
+            ctypes.c_int64(n),
+            ctypes.c_int32(int(start_omega12) & 0xFFF),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(shape)
+
+
+def shell_histogram_state24_checked(states: torch.Tensor) -> tuple[torch.Tensor, int]:
+    """Shell histogram from state24 with Omega check. Returns (hist, invalid_count)."""
+    lib = _get_lib()
+    s = _ensure_cpu_contiguous(states, dtype=torch.int32, name="states")
+    flat = s.reshape(-1)
+    out = torch.zeros(7, dtype=torch.int32, device="cpu")
+
+    if lib is None or not hasattr(lib, "gyro_shell_histogram_state24_checked"):
+        from src.api import try_state24_to_omega12
+        invalid = 0
+        for i in range(flat.numel()):
+            omega = try_state24_to_omega12(int(flat[i].item()))
+            if omega is None:
+                invalid += 1
+            else:
+                out[omega.shell] += 1
+    else:
+        invalid = lib.gyro_shell_histogram_state24_checked(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+        invalid = int(invalid)
+        if invalid < 0:
+            raise RuntimeError("gyro_shell_histogram_state24_checked failed")
+
+    return out, invalid
+
+
+def apply_omega_gate_batch(
+    omega12: torch.Tensor,
+    gate_code: int,
+) -> torch.Tensor:
+    """Apply K4 gate to packed omega12 batch. gate_code: 0=id, 1=S, 2=C, 3=F."""
+    g = int(gate_code)
+    if g not in (0, 1, 2, 3):
+        raise ValueError(f"gate_code must be 0,1,2,3; got {gate_code}")
+
+    lib = _get_lib()
+    o = _ensure_cpu_contiguous(omega12, dtype=torch.int32, name="omega12")
+    flat = o.reshape(-1)
+    out = torch.empty_like(flat, dtype=torch.int32)
+
+    if lib is None or not hasattr(lib, "gyro_apply_omega_gate_batch"):
+        from src.api import unpack_omega12, apply_omega_gate, pack_omega12
+        gate_names = ("id", "S", "C", "F")
+        for i in range(flat.numel()):
+            om = unpack_omega12(int(flat[i].item()))
+            out[i] = pack_omega12(apply_omega_gate(om, gate_names[g]))
+    else:
+        lib.gyro_apply_omega_gate_batch(
+            ctypes.c_void_p(flat.data_ptr()),
+            ctypes.c_int64(flat.numel()),
+            ctypes.c_uint8(g),
+            ctypes.c_void_p(out.data_ptr()),
+        )
+
+    return out.reshape(o.shape)
 
 
 def state_scan_from_state(

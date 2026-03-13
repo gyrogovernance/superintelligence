@@ -23,15 +23,57 @@ from typing import Any, TypeAlias
 
 from src.api import (
     ByteItem,
+    FULL_BYTE_SHELL_DISTRIBUTION,
+    OmegaSignature12,
+    OmegaState12,
     WordSignature,
+    apply_omega_gate,
+    pack_omega12,
+    pack_omega_signature12,
+    unpack_omega12,
+    unpack_omega_signature12,
+    apply_omega_gate_C,
+    apply_omega_gate_F,
+    apply_omega_gate_S,
+    apply_omega_signature,
     apply_word_signature,
     chirality_word6,
+    compose_omega_signatures,
     depth4_intron_sequence32,
     depth4_mask_projection48,
+    fixed_locus,
+    fixed_states_of_gate,
+    frobenius_component12,
+    frobenius_pair,
+    gf4_norm,
+    gf4_trace,
+    is_in_omega24,
+    is_reachable_component,
+    is_trace1_pair,
+    k4_orbit,
+    k4_stabilizer,
+    omega12_to_state24,
+    omega_signature_from_word_signature,
+    omega_word_signature,
+    optical_coordinates_from_state24,
     q_word6,
     q_word6_for_items,
+    shadow_partner_byte,
+    shadow_partner_map,
+    shell_krawtchouk_inverse_exact,
+    shell_krawtchouk_transform_exact,
+    shell_markov_step,
+    shell_population,
+    shell_transition_matrix_for_q_weight,
+    shell_transition_probability,
+    stabilizer_type_from_state24,
+    state24_to_omega12,
     state24_to_spin6_pair,
+    state_conjugate_f,
+    step_omega12_by_byte,
     trajectory_parity_commitment,
+    try_state24_to_omega12,
+    verify_optical_conjugacy,
     walsh_hadamard64,
     word_signature,
 )
@@ -53,6 +95,18 @@ from src.constants import (
 
 ObservableInt: TypeAlias = Callable[[int], int]
 ObservableNum: TypeAlias = Callable[[int], int | float]
+
+
+def _omega_gate_name_to_code(name: str) -> int:
+    if name == "id":
+        return 0
+    if name == "S":
+        return 1
+    if name == "C":
+        return 2
+    if name == "F":
+        return 3
+    raise ValueError(f"Unknown Omega gate: {name!r}")
 
 
 def _flatten_items(items: Iterable[ByteItem]) -> bytes:
@@ -89,6 +143,12 @@ class StateCharts:
     spin_b6: tuple[int, ...] | None
     chirality6: int
     constitutional: ConstitutionalChart
+    omega12: OmegaState12 | None
+    chirality_weight6: int | None
+    optical_shell: int | None
+    optical_eq: Fraction | None
+    optical_comp: Fraction | None
+    optical_mu: Fraction | None
 
 
 @dataclass(frozen=True)
@@ -102,6 +162,7 @@ class Moment:
     b_hex: str
     charts: StateCharts
     signature: WordSignature
+    omega_signature: OmegaSignature12
     parity_commitment: tuple[int, int, int]
     q_transport6: int
 
@@ -146,6 +207,7 @@ class ReachabilityWitness:
     word: bytes
     depth: int
     signature: WordSignature
+    omega_signature: OmegaSignature12
 
 
 def state_charts(state24: int) -> StateCharts:
@@ -173,6 +235,20 @@ def state_charts(state24: int) -> StateCharts:
         complementarity_sum=horiz_d + ab_d,
     )
 
+    omega = try_state24_to_omega12(s)
+    if omega is None:
+        chirality_weight6 = None
+        optical_shell = None
+        optical_eq = None
+        optical_comp = None
+        optical_mu = None
+    else:
+        chirality_weight6 = omega.shell
+        optical_shell = omega.shell
+        optical_eq = omega.optical_eq
+        optical_comp = omega.optical_comp
+        optical_mu = omega.optical_mu
+
     return StateCharts(
         state24=s,
         state_hex=f"{s:06x}",
@@ -184,6 +260,12 @@ def state_charts(state24: int) -> StateCharts:
         spin_b6=spin_b6,
         chirality6=chirality_word6(s),
         constitutional=constitutional,
+        omega12=omega,
+        chirality_weight6=chirality_weight6,
+        optical_shell=optical_shell,
+        optical_eq=optical_eq,
+        optical_comp=optical_comp,
+        optical_mu=optical_mu,
     )
 
 
@@ -200,6 +282,7 @@ def moment_from_ledger(
     last_byte = GENE_MIC_S if len(ledger) == 0 else int(ledger[-1]) & 0xFF
     charts = state_charts(s)
     sig = word_signature(ledger)
+    omega_sig = omega_signature_from_word_signature(sig)
     parity = trajectory_parity_commitment(ledger)
     q_transport = q_word6_for_items(ledger)
 
@@ -213,6 +296,7 @@ def moment_from_ledger(
         b_hex=charts.b_hex,
         charts=charts,
         signature=sig,
+        omega_signature=omega_sig,
         parity_commitment=parity,
         q_transport6=q_transport,
     )
@@ -230,6 +314,7 @@ def verify_moment(
         and rebuilt.state24 == moment.state24
         and rebuilt.last_byte == moment.last_byte
         and rebuilt.signature == moment.signature
+        and rebuilt.omega_signature == moment.omega_signature
         and rebuilt.parity_commitment == moment.parity_commitment
         and rebuilt.q_transport6 == moment.q_transport6
     )
@@ -417,8 +502,67 @@ def _omega_states() -> tuple[int, ...]:
 
 
 def _is_in_omega(state24: int) -> bool:
-    s = int(state24) & MASK_STATE24
-    return s in _rest_witness_index()
+    return is_in_omega24(state24)
+
+
+def locus_of_state(state24: int) -> int:
+    omega = state24_to_omega12(state24)
+    return omega.shell
+
+
+@lru_cache(maxsize=7)
+def _states_on_locus_cached(w: int) -> tuple[int, ...]:
+    if not (0 <= w <= 6):
+        raise ValueError(f"Shell index must be 0..6, got {w}")
+
+    out: list[int] = []
+    chis = [chi for chi in range(64) if chi.bit_count() == w]
+    for chi in chis:
+        for u6 in range(64):
+            out.append(omega12_to_state24(OmegaState12(u6=u6, v6=u6 ^ chi)))
+    return tuple(sorted(out))
+
+
+def states_on_locus(w: int) -> tuple[int, ...]:
+    return _states_on_locus_cached(int(w))
+
+
+def optical_coordinates(state24: int) -> tuple[Fraction, Fraction, Fraction]:
+    return optical_coordinates_from_state24(state24)
+
+
+def stabilizer_type(state24: int) -> str:
+    return stabilizer_type_from_state24(state24)
+
+
+def shell_histogram(states: Iterable[int]) -> tuple[int, ...]:
+    counts = [0] * 7
+    for s in states:
+        omega = state24_to_omega12(s)
+        counts[omega.shell] += 1
+    return tuple(counts)
+
+
+def future_locus_measure(
+    source_state24: int,
+    length: int,
+) -> dict[int, Fraction]:
+    s = int(source_state24) & MASK_STATE24
+    n = int(length)
+
+    if n < 0:
+        raise ValueError(f"length must be non-negative, got {length}")
+    if not _is_in_omega(s):
+        raise ValueError(
+            f"future_locus_measure is defined exactly on Omega only; "
+            f"state {s:#08x} is not in Omega"
+        )
+
+    if n == 0:
+        w0 = state24_to_omega12(s).shell
+        return {w: Fraction(int(w == w0), 1) for w in range(7)}
+
+    return {w: FULL_BYTE_SHELL_DISTRIBUTION[w] for w in range(7)}
 
 
 def witness_from_rest(target_state24: int) -> ReachabilityWitness:
@@ -429,11 +573,13 @@ def witness_from_rest(target_state24: int) -> ReachabilityWitness:
             f"Target {target:#08x} is not in Omega or has no depth<=2 witness from rest"
         )
     word = index[target]
+    sig = word_signature(word)
     return ReachabilityWitness(
         target_state24=target,
         word=word,
         depth=len(word),
-        signature=word_signature(word),
+        signature=sig,
+        omega_signature=omega_signature_from_word_signature(sig),
     )
 
 
@@ -471,6 +617,41 @@ class StateOps:
     gate = staticmethod(apply_gate)
     witness_from_rest = staticmethod(witness_from_rest)
     execute_witness_from_rest = staticmethod(execute_witness_from_rest)
+    is_in_omega = staticmethod(is_in_omega24)
+    try_to_omega12 = staticmethod(try_state24_to_omega12)
+    to_omega12 = staticmethod(state24_to_omega12)
+    from_omega12 = staticmethod(omega12_to_state24)
+    step_omega12 = staticmethod(step_omega12_by_byte)
+    omega_signature = staticmethod(omega_word_signature)
+    omega_signature_from_word_signature = staticmethod(
+        omega_signature_from_word_signature
+    )
+    apply_omega_signature = staticmethod(apply_omega_signature)
+    compose_omega_signatures = staticmethod(compose_omega_signatures)
+    omega_gate = staticmethod(apply_omega_gate)
+    omega_gate_S = staticmethod(apply_omega_gate_S)
+    omega_gate_C = staticmethod(apply_omega_gate_C)
+    omega_gate_F = staticmethod(apply_omega_gate_F)
+    pack_omega12 = staticmethod(pack_omega12)
+    unpack_omega12 = staticmethod(unpack_omega12)
+    pack_omega_signature12 = staticmethod(pack_omega_signature12)
+    unpack_omega_signature12 = staticmethod(unpack_omega_signature12)
+
+    frobenius_pair = staticmethod(frobenius_pair)
+    frobenius_component12 = staticmethod(frobenius_component12)
+    is_trace1_pair = staticmethod(is_trace1_pair)
+    is_reachable_component = staticmethod(is_reachable_component)
+    gf4_trace = staticmethod(gf4_trace)
+    gf4_norm = staticmethod(gf4_norm)
+
+    shadow_partner_byte = staticmethod(shadow_partner_byte)
+    shadow_partner_map = staticmethod(shadow_partner_map)
+    state_conjugate_f = staticmethod(state_conjugate_f)
+
+    k4_orbit = staticmethod(k4_orbit)
+    k4_stabilizer = staticmethod(k4_stabilizer)
+    fixed_locus = staticmethod(fixed_locus)
+    fixed_states_of_gate = staticmethod(fixed_states_of_gate)
 
 
 class MomentOps:
@@ -485,12 +666,29 @@ class MomentOps:
     byte_derivatives = staticmethod(byte_derivative_table)
     transport_table = staticmethod(exact_transport_table)
     depth4_frame = staticmethod(depth4_frame)
+    locus_of_state = staticmethod(locus_of_state)
+    states_on_locus = staticmethod(states_on_locus)
+    future_locus_measure = staticmethod(future_locus_measure)
+    shell_histogram = staticmethod(shell_histogram)
+    shell_population = staticmethod(shell_population)
+    shell_transition_probability = staticmethod(shell_transition_probability)
+    shell_transition_matrix = staticmethod(shell_transition_matrix_for_q_weight)
+    shell_markov_step = staticmethod(shell_markov_step)
+    optical_coordinates = staticmethod(optical_coordinates)
+    stabilizer_type = staticmethod(stabilizer_type)
+    verify_optical_conjugacy = staticmethod(verify_optical_conjugacy)
 
 
 class SpectralOps:
     walsh_matrix = staticmethod(walsh_hadamard64)
     q_class = staticmethod(q_word6)
     q_transport = staticmethod(q_word6_for_items)
+    shell_krawtchouk_transform_exact = staticmethod(
+        shell_krawtchouk_transform_exact
+    )
+    shell_krawtchouk_inverse_exact = staticmethod(
+        shell_krawtchouk_inverse_exact
+    )
 
     @staticmethod
     def wht64(x: Any) -> Any:
@@ -678,6 +876,81 @@ class RuntimeOps:
 
         return ops.apply_signature_to_rest(signature)
 
+    @staticmethod
+    def omega12_from_states(states: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.state24_to_omega12_batch(states)
+
+    @staticmethod
+    def omega12_and_valid_from_states(states: Any) -> Any:
+        """Returns (omega12, valid) tuple from state24 batch."""
+        from src.tools.gyrolabe import ops
+
+        return ops.state24_to_omega12_batch(states)
+
+    @staticmethod
+    def states_from_omega12(omega12: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.omega12_to_state24_batch(omega12)
+
+    @staticmethod
+    def step_omega12_batch(omega12: Any, byte: int) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.step_omega12_batch(omega12, byte)
+
+    @staticmethod
+    def apply_omega_signature_batch(omega12: Any, signatures: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.apply_omega_signature_batch(omega12, signatures)
+
+    @staticmethod
+    def shell_histogram_state24(states: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.shell_histogram_state24(states)
+
+    @staticmethod
+    def shell_histogram_omega12(omega12: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.shell_histogram_omega12(omega12)
+
+    @staticmethod
+    def omega_signature_scan(payload: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.omega_signature_scan(payload)
+
+    @staticmethod
+    def omega12_scan_from_omega12(payload: Any, start_omega12: int) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.omega12_scan_from_omega12(payload, start_omega12)
+
+    @staticmethod
+    def shell_histogram_state24_checked(states: Any) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.shell_histogram_state24_checked(states)
+
+    @staticmethod
+    def apply_omega_gate_batch(omega12: Any, gate_code: int) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.apply_omega_gate_batch(omega12, gate_code)
+
+    @staticmethod
+    def apply_omega_gate_batch_named(omega12: Any, gate: str) -> Any:
+        from src.tools.gyrolabe import ops
+
+        return ops.apply_omega_gate_batch(
+            omega12, _omega_gate_name_to_code(gate)
+        )
+
 
 def initialize_native() -> None:
     """Initialize native GyroLabe tables and state once per process."""
@@ -693,6 +966,8 @@ __all__ = [
     "MomentComparison",
     "FutureConeMeasure",
     "ReachabilityWitness",
+    "OmegaState12",
+    "OmegaSignature12",
     "state_charts",
     "moment_from_ledger",
     "verify_moment",
@@ -704,6 +979,15 @@ __all__ = [
     "directional_derivative",
     "byte_derivative_table",
     "exact_transport_table",
+    "locus_of_state",
+    "states_on_locus",
+    "future_locus_measure",
+    "shell_histogram",
+    "shell_population",
+    "shell_transition_probability",
+    "shell_transition_matrix_for_q_weight",
+    "optical_coordinates",
+    "stabilizer_type",
     "witness_from_rest",
     "execute_witness_from_rest",
     "depth4_frame",

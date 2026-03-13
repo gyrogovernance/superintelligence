@@ -33,6 +33,9 @@ A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Determini
 
 The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns an append-only log of bytes into a single, reproducible state. Two parties with the same log always get the same state; no trusted server or timestamp is required. It runs on standard CPUs using exact integer arithmetic (no qubits, no probabilistic hardware). Its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), which have been verified by exhaustive tests over its full 4,096-state space. The result is a coordination substrate that scales by fixed geometry rather than learned approximation.
 
+> **A Note on "Quantum-Inspired" Computing:** 
+> Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics and probabilistic models to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation. The aQPU does not simulate quantum mechanics. Instead, it is an exact, deterministic mathematical space that intrinsically satisfies quantum axioms using strict integer logic.
+
 ## 🌐 Overview
 
 In this project, **Artificial Superintelligence (ASI)** is not an autonomous agent. It denotes a regime where humans and AI together sustain coherent governance: who decides what, and how it is recorded. The aQPU kernel is a building block for that regime.
@@ -59,7 +62,7 @@ The kernel does not interpret content or set policy. It only provides shared sta
 
 The repository includes an SDK that turns the kernel from a specification into runnable code. It gives three views of the same machine: state trajectories (replay and shared moments), a 6-bit “chirality” register with a fixed orthogonal transform (Walsh-Hadamard), and matrix-vector operations over the 64-dimensional state.
 
-**GyroLabe** is the low-level execution layer. It provides byte- and state-level primitives on CPU, 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and an OpenCL backend for batched linear algebra (GEMV/GEMM). See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [aQPU Verification Report](docs/reports/aQPU_Tests_Report.md) for full details.
+**GyroLabe** is the low-level execution layer. It provides byte- and state-level primitives on CPU, 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and an OpenCL backend for batched linear algebra (GEMV/GEMM). See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) for full details.
 
 ---
 
@@ -162,7 +165,7 @@ CSM is large enough to support a global **Unconditional High Income (UHI)**-styl
 ### Test Reports
 - 📊 [Physics Tests Report](docs/reports/Physics_Tests_Report.md) - Kernel state verification
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
-- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report.md) - Algebraic properties verified
+- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified
 - 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
 ### Supporting Theory

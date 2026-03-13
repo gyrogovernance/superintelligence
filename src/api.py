@@ -9,8 +9,10 @@ parity commitments, depth-4 projections, and derived measurements.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from fractions import Fraction
+from math import comb
 from typing import Final, Union
 
 import numpy as np
@@ -19,8 +21,9 @@ from src.constants import (
     CHIRALITY_MASK_6,
     CHIRALITY_QUBITS_6,
     EPSILON_6,
+    GENE_MAC_A12,
     LAYER_MASK_12,
-    PAIR_MASKS_12,
+    apply_gate,
     byte_to_intron,
     dot12,
     expand_intron_to_mask12,
@@ -46,6 +49,14 @@ MICRO_REF_BY_BYTE: tuple[int, ...] = tuple(
 )
 MASK12_BY_BYTE: tuple[int, ...] = tuple(
     expand_intron_to_mask12(i) for i in INTRON_BY_BYTE
+)
+EPS_A6_BY_BYTE: tuple[int, ...] = tuple(
+    EPSILON_6 if (INTRON_BY_BYTE[b] & 0x01) else 0
+    for b in range(256)
+)
+EPS_B6_BY_BYTE: tuple[int, ...] = tuple(
+    EPSILON_6 if (INTRON_BY_BYTE[b] & 0x80) else 0
+    for b in range(256)
 )
 
 
@@ -323,6 +334,9 @@ BYTES_BY_Q6: tuple[tuple[int, ...], ...] = tuple(
     tuple(b for b in range(256) if q_word6(b) == q6) for q6 in range(64)
 )
 Q_KERNEL_BYTES: tuple[int, ...] = BYTES_BY_Q6[0]
+Q_WEIGHT_BY_BYTE: tuple[int, ...] = tuple(
+    q_word6(b).bit_count() for b in range(256)
+)
 
 
 def q_word6_for_items(items: Iterable[ByteItem]) -> int:
@@ -427,6 +441,648 @@ def compose_word_signatures(
         tau_a12=(ra ^ left.tau_a12) & LAYER_MASK_12,
         tau_b12=(rb ^ left.tau_b12) & LAYER_MASK_12,
     )
+
+
+# ----------------------------------------
+# Omega state chart
+# ----------------------------------------
+
+
+@dataclass(frozen=True)
+class OmegaState12:
+    """
+    Exact compact chart on Omega.
+    u6, v6 are 6-bit GF(2)^6 coordinates such that:
+      A12 = GENE_MAC_A12 ^ word6_to_pairdiag12(u6)
+      B12 = GENE_MAC_A12 ^ word6_to_pairdiag12(v6)
+    """
+    u6: int
+    v6: int
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "u6", int(self.u6) & CHIRALITY_MASK_6)
+        object.__setattr__(self, "v6", int(self.v6) & CHIRALITY_MASK_6)
+
+    @property
+    def chirality6(self) -> int:
+        return (self.u6 ^ self.v6) & CHIRALITY_MASK_6
+
+    @property
+    def shell(self) -> int:
+        return self.chirality6.bit_count()
+
+    @property
+    def is_on_equality_horizon(self) -> bool:
+        return self.u6 == self.v6
+
+    @property
+    def is_on_complement_horizon(self) -> bool:
+        return self.chirality6 == EPSILON_6
+
+    @property
+    def optical_eq(self) -> Fraction:
+        return Fraction(self.shell, 6)
+
+    @property
+    def optical_comp(self) -> Fraction:
+        return Fraction(6 - self.shell, 6)
+
+    @property
+    def optical_mu(self) -> Fraction:
+        return Fraction(2 * self.shell - 6, 6)
+
+
+def is_in_omega24(state24: int) -> bool:
+    """
+    Exact structural Omega-membership check.
+    A state is in Omega iff both components lie on the trace-1 affine shell:
+      A12 ^ 0xAAA is pair-diagonal
+      B12 ^ 0xAAA is pair-diagonal
+    """
+    a12, b12 = unpack_state(state24)
+    return is_pair_diagonal12(a12 ^ GENE_MAC_A12) and is_pair_diagonal12(
+        b12 ^ GENE_MAC_A12
+    )
+
+
+def try_state24_to_omega12(state24: int) -> OmegaState12 | None:
+    s = int(state24) & 0xFFFFFF
+    a12, b12 = unpack_state(s)
+
+    ua12 = a12 ^ GENE_MAC_A12
+    vb12 = b12 ^ GENE_MAC_A12
+
+    if not is_pair_diagonal12(ua12):
+        return None
+    if not is_pair_diagonal12(vb12):
+        return None
+
+    return OmegaState12(
+        u6=pairdiag12_to_word6(ua12),
+        v6=pairdiag12_to_word6(vb12),
+    )
+
+
+def state24_to_omega12(state24: int) -> OmegaState12:
+    omega = try_state24_to_omega12(state24)
+    if omega is None:
+        raise ValueError(f"State {int(state24) & 0xFFFFFF:#08x} is not in Omega")
+    return omega
+
+
+def omega12_to_state24(omega: OmegaState12 | tuple[int, int]) -> int:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+
+    a12 = GENE_MAC_A12 ^ word6_to_pairdiag12(u6)
+    b12 = GENE_MAC_A12 ^ word6_to_pairdiag12(v6)
+    return pack_state(a12, b12)
+
+
+# ----------------------------------------
+# GF(4) mode helpers
+# ----------------------------------------
+
+
+def frobenius_pair(pair_bits: int) -> int:
+    """
+    GF(4) Frobenius on one 2-bit pair.
+      00 -> 00
+      11 -> 11
+      10 -> 01
+      01 -> 10
+    """
+    p = int(pair_bits) & 0x3
+    return ((p & 0x1) << 1) | ((p >> 1) & 0x1)
+
+
+def gf4_trace(pair_bits: int) -> int:
+    """
+    GF(4) trace to GF(2) on one pair.
+      00, 11 -> 0
+      10, 01 -> 1
+    """
+    p = int(pair_bits) & 0x3
+    return 0 if p in (0x0, 0x3) else 1
+
+
+def gf4_norm(pair_bits: int) -> int:
+    """
+    GF(4) norm to GF(2) on one pair.
+      00 -> 0
+      11, 10, 01 -> 1
+    """
+    p = int(pair_bits) & 0x3
+    return 0 if p == 0x0 else 1
+
+
+def is_trace1_pair(pair_bits: int) -> bool:
+    """
+    True exactly for the physical/trace-1 pair states:
+      10, 01
+    """
+    p = int(pair_bits) & 0x3
+    return p in (0x2, 0x1)
+
+
+def frobenius_component12(component12: int) -> int:
+    """
+    Apply pairwise Frobenius to a 12-bit component.
+    """
+    x = int(component12) & LAYER_MASK_12
+    out = 0
+    for i in range(6):
+        pair = (x >> (2 * i)) & 0x3
+        out |= frobenius_pair(pair) << (2 * i)
+    return out & LAYER_MASK_12
+
+
+def is_reachable_component(component12: int) -> bool:
+    """
+    True iff all 6 pairs are trace-1, i.e. each pair is 10 or 01.
+    """
+    x = int(component12) & LAYER_MASK_12
+    for i in range(6):
+        pair = (x >> (2 * i)) & 0x3
+        if not is_trace1_pair(pair):
+            return False
+    return True
+
+
+def step_omega12_by_byte(
+    omega: OmegaState12 | tuple[int, int],
+    byte: int,
+) -> OmegaState12:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+
+    b = int(byte) & 0xFF
+    u_next = v6 ^ EPS_A6_BY_BYTE[b]
+    v_next = u6 ^ MICRO_REF_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b]
+    return OmegaState12(u6=u_next, v6=v_next)
+
+
+def step_omega12_by_items(
+    omega: OmegaState12,
+    items: Iterable[ByteItem],
+) -> OmegaState12:
+    current = omega
+    for item in items:
+        if isinstance(item, (bytes, bytearray, memoryview)):
+            for b in item:
+                current = step_omega12_by_byte(current, b)
+        else:
+            current = step_omega12_by_byte(current, int(item) & 0xFF)
+    return current
+
+
+def apply_omega_gate_S(
+    omega: OmegaState12 | tuple[int, int],
+) -> OmegaState12:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+    return OmegaState12(u6=v6, v6=u6)
+
+
+def apply_omega_gate_F(
+    omega: OmegaState12 | tuple[int, int],
+) -> OmegaState12:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+    return OmegaState12(
+        u6=u6 ^ EPSILON_6,
+        v6=v6 ^ EPSILON_6,
+    )
+
+
+def apply_omega_gate_C(
+    omega: OmegaState12 | tuple[int, int],
+) -> OmegaState12:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+    return OmegaState12(
+        u6=v6 ^ EPSILON_6,
+        v6=u6 ^ EPSILON_6,
+    )
+
+
+def apply_omega_gate(
+    omega: OmegaState12 | tuple[int, int],
+    name: str,
+) -> OmegaState12:
+    if name == "id":
+        if isinstance(omega, OmegaState12):
+            return omega
+        return OmegaState12(u6=omega[0], v6=omega[1])
+    if name == "S":
+        return apply_omega_gate_S(omega)
+    if name == "F":
+        return apply_omega_gate_F(omega)
+    if name == "C":
+        return apply_omega_gate_C(omega)
+    raise ValueError(f"Unknown Omega gate: {name!r}")
+
+
+OMEGA_STATES_4096: tuple[int, ...] = tuple(
+    omega12_to_state24(OmegaState12(u6=u6, v6=v6))
+    for u6 in range(64)
+    for v6 in range(64)
+)
+
+
+def state_conjugate_f(state24: int) -> int:
+    """
+    State-level conjugation by global complement.
+    Equivalent to gate F on the 24-bit carrier.
+    """
+    a12, b12 = unpack_state(state24)
+    return pack_state(a12 ^ LAYER_MASK_12, b12 ^ LAYER_MASK_12)
+
+
+def k4_orbit(state24: int) -> frozenset[int]:
+    """
+    Full K4 orbit of a state under {id, S, C, F}.
+    """
+    s = int(state24) & 0xFFFFFF
+    return frozenset((
+        s,
+        apply_gate(s, "S"),
+        apply_gate(s, "C"),
+        apply_gate(s, "F"),
+    ))
+
+
+def k4_stabilizer(state24: int) -> frozenset[str]:
+    """
+    Non-trivial K4 stabilizer of a state: subset of {"S","C","F"}.
+    """
+    s = int(state24) & 0xFFFFFF
+    out: list[str] = []
+    for name in ("S", "C", "F"):
+        if apply_gate(s, name) == s:
+            out.append(name)
+    return frozenset(out)
+
+
+def fixed_locus(gate_name: str) -> frozenset[int]:
+    """
+    Pointwise fixed locus of a K4 gate on Omega.
+    gate_name in {"id","S","C","F"}.
+    """
+    name = str(gate_name)
+    if name not in ("id", "S", "C", "F"):
+        raise ValueError(f"Unknown gate name: {gate_name!r}")
+    return frozenset(
+        s for s in OMEGA_STATES_4096
+        if apply_gate(s, name) == s
+    )
+
+
+def fixed_states_of_gate(gate_name: str) -> frozenset[int]:
+    """
+    Alias of fixed_locus.
+    """
+    return fixed_locus(gate_name)
+
+
+SHADOW_PARTNER_BY_BYTE: tuple[int, ...] = tuple(
+    (b ^ 0xFE) & 0xFF for b in range(256)
+)
+
+
+def shadow_partner_byte(byte: int) -> int:
+    """
+    Universal shadow partner of a byte.
+    The partner produces the same 24-bit affine action on Omega.
+    """
+    return SHADOW_PARTNER_BY_BYTE[int(byte) & 0xFF]
+
+
+def shadow_partner_map() -> dict[int, int]:
+    """
+    Full byte -> partner involution over all 256 bytes.
+    """
+    return {b: SHADOW_PARTNER_BY_BYTE[b] for b in range(256)}
+
+
+def pack_omega12(omega: OmegaState12 | tuple[int, int]) -> int:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+    return ((u6 & CHIRALITY_MASK_6) << 6) | (v6 & CHIRALITY_MASK_6)
+
+
+def unpack_omega12(packed: int) -> OmegaState12:
+    x = int(packed) & 0xFFF
+    return OmegaState12(
+        u6=(x >> 6) & CHIRALITY_MASK_6,
+        v6=x & CHIRALITY_MASK_6,
+    )
+
+
+def pack_omega_signature12(sig: OmegaSignature12) -> int:
+    return (
+        ((sig.parity & 1) << 12)
+        | ((sig.tau_u6 & CHIRALITY_MASK_6) << 6)
+        | (sig.tau_v6 & CHIRALITY_MASK_6)
+    )
+
+
+def unpack_omega_signature12(packed: int) -> OmegaSignature12:
+    x = int(packed) & 0x1FFF
+    return OmegaSignature12(
+        parity=(x >> 12) & 1,
+        tau_u6=(x >> 6) & CHIRALITY_MASK_6,
+        tau_v6=x & CHIRALITY_MASK_6,
+    )
+
+
+def optical_coordinates_from_omega12(
+    omega: OmegaState12,
+) -> tuple[Fraction, Fraction, Fraction]:
+    return (omega.optical_eq, omega.optical_comp, omega.optical_mu)
+
+
+def optical_coordinates_from_state24(state24: int) -> tuple[Fraction, Fraction, Fraction]:
+    return optical_coordinates_from_omega12(state24_to_omega12(state24))
+
+
+def stabilizer_type_from_omega12(omega: OmegaState12) -> str:
+    if omega.is_on_equality_horizon:
+        return "equality"
+    if omega.is_on_complement_horizon:
+        return "complement"
+    return "bulk"
+
+
+def stabilizer_type_from_state24(state24: int) -> str:
+    return stabilizer_type_from_omega12(state24_to_omega12(state24))
+
+
+def verify_optical_conjugacy(
+    states: Iterable[int],
+    obs_plus: Callable[[int], Union[int, float, Fraction]],
+    obs_minus: Callable[[int], Union[int, float, Fraction]],
+) -> bool:
+    """
+    Verify obs_plus(s) + obs_minus(s) is constant over the given states.
+    """
+    baseline = None
+    seen = False
+
+    for s in states:
+        x = obs_plus(int(s))
+        y = obs_minus(int(s))
+        total = x + y
+        if not seen:
+            baseline = total
+            seen = True
+        elif total != baseline:
+            return False
+
+    return True
+
+
+# ----------------------------------------
+# Omega signatures
+# ----------------------------------------
+
+
+@dataclass(frozen=True)
+class OmegaSignature12:
+    """
+    Exact affine signature of a word on Omega.
+    parity = 0 -> identity linear part
+    parity = 1 -> swap linear part
+    """
+    parity: int
+    tau_u6: int
+    tau_v6: int
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "parity", int(self.parity) & 1)
+        object.__setattr__(self, "tau_u6", int(self.tau_u6) & CHIRALITY_MASK_6)
+        object.__setattr__(self, "tau_v6", int(self.tau_v6) & CHIRALITY_MASK_6)
+
+
+def omega_signature_from_word_signature(sig: WordSignature) -> OmegaSignature12:
+    if not is_pair_diagonal12(sig.tau_a12):
+        raise ValueError(f"tau_a12 is not pair-diagonal: {sig.tau_a12:#05x}")
+    if not is_pair_diagonal12(sig.tau_b12):
+        raise ValueError(f"tau_b12 is not pair-diagonal: {sig.tau_b12:#05x}")
+
+    return OmegaSignature12(
+        parity=sig.parity,
+        tau_u6=pairdiag12_to_word6(sig.tau_a12),
+        tau_v6=pairdiag12_to_word6(sig.tau_b12),
+    )
+
+
+def omega_word_signature(items: Iterable[ByteItem]) -> OmegaSignature12:
+    return omega_signature_from_word_signature(word_signature(items))
+
+
+def apply_omega_signature(
+    omega: OmegaState12 | tuple[int, int],
+    sig: OmegaSignature12,
+) -> OmegaState12:
+    if isinstance(omega, OmegaState12):
+        u6, v6 = omega.u6, omega.v6
+    else:
+        u6, v6 = omega
+
+    if sig.parity == 0:
+        return OmegaState12(u6=u6 ^ sig.tau_u6, v6=v6 ^ sig.tau_v6)
+    return OmegaState12(u6=v6 ^ sig.tau_u6, v6=u6 ^ sig.tau_v6)
+
+
+def compose_omega_signatures(
+    left: OmegaSignature12,
+    right: OmegaSignature12,
+) -> OmegaSignature12:
+    if left.parity == 0:
+        ru, rv = right.tau_u6, right.tau_v6
+    else:
+        ru, rv = right.tau_v6, right.tau_u6
+
+    return OmegaSignature12(
+        parity=left.parity ^ right.parity,
+        tau_u6=ru ^ left.tau_u6,
+        tau_v6=rv ^ left.tau_v6,
+    )
+
+
+# ----------------------------------------
+# Shell algebra primitives
+# ----------------------------------------
+
+
+def shell_index_from_chirality6(chirality6: int) -> int:
+    return (int(chirality6) & CHIRALITY_MASK_6).bit_count()
+
+
+def shell_index_from_omega12(omega: OmegaState12) -> int:
+    return omega.shell
+
+
+def shell_population(shell: int) -> int:
+    w = int(shell)
+    if w < 0 or w > 6:
+        raise ValueError(f"shell must be in 0..6, got {shell}")
+    return comb(6, w) * 64
+
+
+SHELL_POPULATIONS_7: tuple[int, ...] = tuple(
+    shell_population(w) for w in range(7)
+)
+
+
+def shell_transition_probability(
+    w_src: int,
+    q_weight: int,
+    w_dst: int,
+) -> Fraction:
+    """
+    Exact shell transition probability for adding a q-vector of Hamming weight q_weight.
+    Formula:
+      w' = w + j - 2t
+      P = C(w,t) C(6-w, j-t) / C(6,j)
+    where t = (w + j - w') / 2
+    """
+    w = int(w_src)
+    j = int(q_weight)
+    wp = int(w_dst)
+
+    if not (0 <= w <= 6 and 0 <= j <= 6 and 0 <= wp <= 6):
+        raise ValueError("w_src, q_weight, w_dst must all be in 0..6")
+
+    delta = w + j - wp
+    if delta < 0 or (delta & 1):
+        return Fraction(0, 1)
+
+    t = delta // 2
+    if t < 0 or t > min(w, j):
+        return Fraction(0, 1)
+    if (j - t) < 0 or (j - t) > (6 - w):
+        return Fraction(0, 1)
+
+    return Fraction(comb(w, t) * comb(6 - w, j - t), comb(6, j))
+
+
+def shell_transition_matrix_for_q_weight(
+    q_weight: int,
+) -> tuple[tuple[Fraction, ...], ...]:
+    j = int(q_weight)
+    if not (0 <= j <= 6):
+        raise ValueError(f"q_weight must be in 0..6, got {q_weight}")
+    return tuple(
+        tuple(shell_transition_probability(w, j, wp) for wp in range(7))
+        for w in range(7)
+    )
+
+
+def shell_markov_step(
+    distribution: Iterable[int | Fraction],
+    q_weight: int,
+) -> tuple[Fraction, ...]:
+    """
+    Push a shell distribution forward by one exact q-weight shell kernel.
+    Input distribution is over source shells 0..6.
+    Output distribution is over destination shells 0..6.
+    """
+    d = tuple(Fraction(x) for x in distribution)
+    if len(d) != 7:
+        raise ValueError(f"Expected length-7 shell distribution, got {len(d)}")
+
+    T = shell_transition_matrix_for_q_weight(int(q_weight))
+    return tuple(
+        Fraction(sum(d[w] * T[w][wp] for w in range(7)))
+        for wp in range(7)
+    )
+
+
+FULL_BYTE_SHELL_DISTRIBUTION: tuple[Fraction, ...] = tuple(
+    Fraction(comb(6, w), 64) for w in range(7)
+)
+
+
+# ----------------------------------------
+# Krawtchouk shell spectral tools
+# ----------------------------------------
+
+
+def _krawtchouk_6() -> tuple[tuple[int, ...], ...]:
+    rows = []
+    for w in range(7):
+        row = []
+        for k in range(7):
+            val = 0
+            for j in range(k + 1):
+                if j <= w and (k - j) <= (6 - w):
+                    val += ((-1) ** j) * comb(w, j) * comb(6 - w, k - j)
+            row.append(val)
+        rows.append(tuple(row))
+    return tuple(rows)
+
+
+KRAWTCHOUK_7: tuple[tuple[int, ...], ...] = _krawtchouk_6()
+
+
+def shell_krawtchouk_transform_exact(
+    f_shell: Iterable[int | Fraction],
+) -> tuple[Fraction, ...]:
+    f = tuple(Fraction(x) for x in f_shell)
+    if len(f) != 7:
+        raise ValueError(f"Expected length-7 shell vector, got {len(f)}")
+
+    out = []
+    for k in range(7):
+        numer = sum(
+            Fraction(comb(6, w) * KRAWTCHOUK_7[w][k], 1) * f[w]
+            for w in range(7)
+        )
+        denom = 64 * comb(6, k)
+        out.append(numer / denom)
+    return tuple(out)
+
+
+def shell_krawtchouk_inverse_exact(
+    coeffs: Iterable[int | Fraction],
+) -> tuple[Fraction, ...]:
+    c = tuple(Fraction(x) for x in coeffs)
+    if len(c) != 7:
+        raise ValueError(f"Expected length-7 spectral vector, got {len(c)}")
+
+    return tuple(
+        Fraction(sum(Fraction(KRAWTCHOUK_7[w][k], 1) * c[k] for k in range(7)))
+        for w in range(7)
+    )
+
+
+def shell_krawtchouk_transform_float(f_shell: Iterable[float]) -> tuple[float, ...]:
+    f = tuple(float(x) for x in f_shell)
+    if len(f) != 7:
+        raise ValueError(f"Expected length-7 shell vector, got {len(f)}")
+
+    out: list[float] = []
+    for k in range(7):
+        numer = 0.0
+        for w in range(7):
+            numer += comb(6, w) * KRAWTCHOUK_7[w][k] * f[w]
+        denom = 64.0 * comb(6, k)
+        out.append(numer / denom)
+    return tuple(out)
 
 
 # ----------------------------------------

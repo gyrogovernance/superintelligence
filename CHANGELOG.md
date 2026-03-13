@@ -15,6 +15,362 @@
 
 ---
 
+## [v2.0.1-Gyroscopic_ASI_Quantum] – 2026-03-12
+
+Completed the compact Ω/shell program for the aQPU Kernel and integrated the remaining exact algebraic surfaces into the SDK. This release closes the implementation of the compact physical chart stack and its exact structural verification layer.
+
+### Program Definition Finalized
+
+The executable compact program is now fully realized across the following exact layers:
+
+- **Carrier24** — full 24-bit kernel state and provenance surface
+- **Omega12** — exact compact chart on Ω using `(u6, v6) ∈ GF(2)^6 × GF(2)^6`
+- **Chirality6** — exact quotient transport layer
+- **Shell7** — exact constitutional / optical reduction layer
+- **GF(4) pair semantics** — exact mode-level field structure on 2-bit dipole pairs
+- **GF(64) test-side chirality algebra** — exact field implementation for analysis and operator exploration
+
+This release formally completes the code program around:
+- Ω-chart
+- Ω-signatures
+- shell algebra
+- optical conjugacy
+- K4 fixed-locus structure
+- shadow pairing
+- sector factorization
+- shell spectral diagonalization
+
+---
+
+### Added
+
+#### `src/api.py`
+
+Implemented the remaining exact compact-physics helpers:
+
+**GF(4) mode layer**
+- `frobenius_pair`
+- `gf4_trace`
+- `gf4_norm`
+- `is_trace1_pair`
+- `frobenius_component12`
+- `is_reachable_component`
+
+**Ω/K4 structural helpers**
+- `OMEGA_STATES_4096`
+- `state_conjugate_f`
+- `k4_orbit`
+- `k4_stabilizer`
+- `fixed_locus`
+- `fixed_states_of_gate`
+
+**Shadow pairing**
+- `SHADOW_PARTNER_BY_BYTE`
+- `shadow_partner_byte`
+- `shadow_partner_map`
+
+**Shell / optical helpers**
+- `shell_markov_step`
+- `verify_optical_conjugacy`
+
+These additions are exact integer/rational surfaces and extend the existing Ω/signature/shell runtime without altering kernel semantics.
+
+---
+
+#### `src/sdk.py`
+
+Exposed the new compact-physics helpers through the existing namespaces.
+
+**`StateOps` additions**
+- GF(4) helpers:
+  - `frobenius_pair`
+  - `frobenius_component12`
+  - `is_trace1_pair`
+  - `is_reachable_component`
+  - `gf4_trace`
+  - `gf4_norm`
+- Conjugation / shadow helpers:
+  - `shadow_partner_byte`
+  - `shadow_partner_map`
+  - `state_conjugate_f`
+- K4 structure:
+  - `k4_orbit`
+  - `k4_stabilizer`
+  - `fixed_locus`
+  - `fixed_states_of_gate`
+
+**`MomentOps` additions**
+- `shell_markov_step`
+- `verify_optical_conjugacy`
+
+No namespace expansion was introduced beyond the agreed `StateOps` / `MomentOps` surfaces.
+
+---
+
+### Testing
+
+### Added Testing Program: `tests/test_aQPU_SDK_2.py`
+
+Implemented the exact second-stage SDK verification suite covering the compact Ω/shell layer end-to-end.
+
+#### Ω-chart core verification
+Added tests for:
+- exact rest-state Ω coordinates:
+  - `GENE_MAC_REST -> (u6=0x00, v6=0x3F)`
+- exhaustive Ω roundtrip:
+  - `state24 -> Omega12 -> state24` over all `4096` Ω states
+- strict off-Ω handling:
+  - non-Ω states produce `omega12=None`
+  - optical/shell fields remain unset off Ω
+- witness depth histogram from rest:
+  - depth `0`: `1`
+  - depth `1`: `127`
+  - depth `2`: `3968`
+
+#### Ω-step / Ω-signature / Ω-gate consistency
+Added tests for:
+- equality of:
+  - `omega_signature_from_word_signature`
+  - `omega_signature(word)`
+- sampled Ω-step vs carrier-step consistency
+- exhaustive Ω-step vs carrier-step equivalence over:
+  - all `4096` Ω states
+  - all `256` bytes
+- Ω-signature application vs carrier word action
+- Ω-signature composition:
+  - concatenation correctness
+  - associativity
+- repeated Ω-byte stepping vs composed Ω-signature application
+- Ω K4-gate actions vs carrier K4-gates
+- pack/unpack helpers:
+  - `pack_omega12`
+  - `unpack_omega12`
+  - `pack_omega_signature12`
+  - `unpack_omega_signature12`
+
+#### Shell algebra / optical layer verification
+Added tests for:
+- exact Ω shell populations:
+  - `[64, 384, 960, 1280, 960, 384, 64]`
+- exact shell locus counts via `states_on_locus`
+- shell/horizon identification:
+  - shell `0` = equality horizon
+  - shell `6` = complement horizon
+- optical coordinates vs constitutional distances:
+  - `ab_distance = 2w`
+  - `horizon_distance = 2(6-w)`
+  - `eq = w/6`
+  - `comp = (6-w)/6`
+  - `mu = (2w-6)/6`
+- exact future shell measures:
+  - `n=0` delta at source shell
+  - `n>=1` binomial shell law
+- shell transition matrices:
+  - stochastic row sums
+- exact shell transition formula:
+  - `P_j(w -> w') = C(w,t) C(6-w, j-t) / C(6,j)`
+- full-byte averaged shell law:
+  - exact binomial stationary distribution
+  - source-shell independence
+- exact horizon characterization in Ω coordinates:
+  - equality horizon: `u6 == v6`
+  - complement horizon: `u6 ^ v6 == 0x3F`
+- q-weight shell kernel independence at the reduced shell level
+
+#### Krawtchouk shell spectral layer
+Added tests for:
+- transform of constant shell function:
+  - only DC coefficient survives
+- exact inverse roundtrip on shell basis vectors
+- exact inverse roundtrip on nontrivial shell functions
+- float shell transform vs exact rational shell transform
+- diagonalization of shell transition matrices by Krawtchouk columns
+- exact Parseval / orthogonality identity:
+  - `Σ_w C(6,w) K_j(w) K_k(w) = 64·C(6,j)·δ_jk`
+
+#### Moment-level Ω integration
+Added tests for:
+- Moments carrying exact `omega_signature`
+- prefix comparison and divergence localization for ledgers via `compare_ledgers`
+
+#### Native runtime Ω/shell validation
+Added tests validating GyroLabe native/runtime parity for:
+- `state24 -> omega12 -> state24` batch conversion
+- Ω-step batch vs Python reference
+- Ω-signature batch application vs Python reference
+- state24 shell histogram vs omega12 shell histogram vs checked shell histogram
+- omega-signature scan vs Python composition
+- Ω continuation scan from arbitrary Ω start state
+- numeric and named Ω K4 gate batch application equivalence
+
+---
+
+### Verified Results from `test_aQPU_SDK_2.py`
+
+The completed second-stage suite established:
+
+#### Ω-chart correctness
+- exact Ω compact chart is fully consistent with the 24-bit carrier
+- off-Ω behavior is explicitly separated from Ω behavior
+- all Ω states are reachable from rest in depth ≤ 2
+
+#### Ω operator correctness
+- Ω-signatures exactly mirror carrier signatures on Ω
+- Ω-step and Ω-signature execution are exact compiled reductions of carrier execution
+- K4 gate action is identical in carrier and Ω charts
+
+#### Shell / optical correctness
+- shell populations exactly match the binomial law:
+  - `C(6,w) * 64`
+- future shell measures reduce exactly to the binomial shell distribution
+- shell transition kernels are exact, stochastic, and match the closed combinatorial formula
+- optical coordinates exactly match constitutional distances
+
+#### Spectral correctness
+- shell-constant observables admit exact Krawtchouk spectral reduction
+- shell transition matrices are diagonalized by the Krawtchouk basis
+- exact orthogonality and inverse identities hold
+
+#### Runtime correctness
+- native GyroLabe Ω and shell surfaces are exactly consistent with Python reference semantics
+- batch Ω execution, Ω gate application, Ω signature scans, and shell histograms are correct
+
+---
+
+### Validation Status
+
+- `tests/test_aQPU_SDK_2.py`: **43/43 passed**
+
+This stage completed the exact SDK/runtime verification of the compact Ω-chart and shell algebra before the later discovery-oriented structural test expansion.
+
+#### `tests/test_aQPU_SDK_3.py`
+
+Added and completed the exact compact-physics verification and discovery suite.
+
+New test coverage includes:
+
+**GF(4) mode layer**
+- Frobenius involution on pair states
+- exact trace / norm values on all 4 pair symbols
+- reachable-component characterization on Ω
+- equivalence of Frobenius and global pair-flip on trace-1 components
+
+**Shadow partners and conjugation**
+- exact shadow-partner formula `b ↦ b ^ 0xFE`
+- equality of Ω-permutations across each shadow pair
+- exact equality of `state_conjugate_f` and gate `F`
+
+**K4 loci and orbit structure**
+- exact fixed loci:
+  - `id` fixes all Ω
+  - `S` fixes equality horizon
+  - `C` fixes complement horizon
+  - `F` fixes no Ω state
+- exact stabilizers on equality / complement / bulk
+- exact K4 orbit census over Ω
+
+**Even sector and uniformization**
+- exact count of length-2 even Ω-signatures: `4096`
+- exact two-step state uniformization:
+  - from any tested Ω source
+  - all `256^2` two-byte words
+  - every Ω state reached exactly `16` times
+
+**Optical / shell layer**
+- exact verification of optical conjugacy
+- exact shell Markov-step consistency with shell transition kernel
+
+**GF(64) test-side algebra**
+- multiplication
+- inverses
+- Frobenius powers
+- trace distribution
+- subfield sizes
+- matrix representation over GF(2)
+- primitive element generation
+
+**q-fiber / commutation / closure / sector discovery**
+- q-fiber split into two Ω-signatures with multiplicity 2 each
+- commutation iff q-class matches
+- every byte has order 4 on Ω
+- universal `XYXY = id` closure for all byte pairs
+- exact even-sector factorization
+- odd sector generated from even sector via swap
+- exact q-fiber odd-signature formula
+- exact shell-preserving even subgroup
+- exact shell spectral eigenvalue law
+- identical commutation neighborhoods inside each q-fiber
+
+---
+
+### Verified Structural Results
+
+The completed suite establishes the following exact executable results.
+
+#### Byte / q-fiber geometry
+- `256` bytes partition into `64` q-fibers of size `4`
+- each q-fiber splits into exactly `2` distinct odd Ω-signatures
+- each odd Ω-signature is realized by exactly `2` shadow-partner bytes
+- exact q-fiber odd-signature normal form:
+  - `(parity=1, tau_u=0, tau_v=q)`
+  - `(parity=1, tau_u=ε, tau_v=ε⊕q)` with `ε = 0x3F`
+
+#### Commutation geometry
+- two bytes commute **iff** their q-classes match
+- each byte commutes with exactly `4` bytes
+- all bytes in the same q-fiber share the same commutation neighborhood
+
+#### Depth-4 closure
+- every byte has order `4` on Ω
+- for every byte pair `(X, Y)`, the alternating word satisfies:
+  - `XYXY = id`
+
+#### Even / odd sector structure
+- there are exactly `4096` distinct even Ω-signatures
+- length-2 words cover the even sector exactly `16-to-1`
+- the even sector factorizes exactly as:
+  - `(common shift, chirality translation) ∈ GF(2)^6 × GF(2)^6`
+- the shell-preserving even subgroup has exactly `64` elements:
+  - diagonal shifts `(0, c, c)`
+- the full odd sector is generated from the even sector by composition with swap
+
+#### Horizon transport
+- from the equality horizon, a byte of q-weight `j` maps exactly to shell `j`
+- from the complement horizon, a byte of q-weight `j` maps exactly to shell `6-j`
+
+#### Shell spectral law
+- shell transition kernels are exactly diagonalized by the Krawtchouk basis
+- exact eigenvalue law verified:
+  - `T_j K_k = (K_j(k) / C(6, j)) K_k`
+
+---
+
+### Validation Status
+
+- `tests/test_aQPU_SDK_3.py`: **33/33 passed**
+- Full compact Ω/shell implementation delta: **complete**
+- No kernel transition law changes were required
+- No C/OpenCL runtime changes were required for this release
+
+---
+
+### Net Result
+
+This release completes the executable compact-physics layer of the aQPU architecture:
+
+- exact Ω-chart
+- exact Ω-signature algebra
+- exact GF(4) mode semantics
+- exact shell and optical reduction
+- exact K4 orbit / fixed-locus machinery
+- exact q-fiber / shadow structure
+- exact even/odd sector factorization
+- exact shell spectral law
+
+The aQPU now has a fully implemented and rigorously tested compact algebraic runtime from `Carrier24` down through `Omega12`, `Chirality6`, and `Shell7`.
+
+---
+
 ## [v2.0-Gyroscopic_ASI_Quantum] – 2026-03-01 → 2026-03-11
 
 ### Summary
@@ -200,7 +556,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - `docs/AIR_Moments_Economy_Specs.md` — Moments Economy architecture.
 - `docs/AIR_Moments_Genealogies_Specs.md` — Moments Genealogies specification.
 - `docs/reports/Physics_Tests_Report.md` — physics verification report.
-- `docs/reports/aQPU_Tests_Report.md` — aQPU verification report (185 tests).
+- `docs/reports/aQPU_Tests_Report_1.md` — aQPU verification report (185 tests).
 - `docs/reports/Moments_Tests_Report.md` — moments verification report (88 tests).
 - `docs/reports/Alignment_Measurement_Report.md` — governance balance metrics.
 - `docs/reports/GyroLabe_Generation_Report.md` — native backend verification and benchmarks.
