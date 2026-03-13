@@ -58,9 +58,9 @@ The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns su
 
 The state space is fixed and small: **4,096 reachable states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path through this manifold. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
 
-For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md).
+> For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). For the kernel itself, see the [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md).
 
-For the kernel itself, see the [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md).
+---
 
 **GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It is actively tested on Bolmo-1B (a byte-level language model).
 
@@ -71,7 +71,7 @@ It provides:
 - **Trainable structural bias:** Small embedding biases let models learn from the kernel's structural decomposition while remaining identical to the base model before training.
 - **Execution support:** CPU and OpenCL acceleration for spectral and tensor operations used by the broader SDK.
 
-For the model bridge and execution layer, see the [GyroLabe Brief](docs/Gyrolabe_Brief.md).
+> For the model bridge and execution layer, see the [GyroLabe Brief](docs/Gyrolabe_Brief.md).
 
 ---
 
