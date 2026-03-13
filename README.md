@@ -37,15 +37,14 @@ This development is part of the Gyroscopic Global Governance (GGG) framework, wh
 
 Alignment Infrastructure Routing (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
 
-Gyroscopic is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
-
+Gyroscopic ASI is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
 ---
 
 # ⚙️ Gyroscopic ASI aQPU Kernel
 
 A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
 
-> **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require of a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
+> **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 
 
 > **A Note on "Quantum-Inspired" Computing:** 
@@ -53,50 +52,52 @@ A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Determini
 
 ## 🌐 Overview
 
-Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable.
+Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable: given a published append-only log of bytes, anyone can recompute the same state trajectory and check what was recorded.
 
-The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns an append-only log of bytes into a single, reproducible state. Two parties with the same log always get the same state; no trusted server or timestamp is required. It runs on standard CPUs using exact integer arithmetic (no qubits, no probabilistic hardware). Its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), which have been verified by exhaustive tests over its full 4,096-state space.
+The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns such byte logs into a single, reproducible state at each step. Two parties with the same log always get the same state; no trusted server or timestamp is required. It uses exact integer arithmetic (no qubits, no probabilistic hardware), and its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), verified by exhaustive tests across its finite state space.
 
-The state space is fixed and small: **4,096 states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path. Given a published event log, anyone can recompute the same state and verify claims about what happened. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
+The state space is fixed and small: **4,096 reachable states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path through this manifold. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
 
-**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It provides:
+For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md).
 
-- **Byte-level algebraic annotation:** Every byte in a model's input and output is decomposed into its exact structural components (commutation class, family phase, operational payload).
-- **Inference audit trails:** The kernel state at each byte position is determined entirely by the public transition law. Any party with the same bytes computes the same states, without trust in the model operator and without access to proprietary weights.
-- **Trainable structural bias:** Small embedding biases based on the algebraic decomposition let the model learn to use the structural properties of bytes. The wrapped model is mathematically identical to the base model before training.
-- **Acceleration backend:** CPU and OpenCL acceleration for 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and batched linear algebra (GEMV/GEMM).
+For the kernel itself, see the [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md).
 
-GyroLabe exposes three views of the same system: state trajectories (replay and shared moments), a 6-bit chirality register with a fixed orthogonal transform (Walsh-Hadamard), and matrix-vector operations over the 64-dimensional state.
+**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It is actively tested on Bolmo-1B (a byte-level language model).
 
-**Current status:** GyroLabe is actively tested on Bolmo-1B (a byte-level language model). The algebraic annotation and embedding biases are operational. Dimensional scaling and full operator decomposition are in active development.
+It provides:
 
-See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) for more details.
+- **Structural annotation for model I/O:** Model inputs and outputs are annotated using the kernel's algebraic byte structure.
+- **Replayable inference traces:** Inference can be tied to reproducible kernel-state trajectories for verification and audit.
+- **Trainable structural bias:** Small embedding biases let models learn from the kernel's structural decomposition while remaining identical to the base model before training.
+- **Execution support:** CPU and OpenCL acceleration for spectral and tensor operations used by the broader SDK.
+
+For the model bridge and execution layer, see the [GyroLabe Brief](docs/Gyrolabe_Brief.md).
 
 ---
 
 ## 🔬 Why This Matters for Computer Science
 
-- **Processing**: Deterministic stream-processing with exact replay, compact state updates, and composable operator signatures, backed by exact integer compute in fixed 64-dimensional state spaces.
-- **Speed**: Byte words compile into operators, commutativity resolves through compact invariants, and full reachable geometry covers in only 2 steps.
+- **Processing**: Deterministic stream-processing with exact replay, compact state updates, and composable operator signatures, suitable for event sourcing, reproducible workflows, and governance-grade logs.
+- **Speed**: Byte words compile into operators, commutativity resolves through compact invariants, and the full reachable geometry is covered in only 2 steps, reducing structural work compared to classical search and replay.
 - **Security**: Tamper-aware logs, exact divergence localization, replay-based verification, and compact provenance surfaces, grounded in a finite, enumerable state space with built-in error detection.
-- **Compression**: Structural compression through compact state geometry, boundary dictionaries, and operator compilation.
+- **Compression**: Structural compression through compact state geometry, holographic boundary dictionaries, and operator compilation, enabling lossless but storage-efficient coordination records.
 - **Networks**: Replay-based synchronization, shared deterministic moments, and exact branch comparison across distributed participants using shared coordination state computed from append-only logs.
-- **Machine Learning**: Interpretable finite latent layer, exact spectral primitives, tensor tooling, and an audit-friendly bridge between byte-level model behavior and algebraic structure, with verifiable provenance over model I/O traces.
+- **Machine Learning**: An interpretable finite latent layer (6-bit chirality register), exact spectral primitives (Walsh-Hadamard and shell structure), tensor tooling, and an audit-friendly bridge between byte-level model behavior and algebraic structure, with verifiable provenance over model I/O traces.
 
 ---
 
 **Verified Computational Advantages:**
-All results below are verified by exhaustive computation over the full 4,096-state space and all 256 byte operations, totalling over 1 million exact checks. They are strict structural invariants, not statistical estimates.
+All results below are verified by exhaustive computation over the entire reachable state space and all 256 byte operations, totalling over 1 million exact checks. They are strict structural invariants, not statistical estimates.
 
 | Verified result | What it means |
 |-----------------|---------------|
 | **4,096 reachable states** | The full operational manifold from rest is finite, exact, and exhaustively testable. |
-| **2-step exact uniformization** | Any state in the reachable manifold can spread over all 4,096 states in exactly 2 byte steps, with perfect 16-to-1 multiplicity. |
+| **2-step exact uniformization** | Any state in the reachable manifold can spread over the entire state space in exactly 2 byte steps, with perfect 16-to-1 multiplicity. |
 | **128 distinct next states per byte layer** | From any fixed state, the 256-byte alphabet projects to exactly 128 distinct next states with exact 2-to-1 symmetry. |
 | **Depth ≤ 2 witness for every reachable state** | Every reachable state can be synthesized from rest with a byte witness of depth 0, 1, or 2. |
 | **Exact compiled operator signatures** | Byte words collapse into exact affine signatures that can be composed and applied directly without replaying the full word. |
 | **Constant-time commutativity test** | Two byte operations commute iff they share the same 6-bit topological `q-class`, making commutativity an O(1) structural lookup. |
-| **Native spectral register** | The kernel exposes a 64-dimensional logical register with exact Walsh-Hadamard and shell spectral structure. |
+| **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
 | **Holographic boundary relation** | The state geometry satisfies **|H|² = |Ω| = 64² = 4,096**, enabling structural compression and compact boundary reasoning. |
 | **Universal quantum ingredients** | The verified kernel supports stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource. |
 
@@ -120,7 +121,7 @@ There is no reliable way to turn distributed human contribution into stable paid
 
 Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel's finite state space (so the "budget" is physically anchored).
 
-CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person (1 MU is set as equilivent to 1 int$), tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
+CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person (1 MU is denominated at the reference value of 1 int$), tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
 
 ---
 
@@ -128,19 +129,24 @@ CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per 
 
 ### Start Here
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
-- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
-- 🧠 [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) - Three computational surfaces
+- 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
+- 🔭 [GyroLabe Brief](docs/Gyrolabe_Brief.md) - Model bridge and execution layer
+
+
+### Core Specifications
+- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
+- 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
+- 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
+
+### Extensions
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
 - 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Money from coordination
 - 📜 [Moments Genealogies Specification](docs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
 
-### Core Specifications
-- 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Math notation and proofs
-- 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
-- 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 
-### SDK Specifications
+### Quantum & Holographic SDK
+- 🧠 [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) - Three computational surfaces
 - 🔗 [SDK: Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) - Distributed model testing
 - 🌐 [SDK: The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) - Internet coordination layer
 
