@@ -38,6 +38,7 @@ This development is part of the Gyroscopic Global Governance (GGG) framework, wh
 Alignment Infrastructure Routing (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
 
 Gyroscopic ASI is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
+
 ---
 
 # ⚙️ Gyroscopic ASI aQPU Kernel
