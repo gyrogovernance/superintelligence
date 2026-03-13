@@ -47,9 +47,10 @@ A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Determini
 
 > **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 
-
-> **A Note on "Quantum-Inspired" Computing:** 
-> Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics and probabilistic models to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation. The aQPU does not simulate quantum mechanics. Instead, it is an exact, deterministic mathematical space that intrinsically satisfies quantum axioms using strict integer logic.
+```
+**Note:** 
+Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics and probabilistic models to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation. The aQPU does not simulate quantum mechanics. Instead, it is an exact, deterministic mathematical space that intrinsically satisfies quantum axioms using strict integer logic.
+```
 
 ## 🌐 Overview
 
@@ -106,16 +107,6 @@ All results below are verified by exhaustive computation over the entire reachab
 
 ---
 
-## 🚛 Alignment Infrastructure Routing (AIR)
-
-There is no reliable way to turn distributed human contribution into stable paid AI safety work. Most funding routes require institutional access, credentials, or existing lab affiliation. **AIR** applies the kernel to solve this alongside two coordination problems.
-
-**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
-
-**Governance logistics:** Tracking how information and authority move through decision systems is treated with the same rigour as supply chains. AIR provides full replayable histories (“genealogies”) and coherence metrics for governance quality, and supports verifiable compliance with standards such as ISO 42001 and the EU AI Act.
-
----
-
 ![Moments Economy Cover Image](/assets/moments_cover.png)
 
 ## 💰 Moments Economy
@@ -123,6 +114,16 @@ There is no reliable way to turn distributed human contribution into stable paid
 Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel's finite state space (so the "budget" is physically anchored).
 
 CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person (1 MU is denominated at the reference value of 1 int$), tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
+
+---
+
+## 🍃 Alignment Infrastructure Routing (AIR)
+
+There is no reliable way to turn distributed human contribution into stable paid AI safety work. Most funding routes require institutional access, credentials, or existing lab affiliation. **AIR** applies the kernel to solve this alongside two coordination problems.
+
+**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
+
+**Governance logistics:** Tracking how information and authority move through decision systems is treated with the same rigour as supply chains. AIR provides full replayable histories (“genealogies”) and coherence metrics for governance quality, and supports verifiable compliance with standards such as ISO 42001 and the EU AI Act.
 
 ---
 
