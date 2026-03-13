@@ -45,12 +45,8 @@ Gyroscopic ASI is not an autonomous agent, and does not interpret content or set
 
 A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
 
-> **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
-
-```
-**Note:** 
-Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics and probabilistic models to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation. The aQPU does not simulate quantum mechanics. Instead, it is an exact, deterministic mathematical space that intrinsically satisfies quantum axioms using strict integer logic.
-```
++ **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
+- **Note:** Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics and probabilistic models to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation. The aQPU does not simulate quantum mechanics. Instead, it is an exact, deterministic mathematical space that intrinsically satisfies quantum axioms using strict integer logic.
 
 ## 🌐 Overview
 
