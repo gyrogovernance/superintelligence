@@ -22,12 +22,28 @@
 
 ---
 
-# Gyroscopic ASI aQPU Kernel
-
-A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
-
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+
+## 🌐 Artificial Superintelligence
+
+Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
+
+This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
+
+- The **Common Governance Model (CGM):** a formal theory identifying the four capacities required for coherent governance.
+- **The Human Mark (THM):** a classification system distinguishing human (Direct) from artificial (Indirect) sources of information and agency, with four displacement risks.
+- The **Gyroscope Protocol:** a work classification system mapping contributions to the four governance capacities.
+
+Alignment Infrastructure Routing (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
+
+Gyroscopic is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
+
+---
+
+# ⚙️ Gyroscopic ASI aQPU Kernel
+
+A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
 
 > **Verified:** Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require of a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 
@@ -37,93 +53,60 @@ A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Determini
 
 ## 🌐 Overview
 
-The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns an append-only log of bytes into a single, reproducible state. Two parties with the same log always get the same state; no trusted server or timestamp is required. It runs on standard CPUs using exact integer arithmetic (no qubits, no probabilistic hardware). Its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), which have been verified by exhaustive tests over its full 4,096-state space. The result is a coordination substrate that scales by fixed geometry rather than learned approximation.
+Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable.
 
-In this project, **Artificial Superintelligence (ASI)** is not an autonomous agent. It denotes a regime where humans and AI together sustain coherent governance: who decides what, and how it is recorded. The aQPU kernel is a building block for that regime.
+The **aQPU** (algebraic Quantum Processing Unit) is a small kernel that turns an append-only log of bytes into a single, reproducible state. Two parties with the same log always get the same state; no trusted server or timestamp is required. It runs on standard CPUs using exact integer arithmetic (no qubits, no probabilistic hardware). Its design obeys mathematical rules analogous to quantum mechanics (reversibility, no cloning of a privileged state, complementarity), which have been verified by exhaustive tests over its full 4,096-state space.
 
-Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable. Given a published event log, anyone can recompute the same state and verify claims about what happened.
+The state space is fixed and small: **4,096 states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path. Given a published event log, anyone can recompute the same state and verify claims about what happened. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
 
-The kernel does not use learned models. Its state space is fixed and small: **4,096 states**, determined by a compact representation (three axes, left/right “handedness,” and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path. The kernel is part of the broader **Gyroscopic Global Governance (GGG)** framework (Economy, Employment, Education, Ecology) and underpins **Alignment Infrastructure Routing (AIR)**, which tracks safety-related work and funding.
+**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It provides:
 
-The kernel does not interpret content or set policy. It only provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
-
-> **Why it matters:** Typical AI scales by approximation. This kernel scales by fixed geometry: same log always yields the same state, so coordination can be verified without trust.
-
----
-
-## 🗝️ Core Capabilities
-
-- **Exact integer compute:** The kernel and SDK work in 64-dimensional state spaces using packed integer arithmetic (no floating point). That keeps results deterministic and avoids rounding issues for the workloads it targets.
-- **Shared coordination state:** Two parties with the same event log always compute the same state. Coordination is based on replay, not on timestamps or a trusted central authority.
-- **Verifiable provenance:** The state space is finite and enumerable. Any claimed history can be checked by replaying the published log and comparing the final state, so provenance is computational rather than testimonial.
-
----
-
-## 🧠 SDK and Native Compute
-
-The repository includes an SDK that turns the kernel from a specification into runnable code. It gives three views of the same machine: state trajectories (replay and shared moments), a 6-bit “chirality” register with a fixed orthogonal transform (Walsh-Hadamard), and matrix-vector operations over the 64-dimensional state.
-
-**GyroLabe** is the low-level execution layer. It provides byte- and state-level primitives on CPU, 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and an OpenCL backend for batched linear algebra (GEMV/GEMM). See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) for full details.
-
----
-
-## 🔭 GyroLabe: Calibration for Auditable Inference
-
-GyroLabe is the native compute backend and neural model bridge for the aQPU kernel. It connects language models to the kernel's algebraic structure, turning opaque byte-level inference into a process that any party can replay, verify, and audit.
-
-**The Trust Problem in AI:** When a language model generates text, nobody outside the operator can verify what the inference process actually did. Current safety approaches (RLHF, red-teaming, interpretability) work on outputs or weights. None of them produce a verifiable record of the inference computation itself.
-
-**What GyroLabe provides:**
-- **Algebraic byte annotation:** Every byte in the model's input and output is decomposed into its exact structural components (commutation class, family phase, operational payload) using the aQPU kernel.
-- **Inference audit trail:** The kernel state at each byte position is determined entirely by the public transition law. Any party with the same bytes computes the same states. The audit trail requires no trust in the model operator and no access to proprietary model weights.
+- **Byte-level algebraic annotation:** Every byte in a model's input and output is decomposed into its exact structural components (commutation class, family phase, operational payload).
+- **Inference audit trails:** The kernel state at each byte position is determined entirely by the public transition law. Any party with the same bytes computes the same states, without trust in the model operator and without access to proprietary weights.
 - **Trainable structural bias:** Small embedding biases based on the algebraic decomposition let the model learn to use the structural properties of bytes. The wrapped model is mathematically identical to the base model before training.
-- **Bitplane compute engine:** A C/OpenCL backend that decomposes dense matrix-vector multiplication into Boolean operations, providing a path toward structurally transparent linear algebra.
+- **Acceleration backend:** CPU and OpenCL acceleration for 64-point Walsh-Hadamard transforms, fixed-point packed tensor multiply, and batched linear algebra (GEMV/GEMM).
 
-**Current status:** GyroLabe is actively tested on Bolmo-1B (a byte-level language model). The algebraic annotation and embedding biases are operational. Dimensional scaling and full operator decomposition are in active development. 
+GyroLabe exposes three views of the same system: state trajectories (replay and shared moments), a 6-bit chirality register with a fixed orthogonal transform (Walsh-Hadamard), and matrix-vector operations over the 64-dimensional state.
 
-Read the [GyroLabe Brief](docs/GyroLabe_Brief.md) for full details on its architecture and performance.
+**Current status:** GyroLabe is actively tested on Bolmo-1B (a byte-level language model). The algebraic annotation and embedding biases are operational. Dimensional scaling and full operator decomposition are in active development.
 
----
-
-## 🔮 Holographic Architecture
-
-The 4,096-state space has a rigid structure: two small **boundary sets** of 64 states each (called “horizons”) encode the full space in a precise way (**|H|² = |Ω|**, where Ω is the full state set). That is a consequence of the kernel’s transition rules, not an extra design choice.
-
-**What that gives you:**
-- **Compression:** Checking the small boundary sets is enough to guarantee consistency of the whole state space; you do not need to store or verify all 4,096 states explicitly.
-- **Partitioning:** The space splits into four symmetric regions (each 2,048 states), which supports natural boundaries for distributed coordination.
-- **History equivalence:** The geometry defines which different event sequences lead to the same effective outcome, so you can reason about trajectories without training a model.
-
-The [SDK Network Specification](docs/Gyroscopic_ASI_SDK_Network.md) describes testing AI models against this geometry (“oracles”); the [Holographic Web Specification](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) extends the same ideas to internet-scale coordination.
+See the [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) and the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) for more details.
 
 ---
 
-## ⚛️ Proven Computational Advantages
+## 🔬 Why This Matters for Computer Science
 
-The kernel’s internal algebra uses binary arithmetic (bits) and satisfies properties analogous to quantum mechanics. Exhaustive tests over all 4,096 states confirm this.
+- **Processing**: Deterministic stream-processing with exact replay, compact state updates, and composable operator signatures, backed by exact integer compute in fixed 64-dimensional state spaces.
+- **Speed**: Byte words compile into operators, commutativity resolves through compact invariants, and full reachable geometry covers in only 2 steps.
+- **Security**: Tamper-aware logs, exact divergence localization, replay-based verification, and compact provenance surfaces, grounded in a finite, enumerable state space with built-in error detection.
+- **Compression**: Structural compression through compact state geometry, boundary dictionaries, and operator compilation.
+- **Networks**: Replay-based synchronization, shared deterministic moments, and exact branch comparison across distributed participants using shared coordination state computed from append-only logs.
+- **Machine Learning**: Interpretable finite latent layer, exact spectral primitives, tensor tooling, and an audit-friendly bridge between byte-level model behavior and algebraic structure, with verifiable provenance over model I/O traces.
 
-**Structural properties:**
-- **Reversibility (unitarity):** Every byte induces a one-to-one map on the full state; no information is lost or invented.
-- **Order 4:** Applying the same byte four times always returns to the starting state.
-- **No cloning:** One special byte (archetype 0xAA) is the unique “source” that all state paths can trace back to; no other byte can play that role.
-- **Complementarity:** From any state, the 256 possible bytes lead to exactly 128 distinct next states (each reachable by two bytes), giving a symmetric branching structure.
+---
 
-**Concrete advantages over naive classical approaches:**
+**Verified Computational Advantages:**
+All results below are verified by exhaustive computation over the full 4,096-state space and all 256 byte operations, totalling over 1 million exact checks. They are strict structural invariants, not statistical estimates.
 
-| Task | aQPU | Naive classical |
-|------|------|------------------|
-| Resolving hidden structure in the transition graph | 1 step (single lookup on 6-bit register) | Up to 64 steps |
-| Exact uniform mixing | 2 steps, integer exact | ~12 steps for approximate mixing |
-| Testing whether two operations commute | O(1), 6-bit compare | 4 kernel steps |
-| Compressing state to a boundary + index | 8 bits | 24 bits |
+| Verified result | What it means |
+|-----------------|---------------|
+| **4,096 reachable states** | The full operational manifold from rest is finite, exact, and exhaustively testable. |
+| **2-step exact uniformization** | Any state in the reachable manifold can spread over all 4,096 states in exactly 2 byte steps, with perfect 16-to-1 multiplicity. |
+| **128 distinct next states per byte layer** | From any fixed state, the 256-byte alphabet projects to exactly 128 distinct next states with exact 2-to-1 symmetry. |
+| **Depth ≤ 2 witness for every reachable state** | Every reachable state can be synthesized from rest with a byte witness of depth 0, 1, or 2. |
+| **Exact compiled operator signatures** | Byte words collapse into exact affine signatures that can be composed and applied directly without replaying the full word. |
+| **Constant-time commutativity test** | Two byte operations commute iff they share the same 6-bit topological `q-class`, making commutativity an O(1) structural lookup. |
+| **Native spectral register** | The kernel exposes a 64-dimensional logical register with exact Walsh-Hadamard and shell spectral structure. |
+| **Holographic boundary relation** | The state geometry satisfies **|H|² = |Ω| = 64² = 4,096**, enabling structural compression and compact boundary reasoning. |
+| **Universal quantum ingredients** | The verified kernel supports stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource. |
 
-**Error detection:** A built-in code ([12,6,2] over the state bits) detects all odd-weight bit errors. Tampering with a byte in the log is detected unless the replacement is an exact phase match (probability 1/255). 
+**Integrity and Tamper Detection:** The kernel includes a built-in self-dual [12,6,2] code and exact algebraic provenance checks. Integrity misses are structurally classified rather than opaque: substitutions reduce to shadow partners, adjacent swaps reduce to shared `q-class`, and deletions reduce to specific stabilizer conditions on the horizons.
 
 ---
 
 ## 🚛 Alignment Infrastructure Routing (AIR)
 
-**AIR** applies the kernel to two coordination problems.
+There is no reliable way to turn distributed human contribution into stable paid AI safety work. Most funding routes require institutional access, credentials, or existing lab affiliation. **AIR** applies the kernel to solve this alongside two coordination problems.
 
 **Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
 
@@ -135,15 +118,16 @@ The kernel’s internal algebra uses binary arithmetic (bits) and satisfies prop
 
 ## 💰 Moments Economy
 
-Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel’s finite state space (so the “budget” is physically anchored).
+Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel's finite state space (so the "budget" is physically anchored).
 
-CSM is large enough to support a global **Unconditional High Income (UHI)**-style allocation, tiered distributions, and full governance records for billions of years. Within this cap, every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
+CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person (1 MU is set as equilivent to 1 int$), tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
 
 ---
 
 ## 📚 Documentation
 
 ### Start Here
+- 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
 - 🧠 [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) - Three computational surfaces
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
@@ -164,9 +148,12 @@ CSM is large enough to support a global **Unconditional High Income (UHI)**-styl
 - 🧬 [Substrate: Physical Memory Specification](docs/Gyroscopic_ASI_Substrate_Specs.md) - Memory and carrier layout
 
 ### Test Reports
+All kernel properties are verified by exhaustive test suites (499 tests, all passing) covering the full state space, operator algebra, and SDK surfaces.
+
 - 📊 [Physics Tests Report](docs/reports/Physics_Tests_Report.md) - Kernel state verification
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
-- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified
+- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified (185 tests)
+- 📊 [aQPU Verification Report II](docs/reports/aQPU_Tests_Report_2.md) - Extended kernel and SDK tests (122 tests)
 - 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
 ### Supporting Theory
