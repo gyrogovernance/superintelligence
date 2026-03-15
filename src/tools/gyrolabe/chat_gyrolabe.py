@@ -26,7 +26,7 @@ import torch
 from src.tools.gyrolabe import ops as gyro_ops
 from src.tools.gyrolabe.bolmo_bridge import (
     DEFAULT_BOLMO_MODEL_PATH,
-    GyrolabeSettings,
+    GyroLabeSettings,
     load_gyrolabe_bolmo,
 )
 
@@ -81,7 +81,7 @@ def main() -> None:
         hf_kwargs["low_cpu_mem_usage"] = True
         hf_kwargs["device_map"] = "cpu"
 
-    settings = GyrolabeSettings(
+    settings = GyroLabeSettings(
         enable_embedding_bias=True,
         enable_boundary_bias=True,
         enable_decode_expand_cache=True,

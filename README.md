@@ -71,7 +71,18 @@ It provides:
 - **Trainable structural bias:** Small embedding biases let models learn from the kernel's structural decomposition while remaining identical to the base model before training.
 - **Execution support:** CPU and OpenCL acceleration for spectral and tensor operations used by the broader SDK.
 
-> For the model bridge and execution layer, see the [GyroLabe Brief](docs/Gyrolabe_Brief.md).
+> For the model bridge and execution layer, see the [GyroLabe Brief](docs/GyroLabe_Specs.md).
+
+**GyroGraph** is the Multicellular Quantum AI model built on top of the aQPU Kernel and GyroLabe. It organizes the algebraic quantum state space (Ω) into a multicellular, resonance-defined graph for runtime intelligence and structural observability.
+
+It provides:
+
+- **Quantum Cellular Automaton execution:** Cells evolve under the exact aQPU byte law, consuming runtime input as 4-byte words to navigate the discrete quantum state space.
+- **Local structural memories per cell:** Rolling chirality and shell memories providing exact spectral views (Walsh-Hadamard and shell Krawtchouk surfaces) without floating-point approximations.
+- **Resonance-defined graph structure:** Dynamic graph topology induced by resonance profiles over quantum-native observables (e.g., chirality, shell, state coincidence).
+- **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration for Applications, Databases, and Networks.
+
+> For the multicellular runtime intelligence layer, see the [GyroGraph Specification](docs/GyroGraph_Specs.md).
 
 ---
 
@@ -131,12 +142,13 @@ There is no reliable way to turn distributed human contribution into stable paid
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
-- 🔭 [GyroLabe Brief](docs/Gyrolabe_Brief.md) - Model bridge and execution layer
+- 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
 
 
 ### Core Specifications
 - 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
 - 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
+- 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
 - 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
 
 ### Extensions
@@ -187,6 +199,7 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/kernel.py` : Reference kernel execution and replay surfaces
 - `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
 - `src/tools/gyrolabe/` : Native CPU/OpenCL backend, packed tensor engine, Bolmo bridge, and benchmarks
+- `src/tools/gyrograph/` : GyroGraph multicellular runtime engine, resonance profiles, SLCP emission, and bridges for applications, databases, and networks
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
 - `docs/` : Specifications, reports, architecture notes, and supporting theory
 - `tests/` : Exhaustive verification suites for kernel physics, aQPU properties, SDK surfaces, and governance measurement

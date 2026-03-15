@@ -1,5 +1,4 @@
 
-
 # GyroLabe Brief
 
 ## What GyroLabe Is

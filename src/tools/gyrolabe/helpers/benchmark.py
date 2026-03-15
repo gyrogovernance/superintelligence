@@ -28,7 +28,7 @@ from src.api import walsh_hadamard64
 from src.tools.gyrolabe import ops
 from src.tools.gyrolabe.bolmo_bridge import (
     DEFAULT_BOLMO_MODEL_PATH,
-    GyrolabeSettings,
+    GyroLabeSettings,
     load_gyrolabe_bolmo,
 )
 from src.tools.gyrolabe.bolmo_bridge import _NoopLabe
@@ -60,12 +60,12 @@ def _load_base_bolmo(model_path: Path | None = None, **hf_kwargs: Any) -> Any:
 
 
 def _load_bridge_bolmo(
-    settings: GyrolabeSettings | None = None,
+    settings: GyroLabeSettings | None = None,
     model_path: Path | None = None,
     **hf_kwargs: Any,
 ) -> Any:
     """Load Bolmo with GyroLabe bridge."""
-    return load_gyrolabe_bolmo(model_path, settings=settings or GyrolabeSettings(), **hf_kwargs)
+    return load_gyrolabe_bolmo(model_path, settings=settings or GyroLabeSettings(), **hf_kwargs)
 
 
 _GEN_PROMPTS: list[tuple[str, str]] = [
@@ -200,7 +200,7 @@ def _run_generate_benchmarks(
     if tokenizer is None:
         return [], []
 
-    settings_zero = GyrolabeSettings(
+    settings_zero = GyroLabeSettings(
         enable_embedding_bias=True,
         enable_boundary_bias=True,
         enable_decode_expand_cache=False,
@@ -209,7 +209,7 @@ def _run_generate_benchmarks(
     bridge_zero.reset_gyrolabe_parameters()
     bridge_zero.eval()
 
-    settings_cache = GyrolabeSettings(
+    settings_cache = GyroLabeSettings(
         enable_embedding_bias=True,
         enable_boundary_bias=True,
         enable_decode_expand_cache=True,

@@ -19,7 +19,7 @@ import torch
 
 from src.tools.gyrolabe.bolmo_bridge import (
     DEFAULT_BOLMO_MODEL_PATH,
-    GyrolabeSettings,
+    GyroLabeSettings,
     load_gyrolabe_bolmo,
 )
 
@@ -36,7 +36,7 @@ def _get_tokenizer(model: object) -> Any | None:
 
 def main() -> None:
     print("Loading bridge with enable_qclass_sparsity=True...")
-    settings = GyrolabeSettings(
+    settings = GyroLabeSettings(
         enable_embedding_bias=True,
         enable_boundary_bias=True,
         enable_qclass_sparsity=True,

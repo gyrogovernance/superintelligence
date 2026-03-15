@@ -664,7 +664,7 @@ class TestSignatureScanSequences:
         assert states.shape == (2,)
 
 
-class TestGyrolabeRuntimeOps:
+class TestGyroLabeRuntimeOps:
     def test_signature_and_state_flow_consistency(self) -> None:
         payload = _bytes_from_items([0x01, 0x02, 0x03, 0x04])
         t_payload = torch.tensor(list(payload), dtype=torch.uint8)

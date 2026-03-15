@@ -1,5 +1,5 @@
 
-💫 Gyroscopic ASI aQPU Kernel, Alignment Routing Infrastructure - CHANGELOG
+💫 Gyroscopic ASI aQPU Kernel, Alignment Infrastructure Routing  - CHANGELOG
 
 ```            
 ┏━┓╻  ╻┏━╸┏┓╻┏┳┓┏━╸┏┓╻╺┳╸               
@@ -12,6 +12,99 @@
 ┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
 ╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
 ```
+
+---
+
+## [v2.0.2-GyroGraph] – 2026-03-14
+
+### Added
+- Added the first complete GyroGraph runtime intelligence layer as an Ω-native multicellular model built on the aQPU Kernel and QuBEC medium.
+- Added `src/tools/gyrograph/core.py` with:
+  - cell pool allocation and lifecycle
+  - Ω-native per-cell state storage
+  - byte-cadence local memory updates
+  - word-boundary SLCP emission
+  - resonance bucket management
+  - graph query surfaces
+  - persistence and restore support
+  - optional ingest logging
+- Added `SLCPRecord` as the standard structural output record with:
+  - exact kernel-native fields
+  - spectral64 output
+  - adapters into charts, future-cone, future-locus, optical coordinates, and stabilizer views
+- Added `src/tools/gyrograph/profiles.py` with native resonance profiles:
+  - chirality
+  - shell
+  - horizon class
+  - Ω coincidence
+  - signature
+  - q-transport
+- Added `src/tools/gyrograph/serializers.py` with exact 4-byte word helpers:
+  - `pack_word4`
+  - `ensure_word4`
+- Added `src/tools/gyrograph/__init__.py` public exports for:
+  - `GyroGraph`
+  - `SLCPRecord`
+  - `ResonanceProfile`
+  - serializer helpers
+  - Applications bridge surfaces
+- Added native CPU backend `src/tools/gyrograph/gyrograph.c` implementing batched:
+  - Ω word4 trace
+  - trace application to multicellular state
+  - fused ingest over many cells
+- Added OpenCL backend `src/tools/gyrograph/gyrograph_opencl.c` implementing parallel 4-step Ω tracing across many cells.
+- Added `src/tools/gyrograph/ops.py` with:
+  - automatic native build/load
+  - ctypes bindings
+  - Python fallbacks
+  - native/OpenCL availability checks
+  - batched trace/apply/ingest APIs
+- Added the first Applications bridge in `src/tools/gyrograph/bridges/applications.py` with:
+  - entity/role to cell mapping
+  - deterministic event serialization
+  - hot-loop, lock-contention, and GC-cycle feed surfaces
+  - runtime capability surface
+  - initial actuator-facing profiling helpers
+- Added Databases and Networks bridge module stubs to establish the first bridge coverage layout.
+- Added snapshot persistence with kernel-law hash validation and separate optional ingest-log support.
+- Added support for chirality and shell rolling histories with O(1) update semantics and exact spectral extraction.
+- Added support for native and OpenCL hot paths in GyroGraph ingestion to ensure structural processing scales with runtime load rather than Python overhead.
+
+### Changed
+- Elevated GyroGraph from draft concept to implemented runtime layer across Python, C, and OpenCL paths.
+- Standardized GyroGraph around packed `omega12 : int32` as the primary live state representation for ABI-clean interoperability with the SDK and GyroLabe.
+- Structured the implementation around the exact runtime loop:
+  - packet input
+  - Ω stepping
+  - local memory update
+  - resonance update
+  - SLCP and graph queries
+- Aligned the implementation with the depth-4 ingestion model by making the 4-byte word the native bridge unit throughout the stack.
+- Refined the Applications bridge toward categorical structural event mapping instead of opaque ad hoc event handling.
+- Consolidated native multicellular execution around GyroLabe-compatible Ω surfaces rather than introducing a second kernel law.
+
+### Verified
+- Verified GyroGraph core and Applications bridge functionality through dedicated test coverage:
+  - bootstrap state
+  - ingest vs SDK replay equivalence
+  - ring warmup and replacement
+  - resonance profile key correctness
+  - graph query consistency
+  - safeguards and error handling
+  - resonance decay
+  - native batch equivalence
+  - snapshot/restore roundtrip
+  - ingest-log replay
+  - shell spectral and SDK view integration
+  - applications bridge clustering and multi-role usage
+- Confirmed native CPU and OpenCL availability in runtime capability surfaces.
+- Confirmed that GyroGraph maintains exact structural agreement with SDK replay and Ω-state semantics.
+
+### Notes
+- This release establishes GyroGraph as the multicellular runtime observability layer of the Gyroscopic ASI stack.
+- The first implemented domain is Applications, with Python as the first runtime binding.
+- Databases and Networks bridge files are present as the next bridge surfaces and will be extended in subsequent work.
+- The native and OpenCL paths are included to support real runtime utilization, not just development conformance, and form the hardware-near execution basis for future domain scripts and actuator integrations.
 
 ---
 

@@ -105,7 +105,7 @@ def _apply_bolmo_rope_patch() -> None:
 
 
 @dataclass
-class GyrolabeSettings:
+class GyroLabeSettings:
     enable_embedding_bias: bool = True
     enable_boundary_bias: bool = True
     enable_qclass_sparsity: bool = False  # reserved; intentionally not active here
@@ -231,10 +231,10 @@ def canonicalize_bolmo_ids(
     return canonical.to(torch.uint8), valid_mask, boundary_mask
 
 
-class _GyrolabeBoundaryPredictor(nn.Module):
-    owner: "GyrolabeBolmoBridge"
+class _GyroLabeBoundaryPredictor(nn.Module):
+    owner: "GyroLabeBolmoBridge"
 
-    def __init__(self, inner: nn.Module, owner: "GyrolabeBolmoBridge") -> None:
+    def __init__(self, inner: nn.Module, owner: "GyroLabeBolmoBridge") -> None:
         super().__init__()
         self.inner = inner
         object.__setattr__(self, "owner", owner)  # do not register bridge as submodule (avoids train() recursion)
@@ -281,7 +281,7 @@ class _GyrolabeBoundaryPredictor(nn.Module):
         return boundary_logprobs, boundary_mask
 
 
-class GyrolabeBolmoBridge(nn.Module):
+class GyroLabeBolmoBridge(nn.Module):
     """
     Lossless Bolmo wrapper.
 
@@ -292,11 +292,11 @@ class GyrolabeBolmoBridge(nn.Module):
     def __init__(
         self,
         base_model: nn.Module,
-        settings: GyrolabeSettings | None = None,
+        settings: GyroLabeSettings | None = None,
     ) -> None:
         super().__init__()
         self.base_model = base_model
-        self.settings = settings or GyrolabeSettings()
+        self.settings = settings or GyroLabeSettings()
         self._ctx: dict[str, torch.Tensor] = {}
         self._handles: list[Any] = []
         self._original_boundary_predictor: nn.Module | None = None
@@ -418,7 +418,7 @@ class GyrolabeBolmoBridge(nn.Module):
 
         self._original_boundary_predictor = local_encoder.boundary_predictor_module
         inner_bp = cast(nn.Module, local_encoder.boundary_predictor_module)
-        local_encoder.boundary_predictor_module = _GyrolabeBoundaryPredictor(
+        local_encoder.boundary_predictor_module = _GyroLabeBoundaryPredictor(
             inner_bp,
             self,
         )
@@ -573,9 +573,9 @@ class GyrolabeBolmoBridge(nn.Module):
         cls,
         model_path: str | Path,
         *,
-        settings: GyrolabeSettings | None = None,
+        settings: GyroLabeSettings | None = None,
         **hf_kwargs: Any,
-    ) -> "GyrolabeBolmoBridge":
+    ) -> "GyroLabeBolmoBridge":
         os.environ.setdefault("HF_HUB_OFFLINE", "1")
         os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
         path = str(model_path)
@@ -620,11 +620,11 @@ class GyrolabeBolmoBridge(nn.Module):
 def load_gyrolabe_bolmo(
     model_path: str | Path | None = None,
     *,
-    settings: GyrolabeSettings | None = None,
+    settings: GyroLabeSettings | None = None,
     **hf_kwargs: Any,
-) -> GyrolabeBolmoBridge:
+) -> GyroLabeBolmoBridge:
     path = model_path if model_path is not None else DEFAULT_BOLMO_MODEL_PATH
-    return GyrolabeBolmoBridge.from_pretrained(
+    return GyroLabeBolmoBridge.from_pretrained(
         path,
         settings=settings,
         **hf_kwargs,

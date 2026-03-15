@@ -24,13 +24,13 @@ import torch
 from src.tools.gyrolabe import ops as gyro_ops
 from src.tools.gyrolabe.bolmo_bridge import (
     DEFAULT_BOLMO_MODEL_PATH,
-    GyrolabeBolmoBridge,
-    GyrolabeSettings,
+    GyroLabeBolmoBridge,
+    GyroLabeSettings,
     load_gyrolabe_bolmo,
 )
 
 
-def _get_tokenizer(bridge: GyrolabeBolmoBridge) -> Any | None:
+def _get_tokenizer(bridge: GyroLabeBolmoBridge) -> Any | None:
     try:
         tc = getattr(bridge.base_model.model, "tokenizer_config", None)
         if tc is not None and hasattr(tc, "build"):
@@ -81,7 +81,7 @@ def main() -> None:
     if args.bfloat16:
         hf_kwargs["torch_dtype"] = torch.bfloat16
 
-    settings = GyrolabeSettings(
+    settings = GyroLabeSettings(
         enable_embedding_bias=not args.no_embedding_bias,
         enable_boundary_bias=not args.no_boundary_bias,
         enable_qclass_sparsity=False,
