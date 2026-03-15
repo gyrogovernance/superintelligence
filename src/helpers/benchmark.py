@@ -26,12 +26,20 @@ import torch
 
 from src.api import walsh_hadamard64
 from src.tools.gyrolabe import ops
-from src.tools.gyrolabe.bolmo_bridge import (
+from src.tools.gyrolabe.bridges import (
     DEFAULT_BOLMO_MODEL_PATH,
-    GyroLabeSettings,
-    load_gyrolabe_bolmo,
+    BolmoEncodeBridgeConfig,
+    load_base_bolmo,
+    load_gyrolabe_bolmo_encode,
 )
-from src.tools.gyrolabe.bolmo_bridge import _NoopLabe
+
+
+class _NoopLabe:
+    """Minimal labe stub for benchmark timing; no GyroLabe logic."""
+    step_times: list[float]
+
+    def __init__(self) -> None:
+        self.step_times = []
 
 
 def _set_stable_threading() -> None:
@@ -55,17 +63,18 @@ def _get_tokenizer(model: Any) -> Any | None:
 
 def _load_base_bolmo(model_path: Path | None = None, **hf_kwargs: Any) -> Any:
     """Load raw Bolmo without bridge."""
-    from src.tools.gyrolabe.bolmo_bridge import load_base_bolmo
-    return load_base_bolmo(model_path, **hf_kwargs)
+    path = str(model_path) if model_path is not None else None
+    return load_base_bolmo(path, **hf_kwargs)
 
 
 def _load_bridge_bolmo(
-    settings: GyroLabeSettings | None = None,
+    config: BolmoEncodeBridgeConfig | None = None,
     model_path: Path | None = None,
     **hf_kwargs: Any,
 ) -> Any:
-    """Load Bolmo with GyroLabe bridge."""
-    return load_gyrolabe_bolmo(model_path, settings=settings or GyroLabeSettings(), **hf_kwargs)
+    """Load Bolmo with GyroLabe encode bridge."""
+    path = str(model_path) if model_path is not None else None
+    return load_gyrolabe_bolmo_encode(path, config=config or BolmoEncodeBridgeConfig(), **hf_kwargs)
 
 
 _GEN_PROMPTS: list[tuple[str, str]] = [
@@ -200,22 +209,22 @@ def _run_generate_benchmarks(
     if tokenizer is None:
         return [], []
 
-    settings_zero = GyroLabeSettings(
-        enable_embedding_bias=True,
-        enable_boundary_bias=True,
-        enable_decode_expand_cache=False,
+    config_zero = BolmoEncodeBridgeConfig(
+        embedding_scale=1.0,
+        boundary_scale=1.0,
+        strict_cpu=True,
     )
-    bridge_zero = _load_bridge_bolmo(settings_zero, model_path, **hf_kwargs)
-    bridge_zero.reset_gyrolabe_parameters()
+    bridge_zero = _load_bridge_bolmo(config_zero, model_path, **hf_kwargs)
+    bridge_zero.reset_structural_parameters()
     bridge_zero.eval()
 
-    settings_cache = GyroLabeSettings(
-        enable_embedding_bias=True,
-        enable_boundary_bias=True,
-        enable_decode_expand_cache=True,
+    config_cache = BolmoEncodeBridgeConfig(
+        embedding_scale=1.0,
+        boundary_scale=1.0,
+        strict_cpu=True,
     )
-    bridge_cache = _load_bridge_bolmo(settings_cache, model_path, **hf_kwargs)
-    bridge_cache.reset_gyrolabe_parameters()
+    bridge_cache = _load_bridge_bolmo(config_cache, model_path, **hf_kwargs)
+    bridge_cache.reset_structural_parameters()
     bridge_cache.eval()
 
     exactness: list[dict] = []

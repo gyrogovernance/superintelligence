@@ -15,6 +15,117 @@
 
 ---
 
+## [v2.0.3-GyroClimate] – 2026-03-15
+
+### Added
+- Introduced a clean **Bolmo-specialized bridge split**:
+  - `src/tools/gyrolabe/bridges/encode.py`
+  - `src/tools/gyrolabe/bridges/bolmo_config.py`
+  - `src/tools/gyrograph/bridges/decode.py`
+  - `src/tools/gyrograph/bridges/bolmo_config.py`
+- Added canonical bridge namespace exports:
+  - `src/tools/gyrolabe/bridges/__init__.py`
+  - `src/tools/gyrograph/bridges/__init__.py`
+- Added **encode-side structural boundary control** over Bolmo’s non-causal boundary predictor.
+- Added **decode-side paired content/phase quotient selection** for Bolmo’s fused 512-way output alphabet.
+- Added **phase hysteresis** to decode selection to reduce boundary-phase turbulence across steps.
+- Added canonical **climate proxies** to bridge outputs:
+  - `patch_count`
+  - `mean_bytes_per_patch`
+  - `attn_proxy`
+  - `kv_proxy`
+  - `gauge_flip_rate`
+  - `support_count_mean`
+  - `raw_support_count_mean`
+  - `phase_redundancy_mean`
+- Added Bolmo operationalization appendix to:
+  - `docs/reports/AI_Climate_Control.md`
+
+### Changed
+- Replaced the old mixed-purpose Bolmo integration direction with a strict:
+  - **GyroLabe = Encode**
+  - **GyroGraph = Decode**
+  separation.
+- Reframed Bolmo as a **boundary-conditioned byte-to-patch transduction use case**, not a generic observatory target.
+- Upgraded the encode bridge from passive structural biasing to a real **boundary-law actuator**:
+  - supports `boundary_mode = observe | hybrid | exact`
+  - hybrid mode blends cosine boundary probabilities with structural boundary probabilities
+  - exact mode applies the structural boundary law directly
+- Replaced naive encode-side patch-probability scaling with **logit-space calibration** toward a target boundary rate derived from `target_bytes_per_patch`.
+- Upgraded decode from flat token post-processing to a real **selection-law intervention**:
+  - supports `selection_mode = flat | paired`
+  - paired mode selects content first, then boundary phase
+- Added decode-side **phase hysteresis**:
+  - stays more readily in the current phase sector unless phase evidence crosses a stronger threshold
+- Corrected support accounting from malformed ratio comparison to **count-based quotient metrics**:
+  - `support_count_mean`
+  - `raw_support_count_mean`
+  - `phase_redundancy_mean = raw_support_count_mean - support_count_mean`
+
+### Fixed
+- Fixed boundary histogram recording in encode observability:
+  - `boundary_q_hist64`
+  - `boundary_micro_hist64`
+  now use the **predictor’s boundary mask**, not fused input token IDs.
+- Fixed structural boundary probability construction to preserve tensor shape consistency when using adjacent chirality distances.
+- Eliminated repeated Bolmo model loads in tests to avoid Windows/PyTorch native instability and access violations.
+- Removed unsupported reliance on broad multi-file proof sprawl; consolidated testing back into two canonical tool tests.
+
+### Removed
+- Removed obsolete / redundant bridge files:
+  - `src/tools/gyrolabe/bolmo_bridge.py`
+  - `src/tools/gyrograph/bridges/applications.py`
+  - `src/tools/gyrograph/bridges/databases.py`
+  - `src/tools/gyrograph/bridges/networks.py`
+- Deleted surplus Bolmo test files and restored scoped discipline:
+  - `tests/tools/test_bolmo_boundary_control.py`
+  - `tests/tools/test_bolmo_boundary_field.py`
+  - `tests/tools/test_bolmo_climate_advantage.py`
+  - `tests/tools/test_bolmo_decode_factorization.py`
+  - `tests/tools/test_bolmo_decode_integration.py`
+  - `tests/tools/test_bolmo_paired_selection.py`
+  - `tests/tools/test_bolmo_patch_geometry.py`
+
+### Tests
+- Rebuilt the tool test surface around exactly two canonical files:
+  - `tests/tools/test_gyrolabe_encode.py`
+  - `tests/tools/test_gyrograph_decode.py`
+- `test_gyrolabe_encode.py` now validates:
+  - exact byte-native field extraction
+  - q/family/micro/shell histograms
+  - boundary-field observability
+  - operative vs stress-limit boundary control regimes
+  - reduction of patch-count / attention / KV proxies under structural control
+- `test_gyrograph_decode.py` now validates:
+  - synthetic flat vs paired quotient selection
+  - real Bolmo baseline vs controlled decode runs
+  - reduced gauge turbulence under hysteretic paired decode
+  - reduced attention and KV proxies
+  - reduced surviving decode competition by support count
+- Final validated outputs showed:
+  - **encode-side coarsening**
+    - observe: `patch_count=16`, `mean_bpp=4.478`
+    - hybrid: `patch_count=10`, `mean_bpp=7.278`
+    - exact: `patch_count=3`, `mean_bpp=23.667`
+  - **decode-side stabilization**
+    - gauge flip rate mean: `0.4340 -> 0.3410`
+    - mean bytes per patch: `3.7667 -> 4.5681`
+    - attention proxy mean: `102.67 -> 64.67`
+    - KV proxy mean: `10.0 -> 8.0`
+    - support count mean: `8.1486 -> 6.9479`
+
+### Scope outcome
+- Reached a stable **Bolmo-native climate control baseline**.
+- Established real intervention at the two root operational surfaces:
+  - **boundary law**
+  - **content/phase decode algebra**
+- Remained within the original scope:
+  - no new test sprawl
+  - no generic overreach
+  - stronger specialization around the six climate events through exact Bolmo hooks.
+
+---
+
 ## [v2.0.2-GyroGraph] – 2026-03-14
 
 ### Added

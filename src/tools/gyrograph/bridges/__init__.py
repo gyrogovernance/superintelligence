@@ -1,8 +1,21 @@
-"""
-Bridge namespace for GyroGraph runtime adapters.
+from .bolmo_config import (
+    BolmoDecodeBridgeConfig,
+    build_metric_byte,
+    canonical_byte_from_token_id,
+    strip_boundary_phase,
+)
+from .decode import (
+    BolmoDecodeReport,
+    GyroGraphBolmoDecodeBridge,
+    PairedContentMetrics,
+)
 
-Bridge modules own:
-- runtime event -> word4 serialization
-- entity_id <-> cell_id mappings
-- bridge-local actuator helper surfaces
-"""
+__all__ = [
+    "BolmoDecodeBridgeConfig",
+    "BolmoDecodeReport",
+    "GyroGraphBolmoDecodeBridge",
+    "PairedContentMetrics",
+    "build_metric_byte",
+    "canonical_byte_from_token_id",
+    "strip_boundary_phase",
+]

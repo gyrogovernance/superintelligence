@@ -610,21 +610,3 @@ def test_gyrograph_performance_exploration():
     assert ingest_dt >= 0.0
     assert emit_dt >= 0.0
 
-
-def test_gyrograph_bridge_stubs_import():
-    print("\n[bridge stubs import]")
-
-    import src.tools.gyrograph.bridges.applications as applications_bridge
-    import src.tools.gyrograph.bridges.databases as databases_bridge
-    import src.tools.gyrograph.bridges.networks as networks_bridge
-
-    doc = (applications_bridge.__doc__ or "").strip().splitlines()
-    print("applications doc:", doc[0] if doc else "")
-    doc = (databases_bridge.__doc__ or "").strip().splitlines()
-    print("databases doc:", doc[0] if doc else "")
-    doc = (networks_bridge.__doc__ or "").strip().splitlines()
-    print("networks doc:", doc[0] if doc else "")
-
-    assert applications_bridge is not None
-    assert databases_bridge is not None
-    assert networks_bridge is not None
