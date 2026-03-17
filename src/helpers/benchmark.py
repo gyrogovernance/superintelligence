@@ -209,22 +209,12 @@ def _run_generate_benchmarks(
     if tokenizer is None:
         return [], []
 
-    config_zero = BolmoEncodeBridgeConfig(
-        embedding_scale=1.0,
-        boundary_scale=1.0,
-        strict_cpu=True,
-    )
+    config_zero = BolmoEncodeBridgeConfig(strict_cpu=True, chi_boundary_threshold=2)
     bridge_zero = _load_bridge_bolmo(config_zero, model_path, **hf_kwargs)
-    bridge_zero.reset_structural_parameters()
     bridge_zero.eval()
 
-    config_cache = BolmoEncodeBridgeConfig(
-        embedding_scale=1.0,
-        boundary_scale=1.0,
-        strict_cpu=True,
-    )
+    config_cache = BolmoEncodeBridgeConfig(strict_cpu=True, chi_boundary_threshold=2)
     bridge_cache = _load_bridge_bolmo(config_cache, model_path, **hf_kwargs)
-    bridge_cache.reset_structural_parameters()
     bridge_cache.eval()
 
     exactness: list[dict] = []

@@ -62,14 +62,14 @@ The state space is fixed and small: **4,096 reachable states**, determined by a 
 
 ---
 
-**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It is actively tested on Bolmo-1B (a byte-level language model).
+**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It has been successfully deployed on Bolmo-1B (a byte-native billion-parameter language model) to replace classical floating-point math at the model's decision surfaces.
 
 It provides:
 
+- **Zero-transcendental execution:** Bypasses expensive floating-point bottlenecks (like exponentials in softmax or square-roots in cosine similarity) by using exact integer algebra for model routing and token selection.
 - **Structural annotation for model I/O:** Model inputs and outputs are annotated using the kernel's algebraic byte structure.
 - **Replayable inference traces:** Inference can be tied to reproducible kernel-state trajectories for verification and audit.
-- **Trainable structural bias:** Small embedding biases let models learn from the kernel's structural decomposition while remaining identical to the base model before training.
-- **Execution support:** CPU and OpenCL acceleration for spectral and tensor operations used by the broader SDK.
+- **Hardware-near acceleration:** CPU and OpenCL acceleration achieving over 1.2 billion exact operations per second on standard commodity hardware.
 
 > For the model bridge and execution layer, see the [GyroLabe Brief](docs/GyroLabe_Specs.md).
 
@@ -81,6 +81,7 @@ It provides:
 - **Local structural memories per cell:** Rolling chirality and shell memories providing exact spectral views (Walsh-Hadamard and shell Krawtchouk surfaces) without floating-point approximations.
 - **Resonance-defined graph structure:** Dynamic graph topology induced by resonance profiles over quantum-native observables (e.g., chirality, shell, state coincidence).
 - **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration for Applications, Databases, and Networks.
+- **Real-time AI Control:** Uses exact structural state to dynamically manage LLM resource allocation (e.g., adjusting context patch sizes based on the exact thermodynamic state of the computation).
 
 > For the multicellular runtime intelligence layer, see the [GyroGraph Specification](docs/GyroGraph_Specs.md).
 
@@ -93,7 +94,7 @@ It provides:
 - **Security**: Tamper-aware logs, exact divergence localization, replay-based verification, and compact provenance surfaces, grounded in a finite, enumerable state space with built-in error detection.
 - **Compression**: Structural compression through compact state geometry, holographic boundary dictionaries, and operator compilation, enabling lossless but storage-efficient coordination records.
 - **Networks**: Replay-based synchronization, shared deterministic moments, and exact branch comparison across distributed participants using shared coordination state computed from append-only logs.
-- **Machine Learning**: An interpretable finite latent layer (6-bit chirality register), exact spectral primitives (Walsh-Hadamard and shell structure), tensor tooling, and an audit-friendly bridge between byte-level model behavior and algebraic structure, with verifiable provenance over model I/O traces.
+- **Machine Learning**: Eliminates structural computational bottlenecks by substituting floating-point heuristics with exact algebraic selection. Provides an interpretable finite latent layer, exact spectral primitives, and an audit-friendly bridge with verifiable provenance over model I/O traces.
 
 ---
 
@@ -111,6 +112,8 @@ All results below are verified by exhaustive computation over the entire reachab
 | **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
 | **Holographic boundary relation** | The state geometry satisfies **|H|² = |Ω| = 64² = 4,096**, enabling structural compression and compact boundary reasoning. |
 | **Universal quantum ingredients** | The verified kernel supports stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource. |
+| **Standard silicon efficiency** | Achieves over 1.2 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
+| **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
 
 **Integrity and Tamper Detection:** The kernel includes a built-in self-dual [12,6,2] code and exact algebraic provenance checks. Integrity misses are structurally classified rather than opaque: substitutions reduce to shadow partners, adjacent swaps reduce to shared `q-class`, and deletions reduce to specific stabilizer conditions on the horizons.
 
@@ -142,14 +145,17 @@ There is no reliable way to turn distributed human contribution into stable paid
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
-- 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
+- 🧪 [QuBEC Climate Control Brief](docs/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
 
 
 ### Core Specifications
 - 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
 - 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
+- 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
 - 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
 - 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
+- 🧪 [QuBEC Climate Theory](docs/QuBEC_Climate_Theory.md) - Theoretical foundation for climate observables and controls
+
 
 ### Extensions
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
@@ -172,6 +178,8 @@ All kernel properties are verified by exhaustive test suites (499 tests, all pas
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
 - 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified (185 tests)
 - 📊 [aQPU Verification Report II](docs/reports/aQPU_Tests_Report_2.md) - Extended kernel and SDK tests (122 tests)
+- 📊 [QuBEC Climate Tests Report](docs/reports/QuBEC_Climate_Tests_Report.md) - Climate helper and transport diagnostics validation
+- 📊 [aQPU Speed Tests Report](docs/reports/aQPU_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
 - 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
 ### Supporting Theory
@@ -213,6 +221,12 @@ Create an environment and install dependencies (NumPy is required; the rest are 
 
 ### SDK and Native Backend
 The public SDK surface is exposed through `src/sdk.py`. The native compute backend lives in `src/tools/gyrolabe/` and is used automatically when available to accelerate algebraic workloads.
+
+Native backend note: prebuilt Windows binaries are included for convenience. On macOS and Linux, the native backend builds automatically on first run when standard compiler tooling is available. If native build is unavailable, the exact Python fallback remains functional.
+
+For compiler and dependency details on the two native backends, see:
+- [GyroLabe Native Build Notes](src/tools/gyrolabe/README.md)
+- [GyroGraph Native Build Notes](src/tools/gyrograph/README.md)
 
 ### AIR Console (Browser-based UI)
 The Console provides a browser-based interface for managing project contracts:

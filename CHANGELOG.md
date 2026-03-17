@@ -1,17 +1,77 @@
 
-💫 Gyroscopic ASI aQPU Kernel, Alignment Infrastructure Routing  - CHANGELOG
+# 💫 Gyroscopic ASI - CHANGELOG
 
 ```            
-┏━┓╻  ╻┏━╸┏┓╻┏┳┓┏━╸┏┓╻╺┳╸               
-┣━┫┃  ┃┃╺┓┃┗┫┃┃┃┣╸ ┃┗┫ ┃                
-╹ ╹┗━╸╹┗━┛╹ ╹╹ ╹┗━╸╹ ╹ ╹                
-╻┏┓╻┏━╸┏━┓┏━┓┏━┓╺┳╸┏━┓╻ ╻┏━╸╺┳╸╻ ╻┏━┓┏━╸
-┃┃┗┫┣╸ ┣┳┛┣━┫┗━┓ ┃ ┣┳┛┃ ┃┃   ┃ ┃ ┃┣┳┛┣╸ 
-╹╹ ╹╹  ╹┗╸╹ ╹┗━┛ ╹ ╹┗╸┗━┛┗━╸ ╹ ┗━┛╹┗╸┗━╸  
-┏━┓┏━┓╻ ╻╺┳╸╻┏┓╻┏━╸                     
-┣┳┛┃ ┃┃ ┃ ┃ ┃┃┗┫┃╺┓                     
-╹┗╸┗━┛┗━┛ ╹ ╹╹ ╹┗━┛                                              
+┏━╸╻ ╻┏━┓┏━┓┏━┓┏━╸┏━┓┏━┓╻┏━╸                   
+┃╺┓┗┳┛┣┳┛┃ ┃┗━┓┃  ┃ ┃┣━┛┃┃                     
+┗━┛ ╹ ╹┗╸┗━┛┗━┛┗━╸┗━┛╹  ╹┗━╸                   
+┏━┓╻ ╻┏━┓┏━╸┏━┓╻┏┓╻╺┳╸┏━╸╻  ╻  ╻┏━╸┏━╸┏┓╻┏━╸┏━╸
+┗━┓┃ ┃┣━┛┣╸ ┣┳┛┃┃┗┫ ┃ ┣╸ ┃  ┃  ┃┃╺┓┣╸ ┃┗┫┃  ┣╸ 
+┗━┛┗━┛╹  ┗━╸╹┗╸╹╹ ╹ ╹ ┗━╸┗━╸┗━╸╹┗━┛┗━╸╹ ╹┗━╸┗━╸                                         
 ```
+
+---
+
+## [v2.0.4-GyroClimate] – 2026-03-16 -> 2026-03-17
+
+### Added
+- Added a strict **exact climate-control path** for AI model decision surfaces:
+  - encode-side exact boundary selection
+  - decode-side exact q-sector token selection
+- Added **zero-transcendental proof-mode tests** showing that the final encode and decode decisions can execute without `exp`, `sqrt`, `sigmoid`, or `log` in the decision path.
+- Added first-class **QuBEC climate helpers** for runtime control and reporting, including:
+  - effective support (`M2`)
+  - gauge-spectrum helpers
+  - decode-side climate summaries
+- Added **family-phase memory support** to GyroGraph’s multicellular state, enabling gauge-sensitive runtime summaries alongside chirality and shell memory.
+- Added dedicated climate documentation:
+  - `docs/QuBEC_Climate_Control_Brief.md`
+  - `docs/QuBEC_Climate_Theory.md`
+  - updated climate case-study and benchmark reporting
+- Added benchmark surfaces for:
+  - exact selector speed
+  - encode extraction throughput
+  - decode bridge step throughput
+  - OpenCL execution visibility in the live bridge path
+
+### Changed
+- Upgraded encode-side control from structural biasing to a real **exact boundary-law actuator** modulated by QuBEC support state.
+- Upgraded decode-side control from paired quotient selection to a stricter **exact algebraic selection law** suitable for direct runtime use.
+- Extended GyroGraph from chirality-and-shell-only local memory to **chirality + shell + family-phase** local structural memory.
+- Strengthened the OpenCL path as an active runtime surface for GyroGraph decode tracing and climate projection.
+- Consolidated the climate narrative around the practical replacement of expensive floating-point decision math with exact algebraic control on standard silicon.
+
+### Fixed
+- Improved consistency of exact bridge execution across Python, native CPU, and OpenCL paths.
+- Tightened parity validation between reference and accelerated paths for bridge-facing climate operations.
+- Improved runtime stability of the bridge test surface under Windows, PyTorch, and OpenCL execution.
+
+### Tests
+- Climate bridge suite: **13 tests passing**
+- Verified:
+  - exact encode boundary path with transcendental calls blocked
+  - exact decode selector with transcendental calls blocked
+  - strict decode mode forcing exact selection on every step
+  - q-sector collapse eliminating phase redundancy in fused decode selection
+  - monotonic M2 modulation of patch geometry
+  - coherent text generation under exact decode control
+  - active OpenCL backend usage in the decode bridge path
+  - exact OpenCL climate projection (`max_err = 0.0`)
+- Measured:
+  - exact q-sector selector vs softmax + argmax: **1.15x**
+  - chirality distance vs cosine-style baseline: **284.1x faster**
+  - WHT vs NumPy reference: **1.32x**
+  - encode extraction throughput: **4.18M bytes/s**
+  - decode bridge full-step throughput: **84,493 tokens/s** at batch 16
+
+### Scope outcome
+- Established the first live **AI usage stress test** where aQPU algebra directly replaces classical decision math at real model control surfaces.
+- Confirmed that the architecture can steer:
+  - boundary formation
+  - token selection
+  - patch geometry
+  using exact structural state without collapsing language quality.
+- Elevated GyroClimate from a proxy-based framework to a **working runtime intervention layer** with measurable speed, exactness, and GPU-backed execution on commodity hardware.
 
 ---
 

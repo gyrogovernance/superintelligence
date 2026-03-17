@@ -29,6 +29,7 @@
 
 static const char* GYROGRAPH_KERNEL_SOURCE =
 "__kernel void gyrograph_trace_word4_batch(\n"
+"    __global const long* cell_ids,\n"
 "    __global const int* omega12_in,\n"
 "    __global const uchar* words4_in,\n"
 "    const int n,\n"
@@ -38,7 +39,8 @@ static const char* GYROGRAPH_KERNEL_SOURCE =
 "    int gid = get_global_id(0);\n"
 "    if (gid >= n) return;\n"
 "\n"
-"    uint s = ((uint)omega12_in[gid]) & 0x0FFFu;\n"
+"    int cid = (int)cell_ids[gid];\n"
+"    uint s = ((uint)omega12_in[cid]) & 0x0FFFu;\n"
 "    size_t base = ((size_t)gid) * 4u;\n"
 "\n"
 "    for (int k = 0; k < 4; ++k) {\n"
@@ -68,11 +70,13 @@ typedef struct {
     cl_program program;
     cl_kernel kernel;
 
+    cl_mem cell_ids_buf;
     cl_mem omega_in_buf;
     cl_mem words_buf;
     cl_mem omega_trace_buf;
     cl_mem chi_trace_buf;
 
+    size_t cell_ids_capacity;
     size_t omega_in_capacity;
     size_t words_capacity;
     size_t omega_trace_capacity;
@@ -121,6 +125,7 @@ GYROGRAPH_EXPORT int gyrograph_cl_available(void) {
 GYROGRAPH_EXPORT void gyrograph_cl_shutdown(void) {
     if (!G_RUNTIME.initialized) return;
 
+    _release_buffer(&G_RUNTIME.cell_ids_buf, &G_RUNTIME.cell_ids_capacity);
     _release_buffer(&G_RUNTIME.omega_in_buf, &G_RUNTIME.omega_in_capacity);
     _release_buffer(&G_RUNTIME.words_buf, &G_RUNTIME.words_capacity);
     _release_buffer(&G_RUNTIME.omega_trace_buf, &G_RUNTIME.omega_trace_capacity);
@@ -241,6 +246,7 @@ static int _ensure_buffer(cl_mem* buf, size_t* capacity, size_t bytes, cl_mem_fl
 }
 
 GYROGRAPH_EXPORT int gyrograph_cl_trace_word4_batch(
+    const int64_t* cell_ids,
     const int32_t* omega12_in,
     const uint8_t* words4_in,
     int64_t n,
@@ -248,36 +254,43 @@ GYROGRAPH_EXPORT int gyrograph_cl_trace_word4_batch(
     uint8_t* chi_trace4_out
 ) {
     if (!G_RUNTIME.initialized) return 0;
-    if (omega12_in == NULL || words4_in == NULL || omega_trace4_out == NULL || chi_trace4_out == NULL || n < 0) {
+    if (cell_ids == NULL || omega12_in == NULL || words4_in == NULL || omega_trace4_out == NULL || chi_trace4_out == NULL || n < 0) {
         return 0;
     }
 
+    size_t cell_ids_bytes = (size_t)n * sizeof(int64_t);
     size_t omega_in_bytes = (size_t)n * sizeof(int32_t);
     size_t words_bytes = (size_t)n * 4u * sizeof(uint8_t);
     size_t omega_trace_bytes = (size_t)n * 4u * sizeof(int32_t);
     size_t chi_trace_bytes = (size_t)n * 4u * sizeof(uint8_t);
 
+    if (!_ensure_buffer(&G_RUNTIME.cell_ids_buf, &G_RUNTIME.cell_ids_capacity, cell_ids_bytes, CL_MEM_READ_ONLY)) return 0;
     if (!_ensure_buffer(&G_RUNTIME.omega_in_buf, &G_RUNTIME.omega_in_capacity, omega_in_bytes, CL_MEM_READ_ONLY)) return 0;
     if (!_ensure_buffer(&G_RUNTIME.words_buf, &G_RUNTIME.words_capacity, words_bytes, CL_MEM_READ_ONLY)) return 0;
     if (!_ensure_buffer(&G_RUNTIME.omega_trace_buf, &G_RUNTIME.omega_trace_capacity, omega_trace_bytes, CL_MEM_WRITE_ONLY)) return 0;
     if (!_ensure_buffer(&G_RUNTIME.chi_trace_buf, &G_RUNTIME.chi_trace_capacity, chi_trace_bytes, CL_MEM_WRITE_ONLY)) return 0;
 
     cl_int err;
+    err = clEnqueueWriteBuffer(G_RUNTIME.queue, G_RUNTIME.cell_ids_buf, CL_TRUE, 0, cell_ids_bytes, cell_ids, 0, NULL, NULL);
+    if (err != CL_SUCCESS) return 0;
+
     err = clEnqueueWriteBuffer(G_RUNTIME.queue, G_RUNTIME.omega_in_buf, CL_TRUE, 0, omega_in_bytes, omega12_in, 0, NULL, NULL);
     if (err != CL_SUCCESS) return 0;
 
     err = clEnqueueWriteBuffer(G_RUNTIME.queue, G_RUNTIME.words_buf, CL_TRUE, 0, words_bytes, words4_in, 0, NULL, NULL);
     if (err != CL_SUCCESS) return 0;
 
-    err = clSetKernelArg(G_RUNTIME.kernel, 0, sizeof(cl_mem), &G_RUNTIME.omega_in_buf);
+    err = clSetKernelArg(G_RUNTIME.kernel, 0, sizeof(cl_mem), &G_RUNTIME.cell_ids_buf);
     if (err != CL_SUCCESS) return 0;
-    err = clSetKernelArg(G_RUNTIME.kernel, 1, sizeof(cl_mem), &G_RUNTIME.words_buf);
+    err = clSetKernelArg(G_RUNTIME.kernel, 1, sizeof(cl_mem), &G_RUNTIME.omega_in_buf);
     if (err != CL_SUCCESS) return 0;
-    err = clSetKernelArg(G_RUNTIME.kernel, 2, sizeof(int), (int[]){ (int)n });
+    err = clSetKernelArg(G_RUNTIME.kernel, 2, sizeof(cl_mem), &G_RUNTIME.words_buf);
     if (err != CL_SUCCESS) return 0;
-    err = clSetKernelArg(G_RUNTIME.kernel, 3, sizeof(cl_mem), &G_RUNTIME.omega_trace_buf);
+    err = clSetKernelArg(G_RUNTIME.kernel, 3, sizeof(int), (int[]){ (int)n });
     if (err != CL_SUCCESS) return 0;
-    err = clSetKernelArg(G_RUNTIME.kernel, 4, sizeof(cl_mem), &G_RUNTIME.chi_trace_buf);
+    err = clSetKernelArg(G_RUNTIME.kernel, 4, sizeof(cl_mem), &G_RUNTIME.omega_trace_buf);
+    if (err != CL_SUCCESS) return 0;
+    err = clSetKernelArg(G_RUNTIME.kernel, 5, sizeof(cl_mem), &G_RUNTIME.chi_trace_buf);
     if (err != CL_SUCCESS) return 0;
 
     size_t global = (size_t)n;

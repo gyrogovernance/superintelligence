@@ -20,7 +20,7 @@ from src.api import (
     trajectory_parity_commitment,
     unpack_omega12,
 )
-from src.constants import GENE_MAC_REST, GENE_MIC_S
+from src.constants import GENE_MAC_REST, GENE_MIC_S, byte_family
 from src.sdk import moment_from_ledger
 from src.tools.gyrograph import GyroGraph, ResonanceProfile, ensure_word4, pack_word4
 from src.tools.gyrograph.core import step_packed_omega12
@@ -86,6 +86,28 @@ def _parse_ingest_log(path: Path) -> list[tuple[int, bytes]]:
 def _reconstruct_cell_ledger(records: list[tuple[int, bytes]], cell_id: int) -> bytes:
     parts = [word4 for cid, word4 in records if cid == cell_id]
     return b"".join(parts)
+
+
+def _family_simulate_bytes(family_bytes: bytes) -> tuple[np.ndarray, np.ndarray, int, int]:
+    ring = np.zeros(64, dtype=np.uint8)
+    hist = np.zeros(4, dtype=np.uint16)
+    pos = 0
+    valid_len = 0
+
+    for b in family_bytes:
+        fam = byte_family(int(b))
+        if valid_len < 64:
+            ring[pos] = fam
+            hist[fam] += 1
+            valid_len += 1
+        else:
+            old = int(ring[pos])
+            hist[old] -= 1
+            ring[pos] = fam
+            hist[fam] += 1
+        pos = (pos + 1) & 63
+
+    return ring, hist, pos, valid_len
 
 
 def test_gyrograph_smoke_and_bootstrap_state():
@@ -230,6 +252,31 @@ def test_gyrograph_history_warmup_and_ring_replacement():
     assert int(g._shell_hist7[cid].sum()) == 64
 
 
+def test_gyrograph_family_tracking_matches_python_reference():
+    print("\n[gyrograph family tracking reference check]")
+
+    g = GyroGraph(cell_capacity=4, profile=ResonanceProfile.CHIRALITY)
+    [cid] = g.allocate_cells(1)
+
+    byte_stream = bytes((i * 17 + 3) & 0xFF for i in range(64 + 8))
+    words = [
+        pack_word4(
+            byte_stream[i],
+            byte_stream[i + 1],
+            byte_stream[i + 2],
+            byte_stream[i + 3],
+        )
+        for i in range(0, len(byte_stream), 4)
+    ]
+    g.ingest([(cid, w) for w in words])
+
+    exp_ring, exp_hist, exp_pos, exp_valid = _family_simulate_bytes(byte_stream)
+    np.testing.assert_array_equal(g._family_ring64[cid], exp_ring)
+    np.testing.assert_array_equal(g._family_hist4[cid], exp_hist)
+    assert int(g._chi_ring_pos[cid]) == exp_pos
+    assert int(g._chi_valid_len[cid]) == exp_valid
+
+    assert int(g._family_hist4[cid].sum()) == min(len(byte_stream), 64)
 @pytest.mark.parametrize(
     "profile",
     [

@@ -10,6 +10,8 @@
 //   - gyro_extract_scan
 //   - gyro_wht64_float
 //   - gyro_qmap_extract
+//   - gyro_exact_qsector_select_i32
+//   - gyro_exact_qsector_select_i32_shell
 //
 // Notes:
 //   - All integer kernel math is exact.
@@ -22,9 +24,15 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
+#include <limits.h>
 
 #ifdef _OPENMP
 #include <omp.h>
+#endif
+#include <math.h>
+#include <stdlib.h>
+#if defined(__AVX2__) || defined(__AVX512F__) || defined(__AVX512VPOPCNTDQ__)
+#include <immintrin.h>
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -32,18 +40,206 @@
 #else
   #define GYRO_EXPORT __attribute__((visibility("default")))
 #endif
+#if defined(_MSC_VER)
+#  define GYRO_RESTRICT __restrict
+#else
+#  define GYRO_RESTRICT restrict
+#endif
 
 #if defined(_MSC_VER)
   #include <intrin.h>
   static __forceinline uint32_t gyro_popcnt32(uint32_t x) { return (uint32_t)__popcnt(x); }
-  #define POPCNT64(x) ((int64_t)__popcnt64((uint64_t)(x)))
+  static __forceinline int64_t gyro_popcnt64_scalar(uint64_t x) { return (int64_t)__popcnt64((uint64_t)(x)); }
 #else
   static inline uint32_t gyro_popcnt32(uint32_t x) { return (uint32_t)__builtin_popcount(x); }
-  #define POPCNT64(x) ((int64_t)__builtin_popcountll((uint64_t)(x)))
+  static inline int64_t gyro_popcnt64_scalar(uint64_t x) { return (int64_t)__builtin_popcountll((uint64_t)(x)); }
 #endif
 
-#include <math.h>
-#include <stdlib.h>
+#define POPCNT64(x) gyro_popcnt64_scalar((uint64_t)(x))
+static uint8_t  Q6_BY_BYTE[256];
+
+#if defined(__AVX512VPOPCNTDQ__)
+static inline void gyro_popcnt64x8_avx512(
+    const uint64_t* in,
+    int64_t* out
+) {
+    __m512i values = _mm512_loadu_si512((const void*)in);
+    __m512i counts = _mm512_popcnt_epi64(values);
+    _mm512_storeu_si512((void*)out, counts);
+}
+#elif defined(__AVX2__)
+static inline void gyro_popcnt64x4_avx2(
+    const uint64_t* in,
+    int64_t* out
+) {
+    __m256i values = _mm256_loadu_si256((const void*)in);
+    __m256i lo_nibble = _mm256_and_si256(values, _mm256_set1_epi8(0x0F));
+    __m256i hi_nibble = _mm256_and_si256(_mm256_srli_epi16(values, 4), _mm256_set1_epi8(0x0F));
+
+    const __m256i popcount_lut = _mm256_setr_epi8(
+        0, 1, 1, 2, 1, 2, 2, 3,
+        1, 2, 2, 3, 2, 3, 3, 4,
+        0, 1, 1, 2, 1, 2, 2, 3,
+        1, 2, 2, 3, 2, 3, 3, 4
+    );
+
+    __m256i lo = _mm256_shuffle_epi8(popcount_lut, lo_nibble);
+    __m256i hi = _mm256_shuffle_epi8(popcount_lut, hi_nibble);
+    __m256i byte_counts = _mm256_add_epi8(lo, hi);
+
+    __m256i sums = _mm256_sad_epu8(byte_counts, _mm256_setzero_si256());
+    int64_t tmp[4];
+    _mm256_storeu_si256((void*)tmp, sums);
+    out[0] = tmp[0];
+    out[1] = tmp[1];
+    out[2] = tmp[2];
+    out[3] = tmp[3];
+}
+#endif
+
+#if defined(__AVX2__)
+static inline void gyro_apply_qsector_row(
+    const int32_t* norm_row,
+    const int32_t* fused_row,
+    int32_t sector_max[64],
+    uint8_t sector_byte[64]
+) {
+    for (int q = 0; q < 64; ++q) {
+        sector_max[q] = INT32_MIN;
+        sector_byte[q] = 0;
+    }
+
+    for (int b = 0; b < 256; b += 8) {
+        __m256i n_vec = _mm256_loadu_si256((const void*)(norm_row + b));
+        __m256i f_vec = _mm256_loadu_si256((const void*)(fused_row + b));
+        __m256i content = _mm256_max_epi32(n_vec, f_vec);
+
+        int32_t content_arr[8];
+        _mm256_storeu_si256((void*)content_arr, content);
+
+        for (int k = 0; k < 8; ++k) {
+            int32_t c = content_arr[k];
+            uint8_t qv = Q6_BY_BYTE[b + k];
+            if (c > sector_max[qv]) {
+                sector_max[qv] = c;
+                sector_byte[qv] = (uint8_t)(b + k);
+            }
+        }
+    }
+}
+
+static inline void gyro_popcount_dot_accum(
+    const uint64_t* x_bp,
+    uint64_t w_bp_m,
+    int32_t n_bits,
+    uint64_t pos_mask,
+    uint64_t neg_mask,
+    int64_t* pos_dot,
+    int64_t* neg_dot,
+    int32_t m
+) {
+    for (int32_t k = 0; k < n_bits; k += 4) {
+        int32_t active = n_bits - k;
+        if (active > 4) {
+            active = 4;
+        }
+
+        uint64_t pmp[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+        uint64_t pmn[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+        for (int32_t j = 0; j < active; ++j) {
+            uint64_t pm = w_bp_m & x_bp[k + j];
+            pmp[j] = pm & pos_mask;
+            pmn[j] = pm & neg_mask;
+        }
+
+#if defined(__AVX512VPOPCNTDQ__)
+        int64_t pos64[8] = {0};
+        int64_t neg64[8] = {0};
+        gyro_popcnt64x8_avx512(pmp, pos64);
+        gyro_popcnt64x8_avx512(pmn, neg64);
+        for (int32_t j = 0; j < active; ++j) {
+            int shift = m + k + j;
+            int64_t mul = (int64_t)(1ull << shift);
+            *pos_dot += pos64[j] * mul;
+            *neg_dot += neg64[j] * mul;
+        }
+#else
+        int64_t pos64[4];
+        int64_t neg64[4];
+        gyro_popcnt64x4_avx2(pmp, pos64);
+        gyro_popcnt64x4_avx2(pmn, neg64);
+        for (int32_t j = 0; j < active; ++j) {
+            int shift = m + k + j;
+            int64_t mul = (int64_t)(1ull << shift);
+            *pos_dot += pos64[j] * mul;
+            *neg_dot += neg64[j] * mul;
+        }
+#endif
+    }
+}
+#else
+static inline void gyro_apply_qsector_row(
+    const int32_t* norm_row,
+    const int32_t* fused_row,
+    int32_t sector_max[64],
+    uint8_t sector_byte[64]
+) {
+    for (int q = 0; q < 64; ++q) {
+        sector_max[q] = INT32_MIN;
+        sector_byte[q] = 0;
+    }
+
+    for (int b = 0; b < 256; ++b) {
+        int32_t n_val = norm_row[b];
+        int32_t f_val = fused_row[b];
+        int32_t content = (n_val > f_val) ? n_val : f_val;
+
+        uint8_t q = Q6_BY_BYTE[b];
+        if (content > sector_max[q]) {
+            sector_max[q] = content;
+            sector_byte[q] = (uint8_t)b;
+        }
+    }
+}
+
+static inline void gyro_popcount_dot_accum(
+    const uint64_t* x_bp,
+    uint64_t w_bp_m,
+    int32_t n_bits,
+    uint64_t pos_mask,
+    uint64_t neg_mask,
+    int64_t* pos_dot,
+    int64_t* neg_dot,
+    int32_t m
+) {
+    for (int32_t k = 0; k < n_bits; ++k) {
+        uint64_t pm = w_bp_m & x_bp[k];
+        int64_t partial_pos = POPCNT64(pm & pos_mask);
+        int64_t partial_neg = POPCNT64(pm & neg_mask);
+        int shift = m + k;
+        int64_t mul = (int64_t)(1ull << shift);
+        *pos_dot += partial_pos * mul;
+        *neg_dot += partial_neg * mul;
+    }
+}
+#endif
+
+#if defined(__AVX2__)
+static inline void gyro_scale_wht64(float* tmp) {
+    const __m256 scale = _mm256_set1_ps(0.125f);
+    for (int i = 0; i < 64; i += 8) {
+        __m256 val = _mm256_loadu_ps(tmp + i);
+        _mm256_storeu_ps(tmp + i, _mm256_mul_ps(val, scale));
+    }
+}
+#else
+static inline void gyro_scale_wht64(float* tmp) {
+    for (int i = 0; i < 64; ++i) {
+        tmp[i] *= 0.125f;
+    }
+}
+#endif
 
 #define GENE_MIC_S      0xAAu
 #define LAYER_MASK_12   0x0FFFu
@@ -54,11 +250,11 @@
 static uint16_t MASK12_BY_BYTE[256];
 static uint8_t  FAMILY_BY_BYTE[256];
 static uint8_t  MICRO_BY_BYTE[256];
-static uint8_t  Q6_BY_BYTE[256];
 static uint16_t INVERT_A_BY_BYTE[256];
 static uint16_t INVERT_B_BY_BYTE[256];
 static uint8_t  EPS_A6_BY_BYTE[256];
 static uint8_t  EPS_B6_BY_BYTE[256];
+static uint8_t  SHELL_BY_Q6[64];
 static int      TABLES_READY = 0;
 
 static inline uint8_t intron_of_byte(uint8_t b) {
@@ -111,6 +307,9 @@ static void gyro_init_tables(void) {
         Q6_BY_BYTE[b] = q6;
         EPS_A6_BY_BYTE[b] = (uint8_t)((intron & 0x01u) ? EPSILON_6 : 0u);
         EPS_B6_BY_BYTE[b] = (uint8_t)((intron & 0x80u) ? EPSILON_6 : 0u);
+    }
+    for (uint32_t q = 0u; q < 64u; ++q) {
+        SHELL_BY_Q6[q] = (uint8_t)gyro_popcnt32(q);
     }
 
     TABLES_READY = 1;
@@ -248,6 +447,138 @@ GYRO_EXPORT void gyro_chirality_distance_adjacent(
     }
 }
 
+GYRO_EXPORT void gyro_exact_qsector_select_i32(
+    const int32_t* GYRO_RESTRICT normal_scores,
+    const int32_t* GYRO_RESTRICT fused_scores,
+    int64_t batch,
+    int32_t hysteresis_bias,
+    const uint8_t* GYRO_RESTRICT prev_boundary,
+    int64_t* GYRO_RESTRICT winning_byte_out,
+    uint8_t* GYRO_RESTRICT selected_boundary_out
+) {
+    if (!normal_scores || !fused_scores ||
+        !prev_boundary || !winning_byte_out ||
+        !selected_boundary_out || batch <= 0) {
+        return;
+    }
+
+    gyro_init_tables();
+
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static) if(batch >= 2048)
+#endif
+    for (int64_t i = 0; i < batch; ++i) {
+        const int32_t* norm_row = normal_scores + (i * 256);
+        const int32_t* fused_row = fused_scores + (i * 256);
+
+        int32_t sector_max[64];
+        uint8_t sector_byte[64];
+        gyro_apply_qsector_row(norm_row, fused_row, sector_max, sector_byte);
+
+        int32_t best_score = INT32_MIN;
+        uint8_t winning_q = 0;
+        for (int q = 0; q < 64; ++q) {
+            if (sector_max[q] > best_score) {
+                best_score = sector_max[q];
+                winning_q = (uint8_t)q;
+            }
+        }
+
+        uint8_t win_b = sector_byte[winning_q];
+        winning_byte_out[i] = (int64_t)win_b;
+
+        int32_t phase_delta = fused_row[win_b] - norm_row[win_b];
+        uint8_t prev = prev_boundary[i];
+
+        int32_t threshold = 0;
+        if (prev == 1u) {
+            threshold = -hysteresis_bias;
+        } else if (prev == 0u) {
+            threshold = hysteresis_bias;
+        }
+
+        selected_boundary_out[i] = (phase_delta >= threshold) ? 1u : 0u;
+    }
+}
+
+GYRO_EXPORT void gyro_exact_qsector_select_i32_shell(
+    const int32_t* GYRO_RESTRICT normal_scores,
+    const int32_t* GYRO_RESTRICT fused_scores,
+    int64_t batch,
+    int32_t hysteresis_bias,
+    const uint8_t* GYRO_RESTRICT prev_boundary,
+    const int32_t* GYRO_RESTRICT shell_weights,
+    int64_t* GYRO_RESTRICT winning_byte_out,
+    uint8_t* GYRO_RESTRICT selected_boundary_out
+) {
+    if (!normal_scores || !fused_scores ||
+        !prev_boundary || !winning_byte_out ||
+        !selected_boundary_out || batch <= 0) {
+        return;
+    }
+
+    gyro_init_tables();
+
+    int use_identity_shell = 0;
+    if (shell_weights != NULL) {
+        use_identity_shell = 1;
+        for (int32_t sh = 0; sh < 7; ++sh) {
+            if (shell_weights[sh] != 4096) {
+                use_identity_shell = 0;
+                break;
+            }
+        }
+    }
+
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static) if(batch >= 2048)
+#endif
+    for (int64_t i = 0; i < batch; ++i) {
+        const int32_t* norm_row = normal_scores + (i * 256);
+        const int32_t* fused_row = fused_scores + (i * 256);
+
+        int32_t sector_max[64];
+        uint8_t sector_byte[64];
+        gyro_apply_qsector_row(norm_row, fused_row, sector_max, sector_byte);
+
+        int32_t best_score = INT32_MIN;
+        uint8_t winning_q = 0;
+        for (int q = 0; q < 64; ++q) {
+            int32_t raw = sector_max[q];
+            if (raw == INT32_MIN) continue;
+
+            int32_t weighted = raw;
+            if (shell_weights && !use_identity_shell) {
+                uint8_t sh = SHELL_BY_Q6[q];
+                int32_t w = shell_weights[sh];
+                if (w > 0) {
+                    weighted = (int32_t)(((int64_t)raw * (int64_t)w) / 4096);
+                }
+            }
+
+            if (weighted > best_score) {
+                best_score = weighted;
+                winning_q = (uint8_t)q;
+            }
+        }
+
+        uint8_t win_b = sector_byte[winning_q];
+        winning_byte_out[i] = (int64_t)win_b;
+
+        int32_t phase_delta = fused_row[win_b] - norm_row[win_b];
+        uint8_t prev = prev_boundary[i];
+
+        int32_t threshold = 0;
+        if (prev == 1u) {
+            threshold = -hysteresis_bias;
+        } else if (prev == 0u) {
+            threshold = hysteresis_bias;
+        }
+
+        selected_boundary_out[i] = (phase_delta >= threshold) ? 1u : 0u;
+    }
+}
+
 GYRO_EXPORT void gyro_qmap_extract(
     const uint8_t* bytes,
     int64_t n,
@@ -312,36 +643,54 @@ GYRO_EXPORT void gyro_chirality_distance(
 }
 
 GYRO_EXPORT void gyro_wht64_float(
-    const float* input,
-    float* output,
+    const float* GYRO_RESTRICT input,
+    float* GYRO_RESTRICT output,
     int64_t batch
 ) {
     if (input == NULL || output == NULL || batch < 0) {
         return;
     }
 
+#if defined(_OPENMP)
+#pragma omp parallel for schedule(static) if(batch >= 2048)
+#endif
     for (int64_t b = 0; b < batch; ++b) {
-        float tmp[64];
         const float* src = input + (b * 64);
         float* dst = output + (b * 64);
 
-        memcpy(tmp, src, 64 * sizeof(float));
+        memmove(dst, src, 64 * sizeof(float));
 
         for (int stride = 1; stride < 64; stride <<= 1) {
             int jump = stride << 1;
             for (int base = 0; base < 64; base += jump) {
-                for (int j = 0; j < stride; ++j) {
-                    float u = tmp[base + j];
-                    float v = tmp[base + j + stride];
-                    tmp[base + j] = u + v;
-                    tmp[base + j + stride] = u - v;
+                if (stride >= 8) {
+#if defined(__AVX2__) || defined(__AVX512F__)
+                    for (int j = 0; j < stride; j += 8) {
+                        __m256 u = _mm256_loadu_ps(&dst[base + j]);
+                        __m256 v = _mm256_loadu_ps(&dst[base + j + stride]);
+                        _mm256_storeu_ps(&dst[base + j], _mm256_add_ps(u, v));
+                        _mm256_storeu_ps(&dst[base + j + stride], _mm256_sub_ps(u, v));
+                    }
+#else
+                    for (int j = 0; j < stride; ++j) {
+                        float u = dst[base + j];
+                        float v = dst[base + j + stride];
+                        dst[base + j] = u + v;
+                        dst[base + j + stride] = u - v;
+                    }
+#endif
+                } else {
+                    for (int j = 0; j < stride; ++j) {
+                        float u = dst[base + j];
+                        float v = dst[base + j + stride];
+                        dst[base + j] = u + v;
+                        dst[base + j + stride] = u - v;
+                    }
                 }
             }
         }
 
-        for (int i = 0; i < 64; ++i) {
-            dst[i] = tmp[i] * 0.125f; // 1 / sqrt(64)
-        }
+        gyro_scale_wht64(dst);
     }
 }
 
@@ -784,12 +1133,12 @@ GYRO_EXPORT void gyro_float_to_fixed(
 }
 
 GYRO_EXPORT void gyro_bitplane_gemv(
-    const int32_t* W_int,
-    const int32_t* x_int,
+    const int32_t* GYRO_RESTRICT W_int,
+    const int32_t* GYRO_RESTRICT x_int,
     int64_t rows,
     int64_t cols,
     int32_t n_bits,
-    int64_t* y_out
+    int64_t* GYRO_RESTRICT y_out
 ) {
     if (W_int == NULL || x_int == NULL || y_out == NULL || rows < 0 || cols < 0 || n_bits < 1 || n_bits > 30) {
         return;
@@ -840,27 +1189,28 @@ GYRO_EXPORT void gyro_bitplane_gemv(
         int64_t pos_dot = 0;
         int64_t neg_dot = 0;
         for (int32_t m = 0; m < n_bits; ++m) {
-            for (int32_t k = 0; k < n_bits; ++k) {
-                uint64_t pm = W_bp[m] & x_bp[k];
-                int64_t partial_pos = POPCNT64(pm & pos_mask);
-                int64_t partial_neg = POPCNT64(pm & neg_mask);
-                int shift = m + k;
-                int64_t mul = (int64_t)(1ull << shift);
-                pos_dot += partial_pos * mul;
-                neg_dot += partial_neg * mul;
-            }
+            gyro_popcount_dot_accum(
+                x_bp,
+                W_bp[m],
+                n_bits,
+                pos_mask,
+                neg_mask,
+                &pos_dot,
+                &neg_dot,
+                m
+            );
         }
         y_out[i] = pos_dot - neg_dot;
     }
 }
 
 GYRO_EXPORT void gyro_bitplane_gemv_f32(
-    const float* W,
-    const float* x,
+    const float* GYRO_RESTRICT W,
+    const float* GYRO_RESTRICT x,
     int64_t rows,
     int64_t cols,
     int32_t n_bits,
-    float* y_out
+    float* GYRO_RESTRICT y_out
 ) {
     if (W == NULL || x == NULL || y_out == NULL || rows < 0 || cols < 0 || n_bits < 1 || n_bits > 30) {
         return;
@@ -969,14 +1319,14 @@ GYRO_EXPORT void gyro_pack_bitplane_matrix_f32(
 }
 
 GYRO_EXPORT void gyro_bitplane_gemv_packed_f32(
-    const uint64_t* W_sign,
-    const uint64_t* W_bp,
+    const uint64_t* GYRO_RESTRICT W_sign,
+    const uint64_t* GYRO_RESTRICT W_bp,
     float scale_w,
-    const float* x,
+    const float* GYRO_RESTRICT x,
     int64_t rows,
     int64_t cols,
     int32_t n_bits,
-    float* y_out
+    float* GYRO_RESTRICT y_out
 ) {
     if (W_sign == NULL || W_bp == NULL || x == NULL || y_out == NULL
         || rows < 0 || cols < 0 || n_bits < 1 || n_bits > 30 || cols > 64) {
@@ -1029,15 +1379,16 @@ GYRO_EXPORT void gyro_bitplane_gemv_packed_f32(
         int64_t pos_dot = 0;
         int64_t neg_dot = 0;
         for (int32_t m = 0; m < n_bits; ++m) {
-            for (int32_t k = 0; k < n_bits; ++k) {
-                uint64_t pm = W_bp[i * (int64_t)n_bits + m] & x_bp[k];
-                int64_t partial_pos = POPCNT64(pm & pos_mask);
-                int64_t partial_neg = POPCNT64(pm & neg_mask);
-                int shift = m + k;
-                int64_t mul = (int64_t)(1ull << shift);
-                pos_dot += partial_pos * mul;
-                neg_dot += partial_neg * mul;
-            }
+            gyro_popcount_dot_accum(
+                x_bp,
+                W_bp[i * (int64_t)n_bits + m],
+                n_bits,
+                pos_mask,
+                neg_mask,
+                &pos_dot,
+                &neg_dot,
+                m
+            );
         }
         float scale_prod = scale_w * scale_x;
         y_out[i] = (float)(pos_dot - neg_dot) / scale_prod;
@@ -1120,15 +1471,16 @@ static void gyro_bitplane_gemv_packed_x_f32_##N_BITS( \
         int64_t pos_dot = 0; \
         int64_t neg_dot = 0; \
         for (int32_t m = 0; m < (N_BITS); ++m) { \
-            for (int32_t k = 0; k < (N_BITS); ++k) { \
-                uint64_t pm = W_bp[i * (int64_t)(N_BITS) + m] & x_bp[k]; \
-                int64_t partial_pos = POPCNT64(pm & pos_mask); \
-                int64_t partial_neg = POPCNT64(pm & neg_mask); \
-                int shift = m + k; \
-                int64_t mul = (int64_t)(1ull << shift); \
-                pos_dot += partial_pos * mul; \
-                neg_dot += partial_neg * mul; \
-            } \
+            gyro_popcount_dot_accum( \
+                x_bp, \
+                W_bp[i * (int64_t)(N_BITS) + m], \
+                (N_BITS), \
+                pos_mask, \
+                neg_mask, \
+                &pos_dot, \
+                &neg_dot, \
+                m \
+            ); \
         } \
         y_out[i] = (float)(pos_dot - neg_dot) / scale_prod; \
     } \
@@ -1139,16 +1491,16 @@ GEMV_PACKED_X_F32_IMPL(12)
 GEMV_PACKED_X_F32_IMPL(16)
 
 GYRO_EXPORT void gyro_bitplane_gemv_packed_x_f32(
-    const uint64_t* W_sign,
-    const uint64_t* W_bp,
+    const uint64_t* GYRO_RESTRICT W_sign,
+    const uint64_t* GYRO_RESTRICT W_bp,
     float scale_w,
     uint64_t x_sign,
-    const uint64_t* x_bp,
+    const uint64_t* GYRO_RESTRICT x_bp,
     float scale_x,
     int64_t rows,
     int64_t cols,
     int32_t n_bits,
-    float* y_out
+    float* GYRO_RESTRICT y_out
 ) {
     if (W_sign == NULL || W_bp == NULL || x_bp == NULL || y_out == NULL
         || rows < 0 || cols < 0 || cols > 64 || n_bits < 1 || n_bits > 30) {
@@ -1179,15 +1531,16 @@ GYRO_EXPORT void gyro_bitplane_gemv_packed_x_f32(
         int64_t neg_dot = 0;
 
         for (int32_t m = 0; m < n_bits; ++m) {
-            for (int32_t k = 0; k < n_bits; ++k) {
-                uint64_t pm = W_bp[i * (int64_t)n_bits + m] & x_bp[k];
-                int64_t partial_pos = POPCNT64(pm & pos_mask);
-                int64_t partial_neg = POPCNT64(pm & neg_mask);
-                int shift = m + k;
-                int64_t mul = (int64_t)(1ull << shift);
-                pos_dot += partial_pos * mul;
-                neg_dot += partial_neg * mul;
-            }
+            gyro_popcount_dot_accum(
+                x_bp,
+                W_bp[i * (int64_t)n_bits + m],
+                n_bits,
+                pos_mask,
+                neg_mask,
+                &pos_dot,
+                &neg_dot,
+                m
+            );
         }
 
         y_out[i] = (float)(pos_dot - neg_dot) / scale_prod;
@@ -1265,14 +1618,14 @@ GYRO_EXPORT void gyro_pack_bitplane_vector_i32(
 }
 
 GYRO_EXPORT void gyro_bitplane_gemv_packed_i32(
-    const uint64_t* W_sign,
-    const uint64_t* W_bp,
+    const uint64_t* GYRO_RESTRICT W_sign,
+    const uint64_t* GYRO_RESTRICT W_bp,
     uint64_t x_sign,
-    const uint64_t* x_bp,
+    const uint64_t* GYRO_RESTRICT x_bp,
     int64_t rows,
     int64_t cols,
     int32_t n_bits,
-    int64_t* y_out
+    int64_t* GYRO_RESTRICT y_out
 ) {
     if (W_sign == NULL || W_bp == NULL || x_bp == NULL || y_out == NULL
         || rows < 0 || cols < 0 || cols > 64 || n_bits < 1 || n_bits > 30) {
@@ -1289,15 +1642,16 @@ GYRO_EXPORT void gyro_bitplane_gemv_packed_i32(
         int64_t neg_dot = 0;
 
         for (int32_t m = 0; m < n_bits; ++m) {
-            for (int32_t k = 0; k < n_bits; ++k) {
-                uint64_t pm = W_bp[i * (int64_t)n_bits + m] & x_bp[k];
-                int64_t partial_pos = POPCNT64(pm & pos_mask);
-                int64_t partial_neg = POPCNT64(pm & neg_mask);
-                int shift = m + k;
-                int64_t mul = (int64_t)(1ull << shift);
-                pos_dot += partial_pos * mul;
-                neg_dot += partial_neg * mul;
-            }
+            gyro_popcount_dot_accum(
+                x_bp,
+                W_bp[i * (int64_t)n_bits + m],
+                n_bits,
+                pos_mask,
+                neg_mask,
+                &pos_dot,
+                &neg_dot,
+                m
+            );
         }
 
         y_out[i] = pos_dot - neg_dot;
@@ -1366,17 +1720,17 @@ GYRO_EXPORT void gyro_pack_bitplane_vector_batch_f32(
 }
 
 GYRO_EXPORT void gyro_bitplane_gemm_packed_x_batch_f32(
-    const uint64_t* W_sign,
-    const uint64_t* W_bp,
+    const uint64_t* GYRO_RESTRICT W_sign,
+    const uint64_t* GYRO_RESTRICT W_bp,
     float scale_w,
-    const float* scale_x,
-    const uint64_t* X_sign,
-    const uint64_t* X_bp,
+    const float* GYRO_RESTRICT scale_x,
+    const uint64_t* GYRO_RESTRICT X_sign,
+    const uint64_t* GYRO_RESTRICT X_bp,
     int64_t rows,
     int64_t cols,
     int64_t batch,
     int32_t n_bits,
-    float* Y_out
+    float* GYRO_RESTRICT Y_out
 ) {
     if (W_sign == NULL || W_bp == NULL || scale_x == NULL || X_sign == NULL || X_bp == NULL || Y_out == NULL
         || rows < 0 || cols < 0 || cols > 64 || batch < 0 || n_bits < 1 || n_bits > 30) {
@@ -1386,7 +1740,7 @@ GYRO_EXPORT void gyro_bitplane_gemm_packed_x_batch_f32(
     uint64_t col_mask = (cols == 64) ? ~(uint64_t)0 : ((uint64_t)(1ull << cols) - 1);
 
 #ifdef _OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if(batch >= 128)
 #endif
     for (int64_t b = 0; b < batch; ++b) {
         float scale_prod = scale_w * scale_x[b];
@@ -1402,18 +1756,22 @@ GYRO_EXPORT void gyro_bitplane_gemm_packed_x_batch_f32(
             int64_t neg_dot = 0;
 
             for (int32_t m = 0; m < n_bits; ++m) {
-                for (int32_t k = 0; k < n_bits; ++k) {
-                    uint64_t pm = W_bp[i * (int64_t)n_bits + m] & x_bp[k];
-                    int64_t partial_pos = POPCNT64(pm & pos_mask);
-                    int64_t partial_neg = POPCNT64(pm & neg_mask);
-                    int shift = m + k;
-                    int64_t mul = (int64_t)(1ull << shift);
-                    pos_dot += partial_pos * mul;
-                    neg_dot += partial_neg * mul;
-                }
+                gyro_popcount_dot_accum(
+                    x_bp,
+                    W_bp[i * (int64_t)n_bits + m],
+                    n_bits,
+                    pos_mask,
+                    neg_mask,
+                    &pos_dot,
+                    &neg_dot,
+                    m
+                );
             }
 
             y_batch[i] = (float)(pos_dot - neg_dot) / scale_prod;
         }
     }
 }
+
+
+

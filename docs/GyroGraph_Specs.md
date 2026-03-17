@@ -14,6 +14,8 @@ Normative terms MUST, SHOULD, SHOULD NOT, and MAY are interpreted as requirement
 | Term | Definition |
 |------|------------|
 | **Ω** | Reachable manifold of 4096 kernel states |
+| **family_ring64** | Rolling buffer of recent family-phase values derived from ingested bytes |
+| **family_hist4** | Distribution over the 4 family values in the current rolling window |
 | **QuBEC** | Occupied computational object on Ω |
 | **aQPU Kernel** | Exact byte law governing state transitions on Ω |
 | **Cell** | Single computational unit in a GyroGraph pool, occupying one Ω point |
@@ -24,6 +26,8 @@ Normative terms MUST, SHOULD, SHOULD NOT, and MAY are interpreted as requirement
 | **omega_sig** | Compiled Ω signature of a 4-byte word |
 | **Resonance** | Co-occupation relation over a kernel-native observable |
 | **SLCP** | Spectral Light-Cone Parametrization: the structured output record |
+| **Gauge spectral** | 4-mode phase summary derived from family_hist4 via K4 character projection |
+| **QuBEC climate** | Derived summary of occupation, shell balance, and support concentration from local cell memory |
 | **Bridge** | Deployment-specific binding that maps runtime events into 4-byte words |
 | **GyroLabe** | Native execution backend for kernel-level algebra and SDK surfaces |
 | **BU Egress** | Outward structural movement: applying the input word to the cell |
@@ -63,6 +67,7 @@ External actuators consume these reports and make runtime decisions. GyroGraph e
 | Networks | LLM serving, KV-cache pressure, batching, dispatch regularity |
 
 Any runtime that can map events into 4-byte words can be attached through a bridge. These three are the first bindings, not the architectural limit.
+The repository also includes a validated byte-native model-control bridge used as a direct stress test of the architecture. That bridge does not redefine the domain taxonomy above; it demonstrates that the same multicellular substrate can attach directly to AI decision surfaces.
 
 ---
 
@@ -122,7 +127,7 @@ Resonance is a relation of co-occupation over a kernel-native observable. Cells 
 
 #### 4.2 Adaptation mechanism
 
-Cells keep rolling local memories and participate in resonance profiles. Graph structure forms through a Hebbian principle: cells that repeatedly share the same resonance key become structurally linked. Bucket weight is the simplest measure of shared pattern strength (see 8.4).
+Cells keep rolling local memories and participate in resonance profiles. Graph structure forms through repeated co-occupation under the active resonance profile: cells that repeatedly share the same resonance key remain grouped in the same structural bucket. Bucket weight is the simplest measure of shared pattern strength (see 8.4).
 
 Because the underlying observables are exact, there is a clear separation between structural and adaptive quantities. Adaptation focuses only on which structural configurations recur in a particular deployment.
 
@@ -152,13 +157,15 @@ The repository already exposes `pack_omega12`, `unpack_omega12`, `step_omega12_b
 | Chirality memory | chi_valid_len | uint8 | Valid entries in ring (0..64) |
 | Distributions | chi_hist64[64] | uint16 | Histogram over 64 chi6 values in ring |
 | Distributions | shell_hist7[7] | uint16 | Histogram over shells 0..6 in ring |
+| Family memory | family_ring64[64] | uint8 | Rolling buffer of last 64 family values |
+| Family memory | family_hist4[4] | uint16 | Histogram over the 4 family values in the ring |
 | Compiled action | omega_sig | int32 | Ω signature of most recent closed word |
 | Parity | parity_O12 | uint16 | Odd parity commitment |
 | Parity | parity_E12 | uint16 | Even parity commitment |
 | Parity | parity_bit | uint8 | Parity bit |
 | Resonance | resonance_key | uint32 | Current key under active profile |
 
-This is the complete live hot-path state.
+This is the complete live hot-path state, including chirality memory, shell memory, and family-phase memory.
 
 `current_resonance` is not stored per cell. It is derived from the global resonance bucket weight for the cell's key at emission time (see 8.4).
 
@@ -197,11 +204,22 @@ Each cell maintains `chi_ring64[64]`, a rolling buffer of the last 64 chi6 obser
 
 `shell_hist7[7]` is the distribution over shell values 0..6 induced by the chirality ring. It supports Krawtchouk spectral decomposition, shell regularity analysis, and horizon tendency analysis.
 
-#### 6.4 Constant-time update rule
+#### 6.4 Family ring and family histogram
+
+Each cell also maintains a rolling family memory aligned to the same byte cadence as the chirality ring.
+
+- `family_ring64[64]` stores the last 64 family values derived from the ingested bytes.
+- `family_hist4[4]` stores the distribution over the 4 family values present in the ring.
+
+This memory supports gauge-sensitive views of recent transport and bridge-level climate summaries derived from family-phase occupancy.
+
+#### 6.5 Constant-time update rule
 
 During warmup, while `chi_valid_len < 64`, the old value is not removed and histograms are only incremented; the decrement step begins only after the ring becomes full.
 
 When a new chirality value enters the ring:
+
+Family memory is updated at the same ring position and with the same valid-length semantics. Each ingested byte contributes both a `chi6` value and a `family` value, so chirality and family memories remain aligned across the rolling window.
 
 **Warmup (valid_len < 64):** increment chi_hist64[chi_new] and shell_hist7[popcount(chi_new)]; no decrements.
 
@@ -220,9 +238,19 @@ chi_ring64[pos] = chi_new
 pos = (pos + 1) & 63
 ```
 
+```text
+family_old = family_ring64[pos]
+family_new = current family
+
+family_hist4[family_old] -= 1
+family_hist4[family_new] += 1
+
+family_ring64[pos] = family_new
+```
+
 This update is O(1).
 
-#### 6.5 Spectral surfaces
+#### 6.6 Spectral surfaces
 
 Two distinct spectral surfaces are derived from local memory:
 
@@ -230,8 +258,9 @@ Two distinct spectral surfaces are derived from local memory:
 |---------|--------|-----------|--------|
 | Chirality spectral | chi_hist64 | wht64 | spectral64 |
 | Shell spectral | shell_hist7 | shell_krawtchouk_transform_exact | Exact shell spectral coefficients |
+| Gauge spectral | family_hist4 | K4 character projection | 4 gauge-sector coefficients |
 
-These describe different inherited geometries and remain distinct.
+These describe different inherited geometries and remain distinct. Implementations MAY expose only the chirality spectral surface in the core SLCP record while keeping shell and gauge spectral surfaces available as derived views.
 
 ---
 
@@ -240,6 +269,7 @@ These describe different inherited geometries and remain distinct.
 Each ingested 4-byte word has a compiled Ω action obtained through `omega_word_signature(word4)`, stored as `omega_sig : int32`.
 
 `word4` is also retained because it is the exact depth-4 slice from which the Ω signature, parity commitments, replay fragments, and exact local provenance are derived. Both `word4` and `omega_sig` are meaningful and available.
+For a fixed closed 4-byte word, `parity_bit` is 0 by construction because the word length is even; it remains part of the stored commitment format for consistency with the broader trajectory parity contract.
 
 ---
 
@@ -277,7 +307,7 @@ In the implementation, `_resonance_buckets[k]` is initially the membership count
 
 Long-running deployments SHOULD apply deterministic decay or renormalization to resonance buckets. The schedule SHOULD be recorded in state metadata.
 
-**Snapshot restriction:** Snapshots MUST be taken only when resonance bucket values represent true membership counts (no decay applied since last normalization). Restore currently verifies that stored bucket values match membership counts reconstructed from `resonance_key`; that check fails if the snapshot was taken after decay.
+**Snapshot restriction:** Snapshots MUST be taken only when resonance bucket values represent true membership counts (no decay applied since last normalization). On restore, the implementation recomputes resonance buckets from the stored `resonance_key` values. Decayed bucket weights are therefore not preserved across restore and should not be relied on as persistent state.
 
 ---
 
@@ -346,7 +376,7 @@ Two distinct cadences govern the ingestion cycle:
 2. Increment step
 3. Update last_byte
 4. Compute chi6
-5. Update chi_ring64, chi_hist64, shell_hist7
+5. Update chi_ring64, chi_hist64, shell_hist7, family_ring64, and family_hist4
 
 **Word closure** (after the fourth byte):
 
@@ -369,7 +399,7 @@ SLCP records are not automatically emitted after every word. Emission cadence be
 
 | Cadence | Trigger | Updates |
 |---------|---------|---------|
-| Byte | Each byte in word4 | omega12, step, last_byte, chi_ring64, chi_hist64, shell_hist7 |
+| Byte | Each byte in word4 | omega12, step, last_byte, chi_ring64, chi_hist64, shell_hist7, family_ring64, family_hist4 |
 | Word closure | After 4th byte | word4, has_closed_word, omega_sig, parity, resonance key and bucket weight |
 | Emission | Bridge-controlled | SLCP record emitted, graph queries served |
 
@@ -418,9 +448,13 @@ Exactness categories:
 An implementation MAY also expose:
 
 - Shell spectral coefficients
+- Gauge spectral coefficients
+- QuBEC climate summaries derived from chirality, shell, and family histories
 - Optical coordinates
 - Stabilizer type
 - Future-cone summaries
+
+ 
 
 These are derived views, not part of the minimum required record.
 
@@ -502,10 +536,12 @@ Arrays written in C-contiguous layout, in order:
 | last_byte | uint8 | capacity |
 | word4 | uint8 | capacity × 4 |
 | chi_ring64 | uint8 | capacity × 64 |
+| family_ring64 | uint8 | capacity × 64 |
 | chi_ring_pos | uint8 | capacity |
 | chi_valid_len | uint8 | capacity |
 | chi_hist64 | uint16 | capacity × 64 |
 | shell_hist7 | uint16 | capacity × 7 |
+| family_hist4 | uint16 | capacity × 4 |
 | omega_sig | int32 | capacity |
 | parity_O12 | uint16 | capacity |
 | parity_E12 | uint16 | capacity |
@@ -546,6 +582,7 @@ Each bridge defines:
 | Applications | Implemented: event vocabulary, entity/role mapping, SLCP emission, actuator scoring |
 | Databases | Reserved: module present, implementation pending |
 | Networks | Reserved: module present, implementation pending |
+| Model-control | Implemented: byte-native decode bridge, climate helpers, structural control surfaces |
 
 ---
 
@@ -754,6 +791,8 @@ src/tools/gyrograph/
         applications.py
         databases.py
         networks.py
+        bolmo_config.py
+        decode.py
     scripts/
         __init__.py
         _common.py
@@ -770,6 +809,8 @@ src/tools/gyrograph/
 | bridges/applications.py | Applications bridge |
 | bridges/databases.py | Databases bridge (reserved) |
 | bridges/networks.py | Networks bridge (reserved) |
+| bridges/bolmo_config.py | Byte-native model-control bridge and decode report surfaces |
+| bridges/decode.py | Climate helpers, gauge-spectrum helpers, and decode-side structural utilities |
 | scripts/_common.py | Shared formatting and diagnostic helpers |
 
 #### C.2 Python surface
@@ -780,10 +821,17 @@ src/tools/gyrograph/
 from .core import GyroGraph, SLCPRecord
 from .profiles import ResonanceProfile
 from .serializers import pack_word4, ensure_word4
-from .bridges.applications import (
-    ApplicationDecision,
-    ApplicationEvent,
-    ApplicationsBridge,
+from .bridges.bolmo_config import (
+    BolmoDecodeReport,
+    GyroGraphBolmoDecodeBridge,
+    PairedContentMetrics,
+    PairedStepRecord,
+    PatchRecord,
+)
+from .bridges.decode import (
+    QuBECClimate,
+    compute_qubec_climate,
+    gauge_spectrum_from_family_hist,
 )
 ```
 
@@ -845,7 +893,7 @@ class SLCPRecord:
 
 GyroGraph has its own native execution layer alongside GyroLabe:
 
-| Layer | Responsibility |
+| Component | Responsibility |
 |-------|----------------|
 | GyroLabe | Kernel-level algebra: signatures, chirality distance, WHT, bitplane GEMV, SDK execution |
 | gyrograph.c | Batched CPU: full ingestion cycle per cell in a single pass |

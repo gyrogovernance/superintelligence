@@ -160,7 +160,11 @@ def _get_cl_lib():
         return None
     try:
         if os.name == "nt":
-            os.add_dll_directory(r"C:\msys64\ucrt64\bin")
+            for dll_dir in _dll_search_paths():
+                try:
+                    os.add_dll_directory(str(dll_dir))
+                except OSError:
+                    pass
         _CL_LIB = ctypes.CDLL(str(path))
     except OSError:
         return None
@@ -205,6 +209,33 @@ def _get_cl_lib():
         ctypes.c_int64, ctypes.c_void_p,
     ]
     return _CL_LIB
+
+
+def _dll_search_paths() -> list[Path]:
+    if os.name != "nt":
+        return []
+    out: list[Path] = []
+    compiler, _ = _find_compiler()
+    compiler_dir = Path(compiler).resolve().parent
+    if compiler_dir.exists():
+        out.append(compiler_dir)
+    msys_base = Path("C:/msys64")
+    for sub in ("ucrt64", "mingw64"):
+        p = msys_base / sub / "bin"
+        if p.exists():
+            out.append(p)
+    for env_key in ("LLVM_PATH", "LLVM_ROOT", "MINGW64_BIN", "MSYS2_PATH"):
+        value = os.environ.get(env_key)
+        if not value:
+            continue
+        for candidate in (Path(value), Path(value) / "bin"):
+            if candidate.exists():
+                out.append(candidate)
+    deduped: list[Path] = []
+    for p in out:
+        if p not in deduped:
+            deduped.append(p)
+    return deduped
 
 
 def available() -> bool:
@@ -256,12 +287,13 @@ class OpenCLPackedMatrix64:
     Wraps a CPU-packed matrix and uploads it to the GPU.
     """
 
-    def __init__(self, packed_cpu_matrix: "PackedBitplaneMatrix64") -> None:
+    def __init__(self, packed_cpu_matrix: PackedBitplaneMatrix64) -> None:
         lib = _get_cl_lib()
         if lib is None:
             raise RuntimeError("OpenCL backend not built.")
         if not lib.gyro_cl_available():
             raise RuntimeError("OpenCL runtime not available.")
+        initialize()
 
         self._packed = packed_cpu_matrix
         self._handle = lib.gyro_cl_create_packed_matrix_f32(
@@ -330,7 +362,7 @@ class OpenCLPackedMatrix64I32:
     Mirrors PackedBitplaneMatrix64I32 but runs GEMM on OpenCL.
     """
 
-    def __init__(self, packed_cpu_matrix: "PackedBitplaneMatrix64I32") -> None:
+    def __init__(self, packed_cpu_matrix: PackedBitplaneMatrix64I32) -> None:
         from src.tools.gyrolabe import ops
 
         lib = _get_cl_lib()
@@ -338,6 +370,7 @@ class OpenCLPackedMatrix64I32:
             raise RuntimeError("OpenCL backend not built.")
         if not lib.gyro_cl_available():
             raise RuntimeError("OpenCL runtime not available.")
+        initialize()
         if not hasattr(lib, "gyro_cl_create_packed_matrix_i32"):
             raise RuntimeError("OpenCL library does not expose gyro_cl_create_packed_matrix_i32")
 

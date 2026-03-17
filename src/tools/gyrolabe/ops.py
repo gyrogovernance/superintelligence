@@ -13,6 +13,8 @@ from typing import Final
 
 import torch
 
+from src.api import q_word6
+
 from src.constants import (
     GENE_MAC_A12,
     GENE_MAC_B12,
@@ -46,11 +48,33 @@ def _shared_lib_suffix() -> str:
     return ".so"
 
 
-def _hash_source() -> str:
+def _build_mode() -> str:
+    return os.environ.get("GYRO_BUILD_MODE", "portable").strip().lower()
+
+
+def _x86_64_host() -> bool:
+    return platform.machine().lower() in {"x86_64", "amd64", "x64"}
+
+
+def _simd_flags(kind: str) -> list[str]:
+    if _build_mode() != "native" or not _x86_64_host():
+        return []
+    if kind == "msvc":
+        return ["/arch:AVX2"]
+    return ["-mavx2", "-mfma"]
+
+
+def _hash_source(path: Path, *, compiler: str, kind: str, flags: list[str], opencl: bool = False) -> str:
     h = hashlib.sha256()
-    h.update(_CSRC_FILE.read_bytes())
+    h.update(path.read_bytes())
     h.update(platform.platform().encode("utf-8"))
     h.update(platform.python_version().encode("utf-8"))
+    h.update(compiler.encode("utf-8"))
+    h.update(kind.encode("utf-8"))
+    h.update(_build_mode().encode("utf-8"))
+    h.update(("1" if opencl else "0").encode("utf-8"))
+    for flag in flags:
+        h.update(flag.encode("utf-8"))
     return h.hexdigest()[:16]
 
 
@@ -124,19 +148,18 @@ def _build_shared_library() -> Path:
         raise FileNotFoundError(f"GyroLabe source file not found: {_CSRC_FILE}")
 
     _BUILD_DIR.mkdir(parents=True, exist_ok=True)
-    out_name = f"gyrolabe_{_hash_source()}{_shared_lib_suffix()}"
-    out_path = _BUILD_DIR / out_name
-    if out_path.exists():
-        return out_path
-
     compiler, kind = _find_compiler()
+    simd_flags = _simd_flags(kind)
 
     native_flags: list[str] = []
-    if os.environ.get("GYROLABE_NO_NATIVE", "").strip() != "1" and not sys.platform.startswith("win"):
-        if kind == "cc":
-            native_flags = ["-march=native"]
-        elif kind == "msvc":
-            native_flags = []
+    if (
+        _build_mode() == "native"
+        and os.environ.get("GYROLABE_NO_NATIVE", "").strip() != "1"
+        and kind == "cc"
+        and not sys.platform.startswith("win")
+        and _x86_64_host()
+    ):
+        native_flags = ["-march=native"]
 
     openmp_flags: list[str] = []
     if os.environ.get("GYROLABE_NO_OPENMP", "").strip() != "1":
@@ -146,53 +169,55 @@ def _build_shared_library() -> Path:
             openmp_flags = ["/openmp"]
 
     if kind == "msvc":
-        if Path(compiler).name.lower() == "cl.exe" or Path(compiler).name.lower() == "cl":
-            cmd = [
-                compiler,
-                "/nologo",
-                "/O2",
-                "/LD",
-                "/TC",
-                *openmp_flags,
-                str(_CSRC_FILE),
-                f"/Fe:{out_path}",
-            ]
-        else:
-            cmd = [
-                compiler,
-                "/nologo",
-                "/O2",
-                "/LD",
-                "/TC",
-                *openmp_flags,
-                str(_CSRC_FILE),
-                f"/Fe:{out_path}",
-            ]
+        compile_flags = ["/nologo", "/O2", "/LD", "/TC", *simd_flags, *openmp_flags]
+        out_name = f"gyrolabe_{_hash_source(
+            _CSRC_FILE,
+            compiler=compiler,
+            kind=kind,
+            flags=compile_flags,
+            opencl=False,
+        )}{_shared_lib_suffix()}"
+        out_path = _BUILD_DIR / out_name
+        if out_path.exists():
+            return out_path
+        cmd = [
+            compiler,
+            *compile_flags,
+            str(_CSRC_FILE),
+            f"/Fe:{out_path}",
+        ]
     else:
+        compile_flags = [
+            "-O3",
+            "-std=c11",
+            "-shared",
+            *native_flags,
+            *simd_flags,
+            *openmp_flags,
+        ]
         if sys.platform == "darwin":
-            cmd = [
-                compiler,
-                "-O3",
-                "-std=c11",
-                "-dynamiclib",
-                *native_flags,
-                "-o",
-                str(out_path),
-                str(_CSRC_FILE),
-            ]
-        else:
-            # Windows clang/gcc: -fPIC not used (unsupported for MSVC target)
-            flags = ["-O3", "-std=c11", "-shared", *openmp_flags]
-            if not sys.platform.startswith("win"):
-                flags.append("-fPIC")
-            cmd = [
-                compiler,
-                *flags,
-                *native_flags,
-                "-o",
-                str(out_path),
-                str(_CSRC_FILE),
-            ]
+            compile_flags[2] = "-dynamiclib"
+        elif not sys.platform.startswith("win"):
+            compile_flags.append("-fPIC")
+
+        out_name = f"gyrolabe_{_hash_source(
+            _CSRC_FILE,
+            compiler=compiler,
+            kind=kind,
+            flags=compile_flags,
+            opencl=False,
+        )}{_shared_lib_suffix()}"
+        out_path = _BUILD_DIR / out_name
+        if out_path.exists():
+            return out_path
+
+        cmd = [
+            compiler,
+            *compile_flags,
+            "-o",
+            str(out_path),
+            str(_CSRC_FILE),
+        ]
 
     # On Windows with GCC from MSYS2, run from repo root and put compiler's bin on PATH
     run_env = None
@@ -463,6 +488,29 @@ def _setup_lib_argtypes(lib: ctypes.CDLL) -> None:
             ctypes.c_void_p,
         ]
         lib.gyro_apply_omega_gate_batch.restype = None
+    if hasattr(lib, "gyro_exact_qsector_select_i32"):
+        lib.gyro_exact_qsector_select_i32.argtypes = [
+            ctypes.c_void_p,  # normal_scores
+            ctypes.c_void_p,  # fused_scores
+            ctypes.c_int64,   # batch
+            ctypes.c_int32,   # hysteresis_bias
+            ctypes.c_void_p,  # prev_boundary
+            ctypes.c_void_p,  # winning_byte_out
+            ctypes.c_void_p,  # selected_boundary_out
+        ]
+        lib.gyro_exact_qsector_select_i32.restype = None
+    if hasattr(lib, "gyro_exact_qsector_select_i32_shell"):
+        lib.gyro_exact_qsector_select_i32_shell.argtypes = [
+            ctypes.c_void_p,  # normal_scores
+            ctypes.c_void_p,  # fused_scores
+            ctypes.c_int64,   # batch
+            ctypes.c_int32,   # hysteresis_bias
+            ctypes.c_void_p,  # prev_boundary
+            ctypes.c_void_p,  # shell_weights (7 int32, or NULL)
+            ctypes.c_void_p,  # winning_byte_out
+            ctypes.c_void_p,  # selected_boundary_out
+        ]
+        lib.gyro_exact_qsector_select_i32_shell.restype = None
     if hasattr(lib, "gyro_bitplane_gemv_f32"):
         lib.gyro_bitplane_gemv_f32.argtypes = [
             ctypes.c_void_p,
@@ -953,22 +1001,77 @@ def wht64(x: torch.Tensor) -> torch.Tensor:
     return _WHT64Function.apply(x)
 
 
+_WHT_OPENCL_PROJECTOR: object | None = None
+_WHT_OPENCL_PROJECTOR_F32: object | None = None
+
+
+def wht64_metal_first(x: torch.Tensor) -> torch.Tensor:
+    """
+    WHT64 that uses OpenCL when available, else C/numpy.
+    Metal-first for spectral transforms in emit_slcp and _spectral64.
+    """
+    global _WHT_OPENCL_PROJECTOR, _WHT_OPENCL_PROJECTOR_F32
+    t = _ensure_cpu_contiguous(x, dtype=torch.float32, name="x")
+    if t.shape[-1] != 64:
+        raise ValueError(f"wht64_metal_first requires trailing dim 64, got {tuple(t.shape)}")
+    if os.environ.get("GYRO_WHT_OPENCL", "").strip() != "1":
+        return wht64(t)
+
+    rows = t.reshape(-1, 64)
+
+    try:
+        from src.tools.gyrolabe import opencl_backend
+        from src.api import walsh_hadamard64
+
+        if not opencl_backend.available():
+            raise RuntimeError("OpenCL not available")
+
+        # Fast path on current Windows/OpenCL setup:
+        # use float packed-batch path to avoid Python i32 bitplane packing loops.
+        proj_f32 = _WHT_OPENCL_PROJECTOR_F32
+        if proj_f32 is None:
+            opencl_backend.initialize()
+            W = walsh_hadamard64()
+            W_f32 = torch.tensor(W, dtype=torch.float32)
+            packed_cpu_f32 = PackedBitplaneMatrix64(W_f32, n_bits=16)
+            proj_f32 = opencl_backend.OpenCLPackedMatrix64(packed_cpu_f32)
+            _WHT_OPENCL_PROJECTOR_F32 = proj_f32
+        out_f32 = proj_f32.gemm_packed_batch(rows).reshape(rows.shape)
+        return out_f32.reshape(t.shape)
+    except Exception:
+        # Keep exact integer OpenCL path as a fallback if float path fails.
+        try:
+            from src.tools.gyrolabe import opencl_backend
+            from src.api import walsh_hadamard64
+            import numpy as np
+
+            if not opencl_backend.available():
+                raise RuntimeError("OpenCL not available")
+
+            proj = _WHT_OPENCL_PROJECTOR
+            if proj is None:
+                opencl_backend.initialize()
+                W = walsh_hadamard64()
+                W_int = torch.tensor((W * 8.0).astype(np.int32), dtype=torch.int32)
+                packed_cpu = PackedBitplaneMatrix64I32(W_int, n_bits=16)
+                proj = opencl_backend.OpenCLPackedMatrix64I32(packed_cpu)
+                _WHT_OPENCL_PROJECTOR = proj
+            x_i32 = torch.round(rows).to(torch.int32)
+            X_sign, X_bp = pack_vector_batch64_i32(x_i32, n_bits=16)
+            y_int = proj.gemm_packed_batch(X_sign, X_bp)
+            out = (y_int.to(torch.float32) / 8.0).reshape(rows.shape)
+            return out.reshape(t.shape)
+        except Exception:
+            return wht64(t)
+
+
 def qmap_extract(bytes_tensor: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     return torch.ops.gyro.qmap_extract(bytes_tensor)
 
 
 def apply_signature_to_rest(signature: torch.Tensor) -> torch.Tensor:
-    lib = _get_lib()
     sig = _ensure_cpu_contiguous(signature, dtype=torch.int32, name="signature")
-    flat = sig.reshape(-1)
-    out = torch.empty_like(flat, dtype=torch.int32)
-    if lib is None:
-        for i in range(flat.numel()):
-            out[i] = _py_apply_signature_to_rest(int(flat[i].item()))
-    else:
-        for i in range(flat.numel()):
-            out[i] = int(lib.gyro_apply_signature_to_rest(int(flat[i].item())))
-    return out.reshape(sig.shape)
+    return signatures_to_states(sig)
 
 
 def apply_signature_to_state(
@@ -1461,6 +1564,113 @@ def chirality_distance_adjacent(states: torch.Tensor, lookahead: int = 1) -> tor
     return _chirality_distance_adjacent_impl(states, lookahead)
 
 
+def exact_qsector_select(
+    normal_scores: torch.Tensor,
+    fused_scores: torch.Tensor,
+    hysteresis_bias: int,
+    prev_boundary: torch.Tensor,
+    shell_weights: torch.Tensor | None = None,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Exact q-sector selection over 256 bytes, batched.
+
+    normal_scores, fused_scores: [B,256] int32
+    prev_boundary: [B] uint8 (0=non-boundary, 1=boundary, 255=no-history)
+    hysteresis_bias: int (already in int32 units of quantized logits)
+    shell_weights: optional [7] int32, scale 4096=unity. Biases sector by shell.
+    """
+    lib = _get_lib()
+    norm = _ensure_cpu_contiguous(
+        normal_scores, dtype=torch.int32, name="normal_scores"
+    )
+    fused = _ensure_cpu_contiguous(
+        fused_scores, dtype=torch.int32, name="fused_scores"
+    )
+    prev = _ensure_cpu_contiguous(
+        prev_boundary, dtype=torch.uint8, name="prev_boundary"
+    )
+
+    if norm.ndim != 2 or fused.ndim != 2:
+        raise ValueError("normal_scores and fused_scores must be [B,256]")
+    if norm.shape != fused.shape or norm.shape[1] != 256:
+        raise ValueError("normal_scores and fused_scores must be [B,256]")
+    if prev.shape[0] != norm.shape[0]:
+        raise ValueError("prev_boundary batch size mismatch")
+
+    batch = int(norm.shape[0])
+    winning_byte = torch.empty(batch, dtype=torch.int64, device="cpu")
+    selected_boundary = torch.empty(batch, dtype=torch.uint8, device="cpu")
+
+    use_shell = (
+        shell_weights is not None
+        and lib is not None
+        and hasattr(lib, "gyro_exact_qsector_select_i32_shell")
+    )
+    if use_shell:
+        assert shell_weights is not None and lib is not None
+        sw = _ensure_cpu_contiguous(
+            shell_weights, dtype=torch.int32, name="shell_weights"
+        )
+        if sw.shape != (7,):
+            raise ValueError("shell_weights must be [7], got %s" % (sw.shape,))
+        lib.gyro_exact_qsector_select_i32_shell(
+            ctypes.c_void_p(norm.data_ptr()),
+            ctypes.c_void_p(fused.data_ptr()),
+            ctypes.c_int64(batch),
+            ctypes.c_int32(int(hysteresis_bias)),
+            ctypes.c_void_p(prev.data_ptr()),
+            ctypes.c_void_p(sw.data_ptr()),
+            ctypes.c_void_p(winning_byte.data_ptr()),
+            ctypes.c_void_p(selected_boundary.data_ptr()),
+        )
+    elif lib is not None and hasattr(lib, "gyro_exact_qsector_select_i32"):
+        lib.gyro_exact_qsector_select_i32(
+            ctypes.c_void_p(norm.data_ptr()),
+            ctypes.c_void_p(fused.data_ptr()),
+            ctypes.c_int64(batch),
+            ctypes.c_int32(int(hysteresis_bias)),
+            ctypes.c_void_p(prev.data_ptr()),
+            ctypes.c_void_p(winning_byte.data_ptr()),
+            ctypes.c_void_p(selected_boundary.data_ptr()),
+        )
+    else:
+        # Python fallback: mirror the C logic when native library is unavailable.
+        q_lut = torch.tensor([q_word6(b) for b in range(256)], dtype=torch.long)
+        for i in range(batch):
+            n_row = norm[i]
+            f_row = fused[i]
+            p_prev = int(prev[i].item())
+
+            content = torch.maximum(n_row, f_row)
+            sector_scores = torch.full(
+                (64,), torch.iinfo(torch.int32).min, dtype=torch.int32
+            )
+            sector_best = torch.zeros(64, dtype=torch.long)
+            for b in range(256):
+                # If you later expose Q6 from C, use that here.
+                q = int(q_lut[b].item() & 0x3F)
+                val = int(content[b].item())
+                if val > int(sector_scores[q].item()):
+                    sector_scores[q] = val
+                    sector_best[q] = b
+
+            winning_q = int(torch.argmax(sector_scores).item())
+            win_b = int(sector_best[winning_q].item())
+            winning_byte[i] = win_b
+
+            phase_delta = int(f_row[win_b].item()) - int(n_row[win_b].item())
+            if p_prev == 1:
+                threshold = -int(hysteresis_bias)
+            elif p_prev == 0:
+                threshold = int(hysteresis_bias)
+            else:
+                threshold = 0
+
+            selected_boundary[i] = 1 if phase_delta >= threshold else 0
+
+    return winning_byte, selected_boundary
+
+
 def _py_popcount64(x: int) -> int:
     return (x & 0xFFFFFFFFFFFFFFFF).bit_count()
 
@@ -1747,6 +1957,51 @@ def pack_vector_batch64(
         ctypes.c_void_p(X_bp.data_ptr()),
     )
     return scale_x, X_sign, X_bp
+
+
+def pack_vector_batch64_i32(
+    x_batch: torch.Tensor,
+    n_bits: int = 16,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """
+    Integer-native packing for batched vectors.
+
+    x_batch: [batch, cols<=64] int32 (CPU)
+    Returns:
+      X_sign [batch] uint64
+      X_bp   [batch, n_bits] uint64
+    """
+    x_batch = _ensure_cpu_contiguous(x_batch, dtype=torch.int32, name="x_batch")
+    if x_batch.dim() != 2 or x_batch.shape[1] > 64:
+        raise ValueError(
+            f"x_batch must be [batch, cols<=64], got {x_batch.shape}"
+        )
+
+    batch = int(x_batch.shape[0])
+    cols = int(x_batch.shape[1])
+
+    X_sign = torch.empty(batch, dtype=torch.uint64, device="cpu")
+    X_bp = torch.empty(batch, n_bits, dtype=torch.uint64, device="cpu")
+
+    for b in range(batch):
+        row = x_batch[b]
+        sign_mask = 0
+        for j in range(cols):
+            v = int(row[j].item())
+            if v < 0:
+                sign_mask |= 1 << j
+        X_sign[b] = torch.tensor(sign_mask, dtype=torch.uint64)
+
+        for k in range(n_bits):
+            acc = 0
+            for j in range(cols):
+                v = int(row[j].item())
+                mag = -v if v < 0 else v
+                if (mag >> k) & 1:
+                    acc |= 1 << j
+            X_bp[b, k] = torch.tensor(acc, dtype=torch.uint64)
+
+    return X_sign, X_bp
 
 
 class PackedBitplaneVector64:

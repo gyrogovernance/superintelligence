@@ -5,7 +5,7 @@ import struct
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Iterable
 
 import numpy as np
 import torch
@@ -192,8 +192,8 @@ class GyroGraph:
         enable_ingest_log: bool = False,
         ingest_log_path: str | None = None,
         use_native_hotpath: bool = True,
-        use_opencl_hotpath: bool = True,
-        opencl_min_batch: int = 128,
+        use_opencl_hotpath: bool = False,
+        opencl_min_batch: int = 1,
         opencl_platform_index: int = 0,
         opencl_device_index: int = 0,
     ) -> None:
@@ -229,6 +229,12 @@ class GyroGraph:
         if ingest_log_path is not None:
             self.set_ingest_log_path(ingest_log_path)
 
+        self._backend_counts: dict[str, int] = {
+            "python": 0,
+            "cpu_indexed": 0,
+            "opencl_indexed": 0,
+        }
+
     # ------------------------------------------------------------------
     # Storage
     # ------------------------------------------------------------------
@@ -250,12 +256,14 @@ class GyroGraph:
 
         # Rolling chirality memory
         self._chi_ring64 = np.zeros((n, 64), dtype=np.uint8)
+        self._family_ring64 = np.zeros((n, 64), dtype=np.uint8)
         self._chi_ring_pos = np.zeros(n, dtype=np.uint8)
         self._chi_valid_len = np.zeros(n, dtype=np.uint8)
 
         # Rolling distributions
         self._chi_hist64 = np.zeros((n, 64), dtype=np.uint16)
         self._shell_hist7 = np.zeros((n, 7), dtype=np.uint16)
+        self._family_hist4 = np.zeros((n, 4), dtype=np.uint16)
 
         # Most recent compiled word action
         self._omega_sig = np.zeros(n, dtype=np.int32)
@@ -270,9 +278,6 @@ class GyroGraph:
         self._resonance_buckets = np.zeros(
             bucket_count(self._profile), dtype=np.uint64
         )
-        self._bucket_cells: list[set[int]] = [
-            set() for _ in range(self._resonance_buckets.size)
-        ]
 
     # ------------------------------------------------------------------
     # Helpers
@@ -306,11 +311,13 @@ class GyroGraph:
         self._has_closed_word[cid] = False
 
         self._chi_ring64[cid, :] = 0
+        self._family_ring64[cid, :] = 0
         self._chi_ring_pos[cid] = 0
         self._chi_valid_len[cid] = 0
 
         self._chi_hist64[cid, :] = 0
         self._shell_hist7[cid, :] = 0
+        self._family_hist4[cid, :] = 0
 
         self._omega_sig[cid] = 0
         self._parity_O12[cid] = 0
@@ -319,31 +326,6 @@ class GyroGraph:
 
         self._resonance_key[cid] = 0
 
-    def _install_resonance_key(self, cell_id: int, key: int) -> None:
-        cid = int(cell_id)
-        k = self._check_bucket_key(key)
-        self._resonance_key[cid] = k
-        self._bucket_cells[k].add(cid)
-        self._resonance_buckets[k] = len(self._bucket_cells[k])
-
-    def _remove_from_resonance(self, cell_id: int) -> None:
-        cid = int(cell_id)
-        k = self._check_bucket_key(int(self._resonance_key[cid]))
-        self._bucket_cells[k].discard(cid)
-        self._resonance_buckets[k] = len(self._bucket_cells[k])
-
-    def _move_resonance(self, cell_id: int, new_key: int) -> None:
-        cid = int(cell_id)
-        old_key = self._check_bucket_key(int(self._resonance_key[cid]))
-        new_key_i = self._check_bucket_key(int(new_key))
-        if old_key == new_key_i:
-            return
-        self._bucket_cells[old_key].discard(cid)
-        self._resonance_buckets[old_key] = len(self._bucket_cells[old_key])
-        self._bucket_cells[new_key_i].add(cid)
-        self._resonance_buckets[new_key_i] = len(self._bucket_cells[new_key_i])
-        self._resonance_key[cid] = new_key_i
-
     def decay_resonance_buckets(self) -> None:
         """
         Decay resonance bucket weights by one bit (halving).
@@ -351,10 +333,12 @@ class GyroGraph:
         """
         self._resonance_buckets >>= 1
 
-    def _push_chi(self, cell_id: int, chi6: int) -> None:
+    def _push_state(self, cell_id: int, chi6: int, family: int) -> None:
         cid = int(cell_id)
         chi = int(chi6) & 0x3F
         shell = chi.bit_count()
+        fam = int(family) & 0x3
+        family_ring = self._family_ring64[cid]
 
         pos = int(self._chi_ring_pos[cid])
         valid = int(self._chi_valid_len[cid])
@@ -363,20 +347,29 @@ class GyroGraph:
             self._chi_ring64[cid, pos] = chi
             self._chi_hist64[cid, chi] += 1
             self._shell_hist7[cid, shell] += 1
+            self._family_ring64[cid, pos] = fam
+            self._family_hist4[cid, fam] += 1
             self._chi_ring_pos[cid] = (pos + 1) & 63
             self._chi_valid_len[cid] = valid + 1
             return
 
         chi_old = int(self._chi_ring64[cid, pos])
         shell_old = chi_old.bit_count()
+        family_old = int(family_ring[pos])
 
         self._chi_hist64[cid, chi_old] -= 1
         self._shell_hist7[cid, shell_old] -= 1
+        self._family_hist4[cid, family_old] -= 1
 
         self._chi_ring64[cid, pos] = chi
         self._chi_hist64[cid, chi] += 1
         self._shell_hist7[cid, shell] += 1
+        self._family_ring64[cid, pos] = fam
+        self._family_hist4[cid, fam] += 1
         self._chi_ring_pos[cid] = (pos + 1) & 63
+
+    def _push_chi(self, cell_id: int, chi6: int) -> None:
+        self._push_state(cell_id, chi6, 0)
 
     def _parse_packet(
         self,
@@ -407,7 +400,7 @@ class GyroGraph:
             from src.tools.gyrolabe import ops as gyrolabe_ops
 
             x_t = torch.from_numpy(x).to(dtype=torch.float32).reshape(1, 64)
-            y_t = gyrolabe_ops.wht64(x_t)
+            y_t = gyrolabe_ops.wht64_metal_first(x_t)
             y = y_t.reshape(64).detach().cpu().numpy()
             return y.astype(np.float32, copy=False)
         except Exception:
@@ -429,124 +422,97 @@ class GyroGraph:
         with open(self._ingest_log_path, "ab") as f:
             f.write(_INGEST_REC.pack(int(cell_id), ensure_word4(word4)))
 
-    def _gather_native_state(self, ids: np.ndarray) -> dict[str, np.ndarray]:
-        return {
-            "omega12": np.ascontiguousarray(self._omega12[ids], dtype=np.int32),
-            "step": np.ascontiguousarray(self._step[ids], dtype=np.uint64),
-            "last_byte": np.ascontiguousarray(self._last_byte[ids], dtype=np.uint8),
-            "has_closed_word": np.ascontiguousarray(
-                self._has_closed_word[ids], dtype=np.uint8
-            ),
-            "word4": np.ascontiguousarray(self._word4[ids], dtype=np.uint8),
-            "chi_ring64": np.ascontiguousarray(self._chi_ring64[ids], dtype=np.uint8),
-            "chi_ring_pos": np.ascontiguousarray(
-                self._chi_ring_pos[ids], dtype=np.uint8
-            ),
-            "chi_valid_len": np.ascontiguousarray(
-                self._chi_valid_len[ids], dtype=np.uint8
-            ),
-            "chi_hist64": np.ascontiguousarray(self._chi_hist64[ids], dtype=np.uint16),
-            "shell_hist7": np.ascontiguousarray(self._shell_hist7[ids], dtype=np.uint16),
-            "omega_sig": np.ascontiguousarray(self._omega_sig[ids], dtype=np.int32),
-            "parity_O12": np.ascontiguousarray(self._parity_O12[ids], dtype=np.uint16),
-            "parity_E12": np.ascontiguousarray(self._parity_E12[ids], dtype=np.uint16),
-            "parity_bit": np.ascontiguousarray(self._parity_bit[ids], dtype=np.uint8),
-        }
+    def _recount_resonance_buckets(self) -> None:
+        self._resonance_buckets.fill(0)
+        active = np.flatnonzero(self._allocated)
+        if active.size == 0:
+            return
 
-    def _scatter_native_state(
-        self, ids: np.ndarray, state: dict[str, np.ndarray]
-    ) -> None:
-        self._omega12[ids] = state["omega12"]
-        self._step[ids] = state["step"]
-        self._last_byte[ids] = state["last_byte"]
-        self._has_closed_word[ids] = state["has_closed_word"].astype(np.bool_)
-        self._word4[ids] = state["word4"]
-        self._chi_ring64[ids] = state["chi_ring64"]
-        self._chi_ring_pos[ids] = state["chi_ring_pos"]
-        self._chi_valid_len[ids] = state["chi_valid_len"]
-        self._chi_hist64[ids] = state["chi_hist64"]
-        self._shell_hist7[ids] = state["shell_hist7"]
-        self._omega_sig[ids] = state["omega_sig"]
-        self._parity_O12[ids] = state["parity_O12"]
-        self._parity_E12[ids] = state["parity_E12"]
-        self._parity_bit[ids] = state["parity_bit"]
+        counts = np.bincount(
+            self._resonance_key[active].astype(np.int64, copy=False),
+            minlength=self._resonance_buckets.size,
+        )
+        if counts.size != self._resonance_buckets.size:
+            raise ValueError("resonance key values are out of range")
+        self._resonance_buckets[:] = counts.astype(np.uint64)
 
-    def _ingest_batch_native(self, parsed: list[tuple[int, bytes]]) -> None:
-        ids = np.asarray([cid for cid, _ in parsed], dtype=np.int64)
-        words4 = np.vstack(
-            [np.frombuffer(word4, dtype=np.uint8) for _, word4 in parsed]
-        ).astype(np.uint8, copy=False)
+    def _ingest_batch_native(self, ids: np.ndarray, words4: np.ndarray) -> None:
+        old_keys = self._resonance_key[ids].copy()
+        n = int(ids.shape[0])
 
-        state = self._gather_native_state(ids)
-
-        if self._use_opencl_hotpath and len(parsed) >= self._opencl_min_batch:
-            omega_trace4, chi_trace4 = gg_ops.trace_word4_batch_opencl(
-                state["omega12"],
+        if self._use_opencl_hotpath and n >= self._opencl_min_batch:
+            self._backend_counts["opencl_indexed"] += 1
+            omega_trace4, chi_trace4 = gg_ops.trace_word4_batch_indexed_opencl(
+                ids,
+                self._omega12,
                 words4,
             )
-            gg_ops.apply_trace_word4_batch(
-                state["omega12"],
-                state["step"],
-                state["last_byte"],
-                state["has_closed_word"],
-                state["word4"],
-                state["chi_ring64"],
-                state["chi_ring_pos"],
-                state["chi_valid_len"],
-                state["chi_hist64"],
-                state["shell_hist7"],
-                state["omega_sig"],
-                state["parity_O12"],
-                state["parity_E12"],
-                state["parity_bit"],
+            gg_ops.apply_trace_word4_batch_indexed(
+                ids,
+                self._omega12,
+                self._step,
+                self._last_byte,
+                self._has_closed_word,
+                self._word4,
+                self._chi_ring64,
+                self._chi_ring_pos,
+                self._chi_valid_len,
+                self._chi_hist64,
+                self._shell_hist7,
+                self._family_ring64,
+                self._family_hist4,
+                self._omega_sig,
+                self._parity_O12,
+                self._parity_E12,
+                self._parity_bit,
                 words4,
                 omega_trace4,
                 chi_trace4,
+                self._resonance_key,
+                int(self._profile),
             )
         else:
-            gg_ops.ingest_word4_batch(
-                state["omega12"],
-                state["step"],
-                state["last_byte"],
-                state["has_closed_word"],
-                state["word4"],
-                state["chi_ring64"],
-                state["chi_ring_pos"],
-                state["chi_valid_len"],
-                state["chi_hist64"],
-                state["shell_hist7"],
-                state["omega_sig"],
-                state["parity_O12"],
-                state["parity_E12"],
-                state["parity_bit"],
+            self._backend_counts["cpu_indexed"] += 1
+            gg_ops.ingest_word4_batch_indexed(
+                ids,
+                self._omega12,
+                self._step,
+                self._last_byte,
+                self._has_closed_word,
+                self._word4,
+                self._chi_ring64,
+                self._chi_ring_pos,
+                self._chi_valid_len,
+                self._chi_hist64,
+                self._shell_hist7,
+                self._family_ring64,
+                self._family_hist4,
+                self._omega_sig,
+                self._parity_O12,
+                self._parity_E12,
+                self._parity_bit,
+                self._resonance_key,
                 words4,
+                int(self._profile),
             )
 
-        self._scatter_native_state(ids, state)
+        new_keys = self._resonance_key[ids].copy()
+        changed = old_keys != new_keys
+        if np.any(changed):
+            old_changed = old_keys[changed].astype(np.int64, copy=False)
+            new_changed = new_keys[changed].astype(np.int64, copy=False)
+            dec = np.bincount(
+                old_changed, minlength=self._resonance_buckets.size
+            ).astype(np.uint64)
+            inc = np.bincount(
+                new_changed, minlength=self._resonance_buckets.size
+            ).astype(np.uint64)
+            self._resonance_buckets -= dec
+            self._resonance_buckets += inc
 
-        for row, cid in enumerate(ids.tolist()):
-            word4 = bytes(words4[row].tolist())
-            new_key = key_for_closed_word(
-                self._profile,
-                omega12=int(self._omega12[cid]),
-                word4=word4,
-                omega_sig=int(self._omega_sig[cid]),
-            )
-            self._move_resonance(int(cid), new_key)
-            self._append_ingest_record(int(cid), word4)
-
-    def _rebuild_bucket_cells_from_state(self) -> None:
-        self._bucket_cells = [set() for _ in range(self._resonance_buckets.size)]
-        counts = np.zeros_like(self._resonance_buckets)
-        for cid in np.flatnonzero(self._allocated):
-            k = self._check_bucket_key(int(self._resonance_key[cid]))
-            self._bucket_cells[k].add(int(cid))
-            counts[k] += 1
-
-        if not np.array_equal(counts, self._resonance_buckets):
-            raise ValueError(
-                "Snapshot resonance bucket counts do not match stored resonance keys"
-            )
+        if self._enable_ingest_log:
+            for row, cid in enumerate(ids.tolist()):
+                self._append_ingest_record(int(cid), bytes(words4[row]))
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -571,21 +537,24 @@ class GyroGraph:
                 word4=_ZERO_WORD4,
                 omega_sig=0,
             )
-            self._install_resonance_key(cid, key)
+            self._resonance_key[cid] = self._check_bucket_key(key)
+            self._resonance_buckets[self._resonance_key[cid]] += 1
 
         return out
 
     def free_cells(self, cell_ids: list[int]) -> None:
         for cid in cell_ids:
             self._check_allocated(cid)
-            self._remove_from_resonance(cid)
+            old_key = self._check_bucket_key(int(self._resonance_key[cid]))
+            self._resonance_buckets[old_key] -= 1
             self._allocated[cid] = False
             self._clear_cell_memory(cid, 0)
 
     def seed_rest(self, cell_ids: list[int]) -> None:
         for cid in cell_ids:
             self._check_allocated(cid)
-            self._remove_from_resonance(cid)
+            old_key = self._check_bucket_key(int(self._resonance_key[cid]))
+            self._resonance_buckets[old_key] -= 1
             self._clear_cell_memory(cid, _REST_OMEGA12)
             key = key_for_closed_word(
                 self._profile,
@@ -593,7 +562,8 @@ class GyroGraph:
                 word4=_ZERO_WORD4,
                 omega_sig=0,
             )
-            self._install_resonance_key(cid, key)
+            self._resonance_key[cid] = self._check_bucket_key(key)
+            self._resonance_buckets[self._resonance_key[cid]] += 1
 
     def seed_equality_horizon(self, cell_ids: list[int]) -> None:
         """
@@ -603,7 +573,8 @@ class GyroGraph:
         eq_omega12 = 0
         for cid in cell_ids:
             self._check_allocated(cid)
-            self._remove_from_resonance(cid)
+            old_key = self._check_bucket_key(int(self._resonance_key[cid]))
+            self._resonance_buckets[old_key] -= 1
             self._clear_cell_memory(cid, eq_omega12)
             key = key_for_closed_word(
                 self._profile,
@@ -611,7 +582,8 @@ class GyroGraph:
                 word4=_ZERO_WORD4,
                 omega_sig=0,
             )
-            self._install_resonance_key(cid, key)
+            self._resonance_key[cid] = self._check_bucket_key(key)
+            self._resonance_buckets[self._resonance_key[cid]] += 1
 
     def seed_shell(self, cell_ids: list[int], shell: int) -> None:
         s = int(shell)
@@ -627,7 +599,8 @@ class GyroGraph:
 
         for cid in cell_ids:
             self._check_allocated(cid)
-            self._remove_from_resonance(cid)
+            old_key = self._check_bucket_key(int(self._resonance_key[cid]))
+            self._resonance_buckets[old_key] -= 1
             self._clear_cell_memory(cid, omega12)
             key = key_for_closed_word(
                 self._profile,
@@ -635,12 +608,14 @@ class GyroGraph:
                 word4=_ZERO_WORD4,
                 omega_sig=0,
             )
-            self._install_resonance_key(cid, key)
+            self._resonance_key[cid] = self._check_bucket_key(key)
+            self._resonance_buckets[self._resonance_key[cid]] += 1
 
     def seed_omega(self, cell_id: int, omega12: int) -> None:
         cid = int(cell_id)
         self._check_allocated(cid)
-        self._remove_from_resonance(cid)
+        old_key = self._check_bucket_key(int(self._resonance_key[cid]))
+        self._resonance_buckets[old_key] -= 1
         self._clear_cell_memory(cid, int(omega12) & 0xFFF)
         key = key_for_closed_word(
             self._profile,
@@ -648,7 +623,8 @@ class GyroGraph:
             word4=_ZERO_WORD4,
             omega_sig=0,
         )
-        self._install_resonance_key(cid, key)
+        self._resonance_key[cid] = self._check_bucket_key(key)
+        self._resonance_buckets[self._resonance_key[cid]] += 1
 
     # ------------------------------------------------------------------
     # Ingestion
@@ -659,25 +635,51 @@ class GyroGraph:
         if not parsed:
             return
 
-        for cid, _ in parsed:
+        ids = np.asarray([cid for cid, _ in parsed], dtype=np.int64)
+        words4 = np.empty((ids.size, 4), dtype=np.uint8)
+        for row, (cid, word4) in enumerate(parsed):
             self._check_allocated(cid)
+            words4[row] = np.frombuffer(word4, dtype=np.uint8)
 
-        ids_in_batch = [cid for cid, _ in parsed]
-        use_batch = (
-            self._use_native_hotpath
-            and len(parsed) > 1
-            and len(ids_in_batch) == len(set(ids_in_batch))
-        )
-        if use_batch:
-            self._ingest_batch_native(parsed)
+        self.ingest_flat(ids, words4)
+
+    def ingest_flat(self, cell_ids: np.ndarray, words4: np.ndarray) -> None:
+        ids = np.ascontiguousarray(cell_ids, dtype=np.int64)
+        if ids.ndim != 1:
+            raise ValueError(f"cell_ids must have shape ({ids.size},), got {ids.shape}")
+
+        words4_a = np.asarray(words4, dtype=np.uint8, copy=False)
+        if words4_a.ndim != 2 or words4_a.shape != (ids.shape[0], 4):
+            raise ValueError(
+                f"words4 must have shape ({ids.shape[0]}, 4), got {words4_a.shape}"
+            )
+        if ids.size == 0:
             return
 
-        for cid, word4 in parsed:
-            self._ingest_word(cid, word4)
+        if np.any(ids < 0) or np.any(ids >= self._capacity):
+            raise ValueError(
+                "cell_ids contain out-of-range indices"
+            )
+        if not np.all(self._allocated[ids]):
+            raise ValueError("One or more cell_ids are not allocated")
+
+        use_batch = (
+            self._use_native_hotpath
+            and ids.size > 1
+        )
+        if use_batch:
+            self._ingest_batch_native(ids, words4_a)
+            return
+
+        for row, cid in enumerate(ids.tolist()):
+            self._ingest_word(int(cid), bytes(words4_a[row]))
 
     def _ingest_word(self, cell_id: int, word4: bytes) -> None:
         cid = int(cell_id)
         self._check_allocated(cid)
+
+        self._backend_counts["python"] += 1
+        old_key = self._check_bucket_key(int(self._resonance_key[cid]))
 
         w = ensure_word4(word4)
         omega12 = int(self._omega12[cid])
@@ -687,7 +689,7 @@ class GyroGraph:
             omega12 = step_packed_omega12(omega12, b)
             self._step[cid] += 1
             self._last_byte[cid] = b
-            self._push_chi(cid, chi6_from_omega12(omega12))
+            self._push_state(cid, chi6_from_omega12(omega12), byte_family(b))
 
         # Closure-boundary state
         self._omega12[cid] = omega12
@@ -707,7 +709,13 @@ class GyroGraph:
             word4=w,
             omega_sig=omega_sig,
         )
-        self._move_resonance(cid, new_key)
+        new_key = self._check_bucket_key(new_key)
+        if old_key != new_key:
+            self._resonance_buckets[old_key] -= 1
+            self._resonance_buckets[new_key] += 1
+            self._resonance_key[cid] = new_key
+        else:
+            self._resonance_key[cid] = new_key
         self._has_closed_word[cid] = True
 
         self._append_ingest_record(cid, w)
@@ -753,7 +761,7 @@ class GyroGraph:
             )
 
         try:
-            spectral_t = gyrolabe_ops.wht64(torch.from_numpy(chi_hist_np))
+            spectral_t = gyrolabe_ops.wht64_metal_first(torch.from_numpy(chi_hist_np))
             spectral_np = spectral_t.detach().cpu().numpy().astype(
                 np.float32, copy=False
             )
@@ -810,10 +818,11 @@ class GyroGraph:
 
     def get_co_resonant_cells(self, cell_id: int) -> list[int]:
         self._check_allocated(cell_id)
-        key = int(self._resonance_key[cell_id])
-        return sorted(
-            cid for cid in self._bucket_cells[key] if cid != int(cell_id)
-        )
+        k = self._check_bucket_key(int(self._resonance_key[cell_id]))
+        mask = self._allocated & (self._resonance_key == k)
+        out = np.flatnonzero(mask).tolist()
+        out.remove(int(cell_id))
+        return out
 
     def get_bucket_population(self, key: int) -> int:
         k = self._check_bucket_key(key)
@@ -821,7 +830,7 @@ class GyroGraph:
 
     def get_bucket_cells(self, key: int) -> list[int]:
         k = self._check_bucket_key(key)
-        return sorted(self._bucket_cells[k])
+        return np.flatnonzero(self._allocated & (self._resonance_key == k)).tolist()
 
     def get_cells_on_shell(self, shell: int) -> list[int]:
         s = int(shell)
@@ -900,10 +909,12 @@ class GyroGraph:
             f.write(self._last_byte.tobytes(order="C"))
             f.write(self._word4.tobytes(order="C"))
             f.write(self._chi_ring64.tobytes(order="C"))
+            f.write(self._family_ring64.tobytes(order="C"))
             f.write(self._chi_ring_pos.tobytes(order="C"))
             f.write(self._chi_valid_len.tobytes(order="C"))
             f.write(self._chi_hist64.tobytes(order="C"))
             f.write(self._shell_hist7.tobytes(order="C"))
+            f.write(self._family_hist4.tobytes(order="C"))
             f.write(self._omega_sig.tobytes(order="C"))
             f.write(self._parity_O12.tobytes(order="C"))
             f.write(self._parity_E12.tobytes(order="C"))
@@ -954,10 +965,12 @@ class GyroGraph:
             self._last_byte = _read_array(f, np.uint8, (self._capacity,))
             self._word4 = _read_array(f, np.uint8, (self._capacity, 4))
             self._chi_ring64 = _read_array(f, np.uint8, (self._capacity, 64))
+            self._family_ring64 = _read_array(f, np.uint8, (self._capacity, 64))
             self._chi_ring_pos = _read_array(f, np.uint8, (self._capacity,))
             self._chi_valid_len = _read_array(f, np.uint8, (self._capacity,))
             self._chi_hist64 = _read_array(f, np.uint16, (self._capacity, 64))
             self._shell_hist7 = _read_array(f, np.uint16, (self._capacity, 7))
+            self._family_hist4 = _read_array(f, np.uint16, (self._capacity, 4))
             self._omega_sig = _read_array(f, np.int32, (self._capacity,))
             self._parity_O12 = _read_array(f, np.uint16, (self._capacity,))
             self._parity_E12 = _read_array(f, np.uint16, (self._capacity,))
@@ -967,7 +980,7 @@ class GyroGraph:
                 f, np.uint64, (bucket_count(self._profile),)
             )
 
-        self._rebuild_bucket_cells_from_state()
+        self._recount_resonance_buckets()
 
         # Ingest log is maintained separately.
         self._ingest_log_records = [] if self._enable_ingest_log else None
@@ -1020,3 +1033,11 @@ class GyroGraph:
     @property
     def ingest_log_enabled(self) -> bool:
         return bool(self._enable_ingest_log)
+
+    @property
+    def backend_counts(self) -> dict[str, int]:
+        return {
+            "python": int(self._backend_counts.get("python", 0)),
+            "cpu_indexed": int(self._backend_counts.get("cpu_indexed", 0)),
+            "opencl_indexed": int(self._backend_counts.get("opencl_indexed", 0)),
+        }

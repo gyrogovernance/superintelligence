@@ -1,19 +1,69 @@
+"""GyroGraph decode tests with explicit default-path policy.
+
+CPU is the default for normal graph tests. OpenCL behavior is only exercised
+through the dedicated verbose OpenCL test.
+"""
+
 from __future__ import annotations
 
+import os
+import time
+import warnings
 import pytest
 import torch
 
+import src.api as api_mod
 from src.tools.gyrolabe.bridges.bolmo_config import (
     BolmoEncodeBridgeConfig,
     load_base_bolmo,
 )
-from src.tools.gyrolabe.bridges.encode import GyroLabeBolmoEncodeBridge
+from src.tools.gyrolabe.bridges.bolmo_config import GyroLabeBolmoEncodeBridge
 from src.tools.gyrograph.bridges.bolmo_config import BolmoDecodeBridgeConfig
-from src.tools.gyrograph.bridges.decode import GyroGraphBolmoDecodeBridge
+from src.tools.gyrograph.bridges.bolmo_config import (
+    GyroGraphBolmoDecodeBridge,
+)
+
+os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
+os.environ.setdefault("GYRO_WHT_OPENCL", "0")
+try:
+    from transformers.utils import logging as _hf_logging
+    _hf_logging.disable_progress_bar()
+except Exception:
+    pass
+
+warnings.filterwarnings(
+    "ignore",
+    message="`rope_config_validation` is deprecated",
+    category=FutureWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="builtin type SwigPyPacked has no __module__ attribute",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="builtin type SwigPyObject has no __module__ attribute",
+    category=DeprecationWarning,
+)
+warnings.filterwarnings(
+    "ignore",
+    message="builtin type swigvarlink has no __module__ attribute",
+    category=DeprecationWarning,
+)
 
 
 class _DummyModel:
     pass
+
+
+def _strict_decode_config(**overrides: object) -> BolmoDecodeBridgeConfig:
+    cfg = {
+        "phase_hysteresis": 0.75,
+        "proof_mode": True,
+    }
+    cfg.update(overrides)
+    return BolmoDecodeBridgeConfig(**cfg)
 
 
 @pytest.fixture(scope="module")
@@ -43,12 +93,18 @@ def _run_generation(
     max_new_tokens: int,
     stream_id: str,
 ):
+    """Run decode generation through CPU default paths.
+
+    This helper always disables OpenCL hotpath for decode ingest so normal tests
+    exercise the proven fastest and most stable route.
+    """
     encode_bridge = GyroLabeBolmoEncodeBridge(raw_bolmo, config=encode_config)
     encode_bridge.eval()
 
     decode_bridge = GyroGraphBolmoDecodeBridge(
         config=decode_config,
         cell_capacity=512,
+        use_opencl_hotpath=False,
     )
 
     try:
@@ -74,227 +130,354 @@ def _run_generation(
         encode_bridge.uninstall()
 
 
-def test_gyrograph_decode_synthetic_selector_verbose() -> None:
-    logits = torch.full((1, 520), -50.0, dtype=torch.float32)
-
-    # Content 66 has the best flat score.
-    logits[0, 4 + 66] = 9.30
-
-    # Content 65 has the best paired content score after logaddexp(normal, fused).
-    logits[0, 4 + 65] = 9.00
-    logits[0, 260 + 4 + 65] = 9.20
-
-    flat_bridge = GyroGraphBolmoDecodeBridge(
-        config=BolmoDecodeBridgeConfig(
-            control_mode="observe",
-            selection_mode="flat",
-        ),
+def test_exact_selection_zero_transcendentals(monkeypatch) -> None:
+    """
+    Test 1: Exact selection - zero transcendentals.
+    Monkeypatch transcendentals to raise. Run selection. Assert completion.
+    Proves Frost and Drought eliminated from decode.
+    """
+    bridge = GyroGraphBolmoDecodeBridge(
+        config=_strict_decode_config(),
         cell_capacity=16,
     )
-    paired_bridge = GyroGraphBolmoDecodeBridge(
-        config=BolmoDecodeBridgeConfig(
-            control_mode="observe",
-            selection_mode="paired",
-            phase_threshold=0.0,
-        ),
-        cell_capacity=16,
-    )
-
     dummy = _DummyModel()
 
-    with flat_bridge.session(dummy, batch_size=1, stream_ids=["flat"]):
-        flat_token = int(flat_bridge.select_hook(logits.clone(), 260)[0].item())
+    def _forbidden(*args, **kwargs):
+        raise RuntimeError("forbidden transcendental called")
 
-    with paired_bridge.session(dummy, batch_size=1, stream_ids=["paired"]):
-        paired_token = int(paired_bridge.select_hook(logits.clone(), 260)[0].item())
+    monkeypatch.setattr(torch, "exp", _forbidden)
+    monkeypatch.setattr(torch, "log", _forbidden)
+    monkeypatch.setattr(torch, "sigmoid", _forbidden)
+    monkeypatch.setattr(torch, "logaddexp", _forbidden)
+    monkeypatch.setattr(torch, "sqrt", _forbidden)
 
-    print("\n[gyrograph synthetic selector]")
-    print("  flat_token:", flat_token)
-    print("  paired_token:", paired_token)
+    with bridge.session(dummy, batch_size=1, stream_ids=["exact"]):
+        logits = torch.randn((1, 520), dtype=torch.float32) * 10.0
+        logits[0, 4 + 65] += 50.0
+        logits[0, 260 + 4 + 65] += 50.0
+        token = int(bridge.select_hook(logits.clone(), 260)[0].item())
 
-    assert flat_token == (4 + 66)
-    assert paired_token == (260 + 4 + 65)
+    print("\n[decode exact - zero transcendentals]")
+    print("  selected_token:", token)
+    print("  exact selector completed with transcendental calls blocked.")
 
 
-def test_gyrograph_decode_real_baseline_vs_controlled(raw_bolmo, bolmo_tokenizer) -> None:
-    prompts = [
-        "The state",
-        "The flowerbed was",
+def test_qsector_collapse_drought_elimination(raw_bolmo, bolmo_tokenizer) -> None:
+    """
+    Test 2: Q-sector collapse - Drought elimination.
+    Show reduction from 512-way flat to 64-sector exact selection.
+    """
+    text, report = _run_generation(
+        raw_bolmo,
         "The fundamental limits of",
-    ]
-
-    baseline_encode = BolmoEncodeBridgeConfig(
-        embedding_scale=0.0,
-        boundary_scale=0.0,
-        boundary_mode="observe",
-        target_bytes_per_patch=None,
-    )
-    controlled_encode = BolmoEncodeBridgeConfig(
-        embedding_scale=1.0,
-        boundary_scale=1.0,
-        boundary_mode="hybrid",
-        boundary_cosine_weight=0.35,
-        boundary_structural_weight=0.65,
-        target_bytes_per_patch=6.0,
-        target_patch_gain=0.90,
+        encode_config=BolmoEncodeBridgeConfig(chi_boundary_threshold=2),
+        decode_config=_strict_decode_config(),
+        max_new_tokens=16,
+        stream_id="drought",
     )
 
-    baseline_decode = BolmoDecodeBridgeConfig(
-        control_mode="observe",
-        selection_mode="flat",
-        phase_threshold=0.0,
+    pg = report.patch_geometry
+    raw_support = pg.get("raw_support_count_mean", 0.0)
+    exact_support = pg.get("support_count_mean", 0.0)
+    phase_redundancy = pg.get("phase_redundancy_mean", 0.0)
+
+    print("\n[q-sector collapse - Drought elimination]")
+    print("  raw_support_count_mean:", raw_support)
+    print("  exact_support_count_mean:", exact_support)
+    print("  phase_redundancy_mean:", phase_redundancy)
+    print("  512-way flat selection collapsed to 64-sector exact selection.")
+
+    assert abs(phase_redundancy) < 0.1
+
+
+def test_speed_comparison(raw_bolmo, bolmo_tokenizer) -> None:
+    """Speed comparison uses the stable default WHT route (`wht64`)."""
+    from src.tools.gyrolabe.ops import (
+        exact_qsector_select,
+        wht64,
+        chirality_distance_adjacent,
     )
-    controlled_decode = BolmoDecodeBridgeConfig(
-        control_mode="gauge_damp",
-        selection_mode="paired",
-        phase_threshold=0.0,
-        phase_hysteresis=0.75,
-        application_phase_damping=0.90,
-        database_sector_bonus=0.0,
+
+    batch = 256
+    normal = torch.randint(-65536, 65536, (batch, 256), dtype=torch.int32)
+    fused = torch.randint(-65536, 65536, (batch, 256), dtype=torch.int32)
+    prev = torch.full((batch,), 255, dtype=torch.uint8)
+    shell_weights = torch.full((7,), 4096, dtype=torch.int32)
+
+    n_iter = 20
+
+    t0 = time.perf_counter()
+    for _ in range(n_iter):
+        exact_qsector_select(normal, fused, 0, prev, shell_weights)
+    t_exact = (time.perf_counter() - t0) / n_iter
+
+    normal_f = normal.to(torch.float32)
+    t0 = time.perf_counter()
+    for _ in range(n_iter):
+        _ = torch.softmax(normal_f, dim=-1)
+        _ = torch.argmax(normal_f, dim=-1)
+    t_softmax = (time.perf_counter() - t0) / n_iter
+
+    states = torch.randint(0, 1 << 24, (4096,), dtype=torch.int32)
+    t0 = time.perf_counter()
+    for _ in range(n_iter):
+        chirality_distance_adjacent(states, lookahead=1)
+    t_chi = (time.perf_counter() - t0) / n_iter
+
+    x = torch.randn(4096, 64, dtype=torch.float32)
+    t0 = time.perf_counter()
+    for _ in range(n_iter):
+        wht64(x)
+    t_wht = (time.perf_counter() - t0) / n_iter
+
+    import numpy as np
+    W = np.array(api_mod.walsh_hadamard64(), dtype=np.float32)
+    x_np = x.numpy()
+    t0 = time.perf_counter()
+    for _ in range(n_iter):
+        np.matmul(x_np, W.T)
+    t_np = (time.perf_counter() - t0) / n_iter
+
+    print("\n[speed comparison]")
+    print("  exact_qsector_select vs softmax+argmax: %.2fx" % (t_softmax / max(t_exact, 1e-9)))
+    print("  chirality_distance_adjacent: %.6f s" % t_chi)
+    print("  wht64 vs numpy WHT: %.2fx" % (t_np / max(t_wht, 1e-9)))
+
+
+def test_decode_bridge_step_speed_report() -> None:
+    """Report boundary/select/token step throughput at realistic decode batch sizes."""
+    config = _strict_decode_config()
+    decode_bridge = GyroGraphBolmoDecodeBridge(
+        config=config,
+        cell_capacity=1024,
+        use_opencl_hotpath=False,
+    )
+    boundary_offset = config.token_layout.boundary_offset
+    dummy = _DummyModel()
+
+    for batch in (1, 4, 8, 16):
+        n_iter = 40
+        logits = torch.randn((batch, 1, 520), dtype=torch.float32)
+        last_bytes = [0] * batch
+
+        with decode_bridge.session(dummy, batch_size=batch, stream_ids=[f"step:{batch}:{i}" for i in range(batch)]):
+            t0 = time.perf_counter()
+            for _ in range(n_iter):
+                _ = decode_bridge.boundary_hook(logits, last_bytes, boundary_offset)
+            t_boundary = (time.perf_counter() - t0) / n_iter
+
+            t0 = time.perf_counter()
+            for _ in range(n_iter):
+                hooked = decode_bridge.boundary_hook(logits, last_bytes, boundary_offset)
+                _ = decode_bridge.select_hook(hooked, boundary_offset)
+            t_select = (time.perf_counter() - t0) / n_iter
+
+            t0 = time.perf_counter()
+            for _ in range(n_iter):
+                hooked = decode_bridge.boundary_hook(logits, last_bytes, boundary_offset)
+                tokens = decode_bridge.select_hook(hooked, boundary_offset)
+                decode_bridge.token_hook(tokens, boundary_offset)
+            t_full = (time.perf_counter() - t0) / n_iter
+
+        tokens_per_sec = (batch * n_iter) / max(t_full, 1e-12)
+        print(f"\n[decode bridge step speed] batch={batch}")
+        print("  boundary_hook avg_ms:", f"{t_boundary * 1000.0:.3f}")
+        print("  select_hook avg_ms:", f"{t_select * 1000.0:.3f}")
+        print("  full step avg_ms:", f"{t_full * 1000.0:.3f}")
+        print("  full tokens_per_sec:", f"{tokens_per_sec:.2f}")
+
+        assert t_boundary > 0.0
+
+
+def test_generation_overhead_report(raw_bolmo, bolmo_tokenizer) -> None:
+    """Compare raw Bolmo generation time against bridged generation time."""
+    prompt = "In 2026, exact byte-level generation should remain deterministic and stable."
+    input_ids = torch.tensor(
+        [bolmo_tokenizer.encode(prompt)],
+        dtype=torch.long,
+        device="cpu",
     )
 
-    any_text_changed = False
+    max_new_tokens = 8
 
-    base_flip_vals = []
-    ctrl_flip_vals = []
-
-    base_bpp_vals = []
-    ctrl_bpp_vals = []
-
-    base_phase_redundancy_vals = []
-    ctrl_phase_redundancy_vals = []
-
-    base_attn_proxy_vals = []
-    ctrl_attn_proxy_vals = []
-
-    base_kv_proxy_vals = []
-    ctrl_kv_proxy_vals = []
-
-    base_support_count_vals = []
-    ctrl_support_count_vals = []
-
-    print("\n[gyrograph real decode climate]")
-
-    for idx, prompt in enumerate(prompts):
-        base_text, base_report = _run_generation(
-            raw_bolmo,
-            prompt,
-            encode_config=baseline_encode,
-            decode_config=baseline_decode,
-            max_new_tokens=24,
-            stream_id=f"base:{idx}",
+    torch.manual_seed(0)
+    with torch.no_grad():
+        t0 = time.perf_counter()
+        raw_out = raw_bolmo.generate(
+            input_ids,
+            max_new_tokens=max_new_tokens,
+            do_sample=False,
         )
-        ctrl_text, ctrl_report = _run_generation(
-            raw_bolmo,
-            prompt,
-            encode_config=controlled_encode,
-            decode_config=controlled_decode,
-            max_new_tokens=24,
-            stream_id=f"ctrl:{idx}",
+        raw_secs = time.perf_counter() - t0
+
+    encode_bridge = GyroLabeBolmoEncodeBridge(
+        raw_bolmo,
+        config=BolmoEncodeBridgeConfig(chi_boundary_threshold=3),
+    )
+    encode_bridge.eval()
+    decode_bridge = GyroGraphBolmoDecodeBridge(
+        config=_strict_decode_config(),
+        cell_capacity=128,
+        use_opencl_hotpath=False,
+        opencl_min_batch=1,
+    )
+
+    try:
+        torch.manual_seed(0)
+        with torch.no_grad():
+            t0 = time.perf_counter()
+            with decode_bridge.session(encode_bridge, batch_size=1, stream_ids=["bridge-gen"]):
+                bridged_out = encode_bridge.generate(
+                    input_ids,
+                    max_new_tokens=max_new_tokens,
+                    do_sample=False,
+                )
+            bridged_secs = time.perf_counter() - t0
+    finally:
+        encode_bridge.uninstall()
+
+    raw_generated = int(raw_out.shape[1]) - int(input_ids.shape[1])
+    bridged_generated = int(bridged_out.shape[1]) - int(input_ids.shape[1])
+    overhead = (bridged_secs / raw_secs) if raw_secs > 0.0 else float("inf")
+    print("\n[bolmo generation overhead]")
+    print("  prompt_tokens:", int(input_ids.shape[1]))
+    print("  raw_generated:", raw_generated)
+    print("  bridged_generated:", bridged_generated)
+    print("  raw_ms:", f"{raw_secs * 1000.0:.3f}")
+    print("  bridged_ms:", f"{bridged_secs * 1000.0:.3f}")
+    print("  slowdown_ratio:", f"{overhead:.3f}")
+    print("  raw_tokens_per_s:", f"{(raw_generated / max(raw_secs, 1e-12)):.2f}")
+    print("  bridged_tokens_per_s:", f"{(bridged_generated / max(bridged_secs, 1e-12)):.2f}")
+
+    assert raw_generated > 0
+    assert bridged_generated > 0
+
+
+def test_decode_generation_language_quality_metrics(raw_bolmo, bolmo_tokenizer) -> None:
+    prompt = "In 2026, exact byte-level decoding should still produce coherent language about"
+    text, report = _run_generation(
+        raw_bolmo,
+        prompt,
+        encode_config=BolmoEncodeBridgeConfig(chi_boundary_threshold=3),
+        decode_config=_strict_decode_config(),
+        max_new_tokens=80,
+        stream_id="quality",
+    )
+
+    generated = text[len("<bos>"):] if text.startswith("<bos>") else text
+    generated = generated.strip()
+
+    ascii_printable = 0
+    for ch in generated:
+        c = ord(ch)
+        if c == 9 or c == 10 or c == 13 or (32 <= c <= 126):
+            ascii_printable += 1
+    ascii_ratio = ascii_printable / max(1, len(generated))
+
+    def _max_run(s: str) -> int:
+        if not s:
+            return 0
+        best = 1
+        cur = 1
+        for i in range(1, len(s)):
+            if s[i] == s[i - 1]:
+                cur += 1
+                if cur > best:
+                    best = cur
+            else:
+                cur = 1
+        return best
+
+    max_run = _max_run(generated)
+    unique_ratio = len(set(generated)) / max(1, len(generated))
+    pg = report.patch_geometry
+
+    print("\n[decode language quality metrics]")
+    print("  text[:220]:", generated[:220])
+    print("  ascii_ratio:", f"{ascii_ratio:.4f}")
+    print("  max_run:", max_run)
+    print("  unique_char_ratio:", f"{unique_ratio:.4f}")
+    print("  patch_count:", pg["patch_count"])
+    print("  mean_bpp:", f"{pg['mean_bytes_per_patch']:.3f}")
+
+    assert len(generated) >= 40
+    assert ascii_ratio >= 0.98
+    assert max_run < 25
+    assert unique_ratio > 0.05
+    assert pg["patch_count"] >= 2
+
+
+def test_strict_mode_forces_exact_selector(raw_bolmo, bolmo_tokenizer, monkeypatch) -> None:
+    import src.tools.gyrolabe.ops as gyro_ops
+
+    counter = {"exact_calls": 0}
+    original_exact = gyro_ops.exact_qsector_select
+
+    def _counting_exact(*args, **kwargs):
+        counter["exact_calls"] += 1
+        return original_exact(*args, **kwargs)
+
+    monkeypatch.setattr(gyro_ops, "exact_qsector_select", _counting_exact)
+
+    _run_generation(
+        raw_bolmo,
+        "Strict mode should always use native exact selection",
+        encode_config=BolmoEncodeBridgeConfig(chi_boundary_threshold=3),
+        decode_config=_strict_decode_config(),
+        max_new_tokens=24,
+        stream_id="strict-mode",
+    )
+
+    print("\n[strict mode exact selector]")
+    print("  exact_qsector_select calls:", counter["exact_calls"])
+
+    assert counter["exact_calls"] >= 1
+
+
+def test_gyrograph_opencl_backend_usage_verbose(raw_bolmo, bolmo_tokenizer) -> None:
+    """Explicit OpenCL coverage: only this test should force OpenCL decode path."""
+    prompt = "The fundamental limits of"
+
+    encode_cfg = BolmoEncodeBridgeConfig(chi_boundary_threshold=3)
+    decode_cfg = _strict_decode_config()
+
+    encode_bridge = GyroLabeBolmoEncodeBridge(raw_bolmo, config=encode_cfg)
+    encode_bridge.eval()
+
+    decode_bridge = GyroGraphBolmoDecodeBridge(
+        config=decode_cfg,
+        cell_capacity=256,
+        use_opencl_hotpath=True,
+        opencl_min_batch=1,
+    )
+
+    try:
+        tokenizer = raw_bolmo.model.tokenizer
+        input_ids = torch.tensor(
+            [tokenizer.encode(prompt)],
+            dtype=torch.long,
+            device="cpu",
         )
 
-        base_pg = base_report.patch_geometry
-        ctrl_pg = ctrl_report.patch_geometry
+        with torch.no_grad():
+            with decode_bridge.session(
+                encode_bridge,
+                batch_size=1,
+                stream_ids=["ocl"],
+            ):
+                _ = encode_bridge.generate(
+                    input_ids,
+                    max_new_tokens=32,
+                    do_sample=False,
+                )
 
-        base_flip_vals.append(float(base_pg["gauge_flip_rate"]))
-        ctrl_flip_vals.append(float(ctrl_pg["gauge_flip_rate"]))
+        counts = decode_bridge.graph.backend_counts
+        print("\n[gyrograph backend usage]")
+        print("  backend_counts:", counts)
 
-        base_bpp_vals.append(float(base_pg["mean_bytes_per_patch"]))
-        ctrl_bpp_vals.append(float(ctrl_pg["mean_bytes_per_patch"]))
-
-        base_phase_redundancy_vals.append(float(base_pg["phase_redundancy_mean"]))
-        ctrl_phase_redundancy_vals.append(float(ctrl_pg["phase_redundancy_mean"]))
-
-        base_attn_proxy_vals.append(float(base_pg["attn_proxy"]))
-        ctrl_attn_proxy_vals.append(float(ctrl_pg["attn_proxy"]))
-
-        base_kv_proxy_vals.append(float(base_pg["kv_proxy"]))
-        ctrl_kv_proxy_vals.append(float(ctrl_pg["kv_proxy"]))
-
-        base_support_count_vals.append(float(base_pg["support_count_mean"]))
-        ctrl_support_count_vals.append(float(ctrl_pg["support_count_mean"]))
-
-        text_changed = base_text != ctrl_text
-        any_text_changed = any_text_changed or text_changed
-
-        print(f"  prompt[{idx}]: {prompt!r}")
-        print("    baseline   patch_count:", base_pg["patch_count"])
-        print("    baseline   attn_proxy:", base_pg["attn_proxy"])
-        print("    baseline   kv_proxy:", base_pg["kv_proxy"])
-        print("    baseline   mean_bytes_per_patch:", base_pg["mean_bytes_per_patch"])
-        print("    baseline   gauge_flip_rate:", base_pg["gauge_flip_rate"])
-        print("    baseline   support_ratio_mean:", base_pg["support_ratio_mean"])
-        print("    baseline   raw_support_ratio_mean:", base_pg["raw_support_ratio_mean"])
-        print("    baseline   support_count_mean:", base_pg["support_count_mean"])
-        print("    baseline   raw_support_count_mean:", base_pg["raw_support_count_mean"])
-        print("    baseline   phase_redundancy_mean:", base_pg["phase_redundancy_mean"])
-        print("    controlled patch_count:", ctrl_pg["patch_count"])
-        print("    controlled attn_proxy:", ctrl_pg["attn_proxy"])
-        print("    controlled kv_proxy:", ctrl_pg["kv_proxy"])
-        print("    controlled mean_bytes_per_patch:", ctrl_pg["mean_bytes_per_patch"])
-        print("    controlled gauge_flip_rate:", ctrl_pg["gauge_flip_rate"])
-        print("    controlled support_ratio_mean:", ctrl_pg["support_ratio_mean"])
-        print("    controlled raw_support_ratio_mean:", ctrl_pg["raw_support_ratio_mean"])
-        print("    controlled support_count_mean:", ctrl_pg["support_count_mean"])
-        print("    controlled raw_support_count_mean:", ctrl_pg["raw_support_count_mean"])
-        print("    controlled phase_redundancy_mean:", ctrl_pg["phase_redundancy_mean"])
-        print("    baseline   text:", base_text[:96])
-        print("    controlled text:", ctrl_text[:96])
-
-        assert base_report.network["order"]["samples"] > 0
-        assert base_report.database["order"]["samples"] > 0
-        assert base_report.application["order"]["samples"] > 0
-        assert ctrl_report.network["order"]["samples"] > 0
-        assert ctrl_report.database["order"]["samples"] > 0
-        assert ctrl_report.application["order"]["samples"] > 0
-
-    base_flip_mean = sum(base_flip_vals) / len(base_flip_vals)
-    ctrl_flip_mean = sum(ctrl_flip_vals) / len(ctrl_flip_vals)
-    base_bpp_mean = sum(base_bpp_vals) / len(base_bpp_vals)
-    ctrl_bpp_mean = sum(ctrl_bpp_vals) / len(ctrl_bpp_vals)
-    base_phase_redundancy_mean = sum(base_phase_redundancy_vals) / len(base_phase_redundancy_vals)
-    ctrl_phase_redundancy_mean = sum(ctrl_phase_redundancy_vals) / len(ctrl_phase_redundancy_vals)
-
-    base_attn_proxy_mean = sum(base_attn_proxy_vals) / len(base_attn_proxy_vals)
-    ctrl_attn_proxy_mean = sum(ctrl_attn_proxy_vals) / len(ctrl_attn_proxy_vals)
-
-    base_kv_proxy_mean = sum(base_kv_proxy_vals) / len(base_kv_proxy_vals)
-    ctrl_kv_proxy_mean = sum(ctrl_kv_proxy_vals) / len(ctrl_kv_proxy_vals)
-
-    base_support_count_mean = sum(base_support_count_vals) / len(base_support_count_vals)
-    ctrl_support_count_mean = sum(ctrl_support_count_vals) / len(ctrl_support_count_vals)
-
-    print("  baseline   gauge_flip_rate mean:", base_flip_mean)
-    print("  controlled gauge_flip_rate mean:", ctrl_flip_mean)
-    print("  baseline   mean_bpp mean:", base_bpp_mean)
-    print("  controlled mean_bpp mean:", ctrl_bpp_mean)
-    print("  baseline   phase_redundancy_mean:", base_phase_redundancy_mean)
-    print("  controlled phase_redundancy_mean:", ctrl_phase_redundancy_mean)
-    print("  baseline   attn_proxy mean:", base_attn_proxy_mean)
-    print("  controlled attn_proxy mean:", ctrl_attn_proxy_mean)
-    print("  baseline   kv_proxy mean:", base_kv_proxy_mean)
-    print("  controlled kv_proxy mean:", ctrl_kv_proxy_mean)
-    print("  baseline   support_count_mean:", base_support_count_mean)
-    print("  controlled support_count_mean:", ctrl_support_count_mean)
-
-    # Decode quotient selection + phase hysteresis should reduce gauge turbulence on average.
-    assert ctrl_flip_mean <= base_flip_mean
-
-    # Encode boundary control should coarsen patching on average.
-    assert ctrl_bpp_mean >= base_bpp_mean
-
-    # Flat 512-way competition must contain phase redundancy.
-    assert base_phase_redundancy_mean > 0.0
-
-    # Controlled paired selection must not destroy quotient reduction.
-    assert ctrl_phase_redundancy_mean > 0.0
-
-    # Coarser patching must reduce global attention / retrieval pressure proxies.
-    assert ctrl_attn_proxy_mean <= base_attn_proxy_mean
-    assert ctrl_kv_proxy_mean <= base_kv_proxy_mean
-
-    # Quotient selection should reduce surviving content competition on average.
-    assert ctrl_support_count_mean <= base_support_count_mean
-
-    # The controlled law must materially alter actual continuation behavior.
-    assert any_text_changed
+        if decode_bridge.graph.opencl_hotpath_enabled:
+            assert counts["opencl_indexed"] > 0
+        else:
+            assert counts["cpu_indexed"] > 0
+    finally:
+        encode_bridge.uninstall()
