@@ -3,6 +3,7 @@
 ## Draft 1
 
 This document specifies the Quantum Computing SDK for the Gyroscopic ASI algebraic Quantum Processing Unit (aQPU). The SDK exposes the native computational medium of the kernel: a deterministic gyroscopic quantum system whose operations are exact, whose state is algebraically condensed, and whose temporal structure is intrinsic to the dynamics.
+The aQPU is an exact finite-state quantum-computation unit over 4,096 algebraic states where public byte-ledger replay uniquely determines every state transition.
 
 The aQPU is a new class of quantum processor. It achieves quantum advantage through exact integer arithmetic on standard silicon. Its computational primitive is the Moment: the exact algebraic quantum state produced by a public byte ledger under the kernel transition law. When multiple independent parties replay the same ledger prefix, they occupy the same Moment. This collective occupation is the QuBEC, the condensed computational object of the architecture.
 

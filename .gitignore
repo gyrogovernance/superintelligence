@@ -152,6 +152,8 @@ data/programs/
 
 # Models
 data/models/
+!data/models/Bolmo-1B/
+!data/models/Bolmo-1B/modeling_bolmo.py
 
 data/gyroadaptor_out/
 data/atlas/olmo_3_7b_manifolds/
