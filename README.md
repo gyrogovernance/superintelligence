@@ -110,7 +110,7 @@ All results below are verified by exhaustive computation over the entire reachab
 | **Exact compiled operator signatures** | Byte words collapse into exact affine signatures that can be composed and applied directly without replaying the full word. |
 | **Constant-time commutativity test** | Two byte operations commute iff they share the same 6-bit topological `q-class`, making commutativity an O(1) structural lookup. |
 | **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
-| **Holographic boundary relation** | The state geometry satisfies **|H|² = |Ω| = 64² = 4,096**, enabling structural compression and compact boundary reasoning. |
+| **Holographic boundary relation** | The state geometry satisfies |H|² = |Ω| = 64² = 4,096, enabling structural compression and compact boundary reasoning. |
 | **Universal quantum ingredients** | The verified kernel is not a simulation; it is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
 | **Standard silicon efficiency** | Achieves over 1.2 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
 | **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
