@@ -216,3 +216,4 @@ The transition is not a single policy announcement. It occurs when enough of the
 The revised genealogy layer turns replayable byte logs into a three-layer certification medium: final shared moments, depth-4 frame commitments, and compact parity commitments. Parity commitments are compact integrity checks. They are not unique history certificates. When provenance collisions matter, frame records take precedence over final-state or parity-only comparison.
 
 The design is explicit. The infrastructure is useful for present purposes and opens future possibilities. When enough of the world uses it, the transition follows from practice rather than from decree.
+

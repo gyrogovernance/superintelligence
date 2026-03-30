@@ -206,8 +206,6 @@ Closure occurs at 4π (720°) when the cycle returns to Layer 0. This is the **s
 
 This explains why we need exactly 2 boundary bits: fewer gives insufficient closure depth; more is redundant.
 
-**Note on current implementation:** The codebase currently uses a different expansion formula that extracts bits 6,7 as the family index instead of bits 0,7. This is inconsistent with the L0 boundary bit definition and needs architectural review. See the NOTE in `atlas.py` (Category 2: GENE_Mic intron-stage priors).
-
 ---
 
 ## 5. How the Mask Affects the GENE_Mac Tensor (24-Bit State)
@@ -518,3 +516,5 @@ In the CGM paper, the "Generatedness" lemma requires that all valid structure tr
 3. **Silicon:** 64-byte cache lines, 6-bit offsets, 2-bit family tags, CS reachability enforcement.
 
 The CPU's cache-line architecture is an exact discrete representation of the CGM's continuous SE(3) manifold.
+
+

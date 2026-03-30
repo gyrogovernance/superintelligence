@@ -763,3 +763,4 @@ The Human Mark complements existing frameworks (EU AI Act, NIST AI RMF, IEEE sta
 **For questions, clarifications, or proposed additions:**  
 Visit gyrogovernance.com  
 Submit issues at https://github.com/gyrogovernance/tools
+

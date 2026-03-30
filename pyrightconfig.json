@@ -150,6 +150,8 @@
 
     "codebase-mcp",
     "node_modules",
+    "external",
+    "external/**",
 
     "research/baby/baby_preferences.json",
     "research/baby/responses_api/inference/gyro_legacy.py",
@@ -172,9 +174,12 @@
     "data/models",
 
     "data/models/Bolmo-1B",
+    "data/models/Bolmo-1B/modeling_bolmo.py",
     "data/models/Bolmo-1B-vendor",
     "data/models/Bolmo-7B",
 
-    "typings/stubs"
+    "secret_lab_ignore/_backup/chamber",
+    "typings/stubs",
+    "docs/notes/Intelligence/35/mLSTMLayer_Copy"
   ]
 }

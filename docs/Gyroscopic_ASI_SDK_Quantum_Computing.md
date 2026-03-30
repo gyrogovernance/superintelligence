@@ -189,7 +189,7 @@ Chirality space is the exact 64-element logical register GF(2)^6 obtained by the
 
 ## 4.3 Tensor Space
 
-Tensor space is the exact computational tensor space over the native 64-dimensional register. Computation in tensor space uses internal bitplane matrix-vector multiplication, packed repeated application, and the Walsh transform as a native spectral primitive.
+Tensor space is the exact computational tensor space over the native 64-dimensional register. Computation in tensor space uses internal Lattice Multiplication matrix-vector multiplication, packed repeated application, and the Walsh transform as a native spectral primitive.
 
 These spaces are exact computational charts of one machine. They are not separate models.
 
@@ -447,7 +447,7 @@ The SDK ships with two targets:
 
 **PythonKernel.** The reference implementation (src/kernel.py). Full state inspection. All operations supported. WHT via matrix multiplication.
 
-**CEngine.** The accelerated implementation (src/tools/gyrolabe). Full state inspection. Native WHT (wht64). Native bitplane GEMV and operator projection.
+**CEngine.** The accelerated implementation (src/tools/gyrolabe). Full state inspection. Native WHT (wht64). Native Lattice Multiplication GEMV and operator projection.
 
 Future targets may include distributed verifiers (signature-only inspection) and hardware realizations.
 
@@ -644,7 +644,7 @@ The reference SDK exposes five public namespaces:
 - `StateOps`: Gyrostate charts, packing, unpacking, gate application, and witness-based state preparation from rest.
 - `MomentOps`: Moment creation, verification, comparison, future-cone measures, exact entropy, exact expectations, structural derivatives, transport tables, and depth-4 frame extraction.
 - `SpectralOps`: Walsh-Hadamard transform, q-class access, and chirality-space transport.
-- `TensorOps`: internal bitplane matrix-vector computation on the 64-dimensional register space, including reusable packed matrix preparation.
+- `TensorOps`: internal Lattice Multiplication matrix-vector computation on the 64-dimensional register space, including reusable packed matrix preparation.
 - `RuntimeOps`: signature scans, fused extract scans, signature-to-state maps, chirality-state extraction, batch stepping, signature application, chirality distances, q-map extraction, and state continuation from arbitrary start states.
 
 These namespaces provide the canonical computational surface of the SDK.
@@ -667,8 +667,8 @@ The SDK distinguishes two execution classes.
 **Operator and tensor execution.** These operations act on the native 64-dimensional register space and are deterministic, but may use floating arithmetic or fixed-point quantization internally:
 
 - Walsh-Hadamard transform on float vectors
-- bitplane GEMV on float matrices and vectors
-- packed bitplane GEMV
+- Lattice Multiplication GEMV on float matrices and vectors
+- packed Lattice Multiplication GEMV
 
 Their algebraic definitions are exact at the level of the 64-dimensional register space. Concrete CPU implementations are not kernel-exact integer maps: they are numerically faithful realizations that match a fixed reference implementation to specified tolerances. Only the kernel-exact class above is required to be mathematically exact over GF(2)²⁴.
 
@@ -762,8 +762,8 @@ Its current native surfaces include:
 
 **Operator and tensor surfaces**
 - 64-point orthonormal Walsh-Hadamard transform
-- bitplane GEMV for matrices with up to 64 columns
-- packed bitplane matrix preparation and repeated GEMV
+- Lattice Multiplication GEMV for matrices with up to 64 columns
+- packed Lattice Multiplication matrix preparation and repeated GEMV
 
 GyroLabe is CPU-first, ctypes-friendly, and cross-platform. It is the first hardware-near realization of the aQPU operator algebra.
 
@@ -793,16 +793,16 @@ It is exact on Omega and meaningful wherever the chirality chart is defined.
 The SDK includes native tensor computation surfaces over the 64-dimensional chirality register.
 
 **TensorOps**
-- `gemv64(W, x, n_bits)` computes y = W·x for real-valued matrices `W` with trailing dimension 64 using the internal bitplane multiplication engine. Matrices are row-major with shape `[rows, cols]`, where `cols <= 64`. Vectors `x` and `y` have shape `[cols]` and `[rows]` respectively and are stored as contiguous real arrays. Column index `j` corresponds to bit position `j` in all packed representations.
+- `gemv64(W, x, n_bits)` computes y = W·x for real-valued matrices `W` with trailing dimension 64 using the internal Lattice Multiplication multiplication engine. Matrices are row-major with shape `[rows, cols]`, where `cols <= 64`. Vectors `x` and `y` have shape `[cols]` and `[rows]` respectively and are stored as contiguous real arrays. Column index `j` corresponds to bit position `j` in all packed representations.
 - `pack_matrix64(W, n_bits)` packs a 64-column matrix once and returns a reusable packed matrix object for repeated internal multiplication. Packing defines two exact bit-level layouts for each logical row `r`:
   - `W_sign[r]` is a `uint64` sign mask with bit `j` equal to the sign bit of column `j` in row `r` (0 for non-negative, 1 for negative).
-  - `W_bp[r, k]` for `k in {0, ..., n_bits-1}` is a `uint64` bitplane with bit `j` equal to the `k`-th magnitude bit of column `j` in row `r`.
+  - `W_bp[r, k]` for `k in {0, ..., n_bits-1}` is a `uint64` Lattice Multiplication with bit `j` equal to the `k`-th magnitude bit of column `j` in row `r`.
 
-Packed GEMV uses a single stored matrix scale `scale_w` for all applications and per-input-vector scales `scale_x` derived from the incoming `x`. The logical dense matrix-vector result is recovered from the bitplane accumulation followed by these scales. All packing and bitplane conventions are part of the ABI and must be preserved across implementations.
+Packed GEMV uses a single stored matrix scale `scale_w` for all applications and per-input-vector scales `scale_x` derived from the incoming `x`. The logical dense matrix-vector result is recovered from the Lattice Multiplication accumulation followed by these scales. All packing and Lattice Multiplication conventions are part of the ABI and must be preserved across implementations.
 
 A packed matrix object supports repeated exact internal multiplication against many input vectors without repacking the matrix. This is the canonical high-throughput tensor execution mode of the SDK.
 
-Tensor multiplication in the SDK is internal to the aQPU architecture. The reference implementation uses the GyroLabe bitplane Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
+Tensor multiplication in the SDK is internal to the aQPU architecture. The reference implementation uses the GyroLabe Lattice Multiplication Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
 
 ## 11.11 Runtime Namespace Exposure
 
@@ -896,3 +896,5 @@ The aQPU achieves quantum advantage through exact algebraic structure rather tha
 **Word.** A sequence of bytes. Words have exact affine signatures that compose algebraically.
 
 **Ω.** The reachable Moment manifold. 4096 states, accessible within depth 2 from rest, with product structure Ω = U × V.
+
+

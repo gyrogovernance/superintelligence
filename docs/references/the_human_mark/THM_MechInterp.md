@@ -291,3 +291,4 @@ Korompilias, B. (2025). The Human Mark: A Structural Taxonomy of AI Safety Failu
 Korompilias, B. (2025c). The Human Mark in the Wild: Empirical Analysis of Jailbreak Prompts. Zenodo. https://doi.org/10.5281/zenodo.17622837
 
 Neuronpedia. (2025). Open platform for mechanistic interpretability research. https://neuronpedia.org
+

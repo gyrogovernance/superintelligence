@@ -458,3 +458,4 @@ Across `test_holography.py`, `test_holography_2.py`, and `test_holography_3.py`,
    - A well-defined 18D cross-domain projector arises from the K₃ geometry of domains, with exact rank and invariances.
 
 These are properties of the discrete kernel and its associated mask code and ledgers, and they are established by the cited test suites.
+

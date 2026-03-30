@@ -241,7 +241,7 @@ The GF(4) mode layer tests confirm that on reachable components, the pair-level 
 
 ---
 
-## 11. Hardware Layer: Bitplane GEMV and WHT
+## 11. Hardware Layer: Lattice Multiplication GEMV and WHT
 
 ### What the tests show
 
@@ -249,17 +249,17 @@ The GF(4) mode layer tests confirm that on reachable components, the pair-level 
 |------|-----------|
 | WHT self-inverse | 2.4 × 10⁻⁷ |
 | WHT vs reference matrix | 4.9 × 10⁻⁷ |
-| Bitplane GEMV identity | 9.6 × 10⁻⁵ |
-| Bitplane GEMV 64×64 | 1.1 × 10⁻⁵ |
+| Lattice Multiplication GEMV identity | 9.6 × 10⁻⁵ |
+| Lattice Multiplication GEMV 64×64 | 1.1 × 10⁻⁵ |
 | Packed vs unpacked | 2.2 × 10⁻⁶ |
 | TensorOps torch path | 1.3 × 10⁻⁶ |
 | OpenCL GPU vs CPU | 1.9 × 10⁻⁶ |
 
 ### Insight
 
-The kernel-exact integer operations (stepping, signatures, chirality) are mathematically exact — zero error, proven by exhaustive verification. The tensor/spectral operations (WHT, bitplane GEMV) use fixed-point quantization but achieve errors below 10⁻⁴ even at 8-bit precision, and below 10⁻⁶ at 16-bit precision.
+The kernel-exact integer operations (stepping, signatures, chirality) are mathematically exact — zero error, proven by exhaustive verification. The tensor/spectral operations (WHT, Lattice Multiplication GEMV) use fixed-point quantization but achieve errors below 10⁻⁴ even at 8-bit precision, and below 10⁻⁶ at 16-bit precision.
 
-The WHT self-inverse property (H² = I) verified to 2.4 × 10⁻⁷ confirms the normalization (1/8 = 1/√64) is correct. The bitplane engine achieves near-IEEE-754 accuracy through the AND+POPCNT decomposition — every dot product is computed by bitwise AND of magnitude bitplanes followed by hardware POPCNT, which is exact in integer arithmetic. The only error source is the initial fixed-point quantization.
+The WHT self-inverse property (H² = I) verified to 2.4 × 10⁻⁷ confirms the normalization (1/8 = 1/√64) is correct. The Lattice Multiplication engine achieves near-IEEE-754 accuracy through the AND+POPCNT decomposition — every dot product is computed by bitwise AND of magnitude Lattice Multiplications followed by hardware POPCNT, which is exact in integer arithmetic. The only error source is the initial fixed-point quantization.
 
 The OpenCL GPU path matches CPU to 1.9 × 10⁻⁶, confirming cross-platform reproducibility of the tensor engine.
 
@@ -336,3 +336,5 @@ For completeness, areas where the test suite could be extended:
 ## Summary
 
 The 122 tests prove that the aQPU Kernel is an exactly solvable finite algebraic quantum system. Its key structural invariants — depth-4 closure, 2-step uniformization, exact chirality transport, Krawtchouk spectral decomposition, and the K4 gate group — are not approximations or statistical tendencies but mathematical identities verified by exhaustive computation over the complete state space and operator algebra. The system achieves its claimed computational advantages through algebraic structure rather than probabilistic interference, and the C-native tensor engine provides hardware-aligned execution with quantization errors below 10⁻⁶.
+
+

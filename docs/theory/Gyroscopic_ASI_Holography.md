@@ -54,7 +54,7 @@ The 2 times 3 times 2 structure is the minimal discrete topology that supports 3
 
 ## Section 2: The Action Alphabet
 
-The system is driven by an 8-bit input, referred to as the Byte. Because the 8-bit Byte is too small to directly address the 12-bit component space, it acts as a compressed micro-reference that is expanded into a 12-bit Tensor Mask.
+The system is driven by an 8-bit input, referred to as the Byte. The 8-bit Byte acts as a holographic micro-reference that is expanded into a 12-bit Tensor Mask.
 
 ### Transcription and Expansion
 
@@ -456,3 +456,4 @@ The Hodge ledgers decompose governance dynamics into gradient and cycle componen
 The CSM provides the physical capacity medium, derived from atomic constants with the speed of light canceling exactly. The coverage margin exceeds a trillion years of global Unconditional High Income at current population scales. The Hilbert space lift exhibits standard bipartite structure, with zero entropy for product subsets and maximal entropy (6 bits) for bijection graphs.
 
 The kernel is an algebraic quantum processing unit whose computational properties—spinorial closure, exact two-step uniformisation, holographic compression, and intrinsic error detection—are all realised on standard silicon with deterministic integer arithmetic.
+

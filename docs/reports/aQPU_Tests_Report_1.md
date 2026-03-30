@@ -26,7 +26,7 @@ The aQPU suite does not retest properties already verified in those reports. Whe
 | `test_aQPU_2.py` | 30 | Hilbert lift: Bell pairs, CHSH, teleportation, stabilisers, contextuality, MUBs |
 | `test_aQPU_3.py` | 28 | Computational characterisation: permutations, row classes, capacity, tamper detection |
 | `test_aQPU_4.py` | 33 | Native register structure, quantum advantage, universality, non-Clifford resource |
-| `test_aQPU_SDK_1.py` | 50 | SDK surface: moments, future-cone theorems, C engine, chirality, wht64, bitplane GEMV, operator projection |
+| `test_aQPU_SDK_1.py` | 50 | SDK surface: moments, future-cone theorems, C engine, chirality, wht64, GyroMatMul GEMV, operator projection |
 | **Total** | **185** | **All passing** |
 
 ### What the Kernel Is
@@ -800,7 +800,7 @@ These properties are the discrete realisation of the quantum no-cloning theorem:
 
 `TestCEngineAvailability` verifies:
 - The native library loads successfully.
-- Bitplane GEMV symbols are present: `gyro_bitplane_gemv_f32`, `gyro_pack_bitplane_matrix_f32`, `gyro_bitplane_gemv_packed_f32`.
+- GyroMatMul GEMV symbols are present in the native library.
 
 ### 14.2 Signature Scan and Extract
 
@@ -823,10 +823,10 @@ These properties are the discrete realisation of the quantum no-cloning theorem:
 - Self-inverse: wht64(wht64(x)) vs x max err ~2.38e-07.
 - Batch shape handling (e.g. [10, 64]).
 
-### 14.5 Bitplane GEMV
+### 14.5 GyroMatMul GEMV
 
-`TestBitplaneGemv` and `TestPackedBitplaneMatrix64` verify:
-- Bitplane GEMV vs torch.mv: max abs err ~1.09e-05.
+`TestGyroMatMulGemvEdgeCases` and `TestNativeEngineAndGyroMatMul` verify:
+- GyroMatMul GEMV vs torch.mv: max abs err ~1.09e-05.
 - Identity matrix: eye(64) @ x vs x max err ~8.68e-05.
 - Packed GEMV vs torch.mv: max err ~7.45e-06.
 - Packed vs unpacked consistency: max err ~2.24e-06.
@@ -951,10 +951,10 @@ A defining strength of the verified structure is **exactness**: many results are
 - Word signature composition matches concatenation (500 random pairs).
 
 **C engine and tensor math (aQPU Test File 5):**
-- Native library loads; bitplane GEMV symbols present.
+- Native library loads; GyroMatMul symbols present.
 - Signature scan, extract-scan fused, chirality distance (pair, batch, adjacent).
 - wht64 orthonormal, self-inverse, batch-capable.
-- Bitplane GEMV and packed GEMV match torch.mv within ~1e-5.
+- GyroMatMul GEMV and packed GEMV match torch.mv within ~1e-5.
 - Operator projection: project-reconstruct exact, sparse approximation at k=4096.
 - Signatures-to-states roundtrip, apply-signature-to-rest, qmap gate-byte extraction.
 
@@ -971,3 +971,5 @@ A defining strength of the verified structure is **exactness**: many results are
 ---
 
 *All results documented in this report are backed by passing tests. Properties established in the Physics Tests Report or Moments Tests Report are referenced, not retested. Properties newly established by the aQPU suite are cited to specific test classes and methods. Where the report asserts counts, multiplicities, or structural identities, they are exact (integer equalities, exact ranks, exact uniformisation), not approximate. The 185 aQPU tests, together with the previously verified kernel physics and moments tests, confirm that the Gyroscopic ASI aQPU Kernel kernel possesses the structural properties of an algebraic quantum processing unit.*
+
+

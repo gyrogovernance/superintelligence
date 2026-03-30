@@ -154,6 +154,7 @@ data/programs/
 data/models/
 !data/models/Bolmo-1B/
 !data/models/Bolmo-1B/modeling_bolmo.py
+data/models/Bolmo-1B/.hf_modules/
 
 data/gyroadaptor_out/
 data/atlas/olmo_3_7b_manifolds/
@@ -167,4 +168,7 @@ data/layers/
 data/resonators/
 
 
-*/_backup/
+**/_backup/
+**/_backup/**
+
+**secret_lab_ignore/_backup/chamber/

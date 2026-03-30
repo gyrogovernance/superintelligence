@@ -392,10 +392,10 @@ class TestWitnessCoverage:
         assert max(depths) <= 2
 
 
-class TestNativeEngineAndBitplane:
-    """C engine availability and bitplane GEMV symbols (ported from test_aQPU_5)."""
+class TestNativeEngineAndGyroMatMul:
+    """C engine availability and GyroMatMul GEMV symbols."""
 
-    def test_native_available_and_bitplane_works(self) -> None:
+    def test_native_available_and_gyromatmul_works(self) -> None:
         avail = sdk.gyrolabe_available()
         print("GyroLabe native available:", avail)
         if not avail:
@@ -406,18 +406,17 @@ class TestNativeEngineAndBitplane:
         y = sdk.TensorOps.gemv64(W, x, n_bits=16)
         y_ref = torch.mv(W, x)
         err = (y_ref - y).abs().max().item()
-        print("Bitplane GEMV max err:", err)
+        print("GyroMatMul GEMV max err:", err)
         assert err < 1e-3
 
     def test_packed_symbols_when_native_available(self) -> None:
         if not gyro_ops.native_available():
             pytest.skip("Native GyroLabe required")
         lib = gyro_ops._get_lib()
-        has_gemv = hasattr(lib, "gyro_bitplane_gemv_f32")
-        has_pack = hasattr(lib, "gyro_pack_bitplane_matrix_f32")
-        has_packed = hasattr(lib, "gyro_bitplane_gemv_packed_f32")
-        print("Bitplane symbols:", has_gemv, has_pack, has_packed)
-        assert has_gemv and has_pack and has_packed
+        has_gyromatmul = hasattr(lib, "gyromatmul_i32")
+        has_wht = hasattr(lib, "gyromatmul_wht64_i64")
+        print("mul symbols:", has_gyromatmul, has_wht)
+        assert has_gyromatmul and has_wht
 
 
 class TestChiralityDistanceViaRuntimeOps:
@@ -483,10 +482,10 @@ class TestWht64BatchAndSelfInverse:
         assert y.shape == (10, 64)
 
 
-class TestBitplaneGemvEdgeCases:
-    """Bitplane GEMV identity and 64x64 (ported from test_aQPU_5)."""
+class TestGyroMatMulGemvEdgeCases:
+    """GyroMatMul GEMV identity and 64x64."""
 
-    def test_bitplane_gemv_identity(self) -> None:
+    def test_gyromatmul_gemv_identity(self) -> None:
         if not gyro_ops.native_available():
             pytest.skip("Native GyroLabe required")
         W = torch.eye(64, dtype=torch.float32)
@@ -497,7 +496,7 @@ class TestBitplaneGemvEdgeCases:
         print("Identity GEMV max err:", err)
         assert err < 1e-4
 
-    def test_bitplane_gemv_64x64(self) -> None:
+    def test_gyromatmul_gemv_64x64(self) -> None:
         if not gyro_ops.native_available():
             pytest.skip("Native GyroLabe required")
         torch.manual_seed(42)
@@ -511,16 +510,16 @@ class TestBitplaneGemvEdgeCases:
         print("64x64 GEMV max err:", err)
         assert err < 1e-3
 
-    def test_packed_vs_unpacked_gemv_match(self) -> None:
+    def test_qubec_gemv_pair_matches_gyromatmul_gemv64(self) -> None:
         if not gyro_ops.native_available():
             pytest.skip("Native GyroLabe required")
         torch.manual_seed(123)
         W = torch.randn(64, 64, dtype=torch.float32) * 0.05
         x = torch.randn(64, dtype=torch.float32) * 0.05
         y_unpacked = sdk.TensorOps.gemv64(W, x, n_bits=16)
-        pm = sdk.TensorOps.pack_matrix64(W, n_bits=16)
-        pv = sdk.TensorOps.pack_vector64(x, n_bits=16)
-        y_packed = pm.gemv_packed(pv)
+        pm = sdk.TensorOps.qubec_matrix64(W, n_bits=16)
+        pv = sdk.TensorOps.qubec_vector64(x, n_bits=16)
+        y_packed = pm.qubec_gemv_pair(pv)
         err = (y_unpacked - y_packed).abs().max().item()
         print("Packed vs unpacked err:", err)
         assert err < 1e-4
@@ -588,7 +587,7 @@ class TestSpectralAndTensorOps:
 
         assert np.allclose(y_ref, y_sdk, rtol=1e-2, atol=1e-2)
 
-    def test_packed_gemv64_round_trip(self) -> None:
+    def test_qubec_gemv_pair_matches_gemv64(self) -> None:
         if not gyro_ops.native_available():
             pytest.skip("Packed GEMV requires native GyroLabe library.")
 
@@ -596,16 +595,17 @@ class TestSpectralAndTensorOps:
         W = rng.standard_normal((3, 64)).astype(np.float32)
         x = rng.standard_normal(64).astype(np.float32)
 
-        y_ref = W @ x
-        pm = sdk.TensorOps.pack_matrix64(W, n_bits=8)
-        pv = sdk.TensorOps.pack_vector64(x, n_bits=8)
-        y_packed_t = pm.gemv_packed(pv)
+        y_gemv = sdk.TensorOps.gemv64(W, x, n_bits=8)
+        y_gemv_np = y_gemv.detach().cpu().numpy() if hasattr(y_gemv, "detach") else np.asarray(y_gemv, dtype=np.float32)
+        pm = sdk.TensorOps.qubec_matrix64(W, n_bits=8)
+        pv = sdk.TensorOps.qubec_vector64(x, n_bits=8)
+        y_packed_t = pm.qubec_gemv_pair(pv)
         y_packed = y_packed_t.detach().cpu().numpy()
 
-        print("Packed GEMV ref:", y_ref)
+        print("GEMV64 ref:", y_gemv_np)
         print("Packed GEMV sdk:", y_packed)
 
-        assert np.allclose(y_ref, y_packed, rtol=1e-2, atol=1e-2)
+        assert np.allclose(y_gemv_np, y_packed, rtol=1e-5, atol=1e-5)
 
     def test_opencl_packed_gemm64_matches_cpu(self) -> None:
         if not opencl_backend.available():
@@ -614,10 +614,9 @@ class TestSpectralAndTensorOps:
         W = torch.randn(64, 64, dtype=torch.float32)
         X = torch.randn(32, 64, dtype=torch.float32)
 
-        cpu_packed = gyro_ops.PackedBitplaneMatrix64(W, n_bits=8)
-        Y_cpu = cpu_packed.gemm_packed_batch(X)
+        Y_cpu = gyro_ops.gyromatmul_f32_gemm(W, X, n_bits=8)
 
-        gpu_packed = sdk.TensorOps.pack_matrix64_opencl(W, n_bits=8)
+        gpu_packed = sdk.TensorOps.qubec_matrix64_opencl(W, n_bits=8)
         Y_gpu = gpu_packed.gemm_batch(X)
         gpu_packed.close()
 
@@ -785,4 +784,6 @@ class TestNewSignatureAndScanPrimitives:
             expected.append(s & MASK_STATE24)
 
         assert scan.tolist() == expected
+
+
 

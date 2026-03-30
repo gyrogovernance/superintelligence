@@ -701,26 +701,29 @@ class SpectralOps:
         return ops.wht64(x_t)
 
 
-class PackedVector64:
-    """Packed fixed-point vector for repeated internal multiplication. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
+class QubecFixedVector64:
+    """Fixed-point vector for QuBEC matmul pairing. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
 
     def __init__(self, packed: Any) -> None:
         self._packed = packed
 
 
-class PackedMatrix64:
-    """Packed fixed-point matrix for repeated internal multiplication. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
+class QubecFixedMatrix64:
+    """Fixed-point matrix for QuBEC matmul. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
 
-    def __init__(self, packed: Any) -> None:
-        self._packed = packed
+    def __init__(self, W: Any, n_bits: int = 16) -> None:
+        self._W = W
+        self._n_bits = int(n_bits)
 
     def gemv(self, x: Any) -> Any:
-        return self._packed.gemv(x)
-
-    def gemv_packed(self, x: PackedVector64) -> Any:
+        import torch
         from src.tools.gyrolabe import ops
 
-        return ops.packed_gemv_packed_x(self._packed, x._packed)
+        x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(x, dtype=torch.float32, device="cpu")
+        return ops.gyromatmul_f32_gemv(self._W, x_t, n_bits=self._n_bits)
+
+    def qubec_gemv_pair(self, x: QubecFixedVector64) -> Any:
+        raise NotImplementedError("qubec_gemv_pair is deprecated")
 
     def gemm_packed_batch(self, X: Any) -> Any:
         """Batched GEMM: Y[b] = W @ X[b]. X: [batch, cols]. Returns [batch, rows]."""
@@ -730,7 +733,7 @@ class PackedMatrix64:
         X_t = X if isinstance(X, torch.Tensor) else torch.as_tensor(
             X, dtype=torch.float32, device="cpu"
         )
-        return self._packed.gemm_packed_batch(X_t)
+        return ops.gyromatmul_f32_gemm(self._W, X_t, n_bits=self._n_bits)
 
 
 class TensorOps:
@@ -751,30 +754,30 @@ class TensorOps:
         x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(
             x, dtype=torch.float32, device="cpu"
         )
-        return ops.bitplane_gemv(W_t, x_t, n_bits=n_bits)
+        return ops.gyromatmul_f32_gemv(W_t, x_t, n_bits=n_bits)
 
     @staticmethod
-    def pack_matrix64(W: Any, n_bits: int = 16) -> PackedMatrix64:
+    def qubec_matrix64(W: Any, n_bits: int = 16) -> QubecFixedMatrix64:
         import torch
         from src.tools.gyrolabe import ops
 
         W_t = W if isinstance(W, torch.Tensor) else torch.as_tensor(
             W, dtype=torch.float32, device="cpu"
         )
-        return PackedMatrix64(ops.PackedBitplaneMatrix64(W_t, n_bits=n_bits))
+        return QubecFixedMatrix64(W_t, n_bits=n_bits)
 
     @staticmethod
-    def pack_vector64(x: Any, n_bits: int = 16) -> PackedVector64:
+    def qubec_vector64(x: Any, n_bits: int = 16) -> QubecFixedVector64:
         import torch
         from src.tools.gyrolabe import ops
 
         x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(
             x, dtype=torch.float32, device="cpu"
         )
-        return PackedVector64(ops.PackedBitplaneVector64(x_t, n_bits=n_bits))
+        return QubecFixedVector64(ops.QubecPackedVector64(x_t, n_bits=n_bits))
 
     @staticmethod
-    def pack_matrix64_opencl(W: Any, n_bits: int = 8) -> "GPUBackend64":
+    def qubec_matrix64_opencl(W: Any, n_bits: int = 8) -> "GPUBackend64":
         """Pack matrix for GPU batched GEMM. Uses 8-bit fixed-point by default for best throughput."""
         import torch
         from src.tools.gyrolabe import ops
@@ -783,13 +786,15 @@ class TensorOps:
         W_t = W if isinstance(W, torch.Tensor) else torch.as_tensor(
             W, dtype=torch.float32, device="cpu"
         )
-        packed_cpu = ops.PackedBitplaneMatrix64(W_t, n_bits=n_bits)
+        scale_max = (1 << (n_bits - 1)) - 1
+        scale = scale_max / max(float(W_t.abs().max().item()), 1e-12)
+        packed_cpu = torch.round(W_t * scale).to(torch.int32)
         opencl_backend.initialize()
-        return GPUBackend64(opencl_backend.OpenCLPackedMatrix64(packed_cpu))
+        return GPUBackend64(opencl_backend.OpenCLPackedMatrix64I32(packed_cpu, n_bits=n_bits))
 
 
 class GPUBackend64:
-    """GPU-resident packed matrix for batched GEMM. Use TensorOps.pack_matrix64_opencl to create."""
+    """GPU-resident QuBEC matrix for batched GEMM. Use TensorOps.qubec_matrix64_opencl to create."""
 
     def __init__(self, backend: Any) -> None:
         self._backend = backend
@@ -874,7 +879,7 @@ class RuntimeOps:
     def apply_signature_to_rest(signature: Any) -> Any:
         from src.tools.gyrolabe import ops
 
-        return ops.apply_signature_to_rest(signature)
+        return ops.signatures_to_states(signature)
 
     @staticmethod
     def omega12_from_states(states: Any) -> Any:
@@ -993,12 +998,14 @@ __all__ = [
     "depth4_frame",
     "gyrolabe_available",
     "initialize_native",
-    "PackedVector64",
-    "PackedMatrix64",
+    "QubecFixedVector64",
+    "QubecFixedMatrix64",
     "StateOps",
     "MomentOps",
     "SpectralOps",
     "TensorOps",
     "RuntimeOps",
 ]
+
+
 

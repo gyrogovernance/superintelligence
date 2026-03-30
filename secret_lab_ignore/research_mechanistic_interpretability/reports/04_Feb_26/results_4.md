@@ -85,3 +85,4 @@ Instead of random $u, v$, we will use **Principal Curvature Directions**.
 **Why?** 
 If the model has an $su(2)$ engine, it might only be visible if we align our probe with its internal "x, y, z" axes. Picking random $u, v$ is like trying to measure a gyroscope by pushing it from a random angle—you only see one component of the spin.
 
+

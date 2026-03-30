@@ -10,6 +10,13 @@
 ┗━┛┗━┛╹  ┗━╸╹┗╸╹╹ ╹ ╹ ┗━╸┗━╸┗━╸╹┗━┛┗━╸╹ ╹┗━╸┗━╸                                         
 ```
 
+
+---
+
+## [v2.0.5-Bridges] – 2026-03-17 -> 2026-03-31
+
+Extensive development of GyroLabe and GyroGraph, replacement all Matrix Multiplications with a new native kernel, and other stuff, all with custom C Backends, until I decided to mitigate all the heavy work on llama.cpp so I can focus on what matters. So we are in a transitional phase. Now starting from scratch clean. Wait for it. 
+
 ---
 
 ## [v2.0.4-GyroClimate] – 2026-03-16 -> 2026-03-17
@@ -768,7 +775,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - **`src/api.py`**: precomputed tables for all 256 bytes, chirality register helpers, q-class computation, word signatures, Walsh helpers.
 - **`src/kernel.py`**: reference kernel with spinorial transition law, forward/inverse stepping, single-step trace, depth-4 projections.
 - **`src/sdk.py`**: public SDK surface with StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps namespaces.
-- **`src/tools/gyrolabe/gyrolabe.c`**: native C backend — signature scan, chirality distance, qmap extraction, WHT64, bitplane GEMV (unpacked and packed), signature application.
+- **`src/tools/gyrolabe/gyrolabe_codec.c`** and **`src/tools/gyrolabe/gyrolabe_mul.c`**: native C backend — signature scan, chirality distance, qmap extraction, WHT64, Lattice Multiplication GEMV (unpacked and packed), signature application.
 - **`src/tools/gyrolabe/gyrolabe_opencl.c`**: OpenCL backend — batched GEMM, integer-native i32 path.
 - **`src/tools/gyrolabe/ops.py`**: Python wrapper for GyroLabe C/OpenCL surfaces.
 - **`src/tools/gyrolabe/opencl_backend.py`**: OpenCL device management and kernel compilation.
@@ -833,8 +840,8 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - **Chirality distance**: up to 1,568× speedup, 161M pairs/sec at n=262144.
 - **Chirality vs cosine similarity** (2048-dim): up to 353× speedup at n=16384.
 - **Q-map extraction**: up to 8,222× speedup at n=65536.
-- **Bitplane GEMV (OpenCL)**: 1.5× vs PyTorch at batch=4096; integer-native i32 path available.
-- **Bitplane matmul precision**: max error ~1e-5 (random), ~8e-7 (real Bolmo weights), ~3.5e-5 (identity).
+- **Lattice Multiplication GEMV (OpenCL)**: 1.5× vs PyTorch at batch=4096; integer-native i32 path available.
+- **Lattice Multiplication matmul precision**: max error ~1e-5 (random), ~8e-7 (real Bolmo weights), ~3.5e-5 (identity).
 
 ---
 
@@ -5272,3 +5279,4 @@ Fixed TypedDict access warnings for optional keys.
 ```
 
 `plaintext [uLEB128 state_index][uLEB128 n_pairs][(uLEB128 token_id + mask_byte) * n_pairs]` \</uuid>\</iibhx"\`>
+

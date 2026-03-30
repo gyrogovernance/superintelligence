@@ -30,8 +30,8 @@ from src.tools.gyrolabe.bridges import (
     DEFAULT_BOLMO_MODEL_PATH,
     BolmoEncodeBridgeConfig,
     load_base_bolmo,
-    load_gyrolabe_bolmo_encode,
 )
+from src.tools.gyrolabe.bridges.bolmo_config import GyroLabeBolmoEncodeBridge
 
 
 class _NoopLabe:
@@ -74,7 +74,11 @@ def _load_bridge_bolmo(
 ) -> Any:
     """Load Bolmo with GyroLabe encode bridge."""
     path = str(model_path) if model_path is not None else None
-    return load_gyrolabe_bolmo_encode(path, config=config or BolmoEncodeBridgeConfig(), **hf_kwargs)
+    return GyroLabeBolmoEncodeBridge.from_pretrained(
+        path,
+        config=config or BolmoEncodeBridgeConfig(),
+        **hf_kwargs,
+    )
 
 
 _GEN_PROMPTS: list[tuple[str, str]] = [
@@ -432,8 +436,8 @@ def _bench_qmap_extract(full: bool = False) -> list[dict]:
     return results
 
 
-def _bench_aqpu_bitplane(full: bool = False) -> list[dict]:
-    """Benchmark aQPU bitplane GEMV: torch.mv vs C unpacked vs packed vs OpenCL batch."""
+def _bench_aqpu_gyromatmul(full: bool = False) -> list[dict]:
+    """Benchmark aQPU GyroMatMul GEMV: torch.mv vs C unpacked vs packed vs OpenCL batch."""
     results: list[dict] = []
     n_bits = 16
     batch_sizes = [1, 16, 64, 256, 1024, 4096] if full else [64, 256]
@@ -442,7 +446,7 @@ def _bench_aqpu_bitplane(full: bool = False) -> list[dict]:
 
     for batch in batch_sizes:
         X = torch.randn(batch, 64, dtype=torch.float32) * 0.1
-        r: dict[str, Any] = {"op": "aqpu_bitplane", "batch": batch}
+        r: dict[str, Any] = {"op": "aqpu_gyromatmul", "batch": batch}
 
         def _torch_mv():
             for i in range(batch):
@@ -451,28 +455,23 @@ def _bench_aqpu_bitplane(full: bool = False) -> list[dict]:
         r["torch_sec"] = torch_sec
 
         if ops._get_lib() is not None:
-            packed = ops.PackedBitplaneMatrix64(W, n_bits=n_bits)
-            y_cpu = packed.gemm_packed_batch(X)
+            y_cpu = ops.gyromatmul_f32_gemm(W, X, n_bits=n_bits)
 
             def _cpu_packed():
-                packed.gemm_packed_batch(X)
+                ops.gyromatmul_f32_gemm(W, X, n_bits=n_bits)
 
             cpu_sec, _ = _timeit(_cpu_packed)
             r["cpu_packed_sec"] = cpu_sec
             r["speedup_vs_torch"] = torch_sec / cpu_sec if cpu_sec > 0 else 0
 
-            # Integer-native CPU path (i32 -> i64 exact, then scaled back to float)
             W_i32 = (W * 128.0).round().to(torch.int32)
             X_i32 = (X * 128.0).round().to(torch.int32)
-            packed_i32 = ops.PackedBitplaneMatrix64I32(W_i32, n_bits=n_bits)
-            vecs_i32 = [ops.PackedBitplaneVector64I32(X_i32[b], n_bits=n_bits) for b in range(batch)]
-            y_cpu_i32 = torch.stack([packed_i32.gemv_packed(v) for v in vecs_i32], dim=0).to(torch.float32) / (128.0 * 128.0)
+            y_cpu_i32 = ops.gyromatmul_i32(X_i32, W_i32).to(torch.float32) / (128.0 * 128.0)
             err_i32_cpu = (y_cpu - y_cpu_i32).abs().max().item()
             r["cpu_i32_err_vs_cpu_f32"] = err_i32_cpu
 
             def _cpu_i32():
-                for v in vecs_i32:
-                    packed_i32.gemv_packed(v)
+                ops.gyromatmul_i32(X_i32, W_i32)
 
             cpu_i32_sec, _ = _timeit(_cpu_i32)
             r["cpu_i32_sec"] = cpu_i32_sec
@@ -481,48 +480,29 @@ def _bench_aqpu_bitplane(full: bool = False) -> list[dict]:
                 from src.tools.gyrolabe import opencl_backend
                 if opencl_backend.available():
                     opencl_backend.initialize()
-                    cl_matrix = opencl_backend.OpenCLPackedMatrix64(packed)
+                    cl_matrix_i32 = opencl_backend.OpenCLPackedMatrix64I32(W_i32)
                     try:
-                        y_cl = cl_matrix.gemm_packed_batch(X)
-                        err = (y_cpu - y_cl).abs().max().item()
-                        if err > 1e-4:
-                            r["opencl_ok"] = False
-                            r["opencl_err"] = err
-                        else:
-                            def _cl_batch():
-                                cl_matrix.gemm_packed_batch(X)
-
-                            cl_sec, _ = _timeit(_cl_batch)
-                            r["opencl_sec"] = cl_sec
-                            r["opencl_speedup_vs_torch"] = torch_sec / cl_sec if cl_sec > 0 else 0
-                            r["opencl_speedup_vs_cpu"] = cpu_sec / cl_sec if cl_sec > 0 else 0
-                            r["opencl_ok"] = True
-
-                        # Integer-native OpenCL path
-                        cl_matrix_i32 = opencl_backend.OpenCLPackedMatrix64I32(packed_i32)
-                        X_sign = torch.empty(batch, dtype=torch.uint64, device="cpu")
-                        X_bp = torch.empty((batch, n_bits), dtype=torch.uint64, device="cpu")
-                        for b in range(batch):
-                            X_sign[b] = vecs_i32[b]._x_sign.to(torch.uint64)
-                            X_bp[b].copy_(vecs_i32[b]._x_bp)
-                        y_cl_i32 = cl_matrix_i32.gemm_packed_batch(X_sign, X_bp)
-                        cl_matrix_i32.close()
-
+                        y_cl_i32 = cl_matrix_i32.gemm_packed_batch(X_i32)
                         y_cl_i32_scaled = y_cl_i32.to(torch.float32) / (128.0 * 128.0)
                         err_i32_cl = (y_cpu - y_cl_i32_scaled).abs().max().item()
                         r["opencl_i32_err_vs_cpu_f32"] = err_i32_cl
+                        r["opencl_ok"] = err_i32_cl <= 1e-4
+                        r["opencl_err"] = err_i32_cl
 
                         def _cl_i32_batch():
-                            cl_i32 = opencl_backend.OpenCLPackedMatrix64I32(packed_i32)
+                            cl_i32 = opencl_backend.OpenCLPackedMatrix64I32(W_i32)
                             try:
-                                cl_i32.gemm_packed_batch(X_sign, X_bp)
+                                cl_i32.gemm_packed_batch(X_i32)
                             finally:
                                 cl_i32.close()
 
                         cl_i32_sec, _ = _timeit(_cl_i32_batch)
-                        r["opencl_i32_sec"] = cl_i32_sec
+                        cl_sec = cl_i32_sec
+                        r["opencl_sec"] = cl_i32_sec
+                        r["opencl_speedup_vs_torch"] = torch_sec / cl_sec if cl_sec > 0 else 0
+                        r["opencl_speedup_vs_cpu"] = cpu_sec / cl_sec if cl_sec > 0 else 0
                     finally:
-                        cl_matrix.close()
+                        cl_matrix_i32.close()
                     opencl_backend.shutdown()
             except (ImportError, RuntimeError, OSError):
                 r["opencl_ok"] = False
@@ -557,8 +537,8 @@ def _print_report(all_results: list[dict], use_c: bool) -> None:
             print(f"qmap_extract n={r['n']:>6}: "
                   f"Python {r['py_sec']*1000:.3f}ms, C {r['c_sec']*1000:.3f}ms, "
                   f"speedup {r['speedup']:.1f}x")
-        elif r["op"] == "aqpu_bitplane":
-            print(f"aqpu_bitplane batch={r['batch']:>4}: torch {r['torch_sec']*1000:.2f}ms", end="")
+        elif r["op"] == "aqpu_gyromatmul":
+            print(f"aqpu_gyromatmul batch={r['batch']:>4}: torch {r['torch_sec']*1000:.2f}ms", end="")
             if "cpu_packed_sec" in r:
                 print(f", CPU packed {r['cpu_packed_sec']*1000:.2f}ms ({r.get('speedup_vs_torch', 0):.1f}x vs torch)", end="")
             if "cpu_i32_sec" in r:
@@ -578,7 +558,7 @@ def main() -> None:
     parser.add_argument("--report", type=Path, help="Write markdown report to file.")
     parser.add_argument("--skip-wht", action="store_true", help="Skip wht64 (needs C lib).")
     parser.add_argument("--skip-cosine", action="store_true", help="Skip chirality vs cosine.")
-    parser.add_argument("--skip-aqpu", action="store_true", help="Skip aQPU bitplane benchmark.")
+    parser.add_argument("--skip-aqpu", action="store_true", help="Skip aQPU GyroMatMul benchmark.")
     parser.add_argument(
         "--all",
         action="store_true",
@@ -634,7 +614,7 @@ def main() -> None:
     if not args.skip_wht and use_c:
         all_results.extend(_bench_wht64(full=full))
     if not args.skip_aqpu and use_c:
-        all_results.extend(_bench_aqpu_bitplane(full=full))
+        all_results.extend(_bench_aqpu_gyromatmul(full=full))
 
     _print_report(all_results, use_c)
 
@@ -719,14 +699,16 @@ def _write_markdown_report(all_results: list[dict], use_c: bool, path: Path) -> 
             lines.append(f"| wht64 | batch={r['batch']} | py_wht {r['py_wht_sec']*1000:.2f} | {r['c_sec']*1000:.2f} | vs_py {r['speedup_vs_py']:.1f}x, vs_dense {r['speedup_vs_dense']:.1f}x |")
         elif r["op"] == "qmap_extract":
             lines.append(f"| qmap_extract | n={r['n']} | {r['py_sec']*1000:.2f} | {r['c_sec']*1000:.2f} | {r['speedup']:.1f}x |")
-        elif r["op"] == "aqpu_bitplane":
+        elif r["op"] == "aqpu_gyromatmul":
             extra = ""
             if r.get("opencl_ok"):
                 extra = f", OpenCL {r['opencl_sec']*1000:.2f}ms ({r.get('opencl_speedup_vs_torch', 0):.1f}x vs torch)"
-            lines.append(f"| aqpu_bitplane | batch={r['batch']} | torch {r['torch_sec']*1000:.2f} | CPU packed {r.get('cpu_packed_sec', 0)*1000:.2f} | {r.get('speedup_vs_torch', 0):.1f}x{extra} |")
+            lines.append(f"| aqpu_gyromatmul | batch={r['batch']} | torch {r['torch_sec']*1000:.2f} | CPU packed {r.get('cpu_packed_sec', 0)*1000:.2f} | {r.get('speedup_vs_torch', 0):.1f}x{extra} |")
     lines.extend(["", "## Exit Gate", "", "Documented orders-of-magnitude speedups for intercepted algebraic workloads.", ""])
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
 if __name__ == "__main__":
     main()
+
+

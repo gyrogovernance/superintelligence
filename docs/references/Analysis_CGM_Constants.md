@@ -253,3 +253,5 @@ So **m_a** and **Δ** (with ρ and δ_BU) are the central objects; the rest are 
 6. **48² quantization** → **48 Δ ≈ 1**; pentagonal symmetry → **λ₀/Δ = 1/√5**.
 
 All of these are algebraic or geometric consequences of the aperture m_a, the closure ratio ρ, the aperture gap Δ, and the measured monodromy δ_BU, with no free parameters beyond the framework’s geometric definitions and the single measured value δ_BU.
+
+

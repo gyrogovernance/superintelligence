@@ -413,3 +413,4 @@ The Mark works best integrated with comprehensive safety research including tech
 **For questions or contributions:**  
 Visit gyrogovernance.com  
 Submit issues at https://github.com/gyrogovernance/tools
+

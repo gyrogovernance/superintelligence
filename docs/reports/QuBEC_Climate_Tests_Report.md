@@ -47,7 +47,7 @@ We categorize these recurring bottlenecks as six "climate hazards." These are op
 | Transcendental Frost | exp | softmax, activation gates |
 | Division Permafrost | 1/x | normalization, attention scaling |
 | Distance Freeze | sqrt | L2 norms, cosine similarity |
-| Similarity Tsunami | massive dot-product reduction | attention, vector retrieval |
+| Global Warming | massive dot-product reduction | attention, vector retrieval |
 | Argmax Drought | serial max-comparison chains | next-token selection |
 | Branch Fog | unpredictable conditional routing | patching decisions, tool routing |
 
@@ -309,7 +309,7 @@ The extract pipeline annotates over 4 million bytes per second with exact q-clas
 | Transcendental Frost (exp) | **Eliminated** | Integer q-sector selection replaces softmax; integer threshold replaces sigmoid |
 | Division Permafrost (1/x) | **Eliminated** | Chirality distance uses XOR and popcount; no normalization division needed |
 | Distance Freeze (sqrt) | **Eliminated** | 6-bit Hamming distance replaces L2 / cosine distance |
-| Similarity Tsunami (dot products) | **Reduced** | Chirality distance replaces boundary-side dot products; M2 controls patch count and therefore attention sequence length |
+| Global Warming (dot products) | **Reduced** | Chirality distance replaces boundary-side dot products; M2 controls patch count and therefore attention sequence length |
 | Argmax Drought (serial selection) | **Eliminated** | 64-sector identification with phase hysteresis replaces flat 512-way argmax |
 | Branch Fog (conditional routing) | **Reduced** | Phase hysteresis internalizes boundary decision as state; single integer comparison replaces sigmoid-calibrated branch |
 
@@ -363,3 +363,4 @@ When the decision surfaces of a real byte-native language model are moved into t
 The limitation is explicit: this applies to the decision surfaces, not to the internal transformer computation. The attention mechanism, normalization layers, and activation functions inside Bolmo still run classically. Addressing those layers without output instability is the primary open challenge.
 
 Within its scope, this case study achieves what it set out to achieve: a working demonstration that exact algebraic quantum processing on a commodity mini PC can replace the expensive classical mathematics at the root control surfaces of a real billion-parameter language model, with the model continuing to produce coherent natural language, and with a structural feedback loop governing computational resource allocation through an exact climate variable.
+

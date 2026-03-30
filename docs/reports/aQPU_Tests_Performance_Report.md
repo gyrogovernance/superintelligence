@@ -7,7 +7,7 @@ This report measures the runtime performance of the Gyroscopic ASI algebraic Qua
    Byte scans, compiled signatures, chirality distance, Ω-native stepping, and shell histograms.
 
 2. **GyroLabe spectral and tensor operations**  
-   64-point Walsh-Hadamard transforms, packed bitplane GEMV/GEMM, and OpenCL acceleration.
+   64-point Walsh-Hadamard transforms, packed Lattice Multiplication GEMV/GEMM, and OpenCL acceleration.
 
 3. **GyroGraph multicellular runtime**  
    Batched 4-byte word ingestion, trace generation, local memory updates, and end-to-end graph runtime throughput.
@@ -165,16 +165,16 @@ Observations:
 - The native butterfly implementation wins once the batch is large enough.
 - The OpenCL-backed `wht64_metal_first` path is the fastest measured WHT path on this machine.
 
-## 5.2 Bitplane GEMV and GEMM
+## 5.2 Lattice Multiplication GEMV and GEMM
 
-The bitplane engine rewrites dense matrix-vector products into Boolean AND plus POPCNT on packed 64-bit words.
+The Lattice Multiplication engine rewrites dense matrix-vector products into Boolean AND plus POPCNT on packed 64-bit words.
 
 ### Single-vector and packed-vector paths
 
 | Operation | batch = 64 | batch = 256 | Notes |
 |---|---:|---:|---|
-| Python bitplane GEMV | 386.066 ms | 1573.745 ms | Reference only |
-| C bitplane GEMV | 0.119 ms | 0.446 ms | 3,000×+ faster than Python |
+| Python Lattice Multiplication GEMV | 386.066 ms | 1573.745 ms | Reference only |
+| C Lattice Multiplication GEMV | 0.119 ms | 0.446 ms | 3,000×+ faster than Python |
 | Packed GEMV | 0.079 ms | 0.282 ms | Reuses packed weights |
 | Torch `mv` | 0.003 ms | 0.003 ms | Still faster on small dense blocks |
 
@@ -189,8 +189,8 @@ The bitplane engine rewrites dense matrix-vector products into Boolean AND plus 
 Observations:
 
 - On current 64×64 block sizes, optimized BLAS still wins on dense float GEMM.
-- OpenCL substantially improves the bitplane GEMM over the CPU packed path.
-- The bitplane system is strongest where structural transparency and exact integer paths matter, not where small dense BLAS is already heavily optimized.
+- OpenCL substantially improves the Lattice Multiplication GEMM over the CPU packed path.
+- The Lattice Multiplication system is strongest where structural transparency and exact integer paths matter, not where small dense BLAS is already heavily optimized.
 
 ### Integer-native exact tensor path
 
@@ -380,3 +380,6 @@ python scripts/bench_gyrolabe.py
 python scripts/bench_gyrograph.py
 pytest tests/tools/test_gyrograph_decode.py tests/tools/test_gyrolabe_encode.py -v -s
 ```
+
+
+

@@ -1,9 +1,3 @@
-You are right. The previous version swung too far into wall-of-text prose, which made it dense and exhausting. The version before that was all lists. Neither extreme works.
-
-The right approach is: **prose for ideas and narrative, lists and tables only where they genuinely clarify structure or enumeration.** Short paragraphs. Breathing room. No redundancy.
-
----
-
 # GyroLabe
 ## Specification
 
@@ -41,7 +35,7 @@ Beyond extraction and execution, GyroLabe is the first point in the stack where 
 
 GyroLabe exposes four cooperating surfaces.
 
-### 3.1 Exact native surface (gyrolabe.c)
+### 3.1 Exact native surface (gyrolabe_codec.c, gyrolabe_mul.c)
 
 The C implementation of the kernel-facing algebra. All operations here are exact integer arithmetic producing bit-identical results across platforms.
 
@@ -53,13 +47,13 @@ This surface covers:
 - compact Omega scans and shell histograms
 - exact q-sector selection with optional shell weighting
 
-### 3.2 Packed tensor surface (gyrolabe.c, gyrolabe_opencl.c)
+### 3.2 Packed tensor surface (gyrolabe_codec.c, gyrolabe_mul.c, gyrolabe_opencl.c)
 
-Matrix computation through packed sign masks and magnitude bitplanes over 64-bit words, using Boolean AND and population count internally.
+Matrix computation through packed sign masks and magnitude Lattice Multiplications over 64-bit words, using Boolean AND and population count internally.
 
 Two execution classes are available:
 
-- **Fixed-point float path**: floats quantized to n-bit integers before bitplane decomposition. Deterministic, bounded quantization error decreasing with bit depth.
+- **Fixed-point float path**: floats quantized to n-bit integers before Lattice Multiplication decomposition. Deterministic, bounded quantization error decreasing with bit depth.
 - **Exact integer path**: int32 inputs produce exact int64 outputs with zero quantization error.
 
 The OpenCL backend accelerates batched packed GEMM on available GPUs, with persistent buffers and GPU-resident packed matrices reused across batches.
@@ -86,7 +80,7 @@ GyroLabe works in two fundamentally different modes of computation.
 
 **Deterministic numeric operations** use floating-point or fixed-point arithmetic internally. The Walsh-Hadamard transform and the packed float tensor paths belong here. They are structured and reproducible, but carry bounded numeric error from quantization or floating-point rounding.
 
-Where the integer-native packed tensor path is used, exactness returns: int32 inputs produce exact int64 outputs through the same bitplane decomposition, with zero error.
+Where the integer-native packed tensor path is used, exactness returns: int32 inputs produce exact int64 outputs through the same Lattice Multiplication decomposition, with zero error.
 
 ---
 
@@ -137,4 +131,6 @@ The long-term goal is not a generic numeric library. It is to make exact structu
 
 ## 8. Technical notes
 
-The native C library requires any C11 compiler and builds automatically on first import. OpenCL is optional. PyTorch is required for the Python bindings. The WHT supports autograd (backward equals forward). Trainable bias surfaces use standard PyTorch autograd. The packed bitplane path is forward-only. The C library uses process-global tables initialized once per process and is safe for single-threaded and OpenMP-parallel use.
+The native C library requires any C11 compiler and builds automatically on first import. OpenCL is optional. PyTorch is required for the Python bindings. The WHT supports autograd (backward equals forward). Trainable bias surfaces use standard PyTorch autograd. The packed Lattice Multiplication path is forward-only. The C library uses process-global tables initialized once per process and is safe for single-threaded and OpenMP-parallel use.
+
+

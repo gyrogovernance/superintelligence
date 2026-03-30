@@ -508,3 +508,4 @@ The dominant cost remains the model's own forward pass.
 - **Missing atlas:** The kernel raises an error at construction if atlas files are not found. Generation cannot proceed.
 - **Incompatible model architecture:** GyroLabe raises an error during `install()` if the model does not expose the required interface or fails divisibility checks.
 - **Numeric instability:** If mask computation produces NaN or Inf (e.g., due to extreme sigma values), the reference implementation clamps or skips the mask for that step. This is logged but does not halt generation.
+

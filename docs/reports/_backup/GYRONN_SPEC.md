@@ -246,3 +246,5 @@ The kernel is non-semantic; meaning enters at the agent layer. GyroNN does not m
 | Bridge | Yes — linear maps to Bolmo |
 | Params | ~3.9M |
 | Inference | No L3 table needed |
+
+

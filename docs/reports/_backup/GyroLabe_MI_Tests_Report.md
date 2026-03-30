@@ -326,3 +326,5 @@ So CGM sigma + focus:
 - Strengthens coupling (correlation),
 - Shifts where the model spends its “semantic budget”:  
   math now lands in deeply geometric territory the original model rarely visited.
+
+

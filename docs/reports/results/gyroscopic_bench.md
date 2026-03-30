@@ -1,110 +1,261 @@
-PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/Activate.ps1
-(.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/scripts/bench_gyrolabe.py
+(.venv) PS F:\Development\superintelligence> python scripts\bench_gyrolabe.py
+All 2 critical native symbols available
+GyroLabe benchmark (repeats=8, native=YES)
+
 === exact kernel ops ===
+
 --- n=256 ---
-signature_scan python: n=256, avg 1.922 ms, 133175.53 items/s
-signature_scan native: n=256, avg 0.017 ms, 14862118.85 items/s
-qmap_extract python: n=256, avg 3.831 ms, 66831.35 items/s
-qmap_extract native: n=256, avg 0.020 ms, 12953823.44 items/s
-extract_scan native: n=256, avg 0.031 ms, 8379705.46 items/s
-chirality_distance python: n=256, avg 2.424 ms, 105606.20 items/s
-chirality_distance native: n=256, avg 0.035 ms, 7311674.95 items/s
-chirality_distance_adjacent python: n=256, avg 2.428 ms, 105449.06 items/s
-chirality_distance_adjacent native: n=256, avg 0.013 ms, 20439120.48 items/s
-apply_signature_batch python: n=256, avg 2.180 ms, 117424.46 items/s
-apply_signature_batch native: n=256, avg 0.018 ms, 13998632.18 items/s
-state_scan_from_state python: n=256, avg 1.606 ms, 159424.58 items/s
-state_scan_from_state native: n=256, avg 0.009 ms, 28643371.72 items/s
-omega_signature_scan python: n=256, avg 2.123 ms, 120606.09 items/s
-omega_signature_scan native: n=256, avg 0.009 ms, 29897811.21 items/s
-omega12_scan_from_omega12 python: n=256, avg 1.801 ms, 142161.01 items/s
-omega12_scan_from_omega12 native: n=256, avg 0.009 ms, 29425284.78 items/s
-shell_histogram_state24 python: n=256, avg 2.966 ms, 86308.98 items/s
-shell_histogram_state24 native: n=256, avg 0.008 ms, 31801230.03 items/s
-shell_histogram_omega12 python: n=256, avg 3.071 ms, 83371.33 items/s
-shell_histogram_omega12 native: n=256, avg 0.008 ms, 31219496.09 items/s
-wht64 python ref: n=256, avg 0.024 ms, 10633436.55 items/s
-wht64 native: n=256, avg 0.063 ms, 4045032.48 items/s
-wht64_metal_first: n=256, avg 0.065 ms, 3922620.06 items/s
+  signature_scan python: n=256, avg 1.933 ms, 132440.91 items/s
+  signature_scan native: n=256, avg 0.012 ms, 22260869.07 items/s (168x vs py)
+  qmap_extract python: n=256, avg 3.949 ms, 64831.67 items/s
+  qmap_extract native: n=256, avg 0.021 ms, 12032901.38 items/s (186x vs py)
+  extract_scan native: n=256, avg 0.028 ms, 9155120.22 items/s
+  chirality_distance python: n=256, avg 2.507 ms, 102108.48 items/s
+  chirality_distance native: n=256, avg 0.022 ms, 11729668.44 items/s (115x vs py)
+  chir_dist_adjacent python: n=256, avg 2.516 ms, 101743.25 items/s
+  chir_dist_adjacent native: n=256, avg 0.013 ms, 19015783.67 items/s (187x vs py)
+  apply_sig_batch python: n=256, avg 2.179 ms, 117508.00 items/s
+  apply_sig_batch native: n=256, avg 0.013 ms, 20398404.79 items/s (174x vs py)
+  state_scan python: n=256, avg 1.668 ms, 153493.32 items/s
+  state_scan native: n=256, avg 0.009 ms, 27125830.40 items/s (177x vs py) 
+  omega_sig_scan python: n=256, avg 2.218 ms, 115431.01 items/s
+  omega_sig_scan native: n=256, avg 0.009 ms, 27713133.11 items/s (240x vs py)
+  omega12_scan python: n=256, avg 1.847 ms, 138581.57 items/s
+  omega12_scan native: n=256, avg 0.013 ms, 20418754.19 items/s (147x vs py)
+  shell_hist_state24 python: n=256, avg 3.024 ms, 84654.68 items/s
+  shell_hist_state24 native: n=256, avg 0.014 ms, 18400723.01 items/s (217x vs py)
+  shell_hist_omega12 python: n=256, avg 3.143 ms, 81445.66 items/s
+  shell_hist_omega12 native: n=256, avg 0.008 ms, 30476196.00 items/s (374x vs py)
+
 --- n=4096 ---
-signature_scan python: n=4096, avg 26.480 ms, 154683.80 items/s
-signature_scan native: n=4096, avg 0.017 ms, 246932892.51 items/s
-qmap_extract python: n=4096, avg 59.612 ms, 68711.06 items/s
-qmap_extract native: n=4096, avg 0.025 ms, 163594646.00 items/s
-extract_scan native: n=4096, avg 0.040 ms, 103011620.02 items/s
-chirality_distance python: n=4096, avg 38.336 ms, 106844.11 items/s
-chirality_distance native: n=4096, avg 0.065 ms, 62858237.65 items/s
-chirality_distance_adjacent python: n=4096, avg 38.257 ms, 107066.21 items/s
-chirality_distance_adjacent native: n=4096, avg 0.036 ms, 112604809.48 items/s
-apply_signature_batch python: n=4096, avg 33.553 ms, 122074.79 items/s
-apply_signature_batch native: n=4096, avg 0.014 ms, 289725936.80 items/s
-state_scan_from_state python: n=4096, avg 25.520 ms, 160501.17 items/s
-state_scan_from_state native: n=4096, avg 0.013 ms, 304535303.50 items/s
-omega_signature_scan python: n=4096, avg 34.173 ms, 119861.28 items/s
-omega_signature_scan native: n=4096, avg 0.024 ms, 172918216.98 items/s
-omega12_scan_from_omega12 python: n=4096, avg 28.665 ms, 142890.10 items/s
-omega12_scan_from_omega12 native: n=4096, avg 0.013 ms, 327025927.63 items/s
-shell_histogram_state24 python: n=4096, avg 45.900 ms, 89237.18 items/s
-shell_histogram_state24 native: n=4096, avg 0.024 ms, 168994308.44 items/s
-shell_histogram_omega12 python: n=4096, avg 65.230 ms, 62792.74 items/s
-shell_histogram_omega12 native: n=4096, avg 0.023 ms, 176266792.52 items/s
-wht64 python ref: n=4096, avg 0.291 ms, 14065933.80 items/s
-wht64 native: n=4096, avg 0.212 ms, 19286639.03 items/s
-wht64_metal_first: n=4096, avg 0.184 ms, 22269946.56 items/s
+  signature_scan python: n=4096, avg 30.657 ms, 133607.28 items/s
+  signature_scan native: n=4096, avg 0.018 ms, 224746221.16 items/s (1682x vs py)
+  qmap_extract python: n=4096, avg 62.075 ms, 65984.94 items/s
+  qmap_extract native: n=4096, avg 0.027 ms, 153768189.12 items/s (2330x vs py)
+  extract_scan native: n=4096, avg 0.043 ms, 95366706.31 items/s
+  chirality_distance python: n=4096, avg 38.830 ms, 105486.57 items/s
+  chirality_distance native: n=4096, avg 0.068 ms, 60546934.06 items/s (574x vs py)
+  chir_dist_adjacent python: n=4096, avg 39.161 ms, 104594.09 items/s
+  chir_dist_adjacent native: n=4096, avg 0.037 ms, 109922844.76 items/s (1051x vs py)
+  apply_sig_batch python: n=4096, avg 34.100 ms, 120118.40 items/s
+  apply_sig_batch native: n=4096, avg 0.015 ms, 266623261.19 items/s (2220x vs py)
+  state_scan python: n=4096, avg 25.937 ms, 157924.08 items/s
+  state_scan native: n=4096, avg 0.015 ms, 279590397.64 items/s (1770x vs py)
+  omega_sig_scan python: n=4096, avg 34.123 ms, 120034.93 items/s
+  omega_sig_scan native: n=4096, avg 0.017 ms, 246932892.51 items/s (2057x vs py)
+  omega12_scan python: n=4096, avg 29.289 ms, 139846.05 items/s
+  omega12_scan native: n=4096, avg 0.014 ms, 303407386.46 items/s (2170x vs py)
+  shell_hist_state24 python: n=4096, avg 47.565 ms, 86113.76 items/s
+  shell_hist_state24 native: n=4096, avg 0.043 ms, 94979708.04 items/s (1103x vs py)
+  shell_hist_omega12 python: n=4096, avg 49.349 ms, 83000.54 items/s
+  shell_hist_omega12 native: n=4096, avg 0.015 ms, 281029264.30 items/s (3386x vs py)
+
 --- n=65536 ---
-signature_scan python: n=65536, avg 440.935 ms, 148629.49 items/s
-signature_scan native: n=65536, avg 0.121 ms, 540224627.88 items/s
-qmap_extract python: n=65536, avg 959.006 ms, 68337.44 items/s
-qmap_extract native: n=65536, avg 0.119 ms, 549683379.41 items/s
-extract_scan native: n=65536, avg 0.229 ms, 286245899.74 items/s
-chirality_distance python: n=65536, avg 610.520 ms, 107344.52 items/s
-chirality_distance native: n=65536, avg 0.449 ms, 145980231.51 items/s
-chirality_distance_adjacent python: n=65536, avg 610.917 ms, 107274.88 items/s
-chirality_distance_adjacent native: n=65536, avg 0.398 ms, 164694350.63 items/s
-apply_signature_batch python: n=65536, avg 540.639 ms, 121219.48 items/s
-apply_signature_batch native: n=65536, avg 0.052 ms, 1257285275.13 items/s
-state_scan_from_state python: n=65536, avg 408.611 ms, 160387.11 items/s
-state_scan_from_state native: n=65536, avg 0.091 ms, 721861489.07 items/s
-omega_signature_scan python: n=65536, avg 537.802 ms, 121858.95 items/s
-omega_signature_scan native: n=65536, avg 0.125 ms, 523293739.93 items/s
-omega12_scan_from_omega12 python: n=65536, avg 475.132 ms, 137932.30 items/s
-omega12_scan_from_omega12 native: n=65536, avg 0.077 ms, 847402623.51 items/s
-shell_histogram_state24 python: n=65536, avg 799.112 ms, 82011.03 items/s
-shell_histogram_state24 native: n=65536, avg 0.290 ms, 226161681.38 items/s
-shell_histogram_omega12 python: n=65536, avg 834.364 ms, 78546.06 items/s
-shell_histogram_omega12 native: n=65536, avg 0.152 ms, 431441738.66 items/s
-wht64 python ref: n=65536, avg 6.319 ms, 10371794.71 items/s
-wht64 native: n=65536, avg 2.172 ms, 30175890.98 items/s
-wht64_metal_first: n=65536, avg 1.623 ms, 40388564.89 items/s
-=== tensor and operator ops ===
+  signature_scan python: n=65536, avg 502.729 ms, 130360.51 items/s
+  signature_scan native: n=65536, avg 0.133 ms, 493215426.48 items/s (3783x vs py)
+  qmap_extract python: n=65536, avg 955.985 ms, 68553.34 items/s
+  qmap_extract native: n=65536, avg 0.125 ms, 523137095.23 items/s (7631x vs py)
+  extract_scan native: n=65536, avg 0.283 ms, 231811470.04 items/s
+  chirality_distance python: n=65536, avg 622.694 ms, 105245.91 items/s
+  chirality_distance native: n=65536, avg 0.412 ms, 159072789.77 items/s (1511x vs py)
+  chir_dist_adjacent python: n=65536, avg 617.855 ms, 106070.21 items/s
+  chir_dist_adjacent native: n=65536, avg 0.421 ms, 155547380.48 items/s (1466x vs py)
+  apply_sig_batch python: n=65536, avg 546.541 ms, 119910.42 items/s
+  apply_sig_batch native: n=65536, avg 0.051 ms, 1281564315.44 items/s (10688x vs py)
+  state_scan python: n=65536, avg 412.662 ms, 158812.95 items/s
+  state_scan native: n=65536, avg 0.105 ms, 626688959.99 items/s (3946x vs py)
+  omega_sig_scan python: n=65536, avg 541.187 ms, 121096.78 items/s
+  omega_sig_scan native: n=65536, avg 0.133 ms, 493958926.29 items/s (4079x vs py)
+  omega12_scan python: n=65536, avg 461.756 ms, 141927.81 items/s
+  omega12_scan native: n=65536, avg 0.078 ms, 843313469.33 items/s (5942x vs py)
+  shell_hist_state24 python: n=65536, avg 795.951 ms, 82336.75 items/s
+  shell_hist_state24 native: n=65536, avg 0.318 ms, 206128564.28 items/s (2503x vs py)
+  shell_hist_omega12 python: n=65536, avg 851.888 ms, 76930.27 items/s
+  shell_hist_omega12 native: n=65536, avg 0.125 ms, 524812791.86 items/s (6822x vs py)
+
+=== OpenCL reference ===
+
 --- batch=64 ---
-bitplane_gemv python: n=64, avg 386.066 ms, 165.77 items/s
-bitplane_gemv native: n=64, avg 0.119 ms, 540084.39 items/s
-torch mv: n=64, avg 0.003 ms, 24037572.72 items/s
-parity warning for PackedBitplaneMatrix64.gemv parity batch=64: max_abs=0.000865
-PackedBitplaneMatrix64.gemv: n=64, avg 0.079 ms, 806807.44 items/s
-parity warning for PackedBitplaneMatrix64.gemm_packed_batch parity batch=64: max_abs=0.001241
-pack_vector_batch64: n=64, avg 0.060 ms, 1063564.61 items/s
-PackedBitplaneMatrix64.gemm_packed_batch: n=64, avg 3.741 ms, 17107.38 items/s
-torch mm: n=64, avg 0.012 ms, 5327784.94 items/s
-PackedBitplaneMatrix64I32.gemv_packed: n=64, avg 0.058 ms, 1108705.15 items/s        
-OpenCLPackedMatrix64.gemm_packed_batch: n=64, avg 0.379 ms, 168715.19 items/s
-parity warning for OpenCLPackedMatrix64 parity batch=64: max_abs=0.001368
-OpenCLPackedMatrix64I32.gemm_packed_batch: n=64, avg 0.371 ms, 172471.87 items/s
+  OpenCL_f32.gemm_batch: n=64, avg 0.339 ms, 188804.48 items/s
+  parity warning for OpenCL_f32 batch=64: max_abs=0.001369
+  OpenCL_i32.gemm_batch: n=64, avg 0.250 ms, 255782.58 items/s
+
 --- batch=256 ---
-bitplane_gemv python: n=256, avg 1573.745 ms, 162.67 items/s
-bitplane_gemv native: n=256, avg 0.446 ms, 573669.47 items/s
-torch mv: n=256, avg 0.003 ms, 78168038.37 items/s
-parity warning for PackedBitplaneMatrix64.gemv parity batch=256: max_abs=0.000932
-PackedBitplaneMatrix64.gemv: n=256, avg 0.282 ms, 906917.00 items/s
-parity warning for PackedBitplaneMatrix64.gemm_packed_batch parity batch=256: max_abs=0.001390
-pack_vector_batch64: n=256, avg 0.222 ms, 1152050.42 items/s
-PackedBitplaneMatrix64.gemm_packed_batch: n=256, avg 4.188 ms, 61128.31 items/s
-torch mm: n=256, avg 0.027 ms, 9394496.62 items/s
-PackedBitplaneMatrix64I32.gemv_packed: n=256, avg 0.063 ms, 4079680.96 items/s       
-OpenCLPackedMatrix64.gemm_packed_batch: n=256, avg 0.733 ms, 349065.12 items/s
-parity warning for OpenCLPackedMatrix64 parity batch=256: max_abs=0.001405
-OpenCLPackedMatrix64I32.gemm_packed_batch: n=256, avg 0.429 ms, 597328.36 items/s
+  OpenCL_f32.gemm_batch: n=256, avg 0.743 ms, 344392.69 items/s
+  parity warning for OpenCL_f32 batch=256: max_abs=0.001405
+  OpenCL_i32.gemm_batch: n=256, avg 0.381 ms, 672202.72 items/s
+
+=== QuBEC holographic matmul ===
+
+--- 64×64 ---
+  numpy i64 matmul: n=4096, avg 0.110 ms, 37402121.53 items/s
+  torch i64 matmul: n=4096, avg 0.112 ms, 36600022.05 items/s (98% vs numpy)
+  matmul_i32_exact: n=4096, avg 0.093 ms, 44221322.76 items/s (118% vs numpy)
+  qubec_holographic: n=4096, avg 0.101 ms, 40514342.81 items/s (108% vs numpy)
+  qubec_holographic (torch): n=4096, avg 0.100 ms, 41129659.18 items/s (110% vs numpy)
+  mixed profile [high dynamic range input]:
+    q: bulk=0 spin=19 dense=45
+    k: bulk=0 spin=21 dense=43
+    pairs: bb=0 bs=0 bd=0 ss=399 sd=1762 dd=1935 total=4096
+  qubec symmetric: n=4096, avg 0.083 ms, 49127439.48 items/s (131% vs numpy)
+  standard profile [default range input]: init=0.00ms eval=1.00ms total_pairs=4096
+    q: bulk=64 spin=0 dense=0
+    k: bulk=64 spin=0 dense=0
+    pairs: bb=4096 bs=0 bd=0 ss=0 sd=0 dd=0
+
+--- 128×64 ---
+  numpy i64 matmul: n=16384, avg 0.423 ms, 38713412.36 items/s
+  torch i64 matmul: n=16384, avg 0.471 ms, 34816978.97 items/s (90% vs numpy)
+  matmul_i32_exact: n=16384, avg 0.153 ms, 107181290.50 items/s (277% vs numpy)
+  qubec_holographic: n=16384, avg 0.140 ms, 116715940.01 items/s (301% vs numpy)
+  qubec_holographic (torch): n=16384, avg 0.147 ms, 111332710.39 items/s (288% vs numpy)
+  mixed profile [high dynamic range input]:
+    q: bulk=0 spin=49 dense=79
+    k: bulk=0 spin=41 dense=87
+    pairs: bb=0 bs=0 bd=0 ss=2009 sd=7502 dd=6873 total=16384
+  qubec symmetric: n=16384, avg 0.130 ms, 126346630.80 items/s (326% vs numpy)
+  standard profile [default range input]: init=0.00ms eval=0.00ms total_pairs=16384
+    q: bulk=128 spin=0 dense=0
+    k: bulk=128 spin=0 dense=0
+    pairs: bb=16384 bs=0 bd=0 ss=0 sd=0 dd=0
+
+--- 256×64 ---
+  numpy i64 matmul: n=65536, avg 1.766 ms, 37105387.88 items/s
+  torch i64 matmul: n=65536, avg 1.846 ms, 35492252.13 items/s (96% vs numpy)
+  matmul_i32_exact: n=65536, avg 0.435 ms, 150648812.62 items/s (406% vs numpy)
+  qubec_holographic: n=65536, avg 0.252 ms, 260257131.79 items/s (701% vs numpy)
+  qubec_holographic (torch): n=65536, avg 0.291 ms, 224996996.94 items/s (606% vs numpy)
+  mixed profile [high dynamic range input]:
+    q: bulk=0 spin=86 dense=170
+    k: bulk=0 spin=69 dense=187
+    pairs: bb=0 bs=0 bd=0 ss=5934 sd=27812 dd=31790 total=65536
+  qubec symmetric: n=65536, avg 0.201 ms, 326272945.45 items/s (879% vs numpy)
+  standard profile [default range input]: init=0.00ms eval=0.00ms total_pairs=65536
+    q: bulk=256 spin=0 dense=0
+    k: bulk=256 spin=0 dense=0
+    pairs: bb=65536 bs=0 bd=0 ss=0 sd=0 dd=0
+
+--- 512×64 ---
+  numpy i64 matmul: n=262144, avg 7.460 ms, 35138415.57 items/s
+  torch i64 matmul: n=262144, avg 7.427 ms, 35295072.01 items/s (100% vs numpy)
+  matmul_i32_exact: n=262144, avg 1.489 ms, 176101033.79 items/s (501% vs numpy)
+  qubec_holographic: n=262144, avg 1.001 ms, 261842879.30 items/s (745%   qubec_holographic: n=262144, avg 1.001 ms, 261842879.30 items/s   qubec_holographic: n=262144, avg 1.001 ms, 261842879.30 items/s (745% vs numpy)
+  qubec_holographic (torch): n=262144, avg 0.744 ms, 352415135.88 items/s (10x vs numpy)
+  mixed profile [high dynamic range input]:
+    q: bulk=0 spin=178 dense=334
+    k: bulk=0 spin=180 dense=332
+    pairs: bb=0 bs=0 bd=0 ss=32040 sd=119216 dd=110888 total=262144  
+  qubec symmetric: n=262144, avg 0.893 ms, 293394143.59 items/s (835% vs numpy)
+  standard profile [default range input]: init=0.00ms eval=0.00ms total_pairs=262144
+    q: bulk=512 spin=0 dense=0
+    k: bulk=512 spin=0 dense=0
+    pairs: bb=262144 bs=0 bd=0 ss=0 sd=0 dd=0
+(.venv) PS F:\Development\superintelligence>
+
+===
+
+(.venv) PS F:\Development\superintelligence> pytest tests\tools\test_gyrolabe_encode.py -v -s
+========================== test session starts ===========================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- F:\Development\superintelligence\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: F:\Development\superintelligence
+configfile: pytest.ini
+plugins: anyio-4.12.1
+collected 26 items                                                        
+
+tests/tools/test_gyrolabe_encode.py::test_exact_boundary_zero_transcendentals 
+[exact boundary - zero transcendentals]
+  prompt: 'The QuBEC climate is finite, shell-exact, and byte-native.'
+  patch_count: 58
+  mean_bytes_per_patch: 1.000
+  exact boundary path completed with transcendental calls blocked.
+PASSED
+tests/tools/test_gyrolabe_encode.py::test_chirality_vs_cosine_speed_fidelity
+[chirality vs cosine - speed]
+  chirality_distance_adjacent: 0.000011 s
+  mock_cosine_adjacent: 0.002950 s
+  speedup: 274.7x
+  chirality path runs without transcendental operations.
+
+  [fidelity] Chirality distance stratification:
+    Chirality Dist 0: count = 1
+    Chirality Dist 1: count = 7
+    Chirality Dist 2: count = 14
+    Chirality Dist 3: count = 23
+    Chirality Dist 4: count = 23
+    Chirality Dist 5: count = 6
+PASSED
+tests/tools/test_gyrolabe_encode.py::test_m2_modulated_boundary_threshold  
+[M2-modulated boundary threshold]
+  M2=64 (condensed): patch_count = 31
+  M2=4096 (thermalized): patch_count = 74
+  M2 modulates effective threshold; monotonic relationship observed.       
+PASSED
+tests/tools/test_gyrolabe_encode.py::test_encode_extract_fields_speed_report
+[encode extract_fields speed]
+  batch: 2
+  tokens: 8192
+  valid_bytes: 8192
+  avg_ms: 1.648
+  bytes_per_sec: 4970067.06
+  valid_bytes_per_sec: 4970067.06
+PASSED
+tests/tools/test_gyrolabe_encode.py::test_gyrolabe_opencl_climate_projection_verbose
+[gyrolabe OpenCL climate projection]
+  batch_shape: (64, 64)
+  max_err: 0.0
+PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_small_exact PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_symmetric PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_asymmetric_shapes PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_wide_columns PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_width_64_exact PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_extreme_values PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_zero_matrix PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_single_row PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_sparse_values PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_spin_heavy PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_dense_heavy PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_mixed_bulk_spin_dense PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_profile_fields PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_profile_symmetric PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_torch_input PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecHolographicMatmul::test_qubec_matches_matmul_i32 PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecBolmoIntegration::test_qubec_wht64_exact PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecBolmoIntegration::test_qubec_embedding_projection
+[qubec embedding projection]
+  embed slice: 64×64
+  query batch: 16×64
+  exact match: YES
+PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecBolmoIntegration::test_qubec_attention_score_simulation
+[qubec attention simulation]
+  seq_len=32, head_dim=64
+  asymmetric: exact
+  symmetric: exact
+PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecBolmoIntegration::test_qubec_speed_vs_torch
+[qubec speed vs torch]
+  64×64: qubec=0.119ms torch=0.117ms ratio=0.98x
+  128×64: qubec=0.152ms torch=0.568ms ratio=3.73x
+  256×64: qubec=0.371ms torch=2.000ms ratio=5.40x
+PASSED
+tests/tools/test_gyrolabe_encode.py::TestQubecBolmoIntegration::test_qubec_real_weight_matmul_speed
+[qubec on real Bolmo weights]
+  name                                                      shape  bulk  spin dense     qubec    torch  ratio
+  model.local_encoder.byte_embedding.weight               256×256     0   model.local_encoder.byte_embedding.weight               256×256    0   256    2.568ms   6.624ms  2.58x
+  model.local_encoder.subword_embedding.weight            256×256     0    13   243    3.206ms   6.761ms  2.11x
+  model.local_encoder.layers.0.xlstm.q.weight             256×256     0     0   256    2.598ms   7.013ms  2.70x
+  model.local_encoder.layers.0.xlstm.k.weight             256×256     0     0   256    2.475ms   7.449ms  3.01x
+  model.local_encoder.layers.0.xlstm.v.weight             256×256     0     0   256    2.675ms   7.445ms  2.78x
+  model.local_encoder.layers.0.xlstm.ogate_preact.weight      256×256     0     0   256    2.750ms   7.999ms  2.91x
+PASSED
+
+========================== 26 passed in 27.68s ===========================
+(.venv) PS F:\Development\superintelligence>
+
+===
+
 (.venv) PS F:\Development\superintelligence> & f:/Development/superintelligence/.venv/Scripts/python.exe f:/Development/superintelligence/scripts/bench_gyrograph.py      
 native_available=True, opencl_available=True
 bench scales: [256, 4096, 65536], repeats: 20
@@ -286,3 +437,5 @@ PASSED
 
 ========================== 13 passed in 88.64s (0:01:28) =========================== 
 (.venv) PS F:\Development\superintelligence> 
+
+

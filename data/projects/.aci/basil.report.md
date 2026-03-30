@@ -43,3 +43,4 @@ originating from Human Intelligence.
 - Economy aperture: 0.500000
 - Employment aperture: 0.526316
 - Education aperture: 0.500000
+

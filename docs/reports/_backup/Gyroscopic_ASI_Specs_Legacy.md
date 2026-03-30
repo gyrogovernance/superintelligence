@@ -1813,3 +1813,5 @@ The `intron_features` matrix has 10 columns:
 - Column 9: total intron weight normalized to [-1, +1]
 
 These priors are available to any computation that benefits from the byte's constitutional structure before it gets projected into mask_12 geometry. The mask-stage helpers in Category 6 (`mask12_by_byte`, `features_K*`) are the post-projection representations.
+
+

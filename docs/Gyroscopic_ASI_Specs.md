@@ -1548,3 +1548,5 @@ In the aQPU model, computation proceeds as follows:
 
 The 4 intrinsic gates {id, S, C, F} are the operations where the mutation step is either trivial (mask = 0) or maximal (mask = 0xFFF) and exactly compensated by the gyration phase. They preserve both horizons because they do not create partial chirality: they either leave chirality unchanged (id, C on complement horizon, S on equality horizon) or fully invert it (S on complement horizon, C on equality horizon, F on both). All other bytes create partial transformations that move states between the horizons, populating the contingent bulk of Omega.
 
+
+

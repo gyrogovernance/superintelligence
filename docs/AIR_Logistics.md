@@ -272,3 +272,4 @@ The framework does not replace human governance. It makes human governance demon
 In AIR, replayable byte logs establish shared moments, and depth-4 frame commitments provide the stronger provenance needed when final-state agreement alone is insufficient.
 
 In this way, AIR provides the logistical infrastructure for artificial intelligence governance: the rigorous planning, tracking, and verification that allows complex systems to operate transparently and accountably.
+

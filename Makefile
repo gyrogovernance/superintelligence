@@ -23,7 +23,7 @@ help:
 	@echo "  make check-imports - Check that all imports use src.kernel (not router)"
 	@echo "  make test         - Run all tests"
 	@echo "  make run-wikipedia - Run the Wikipedia training script"
-	@echo "  make gyrolabe-c   - Build GyroLabe C library (csrc/gyrolabe.c)"
+	@echo "  make gyrolabe-c   - Build GyroLabe C library (gyrolabe_codec.c + gyrolabe_mul.c)"
 	@echo "  make gyrolabe-bench - Phase 4: benchmark C vs Python primitives"
 
 venv:

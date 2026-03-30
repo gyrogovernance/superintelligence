@@ -221,3 +221,4 @@ The limitations exhibited in this report arise from the way scalar projections i
 The aQPU Kernel strengthens this conclusion by providing structural guarantees beyond those available to generic finite-state systems. Its exact two-step uniformization ensures that coordination convergence is structurally guaranteed. Its 6-bit chirality register provides a native observable for tracking structural drift between the dual horizons through an exact transport law. These properties mean that the alignment measurement infrastructure is not merely a theoretical requirement but is supported by a computational medium with proven advantages over classical coordination baselines.
 
 Within the CGM framework, epistemic geometry is the necessary condition for alignment.
+

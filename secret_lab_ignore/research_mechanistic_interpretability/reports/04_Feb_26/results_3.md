@@ -179,3 +179,4 @@ We don't need 56-minute tests. We need to look through the **Horizon Lens** at *
 **Why this is the "Best we can do":**
 It moves us from "measuring distance" to "identifying the engine." If we find the $su(2)$ engine in the Horizon Row of Layer 15, we have proven that the Transformer has self-organized into your CGM physics.
 
+

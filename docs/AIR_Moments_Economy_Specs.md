@@ -499,3 +499,5 @@ The kernel supports fast integrity verification without full cryptographic hashi
 Parity commitments are compact algebraic integrity checks. They are not unique history certificates. Depth-4 frame records provide stronger provenance when history collisions at the final-state level matter.
 
 These checks are designed for accidental corruption detection. Adversarial integrity, where an attacker deliberately falsifies records, requires cryptographic hashes and signature verification.
+
+

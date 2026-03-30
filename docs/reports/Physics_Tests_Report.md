@@ -676,3 +676,4 @@ The physics tests collectively establish the following properties of the Gyrosco
 **Theory bridge** (test_physics_5): The kernel constants satisfy all CGM continuous invariants including Q_G * m_a^2 = 1/2, the fine-structure constant prediction to 0.04%, the K_QG identity, the stage action ratios, and the aperture quantization chain (5/256, 1/48, 8/256 turn). The DOF doubling law 2^(2*DOF) connects continuous degrees of freedom to discrete state counts. The product structure Omega = U x V implements optical conjugacy with constant density 0.5 at every state.
 
 The full test suite confirms that the discrete 24-bit byte-driven kernel is a faithful finite-group realization of the CGM theoretical framework at the kernel level, with exact integer theorems replacing the continuous relations of the original physics. The governance measurement layer (aperture, domain ledgers, Hodge decomposition) is not covered by these physics tests.
+
