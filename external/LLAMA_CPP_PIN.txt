@@ -1,0 +1,4 @@
+# Pinned ggml-org/llama.cpp release. Submodule gitlink must match commit_sha.
+# Update: cd external/llama.cpp && git fetch --tags && git checkout <tag> && cd ../.. && git add external/llama.cpp
+tag=b8589
+commit_sha=08f21453aec846867b39878500d725a05bd32683
