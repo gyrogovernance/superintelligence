@@ -58,6 +58,7 @@
 
     "**/__pycache__",
     "**/_backup",
+    "**/_backup/**",
     "**/*.py[cod]",
     "**/*$py.class",
     "**/*.so",

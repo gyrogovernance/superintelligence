@@ -9,7 +9,6 @@ import random
 import pytest
 
 torch = pytest.importorskip("torch")
-from torch import Tensor as TorchTensor
 
 import src.sdk as sdk
 from src.api import (
@@ -60,26 +59,6 @@ def _sample_states(states: tuple[int, ...], n: int, seed: int = 12345) -> tuple[
     return tuple(states[i] for i in idxs)
 
 
-def _mixed_state_batch(omega_states: tuple[int, ...]) -> TorchTensor:
-    mixed = [
-        omega_states[0],
-        omega_states[1],
-        omega_states[127],
-        omega_states[2048],
-        0x000000,
-        0x123456,
-        0xFFFFFF,
-        0x024924,
-    ]
-    return torch.tensor(mixed, dtype=torch.int32, device="cpu")
-
-
-def _bytes_tensor(seq: list[int] | bytes) -> TorchTensor:
-    if isinstance(seq, bytes):
-        return torch.tensor(list(seq), dtype=torch.uint8, device="cpu")
-    return torch.tensor(seq, dtype=torch.uint8, device="cpu")
-
-
 # ---------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------
@@ -102,17 +81,6 @@ def witness_depth_histogram(omega_states: tuple[int, ...]) -> dict[int, int]:
     for depth in sorted(hist):
         print(f"  depth {depth}: {hist[depth]}")
     return dict(hist)
-
-
-@pytest.fixture(scope="module")
-def native_ready() -> bool:
-    try:
-        sdk.initialize_native()
-    except Exception as e:
-        print(f"\n[native] initialize_native() raised: {e!r}")
-    available = bool(sdk.gyrolabe_available())
-    print(f"\n[native] GyroLabe available: {available}")
-    return available
 
 
 # ---------------------------------------------------------------------
@@ -590,171 +558,3 @@ class TestMomentsCarryOmegaData:
         assert cmp.left_next_byte == 0x22
         assert cmp.right_next_byte == 0x99
 
-
-# ---------------------------------------------------------------------
-# Native runtime Ω / shell surfaces
-# ---------------------------------------------------------------------
-
-
-@pytest.mark.skipif(not torch, reason="torch not available")
-class TestRuntimeNativeOmegaAndShell:
-    def test_runtime_state24_to_omega12_and_back(self, omega_states: tuple[int, ...], native_ready: bool) -> None:
-        states = _mixed_state_batch(omega_states)
-        omega_packed, valid = sdk.RuntimeOps.omega12_from_states(states)
-        rebuilt = sdk.RuntimeOps.states_from_omega12(omega_packed)
-
-        print("\nruntime state24 -> omega12 -> state24:")
-        for i in range(states.numel()):
-            print(
-                f"  state=0x{int(states[i]):06x} "
-                f"valid={int(valid[i])} "
-                f"omega=0x{int(omega_packed[i]):03x} "
-                f"rebuilt=0x{int(rebuilt[i]):06x}"
-            )
-
-        for i in range(states.numel()):
-            s = int(states[i])
-            is_omega = sdk.StateOps.is_in_omega(s)
-            assert int(valid[i]) == int(is_omega)
-            if is_omega:
-                assert int(rebuilt[i]) == s
-
-    def test_runtime_step_omega12_batch_matches_python(self, omega_states: tuple[int, ...], native_ready: bool) -> None:
-        sample = torch.tensor(
-            [sdk.StateOps.pack_omega12(sdk.StateOps.to_omega12(s)) for s in omega_states[:16]],
-            dtype=torch.int32,
-            device="cpu",
-        )
-        byte = 0x7E
-
-        native_out = sdk.RuntimeOps.step_omega12_batch(sample, byte)
-        py_out = []
-        for x in sample:
-            om = sdk.StateOps.unpack_omega12(int(x))
-            py_out.append(sdk.StateOps.pack_omega12(sdk.StateOps.step_omega12(om, byte)))
-        py_out_t = torch.tensor(py_out, dtype=torch.int32, device="cpu")
-
-        print(f"\nruntime Ω step batch byte=0x{byte:02x}")
-        print(f"  native = {native_out.tolist()[:8]}")
-        print(f"  python = {py_out_t.tolist()[:8]}")
-
-        assert torch.equal(native_out, py_out_t)
-
-    def test_runtime_apply_omega_signature_batch_matches_python(self, omega_states: tuple[int, ...], native_ready: bool) -> None:
-        packed_states = torch.tensor(
-            [sdk.StateOps.pack_omega12(sdk.StateOps.to_omega12(s)) for s in omega_states[:8]],
-            dtype=torch.int32,
-            device="cpu",
-        )
-
-        words = [
-            bytes([0xAA]),
-            bytes([0x11, 0x22]),
-            bytes([0xD5, 0x2B, 0x54]),
-            bytes([0x7E, 0x81, 0x00, 0x44]),
-            bytes([0x54]),
-            bytes([0xAA, 0xAA]),
-            bytes([0x01, 0x02, 0x03]),
-            bytes([0xFE, 0xEF]),
-        ]
-        packed_sigs = torch.tensor(
-            [sdk.StateOps.pack_omega_signature12(sdk.StateOps.omega_signature(w)) for w in words],
-            dtype=torch.int32,
-            device="cpu",
-        )
-
-        native_out = sdk.RuntimeOps.apply_omega_signature_batch(packed_states, packed_sigs)
-
-        py_out = []
-        for x, sig in zip(packed_states.tolist(), packed_sigs.tolist()):
-            om = sdk.StateOps.unpack_omega12(x)
-            sg = sdk.StateOps.unpack_omega_signature12(sig)
-            py_out.append(
-                sdk.StateOps.pack_omega12(sdk.StateOps.apply_omega_signature(om, sg))
-            )
-        py_out_t = torch.tensor(py_out, dtype=torch.int32, device="cpu")
-
-        print("\nruntime Ω signature application:")
-        print(f"  native = {native_out.tolist()}")
-        print(f"  python = {py_out_t.tolist()}")
-
-        assert torch.equal(native_out, py_out_t)
-
-    def test_runtime_shell_histograms(self, omega_states: tuple[int, ...], native_ready: bool) -> None:
-        packed_states = torch.tensor(list(omega_states[:256]), dtype=torch.int32, device="cpu")
-        packed_omega = torch.tensor(
-            [sdk.StateOps.pack_omega12(sdk.StateOps.to_omega12(s)) for s in omega_states[:256]],
-            dtype=torch.int32,
-            device="cpu",
-        )
-
-        hist_state = sdk.RuntimeOps.shell_histogram_state24(packed_states)
-        hist_omega = sdk.RuntimeOps.shell_histogram_omega12(packed_omega)
-        hist_checked, invalid = sdk.RuntimeOps.shell_histogram_state24_checked(packed_states)
-
-        print("\nruntime shell histograms:")
-        print(f"  from state24 unchecked = {hist_state.tolist()}")
-        print(f"  from omega12           = {hist_omega.tolist()}")
-        print(f"  from state24 checked   = {hist_checked.tolist()}, invalid={invalid}")
-
-        assert torch.equal(hist_omega, hist_checked)
-        assert invalid == 0
-
-    def test_runtime_omega_signature_scan(self, native_ready: bool) -> None:
-        word = _bytes_tensor([0xAA, 0x7E, 0x81, 0x00, 0x54, 0x2B])
-        packed_sigs = sdk.RuntimeOps.omega_signature_scan(word)
-
-        py = []
-        acc = sdk.OmegaSignature12(parity=0, tau_u6=0, tau_v6=0)
-        for b in word.tolist():
-            sig_b = sdk.OmegaSignature12(
-                parity=1,
-                tau_u6=EPS_A6_BY_BYTE[b],
-                tau_v6=MICRO_REF_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b],
-            )
-            acc = sdk.StateOps.compose_omega_signatures(sig_b, acc)
-            py.append(sdk.StateOps.pack_omega_signature12(acc))
-
-        py_t = torch.tensor(py, dtype=torch.int32, device="cpu")
-
-        print("\nruntime omega signature scan:")
-        print(f"  native = {packed_sigs.tolist()}")
-        print(f"  python = {py_t.tolist()}")
-
-        assert torch.equal(packed_sigs, py_t)
-
-    def test_runtime_omega12_scan_from_omega12(self, native_ready: bool) -> None:
-        payload = _bytes_tensor([0x11, 0x22, 0x33, 0x44, 0x55])
-        start = sdk.StateOps.pack_omega12(sdk.StateOps.to_omega12(GENE_MAC_REST))
-        native_scan = sdk.RuntimeOps.omega12_scan_from_omega12(payload, start)
-
-        py = []
-        om = sdk.StateOps.unpack_omega12(start)
-        for b in payload.tolist():
-            om = sdk.StateOps.step_omega12(om, b)
-            py.append(sdk.StateOps.pack_omega12(om))
-        py_t = torch.tensor(py, dtype=torch.int32, device="cpu")
-
-        print("\nruntime omega12 continuation scan:")
-        print(f"  native = {native_scan.tolist()}")
-        print(f"  python = {py_t.tolist()}")
-
-        assert torch.equal(native_scan, py_t)
-
-    def test_runtime_apply_omega_gate_batch_numeric_and_named(self, omega_states: tuple[int, ...], native_ready: bool) -> None:
-        packed_omega = torch.tensor(
-            [sdk.StateOps.pack_omega12(sdk.StateOps.to_omega12(s)) for s in omega_states[:16]],
-            dtype=torch.int32,
-            device="cpu",
-        )
-        gate_pairs = [(0, "id"), (1, "S"), (2, "C"), (3, "F")]
-
-        for code, name in gate_pairs:
-            out_num = sdk.RuntimeOps.apply_omega_gate_batch(packed_omega, code)
-            out_named = sdk.RuntimeOps.apply_omega_gate_batch_named(packed_omega, name)
-
-            print(f"\nruntime Ω gate batch {name} / code {code}:")
-            print(f"  numeric = {out_num.tolist()[:8]}")
-            print(f"  named   = {out_named.tolist()[:8]}")
-
-            assert torch.equal(out_num, out_named)

@@ -53,7 +53,8 @@ Modern AI treats the computer as a passive engine for evaluating frozen paramete
 **The Gyroscopic Paradigm**
 * Intelligence is stored in live occupation and resonance.
 * The machine is the active substrate, making static parameters unnecessary.
-* Inference is an exact state evolution happening in the present.
+* Inference is not a computed score or a probabilistic guess; it is the physical gyration itself.
+* The exact XOR crossover, where the passive past constrains the mutated present to commit the future, is the native act of intelligence.
 
 This fundamental shift transforms training, deployment, and optimization. The result is not merely a language model, but a **universal computational condenser**. Because all scientific and industrial domains eventually become computational artifacts, this architecture can index, compress, and reorganize the core structure of science, engineering, governance, and digital infrastructure.
 
@@ -86,6 +87,8 @@ It provides:
 - **Structural annotation for model I/O:** Model inputs and outputs are annotated using the kernel's algebraic byte structure.
 - **Replayable inference traces:** Inference can be tied to reproducible kernel-state trajectories for verification and audit.
 - **Hardware-near acceleration:** CPU and OpenCL acceleration achieving over 1.2 billion exact operations per second on standard commodity hardware.
+
+Crucially, GyroLabe does not operate as an external monitor evaluating a classical model's outputs. Its role is substitutional. It upgrades transformers by intercepting expensive continuous decision surfaces (such as floating-point matrix multiplications or softmax selections) and replacing them natively with exact discrete kinematics. The external model's interface is preserved, but its internal engine is swapped for the aQPU's Walsh-Hadamard XOR-convolutions and Plancherel condensation measures.
 
 > For the model bridge and execution layer, see the [GyroLabe Brief](docs/GyroLabe_Specs.md).
 
@@ -170,7 +173,7 @@ There is no reliable way to turn distributed human contribution into stable paid
 - 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
 - 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
 - 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
-- 🧪 [QuBEC Climate Theory](docs/QuBEC_Climate_Theory.md) - Theoretical foundation for climate observables and controls
+- 🧪 [QuBEC Climate Dynamics](docs/theory/QuBEC_Climate_Dynamics.md) - Finite occupation dynamics, transport, and operator partitions
 
 
 ### Extensions
@@ -200,6 +203,7 @@ All kernel properties are verified by exhaustive test suites (499 tests, all pas
 
 ### Supporting Theory
 - 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) - Shared coordination theory
+- 📖 [Analysis: Gyroscopic Multiplication](docs/references/Analysis_Gyroscopic_Multiplication.md) - Arithmetic layer and cross-layer structural analysis
 - 📖 [The Human Mark (THM)](docs/references/THM.md) - Human vs machine tagging
 - 📖 [The Human Mark: Paper](docs/references/THM_Paper.md) - Full tagging specification
 - 📖 [The Human Mark: Grammar](docs/references/THM_Grammar.md) - Parser and validation rules

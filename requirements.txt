@@ -41,3 +41,5 @@ typing-extensions>=4.10.0
 tqdm>=4.66.0
 psutil>=5.9.0
 rich>=13.0.0
+
+# Gyroscopic local LLM: native llama-cli (C); see requirements-gyroscopic.txt (notes only)

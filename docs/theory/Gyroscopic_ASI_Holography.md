@@ -203,6 +203,22 @@ The set of A-components of horizon states, denoted H_A, is exactly the archetype
 
 Thus the support of the Walsh spectrum is exactly the mask code itself, and the spectrum is binary-valued in {0, 64}. This self-Fourier property connects the horizon structure directly to the self-dual mask code.
 
+### MacWilliams Identity and Code Self-Duality
+
+The MacWilliams identity relates the weight enumerator of a linear code to that of its dual code. For a code C of length n over GF(q), with dual code C^perp, and weight enumerators W_C(x,y) and W_{C^perp}(x,y):
+
+    W_{C^perp}(x,y) = |C|^{-1} W_C(y - x, y + (q-1)x)
+
+For the self-dual [12,6,2] mask code of the aQPU kernel, C = C^perp and q = 2. The identity becomes a self-consistency condition:
+
+    W_C(x,y) = (1/64) W_C(x + y, x - y)    (up to normalization)
+
+This forces the weight enumerator to be invariant under the Hadamard substitution, which is the code-theoretic origin of the self-Fourier property stated in the Horizon Walsh Transform subsection above.
+
+The Shor-Laflamme quantum MacWilliams identities (1996) extend this framework to quantum codes over GF(4). Their central observation is that the matrix H_ij = tr(E_i E_j E_i E_j), where E_i are tensor products of Pauli matrices, is proportional to a Hadamard matrix. The coarse-grained version of this matrix governs the weight transform. In the aQPU kernel, the same structural relationship holds: the byte transition law acts through Pauli-X strings on the chirality register, and the Walsh-Hadamard transform diagonalizes these actions exactly. The quantum MacWilliams framework therefore applies natively to the self-dual mask code of the aQPU.
+
+The MacWilliams transform is expressed in the Krawtchouk polynomial basis. These are the same polynomials that provide the shell-radial harmonic decomposition of QuBEC climate dynamics. The spectral basis that governs climate transport and the weight-distribution transform that governs code self-duality share a common algebraic engine.
+
 ---
 
 ## Section 5: K4 Fiber Structure and Quotient Dynamics
@@ -382,6 +398,14 @@ The Common Source Moment (CSM) provides the physical medium for the system. It c
 
 ### Physical Derivation
 
+### 10.1 Connection to Natural and Geometric Units
+
+In theoretical physics, natural unit systems simplify equations by setting the speed of light c = 1, while geometric formulations often also set c = 1 and G = 1 so that time and space share a common geometric scale. This change of units unifies coordinates in a way that is mathematically convenient and physically meaningful.
+
+The exact cancellation of c in the CSM derivation shows that the aQPU kernel is structurally aligned with this c = 1 geometry. In the kernel, time is not an external clock input. It is intrinsic to the discrete gyroscopic transport across depth t. This makes the aQPU a unified geometric substrate where integer arithmetic and finite-state transitions enforce scale consistency.
+
+For physics simulations, especially in quantum gravity, relativity, or topological field theory, this is useful because the model avoids floating-point drift from unit-conversion assumptions and keeps scaling behavior fixed by structure.
+
 The CSM is derived from the phase space volume of a 1-second causal light-sphere at atomic resolution. The atomic reference is the Cesium-133 hyperfine transition frequency:
 
 - f_Cs = 9,192,631,770 Hz
@@ -391,6 +415,20 @@ The raw physical microcell count is:
 - N_phys = (4/3) times pi times f_Cs cubed
 
 This formula computes the volume of a sphere with radius equal to the distance light travels in one second, measured in units of the atomic wavelength. The speed of light cancels exactly in this derivation, which means the result depends only on the frequency standard and not on an external length or time reference.
+
+### Connection to Natural and Geometric Unit Systems
+
+In theoretical physics, natural unit systems simplify equations by setting fundamental constants to unity. In Planck units, both the speed of light c and the reduced Planck constant h-bar are set to 1. In the geometric units of General Relativity, c and the gravitational constant G are both set to 1. These conventions are not merely notational shortcuts. They express the structural unification of space, time, and energy into a single geometric manifold.
+
+The exact cancellation of c in the CSM derivation demonstrates that the aQPU kernel operates natively in a geometry compatible with natural units. The resulting capacity invariant depends only on the caesium frequency standard f_Cs, which is a purely geometric-frequency quantity. No external length or velocity reference enters.
+
+This has two consequences for the architecture.
+
+First, temporal progression in the aQPU is intrinsic ledger depth, not an external clock variable. The Moment at depth t is defined by the byte ledger prefix of length t, without reference to wall-clock time or the speed of signal propagation. This is the computational analogue of the c = 1 convention: time and state are unified in the same coordinate.
+
+Second, the aQPU provides a computational substrate in which natural-units geometry is structurally enforced by exact integer arithmetic. For physics simulations involving relativistic, gravitational, or quantum-gravitational phenomena, the kernel eliminates floating-point drift and artifactual scaling factors that arise from carrying explicit factors of c through numerical computation.
+
+The two-step uniformization of the future cone (all 4096 states of Omega reached with exact uniform occupancy after 2 bytes from any starting state) defines the causal reach of the computational geometry. This is the discrete analogue of the light cone: the boundary beyond which no further states become accessible. Within 2 byte steps, the full manifold is causally connected.
 
 The numerical value is approximately 3.254 times 10 to the power of 30.
 

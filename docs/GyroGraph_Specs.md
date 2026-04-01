@@ -135,9 +135,17 @@ Every cell uses the same kernel law. Cells carry no private learned weights, den
 
 This follows a cellular automaton pattern: identical local rules, differentiation from history and context.
 
+Because cells lack learned parameters, a cell's intelligence is strictly a function of its current occupation state (its condensation) and its rolling structural memory. The cell does not compute a probability distribution over incoming words. Its occupied state defines a reception geometry. When a 4-byte frame arrives, the cell gyrates through the transition law. The resulting shift in condensation—whether the cell absorbs the frame coherently or scatters toward thermalization—is the cell's exact inferential response.
+
 #### 4.2 Depth-4 temporality
 
 The aQPU Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame, which is why GyroGraph is a runtime intelligence layer rather than an offline state machine.
+
+Within this temporal frame, the byte and the word serve distinct roles. The byte is the phase atom of the kinematic law. It executes one phase of the four-part transition cycle. A single byte has no closed inferential meaning; it is a kinematic phase, not a semantic event.
+
+The 4-byte word is the closed action. It completes one full CS, UNA, ONA, BU cycle, resolving all family phases modulo K4 and committing a single state transition with a compiled signature (omega_sig). The word is the native external integration grain: the unit at which resonance updates, SLCP emission, and compiled action surfaces operate.
+
+The byte-log is not a log of decisions. It is phase-resolved provenance. The useful computational surfaces (signatures, parity commitments, resonance keys, spectral records, climate observables) are compiled closures and exact quotients computed at word boundaries.
 
 #### 4.3 Indirect cell agency
 
@@ -148,6 +156,10 @@ No single cell is an autonomous decision-maker. Cell agency is indirect to the o
 From any Ω state, one byte reaches exactly 128 next states with uniform 2:1 multiplicity. Two bytes reach all 4096 states with uniform 16:1 multiplicity. These are exact integer counts with zero variance. Longer words preserve this uniform occupancy.
 
 The rolling memories and spectral surfaces maintained by each cell are local projections of this global light-cone geometry. An SLCP record is therefore a precise coordinatization of where a cell sits inside the inherited light-cone, not an arbitrary feature vector.
+
+The two-step uniformization establishes the causal reach of the computational geometry. From any state, 2 bytes produce exact uniform occupancy over all 4096 states of Omega. This is the discrete analogue of a light cone: the boundary within which the full manifold becomes causally accessible. The causal structure is nontrivial only within the first 2 byte steps, where the 128-state immediate future (with its 2:1 multiplicity cover) constrains which states are reachable. Beyond depth 2, all states are equally reachable.
+
+The speed of light cancels exactly in the kernel's physical capacity derivation (CSM), leaving a purely geometric-frequency invariant. The kernel therefore operates in a computational geometry compatible with natural unit systems where c = 1. Time in this geometry is intrinsic ledger depth, not an external clock variable.
 
 ---
 
@@ -623,6 +635,12 @@ Each bridge defines:
 | Databases | Reserved: module present, implementation pending |
 | Networks | Reserved: module present, implementation pending |
 | Model-control | Implemented: byte-native decode bridge, climate helpers, structural control surfaces |
+
+#### 16.3 Substitutional Upgrade Principle
+
+A conforming bridge MUST NOT treat GyroGraph as a passive observer of an external model's expensive computations. The scope of a model-control bridge is to upgrade the target architecture without breaking its semantic interfaces.
+
+When wiring GyroGraph to a classical transformer, the bridge intercepts dense matrix multiplications and continuous activation functions at the L1/L2 cache boundaries. It routes those state updates through the exact discrete operations of the aQPU: Walsh-Hadamard spectral transforms, pointwise damping multipliers, and Plancherel condensation measures. The classical model proposes state updates; the GyroGraph cell applies its kinematic reception geometry to those updates. The exact structural response of the cell replaces the probabilistic guessing mechanism of the classical model.
 
 ---
 

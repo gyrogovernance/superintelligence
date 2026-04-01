@@ -13,9 +13,32 @@
 
 ---
 
+## [v2.0.6-Gyroscopic] – 2026-04-01
+
+Engineering direction for GyroLabe and GyroGraph is now pinned in `src/tools/gyroscopic/agent.md`, with build hooks, env vars, and bridge surfaces summarized in `src/tools/gyroscopic/log.md`. Integration targets **llama.cpp** via `external/llama.cpp/ggml/src/ggml-gyroscopic/` as a vendor-clean drop-in for `ggml-cpu`: study existing tiling, repack, and thread dispatch, then swap FMA-style inner loops for QuBEC-exact AVX2 micro-kernels in `src/tools/gyroscopic/gyrolabe/`. Phase 1 aims at end-to-end coverage for the live trace model (GyroMatMul for `MUL_MAT` / `MUL_MAT_ID` / `OUT_PROD`, structural scalar ops, loud failure under strict mode). Bench and configure entry points: `scripts/bench_gyromatmul_llama.py`, `scripts/build_llama_cpp_windows.ps1`, `config/gyroscopic_llm.yaml`.
+
+### Documentation
+
+- **`docs/Gyroscopic_ASI_SDK_Quantum_Computing.md`:** Extended Walsh-Hadamard discussion (±1 entries, FWHT without multiplication); new **§5.1.5 XOR-convolution** and spectral composition; **Plancherel conservation** structural invariant under observables.
+- **`docs/theory/Gyroscopic_ASI_Specs_Formalism.md`:** New **§10 Chart Convergence** (carrier, chirality, spectral, code, climate, runtime as one machine); **§5.5** ties temporal XOR crossing to intelligence as kinematic gyration and depth-4 inferential outcome (refined from the earlier temporal-binding note).
+- **`docs/theory/QuBEC_Climate_Dynamics.md`:** Shell symmetry and **MacWilliams** link to Krawtchouk (§1.3, §7.3); **Plancherel** dual view of M₂ (§5.2); **§5.4 Condensation as inference medium** with BEC equivalence and closing “selection is gyration”; **§8.5** XOR-convolution and spectral n-step cost.
+- **`docs/theory/Gyroscopic_ASI_Holography.md`:** **MacWilliams identity and code self-duality** after horizon Walsh material; **Connection to natural and geometric unit systems** after the CSM c-cancellation sentence (ledger depth, two-step uniformization, natural units).
+- **`docs/GyroGraph_Specs.md`:** **§4.1** reception geometry and inferential response without learned weights; **§4.2/§4.4** byte vs word, two-step uniformization, CSM/natural units; **§16.3 Substitutional Upgrade Principle** for model-control bridges (no passive observer; L1/L2 interception; exact aQPU routing).
+- **`docs/references/Analysis_Gyroscopic_Multiplication.md`:** Cross-layer table row (Krawtchouk / MacWilliams / shared engine); **§12.5** MacWilliams–Krawtchouk–Plancherel unification on the 6-mode register.
+- **`README.md`:** **Gyroscopic Paradigm** bullets define inference as physical gyration and XOR crossover as native intelligence; **GyroLabe** paragraph on **substitutional upgrade** of transformers (interface preserved, engine swapped for exact kinematics, Walsh–Hadamard XOR-convolutions, Plancherel condensation).
+
+---
+
 ## [v2.0.5-Bridges] – 2026-03-17 -> 2026-03-31
 
-Extensive development of GyroLabe and GyroGraph, replacement all Matrix Multiplications with a new native kernel, and other stuff, all with custom C Backends, until I decided to mitigate all the heavy work on llama.cpp so I can focus on what matters. So we are in a transitional phase. Now starting from scratch clean. Wait for it. 
+### Retired experimental tree (superseded by v2.0.6)
+
+Two weeks of deep work on **GyroLabe** and **GyroGraph**: replacing matrix multiply with native GyroMatMul-style paths, custom C cores, OpenCL experiments, Python ops layers, and model bridges. That stack is **frozen** under `_backup` and is scheduled for deletion once the llama.cpp-integrated path is authoritative:
+
+- **`src/tools/gyroscopic/gyrolabe/_backup/`** — `bridges/`, `gyromatmul/`, `gyrolabe_*.c`, `gyrolabe_core.h`, `opencl_backend.py`, `ops*.py`, `README.md`, `__init__.py`
+- **`src/tools/gyroscopic/gyrograph/_backup/`** — `bridges/`, `scripts/`, `core.py`, `gyrograph*.c`, `ops.py`, `profiles.py`, `serializers.py`, `README.md`, `__init__.py`
+
+**Pivot:** carry the same mathematical goals forward inside **`ggml-gyroscopic`** and the slim `gyrolabe/` tree so effort rides the production inference graph instead of maintaining a parallel full backend.
 
 ---
 

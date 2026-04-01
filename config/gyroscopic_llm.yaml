@@ -1,0 +1,13 @@
+# Native llama.cpp C backend (llama-cli). Build: external/llama.cpp (see docs/build.md).
+# Paths below are relative to the repository root unless absolute.
+#
+# Env overrides: GYROSCOPIC_GGUF_PATH, GYROSCOPIC_LLAMA_CLI, GYROSCOPIC_N_CTX,
+# GYROSCOPIC_N_THREADS, GYROSCOPIC_N_GPU_LAYERS, GYROSCOPIC_VERBOSE
+
+gguf_path: data/models/unsloth-Qwen3.5-4B-GGUF/Qwen3.5-4B-Q8_0.gguf
+# null = search external/llama.cpp/build/bin (Release, Debug, bin) for llama-cli
+llama_cli_path: null
+n_ctx: 4096
+n_threads: null
+n_gpu_layers: 0
+verbose: false

@@ -172,3 +172,5 @@ data/resonators/
 **/_backup/**
 
 **secret_lab_ignore/_backup/chamber/
+
+data/benchmarks/

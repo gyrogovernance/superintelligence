@@ -9,9 +9,8 @@ This file keeps the public exposure compact and centered on:
 - Future-cone structure
 - Exact structural derivatives
 - State synthesis from rest
-- Tensor and spectral access through GyroLabe when available
 
-It is intentionally thin over src.constants, src.api, and src.tools.gyrolabe.
+It is intentionally thin over src.constants and src.api.
 """
 
 from collections.abc import Callable, Iterable
@@ -19,7 +18,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from functools import lru_cache
 from math import log2
-from typing import Any, TypeAlias
+from typing import TypeAlias
 
 from src.api import (
     ByteItem,
@@ -95,18 +94,6 @@ from src.constants import (
 
 ObservableInt: TypeAlias = Callable[[int], int]
 ObservableNum: TypeAlias = Callable[[int], int | float]
-
-
-def _omega_gate_name_to_code(name: str) -> int:
-    if name == "id":
-        return 0
-    if name == "S":
-        return 1
-    if name == "C":
-        return 2
-    if name == "F":
-        return 3
-    raise ValueError(f"Unknown Omega gate: {name!r}")
 
 
 def _flatten_items(items: Iterable[ByteItem]) -> bytes:
@@ -601,15 +588,6 @@ def depth4_frame(
     }
 
 
-def gyrolabe_available() -> bool:
-    try:
-        from src.tools.gyrolabe import ops
-
-        return bool(ops.native_available())
-    except Exception:
-        return False
-
-
 class StateOps:
     charts = staticmethod(state_charts)
     pack = staticmethod(pack_state)
@@ -690,279 +668,6 @@ class SpectralOps:
         shell_krawtchouk_inverse_exact
     )
 
-    @staticmethod
-    def wht64(x: Any) -> Any:
-        import torch
-        from src.tools.gyrolabe import ops
-
-        x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(
-            x, dtype=torch.float32, device="cpu"
-        )
-        return ops.wht64(x_t)
-
-
-class QubecFixedVector64:
-    """Fixed-point vector for QuBEC matmul pairing. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
-
-    def __init__(self, packed: Any) -> None:
-        self._packed = packed
-
-
-class QubecFixedMatrix64:
-    """Fixed-point matrix for QuBEC matmul. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
-
-    def __init__(self, W: Any, n_bits: int = 16) -> None:
-        self._W = W
-        self._n_bits = int(n_bits)
-
-    def gemv(self, x: Any) -> Any:
-        import torch
-        from src.tools.gyrolabe import ops
-
-        x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(x, dtype=torch.float32, device="cpu")
-        return ops.gyromatmul_f32_gemv(self._W, x_t, n_bits=self._n_bits)
-
-    def qubec_gemv_pair(self, x: QubecFixedVector64) -> Any:
-        raise NotImplementedError("qubec_gemv_pair is deprecated")
-
-    def gemm_packed_batch(self, X: Any) -> Any:
-        """Batched GEMM: Y[b] = W @ X[b]. X: [batch, cols]. Returns [batch, rows]."""
-        import torch
-        from src.tools.gyrolabe import ops
-
-        X_t = X if isinstance(X, torch.Tensor) else torch.as_tensor(
-            X, dtype=torch.float32, device="cpu"
-        )
-        return ops.gyromatmul_f32_gemm(self._W, X_t, n_bits=self._n_bits)
-
-
-class TensorOps:
-    """
-    Internal fixed-point tensor engine. Uses fixed-point quantization internally.
-    Exact over the chosen fixed-point representation, not IEEE-754 exact.
-    """
-
-    @staticmethod
-    def gemv64(W: Any, x: Any, n_bits: int = 16) -> Any:
-        """Fixed-point GEMV. Exact over the chosen fixed-point representation, not IEEE-754 exact."""
-        import torch
-        from src.tools.gyrolabe import ops
-
-        W_t = W if isinstance(W, torch.Tensor) else torch.as_tensor(
-            W, dtype=torch.float32, device="cpu"
-        )
-        x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(
-            x, dtype=torch.float32, device="cpu"
-        )
-        return ops.gyromatmul_f32_gemv(W_t, x_t, n_bits=n_bits)
-
-    @staticmethod
-    def qubec_matrix64(W: Any, n_bits: int = 16) -> QubecFixedMatrix64:
-        import torch
-        from src.tools.gyrolabe import ops
-
-        W_t = W if isinstance(W, torch.Tensor) else torch.as_tensor(
-            W, dtype=torch.float32, device="cpu"
-        )
-        return QubecFixedMatrix64(W_t, n_bits=n_bits)
-
-    @staticmethod
-    def qubec_vector64(x: Any, n_bits: int = 16) -> QubecFixedVector64:
-        import torch
-        from src.tools.gyrolabe import ops
-
-        x_t = x if isinstance(x, torch.Tensor) else torch.as_tensor(
-            x, dtype=torch.float32, device="cpu"
-        )
-        return QubecFixedVector64(ops.QubecPackedVector64(x_t, n_bits=n_bits))
-
-    @staticmethod
-    def qubec_matrix64_opencl(W: Any, n_bits: int = 8) -> "GPUBackend64":
-        """Pack matrix for GPU batched GEMM. Uses 8-bit fixed-point by default for best throughput."""
-        import torch
-        from src.tools.gyrolabe import ops
-        from src.tools.gyrolabe import opencl_backend
-
-        W_t = W if isinstance(W, torch.Tensor) else torch.as_tensor(
-            W, dtype=torch.float32, device="cpu"
-        )
-        scale_max = (1 << (n_bits - 1)) - 1
-        scale = scale_max / max(float(W_t.abs().max().item()), 1e-12)
-        packed_cpu = torch.round(W_t * scale).to(torch.int32)
-        opencl_backend.initialize()
-        return GPUBackend64(opencl_backend.OpenCLPackedMatrix64I32(packed_cpu, n_bits=n_bits))
-
-
-class GPUBackend64:
-    """GPU-resident QuBEC matrix for batched GEMM. Use TensorOps.qubec_matrix64_opencl to create."""
-
-    def __init__(self, backend: Any) -> None:
-        self._backend = backend
-
-    def gemm_batch(self, X: Any) -> Any:
-        """Batched GEMM: Y[b] = W @ X[b]. X: [batch, cols]. Returns [batch, rows] on CPU."""
-        return self._backend.gemm_packed_batch(X)
-
-    def close(self) -> None:
-        """Release GPU resources."""
-        self._backend.close()
-
-
-class RuntimeOps:
-    @staticmethod
-    def signature_scan(payload: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.signature_scan(payload)
-
-    @staticmethod
-    def extract_scan(payload: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.extract_scan(payload)
-
-    @staticmethod
-    def states_from_signatures(signatures: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.signatures_to_states(signatures)
-
-    @staticmethod
-    def chirality_states_from_bytes(payload: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.chirality_states_from_bytes(payload)
-
-    @staticmethod
-    def apply_signature_to_state(state24: Any, signature: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.apply_signature_to_state(state24, signature)
-
-    @staticmethod
-    def apply_signature_batch(states: Any, signatures: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.apply_signature_batch(states, signatures)
-
-    @staticmethod
-    def step_byte_batch(states: Any, byte: int) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.step_byte_batch(states, byte)
-
-    @staticmethod
-    def state_scan_from_state(payload: Any, start_state24: int) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.state_scan_from_state(payload, start_state24)
-
-    @staticmethod
-    def chirality_distance(states_a: Any, states_b: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.chirality_distance(states_a, states_b)
-
-    @staticmethod
-    def chirality_distance_adjacent(states: Any, lookahead: int = 1) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.chirality_distance_adjacent(states, lookahead=lookahead)
-
-    @staticmethod
-    def qmap_extract(payload: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.qmap_extract(payload)
-
-    @staticmethod
-    def apply_signature_to_rest(signature: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.signatures_to_states(signature)
-
-    @staticmethod
-    def omega12_from_states(states: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.state24_to_omega12_batch(states)
-
-    @staticmethod
-    def omega12_and_valid_from_states(states: Any) -> Any:
-        """Returns (omega12, valid) tuple from state24 batch."""
-        from src.tools.gyrolabe import ops
-
-        return ops.state24_to_omega12_batch(states)
-
-    @staticmethod
-    def states_from_omega12(omega12: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.omega12_to_state24_batch(omega12)
-
-    @staticmethod
-    def step_omega12_batch(omega12: Any, byte: int) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.step_omega12_batch(omega12, byte)
-
-    @staticmethod
-    def apply_omega_signature_batch(omega12: Any, signatures: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.apply_omega_signature_batch(omega12, signatures)
-
-    @staticmethod
-    def shell_histogram_state24(states: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.shell_histogram_state24(states)
-
-    @staticmethod
-    def shell_histogram_omega12(omega12: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.shell_histogram_omega12(omega12)
-
-    @staticmethod
-    def omega_signature_scan(payload: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.omega_signature_scan(payload)
-
-    @staticmethod
-    def omega12_scan_from_omega12(payload: Any, start_omega12: int) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.omega12_scan_from_omega12(payload, start_omega12)
-
-    @staticmethod
-    def shell_histogram_state24_checked(states: Any) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.shell_histogram_state24_checked(states)
-
-    @staticmethod
-    def apply_omega_gate_batch(omega12: Any, gate_code: int) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.apply_omega_gate_batch(omega12, gate_code)
-
-    @staticmethod
-    def apply_omega_gate_batch_named(omega12: Any, gate: str) -> Any:
-        from src.tools.gyrolabe import ops
-
-        return ops.apply_omega_gate_batch(
-            omega12, _omega_gate_name_to_code(gate)
-        )
-
-
-def initialize_native() -> None:
-    """Initialize native GyroLabe tables and state once per process."""
-    from src.tools.gyrolabe import ops
-
-    ops.initialize_native()
-
 
 __all__ = [
     "ConstitutionalChart",
@@ -996,15 +701,9 @@ __all__ = [
     "witness_from_rest",
     "execute_witness_from_rest",
     "depth4_frame",
-    "gyrolabe_available",
-    "initialize_native",
-    "QubecFixedVector64",
-    "QubecFixedMatrix64",
     "StateOps",
     "MomentOps",
     "SpectralOps",
-    "TensorOps",
-    "RuntimeOps",
 ]
 
 

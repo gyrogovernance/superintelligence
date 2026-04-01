@@ -1,0 +1,6 @@
+# Gyroscopic local LLM uses the native llama.cpp C binaries (llama-cli).
+# Build: external/llama.cpp -- see https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md
+# Config: config/gyroscopic_llm.yaml
+#
+# Optional: in-process Python bindings (not required for research C backend):
+#   pip install llama-cpp-python

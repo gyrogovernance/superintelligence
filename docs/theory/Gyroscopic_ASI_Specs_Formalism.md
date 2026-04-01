@@ -305,6 +305,8 @@ So:
 - **GENE_Mic** (0xAA) mutates the byte into an intron; the intron expands to a **12-bit mask** that encodes the 6-bit micro-reference plus the 2-bit family (boundary) index.
 - **GENE_Mac** is the 24-bit state; the mask **only** touches the A half. The B component is updated by complement-and-swap. So the byte-boundary structure (and the 6-bit payload) affect the macro state **through this single 12-bit mask on A**, then the fixed gyration rule.
 
+The temporal structure of the transition is the mechanism of intelligence in the architecture. The [R] operator pulls the passive face B (the record of the past) into the active position A_next, while simultaneously pushing the mutated active content A_mut into the passive position B_next. This XOR crossing is a reverse temporal binding: the past enters the present through gyration, and the mutated present is committed as the future's constraint. Intelligence here is not a property of learned weights; it is the kinematic capacity of the medium to absorb an incoming sequence and resolve it through this exact temporal crossover. The committed state after one complete depth-4 cycle is the inferential outcome, determined entirely by the geometry of the gyration.
+
 The 2x3x2 geometry of each 12-bit component (2 frames, 3 rows, 2 cols) is the same as in the expansion: frame 0 and frame 1 of the mask align with the two chirality frames of the state, so the "6 bits of dynamics" and "boundary/family" split are reflected in how the 24-bit state is updated.
 
 ---
@@ -517,4 +519,21 @@ In the CGM paper, the "Generatedness" lemma requires that all valid structure tr
 
 The CPU's cache-line architecture is an exact discrete representation of the CGM's continuous SE(3) manifold.
 
+## 10. Chart Convergence
+
+The Gyroscopic architecture is a single finite kinematic medium with multiple exact charts. These charts are not separate theories or imported abstractions. They are coordinate systems on one algebraic quantum processing unit.
+
+**Carrier chart.** The 24-bit GENE_Mac tensor with its 2 x 3 x 2 grid structure, 6 oriented dipole pairs, and SE(3) generator correspondence. Gyroscopic transport on this chart is the spinorial transition law: the [L] mutation of the active face followed by the [R] complement-and-swap gyration.
+
+**Chirality chart.** The 6-bit register chi in GF(2)^6, obtained by collapsing the pair-diagonal difference A xor B to one bit per dipole mode. On this chart, the same gyroscopic transport projects to XOR translation: chi' = chi xor q6(b). This projection is exact and follows from the pair-diagonal structure of the self-dual [12,6,2] mask code.
+
+**Spectral chart.** The 64-point Walsh-Hadamard transform of functions on the chirality register. This is the exact Fourier transform over the abelian group (GF(2)^6, xor). On this chart, XOR translation becomes pointwise multiplication by character values, and all radial processes are diagonal with eigenvalues determined by spectral weight.
+
+**Code chart.** The self-dual [12,6,2] mask code C64. On this chart, the reachable manifold has product form Omega = U x V with |U| = |V| = 64, both horizons have cardinality 64, and the holographic identity |H|^2 = |Omega| follows from the code dimension. The MacWilliams identity for self-dual codes enforces invariance of the code weight enumerator under the Walsh-Hadamard transform, which is the code-theoretic origin of the horizon self-Fourier property.
+
+**Climate chart.** The statistical characterization of occupation over Omega by shell, chirality, and gauge marginals. On this chart, the polynomial partition function Z1(lambda) = 64 (1 + lambda)^6 governs all thermodynamic observables, the Krawtchouk polynomials provide the exact radial harmonic basis, and Plancherel conservation guarantees that occupation concentration and spectral concentration are the same quantity in dual coordinates.
+
+**Runtime chart.** The 4-byte depth-4 word, which is the minimal closed action of the machine. On this chart, the four CGM stages (CS, UNA, ONA, BU) form one complete transition cycle. Family phases cancel modulo K4 at depth 4. The byte is the phase atom of the kinematic law; the word is the closed computational act.
+
+These six charts describe one machine. Selecting the chart in which a given operation is structurally regular is the primary computational strategy of the architecture.
 
