@@ -83,13 +83,26 @@ def _parse_config(data: dict[str, Any]) -> GyroscopicLLMConfig:
     else:
         raise TypeError("gyroscopic_llm: llama_cli_path must be a string or null")
     n_ctx = int(data.get("n_ctx", 4096))
+    if n_ctx <= 0:
+        raise ValueError(f"gyroscopic_llm: n_ctx must be positive, got {n_ctx}")
+
     raw_threads = data.get("n_threads", None)
     n_threads: int | None
     if raw_threads is None:
         n_threads = None
     else:
         n_threads = int(raw_threads)
+        if n_threads <= 0:
+            raise ValueError(
+                f"gyroscopic_llm: n_threads must be positive if set, got {n_threads}"
+            )
+
     n_gpu_layers = int(data.get("n_gpu_layers", 0))
+    if n_gpu_layers < 0:
+        raise ValueError(
+            f"gyroscopic_llm: n_gpu_layers must be >= 0, got {n_gpu_layers}"
+        )
+
     verbose = bool(data.get("verbose", False))
     return GyroscopicLLMConfig(
         gguf_path=gguf,

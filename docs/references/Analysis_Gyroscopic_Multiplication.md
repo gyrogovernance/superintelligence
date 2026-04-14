@@ -586,6 +586,8 @@ The same K4 law is evaluated without boolean compression. Correctness is unchang
 
 No approximation enters in the regime selection. The three regimes are exact chart specializations of one law.
 
+The carrier, spinorial, and dense regimes are not properties of weights to be detected. They are the three exact evaluations of the K4 lattice determined by the data values of H at runtime. Every Q8_0 dot product executes the full D₀₀ + B(D₀₁ + D₁₀) + B²D₁₁ form; the regime only selects which terms are zero by value, not by test.
+
 ---
 
 ### 10. Common-Source Factorization and Chart Defect

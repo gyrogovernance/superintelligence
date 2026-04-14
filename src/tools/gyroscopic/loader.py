@@ -6,7 +6,7 @@ import os
 import subprocess
 from collections.abc import Sequence
 
-from src.tools.gyroscopic.config import GyroscopicLLMConfig, resolve_gguf_path, resolve_llama_cli_path
+from .config import GyroscopicLLMConfig, resolve_gguf_path, resolve_llama_cli_path
 
 
 def build_llama_cli_command(

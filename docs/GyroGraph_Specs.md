@@ -1,11 +1,11 @@
 # GyroGraph
 ## Specification
 
-GyroGraph is the **Multicellular Quantum AI model** of the Gyroscopic ASI architecture. Operating as an **Algebraic Quantum Cellular Automaton (aQCA)**, it composes the existing aQPU Kernel, SDK, and GyroLabe primitives into an executable model that provides structural observability to external actuators. It does not introduce new kernel physics.
+GyroGraph is the **Multicellular Quantum AI model** of the Gyroscopic ASI architecture. Operating as an **Algebraic Quantum Cellular Automaton (aQCA)**, it composes the aQPU Kernel, SDK, and GyroLabe primitives into an executable multicellular model. It provides structural observability and optimization surfaces to external actuators and runtimes.
 
-This document is the normative specification. GyroGraph's architecture is the CPU architecture: Registry, Cache, RAM, and disk (Section 3). The specification defines the core machine, state model, ingestion protocol, local memories, resonance profiles, output surfaces, persistence, and first bridge coverage, all organized by that hardware-tier hierarchy.
+GyroGraph operates in two valid modes. In **native mode**, cells evolve directly on Ω and interact by resonance, forming a standalone multicellular computational system. In **interoperability mode**, GyroGraph attaches to an external architecture, providing structural analysis, exact and hybrid operator routing, runtime scheduling guidance, and cache management support. Both modes use the same cell model, the same rolling climate memory, and the same spectral surfaces. The mode is a deployment choice, not an architectural distinction.
 
-Normative terms MUST, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
+**Versioning note:** This specification is a living document. Changes to enum encodings, normalization contracts, or projection classes must include migration notes and conformance test updates.
 
 ---
 
@@ -29,9 +29,13 @@ Normative terms MUST, SHOULD, SHOULD NOT, and MAY are interpreted as requirement
 | **Gauge spectral** | 4-mode phase summary derived from family_hist4 via K4 character projection |
 | **QuBEC climate** | Derived summary of occupation, shell balance, and support concentration from local cell memory |
 | **Bridge** | Deployment-specific binding that maps runtime events into 4-byte words |
-| **GyroLabe** | Native execution backend for kernel-level algebra and SDK surfaces |
+| **GyroLabe** | Native execution backend for kernel-level algebra, transform surfaces, and lowering |
 | **BU Egress** | Outward structural movement: applying the input word to the cell |
 | **BU Ingress** | Structured return: emitting the SLCP report to an external actuator |
+| **SCR** | Structure capture ratio: fraction of operator energy in an exact quotient class |
+| **Activation block** | A 64-wide hidden-state slice of an external model |
+| **Weight block** | A 64-wide operator slice of an external model layer |
+| **KV block** | A 64-wide cached key or value slice |
 
 ---
 
@@ -43,20 +47,22 @@ Normative terms MUST, SHOULD, SHOULD NOT, and MAY are interpreted as requirement
 
 GyroGraph transforms runtime traces into exact structural reports over the QuBEC medium:
 
-```text
-runtime events → bridge serializer → 4-byte words → multicellular evolution on Ω → SLCP records + graph queries
+```
+runtime events → bridge serializer → 4-byte words → multicellular evolution on Ω
+    → SLCP records + graph queries + interoperability outputs
 ```
 
-External actuators consume these reports and make runtime decisions. GyroGraph emits structural information; it does not make decisions.
+In native mode, external actuators consume these reports and make runtime decisions. In interoperability mode, external runtimes additionally receive operator routing recommendations, exact block substitutions, and hybrid execution results.
 
 #### 1.2 Classification
 
 | GyroGraph is | GyroGraph is not |
 |---|---|
-| A Multicellular Quantum AI model over the algebraic quantum space (Ω) | A new kernel physics layer |
+| A Multicellular Quantum AI model over Ω | A new kernel physics layer |
 | An orchestration layer over the aQPU Kernel | A gradient-trained neural network |
 | A resonance-defined graph without learned weights | A fixed-adjacency graph engine |
-| A structural observability surface for external actuators | A semantic parser of runtime events |
+| A structural observability surface | A semantic parser of runtime events |
+| An exact and hybrid optimization layer for external architectures | A replacement requiring external systems to adopt byte formalism internally |
 
 #### 1.3 First coverage domains
 
@@ -65,15 +71,15 @@ External actuators consume these reports and make runtime decisions. GyroGraph e
 | Applications | Program execution optimization (Python first) |
 | Databases | Search, retrieval, indexing, query execution regularity |
 | Networks | LLM serving, KV-cache pressure, batching, dispatch regularity |
+| Transformers | Operator analysis, exact block substitution, hybrid lowering, KV management |
 
-Any runtime that can map events into 4-byte words can be attached through a bridge. These three are the first bindings, not the architectural limit.
-The repository also includes a validated byte-native model-control bridge used as a direct stress test of the architecture. That bridge does not redefine the domain taxonomy above; it demonstrates that the same multicellular substrate can attach directly to AI decision surfaces.
+Any runtime that can map events into 4-byte words can be attached through a bridge. The transformer domain is treated as a first-class integration target given its strategic significance and the direct applicability of the QuBEC transform algebra to transformer weight and activation structure.
 
 ---
 
 ### 2. Position in the Stack
 
-GyroGraph sits above the existing aQPU Kernel, SDK, and GyroLabe layers.
+GyroGraph sits above the aQPU Kernel, SDK, and GyroLabe layers.
 
 #### 2.1 Inherited kernel surfaces
 
@@ -85,11 +91,21 @@ GyroGraph sits above the existing aQPU Kernel, SDK, and GyroLabe layers.
 - Walsh-Hadamard spectral surface
 - Replay and Moment surfaces
 
-#### 2.2 QuBEC relation
+#### 2.2 Inherited GyroLabe surfaces
 
-A cell occupies one point on Ω at a time and therefore one local state of the QuBEC medium.
+- Exact kernel stepping and extraction
+- WHT64, Krawtchouk7, K4Char4 native transforms
+- Structured operator analysis and quotient classification
+- 64-wide lowering and hybrid application
+- Packed arithmetic execution
 
-#### 2.3 BU ordering
+GyroGraph does not reimplement any of these. It calls GyroLabe native operations directly for all stepping, transform, analysis, and lowering operations.
+
+#### 2.3 QuBEC relation
+
+A cell occupies one point on Ω at a time and therefore one local state of the QuBEC medium. The rolling local memories of each cell are empirical summaries of the one-cell climate marginals defined in the QuBEC Climate Dynamics and QuBEC Transform Algebra documents.
+
+#### 2.4 BU ordering
 
 Applying the input word (BU Egress) always precedes emitting the SLCP report (BU Ingress).
 
@@ -97,7 +113,7 @@ Applying the input word (BU Egress) always precedes emitting the SLCP report (BU
 
 ### 3. Hardware-Tier Architecture
 
-GyroGraph's architecture is the CPU architecture. Its parameters are Registry, Cache, RAM, and disk. There is no separate "model" to load; the multicellular substrate lives in the same memory hierarchy that executes it. This mapping is not cosmetic. It determines the size, placement, and purpose of every component.
+GyroGraph's architecture is the CPU architecture. Its parameters are Registry, Cache, RAM, and disk.
 
 #### 3.1 The hierarchy
 
@@ -106,24 +122,20 @@ GyroGraph's architecture is the CPU architecture. Its parameters are Registry, C
 | Register | 32-bit CPU register | omega12, state24, last_byte: the current transition atom per cell | CS |
 | L1 Cache | 64-byte cache line, 6-bit offset | chi_ring64, family_ring64: 64-element rolling buffers; 6-bit chi6 keys | UNA |
 | L2 Cache | 64-bit interaction, depth-two composition | word4, omega_sig, parity: closure-boundary context | ONA |
-| L3 / RAM | Shared working memory | Cell pool, resonance buckets, active cell set | BU Egress |
+| L3 / RAM | Shared working memory | Cell pool, resonance buckets, active cell set, operator block registry | BU Egress |
 | RAM / Disk | Persistence, reconstruction | Ingest log, snapshot, crystallized trajectory (.gyrg) | BU Ingress |
 
-Data flow is inward on ingress (disk -> RAM -> L3 -> L2 -> L1 -> registers) and outward on egress. GyroGraph ingests words into the register tier, updates cache-tier rolling memories, commits to RAM-tier resonance surfaces, and persists to disk when replay or indexing is required.
+Data flow is inward on ingress (disk → RAM → L3 → L2 → L1 → registers) and outward on egress.
 
 #### 3.2 Why this orders the design
 
-- **64-element rings:** The chirality and family rings are 64 entries because the kernel's 6-bit payload space and hardware cache-line offset are both 64. Local structural variety lives in L1-aligned working set.
+**64-element rings.** The chirality and family rings are 64 entries because the kernel's 6-bit payload space and the hardware cache-line offset are both 64. Local structural variety lives in the L1-aligned working set.
 
-- **Resonance buckets in RAM:** Bucket membership and weight are shared across cells. They belong to L3/RAM: the tier where internal computation becomes auditable, visible to graph queries, and available for batch grouping.
+**Resonance buckets in RAM.** Bucket membership and weight are shared across cells and available for graph queries and batch grouping.
 
-- **Ingest log on disk:** The append-only (cell_id, word4) ledger enables deterministic replay. Disk is the persistence tier. Reconstruction flows inward from there.
+**Operator block registry in RAM.** Structure analysis reports for external operator blocks are cached at the L3/RAM tier. Repeated lowering operations use cached reports without re-analysis.
 
-- **No learned weights:** Embeddings and structural state are integrated within the cache layers. The 64-byte cache line, 6-bit chi6 space, and 4096-state Omega manifold are the geometry. GyroGraph does not approximate this geometry; it occupies it.
-
-#### 3.3 Relation to kernel G.7
-
-The aQPU Kernel specification (Gyroscopic_ASI_Specs Appendix G.7) maps the kernel law to Register, L1 Cache, Working Memory, and Persistent Storage. GyroGraph extends that mapping to the multicellular layer: each cell's register atom, each cell's cache-tier rolling memory, the shared RAM-tier resonance surface, and the disk-tier ingest log and snapshot. The correspondence is exact.
+**Ingest log on disk.** The append-only (cell_id, word4) ledger enables deterministic replay.
 
 ---
 
@@ -133,19 +145,13 @@ The aQPU Kernel specification (Gyroscopic_ASI_Specs Appendix G.7) maps the kerne
 
 Every cell uses the same kernel law. Cells carry no private learned weights, dense latent vectors, or fixed semantic types. Specialization arises solely from the words applied, the resulting trajectory on Ω, rolling local structural memory, and resonance participation.
 
-This follows a cellular automaton pattern: identical local rules, differentiation from history and context.
-
-Because cells lack learned parameters, a cell's intelligence is strictly a function of its current occupation state (its condensation) and its rolling structural memory. The cell does not compute a probability distribution over incoming words. Its occupied state defines a reception geometry. When a 4-byte frame arrives, the cell gyrates through the transition law. The resulting shift in condensation—whether the cell absorbs the frame coherently or scatters toward thermalization—is the cell's exact inferential response.
+A cell's occupied state defines a reception geometry. When a 4-byte frame arrives, the cell gyrates through the transition law. The resulting shift in condensation is the cell's exact inferential response.
 
 #### 4.2 Depth-4 temporality
 
-The aQPU Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame, which is why GyroGraph is a runtime intelligence layer rather than an offline state machine.
+The aQPU Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame.
 
-Within this temporal frame, the byte and the word serve distinct roles. The byte is the phase atom of the kinematic law. It executes one phase of the four-part transition cycle. A single byte has no closed inferential meaning; it is a kinematic phase, not a semantic event.
-
-The 4-byte word is the closed action. It completes one full CS, UNA, ONA, BU cycle, resolving all family phases modulo K4 and committing a single state transition with a compiled signature (omega_sig). The word is the native external integration grain: the unit at which resonance updates, SLCP emission, and compiled action surfaces operate.
-
-The byte-log is not a log of decisions. It is phase-resolved provenance. The useful computational surfaces (signatures, parity commitments, resonance keys, spectral records, climate observables) are compiled closures and exact quotients computed at word boundaries.
+The byte is the phase atom of the kinematic law. A single byte executes one phase of the four-part transition cycle. The 4-byte word is the closed action: it completes one full CS, UNA, ONA, BU cycle, resolving all family phases modulo K4 and committing a single state transition with a compiled signature. The word is the native external integration grain.
 
 #### 4.3 Indirect cell agency
 
@@ -153,43 +159,73 @@ No single cell is an autonomous decision-maker. Cell agency is indirect to the o
 
 #### 4.4 Light-cone structure
 
-From any Ω state, one byte reaches exactly 128 next states with uniform 2:1 multiplicity. Two bytes reach all 4096 states with uniform 16:1 multiplicity. These are exact integer counts with zero variance. Longer words preserve this uniform occupancy.
+From any Ω state, one byte reaches exactly 128 next states with uniform 2:1 multiplicity. Two bytes reach all 4096 states with uniform 16:1 multiplicity. These are exact integer counts.
 
-The rolling memories and spectral surfaces maintained by each cell are local projections of this global light-cone geometry. An SLCP record is therefore a precise coordinatization of where a cell sits inside the inherited light-cone, not an arbitrary feature vector.
-
-The two-step uniformization establishes the causal reach of the computational geometry. From any state, 2 bytes produce exact uniform occupancy over all 4096 states of Omega. This is the discrete analogue of a light cone: the boundary within which the full manifold becomes causally accessible. The causal structure is nontrivial only within the first 2 byte steps, where the 128-state immediate future (with its 2:1 multiplicity cover) constrains which states are reachable. Beyond depth 2, all states are equally reachable.
-
-The speed of light cancels exactly in the kernel's physical capacity derivation (CSM), leaving a purely geometric-frequency invariant. The kernel therefore operates in a computational geometry compatible with natural unit systems where c = 1. Time in this geometry is intrinsic ledger depth, not an external clock variable.
+The two-step uniformization establishes the causal reach of the computational geometry. From any state, 2 bytes produce exact uniform occupancy over all 4096 states of Ω. Beyond depth 2, all states are equally reachable.
 
 ---
 
-### 5. Resonance and Graph Structure
+### 5. Operating Modes
 
-#### 5.1 Core concept
+#### 5.1 Native mode
+
+In native mode, GyroGraph operates as a standalone multicellular computational system. Cells evolve on Ω under the byte transition law. The graph topology is defined by resonance over kernel-native observables. SLCP records are emitted to external actuators, which consume structural observables and make runtime decisions.
+
+Native mode is the reference operating context for all cell mechanics, resonance, and SLCP emission defined in Parts II and III.
+
+#### 5.2 Interoperability mode
+
+In interoperability mode, GyroGraph attaches to an external architecture and provides structural analysis, exact and hybrid operator routing, scheduling guidance, and cache management. The same cell mechanics apply. The additional capability is that GyroGraph's transform surfaces and quotient analysis are exposed as optimization services to the external runtime.
+
+Interoperability mode has four submodes, which may be combined:
+
+**Observability.** GyroGraph reads runtime structure and emits diagnostics only. No computation is replaced. Use cases include decode monitoring, KV pressure analysis, batch grouping guidance, and shell and resonance analysis.
+
+**Advisory optimization.** GyroGraph emits structural hints consumed by the external runtime. Examples include request grouping, KV keep/evict priority, hot block detection, and routing hints. The external runtime makes all decisions.
+
+**Exact substitution.** When a 64-wide weight block has SCR equal to 1.0 in some exact quotient class, `D_Q(W)` is zero by value, so `W · x = P_Q(W) · x` under the same decomposition used in all cases. This is a cost-special case, not a separate correctness regime.
+
+**Hybrid exact-residual.** For a general weight block W and quotient class Q:
+
+```
+W · x = P_Q(W) · x + D_Q(W) · x
+```
+
+The structured component `P_Q(W)` routes through the native transform path. The defect component `D_Q(W)` is still part of the same exact decomposition and must not be treated as an optional gateable fallback. Runtime offload choices do not change the defining sum.
+
+The choice of submode is a deployment decision made by the bridge or orchestrator. The core model supports all four.
+
+---
+
+### 6. Resonance and Graph Structure
+
+#### 6.1 Core concept
 
 Resonance is a relation of co-occupation over a kernel-native observable. Cells that share the same value of a chosen observable are co-resonant. No pairwise adjacency matrix is stored. Graph topology is dynamic, determined at runtime by the observable values cells occupy.
 
-#### 5.2 Adaptation mechanism
+#### 6.2 Adaptation mechanism
 
-Cells keep rolling local memories and participate in resonance profiles. Graph structure forms through repeated co-occupation under the active resonance profile: cells that repeatedly share the same resonance key remain grouped in the same structural bucket. Bucket weight is the simplest measure of shared pattern strength (see 9.4).
-
-Because the underlying observables are exact, there is a clear separation between structural and adaptive quantities. Adaptation focuses only on which structural configurations recur in a particular deployment.
+Cells keep rolling local memories and participate in resonance profiles. Graph structure forms through repeated co-occupation under the active resonance profile. Bucket weight is the simplest measure of shared pattern strength.
 
 ---
 
 ## Part II: Specification
 
-### 6. State Model
+### 7. State Model
 
-The state model is organized by the hardware-tier hierarchy (Section 3). Primary state belongs to the register tier; per-cell stored state spans cache and RAM tiers.
+The state model is organized by the hardware-tier hierarchy.
 
-#### 6.1 Primary state
+#### 7.1 Primary state
 
-The primary state of each cell is its packed Ω coordinate, `omega12 : int32`. This is the register atom: the current transition context (24-bit Mac + 8-bit byte) per cell. This contains u6 in bits 11..6 and v6 in bits 5..0. The `int32` type matches the native GyroLabe batch interfaces for zero-copy compatibility.
+The primary state of each cell is its packed Ω coordinate:
 
-The repository already exposes `pack_omega12`, `unpack_omega12`, `step_omega12_by_byte`, `omega12_to_state24`, `state24_to_omega12`, and native batch versions of the same.
+```
+omega12 : int32
+```
 
-#### 6.2 Per-cell stored state
+containing u6 in bits 11..6 and v6 in bits 5..0.
+
+#### 7.2 Per-cell stored state
 
 | Group | Field | Type | Description |
 |-------|-------|------|-------------|
@@ -211,13 +247,9 @@ The repository already exposes `pack_omega12`, `unpack_omega12`, `step_omega12_b
 | Parity | parity_bit | uint8 | Parity bit |
 | Resonance | resonance_key | uint32 | Current key under active profile |
 
-This is the complete live hot-path state, including chirality memory, shell memory, and family-phase memory.
+#### 7.3 Derived observables
 
-`current_resonance` is not stored per cell. It is derived from the global resonance bucket weight for the cell's key at emission time (see 9.4).
-
-#### 6.3 Derived observables
-
-These are computed on demand, not stored:
+Computed on demand:
 
 | Observable | Source |
 |------------|--------|
@@ -225,8 +257,8 @@ These are computed on demand, not stored:
 | chi6 | u6 ⊕ v6 |
 | shell | popcount(chi6) |
 | state24 | omega12_to_state24 |
-| horizon_distance | Kernel observable (constants.horizon_distance) |
-| ab_distance | Kernel observable (constants.ab_distance) |
+| horizon_distance | Kernel observable |
+| ab_distance | Kernel observable |
 | family, micro_ref, q6 | last_byte decomposition |
 | charts | sdk.state_charts |
 | future-cone measures | sdk.future_cone_measure |
@@ -236,44 +268,33 @@ These are computed on demand, not stored:
 
 ---
 
-### 7. Local Structural Memory
+### 8. Local Structural Memory
 
-Local structural memory is the cache-tier realization of GyroGraph (Section 3.1). The 64-element rings and histograms align to the L1 cache line; the word4 and omega_sig closure context align to L2.
+Local structural memory is the cache-tier realization of GyroGraph. The 64-element rings and histograms align to the L1 cache line.
 
-#### 7.1 Chirality ring
+#### 8.1 Chirality ring
 
-Each cell maintains `chi_ring64[64]`, a rolling buffer of the last 64 chi6 observations, each the exact 6-bit value u6 ⊕ v6 derived from omega12.
+Each cell maintains chi_ring64[64], a rolling buffer of the last 64 chi6 observations.
 
-#### 7.2 Chirality histogram
+#### 8.2 Chirality histogram
 
-`chi_hist64[64]` is the distribution over the 64 elements of GF(2)⁶ present in the ring. It supports 64-point Walsh-Hadamard spectral analysis and fast structural similarity comparison.
+chi_hist64[64] is the distribution over the 64 elements of GF(2)⁶ in the ring. It is the empirical chirality marginal of the one-cell climate. It supports 64-point Walsh-Hadamard spectral analysis via the GyroLabe WHT64 surface and fast structural similarity comparison.
 
-#### 7.3 Shell histogram
+#### 8.3 Shell histogram
 
-`shell_hist7[7]` is the distribution over shell values 0..6 induced by the chirality ring. It supports Krawtchouk spectral decomposition, shell regularity analysis, and horizon tendency analysis.
+shell_hist7[7] is the distribution over shell values 0..6 induced by the chirality ring. It supports Krawtchouk spectral decomposition via the GyroLabe Krawtchouk7 surface and horizon tendency analysis.
 
-#### 7.4 Family ring and family histogram
+#### 8.4 Family ring and family histogram
 
-Each cell also maintains a rolling family memory aligned to the same byte cadence as the chirality ring.
+family_ring64[64] stores the last 64 family values. family_hist4[4] stores the distribution over the 4 family values. This memory supports gauge-sensitive views of recent transport via the GyroLabe K4Char4 surface.
 
-- `family_ring64[64]` stores the last 64 family values derived from the ingested bytes.
-- `family_hist4[4]` stores the distribution over the 4 family values present in the ring.
+#### 8.5 Constant-time update rule
 
-This memory supports gauge-sensitive views of recent transport and bridge-level climate summaries derived from family-phase occupancy.
+**Warmup (chi_valid_len < 64):** increment chi_hist64[chi_new] and shell_hist7[popcount(chi_new)]; no decrements.
 
-#### 7.5 Constant-time update rule
+**Full ring (chi_valid_len == 64):**
 
-During warmup, while `chi_valid_len < 64`, the old value is not removed and histograms are only incremented; the decrement step begins only after the ring becomes full.
-
-When a new chirality value enters the ring:
-
-Family memory is updated at the same ring position and with the same valid-length semantics. Each ingested byte contributes both a `chi6` value and a `family` value, so chirality and family memories remain aligned across the rolling window.
-
-**Warmup (valid_len < 64):** increment chi_hist64[chi_new] and shell_hist7[popcount(chi_new)]; no decrements.
-
-**Full ring (valid_len == 64):**
-
-```text
+```
 chi_old = chi_ring64[pos]
 chi_new = current chi6
 
@@ -286,7 +307,7 @@ chi_ring64[pos] = chi_new
 pos = (pos + 1) & 63
 ```
 
-```text
+```
 family_old = family_ring64[pos]
 family_new = current family
 
@@ -296,78 +317,60 @@ family_hist4[family_new] += 1
 family_ring64[pos] = family_new
 ```
 
-This update is O(1).
+Family memory is updated at the same ring position and with the same valid-length semantics. This update is O(1).
 
-#### 7.6 Spectral surfaces
+#### 8.6 Spectral surfaces
 
-Two distinct spectral surfaces are derived from local memory:
+Three spectral surfaces are derived from local memory via GyroLabe native transforms:
 
 | Surface | Source | Transform | Output |
 |---------|--------|-----------|--------|
-| Chirality spectral | chi_hist64 | wht64 | spectral64 |
-| Shell spectral | shell_hist7 | shell_krawtchouk_transform_exact | Exact shell spectral coefficients |
-| Gauge spectral | family_hist4 | K4 character projection | 4 gauge-sector coefficients |
+| Chirality spectral | chi_hist64 | WHT64 | spectral64[64] |
+| Shell spectral | shell_hist7 | Krawtchouk7 | shell_spectral[7] |
+| Gauge spectral | family_hist4 | K4Char4 | gauge_spectral[4] |
 
-These describe different inherited geometries and remain distinct. Implementations MAY expose only the chirality spectral surface in the core SLCP record while keeping shell and gauge spectral surfaces available as derived views.
-
----
-
-### 8. Native Compiled Action
-
-Each ingested 4-byte word has a compiled Ω action obtained through `omega_word_signature(word4)`, stored as `omega_sig : int32`.
-
-`word4` is also retained because it is the exact depth-4 slice from which the Ω signature, parity commitments, replay fragments, and exact local provenance are derived. Both `word4` and `omega_sig` are meaningful and available.
-For a fixed closed 4-byte word, `parity_bit` is 0 by construction because the word length is even; it remains part of the stored commitment format for consistency with the broader trajectory parity contract.
+These describe different inherited geometries and remain distinct in the SLCP record and in interoperability outputs.
 
 ---
 
-### 9. Resonance Profiles
+### 9. Native Compiled Action
 
-Resonance buckets live in the L3/RAM tier (Section 3.1): shared, visible across cells, and queriable for graph operations. Bucket membership is the structural commitment that makes the multicellular graph auditable.
+Each ingested 4-byte word has a compiled Ω action obtained through omega_word_signature(word4), stored as omega_sig. The word4 is retained because it is the exact depth-4 slice from which the Ω signature, parity commitments, and exact local provenance are derived.
 
-#### 9.1 Available profiles
+---
+
+### 10. Resonance Profiles
+
+#### 10.1 Available profiles
 
 | Profile | Observable | Buckets | Key computation |
 |---------|------------|---------|-----------------|
 | Chirality | chi6 | 64 | Current chi6 |
 | Shell | shell | 7 | Current shell |
-| Horizon class | 3-way partition: equality (0), complement (1), bulk (2) | 3 | From chi6: 0 if chi6 == 0, 1 if chi6 == 0x3F, else 2 |
+| Horizon class | Shell count class | 7 | popcount(chi6), values 0..6 |
 | Ω coincidence | omega12 | 4096 | Current omega12 |
 | Signature | omega_sig | 8192 | Current omega_sig |
 | Q-transport | q_word6 of most recent closed word | 64 | q_word6_for_items(word4) |
 
-#### 9.2 Reference profile
+#### 10.2 Reference profile
 
-The reference profile is **chirality resonance** (chi6 ∈ {0..63}, 64 buckets). It is the reference because it is inherited directly from the kernel, compact, cross-domain, cheap to compute, naturally shared across cells, and already supported by all code surfaces. Under the reference profile, two cells are adjacent if and only if they share the same chi6.
+The reference profile is chirality resonance (chi6 ∈ {0..63}, 64 buckets). It is the reference because it is inherited directly from the kernel, compact, cross-domain, cheap to compute, and naturally shared across cells.
 
-#### 9.3 Profile runtime state
+#### 10.3 Resonance decay
 
-Under the active profile:
+Bucket weight is always an integer derived from cell membership. decay_resonance_buckets() shifts bucket values right by 1 without changing cell membership. Long-running deployments should apply deterministic decay or renormalization on a recorded schedule.
 
-- `resonance_key` is stored per cell
-- `current_resonance` is derived at emission time, not stored per cell (see 6.2)
-
-Alternative profiles MAY be selected by a bridge. If so, the profile identifier SHOULD be recorded in persisted state metadata, and the graph query surface SHOULD report which profile is active.
-
-#### 9.4 Resonance decay
-
-Bucket weight is always an integer derived from cell membership, equal to the exact membership count when no decay has been applied.
-
-In the implementation, `_resonance_buckets[k]` is initially the membership count. `decay_resonance_buckets()` shifts bucket values right by 1 without changing cell membership. After decay, a bucket value is a decayed weight, not the current membership count.
-
-Long-running deployments SHOULD apply deterministic decay or renormalization to resonance buckets. The schedule SHOULD be recorded in state metadata.
-
-**Snapshot restriction:** Snapshots MUST be taken only when resonance bucket values represent true membership counts (no decay applied since last normalization). On restore, the implementation recomputes resonance buckets from the stored `resonance_key` values. Decayed bucket weights are therefore not preserved across restore and should not be relied on as persistent state.
+**Snapshot restriction.** Snapshots must be taken only when resonance bucket values represent true membership counts. On restore, resonance buckets are recomputed from stored resonance_key values.
 
 ---
 
-### 10. Cell Lifecycle
+### 11. Cell Lifecycle
 
-#### 10.1 Pool management
+#### 11.1 Pool management
 
-A GyroGraph is a finite pool of cells: G = {c₁, c₂, …, cₙ}. Required operations: allocate, seed, free, and query active cells.
+A GyroGraph is a finite pool of cells G = {c₁, c₂, …, cₙ}. Required operations: allocate, seed, free, and query active cells.
 
-#### 10.2 Seeding options
+#### 11.2 Seeding options
 
 | Seed method | Description |
 |-------------|-------------|
@@ -376,57 +379,43 @@ A GyroGraph is a finite pool of cells: G = {c₁, c₂, …, cₙ}. Required ope
 | seed_shell | Chosen shell representative |
 | seed_omega | Arbitrary Ω coordinate |
 
-A separate `seed_complement_horizon` is not exposed because rest is already a complement-horizon state. The SDK witness synthesis surface may be used when a replayable seed certificate is needed.
+#### 11.3 Cell-to-entity mapping
 
-#### 10.3 Freeing
-
-Freeing returns a cell to the inactive pool, clears its local memories, and removes its contribution from the resonance surface.
-
-#### 10.4 Cell-to-entity mapping
-
-A bridge may assign one entity to one cell, one entity to several cells, or several entities to one cell. This mapping is bridge policy. The bridge decides what a cell represents.
+A bridge may assign one entity to one cell, one entity to several cells, or several entities to one cell. This mapping is bridge policy.
 
 ---
 
-### 11. Ingestion Protocol
+### 12. Ingestion Protocol
 
-#### 11.1 Native input unit
+#### 12.1 Native input unit
 
 The native input is the 4-byte word:
 
-```text
+```
 w = (b₀, b₁, b₂, b₃)
 ```
 
-Each byte is a full kernel byte (0..255). This aligns with the depth-4 closure structure already exposed by the repository (`depth4_mask_projection48`, `depth4_intron_sequence32`, `depth4_frame`).
+Each byte is a full kernel byte (0..255), aligned with the depth-4 closure structure.
 
-GyroGraph consumes input as words, not as isolated bytes and not as classical field packets.
-
-#### 11.2 External packets
+#### 12.2 External packets
 
 At the orchestration boundary, runtime systems feed packets:
 
-```text
+```
 P = (cell_id, word4, bridge_metadata)
 ```
 
-`bridge_metadata` is not kernel state. It MAY include request IDs, program IDs, query IDs, actor IDs, wall-clock timestamps, or bridge-local routing hints.
+bridge_metadata is not kernel state. It may include request IDs, program IDs, actor IDs, wall-clock timestamps, or bridge-local routing hints.
 
-#### 11.3 Event-to-word mapping
-
-External runtime events do not define the model. A bridge MAY map one event to zero, one, or many words. The bridge owns that policy.
-
-#### 11.4 Ingestion rule
-
-Two distinct cadences govern the ingestion cycle:
+#### 12.3 Ingestion rule
 
 **Byte cadence** (for each byte bₖ in word4):
 
-1. Step: `omega12 = step_omega12_by_byte(omega12, bₖ)`
+1. Step: omega12 = step_omega12_by_byte(omega12, bₖ)
 2. Increment step
 3. Update last_byte
 4. Compute chi6
-5. Update chi_ring64, chi_hist64, shell_hist7, family_ring64, and family_hist4
+5. Update chi_ring64, chi_hist64, shell_hist7, family_ring64, family_hist4
 
 **Word closure** (after the fourth byte):
 
@@ -437,90 +426,75 @@ Two distinct cadences govern the ingestion cycle:
 10. Update resonance bucket membership
 11. Optionally append ingest log record
 
-Resonance updates occur only at word closure because the resonance key may depend on the final omega12, word4, and omega_sig.
+Resonance updates occur only at word closure.
 
-#### 11.5 Observation and emission
-
-Cells are naturally observed at closure boundaries, after a full 4-byte word has been consumed. Internal evolution is byte-cadence; external reporting is word-boundary.
-
-SLCP records are not automatically emitted after every word. Emission cadence belongs to the bridge or orchestrator. The core model maintains exact structural state continuously; bridges choose when to poll.
-
-#### 11.6 Cadence summary
+#### 12.4 Cadence summary
 
 | Cadence | Trigger | Updates |
 |---------|---------|---------|
 | Byte | Each byte in word4 | omega12, step, last_byte, chi_ring64, chi_hist64, shell_hist7, family_ring64, family_hist4 |
 | Word closure | After 4th byte | word4, has_closed_word, omega_sig, parity, resonance key and bucket weight |
-| Emission | Bridge-controlled | SLCP record emitted, graph queries served |
+| Emission | Bridge-controlled | SLCP record emitted, graph queries served, interoperability outputs emitted |
 
 ---
 
-### 12. SLCP Record
+### 13. SLCP Record
 
-#### 12.1 Role
+#### 13.1 Role
 
-The Spectral Light-Cone Parametrization is the structured output record delivered to external actuators.
+The Spectral Light-Cone Parametrization is the structured output record delivered to external actuators and interoperability consumers.
 
-#### 12.2 Standard fields
-
-Exactness categories:
-
-- **Kernel-exact:** derived solely from exact kernel state and byte law (no approximations)
-- **GyroGraph-exact:** exact integers from resonance surface and local memory
-- **Deterministic numeric:** deterministic floating-point output (e.g. WHT)
+#### 13.2 Standard fields
 
 | Field | Type | Exactness class |
 |-------|------|-----------------|
 | cell_id | int | Identifier |
-| step | uint64 | Kernel-exact |
-| omega12 | int32 | Kernel-exact |
-| state24 | int32 | Kernel-exact |
-| last_byte | uint8 | Kernel-exact |
-| family | int | Kernel-exact |
-| micro_ref | int | Kernel-exact |
-| q6 | int | Kernel-exact |
-| chi6 | int | Kernel-exact |
-| shell | int | Kernel-exact |
-| horizon_distance | int | Kernel-exact |
-| ab_distance | int | Kernel-exact |
-| omega_sig | int32 | Kernel-exact |
-| parity_O12 | uint16 | Kernel-exact |
-| parity_E12 | uint16 | Kernel-exact |
-| parity_bit | uint8 | Kernel-exact |
-| resonance_key | uint32 | Kernel-exact |
-| current_resonance | int | GyroGraph-exact (resonance bucket weight at emission) |
-| spectral64 | array[64] | Deterministic numeric (WHT of chi_hist64) |
+| step | uint64 | Integer exact |
+| omega12 | int32 | Integer exact |
+| state24 | int32 | Integer exact |
+| last_byte | uint8 | Integer exact |
+| family | int | Integer exact |
+| micro_ref | int | Integer exact |
+| q6 | int | Integer exact |
+| chi6 | int | Integer exact |
+| shell | int | Integer exact |
+| horizon_distance | int | Integer exact |
+| ab_distance | int | Integer exact |
+| omega_sig | int32 | Integer exact |
+| parity_O12 | uint16 | Integer exact |
+| parity_E12 | uint16 | Integer exact |
+| parity_bit | uint8 | Integer exact |
+| resonance_key | uint32 | Integer exact |
+| current_resonance | int | GyroGraph exact (resonance bucket weight at emission) |
+| spectral64 | float32[64] | Numerically faithful (WHT64 of chi_hist64, normalized) |
 
-**Pre-closure default:** Before the first word closure (`has_closed_word` is false), `omega_sig` and all parity fields MUST be reported as 0.
+**Pre-closure default.** Before the first word closure, omega_sig and all parity fields are reported as 0.
 
-#### 12.3 Optional views
+#### 13.3 Optional views
 
-An implementation MAY also expose:
+An implementation may also expose:
 
-- Shell spectral coefficients
-- Gauge spectral coefficients
-- QuBEC climate summaries derived from chirality, shell, and family histories
-- Optical coordinates
-- Stabilizer type
-- Future-cone summaries
-
- 
-
-These are derived views, not part of the minimum required record.
+- shell_spectral[7]: Krawtchouk7 of shell_hist7
+- gauge_spectral[4]: K4Char4 of family_hist4
+- QuBEC climate summary (occupation density, effective support M₂, spectral damping η)
+- optical coordinates
+- stabilizer type
+- future-cone summaries
+- interoperability outputs (Section 17)
 
 ---
 
-### 13. Graph Query Surface
+### 14. Graph Query Surface
 
-#### 13.1 Resonance queries (minimum required)
+#### 14.1 Resonance queries (minimum required)
 
 | Query | Returns |
 |-------|---------|
 | get_co_resonant_cells(cell_id) | Cells sharing the same resonance key |
-| get_bucket_population(key) | Current bucket value for key (membership count before decay, decayed weight after; see 9.4) |
+| get_bucket_population(key) | Current bucket value for key |
 | get_bucket_cells(key) | All cells in a resonance bucket |
 
-#### 13.2 Relation queries (SHOULD expose)
+#### 14.2 Relation queries
 
 | Query | Returns |
 |-------|---------|
@@ -531,89 +505,412 @@ These are derived views, not part of the minimum required record.
 
 ---
 
-### 14. Ledger History and Replay
+### 15. Ledger History and Replay
 
-Ledger and ingest log belong to the RAM/disk tier (Section 3.1). The ingest log on disk is the persistence record that enables deterministic replay; reconstruction flows inward from there.
-
-#### 14.1 Two memory types
+#### 15.1 Two memory types
 
 | Type | Contents | Purpose |
 |------|----------|---------|
-| Local rolling memory | word4, chi_ring64, chi_hist64, shell_hist7, omega_sig, parity fields | Live runtime structure |
+| Local rolling memory | word4, chi_ring64, chi_hist64, shell_hist7, omega_sig, parity | Live runtime structure |
 | Replayable ledger | Append-only (cell_id, word4) records | Replay, verification, audit |
 
-#### 14.2 Ingest log
+#### 15.2 Replay surfaces
 
-If replayability is required, the orchestrator records a global ingest log. A per-cell ledger is reconstructed by filtering by cell_id and concatenating word4 byte sequences.
-
-#### 14.3 Replay surfaces
-
-Replay, verification, and comparison use existing SDK surfaces: `moment_from_ledger`, `verify_moment`, `compare_ledgers`. No parallel replay subsystem is introduced.
+Replay, verification, and comparison use existing SDK surfaces: moment_from_ledger, verify_moment, compare_ledgers.
 
 ---
 
-### 15. Persistence Format
+### 16. Persistence Format
 
-#### 15.1 State file
+#### 16.1 State file
 
-Single file, e.g. `data/models/gyrograph/gyrograph.state.bin`.
+Single file, e.g. data/models/gyrograph/gyrograph.state.bin.
 
-#### 15.2 Header (fixed struct)
+#### 16.2 Header
 
 | Field | Type | Description |
 |-------|------|-------------|
-| magic | 4 bytes | `GYRG` |
+| magic | 4 bytes | GYRG |
 | version | uint32 | Format version |
 | capacity | uint32 | Cell pool capacity |
 | active_count | uint32 | Currently active cells |
 | profile_id | uint16 | Active resonance profile |
 | flags | uint16 | Bit 0 = ingest logging enabled |
 | created_unix_ns | uint64 | Creation timestamp |
-| kernel_law_hash | 32 bytes | SHA-256 of kernel law surfaces (see below) |
+| kernel_law_hash | 32 bytes | SHA-256 of kernel law surfaces |
 
-The kernel law hash is computed over the contents of: `src/constants.py`, `src/api.py`, and native law-carrying sources (e.g. `gyrolabe_codec.c`, `gyrolabe_mul.c`, `gyrolabe_opencl.c` if present). It does not include `gyrograph.c` or `gyrograph_opencl.c`.
+A conforming implementation must reject snapshots where the stored kernel law hash does not match the current kernel law hash.
 
-A conforming implementation MUST reject snapshots where the stored kernel law hash does not match the current kernel law hash.
+#### 16.3 Body
 
-#### 15.3 Body
+Arrays in C-contiguous layout, in order: allocated, has_closed_word, omega12, step, last_byte, word4, chi_ring64, family_ring64, chi_ring_pos, chi_valid_len, chi_hist64, shell_hist7, family_hist4, omega_sig, parity_O12, parity_E12, parity_bit, resonance_key, resonance_buckets.
 
-Arrays written in C-contiguous layout, in order:
+#### 16.4 Ingest log
 
-| Array | Type | Shape |
-|-------|------|-------|
-| allocated | bool | capacity |
-| has_closed_word | bool | capacity |
-| omega12 | int32 | capacity |
-| step | uint64 | capacity |
-| last_byte | uint8 | capacity |
-| word4 | uint8 | capacity × 4 |
-| chi_ring64 | uint8 | capacity × 64 |
-| family_ring64 | uint8 | capacity × 64 |
-| chi_ring_pos | uint8 | capacity |
-| chi_valid_len | uint8 | capacity |
-| chi_hist64 | uint16 | capacity × 64 |
-| shell_hist7 | uint16 | capacity × 7 |
-| family_hist4 | uint16 | capacity × 4 |
-| omega_sig | int32 | capacity |
-| parity_O12 | uint16 | capacity |
-| parity_E12 | uint16 | capacity |
-| parity_bit | uint8 | capacity |
-| resonance_key | uint32 | capacity |
-| resonance_buckets | uint64 | bucket_count |
-
-**Resonance bucket constraint:** Snapshots MUST be taken only when resonance bucket values represent true membership counts (see 9.4).
-
-#### 15.4 Ingest log
-
-Persisted separately if enabled. Each record: `(uint32 cell_id, 4 bytes word4)`.
+Persisted separately if enabled. Each record: (uint32 cell_id, 4 bytes word4).
 
 ---
 
-## Part III: Deployment
+## Part III: Transformer Interoperability
 
-### 16. Bridge Architecture
+---
 
-#### 16.1 Bridge contract
+### 17. Transformer Integration Model
+
+GyroGraph provides structural analysis and exact or hybrid operator routing for transformer architectures. The integration does not require the transformer to adopt the byte formalism internally. External weight tensors, activation tensors, and KV cache entries are consumed as 64-wide blocks through the GyroLabe lowering surface. Results are returned in the format expected by the external runtime.
+
+The integration preserves external semantics. In exact substitution mode, the native path produces identical results to the dense path. In hybrid exact-residual mode, the result equals the full dense result up to the precision of the dense backend.
+
+#### 17.1 External block projection contract
+
+External tensors are not kernel states on Ω. When GyroGraph derives chirality, shell, boundary-anchor, or climate summaries from external tensors, it does so through a bridge-defined projection map Pi.
+
+A projection map Pi is a deterministic bridge contract from an external 64-wide block into one of the native QuBEC coordinate charts or summaries. Every interoperability pathway that operates on external tensors must declare which projection map it uses.
+
+Three projection classes are distinguished.
+
+**Pi_basis.** Canonical basis-preserving projection for operator analysis. This projection preserves the canonical 64-wide basis ordering used by quotient tests and transform surfaces. It is used for translation-invariance tests, shell-radial tests, χ × gauge tests, and exact or hybrid routing of weight blocks.
+
+**Pi_summary.** Structural summary projection for runtime observability. This projection maps an external block or runtime summary into a chirality, shell, or resonance summary without claiming the block is itself a kernel state. It is used for request grouping, decode monitoring, and cache-structure diagnostics.
+
+**Pi_polar.** Polar encoding projection for derived applications. This projection maps an external block into a structural tuple such as (c, χ, N, r), where c is a boundary-anchor summary, χ is a chirality summary, N is a shell summary, and r is a magnitude term. It is used in approximate block encoding, cache compression experiments, and speculative scoring.
+
+The bridge must declare, for every interoperability pathway, which projection class is in use and whether the computation is:
+
+- exact on native kernel objects
+- semantics-preserving through exact or hybrid execution
+- approximate as a derived external summary
+
+#### 17.2 Interoperability classes
+
+Transformer interoperability pathways belong to one of the following classes.
+
+| Class | Replaces external compute | Result status | Typical use |
+|---|---|---|---|
+| Observability | No | Exact structural report | Decode monitoring, KV pressure, resonance tracking |
+| Advisory | No | Exact structural report, external decision | Scheduling, grouping, cache hints |
+| Exact substitution | Yes, when D_Q = 0 by value | Semantics-preserving | Native block application |
+| Hybrid exact-residual | Yes, partially | Semantics-preserving up to backend precision | Structured plus residual execution |
+| Approximate derived | Optional | Approximate | Polar encoding, speculative scoring, compression experiments |
+
+The first four classes preserve external computation semantics under the stated contracts. Approximate derived pathways are separate and must be labeled explicitly where they appear.
+
+#### 17.3 Transformer block objects
+
+| Object | Description | Mapping |
+|--------|-------------|---------|
+| Activation block | 64-wide hidden-state slice | One block per 64 hidden dimensions |
+| Weight block | 64-wide operator slice | One block per 64 columns of a weight matrix |
+| KV block | 64-wide cached key or value slice | One block per 64 dimensions of KV embeddings |
+| Request cell | One cell per active request or request role | Tracks per-request climate and resonance |
+| Layer block cell | One cell per (layer, block) pair | Tracks per-block structural history |
+| KV segment cell | One cell per cache segment class | Tracks per-segment occupancy and priority |
+
+#### 17.4 Integration workflow overview
+
+```
+External weight matrix W (shape: rows × d)
+    │
+    ▼
+Tile into 64-wide blocks (GyroLabe: tile64)
+    │
+    ▼
+Analyze each block (GyroLabe: analyze_operator)
+    │   Reports: class, SCR, eigenvalues, defect_norm
+    ▼
+Cache reports in operator block registry (RAM tier)
+    │
+    ▼
+For each inference step:
+    Input activation x (width d)
+    │
+    ▼
+    Apply per block (GyroLabe: apply_hybrid64)
+    │   Always evaluate W·x = P_Q(W)·x + D_Q(W)·x
+    │   If D_Q = 0 by value, only the P_Q branch remains
+    │   SCR is used for profiling and scheduling only
+    ▼
+    Concatenate results
+    │
+    ▼
+    Update cell climate (chi_hist64, shell_hist7, family_hist4)
+    │
+    ▼
+    Emit interoperability outputs (Section 22)
+```
+
+---
+
+### 18. Operator Analysis and Routing
+
+#### 18.1 Layer analysis
+
+Layer analysis is defined on the canonical 64-wide basis ordering inherited from the QuBEC chirality register. Weight blocks are tested in that basis under Pi_basis. Exact quotient-class detection, WHT diagonalization, shell-radial analysis, and χ × gauge analysis are all defined relative to this basis.
+
+```
+Input:  W         weight matrix, shape (rows, d)
+        threshold real, default 0.01
+
+Output: block_registry
+
+1. pad d to next multiple of 64
+2. for each block b in range(d // 64):
+       W_block ← W[:, b·64 : (b+1)·64]
+       report  ← gyrolabe.analyze_operator(W_block, threshold)
+       block_registry[b] ← (W_block, report)
+
+return block_registry
+```
+
+Reports are cached in RAM and reused across inference steps without re-analysis unless the weight changes.
+
+#### 18.2 Block application
+
+```
+Input:  block_registry
+        x_block   activation slice, width 64
+
+Output: y_block   result, width rows
+
+report ← block_registry[b].report
+
+y_structured ← gyrolabe.apply_native(report.class,
+                                     x_block,
+                                     report.eigenvalues)
+y_defect     ← gyrolabe.apply_k4_defect(report, x_block)
+y_block      ← y_structured + y_defect
+
+return y_block
+```
+
+#### 18.3 Full layer application
+
+```
+Input:  block_registry
+        x   activation vector, width d
+
+Output: y   result vector, width rows
+
+y ← zeros(rows)
+for each block b in block_registry:
+    x_block ← x[b·64 : (b+1)·64]
+    y_block ← apply_block(block_registry, b, x_block)
+    y       += y_block
+
+return y
+```
+
+#### 18.4 Quality preservation contracts
+
+**Exact substitution contract.** When `report.scr == 1.0`, `D_Q(W)` is zero by value, so `y = P_Q(W)·x` is exactly the same semantic decomposition, with no defect term to evaluate.
+
+**Preservation contract (all SCR values).** For any `report.scr`, the result satisfies:
+
+```
+y_hybrid = P_Q(W) · x + D_Q(W) · x = W · x
+```
+
+up to the declared numeric precision of the backend used for defect evaluation. `SCR` does not gate correctness.
+
+**Low-structure contract.** When `report.scr` is near zero, almost all cost sits in `D_Q`, but semantics remain `P_Q + D_Q`.
+
+---
+
+### 19. KV Cache Management
+
+#### 19.1 KV block encoding
+
+Each KV embedding of width d may be encoded, under a bridge-defined projection Pi_polar, into a derived polar summary per 64-wide block.
+
+```
+Input:  kv_vector   embedding, width d
+        Pi_polar     bridge-defined polar projection
+
+Output: encoded_blocks
+
+1. pad d to next multiple of 64
+2. for each block b:
+       kv_block ← kv_vector[b·64 : (b+1)·64]
+       c    ← boundary_anchor(kv_block)    (6 bits, from Pi_polar)
+       chi  ← chirality_word(kv_block)     (6 bits, from Pi_polar)
+       N    ← popcount(chi)                (3 bits, shell 0..6)
+       r    ← l2_norm(kv_block)            (float16, 16 bits)
+       encoded_blocks[b] ← (c, chi, N, r)
+
+return encoded_blocks
+```
+
+Storage per block: 31 bits total (6 + 6 + 3 + 16).
+Uncompressed storage: 64 · 16 = 1024 bits per block.
+Structural compression ratio: approximately 33×.
+
+This encoding is a derived structural summary of external embeddings. It is not a universal or lossless representation theorem for arbitrary transformer embeddings.
+
+#### 19.2 KV block decoding
+
+```
+Input:  encoded_blocks, b   block index
+        decode_polar        bridge-defined reconstruction map
+
+Output: kv_block_approx
+
+(c, chi, N, r) ← encoded_blocks[b]
+kv_block_approx ← decode_polar(c, chi, N, r)
+
+return kv_block_approx
+```
+
+The reconstruction map is bridge-defined and approximate unless a semantics-preserving inverse is explicitly available for the chosen projection class.
+
+#### 19.3 KV resonance tracking
+
+Each KV segment is assigned to one KV segment cell. As KV entries are written and evicted, the cell ingests corresponding 4-byte words derived from the segment identifier and operation type.
+
+The resulting chi6 and shell values characterize the structural occupancy of the KV segment. The resonance bucket gives the co-occupancy weight relative to other segments.
+
+#### 19.4 KV eviction priority
+
+```
+Input:  kv_cell   KV segment cell SLCP record
+
+Output: eviction_priority   real
+
+priority ← weighted_combination(
+    weight_resonance  * (1 − current_resonance / max_resonance),
+    weight_shell      * |shell − 3| / 3,
+    weight_horizon    * (1 − horizon_distance / 12),
+    weight_spectral   * spectral_concentration(spectral64)
+)
+
+return priority
+```
+
+Higher priority indicates a candidate for eviction. The weights are bridge-level policy parameters. The inputs are exact kernel observables or deterministic spectral summaries.
+
+---
+
+### 20. Decode Batch Grouping
+
+#### 20.1 Grouping principle
+
+Requests whose cells share resonance keys or close chirality values produce structurally similar activation patterns. Grouping such requests into the same decode batch enables shared KV cache access and reduces memory bandwidth.
+
+#### 20.2 Grouping algorithm
+
+```
+Input:  active_request_cells   list of (cell_id, SLCP record)
+        max_batch_size         int
+
+Output: batches   list of request-id lists
+
+1. Sort cells by resonance_key (primary) and chi6 (secondary)
+2. batch ← []
+   batches ← []
+   for each cell in sorted order:
+       if len(batch) == 0:
+           batch.append(cell)
+       elif resonance_key(cell) == resonance_key(batch[0])
+            or chirality_distance(cell, batch[0]) <= 2:
+           batch.append(cell)
+       else:
+           batches.append(batch)
+           batch ← [cell]
+       if len(batch) == max_batch_size:
+           batches.append(batch)
+           batch ← []
+   if len(batch) > 0:
+       batches.append(batch)
+
+return batches
+```
+
+Chirality distance between two cells is the Hamming distance between their chi6 values, computed via the GyroLabe chirality_distance surface.
+
+#### 20.3 Batch resonance update
+
+After each decode step, cells update their chi6 and resonance key. The grouping algorithm is re-run at bridge-controlled intervals. Cells that drift in chirality may join different batches in subsequent steps.
+
+---
+
+### 21. Attention Approximation
+
+When KV embeddings are encoded through Pi_polar, attention scores may be approximated in the native structural domain without reconstructing full embeddings. This is a derived approximate pathway. It is not part of the semantics-preserving execution modes.
+
+#### 21.1 Native attention score
+
+```
+Input:  q_encoded    projected query summary from Pi_polar
+        k_encoded    projected key summary from Pi_polar
+
+Output: score   real
+
+chi_dist        ← popcount(chi_q ⊕ chi_k)
+shell_sim       ← (6 − chi_dist) / 6
+anchor_align    ← 1 − popcount(c_q ⊕ c_k) / 64
+score           ← r_q * r_k * shell_sim * anchor_align
+
+return score
+```
+
+This is a closed-form approximation. It does not reconstruct the full embeddings and requires only popcount operations and one multiply. It is suitable for candidate scoring, speculative filtering, and early-exit heuristics. Final attention computation should use the exact dense path or a semantics-preserving hybrid path unless a bridge explicitly declares an approximate-derived pathway.
+
+#### 21.2 Approximate attention pass
+
+```
+Input:  q_encoded    encoded query blocks, one per 64-wide block
+        K_encoded    encoded key blocks for all KV entries
+        V_encoded    encoded value blocks for all KV entries
+        d            embedding dimension
+
+Output: output   approximate attention output
+
+for each block b:
+    scores_b ← [native_attention_score(q_encoded[b], k_encoded[b])
+                 for k in K_encoded]
+    weights_b ← softmax(scores_b / sqrt(d))
+    output_b  ← weighted_sum(decode_kv_block(V_encoded, b), weights_b)
+
+output ← concatenate(output_b for all b)
+return output
+```
+
+#### 21.3 Accuracy characteristics
+
+The native attention score is an approximate structural score. Its accuracy depends on the chosen projection Pi_polar and on the structural regularity of embeddings. It is appropriate for candidate scoring, speculative filtering, early-exit heuristics, and related approximate workflows. Final attention computation remains on the semantics-preserving path unless a bridge explicitly declares otherwise.
+
+For final attention computation, full embedding reconstruction or the exact dense path is used.
+
+---
+
+### 22. Interoperability Outputs
+
+At each emission point, GyroGraph exposes the following interoperability outputs in addition to the standard SLCP record.
+
+Outputs derived from exact kernel state and exact lowering are exact or semantics-preserving under the contracts of Sections 17 and 18. Outputs derived from Pi_summary or Pi_polar are bridge-defined structural summaries and must be interpreted according to their declared projection class.
+
+| Output | Type | Description |
+|--------|------|-------------|
+| block_class | string | Quotient class of the most recently analyzed operator block |
+| block_scr | float | Structure capture ratio of the most recently analyzed block |
+| block_eigenvalues | array | Eigenvalues of the structured component |
+| block_defect_norm | float | Frobenius norm of the defect component |
+| native_route | bool | Whether the native path was used for this block |
+| kv_priority | float | Eviction priority for KV segment cells |
+| batch_group_id | int | Assigned decode batch group |
+| chi_anisotropy | float[6] | Per-axis damping estimates from chi_hist64 |
+| gauge_anisotropy | float[2] | Per-axis gauge damping from family_hist4 |
+| effective_support | float | Rényi-2 effective support M₂ estimated from chi_hist64 |
+| spectral_damping | float | Isotropic spectral damping η estimated from shell_hist7 |
+
+These outputs are consumed by bridge actuators, external runtime schedulers, and monitoring surfaces.
+
+---
+
+## Part IV: Bridge Architecture
+
+---
+
+### 23. Bridge Contract
 
 Each bridge defines:
 
@@ -623,79 +920,100 @@ Each bridge defines:
 | Serializer contract | How events become 4-byte words |
 | Cell allocation policy | How entities map to cells |
 | Active resonance profile | Which profile the bridge uses |
+| Operating mode | Native, observability, advisory, exact substitution, hybrid, or combination |
 | Consumed SLCP fields | Which output fields the actuator reads |
+| Consumed interoperability outputs | Which optimization outputs the actuator uses |
 | Actuator decision surface | What decisions the actuator makes |
-| Concrete scenarios | 1–3 illustrative use cases |
 
-#### 16.2 Implementation status
+#### 23.1 Substitutional Upgrade Principle
+
+A conforming bridge that operates in exact substitution or hybrid mode identifies exact or partially exact structural components of the external computation and routes those components through native QuBEC charts when doing so preserves the target semantics or preserves the full result through structured-plus-residual decomposition. The bridge does not replace the external model's semantic interfaces. It upgrades the execution of specific operator blocks within those interfaces.
+
+---
+
+### 24. Bridge Implementation Status
 
 | Bridge | Status |
 |--------|--------|
-| Applications | Implemented: event vocabulary, entity/role mapping, SLCP emission, actuator scoring |
-| Databases | Reserved: module present, implementation pending |
-| Networks | Reserved: module present, implementation pending |
-| Model-control | Implemented: byte-native decode bridge, climate helpers, structural control surfaces |
-
-#### 16.3 Substitutional Upgrade Principle
-
-A conforming bridge MUST NOT treat GyroGraph as a passive observer of an external model's expensive computations. The scope of a model-control bridge is to upgrade the target architecture without breaking its semantic interfaces.
-
-When wiring GyroGraph to a classical transformer, the bridge intercepts dense matrix multiplications and continuous activation functions at the L1/L2 cache boundaries. It routes those state updates through the exact discrete operations of the aQPU: Walsh-Hadamard spectral transforms, pointwise damping multipliers, and Plancherel condensation measures. The classical model proposes state updates; the GyroGraph cell applies its kinematic reception geometry to those updates. The exact structural response of the cell replaces the probabilistic guessing mechanism of the classical model.
+| Applications | Implemented |
+| Databases | Reserved |
+| Networks | Reserved |
+| Transformers | Partially implemented (model-control bridge, decode surfaces) |
 
 ---
 
-### 17. First Bridge Coverage
+### 25. First Bridge Coverage
 
-#### 17.1 Applications Bridge
+#### 25.1 Applications Bridge
 
-For detailed step-by-step narratives of the following scenarios, see Appendix B.
+**Scope.** Runtime execution traces. Python is the first binding.
 
-**Scope:** Runtime execution traces. Python is the first binding.
+**Serializer.** Fixed categorical vocabulary mapping event types to predetermined 4-byte words.
 
-**Serializer:** Fixed categorical vocabulary mapping event types to predetermined 4-byte words. Similar event types share q-class structure. Unknown events map to identity word `0xAA 0xAA 0xAA 0xAA`.
+**Cell allocation.** One (entity_id, role) pair maps to one cell.
 
-**Cell allocation:** One (entity_id, role) pair maps to one cell, allocated on first reference. A bridge may assign one code region, one thread, one subsystem, or one program to one or more cells.
+**Resonance profile.** Chirality (reference profile).
 
-**Resonance profile:** Chirality (reference profile).
+**Actuator scoring.** Two heuristic scores derived from exact structural inputs:
 
-**Actuator scoring:** Two heuristic scores derived from exact structural inputs:
+| Score | Inputs | Indicates |
+|-------|--------|-----------|
+| hot_loop_score | chi_support_ratio, shell_entropy, spectral_peak_ratio | Concentrated, repetitive occupation |
+| contention_score | chi_support_ratio, shell_entropy, spectral_peak_ratio | Dispersed, irregular occupation |
 
-| Score | Inputs (weighted) | Indicates |
-|-------|-------------------|-----------|
-| hot_loop_score | (1 − chi_support_ratio), (1 − shell_entropy), spectral_peak_ratio | Concentrated, repetitive occupation |
-| contention_score | chi_support_ratio, shell_entropy, (1 − spectral_peak_ratio) | Dispersed, irregular occupation |
+profile_entity produces an ApplicationDecision with suggested action: specialize_hot_loop, mitigate_contention, or observe.
 
-`profile_entity` produces an `ApplicationDecision` with suggested action: `specialize_hot_loop`, `mitigate_contention`, or `observe`.
+#### 25.2 Databases Bridge
 
-The structural inputs (chi_hist64, shell_hist7, spectral64, resonance bucket weight) are exact or deterministic. The scoring weights and action thresholds are bridge-level heuristics subject to revision.
+**Scope.** Query planning, indexing, traversal, and cache-structure regularity.
 
-#### 17.2 Databases Bridge
+**Status.** Reserved.
 
-**Scope:** Query planning, indexing, traversal, and cache-structure regularity.
+#### 25.3 Networks Bridge
 
-**Serializer:** Maps query-plan and storage events into deterministic 4-byte words.
+**Scope.** Inference serving, request grouping, KV-cache pressure, and queue regularity.
 
-**Cell allocation:** One query class, index path, query plan branch, or database workflow maps to one or more cells.
+**Status.** Reserved.
 
-**Resonance profile:** Chirality, with optional signature resonance for specialized deployments.
+#### 25.4 Transformer Bridge
 
-**Status:** Reserved; implementation pending.
+**Scope.** Transformer weight analysis, exact and hybrid block substitution, KV cache management, decode batch grouping, and attention approximation.
 
-#### 17.3 Networks Bridge
+**Serializer.** The transformer bridge has two distinct interoperability channels.
 
-**Scope:** Inference serving, request grouping, KV-cache pressure, and queue regularity.
+**Runtime-event channel.** Maps transformer runtime events such as layer invocation, token generation, KV write, and KV evict into deterministic 4-byte words. This channel drives request cells, KV segment cells, resonance updates, and runtime observability.
 
-**Serializer:** Maps serving events into deterministic 4-byte words.
+**Operator-analysis channel.** Consumes weight blocks, activation blocks, and KV blocks directly as 64-wide tensors through the GyroLabe lowering surface. This channel does not depend on event serialization. It performs block analysis, quotient classification, exact substitution, and hybrid routing.
 
-**Cell allocation:** One request, batch fragment, or KV-cache segment class maps to one or more cells.
+**Cell allocation.**
 
-**Resonance profile:** Chirality, with optional signature or Q-transport resonance for specialized deployments.
+| Entity | Cell type |
+|--------|-----------|
+| Active request | Request cell |
+| (Layer, block) pair | Layer block cell |
+| KV segment class | KV segment cell |
 
-**Status:** Reserved; implementation pending.
+**Resonance profile.** Chirality (reference profile) for request grouping. Signature resonance for layer block tracking.
+
+**Operating mode.** Submodes may be combined per layer or per block as deployment policy. `SCR` can guide cost scheduling but must not gate semantic decomposition.
+
+**Actuator decision surface.**
+
+| Decision | Source |
+|----------|--------|
+| Operator routing | block_scr, block_class (exact vs hybrid vs dense) |
+| KV eviction priority | kv_priority, effective_support, current_resonance |
+| Decode batch grouping | resonance_key, chi6, chirality_distance |
+| Attention approximation | polar-encoded KV blocks, native attention scores |
+| Layer scheduling | shell spectral profile, spectral damping η |
 
 ---
 
-### 18. Conformance Requirements
+## Part V: Conformance
+
+---
+
+### 26. Conformance Requirements
 
 A conforming implementation:
 
@@ -705,15 +1023,18 @@ A conforming implementation:
 4. Maintains both chirality and shell histories
 5. Uses a declared resonance profile over a kernel-native observable
 6. Emits SLCP records and exposes the graph query surface to external actuators
-7. Uses existing SDK and GyroLabe surfaces for stepping, extraction, replay, and spectral transforms
+7. Uses SDK and GyroLabe surfaces for stepping, extraction, replay, and spectral transforms
 8. Keeps bridge policy outside the core machine
-9. Treats the first bridge domains as coverage examples, not architectural limits
-10. Rejects restored snapshots whose kernel law hash does not match the current kernel
+9. Rejects restored snapshots whose kernel law hash does not match the current kernel
+10. In interoperability mode, applies the exact substitution and hybrid preservation contracts of Section 18.4
+11. Declares every external-tensor pathway with explicit projection class Pi_basis, Pi_summary, or Pi_polar and labels each pathway as semantics-preserving or approximate-derived
+12. Reports operating mode and consumed SLCP and interoperability output fields in the bridge contract declaration
 
-The operational loop in all cases is (BU Egress first, BU Ingress second):
+The operational loop in all cases is:
 
-```text
-packet input → Ω stepping → local memory update → resonance update → SLCP and graph queries
+```
+packet input → Ω stepping → local memory update → resonance update
+    → SLCP and graph queries → interoperability outputs
 ```
 
 ---
@@ -722,43 +1043,26 @@ packet input → Ω stepping → local memory update → resonance update → SL
 
 ### Appendix A: Theoretical Classification
 
-#### A.1 Computational model
-
-GyroGraph is an Algebraic Quantum Cellular Automaton (aQCA) over GF(2). This classification arises from the intersection of three established model families:
+GyroGraph is an Algebraic Quantum Cellular Automaton (aQCA) over GF(2). This classification arises from the intersection of three model families:
 
 | Model family | Key properties | GyroGraph realization |
 |--------------|----------------|----------------------|
-| Quantum Cellular Automaton | Identical finite-dimensional cells, time-independent law, locality, reversibility, local unitarity | Each cell has 4096 reachable states; all evolve under the same byte law; evolution is reversible per byte and per word; 24-bit carrier provides 2×3×2 lattice geometry |
-| Algebraic Quantum Automaton over GF(2) | Exact finite field arithmetic, spectral transforms for global property extraction | Chirality register is GF(2)⁶; Walsh-Hadamard transforms are exact; hidden subgroup resolution in one spectral step gives O(1) answers where a classical DFA needs O(N) |
+| Quantum Cellular Automaton | Identical finite-dimensional cells, time-independent law, locality, reversibility | Each cell has 4096 reachable states; all evolve under the same byte law |
+| Algebraic Quantum Automaton over GF(2) | Exact finite field arithmetic, spectral transforms for global property extraction | Chirality register is GF(2)⁶; WHT is exact; hidden subgroup resolution in one step |
 | Group Automaton | Transition bijections forming a finite group | Each byte is a bijection on Ω with period 4; two bytes reach all of Ω with exact uniform multiplicity |
 
-"Algebraic" distinguishes this from QCA models using floating-point complex numbers. GyroGraph achieves quantum structure through exact integer arithmetic over finite fields on standard silicon.
-
-A classical DFA classification would be inadequate: it ignores algorithmic efficiency and state geometry. The aQCA encodes discrete light-cone geometry, SE(3) Lie algebra structure, and SU(2) spinorial double-cover, none of which arise in standard DFA specifications.
-
-#### A.2 Comparison with adjacent architectures
+#### Comparison with adjacent architectures
 
 | Architecture | Key difference from GyroGraph |
 |--------------|-------------------------------|
-| Neural networks | GyroGraph has zero learned per-cell weights; specialization from trajectory and resonance, not gradient descent; most quantities NNs approximate are analytically available |
-| Classical cellular automata | Classical CAs use fixed spatial grids; GyroGraph cells connect by resonance over algebraic observables, producing dynamic topology |
-| Graph neural networks | GNN edges carry learned message-passing functions over continuous embeddings; GyroGraph edges are exact co-occupation relations with no adjacency matrix or learned edge function |
-| Reservoir computing | Reservoirs use random fixed dynamics with a trained linear readout; GyroGraph uses exact structured dynamics with analytical spectral surfaces and exact SLCP output |
+| Neural networks | GyroGraph has zero learned per-cell weights; specialization from trajectory and resonance |
+| Classical cellular automata | GyroGraph cells connect by resonance over algebraic observables, not fixed spatial grids |
+| Graph neural networks | GyroGraph edges are exact co-occupation relations; no learned edge functions |
+| Reservoir computing | GyroGraph uses exact structured dynamics with analytical spectral surfaces |
 
 ---
 
 ### Appendix B: Bridge Scenario Catalog
-
-All scenarios follow the same structure:
-
-| Step | Description |
-|------|-------------|
-| Runtime event | What happens in the source system |
-| GyroGraph response | Observable structural changes in target cells |
-| Actuator reads | SLCP fields and graph queries consumed |
-| Actuator decision | External action taken |
-
-The bridge serializer step (events → 4-byte words) is common to all scenarios and is omitted from individual entries.
 
 #### B.1 Applications
 
@@ -767,42 +1071,60 @@ The bridge serializer step (events → 4-byte words) is common to all scenarios 
 | Step | Detail |
 |------|--------|
 | Runtime event | A Python code region repeatedly executes a stable loop |
-| GyroGraph response | Repeated omega_sig; concentrated chi_hist64 and shell_hist7; stable spectral64; elevated current_resonance |
-| Actuator reads | omega_sig, spectral64, current_resonance, q6 |
-| Actuator decision | Raise specialization or tier-up priority for that code region |
+| GyroGraph response | Repeated omega_sig; concentrated chi_hist64; elevated current_resonance |
+| Actuator reads | omega_sig, spectral64, current_resonance |
+| Actuator decision | Raise specialization priority for that code region |
 
 **A2: Lock-contention detection**
 
 | Step | Detail |
 |------|--------|
 | Runtime event | A thread alternates through wait, lock, wake, retry |
-| GyroGraph response | Rapidly varying chi6; unstable omega_sig; broad shell occupancy; unstable spectral64 |
+| GyroGraph response | Rapidly varying chi6; broad shell occupancy; unstable spectral64 |
 | Actuator reads | chi6, shell, spectral64, co-resonant cell graph queries |
-| Actuator decision | Adjust backoff, affinity, or contention handling policy |
+| Actuator decision | Adjust backoff or contention handling policy |
 
-#### B.2 Databases
+#### B.2 Transformer
 
-**D1: Repeated index-seek path**
-
-| Step | Detail |
-|------|--------|
-| Runtime event | Many similarly shaped index lookups |
-| GyroGraph response | Repeated omega_sig; stable q6; concentrated spectral64; elevated current_resonance |
-| Actuator reads | omega_sig, q6, current_resonance, spectral64 |
-| Actuator decision | Keep seek path hot; favor corresponding index structures |
-
-**D2: Scan/seek regime shift**
+**T1: Exact block substitution**
 
 | Step | Detail |
 |------|--------|
-| Runtime event | Workload shifts from repeated seeks to broader scans |
-| GyroGraph response | Drift in shell occupancy and spectral shape |
-| Actuator reads | shell, spectral64, chi6, current_resonance |
-| Actuator decision | Change scan strategy, cache policy, or prefetching mode |
+| Runtime event | Layer weight analysis at model load |
+| GyroGraph response | Block registry populated; structure reports and defect mass identified |
+| Actuator reads | block_scr, block_class, block_eigenvalues |
+| Actuator decision | Schedule native and defect costs by profile; preserve P_Q + D_Q semantics |
+
+**T2: KV cache pressure management**
+
+| Step | Detail |
+|------|--------|
+| Runtime event | KV cache approaches capacity |
+| GyroGraph response | KV segment cells diverge in spectral64 and effective_support |
+| Actuator reads | kv_priority, current_resonance, effective_support |
+| Actuator decision | Evict segments with highest priority score |
+
+**T3: Decode batch grouping**
+
+| Step | Detail |
+|------|--------|
+| Runtime event | Multiple active requests await decode |
+| GyroGraph response | Request cells carry live chirality and spectral profiles |
+| Actuator reads | resonance_key, chi6, co-resonant cell queries |
+| Actuator decision | Group requests with chirality distance ≤ 2 into shared decode batch |
+
+**T4: Hybrid operator routing**
+
+| Step | Detail |
+|------|--------|
+| Runtime event | Inference step on a layer with mixed-structure weight blocks |
+| GyroGraph response | Block registry reports vary by SCR across blocks |
+| Actuator reads | block_scr, native_route, block_defect_norm |
+| Actuator decision | Apply decomposition per block and sum native structured plus defect evaluation |
 
 #### B.3 Networks
 
-**N1: Decode batch grouping**
+**N1: Decode batch grouping by serving cell**
 
 | Step | Detail |
 |------|--------|
@@ -816,18 +1138,9 @@ The bridge serializer step (events → 4-byte words) is common to all scenarios 
 | Step | Detail |
 |------|--------|
 | Runtime event | KV-cache pressure rises |
-| GyroGraph response | Cells diverge in spectral64, horizon_distance, ab_distance, current_resonance |
-| Actuator reads | current_resonance, horizon_distance, ab_distance, spectral64 |
+| GyroGraph response | Cells diverge in spectral64, horizon_distance, current_resonance |
+| Actuator reads | current_resonance, horizon_distance, spectral64 |
 | Actuator decision | Decide which request states remain resident |
-
-**N3: TTFT pressure detection**
-
-| Step | Detail |
-|------|--------|
-| Runtime event | Time-to-first-token rises under mixed prefill/decode pressure |
-| GyroGraph response | Affected cells shift in shell occupancy and chirality regularity |
-| Actuator reads | shell, spectral64, q6, graph queries |
-| Actuator decision | Reshape request groups or separate service paths to recover TTFT |
 
 ---
 
@@ -835,7 +1148,7 @@ The bridge serializer step (events → 4-byte words) is common to all scenarios 
 
 #### C.1 Repository file layout
 
-```text
+```
 src/tools/gyrograph/
     __init__.py
     core.py
@@ -849,6 +1162,7 @@ src/tools/gyrograph/
         applications.py
         databases.py
         networks.py
+        transformers.py
         bolmo_config.py
         decode.py
     scripts/
@@ -856,22 +1170,9 @@ src/tools/gyrograph/
         _common.py
 ```
 
-| File | Role |
-|------|------|
-| ops.py | ctypes loading, automatic C build, CPU/OpenCL dispatch, Python fallback, batched ingest and trace entry points |
-| gyrograph.c | Native CPU batched helpers: Ω stepping, local-memory updates, omega signature, parity commitment |
-| gyrograph_opencl.c | OpenCL backend: parallel omega_trace4 and chi_trace4 on GPU; histogram and ring updates on CPU |
-| core.py | Cell pools, ingestion, SLCP emission, graph queries, lifecycle, snapshot/restore |
-| serializers.py | Shared serializer helpers and deterministic word construction |
-| profiles.py | Resonance profile definitions and keying functions |
-| bridges/applications.py | Applications bridge |
-| bridges/databases.py | Databases bridge (reserved) |
-| bridges/networks.py | Networks bridge (reserved) |
-| bridges/bolmo_config.py | Byte-native model-control bridge and decode report surfaces |
-| bridges/decode.py | Climate helpers, gauge-spectrum helpers, and decode-side structural utilities |
-| scripts/_common.py | Shared formatting and diagnostic helpers |
-
 #### C.2 Python surface
+
+This Python surface is specified around ctypes/numpy integration. PyTorch FakeTensor behavior is not part of the current contract unless explicitly added later.
 
 **Exports from `__init__.py`:**
 
@@ -879,6 +1180,13 @@ src/tools/gyrograph/
 from .core import GyroGraph, SLCPRecord
 from .profiles import ResonanceProfile
 from .serializers import pack_word4, ensure_word4
+from .bridges.transformers import (
+    TransformerBridge,
+    TransformerBlockRegistry,
+    KVCacheManager,
+    DecodeGrouper,
+    InteroperabilityRecord,
+)
 from .bridges.bolmo_config import (
     BolmoDecodeReport,
     GyroGraphBolmoDecodeBridge,
@@ -913,8 +1221,6 @@ def __init__(
 
 **Core methods:** allocate_cells, free_cells, seed_rest, seed_equality_horizon, seed_shell, seed_omega, ingest, emit_slcp, get_co_resonant_cells, get_bucket_population, get_bucket_cells, get_cells_on_shell, get_cells_with_chi6, get_cells_with_signature, chirality_distance_between_cells, snapshot, restore, decay_resonance_buckets, shell_spectral, set_ingest_log_path, iter_ingest_log, clear_ingest_log.
 
-**Properties:** capacity, profile, active_cell_count, active_cell_ids, native_hotpath_enabled, opencl_hotpath_enabled, ingest_log_enabled.
-
 **SLCPRecord dataclass:**
 
 ```python
@@ -945,19 +1251,14 @@ class SLCPRecord:
     def future_cone(self, n: int): ...
     def future_locus(self, n: int): ...
     def optical_coordinates(self): ...
+    def interoperability_record(self) -> InteroperabilityRecord: ...
 ```
 
 #### C.3 Native boundary
 
-GyroGraph has its own native execution layer alongside GyroLabe:
-
 | Component | Responsibility |
 |-------|----------------|
-| GyroLabe | Kernel-level algebra: signatures, chirality distance, WHT, Lattice Multiplication GEMV, SDK execution |
-| gyrograph.c | Batched CPU: full ingestion cycle per cell in a single pass |
-| gyrograph_opencl.c | GPU-parallel: 4-step Omega trace for all cells; histogram and ring updates on CPU |
-| ops.py | Build automation, compiler detection, ctypes setup, dispatch between CPU/OpenCL/Python fallback |
-
-Neither layer redefines kernel law. Both implement the same exact Ω stepping rule.
-
-
+| GyroLabe | Kernel algebra, WHT64, Krawtchouk7, K4Char4, structured analysis, hybrid lowering |
+| gyrograph.c | Batched CPU ingestion cycle per cell |
+| gyrograph_opencl.c | GPU-parallel 4-step Ω trace for all cells |
+| ops.py | Build automation, dispatch, ctypes setup |

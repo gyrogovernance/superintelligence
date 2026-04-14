@@ -266,7 +266,7 @@ It is self-inverse, unitary, and factors as H₁⊗⁶ where H₁ is the single-
 
 The WHT is native to the kernel's algebraic structure. The mask code is self-dual, the chirality register is exact, and the code's Walsh support closes on itself. The WHT and the q-map translation form dual faces of the same computational medium: the q-map provides Pauli-X translations on the chirality register, the WHT provides the Fourier transform over it.
 
-The WHT has a property that distinguishes it from the standard discrete Fourier transform: its matrix entries are restricted to +1 and -1. Evaluation of the 64-point WHT on the chirality register therefore requires no multiplication. The fast Walsh-Hadamard transform (FWHT) computes the full 64-point transform using only additions and subtractions, in O(N log N) operations with N = 64. This matches the kernel's computational character: the XOR transport on the chirality register is addition-free (bitwise), and its spectral dual (the WHT) is multiplication-free. Both operate entirely within exact integer arithmetic.
+The WHT has a property that distinguishes it from the standard discrete Fourier transform: its matrix entries are restricted to +1 and -1. Evaluation of the 64-point WHT on the chirality register therefore requires no multiplication. The fast Walsh-Hadamard transform (WHT) computes the full 64-point transform using only additions and subtractions, in O(N log N) operations with N = 64. This matches the kernel's computational character: the XOR transport on the chirality register is addition-free (bitwise), and its spectral dual (the WHT) is multiplication-free. Both operate entirely within exact integer arithmetic.
 
 ### 5.1.5 XOR-Convolution
 
@@ -282,11 +282,11 @@ This identity holds exactly on the 64-element chirality register.
 
 Because chirality transport under a byte b is chi' = chi xor q6(b), the sequential application of multiple bytes is an iterated XOR-convolution in chirality space. Composing n byte-transport steps therefore reduces to:
 
-1. Transform each byte-ensemble distribution with the 64-point FWHT.
+1. Transform each byte-ensemble distribution with the 64-point WHT.
 2. Multiply the 64 spectral coefficients pointwise.
-3. Apply the inverse FWHT to recover the composed transport.
+3. Apply the inverse WHT to recover the composed transport.
 
-For repeated application of the same byte ensemble, the spectral coefficients are raised to the n-th power and a single inverse transform recovers the result. The total cost is one FWHT plus 64 scalar exponentiations, independent of n.
+For repeated application of the same byte ensemble, the spectral coefficients are raised to the n-th power and a single inverse transform recovers the result. The total cost is one WHT plus 64 scalar exponentiations, independent of n.
 
 This is the native spectral composition law of the aQPU. It follows directly from the fact that the chirality transport group is (GF(2)^6, xor) and the WHT is the exact Fourier transform of that group.
 

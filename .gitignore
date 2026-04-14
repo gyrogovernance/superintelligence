@@ -125,6 +125,8 @@ dmypy.json
 
 # External dependencies and tools
 codebase-mcp/
+external/fwht/
+external/Fast-Walsh-Hadamard-Transform-master/
 node_modules/
 
 # BabyLM: ignore all private agent and thread data
@@ -174,3 +176,5 @@ data/resonators/
 **secret_lab_ignore/_backup/chamber/
 
 data/benchmarks/
+
+src/tools/gyroscopic/workflow/

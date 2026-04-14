@@ -133,6 +133,7 @@ All results below are verified by exhaustive computation over the entire reachab
 | **Universal quantum ingredients** | The verified kernel is not a simulation; it is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
 | **Standard silicon efficiency** | Achieves over 1.2 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
 | **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
+| **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks; structured `P_Q` and residual `D_Q` components are evaluated through native transforms and K4 lattice arithmetic. |
 
 **Integrity and Tamper Detection:** The kernel includes a built-in self-dual [12,6,2] code and exact algebraic provenance checks. Integrity misses are structurally classified rather than opaque: substitutions reduce to shadow partners, adjacent swaps reduce to shared `q-class`, and deletions reduce to specific stabilizer conditions on the horizons.
 
@@ -174,6 +175,7 @@ There is no reliable way to turn distributed human contribution into stable paid
 - 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
 - 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
 - 🧪 [QuBEC Climate Dynamics](docs/theory/QuBEC_Climate_Dynamics.md) - Finite occupation dynamics, transport, and operator partitions
+- 🧪 [QuBEC Transform Algebra](docs/theory/QuBEC_Transform_Algebra.md) - Transform surfaces and chart correspondence for one-cell climate evolution
 
 
 ### Extensions
@@ -226,8 +228,7 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/api.py` : Precomputed tables, chirality register, word signatures, Walsh helpers, and public algebra API
 - `src/kernel.py` : Reference kernel execution and replay surfaces
 - `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
-- `src/tools/gyrolabe/` : Native CPU/OpenCL backend, packed tensor engine, Bolmo bridge, and benchmarks
-- `src/tools/gyrograph/` : GyroGraph multicellular runtime engine, resonance profiles, SLCP emission, and bridges for applications, databases, and networks
+- `src/tools/gyroscopic/` : Unified GyroLabe (native transforms, structured operator analysis, QuBEC matmul) and GyroGraph (multicellular telemetry, SLCP emission, resonance) surfaces; native llama.cpp bridge (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
 - `docs/` : Specifications, reports, architecture notes, and supporting theory
 - `tests/` : Exhaustive verification suites for kernel physics, aQPU properties, SDK surfaces, and governance measurement
@@ -240,13 +241,15 @@ If you are evaluating this work for research, policy, or implementation:
 Create an environment and install dependencies (NumPy is required; the rest are in the repo tooling).
 
 ### SDK and Native Backend
-The public SDK surface is exposed through `src/sdk.py`. The native compute backend lives in `src/tools/gyrolabe/` and is used automatically when available to accelerate algebraic workloads.
+The public SDK surface is exposed through `src/sdk.py`. The native compute backend lives in `src/tools/gyroscopic/` and is used automatically when available to accelerate algebraic workloads.
+
+The Python SDK surface is organized into `ClimateOps` (QuBEC climate helpers) and `RuntimeOps` (native kernel entry points) namespaces, aligned with the Quantum Computing SDK specification. See `src/sdk.py` and `src/tools/gyroscopic/ops.py`.
 
 Native backend note: prebuilt Windows binaries are included for convenience. On macOS and Linux, the native backend builds automatically on first run when standard compiler tooling is available. If native build is unavailable, the exact Python fallback remains functional.
 
-For compiler and dependency details on the two native backends, see:
-- [GyroLabe Native Build Notes](src/tools/gyrolabe/README.md)
-- [GyroGraph Native Build Notes](src/tools/gyrograph/README.md)
+For native build details (GyroLabe/GyroGraph unified backend), see:
+- `src/tools/gyroscopic/` (native backend sources and helpers)
+- [llama.cpp Gyroscopic Backend](external/llama.cpp/ggml/src/ggml-gyroscopic/)
 
 ### AIR Console (Browser-based UI)
 The Console provides a browser-based interface for managing project contracts:

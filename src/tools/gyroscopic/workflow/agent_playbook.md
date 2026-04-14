@@ -15,32 +15,32 @@ For each file, tag findings into one or more of these buckets. Copy short quotes
 - **Op / API contract** -- What: function names, tensor `ne`/`nb`, `src0`/`src1` roles, types, contiguity assumptions. Why: Gyrolabe and bridge must match ggml calling conventions or strict mode will fire.
 - **Dispatch path** -- What: who calls whom: graph compute -> `ggml_compute_forward_*` -> vec_dot / repack / gemm. Why: you need to know every entry that can still bypass your kernel.
 - **Orchestration** -- What: chunking, `ith`/`nth`, barriers, workspace (`wdata`) sizing. Why: usually keep stock; only change if gyro kernels need different chunk boundaries.
-- **Microkernel grammar** -- What: load width, widen/madd pattern, horizontal sum, unroll depth, scale application point. Why: port into `codec.c` (or gyrolabe TU) as instruction shape, not as copied float semantics if gyro math differs.
+- **Microkernel grammar** -- What: load width, widen/madd pattern, horizontal sum, unroll depth, scale application point. Why: port into `gyrolabe_qubec_matmul.c` (or another gyrolabe TU under `src/tools/gyroscopic/`) as instruction shape, not as copied float semantics if gyro math differs.
 - **Repack / extra buffer** -- What: `tensor_traits`, `forward_mul_mat`, when repack wins over generic path. Why: if repack bypasses `vec_dot`, hooks must cover repack or you silently run stock.
 - **Bypass map** -- What: alternate fast paths, repack-only routes, dtype-specific kernels, fused branches that avoid the generic hook. Why: key to honest coverage claims for `MUL_MAT` and related ops.
-- **Hook locus** -- What: exact function + line region for `#ifdef GGML_USE_GYROSCOPIC`. Why: prefer minimal call sites; extend `gyroscopic-bridge` instead of scattering logic.
+- **Hook locus** -- What: exact function + line region for `#ifdef GGML_USE_GYROSCOPIC`. Why: prefer minimal call sites; extend `gyroscopic-backend` instead of scattering logic.
 - **Validation** -- What: which test or tool proves parity or acceptable drift. Why: tie each code change to `llama-bench`, `perplexity`, `export-graph-ops`, or `test-backend-ops` as appropriate.
 
 ## What to do with the knowledge
 
 1. **If it is contract or bypass risk:** Add a one-line bullet under **Findings** in `log.md` (or a dated subsection you append there). Example: "repack `forward_mul_mat` used for Q8_0 when extra buft X".
-2. **If it is kernel grammar:** Sketch the loop nest (M/N/K order, block sizes) in `exports/<id>.md` or scratch; then map it to a **single** target in `gyrolabe/codec.c` (or new gyrolabe C file) with the same structure and different inner operation.
-3. **If it is a new hook site:** Implement thin redirect in `ggml-gyroscopic` -> `gyroscopic-bridge` -> `gyromatmul_*` / future `gyrolabe_*`; document env and strict behavior in `log.md` (Hook sites section).
+2. **If it is kernel grammar:** Sketch the loop nest (M/N/K order, block sizes) in `exports/<id>.md` or scratch; then map it to a **single** target in `src/tools/gyroscopic/gyrolabe_qubec_matmul.c` (or a new C file next to it) with the same structure and different inner operation.
+3. **If it is a new hook site:** Implement thin redirect in `ggml-gyroscopic` -> `gyroscopic-backend` -> `gyromatmul_*` / future `gyrolabe_*`; document env and strict behavior in `log.md` (Hook sites section).
 4. **If it contradicts `agent.md` scope:** Fix `agent.md` in a small PR-sized edit, or flag the human; do not let drift accumulate in chat only.
 5. **If it reveals a bypass:** record it explicitly in `log.md` under Findings or Coverage risk. Do not leave bypass knowledge only in chat or private notes.
 
 ## How to implement (order)
 
 1. **Inventory before code:** List symbols and call edges relevant to `MUL_MAT` / `MUL_MAT_ID` / `OUT_PROD` (and any op you are promoting).
-2. **Bridge first or kernel first:** Prefer **kernel contract in `core.h`** + stub, then bridge wire, then fill kernel. Avoid giant bridge blobs.
+2. **Bridge first or kernel first:** Prefer **kernel contract in `gyrolabe.h`** + stub, then bridge wire, then fill kernel. Avoid giant bridge blobs.
 3. **One vertical slice:** One dtype/shape family working end-to-end with trace counters and a bench row beats many partial hooks.
 4. **Strict mode:** Any new path either succeeds through gyro or aborts under strict; no silent stock fallback inside gyrolabe.
 
 ## What to update after implementation
 
 - **`log.md`** -- Update when: new hook sites, env vars, CMake sources, findings from file reads, corrected "facts" rows.
-- **`gyrolabe/core.h`** -- Update when: new exports, exactness class tag per symbol, block layout comments.
-- **`gyroscopic-bridge.h` / `.cpp`** -- Update when: new entry points, counters, error strings.
+- **`src/tools/gyroscopic/gyrolabe.h`** -- Update when: new exports, exactness class tag per symbol, block layout comments.
+- **`gyroscopic-backend.h` / `.cpp`** -- Update when: new entry points, counters, error strings.
 - **`agent.md`** -- Update when: only if substitution priority or scope lock changes (rare).
 - **Bench / config scripts** -- Update when: new modes, timeouts, or required trace markers.
 - **`CHANGELOG.md` (repo root)** -- Update when: user-facing or milestone integration changes (project convention).
@@ -80,7 +80,7 @@ Use these as checklists. Check off only what applies.
 
 - Extract: inner loop of `ggml_vec_dot_q8_0_q8_0` (and any near variants); block struct layout; reduction tail.
 - Do: list registers and steps; decide gyrolabe inner replacement preserving block boundaries.
-- Implement: `codec.c` hot loops + existing bridge vec_dot hook.
+- Implement: `gyrolabe_qubec_matmul.c` hot loops + existing bridge hook.
 - Update: `log.md` if layout asserts or hook conditions change.
 
 ### `ggml-gyroscopic/simd-gemm.h`

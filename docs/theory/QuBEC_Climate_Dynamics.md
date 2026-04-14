@@ -152,7 +152,7 @@ p_t^χ(χ)    = Σ_{s : χ(s)=χ} p_t(s)           chirality marginal
 p_t^g(g)    = process probability of gauge sector g in K4
 ```
 
-The formal climate is the measure-level object p_t and its quotients. The empirical climate is a finite-window estimator built from rolling histories (`chi_hist64`, `shell_hist7`, `family_hist4`).
+The formal climate is the measure-level object p_t and its quotients. The empirical climate is a finite-window estimator built from rolling histories (`chi_hist64`, `shell_hist7`, `family_hist4`) as empirical summaries of the underlying occupation evolution.
 
 ---
 
@@ -543,9 +543,9 @@ phi_n(s) = phi(s)^n
 
 where phi(s) is the single-step spectral multiplier from Section 8.1.
 
-The total cost of computing the n-step climate evolution is one FWHT (to obtain the spectral multipliers), 64 scalar exponentiations, and one inverse FWHT. This cost is independent of n. Dense matrix exponentiation is not required.
+The total cost of computing the n-step climate evolution is one WHT (to obtain the spectral multipliers), 64 scalar exponentiations, and one inverse WHT. This cost is independent of n. Dense matrix exponentiation is not required.
 
-For non-stationary ensembles (where the byte bath changes at each step), the composition remains exact: the spectral multipliers at each step are multiplied pointwise. The total cost is O(n x 64 log 64) via repeated FWHT and pointwise multiplication, compared to O(n x 64^2) for dense matrix application.
+For non-stationary ensembles (where the byte bath changes at each step), the composition remains exact: the spectral multipliers at each step are multiplied pointwise. The total cost is O(n x 64 log 64) via repeated WHT and pointwise multiplication, compared to O(n x 64^2) for dense matrix application.
 
 This spectral composition law is the computational consequence of the kernel's transport being a group action on (GF(2)^6, xor).
 
@@ -747,14 +747,16 @@ Including gauge characters gives the product algebra of chirality translation-in
 
 ### 12.6 Generic operator and defect decomposition
 
-The one-cell operator hierarchy is:
+**Scope.** Here **one-cell** means one **local QuBEC register**: the 64-dimensional chirality chart GF(2)^6 at a single byte-horizon grain. Section 12 classifies **linear operators on that one 64-dimensional space** (one 64×64 block in the lowering of Sections 13.6 and 15). It is **not** a claim that the deployed system has only one register. **Multi-cellular** climate (Section 17, GyroGraph **cell_id**, per-cell rolling memories) repeats the **same** local algebra once per trajectory cell. **Wide tensors** repeat it **ceil(d/64)** times along an axis (each 64-wide tile gets its own operator instance). Readers should implement **per register / per block**, then compose across cells and blocks as the outer architecture specifies.
+
+The local operator hierarchy (one 64-state register) is:
 
 - shell-radial exact class: 7 parameters
 - shell x gauge exact class: 28 parameters
 - chirality translation-invariant exact class: 64 parameters
 - chirality x gauge translation-invariant exact class: 256 parameters
 
-A generic one-cell operator decomposes into exact quotient-algebra content plus residual defect. The defect is the part not captured by the selected exact partition algebra and is the only component that requires ambient dense treatment.
+A generic local operator on one register decomposes into exact quotient-algebra content plus residual defect. The defect is the part not captured by the selected exact partition algebra. It is still evaluated **exactly** via the **K4 lattice** in the native arithmetic; **ambient dense** treatment is an optional offload when a remainder is **stored** and delegated, not the semantic substitute for native **D_Q**.
 
 ---
 
@@ -969,16 +971,18 @@ Each projection is exact inside its class and yields an explicit residual defect
 
 ### 15.4 Runtime execution policy
 
-Execute by class where possible:
+Execute the **full** native identity at all times: **W · x = P_Q(W) · x + D_Q(W) · x** (QuBEC Transform Algebra, Section 8.2). Chart and regime choices only pick **which exact specialization** of the K4 law applies to the **data**, and which native diagonal implements **P_Q** when **W** lies in a quotient class. They are **not** detectors used to skip **P_Q** or replace **D_Q** with a stock matmul.
+
+Scheduling list (all exact, not gated on SCR):
 
 - carrier regime path when high charts vanish
 - spinorial regime path when high charts are in {−1,0,+1}
 - shell-radial exact path for 7-parameter content
 - shell x gauge exact path for 28-parameter content
 - WHT-diagonal exact path for 64 or 256 multiplier content
-- dense residual path only for remaining defect
+- K4 lattice evaluation for the defect **D_Q** on every application
 
-The structured/residual split provides a natural handoff point for external backends. The exact component is executed natively through GyroLabe. The residual component can be forwarded to any external execution backend (GPU dense path, tensor-network approximation, quantized inference engine) without requiring that backend to adopt the byte formalism. This separation is the operational bridge between the aQPU's exact geometry and external approximate or probabilistic computation. The defect norm (Section 15.3) quantifies what fraction of the workload crosses this boundary.
+The structured/residual split is an optional **deployment** boundary: the **P_Q** and **D_Q** pieces can both be computed natively, or a **stored** residual can be forwarded to an external backend (GPU dense path, tensor-network approximation, quantized inference engine) **without changing the defining sum**. That handoff is storage and engineering convenience, not "if structure capture is low, define the product elsewhere." The defect norm (Section 15.3) quantifies how much mass crosses an offload boundary when you choose to use one.
 
 ### 15.5 Routing and depth implications
 
@@ -1018,7 +1022,7 @@ Derived from the kernel at any moment:
 
 ### 16.3 Empirical estimators from rolling memory
 
-At this point the distinction from Section 1.6 is operational: the formal climate is a measure on Ω and its marginals, while the empirical climate is a finite-window estimator from rolling statistics. The formal quantities connect to implementation through the GyroGraph rolling memories.
+At this point the distinction from Section 1.6 is operational: the formal climate is a measure on Ω and its marginals, while the empirical climate is a finite-window estimator derived from rolling histories. The formal quantities connect to implementation through the GyroGraph rolling memories.
 
 **Empirical occupation density.** From `shell_hist7[0..6]` over a window of W observed states:
 
@@ -1040,7 +1044,7 @@ M̂₂ = W² / Σ_{χ=0}^{63} chi_hist64[χ]²
 
 This is the Rényi-2 effective support estimated from the chirality histogram.
 
-**Empirical shell spectrum.** The exact Krawtchouk transform of `shell_hist7`:
+**Empirical shell spectrum.** The exact Krawtchouk transform applied to a rolling shell histogram:
 
 ```
 Â(r) = Σ_{N=0}^{6} K_r(N) · shell_hist7[N] / W
@@ -1048,7 +1052,7 @@ This is the Rényi-2 effective support estimated from the chirality histogram.
 
 This is available through `shell_krawtchouk_transform_exact`.
 
-**Empirical chirality spectrum.** The 64-point WHT of `chi_hist64`:
+**Empirical chirality spectrum.** The 64-point WHT of rolling chirality counts:
 
 ```
 spectral64 = wht64(chi_hist64 / W)
@@ -1074,7 +1078,7 @@ This is the `spectral64` field of the SLCP record.
 
 For external systems that produce binary sample traces, trajectory logs, or bitstring outputs, the climate observables provide a projection bridge. Any external binary output stream can be windowed and mapped into chirality histograms, shell marginals, gauge spectra, and effective support estimates using the rolling-memory estimators above. This allows the QuBEC climate framework to serve as a diagnostic and calibration layer over external samplers, simulators, or stochastic hardware without requiring those systems to adopt the byte transition law internally.
 
-All formal quantities of the climate theory have explicit empirical counterparts in the existing stack. The rolling memories (`chi_ring64`, `chi_hist64`, `shell_hist7`, `family_ring64`, `family_hist4`) are the sufficient statistics of the one-cell climate.
+All formal quantities of the climate theory have explicit empirical counterparts in the existing stack. The rolling memories (`chi_ring64`, `chi_hist64`, `shell_hist7`, `family_ring64`, `family_hist4`) are the empirical summaries used to estimate one-cell climate observables.
 
 ---
 
