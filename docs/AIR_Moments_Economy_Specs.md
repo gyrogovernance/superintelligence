@@ -1,59 +1,63 @@
 # Moments Economy Architecture Specification
 
-![Moments Economy Cover Image](/assets/moments_cover.png)
-
 ## Introduction
 
-The Moments Economy establishes a monetary system grounded in physical capacity rather than debt. Money in this architecture represents verified coordination that maintains good governance (alignment work). Issuance is therefore constrained not by institutional policy but by the volume and properties of the physical container defined by the atomic standard.
+The Moments Economy is a monetary and settlement architecture in which the ability to issue money is limited by a publicly verifiable physical capacity rather than by debt issuance, discretionary ledger authority, or institution-specific trust. It is grounded in the caesium-133 hyperfine transition frequency (`f_Cs = 9,192,631,770 Hz`), the physical frequency that defines the SI second. Because this atomic standard fixes how finely distinct physical events can be resolved, it also sets a physical bound on how much coordination can be recorded and settled within a shared causal region. In this architecture, money is not treated as an expandable claim created by a central issuer. It is treated as a recorded and replayable governance allocation within a bounded structural capacity.
 
-The system operationalises and routes alignment work through the Gyroscopic ASI aQPU Kernel, an algebraic quantum processing unit (aQPU) that provides an efficient and distributable mechanism for global governance coordination. The aQPU Kernel provides deterministic coordination through a finite state space of 4,096 reachable states. Its outputs are compact routing signatures and governance observables that any party can verify through replay. The aQPU Kernel performs structural transformations rather than interpreting empirical meaning. This ensures results are reproducible, comparable and auditable while keeping decision-making traceable to human agency.
+That envelope is called the Common Source Moment. It is derived from the caesium-133 atomic-second standard together with the finite verification space of the settlement system. The result is a fixed one-time capacity for recording and settling coordination. This capacity is not a metaphor. It is the explicit physical and geometric basis on which issuance is bounded.
 
-Settlement in this economy does not depend on a central ledger keeper. All distributions are recorded in data structures that bind identity to specific coordinates within the aQPU Kernel's finite state space. Because the aQPU Kernel is deterministic, any party with the transaction logs can replay history to confirm exactly who received what and when. This removes the need for central custodians and replaces institutional trust with cryptographic proof.
+The settlement system used in this architecture is the Gyroscopic ASI aQPU Kernel. It is a deterministic verification system that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
 
-The physical anchor for the system is the caesium-133 hyperfine transition frequency. This frequency is used because it is the most widely accepted, reproducible and internationally audited physical reference for measurement, independent of any institution's monetary policy. When this atomic resolution is coarse-grained by the aQPU Kernel's holographic state space, the result is a fixed total volume of distinct, verifiable coordination states. This one-time capacity is called the Common Source Moment (CSM).
+The Moments Economy is an institutional record architecture as well as a distribution system. The same infrastructure that supports monetary settlement also supports complete governance records, including who acted, what was issued, what evidence was referenced, what corrections were made, and where disputes arose. This is why the architecture matters beyond economic policy narrowly understood. It offers a common method for settlement, audit, provenance, and institutional memory within one replayable medium.
 
-The Common Source Moment constitutes the total volume available for these operations. This single capacity supports both the distribution of an Unconditional High Income and the governance of additional tiered distributions that recognise wider scope and higher responsibility. It also supports the preservation of complete governance records. These records include provenance, commitments, consultation, and disputes. Because the capacity is large, settlement does not require compressing or discarding coordination detail, and multiple independent parties can maintain complete records for verification. This supports uses beyond monetary distribution, including scientific research verification, AI model auditing, supply chain traceability, and personal consent tracking.
+The architecture also has a staged adoption path. Institutions do not need to begin by replacing existing currencies or payment rails. They can first adopt the system for coordination, audit, compliance, and traceable programme administration. In doing so, they build the same byte-complete records that later make economic settlement in Moment-Units possible. The transition path is therefore cumulative. The infrastructure first functions as a coordination and verification system and only later, where conditions permit, as a monetary settlement architecture.
 
-This document specifies the complete architecture, including the economic units, the structural objects for accounting, the geometric foundations of coordination, and the institutional requirements for transition.
+This document specifies that architecture. It defines the unit of account, the capacity envelope, the structural objects of settlement, the verification pattern, the domain model, the epistemic commitments, and the institutional requirements for transition.
 
 ### Why this matters
 
-- **For individuals:** A guaranteed baseline income with additional tiered distributions that recognise wider scope and higher responsibility, delivered through verifiable records rather than debt-based issuance.
-- **For policymakers:** Issuance limits derived from explicit physical and geometric assumptions, with parameters that can be inspected, tested, and revised through governance rather than opaque monetary policy.
-- **For institutions:** A settlement and audit method where distributions and eligibility decisions are replayable records, reducing reliance on custodians and retrospective narrative dispute.
-- **For AI safety:** A coordination medium that preserves human authority, traceability, and accountability in systems where artificial agents contribute to decisions and record-keeping.
+* **For individuals:** A guaranteed baseline distribution with additional tiered distributions for wider responsibility, delivered through verifiable records rather than debt-based issuance.
+* **For policymakers:** Issuance limits derived from explicit physical and geometric assumptions that can be inspected, challenged, and revised through governance.
+* **For institutions:** A settlement and audit method in which distributions and eligibility decisions are replayable records rather than opaque internal updates.
+* **For AI safety:** A coordination medium that preserves human authority, traceability, and accountability in systems where artificial agents contribute to decisions and record-keeping.
 
-### Scope of the aQPU Kernel
+### Two capabilities, one infrastructure
 
-The Gyroscopic ASI aQPU Kernel is used in this document as the settlement and verification layer for the Moments Economy. However, the aQPU Kernel also serves as the coordination backbone for the Alignment Infrastructure Routing (AIR) framework, where it provides coordination states and deterministic replay for grant distribution, work receipts, and project coordination. These uses are independent. Institutions may adopt AIR for coordination without committing to the Moments Economy. The economic architecture described here specifies how the aQPU Kernel can additionally serve as a monetary settlement layer when the conditions for the turning point (Section 16) are met.
+The same infrastructure provides two distinct capabilities.
+
+First, it provides an immediate capability: verifiable coordination records for audit, safety, compliance, dispute resolution, and programme administration.
+
+Second, it provides a latent capability: a complete replayable history of distributions and governance actions that can serve as the accounting basis for Moment-Units.
+
+Adoption for the first purpose automatically builds the infrastructure for the second. The same byte logs and event bindings used for coordination and verification can also support economic settlement when the conditions for transition are met.
+
+### Scope and relationship to AIR
+
+The Gyroscopic ASI aQPU Kernel serves here as the settlement and verification layer for the Moments Economy. The same kernel also serves as the coordination backbone for Alignment Infrastructure Routing, a related coordination framework for grants, work receipts, and project histories. These uses are related but distinct. Institutions may adopt AIR for coordination without adopting the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
 
 ### Document structure
 
-**Part I: The Economic Proposition** defines the Moment-Unit, the baseline unconditional income, the participation tiers, and the capacity derivation that supports them.
+**Part I: The Economic Proposition** defines the Moment-Unit, the Common Source Moment, the baseline unconditional distribution, and the participation tiers.
 
-**Part II: The Architecture** specifies the structural objects used for accounting, the domain structure (economy, employment, education, ecology), and the verification procedures.
+**Part II: The Architecture** specifies the structural objects, the four domains, the verification pattern, and the role of genealogies.
 
-**Part III: Foundations** explains the epistemic consensus on human authority and the geometric invariants (aQPU Kernel properties) that underpin the system.
+**Part III: Foundations** explains the epistemic commitments and the geometric invariants that underpin the system.
 
-**Part IV: Institutions and Transition** outlines the requirements for registries, settlement systems, tier governance, and interoperability.
+**Part IV: Institutions and Transition** sets out registry, settlement, governance, interoperability, and transition requirements.
 
 ### Related frameworks
 
-The architecture integrates four specifications. Each is referenced where relevant.
+The architecture draws on five related internal frameworks and specifications.
 
-**Common Governance Model (CGM):** Geometric theory of coherent measurement identifying the intrinsic fourfold structure and target aperture (≈ 0.0207).  
-[GitHub: Gyroscopic Alignment Research Lab](https://github.com/gyrogovernance/science)
+**Common Governance Model (CGM):** A geometric theory of coherent measurement used in this body of work to describe an intrinsic fourfold governance structure.
 
-**Gyroscopic Global Governance (GGG):** Framework applying CGM to the coupled domains of economy, employment, education, and ecology.  
-[Document: GGG Paper](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md)
+**Gyroscopic Global Governance (GGG):** A governance framework developed in the surrounding research programme, applying four governance capacities across economy, employment, education, and ecology.
 
-**The Human Mark (THM):** Epistemic taxonomy distinguishing Direct (human) from Indirect (artificial) sources and defining displacement risks.  
-[Document: The Human Mark](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md)
+**The Human Mark (THM):** An epistemic taxonomy used here to distinguish Direct human sources from Indirect artificial and mediated sources.
 
-**Gyroscopic ASI aQPU Kernel:** Deterministic coordination kernel providing shared moments, provenance, and replay.  
-[Document: Kernel Specifications](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md)
+**Gyroscopic ASI aQPU Kernel:** The deterministic coordination kernel used in this architecture for shared moments, provenance, and replay.
 
-**Gyroscope Protocol:** Classification framework for work into four categories (governance management, information curation, inference interaction, intelligence cooperation).  
+**Gyroscope Protocol:** A classification framework used to describe work in terms of governance management, information curation, inference interaction, and intelligence cooperation.
 
 Normative requirements use **MUST**, **SHOULD**, and **MAY** as defined in RFC 2119.
 
@@ -63,105 +67,148 @@ Normative requirements use **MUST**, **SHOULD**, and **MAY** as defined in RFC 2
 
 ## 1. The Moment-Unit
 
-The unit of account is the Moment-Unit (MU).
+The unit of account is the Moment-Unit, or MU.
 
-The MU is anchored to time: **one MU corresponds to one minute of capacity at the base rate.**
+The MU is anchored to time for readability and practical accounting: **one MU corresponds to one minute of capacity at the base rate**.
 
-The base rate is fixed at 60 MU per hour. This definition yields:
-- 1,440 MU per day
-- 525,600 MU per year
+The base rate is fixed at 60 MU per hour. This yields:
 
-This convention aligns monetary accounting with standard timekeeping. Annual magnitudes remain comparable to familiar salary figures, and the unit avoids dependence on volatile commodity prices or debt instruments.
+* 1,440 MU per day
+* 525,600 MU per year
 
-## 2. Unconditional High Income
+This convention makes annual magnitudes legible in familiar terms while avoiding dependence on commodity prices or debt instruments.
 
-Unconditional High Income (UHI) is the baseline distribution provided to every person.
+The MU is a scalar unit of account. As noted above, the minute denomination is for readability only; the system is not a time currency. The underlying capacity of the system is not generated by the passage of time. It is drawn from a fixed one-time capacity envelope, the Common Source Moment.
 
-**Definition.** UHI corresponds to four hours per day at the base rate.
-- Daily: 240 MU
-- Annual: 87,600 MU
+A Moment and a Moment-Unit are not the same kind of object. In this document, a **Moment** means a reproducible verification state at a given point in a replayable record. A **Shared Moment** means such a state when multiple parties reproduce it from the same record. A **Moment-Unit** is the accounting measure used to denominate distributions within this architecture.
 
-**Distinction from Temporal Currencies.** 
-The MU is a scalar unit of account denominated in minutes for human readability. The system is not time-based; it is grounded in a fixed geometric volume (the Common Source Moment) derived from the atomic standard. This capacity is a one-time total derived from the phase space of the light-sphere, not a flow generated by the passage of time. Value derives from structural coherence, not labor duration.
+## 2. The Common Source Moment
 
-**Funding.** UHI is issued within the Common Source Moment capacity envelope. Section 4 shows that the envelope supports this distribution for the entire global population with a resilience margin exceeding 99.999999 percent.
+The system capacity is the Common Source Moment, or CSM. It is calculated as the phase-space volume of the atomic-second light-sphere, coarse-grained by the finite verification space of the settlement system. In plainer terms, the architecture takes the smallest shared physical timing reference in common scientific use and combines it with a finite replay space to define a bounded total settlement capacity. This is a one-time total, not a renewable rate.
 
-**Mechanism.** Individuals receive UHI through public registries maintained by recognised institutions or fiscal hosts. These registries bind the individual's identity to a structural anchor (an Identity Anchor) and issue Grants within time-bounded Shells. Payment providers then route these Grants into bank accounts or digital wallets. Every step produces a verifiable audit trail that can be independently replayed.
+### 2.1 Capacity derivation
 
-## 3. Participation tiers
+**1. Physical capacity standard**
 
-Participation tiers provide distributions above the UHI baseline. They recognise contributions that involve wider scope or higher responsibility.
+The International System of Units defines the atomic second via the caesium-133 hyperfine transition frequency:
 
-**Tier Schedule.** Tiers are defined as multiples of UHI:
-
-| Tier | Multiple | Annual MU      |
-|------|----------|----------------|
-| 1    | 1×       | 87,600         |
-| 2    | 2×       | 175,200        |
-| 3    | 3×       | 262,800        |
-| 4    | 60×      | 5,256,000      |
-
-**Capacity Associations.** Tiers correspond to the four Gyroscope capacities:
-- **Tier 1 (Intelligence Cooperation):** Maintenance of shared systems and cultural continuity.
-- **Tier 2 (Inference Interaction):** Negotiation of meaning and conflict resolution.
-- **Tier 3 (Information Curation):** Selection, verification, and contextualisation of information.
-- **Tier 4 (Governance Management):** Direction of authority and traceability across systems.
-
-**Governance.** Tier multipliers are governance parameters revisable through institutional processes. Tier assignments must be made by identifiable human agents and recorded in the audit log.
-
----
-
-## 4. Coordination Capacity: The Common Source Moment
-
-The system capacity is the Common Source Moment (CSM). It is calculated as the phase space volume of the atomic-second light-sphere, coarse-grained by the aQPU Kernel's finite reachable state space. This is a one-time total, not a renewable rate.
-
-### 4.1 Capacity Derivation
-
-**1. The Physical Capacity Standard (f_Cs)**  
-The International System of Units (SI) defines the atomic-second via the caesium-133 hyperfine transition. This sets the fundamental frequency reference for the system:  
 `f_Cs = 9,192,631,770 Hz`
 
-We use this constant because atomic timekeeping is the most precise, globally audited method humans have for synchronising physical processes. In metrology it quantifies how finely distinct events in a shared causal region can be distinguished and coordinated. The Moments Economy treats that same limit as a finite pool of distinguishable coordination states, where alignment work is the verified occupation and transformation of those states.
+This frequency is used as the physical coordination standard because atomic timekeeping provides the most precise and internationally audited method currently available for distinguishing and synchronising physical events.
 
-**2. The Physical Volume (N_phys)**  
-The causal container is the light-sphere whose radius equals the distance light travels in one second, with volume `V = (4/3)π(c × 1s)³`. This volume determines the total capacity; it does not regenerate with each passing second. At the atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:  
-`N_phys = V / λ³ = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`  
-The speed of light cancels out in this equation, creating a purely geometric and frequency-based invariant (verified in `test_physical_microcell_count_closed_form_and_c_cancellation`).
+**2. Physical volume**
 
-**3. The Common Source Moment (CSM)**  
-The aQPU Kernel kernel has reachable shared-moment space |Ω| = 4,096. Uniform coarse-graining by this reachable space gives the Common Source Moment:  
+The causal container is the light-sphere whose radius equals the distance light travels in one second. At atomic wavelength `λ = c / f_Cs`, the raw physical microcell count is:
+
+`N_phys = (4/3)π f_Cs³ ≈ 3.25 × 10³⁰`
+
+The speed of light cancels in this expression, because `c` appears in both the volume and the wavelength expression, yielding a purely geometric and frequency-based invariant.
+
+**3. Coarse-graining by reachable verification states**
+
+The settlement system has a finite reachable verification space:
+
+`|Ω| = 4,096`
+
+Uniform coarse-graining by this verification space gives the Common Source Moment:
+
 `CSM = N_phys / |Ω| ≈ 7.94 × 10²⁶ MU`
 
-**Capacity Functionality**
+This is the fixed total capacity envelope for the Moments Economy.
 
-This capacity serves two distinct purposes:
+### 2.2 Functional meaning of the capacity
 
-**A. Monetary Distribution**  
-- Global UHI demand per year: `≈ 7.10 × 10¹⁴ MU`  
-- Coverage: The CSM pool supports global UHI for approximately 1.12 trillion years.  
-- Tier distributions: Under realistic tier participation scenarios, the coverage remains between approximately 7.64 × 10¹¹ and 1.00 × 10¹² years.  
-- Adversarial safety: An adversary would need to issue approximately 11,195,903,022 times the annual global UHI to consume 1% of total capacity. This is operationally impossible.
+The Common Source Moment serves two distinct functions.
 
-**B. Coordination Records**  
-The capacity also supports complete coordination records. These records track:
+**A. Monetary distribution**
 
-- **Provenance:** Dependencies between documents, data, models, and decisions. Example: a scientific paper's byte log records which sources were consulted and in what order. Replay verifies the claim.
-- **Commitments:** Claims that a dataset is valid, a model is safe, or a guideline is in force. These are bound to aQPU Kernel moments, making them verifiable and disputable.
-- **Consultation:** What humans and machines actually used when making decisions. Example: a regulator's decision byte log shows which expert reports were routed through the kernel. Independent parties can replay to confirm.
-- **Disputes:** Where institutions diverge. Because disagreement localises to specific byte log differences, disputes are resolvable by comparing logs rather than by adjudicating narratives.
+It provides the total capacity envelope within which baseline and tiered distributions can be issued.
 
-In practice these records are maintained as append-only byte logs and event logs bound to aQPU Kernel moments, with external artefacts referenced by identifiers rather than embedded.
+**B. Coordination records**
 
-The depth of the capacity allows these records to remain complete rather than aggregated. This enables:
+It provides sufficient capacity to preserve complete coordination records, including provenance, consultation histories, commitments, disputes, and corrections.
 
-- **Complete genealogies:** No summarisation. Every decision retains its full provenance chain.
-- **Independent redundancy:** Multiple institutions maintain their own complete records. No central custodian is required.
-- **Fine granularity:** Every consultation event, every micro-decision, and every version is recorded without approaching saturation.
+Because the capacity far exceeds foreseeable demand, these records do not need to be compressed into sparse summaries merely to conserve accounting space. Multiple institutions can maintain complete independent records without approaching saturation.
 
-This dual function is what makes the Moments Economy secure. Monetary distributions are traceable because the coordination records are complete. Recovery from fraud involves replaying logs and republishing corrected Shells, not defending a scarce stock of money.
+### 2.3 Capacity implications
 
-**Implication**  
-Capacity scarcity is not a constraint. The limiting factors are governance quality and registry integrity: how genealogies are constructed, how events are classified, and how institutions publish sufficient information for independent verification.
+The practical implications are as follows.
+
+* Global UHI demand per year is `≈ 7.10 × 10¹⁴ MU`.
+* The CSM supports global UHI for approximately `1.12 × 10¹² years`.
+* Under realistic tier participation assumptions, the duration remains on the order of `10¹²` years.
+* Adversarial exhaustion of even 1% of total capacity would require issuance on the order of `1.12 × 10¹⁰` times annual global UHI. On any human, institutional, or civilisational timescale relevant to settlement design, this is operationally impossible.
+
+Capacity exhaustion is therefore not a credible attack vector for the Moments Economy. The real constraints are governance quality, registry integrity, and publication discipline.
+
+## 3. Unconditional High Income
+
+Unconditional High Income, or UHI, is the universal baseline distribution provided to every person recorded in a conforming registry under published eligibility rules.
+
+### 3.1 Definition
+
+UHI corresponds to four hours per day at the base rate.
+
+* Daily: 240 MU
+* Annual: 87,600 MU
+
+### 3.2 Distinction from temporal currencies
+
+The MU is denominated in minutes for readability, but value in this architecture does not derive from labour duration. It derives from structurally verifiable coordination within a fixed physical-capacity envelope.
+
+The Moments Economy is therefore neither a time bank nor a labour-time currency. It is a settlement architecture whose accounting unit is made legible through time denomination while remaining grounded in a one-time geometric capacity.
+
+### 3.3 Mechanism
+
+Individuals receive UHI through public registries maintained by recognised institutions, fiscal hosts, or equivalent public-interest entities.
+
+These registries:
+
+* bind the individual to an Identity Anchor,
+* issue Grants within time-bounded Shells,
+* publish the relevant structural records,
+* and route payment through banks or digital wallets where applicable.
+
+Every step in this process produces a replayable audit trail.
+
+## 4. Participation tiers
+
+Participation tiers define the entitlement schedule of the Moments Economy.
+
+Tier 1 is the universal baseline distribution: UHI.
+
+Tiers 2 to 4 recognise progressively wider scope and higher responsibility. All tiers draw from the same Common Source Moment envelope.
+
+### 4.1 Tier schedule
+
+* **Tier 1:** 1× UHI = 87,600 MU annually
+* **Tier 2:** 2× UHI = 175,200 MU annually
+* **Tier 3:** 3× UHI = 262,800 MU annually
+* **Tier 4:** 60× UHI = 5,256,000 MU annually
+
+The Tier 4 multiplier reflects the outsized structural impact of governance-management roles in this architecture. It remains a governance parameter and is therefore subject to revision through the processes described in §4.3.
+
+### 4.2 Capacity associations
+
+The tier structure aligns with the four governance capacities used in the Gyroscope framework.
+
+* **Tier 1: Intelligence Cooperation:** maintenance of shared systems and continuity of participation
+* **Tier 2: Inference Interaction:** negotiation of meaning, mediation, and conflict resolution
+* **Tier 3: Information Curation:** verification, selection, contextualisation, and stewardship of informational order
+* **Tier 4: Governance Management:** direction of authority, traceability, and institutional continuity across systems
+
+### 4.3 Governance of tier assignments
+
+Tier 1 is universal.
+
+Assignments for Tiers 2 to 4 are governance actions. They MUST:
+
+* be made by identifiable human agents,
+* be recorded as governance events bound to specific Moments,
+* be reversible through subsequent logged events,
+* and SHOULD reference the genealogical evidence on which the decision relied.
+
+Tier multipliers are governance parameters. They may be revised through institutional process, but every revision MUST be published in a replayable form.
 
 ---
 
@@ -169,98 +216,86 @@ Capacity scarcity is not a constraint. The limiting factors are governance quali
 
 ## 5. The four domains
 
-The architecture organises activity into four coupled domains derived from the GGG framework.
+The architecture organises activity into four coupled domains drawn from Gyroscopic Global Governance, a governance framework developed within the same body of work as this specification.
 
-**Economy.** The domain of infrastructure, routing, and settlement. It encompasses the aQPU Kernel, the capacity ledger, and the physical networks enabling circulation.
+The **economy** domain covers infrastructure, routing, settlement, and circulation. It includes the movement of Moment-Units, the publication of structural records, and the maintenance of the settlement environment.
 
-**Employment.** The domain of work and activity. It encompasses the classification of contributions into governance management, information curation, inference interaction, and intelligence cooperation.
+The **employment** domain covers work and contribution. It includes the classification of activity into the four governance capacities used in the Gyroscope framework and the programme-level interpretation of contributions that may justify tiered allocations.
 
-**Education.** The domain of capacity building. It encompasses the development of alignment capacities (GMT, ICV, IIA, ICI) and the detection of displacement risks.
+The **education** domain covers capacity formation. It includes the cultivation of the human capabilities required for governance, the development of alignment capacities, and the detection of displacement risks.
 
-**Ecology.** The domain of circulation and balance. In GGG, ecology integrates the accumulated effects of the other three domains. In this architecture, ecology domain accounting is tracked via Shells and Archives that record the distribution of MU within the structural envelope and monitor the integrity of circulation. Unlike the other three domains, ecology is not maintained as a separate edge ledger but as aggregated capacity containers.
+The **ecology** domain is the integrative domain of systemic balance. It reflects the accumulated state of the other three domains rather than operating as an independent edge ledger. It is computed from cross-domain records and may be summarised through Shells, Archives, and other aggregate capacity views.
 
-These domains align with the aQPU Kernel's intrinsic fourfold coordination structure exposed by depth-4 frames. The economic architecture does not depend on an external K₄ ledger in order to operate.
+These four domains are not arbitrary administrative categories. They correspond to the fourfold coordination structure assumed within the surrounding governance research. The economic architecture uses that correspondence directly.
 
 ## 6. Structural objects
 
-Accounting relies on four standardised data structures.
+Accounting and verification rely on six standardised structural objects.
 
-**Identity Anchor.** A data pair linking an identity to a structural coordinate.
-- *Identity Identifier:* A collision-resistant hash of the identity string.
-- *Kernel Anchor:* An aQPU Kernel state derived by routing the identifier from rest.
+The **Byte Log** is the canonical append-only sequence of bytes. It is the primary replay object. Every conforming verification procedure ultimately depends on the integrity of this log.
 
-In the reference implementation, the Identity Identifier is a SHA-256 digest of the identity string, and the Kernel Anchor is the 6-character aQPU Kernel state hex obtained by routing that digest from rest.
+The **Event Log** is the application-layer annotation layer bound to specific verification states or to depth-4 frame records. It records meanings, decisions, classifications, references, and justifications that the kernel itself does not interpret.
 
-**Grant.** A record of a single MU allocation.
-- Contains: Identity label, Identity Identifier, Kernel Anchor, and MU amount.
-- Function: The atomic unit of distribution.
+An **Identity Anchor** links an identity to a structural coordinate within the settlement system. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and a Kernel Anchor, which is the state obtained by routing that identifier from rest. In the reference implementation, the Identity Identifier is a SHA-256 digest and the Kernel Anchor is the resulting 6-hex-character kernel state.
 
-The canonical Grant receipt is identity_id || kernel_anchor || amount_mu, where amount_mu is encoded as an unsigned 8-byte big-endian integer.
+A **Grant** is a record of a single MU allocation. It contains an identity label, an Identity Identifier, a Kernel Anchor, an MU amount, and the relevant shell context. The canonical Grant receipt is:
 
-**Shell.** A time-bounded capacity container (typically annual).
-- **Header:** Contextual label (e.g., `ecology:year:2026`).
-- **Capacity Metrics:** Total Capacity (F_total), Used Capacity, and Free Capacity.
-- **Seal:** A cryptographic commitment computed by:
-  1. Converting all Grants into canonical receipts (Identity ID || Anchor || Amount).
-  2. **Sorting** receipts lexicographically by Identity ID.
-  3. Concatenating the Header and sorted receipts.
-  4. Routing the result through the aQPU Kernel from GENE_MAC_REST (0xAAA555).
-  5. Recording the final 3-byte state.
+`identity_id || kernel_anchor || amount_mu`
 
-Because receipts are sorted by Identity Identifier before routing, Shell seals are invariant to the order in which Grants were added.
+where `||` denotes concatenation and `amount_mu` is encoded as an unsigned 8-byte big-endian integer.
 
-**Archive.** A long-horizon aggregation object.
-- Function: Aggregates Shells to track per-identity totals and global capacity usage over multiple periods.
+A **Shell** is a time-bounded capacity container, typically annual or programme-bounded. It contains a contextual header, total, used, and free capacity metrics, a set of Grants, and a Seal. The Shell Seal is an order-invariant, deterministically computed commitment over the Shell's canonical contents. The computation procedure is specified in Appendix C.
+
+An **Archive** is a long-horizon aggregation object. It aggregates Shells to track per-identity totals, programme totals, corrections, and overall capacity usage across multiple periods.
+
+These objects form the minimum structural vocabulary required for settlement. Byte Logs and Event Logs preserve the replayable history. Identity Anchors and Grants define allocations. Shells and Archives make those allocations publishable and auditable across time.
 
 ## 7. Verification and replay
 
 The defining feature of the Moments Economy is deterministic verification.
 
-**The Replay Procedure.** Any party with access to the published artefacts can verify a Shell:
-1. **Ingest:** Load the published Grants and Header.
-2. **Reconstruct:** Generate the canonical byte sequence by sorting Grants by identifier.
-3. **Execute:** Route the sequence through a conforming aQPU Kernel instance starting from GENE_MAC_REST (0xAAA555).
-4. **Compare:** Check if the resulting aQPU Kernel state matches the published Seal.
+The settlement system verifies structural integrity and replay consistency. It does not determine eligibility, authorisation, or justice. Those remain institutional and human governance functions that must themselves be published in forms suitable for replay and audit.
 
-**Outcome.** A match confirms that the data is authentic and the circulation totals are correct. A mismatch indicates that the Header or at least one Grant has been altered.
+Any party with access to the published artefacts can verify a Shell through the following procedure:
 
-Replay verification is exact: the published Shell seal must match the independently recomputed 24-bit aQPU Kernel state. Any mismatch proves that the canonical header or at least one canonical receipt differs.
+* Load the published Header and Grants.
+* Reconstruct the canonical byte sequence by converting Grants into canonical receipts and sorting them.
+* Route that sequence through a conforming aQPU Kernel instance from `GENE_MAC_REST`.
+* Compare the resulting state with the published Seal.
 
-Because replay uses exact integer arithmetic on fixed-width bit operations, verification produces identical results across all conforming implementations regardless of platform, language, or floating-point behaviour.
+A match confirms that the published structural object corresponds to its canonical contents. A mismatch proves that the Header or at least one Grant differs from the published claim.
 
-A structurally computable Shell seal does not by itself certify application-layer validity. Conforming settlement policy SHOULD reject or flag duplicate identity receipts within a Shell and SHOULD reject or flag Shells whose used capacity exceeds total capacity.
+Because replay uses exact integer arithmetic and fixed-width bit operations, conforming implementations produce identical results regardless of platform or language.
 
-**Requirement.** Public programmes MUST publish byte logs, event logs, Shells, and Archives at defined intervals to enable this verification.
+The system supports three layers of certification relevant to economic verification.
+
+* **Final-state layer:** Shared Moments as reproducible 24-bit verification states.
+* **Frame layer:** Depth-4 frame records `(mask48, φ_a, φ_b)`, providing stronger provenance than final states alone, because distinct histories can collapse to the same final state while still producing different frame records.
+* **Parity layer:** Compact commitments `(O, E, parity)` for integrity checking and batch verification, but not unique history certificates.
+
+A structurally correct seal does not by itself certify application-layer validity. Conforming settlement policy SHOULD reject or flag duplicate identity receipts within a Shell, SHOULD reject or flag Shells whose used capacity exceeds total capacity, SHOULD preserve correction histories rather than silently overwriting them, and SHOULD publish the policy basis for eligibility and dispute handling.
+
+Public programmes MUST publish, at defined intervals, the Byte Logs, Event Logs, Shells, Archives, and any frame records or commitments required by their verification policy.
 
 ## 8. Coordination levels
 
-**Individuals.** Any person or organisation acts as an individual node. They run a local aQPU Kernel instance and maintain private logs.
+At the **individual** level, any person or organisation may operate as a node. Each maintains a local aQPU Kernel instance and its own logs.
 
-**Projects.** A project defines a shared context for contribution. Participants agree on a canonical byte log and event log. Divergence from these logs is detected by replay. In many cases final aQPU Kernel states differ directly. When distinct histories collapse to the same final state, depth-4 frame records still distinguish them and localize the divergence.
+At the **project** level, a shared context of contribution is defined. Participants agree on a canonical Byte Log and Event Log. Divergence is detected by replay. Where distinct histories collapse to the same final state, frame records localise the divergence.
 
-**Programmes.** A programme aggregates projects under a broader mandate. Programmes maintain references to project genealogies and produce programme-level Shells and Archives. Programme bundles MAY be aggregated by meta-routing, where leaf seals are themselves routed into a higher-level root seal. This enables deterministic multi-programme aggregation with tamper localization.
+At the **programme** level, multiple projects are aggregated under a wider mandate. Programmes maintain references to project genealogies and produce programme-level Shells and Archives. Programme bundles MAY be aggregated by meta-routing, where leaf seals are themselves routed into a higher-level root seal. This enables deterministic multi-programme aggregation with tamper localisation.
 
 ## 9. Genealogies
 
-A genealogy is the complete structural history of an actor or programme. It consists of:
-- The full byte log, which is the canonical replay object.
-- Any application-layer event log bound to specific aQPU Kernel states or depth-4 frames.
-- The trajectory of Moments, meaning the aQPU Kernel states produced by replay.
-- The depth-4 frame sequence, where each frame is recorded as (mask48, φ_a, φ_b).
-- Optional compact integrity commitments such as trajectory parity commitments.
+A genealogy is the complete structural history of an actor, project, or programme within this architecture.
 
-A final aQPU Kernel state alone is not a unique history certificate. Genealogy-grade audit therefore compares frame sequences as well as final states.
+It consists of the Byte Log, any bound Event Log, the trajectory of Moments, the depth-4 frame sequence, and any optional compact integrity commitments attached to that trajectory.
 
-Genealogies function as verifiable assets. A programme can prove its history of alignment and capacity usage by providing its genealogy for replay. New programmes can initialise from the final state of an existing verified genealogy, preserving continuity.
+A final state alone is not a unique history certificate. Genealogy-grade audit therefore compares frame sequences as well as final states.
 
-### 9.1 The verification pattern
+Genealogies function as verifiable assets. A programme can prove its history of alignment and capacity usage by providing its genealogy for replay. New programmes may initialise from the final state of an existing verified genealogy and thereby preserve continuity.
 
-Verification follows a three-stage pattern that replaces reliance on a central ledger:
-- **Local:** Each actor maintains their own aQPU Kernel instance and logs.
-- **Published:** Selected genealogies and ledgers are exported as signed bundles.
-- **Verified:** Independent parties replay published bundles against the public aQPU Kernel specification and canonical serialization rules to confirm states, frame records, and seals.
-
-Truth emerges from the agreement of independently replayed computations.
+Verification follows a three-stage social pattern. It begins locally, where each actor maintains its own kernel instance and logs. It extends through publication, where selected genealogies and structural objects are exported as signed bundles. It completes through independent verification, when other parties replay those bundles against the public specification. Truth emerges from the agreement of independently replayed computations.
 
 ---
 
@@ -268,41 +303,61 @@ Truth emerges from the agreement of independently replayed computations.
 
 ## 10. Epistemic foundations
 
-The architecture relies on the distinction between human and artificial sources.
+The Moments Economy relies on the distinction between human and artificial sources as set out in The Human Mark, an epistemic framework used throughout this wider body of work.
 
-**Common Source Consensus.** The system operates on the principle that all artificial authority and agency are Indirect and originate from human intelligence.
+### 10.1 Common Source Consensus
 
-**Classifications.**
-- **Direct Authority:** Direct epistemic access (e.g., eyewitness, expertise).
-- **Direct Agency:** Human capacity for comprehension, intention, and commitment.
-- **Indirect Authority:** Mediated access (e.g., AI outputs, records).
-- **Indirect Agency:** Artificial processing capacity.
+The architecture operates on the principle that all artificial authority and agency are indirect and originate from human intelligence. Accordingly, every governance action above Tier 1 MUST trace to a Direct human source (§10.2).
 
-**Displacement.** Misclassifying a Indirect source as Direct (or vice versa) creates displacement risks.
-- *GTD:* Governance Traceability Displacement.
-- *IVD:* Information Variety Displacement.
-- *IAD:* Inference Accountability Displacement.
-- *IID:* Intelligence Integrity Displacement.
+### 10.2 Classifications
 
-The system uses these categories to route events and audit automated contributions.
+* **Direct Authority:** direct human access to a subject matter, such as observation, expertise, or measurement
+* **Direct Agency:** human capacity for comprehension, intention, judgement, and accountable commitment
+* **Indirect Authority:** mediated, processed, recorded, or model-generated information
+* **Indirect Agency:** artificial processing capacity
+
+Artificial systems may contribute to coordination, interpretation, and record production, but they do not originate authority and they do not bear final accountability.
+
+### 10.3 Displacement risks
+
+Misclassification between Direct and Indirect sources creates four named displacement risks in this framework.
+
+* **GTD:** Governance Traceability Displacement
+* **IVD:** Information Variety Displacement
+* **IAD:** Inference Accountability Displacement
+* **IID:** Intelligence Integrity Displacement
+
+These categories are used to classify events and to audit automated contributions.
 
 ## 11. Geometric foundations
 
-The aQPU Kernel's reachable shared-moment space has 4,096 states and a 64-state horizon. These satisfy the holographic identity |H|² = |Ω| (64² = 4,096).
+The settlement system used in this architecture has a reachable verification space of `4,096` states and a `64`-state horizon (`|H| = 64`) satisfying the holographic identity:
 
-The kernel supports three certification layers relevant to the Moments Economy:
+`|H|² = |Ω|`
 
-- **Shared moments** as final aQPU Kernel states. When two parties hold the same byte-log prefix and compute the same aQPU Kernel state, they share a structural "now" independent of external clocks or authorities.
-- **Depth-4 frame records** (mask48, φ_a, φ_b). Each frame is computed from four consecutive bytes and provides stronger provenance than a final state alone.
-- **Trajectory parity commitments** (O, E, parity). These are compact algebraic integrity checks over longer trajectories.
+The economic architecture relies on several properties of this verification space.
 
-The kernel's algebraic structure provides additional properties relevant to economic verification. The self-dual [12,6,2] mask code detects all odd-weight bit errors in states, providing intrinsic corruption detection for coordination records. From any state, two consecutive bytes distribute the coordination state exactly uniformly across all 4,096 reachable states, ensuring that settlement convergence is structurally guaranteed rather than probabilistically approximated. The 6-bit chirality register satisfies an exact transport law that enables early detection of divergence between parties before full state disagreement becomes visible.
+### 11.1 Shared moments
 
-Frame records are strictly stronger than final-state-only seals, because distinct byte histories can reach the same final state while producing different frame records.
+When two parties hold the same byte-log prefix and compute the same verification state, they share a structural present independent of external clocks or asserted authorities.
 
-The economic architecture uses the aQPU Kernel's intrinsic fourfold depth-4 structure. It does not require an external K₄ ledger or aperture calculation to validate Grants, Shells, or Genealogies.
+### 11.2 Exact uniformisation
 
-**Provenance.** A claimed state or seal has valid provenance if and only if it is reproducibly reachable from the rest state by the claimed byte history under the public transition law and canonical serialization rules.
+From any state, two consecutive bytes distribute coordination state exactly uniformly across all 4,096 reachable states. Settlement convergence is therefore structurally guaranteed rather than probabilistically approximated.
+
+### 11.3 Intrinsic error detection
+
+The self-dual `[12,6,2]` mask code detects all odd-weight bit errors in states, giving intrinsic corruption detection for coordination records.
+
+### 11.4 Chirality transport
+
+The 6-bit chirality register satisfies an exact transport law that enables early detection of divergence between parties before full state disagreement becomes visible.
+
+### 11.5 Provenance
+
+A state or seal has valid provenance if and only if it is reproducibly reachable from the rest state by the claimed byte history under the public transition law and canonical serialization rules.
+
+The economic architecture uses these invariants as the basis for settlement verification. It does not require semantic consensus in order to establish structural truth.
 
 ---
 
@@ -310,194 +365,208 @@ The economic architecture uses the aQPU Kernel's intrinsic fourfold depth-4 stru
 
 ## 12. Registries and settlement
 
-Public programmes facilitate settlement through three functions.
+Public programmes support the settlement architecture through three functions.
 
-**Registry Operation.** Programmes MUST maintain registries mapping persons and organisations to eligibility status. These registries bind entries to Identity Anchors.
+### 12.1 Registry operation
 
-**Recording.** Programmes MUST record all distributions as Grants within Shells.
+Programmes MUST maintain registries mapping persons and organisations to eligibility status. These registries bind entries to Identity Anchors.
 
-**Publication.** Programmes MUST publish the associated logs and structural objects. This converts settlement from an internal ledger update into a public, verifiable act.
+### 12.2 Recording
 
-Banks and payment providers act as routing layers, moving MU based on the verified Grants.
+Programmes MUST record all distributions as Grants within Shells.
+
+### 12.3 Publication
+
+Programmes MUST publish the associated logs and structural objects. This converts settlement from an internal ledger update into a public, verifiable act.
+
+Banks, payment processors, and digital-wallet providers may act as routing layers for fiat or digital disbursement, but they do not replace the replayable record as the basis of settlement integrity.
 
 ## 13. Tier governance
 
-Tier distributions are governance actions. They require higher scrutiny than UHI.
+Tier distributions above Tier 1 require higher scrutiny than the universal baseline.
 
-**Requirements.**
-- Decisions MUST be made by identifiable human agents (Direct Agency).
-- Decisions MUST be recorded as governance events bound to specific Moments.
-- Decisions MUST be reversible through subsequent logged events.
-- Decisions SHOULD reference the genealogical evidence used.
+These decisions:
 
-These rules ensure that tier assignments remain traceable to human judgement.
+* MUST be made by identifiable human agents,
+* MUST be recorded as governance events bound to specific Moments,
+* MUST be reversible through subsequent logged events,
+* SHOULD reference the genealogical evidence used,
+* and MUST preserve traceability from decision to authorising human source.
+
+These rules ensure that tier assignments remain attached to human judgement rather than being silently delegated to opaque automation.
 
 ## 14. Interoperability
 
-Interoperability is defined by the ability to replay. Systems are interoperable if they can exchange logs and reproduce each other's states.
+Interoperability is defined by the ability to replay. Systems are interoperable if they can exchange logs and reproduce one another’s states and structural objects.
 
-**Standards.** Conforming systems MUST:
-- Use the shared aQPU Kernel specification, canonical byte replay rules, and canonical serialization rules for Identity Anchors, Grants, Shells, and frame records.
-- Format byte logs and event logs canonically, as specified by the aQPU Kernel runtime and project format specifications (see `Gyroscopic_ASI_Specs.md`).
-- Use consistent identifiers for domains, identities, Grants, Shells, and frame records.
-- Support the standard format for Grants, Shells, and Archives.
+Conforming systems MUST:
+
+* use the shared aQPU Kernel specification,
+* use canonical byte replay rules,
+* use canonical serialization for Identity Anchors, Grants, Shells, and Archives,
+* use consistent identifiers for domains, identities, programmes, and periods,
+* and preserve sufficient information for independent verification.
 
 ## 15. Value and wealth
 
 In this architecture, value is structural coherence rather than debt obligation.
-- **Wealth** is access to deep, verified genealogies and the capacity to navigate the coordination space effectively.
-- **Poverty** is the absence of structural resources: lacking access to aligned programmes or verified genealogies.
-- **Exchange** is a positive-sum coordination act. When aligned actors exchange, they generate shared structural surplus rather than transferring fixed value.
+
+**Wealth** is access to deep, verified genealogies and the ability to navigate coordination space effectively.
+
+**Poverty** is the absence of structural resources, such as access to aligned programmes, registry recognition, or verified genealogical continuity.
+
+**Exchange** within this architecture is a positive-sum coordination act: when aligned actors exchange, they generate shared structural surplus rather than merely transferring fixed value.
 
 ## 16. Transition path
 
-A systemic **turning point** is reached when two conditions hold:
+A systemic turning point is reached when two conditions hold.
+
 1. UHI distributions occur reliably using replayable genealogies.
 2. Displacement remains bounded under increased participation.
 
-Before this point, governance focuses on building replayable records and verifiable settlement discipline; after it, focus shifts to allocation and long-horizon integrity.
+Before this point, institutions focus on building replayable records, publication discipline, and verifiable settlement practice.
 
 Transition from legacy systems to the Moments Economy typically follows three phases.
 
-**Phase 1: Measurement.** Institutions run pilots to build genealogies. They publish replayable genealogies, shell seals, and frame commitments but settle in conventional currency. This builds verification capacity.
+### Phase 1: Measurement
 
-**Phase 2: Distribution.** UHI is introduced as a parallel distribution. Registries issue Grants, and Shells are published. This establishes the circulation loop.
+Institutions run pilots to build genealogies, test publication procedures, and establish replay discipline. Settlement may still occur in conventional currencies.
 
-**Phase 3: Expansion.** Tier distributions are introduced. Additional functions—such as pensions, grants, and scholarships—migrate to MU channels, leveraging the established verification infrastructure.
+### Phase 2: Parallel distribution
+
+UHI is introduced as a parallel distribution architecture alongside existing currency systems. Registries issue Grants, Shells are published, and the circulation loop becomes publicly auditable. Existing currencies may continue to be used for pricing, contracts, taxation, and banking interfaces.
+
+### Phase 3: Expansion
+
+Tiered distributions are introduced. Additional functions such as grants, pensions, scholarships, stipends, or programme entitlements migrate into MU channels, while legacy systems continue to interoperate where required.
+
+The transition is therefore staged rather than abrupt. The same infrastructure that first supports audit and coordination can later support economic settlement.
 
 ---
 
 ## Conclusion
 
-The Moments Economy establishes money as a function of coordination capacity rather than credit. Value derives from structural coherence rather than debt obligation. Humans retain authority and agency over all governance decisions; artificial systems contribute derivatively within auditable bounds.
+The Moments Economy establishes money as a function of coordination capacity rather than credit. Value derives from structural coherence rather than debt obligation. Human agents retain authority and accountability over governance decisions. Artificial systems contribute derivatively within auditable bounds.
 
-The aQPU Kernel provides shared moments and deterministic replay. Shells and Archives provide verifiable records of circulation. Genealogies provide structural histories that can be independently confirmed.
+The aQPU Kernel provides shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
 
-Under the capacity analysis in this document, scarcity of structural capacity is not a binding constraint. The central challenges are governance quality, registry integrity, and institutional design: how byte logs are constructed, how frame commitments are published, how shell seals are verified, and how programmes expose sufficient information for independent replay.
+Under the capacity analysis presented here, capacity is not a realistic limiting factor on human timescales. The central challenges are governance quality, registry integrity, publication discipline, and institutional design.
 
-The technical medium is available in open-source form. Implementation begins with the aQPU Kernel specification and reference implementation, the AIR coordination infrastructure, and the THM and Gyroscope frameworks for classification and measurement.
+Implementation begins with the aQPU Kernel specification and reference implementation, the AIR coordination infrastructure, and the THM and Gyroscope frameworks referenced throughout this document.
 
-Pilot programmes—including municipal experiments, NGO distribution channels, and research coordination initiatives—can be coordinated through AIR. Policy evaluation frameworks and economic modelling resources are available from the Gyro Governance research team.
+Pilot programmes, public-interest fiscal hosts, NGO channels, research networks, and municipal or institutional experiments may adopt AIR first for coordination and verification, thereby establishing the records on which a Moments Economy can later settle.
 
-**Contact:** basilkorompilias@gmail.com  
-**Repository:** https://github.com/gyrogovernance
+**Contact:** [basilkorompilias@gmail.com](mailto:basilkorompilias@gmail.com)
+**Repository:** [https://github.com/gyrogovernance](https://github.com/gyrogovernance)
 
 ---
 
 ## Appendix A: Glossary
 
-**GENE_MIC_S (micro archetype):** The transcription constant 0xAA used to compute introns: intron = byte XOR 0xAA. It is the unique common source of all transcription and the reference byte for the pure swap operation.
+**Archive:** A long-horizon aggregation of Shells recording per-identity totals and overall capacity usage.
 
-**GENE_MAC_REST (rest state):** The universal tensor rest state 0xAAA555 (A = 0xAAA, B = 0x555) from which all aQPU Kernel trajectories begin. All genealogy replay starts from this state.
+**Byte Log:** The canonical append-only replay object.
 
-**Archive:** A long-horizon aggregation of Shells recording per-identity totals and global capacity usage.
+**Common Source Moment (CSM):** The one-time total capacity envelope obtained by coarse-graining the physical microcell count by the settlement system’s reachable verification space.
 
-**CGM (Common Governance Model):** The geometric theory identifying the intrinsic fourfold coordination structure compatible with the aQPU Kernel's depth-4 frame quotient.
+**Depth-4 Frame Record:** A kernel-native certification atom of the form `(mask48, φ_a, φ_b)`, computed from four consecutive bytes.
 
-**Depth-4 Frame Record:** A kernel-native certification atom of the form (mask48, φ_a, φ_b), computed from four consecutive bytes. Frame records distinguish histories that can collapse to the same final aQPU Kernel state.
+**Direct:** A source type indicating direct human authority or agency.
 
-**Indirect:** A source type indicating mediated epistemic access or artificial processing capacity.
+**Event Log:** Application-layer annotations bound to specific states or frames.
 
-**GGG (Gyroscopic Global Governance):** The framework applying CGM to economy, employment, education, and ecology.
+**Genealogy:** The byte-complete replay history of an actor, project, or programme, optionally accompanied by event bindings, frame records, and integrity commitments.
 
-**Genealogy:** The byte-complete replay history of an actor or programme, optionally accompanied by event bindings, frame records, and compact integrity commitments.
+**GENE_MAC_REST:** The universal tensor rest state `0xAAA555` from which all aQPU Kernel trajectories begin.
 
-**Grant:** A single MU allocation to an identity within a Shell. The canonical Grant receipt is identity_id || kernel_anchor || amount_mu.
+**GENE_MIC_S:** The transcription constant `0xAA` used to compute introns by `byte XOR 0xAA`.
 
-**GTD, IVD, IAD, IID:** The four displacement risks (Governance Traceability, Information Variety, Inference Accountability, Intelligence Integrity).
+**GGG:** Gyroscopic Global Governance, the governance framework referenced in this document.
 
-**GMT, ICV, IIA, ICI:** The four alignment capacities (Governance Management Traceability, Information Curation Variety, Inference Interaction Accountability, Intelligence Cooperation Integrity).
+**Grant:** A single MU allocation to an identity within a Shell.
 
-**Identity Anchor:** A pair consisting of an Identity Identifier (SHA-256 hash) and a Kernel Anchor (6-character aQPU Kernel state hex).
+**GTD, IVD, IAD, IID:** The four displacement risks.
 
-**K₄:** The intrinsic fourfold coordination structure compatible with the aQPU Kernel's depth-4 frame quotient. In the CGM theoretical foundation, it is the complete graph on four vertices representing the four governance capacities.
+**Identity Anchor:** A pair consisting of an Identity Identifier and a Kernel Anchor.
 
-**Moment:** A reproducible aQPU Kernel state at a byte-log prefix. For stronger certification, a published Moment may also include the current frame record and parity commitment.
+**Indirect:** A source type indicating mediated information or artificial processing capacity.
 
-**MU (Moment-Unit):** The unit of account. One MU corresponds to one minute at the base rate (60 MU per hour).
+**Moment:** A reproducible verification state at a byte-log prefix.
 
-**Parity Commitment:** A compact trajectory integrity commitment (O, E, parity), where O and E are XOR sums of 12-bit masks at even and odd byte indices.
+**Moment-Unit (MU):** The scalar unit of account. One MU corresponds to one minute at the base rate for accounting readability.
 
-**Direct:** A source type indicating direct epistemic access or human agency.
+**Parity Commitment:** A compact trajectory integrity commitment useful for integrity checking but not a unique history certificate.
 
-**aQPU Kernel:** The Gyroscopic ASI aQPU Kernel, a deterministic finite-state coordination kernel.
+**Seal:** A structural commitment for a Shell computed by replaying canonical contents through the aQPU Kernel.
 
-**aQPU (algebraic Quantum Processing Unit):** A deterministic finite-state machine over GF(2) whose internal structure satisfies discrete analogues of quantum axioms, including unitarity (per-byte bijection), spinorial closure (order 4), non-cloning (unique archetype), and complementarity (128-way SO(3)/SU(2) shadow projection).
+**Shared Moment:** A reproducible verification state computed from a shared byte-log prefix.
 
-**Seal:** A cryptographic commitment for a Shell, computed by routing the Shell contents through the aQPU Kernel.
+**Shell:** A time-bounded capacity container containing Grants and a Seal.
 
-**Shared Moment:** A reproducible aQPU Kernel state computed from a shared byte-log prefix.
+**THM:** The Human Mark, the epistemic framework referenced in this document.
 
-**Chirality Register:** A 6-bit observable derived from the pair-diagonal collapse of A XOR B. It satisfies the exact transport law chi(T_b(s)) = chi(s) XOR q6(b) on the reachable state space, enabling constant-time divergence detection between coordination parties.
-
-**Shell:** A time-bounded capacity window containing Grants and a Seal. Shell seals are computed over canonically sorted Grant receipts and are invariant to insertion order.
-
-**THM (The Human Mark):** The epistemic taxonomy classifying Direct and Indirect sources and defining displacement risks.
-
-**UHI (Unconditional High Income):** The baseline distribution of 240 MU per day to every person.
+**UHI:** Unconditional High Income, the universal Tier 1 baseline distribution.
 
 ---
 
 ## Appendix B: Capacity Derivation
 
-This appendix provides the detailed calculation supporting the capacity claims in Section 4. Full results in `docs/reports/Moments_Tests_Report.md` (all Moments Economy, Genealogy, and Moments-physics tests pass).
+This appendix summarises the calculation supporting the capacity claims in Section 2.
 
-### B.1 Verified Constants
+### B.1 Verified constants
 
-| Parameter | Value | Source |
-|-----------|-------|--------|
-| Atomic Reference (f_Cs) | 9,192,631,770 Hz | Caesium-133 hyperfine transition |
-| aQPU Kernel Reachable Space (\|Ω\|) | 4,096 | BFS-verified from rest state |
-| Horizon (\|H\|) | 64 | Fixed points of reference byte |
-| N_phys (microcells) | 3.254 × 10³⁰ | Derived (4/3)π f_Cs³ |
-| CSM (one-time total capacity) | 7.944 × 10²⁶ MU | N_phys / \|Ω\| (fixed pool, not a rate) |
+* `f_Cs = 9,192,631,770 Hz`
+* `|Ω| = 4,096`
+* `|H| = 64`
+* `N_phys ≈ 3.254 × 10³⁰`
+* `CSM ≈ 7.944 × 10²⁶ MU`
 
-### B.2 Coverage Proof
+### B.2 Coverage proof
 
-**Global Demand:**
-8.1 × 10⁹ people × 87,600 MU/year ≈ 7.096 × 10¹⁴ MU/year
+**Global demand:**
 
-**Coverage Duration:**
-7.944 × 10²⁶ MU / 7.096 × 10¹⁴ MU/year ≈ 1.12 × 10¹² years
+`8.1 × 10⁹ people × 87,600 MU/year ≈ 7.10 × 10¹⁴ MU/year`
+
+**Coverage duration:**
+
+`7.944 × 10²⁶ MU / 7.10 × 10¹⁴ MU/year ≈ 1.12 × 10¹² years`
 
 **Conclusion:**
-The fixed CSM capacity can support global UHI for approximately 1.12 trillion years. Capacity is not a binding constraint on any human timescale.
+
+The fixed CSM supports global UHI for approximately 1.12 trillion years. Capacity is not a realistic limiting constraint on any human timescale relevant to settlement design.
 
 ---
 
-## Appendix C: Kernel Mechanics
+## Appendix C: Kernel mechanics summary
 
-This appendix provides the technical details of the aQPU Kernel kernel implementation.
+The aQPU Kernel operates on a 24-bit state packed as two 12-bit components `(A, B)` from the rest state `0xAAA555`.
 
-### C.1 State Model
+A byte transition consists of:
 
-The aQPU Kernel operates on a 24-bit state packed as two 12-bit components (A, B):
-- **Packing:** state24 = (A << 12) | B
-- **Rest state:** 0xAAA555 (A=0xAAA, B=0x555)
-- **Reachable shared-moment space:** Exactly 4,096 states from the rest condition, with two 64-state boundary horizons (equality horizon where A = B, and complement horizon where A = B XOR 0xFFF).
+1. transcription by `byte XOR 0xAA`,
+2. expansion of the 6-bit payload into a 12-bit mask,
+3. mutation of the active component,
+4. family-controlled gyration between active and passive components.
 
-### C.2 Transition Law
+The kernel is deterministic, invertible, replayable, and exact under fixed-width integer arithmetic.
 
-The transition T_byte(A, B) is defined by:
-1. **Transcription:** intron = byte XOR 0xAA
-2. **Expansion:** Payload bits 1..6 of the intron expand to a 12-bit Type A mask via dipole-pair projection: each payload bit i flips mask bits 2i and 2i+1.
-3. **Mutation:** A_mut = A XOR mask12
-4. **Family-controlled gyration:**
-   - invert_a = 0xFFF if intron bit 0 is 1 else 0
-   - invert_b = 0xFFF if intron bit 7 is 1 else 0
-   - A_next = B XOR invert_a
-   - B_next = A_mut XOR invert_b
+Its economic relevance lies in four properties:
 
-Byte 0xAA is the reference byte. It performs a pure swap, so its fixed points satisfy A = B.
+* deterministic replay,
+* exact reachable-state geometry,
+* intrinsic corruption detection,
+* and exact convergence under short byte sequences.
 
-### C.3 Algebraic Integrity
+These properties make it suitable as a public settlement-verification medium.
 
-The kernel supports fast integrity verification without full cryptographic hashing:
-1. **Parity Commitment:** A trajectory is committed to a tuple (O, E, p) where O is the XOR of masks at 0-based even byte positions, E is the XOR of masks at 0-based odd byte positions, and p is the length parity.
-2. **Dual-Code Syndrome:** A 64-element self-dual code C^⊥ exists such that any valid mask m satisfies m · v = 0 for all v in C^⊥. Non-zero syndromes indicate data corruption.
+### C.1 Shell Seal computation
 
-Parity commitments are compact algebraic integrity checks. They are not unique history certificates. Depth-4 frame records provide stronger provenance when history collisions at the final-state level matter.
+The Shell Seal is computed from the Shell's canonical contents through the following procedure:
 
-These checks are designed for accidental corruption detection. Adversarial integrity, where an attacker deliberately falsifies records, requires cryptographic hashes and signature verification.
+1. Convert each Grant into its canonical receipt: `identity_id || kernel_anchor || amount_mu`.
+2. Sort the canonical receipts lexicographically by Identity Identifier.
+3. Concatenate the Shell Header and the sorted receipts to form the canonical Shell byte sequence.
+4. Route that sequence through a conforming aQPU Kernel instance beginning from `GENE_MAC_REST` (`0xAAA555`).
+5. Record the resulting 3-byte state as the Shell Seal.
 
-
+Because the canonical receipts are sorted before routing, the Shell Seal is invariant to the order in which Grants were originally added to the Shell.
