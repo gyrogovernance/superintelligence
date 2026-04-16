@@ -12,7 +12,17 @@
 
 ---
 
-You're right—I omitted the actual benchmark data entirely. Here is the corrected release note with the live inference conformance results integrated:
+## [v2.0.7-Moments] – 2026-04-16
+
+### New
+
+- Added **Moments Economy Whitepaper** (`docs/AIR_Moments_Economy_Whitepaper.md`)  
+  A civil governance and monetary framework grounded in replayable coordination and physical capacity limits.
+
+### Updates
+
+- Updated Moments Economy Architecture Specification for consistency with whitepaper:
+- Refined README structure to clarify that AIR and Moments Economy sit within Gyroscopic Collective Superintelligence, not as standalone systems.
 
 ---
 

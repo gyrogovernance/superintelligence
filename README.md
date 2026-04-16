@@ -29,7 +29,7 @@
 
 Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
 
-This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
+Within this broader framework, Alignment Infrastructure Routing (AIR) provides a coordination layer for work, provenance, and governance logistics, while Moments Economy provides a monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
 
 - The **Common Governance Model (CGM):** a formal theory identifying the four capacities required for coherent governance.
 - **The Human Mark (THM):** a classification system distinguishing human (Direct) from artificial (Indirect) sources of information and agency, with four displacement risks.
@@ -139,23 +139,31 @@ All results below are verified by exhaustive computation over the entire reachab
 
 ---
 
-![Moments Economy Cover Image](/assets/moments_cover.png)
-
-## 💰 Moments Economy
-
-Moments Economy is a monetary design where value is tied to verified coordination capacity rather than debt. A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic time standard and the kernel's finite state space (so the "budget" is physically anchored).
-
-CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person (1 MU is denominated at the reference value of 1 int$), tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
-
----
-
 ## 🍃 Alignment Infrastructure Routing (AIR)
 
-There is no reliable way to turn distributed human contribution into stable paid AI safety work. Most funding routes require institutional access, credentials, or existing lab affiliation. **AIR** applies the kernel to solve this alongside two coordination problems.
+Alignment Infrastructure Routing (AIR) sits within the broader framework of Gyroscopic Collective Superintelligence, routing work, funding, provenance, and governance across AI safety and public-interest programmes.
+
+AIR serves as a practical bridge between human contribution, programme administration, and verifiable machine-assisted workflows.
+
+While most funding routes require institutional access, credentials, or existing lab affiliation, AIR addresses this accessibility gap by providing a reliable way to turn distributed human contribution into stable paid AI safety work.
 
 **Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
 
 **Governance logistics:** Tracking how information and authority move through decision systems is treated with the same rigour as supply chains. AIR provides full replayable histories (“genealogies”) and coherence metrics for governance quality, and supports verifiable compliance with standards such as ISO 42001 and the EU AI Act.
+
+---
+
+![Moments Economy Cover Image](/assets/moments_cover.png)
+
+## 💰 Moments Economy
+
+Moments Economy is part of Gyroscopic Collective Superintelligence broader framework. It extends the same replayable coordination infrastructure into economic distribution, making money a function of verified coordination capacity rather than debt issuance.
+
+A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the aQPU. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base.
+
+CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person, tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
+
+Moments Economy builds on the same infrastructure as AIR, but adds the economic layer: unit definition, issuance logic, settlement structure, and long-horizon distribution design.
 
 ---
 
@@ -166,7 +174,7 @@ There is no reliable way to turn distributed human contribution into stable paid
 - 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
 - 🧪 [QuBEC Climate Control Brief](docs/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
-
+- 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Core Specifications
 - 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
@@ -180,7 +188,7 @@ There is no reliable way to turn distributed human contribution into stable paid
 
 ### Extensions
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
-- 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Money from coordination
+- 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Monetary settlement from coordination
 - 📜 [Moments Genealogies Specification](docs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
 
 

@@ -6,7 +6,7 @@ The Moments Economy is a monetary and settlement architecture in which the abili
 
 That envelope is called the Common Source Moment. It is derived from the caesium-133 atomic-second standard together with the finite verification space of the settlement system. The result is a fixed one-time capacity for recording and settling coordination. This capacity is not a metaphor. It is the explicit physical and geometric basis on which issuance is bounded.
 
-The settlement system used in this architecture is the Gyroscopic ASI aQPU Kernel. It is a deterministic verification system that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
+The settlement and verification substrate used in this architecture is the Gyroscopic infrastructure, comprising aQPU, GyroLabe, GyroGraph, and QuBEC. Within that infrastructure, the aQPU kernel serves as the deterministic verification component that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
 
 The Moments Economy is an institutional record architecture as well as a distribution system. The same infrastructure that supports monetary settlement also supports complete governance records, including who acted, what was issued, what evidence was referenced, what corrections were made, and where disputes arose. This is why the architecture matters beyond economic policy narrowly understood. It offers a common method for settlement, audit, provenance, and institutional memory within one replayable medium.
 
@@ -33,7 +33,7 @@ Adoption for the first purpose automatically builds the infrastructure for the s
 
 ### Scope and relationship to AIR
 
-The Gyroscopic ASI aQPU Kernel serves here as the settlement and verification layer for the Moments Economy. The same kernel also serves as the coordination backbone for Alignment Infrastructure Routing, a related coordination framework for grants, work receipts, and project histories. These uses are related but distinct. Institutions may adopt AIR for coordination without adopting the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
+The Gyroscopic infrastructure serves here as the settlement and verification substrate for the Moments Economy. The same infrastructure also serves as the coordination backbone for Alignment Infrastructure Routing, a related coordination framework for grants, work receipts, and project histories. These uses are related but distinct. Institutions may adopt AIR for coordination without adopting the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
 
 ### Document structure
 
@@ -54,6 +54,8 @@ The architecture draws on five related internal frameworks and specifications.
 **Gyroscopic Global Governance (GGG):** A governance framework developed in the surrounding research programme, applying four governance capacities across economy, employment, education, and ecology.
 
 **The Human Mark (THM):** An epistemic taxonomy used here to distinguish Direct human sources from Indirect artificial and mediated sources.
+
+**Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising aQPU, GyroLabe, GyroGraph, and QuBEC.
 
 **Gyroscopic ASI aQPU Kernel:** The deterministic coordination kernel used in this architecture for shared moments, provenance, and replay.
 
@@ -236,7 +238,7 @@ The **Byte Log** is the canonical append-only sequence of bytes. It is the prima
 
 The **Event Log** is the application-layer annotation bound to specific verification states or to depth-4 frame records. It records meanings, decisions, classifications, references, and justifications that the kernel itself does not interpret.
 
-An **Identity Anchor** links an identity to a structural coordinate within the settlement system. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and a Kernel Anchor, which is the state obtained by routing that identifier from rest. The Identity Identifier MUST be computed as the SHA-256 digest of the identity string, and the Kernel Anchor is the resulting 6-hex-character kernel state.
+An **Identity Anchor** links an identity to a structural coordinate within the Gyroscopic infrastructure. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and an aQPU Anchor, which is the state obtained by routing that identifier from rest through the aQPU verification component.
 
 A **Grant** is a record of a single MU allocation. It contains an identity label, an Identity Identifier, a Kernel Anchor, an MU amount, and the relevant shell context. The canonical Grant receipt is:
 
@@ -260,7 +262,7 @@ Any party with access to the published artefacts can verify a Shell through the 
 
 * Load the published Header and Grants.
 * Reconstruct the canonical byte sequence by converting Grants into canonical receipts and sorting them.
-* Route that sequence through a conforming aQPU Kernel instance from `GENE_MAC_REST`.
+* Route that sequence through a conforming aQPU component instance from GENE_MAC_REST.
 * Compare the resulting state with the published Seal.
 
 A match confirms that the published structural object corresponds to its canonical contents. A mismatch proves that the Header or at least one Grant differs from the published claim.
@@ -279,7 +281,7 @@ Public programmes MUST publish, at defined intervals, the Byte Logs, Event Logs,
 
 ## 8. Coordination levels
 
-At the **individual** level, any person or organisation may operate as a node. Each maintains a local aQPU Kernel instance and its own logs.
+At the **individual** level, any person or organisation may operate as a node within the Gyroscopic infrastructure. Each maintains a local aQPU verification instance and its own logs.
 
 At the **project** level, a shared context of contribution is defined. Participants agree on a canonical Byte Log and Event Log. Divergence is detected by replay. Where distinct histories collapse to the same final state, frame records localise the divergence.
 
@@ -295,7 +297,7 @@ A final state alone is not a unique history certificate. Genealogy-grade audit t
 
 Genealogies function as verifiable assets. A programme can prove its history of alignment and capacity usage by providing its genealogy for replay. New programmes may initialise from the final state of an existing verified genealogy and thereby preserve continuity.
 
-Verification follows a three-stage social pattern. It begins locally, where each actor maintains its own kernel instance and logs. It extends through publication, where selected genealogies and structural objects are exported as signed bundles. It completes through independent verification, when other parties replay those bundles against the public specification. Truth emerges from the agreement of independently replayed computations.
+Verification follows a three-stage social pattern. It begins locally, where each actor maintains its own verification instance and logs within the Gyroscopic infrastructure. It extends through publication, where selected genealogies and structural objects are exported as signed bundles. It completes through independent verification, when other parties replay those bundles against the public specification. Truth emerges from the agreement of independently replayed computations.
 
 ---
 
@@ -401,7 +403,7 @@ Interoperability is defined by the ability to replay. Systems are interoperable 
 
 Conforming systems MUST:
 
-* use the shared aQPU Kernel specification,
+* use the shared Gyroscopic infrastructure specifications, including the aQPU verification specification,
 * use canonical byte replay rules,
 * use canonical serialization for Identity Anchors, Grants, Shells, and Archives,
 * use SHA-256 for Identity Identifier computation,
@@ -449,7 +451,7 @@ The transition is therefore staged rather than abrupt. The same infrastructure t
 
 The Moments Economy establishes money as a function of coordination capacity rather than credit. Value derives from structural coherence rather than debt obligation. Human agents retain authority and accountability over governance decisions. Artificial systems contribute derivatively within auditable bounds.
 
-The aQPU Kernel provides shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
+The Gyroscopic infrastructure provides the shared coordination substrate for the Moments Economy, while the aQPU verification component provides shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
 
 Under the capacity analysis presented here, capacity is not a realistic limiting factor on human timescales. The central challenges are governance quality, registry integrity, publication discipline, and institutional design.
 
