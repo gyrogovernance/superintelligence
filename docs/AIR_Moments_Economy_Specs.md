@@ -234,9 +234,9 @@ Accounting and verification rely on six standardised structural objects.
 
 The **Byte Log** is the canonical append-only sequence of bytes. It is the primary replay object. Every conforming verification procedure ultimately depends on the integrity of this log.
 
-The **Event Log** is the application-layer annotation layer bound to specific verification states or to depth-4 frame records. It records meanings, decisions, classifications, references, and justifications that the kernel itself does not interpret.
+The **Event Log** is the application-layer annotation bound to specific verification states or to depth-4 frame records. It records meanings, decisions, classifications, references, and justifications that the kernel itself does not interpret.
 
-An **Identity Anchor** links an identity to a structural coordinate within the settlement system. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and a Kernel Anchor, which is the state obtained by routing that identifier from rest. In the reference implementation, the Identity Identifier is a SHA-256 digest and the Kernel Anchor is the resulting 6-hex-character kernel state.
+An **Identity Anchor** links an identity to a structural coordinate within the settlement system. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and a Kernel Anchor, which is the state obtained by routing that identifier from rest. The Identity Identifier MUST be computed as the SHA-256 digest of the identity string, and the Kernel Anchor is the resulting 6-hex-character kernel state.
 
 A **Grant** is a record of a single MU allocation. It contains an identity label, an Identity Identifier, a Kernel Anchor, an MU amount, and the relevant shell context. The canonical Grant receipt is:
 
@@ -322,10 +322,10 @@ Artificial systems may contribute to coordination, interpretation, and record pr
 
 Misclassification between Direct and Indirect sources creates four named displacement risks in this framework.
 
-* **GTD:** Governance Traceability Displacement
-* **IVD:** Information Variety Displacement
-* **IAD:** Inference Accountability Displacement
-* **IID:** Intelligence Integrity Displacement
+* **GTD:** Governance Traceability Displacement - Approaching Indirect Authority and Agency as Direct
+* **IVD:** Information Variety Displacement - Approaching Indirect Authority without Agency as Direct
+* **IAD:** Inference Accountability Displacement - Approaching Indirect Agency without Authority as Direct
+* **IID:** Intelligence Integrity Displacement - Approaching Direct Authority and Agency as Indirect
 
 These categories are used to classify events and to audit automated contributions.
 
@@ -404,6 +404,7 @@ Conforming systems MUST:
 * use the shared aQPU Kernel specification,
 * use canonical byte replay rules,
 * use canonical serialization for Identity Anchors, Grants, Shells, and Archives,
+* use SHA-256 for Identity Identifier computation,
 * use consistent identifiers for domains, identities, programmes, and periods,
 * and preserve sufficient information for independent verification.
 
@@ -564,9 +565,9 @@ These properties make it suitable as a public settlement-verification medium.
 The Shell Seal is computed from the Shell's canonical contents through the following procedure:
 
 1. Convert each Grant into its canonical receipt: `identity_id || kernel_anchor || amount_mu`.
-2. Sort the canonical receipts lexicographically by Identity Identifier.
+2. Sort the canonical receipts lexicographically by the byte representation of the Identity Identifier.
 3. Concatenate the Shell Header and the sorted receipts to form the canonical Shell byte sequence.
 4. Route that sequence through a conforming aQPU Kernel instance beginning from `GENE_MAC_REST` (`0xAAA555`).
-5. Record the resulting 3-byte state as the Shell Seal.
+5. Record the resulting 3-byte (24-bit) state as the Shell Seal.
 
 Because the canonical receipts are sorted before routing, the Shell Seal is invariant to the order in which Grants were originally added to the Shell.
