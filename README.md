@@ -27,7 +27,7 @@
 
 ## 🌐 Artificial Superintelligence
 
-Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
+Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) and Artificial General Intelligence (AGI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
 
 Within this broader framework, Alignment Infrastructure Routing (AIR) provides a coordination layer for work, provenance, and governance logistics, while Moments Economy provides a monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
 
@@ -60,7 +60,7 @@ This fundamental shift transforms training, deployment, and optimization. The re
 
 ---
 
-# ⚙️ Gyroscopic ASI aQPU Kernel
+# ⚙️ Gyroscopic AGI/ASI aQPU Kernel
 
 A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
 
@@ -75,6 +75,8 @@ The **aQPU** (algebraic Quantum Processing Unit) is a compact, finite-state kern
 
 The state space is fixed and small: **4,096 reachable states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path through this manifold. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
 
+The kernel's computational medium is **QuBEC** (Quantum Bose-Einstein Condensate): a condensed computational state with six internal binary orientation modes (dipoles), a four-phase spinorial gauge structure, and exact ensemble stochasticity induced by deterministic byte dynamics. Together they replace costly continuous approximation with exact integer algebra on standard CPUs and GPUs, without qubits, cryogenics, or probabilistic hardware noise.
+
 > For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). For the kernel itself, see the [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md).
 
 ---
@@ -86,7 +88,7 @@ It provides:
 - **Zero-transcendental execution:** Bypasses expensive floating-point bottlenecks (like exponentials in softmax or square-roots in cosine similarity) by using exact integer algebra for model routing and token selection.
 - **Structural annotation for model I/O:** Model inputs and outputs are annotated using the kernel's algebraic byte structure.
 - **Replayable inference traces:** Inference can be tied to reproducible kernel-state trajectories for verification and audit.
-- **Hardware-near acceleration:** CPU and OpenCL acceleration achieving over 1.2 billion exact operations per second on standard commodity hardware.
+- **Hardware-near acceleration:** Native C/C++ backends with llama.cpp ggml integration, achieving 1.26 billion exact operations per second on standard commodity hardware. 100% native matmul routing on quantized models with zero parity mismatches, 284× faster encode and 1.15× faster decode than softmax.
 
 Crucially, GyroLabe does not operate as an external monitor evaluating a classical model's outputs. Its role is substitutional. It upgrades transformers by intercepting expensive continuous decision surfaces (such as floating-point matrix multiplications or softmax selections) and replacing them natively with exact discrete kinematics. The external model's interface is preserved, but its internal engine is swapped for the aQPU's Walsh-Hadamard XOR-convolutions and Plancherel condensation measures.
 
@@ -99,7 +101,7 @@ It provides:
 - **Quantum Cellular Automaton execution:** Cells evolve under the exact aQPU byte law, consuming runtime input as 4-byte words to navigate the discrete quantum state space.
 - **Local structural memories per cell:** Rolling chirality and shell memories providing exact spectral views (Walsh-Hadamard and shell Krawtchouk surfaces) without floating-point approximations.
 - **Resonance-defined graph structure:** Dynamic graph topology induced by resonance profiles over quantum-native observables (e.g., chirality, shell, state coincidence).
-- **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration for Applications, Databases, and Networks.
+- **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration across four bridge domains: Applications, Databases, Networks, and Transformers.
 - **Real-time AI Control:** Uses exact structural state to dynamically manage LLM resource allocation (e.g., adjusting context patch sizes based on the exact thermodynamic state of the computation).
 
 > For the multicellular runtime intelligence layer, see the [GyroGraph Specification](docs/GyroGraph_Specs.md).
@@ -122,6 +124,7 @@ All results below are verified by exhaustive computation over the entire reachab
 
 | Verified result | What it means |
 |-----------------|---------------|
+| **499 exhaustive tests passing** | The full verification suite covers the entire reachable state space and all 256 byte operations, totalling over 1 million exact checks. |
 | **4,096 reachable states** | The full operational manifold from rest is finite, exact, and exhaustively testable. |
 | **2-step exact uniformization** | Any state in the reachable manifold can spread over the entire state space in exactly 2 byte steps, with perfect 16-to-1 multiplicity. |
 | **128 distinct next states per byte layer** | From any fixed state, the 256-byte alphabet projects to exactly 128 distinct next states with exact 2-to-1 symmetry. |
@@ -131,7 +134,7 @@ All results below are verified by exhaustive computation over the entire reachab
 | **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
 | **Holographic boundary relation** | The state geometry satisfies |H|² = |Ω| = 64² = 4,096, enabling structural compression and compact boundary reasoning. |
 | **Universal quantum ingredients** | The verified kernel is not a simulation; it is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
-| **Standard silicon efficiency** | Achieves over 1.2 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
+| **Standard silicon efficiency** | Achieves 1.26 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
 | **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
 | **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks; structured `P_Q` and residual `D_Q` components are evaluated through native transforms and K4 lattice arithmetic. |
 
@@ -149,6 +152,12 @@ While most funding routes require institutional access, credentials, or existing
 
 **Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
 
+Contributors map their work to four governance capacities, which act as a career ladder to unlock higher funding tiers: 
+- 🤝 Intelligence Cooperation, 
+- 🧩 Inference Interaction, 
+- 📚 Information Curation, 
+- and 🧭 Governance Management.
+
 **Governance logistics:** Tracking how information and authority move through decision systems is treated with the same rigour as supply chains. AIR provides full replayable histories (“genealogies”) and coherence metrics for governance quality, and supports verifiable compliance with standards such as ISO 42001 and the EU AI Act.
 
 ---
@@ -159,7 +168,7 @@ While most funding routes require institutional access, credentials, or existing
 
 Moments Economy is part of Gyroscopic Collective Superintelligence broader framework. It extends the same replayable coordination infrastructure into economic distribution, making money a function of verified coordination capacity rather than debt issuance.
 
-A fixed total supply, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the aQPU. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base.
+A fixed total supply of **7.94 × 10²⁶ Moment-Units (MU)**, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the aQPU. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base. Its native commodity is the **AI Generated Token**: a verified inference event from the intersection of human experience and AI processing. No debt issuance, no discretionary monetary policy. Every settlement is a replayable, verifiable history.
 
 CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person, tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
 
@@ -173,7 +182,7 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
-- 🧪 [QuBEC Climate Control Brief](docs/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
+- 🧪 [QuBEC Climate Control Brief](docs/theory/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
 - 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Core Specifications
