@@ -175,6 +175,8 @@ Alignment Infrastructure Routing uses two canonical units of work:
 
 These units are defined in terms of work and deliverables, not employment status. Sponsors fund outputs that correspond to one or more of these units.
 
+In transition contexts, sponsors may express funding in conventional currency. Natively, within the Moments Economy framework, these units are denominated in Moment-Units (MU) using the international dollar legibility convention, settled through the aQPU Kernel.
+
 ---
 
 ### Tier 1: Individual rapid grants (per-person cap, e.g. £1,000)

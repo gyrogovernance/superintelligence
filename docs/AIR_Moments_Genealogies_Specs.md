@@ -20,7 +20,7 @@ For technical specifications, see the linked documents throughout this text and 
 
 **A depth-4 frame record** is the kernel-native certification atom for genealogy. It is a triple (mask48, φ_a, φ_b) computed from four consecutive bytes. Frame records distinguish histories that can collapse to the same final aQPU Kernel state.
 
-**A Moment‑Unit** is the unit of account in the Moments Economy. One Moment‑Unit corresponds to one minute of coordination capacity at the base rate. This aligns monetary accounting with standard timekeeping: 60 Moment‑Units per hour, 1,440 per day, 525,600 per year. Annual magnitudes remain comparable to familiar salary figures. The total supply is constrained by a fixed physical capacity derived from an atomic time standard, not by debt issuance. Independent parties can inspect this derivation and confirm that the total capacity supports a global baseline income for approximately 1.12 trillion years without oversubscription.
+**A Moment-Unit** is the unit of account in the Moments Economy. One Moment-Unit corresponds to one minute of coordination capacity at the base rate. This aligns monetary accounting with standard timekeeping: 60 Moment-Units per hour, 1,440 per day, 525,600 per year. Annual magnitudes remain comparable to familiar salary figures. The total supply is constrained by a fixed physical capacity derived from an atomic time standard, not by debt issuance. Independent parties can inspect this derivation and confirm that the total capacity supports a global baseline income for approximately 1.12 trillion years without oversubscription. Where used as a reference value, MU values are expressed as a purchasing-power convention, not as a money peg, exchange-rate parity, or redemption guarantee.
 
 **A Shell** is a container for a set of distributions within a defined period. It carries a seal computed through the aQPU Kernel, making its contents independently verifiable.
 
@@ -111,7 +111,7 @@ The timeline is uncertain. Given the current appetite for AI governance solution
 
 The Moments Economy provides entitlements at multiple levels, each corresponding to different scopes of responsibility. The four tiers correspond to four capacities that coherent governance must maintain.
 
-**Tier 1: Intelligence Cooperation.** This tier provides a baseline income to every person. It amounts to 240 Moment‑Units per day (equivalent in scale to 240 international dollars), corresponding to four hours at the base rate. This baseline requires no application, no institutional approval, and no employment status. It flows from verified existence within the genealogical record: a confirmed identity and recorded participation in coordinated activity. The associated capacity is the maintenance of shared systems and cultural continuity.
+**Tier 1: Intelligence Cooperation.** This tier provides a baseline income to every person. It amounts to 240 Moment-Units per day (equivalent in scale to 240 international dollars as a purchasing-power language, not as an exchange rate, peg, or redemption promise), corresponding to four hours at the base rate. This baseline requires no application, no institutional approval, and no employment status. It flows from verified existence within the genealogical record: a confirmed identity and recorded participation in coordinated activity. The associated capacity is the maintenance of shared systems and cultural continuity.
 
 **Tier 2: Inference Interaction.** This tier provides double the baseline for those engaged in work that reconciles meaning and resolves conflicts across contexts. It covers activities such as negotiation, care, teaching, and human review of artificial outputs.
 
@@ -149,9 +149,11 @@ Once the transition is complete, several changes follow:
 
 **Privacy is preserved while histories remain complete.** The aQPU Kernel's design allows many different activity sequences to lead to the same coordination state. The system records the evolution of coordination, but does not require public exposure of every underlying detail. Different internal processes can result in identical verified states, so organisations and individuals can demonstrate alignment of their coordination without revealing proprietary methods or sensitive data. When stronger audit is required, parties can disclose frame commitments without having to reduce genealogy verification to final-state comparison alone.
 
+Genealogies support selective disclosure. A user can prove continuity, source relation, or receipt validity for a specific context without requiring total exposure of their event history. Full genealogical exposure cannot be a condition for baseline occupation or ordinary civic participation.
+
 **Disputes are resolved by replay rather than litigation.** When parties disagree about what happened, the genealogy provides a definitive account. Courts and regulators can inspect the same record and reach consistent conclusions.
 
-**The income floor becomes administratively feasible.** Because total capacity is fixed and known, distribution does not depend on discretionary monetary policy. The baseline can be provided to every person without inflation or debt accumulation.
+**The income floor becomes administratively feasible.** Because total capacity is fixed and known, distribution does not depend on discretionary monetary policy. The baseline can be provided to every person without inflation or debt accumulation. Because the settlement medium is abundant but physical goods remain constrained, the economy demotes price from the primary governor of access. Price inflation is treated as an insufficient governance response to physical constraint. Where essentials, ecology, housing, or care are constrained, access is governed through fair-use rules and Community Shell coordination rather than exclusionary bidding.
 
 **Higher tiers become transparent.** Those receiving greater entitlements do so through recorded governance decisions. The basis for their tier assignment is visible and contestable.
 

@@ -537,3 +537,124 @@ The Gyroscopic architecture is a single finite kinematic medium with multiple ex
 
 These six charts describe one machine. Selecting the chart in which a given operation is structurally regular is the primary computational strategy of the architecture.
 
+## 11. Common Source Moment as Physical Capacity Medium
+
+The Common Source Moment (CSM) is the physical capacity medium of the architecture, linking the cesium atomic timing standard to the finite reachable manifold of the aQPU. It is an invariant geometric quantity and a state-capacity envelope, not an economic construct.
+
+### 11.1 Physical source and causal geometry
+
+The reference scale is fixed by the cesium-133 hyperfine frequency:
+
+`f_Cs = 9,192,631,770 Hz`.
+
+The raw reference count is written as the phase-space volume of a one-second causal light-sphere at atomic resolution:
+
+`N_phys = (4/3)π f_Cs^3` (approximately `3.254×10^30`).
+
+The derivation is expressed in a geometry where the explicit light-speed factor cancels, so this scale is tied to atomic frequency and intrinsic geometry rather than an external conversion convention.
+
+### 11.2 Coarse-graining by the reachable ontology
+
+The operational ontology is the reachable set Ω.
+
+`|Ω| = 4096`.
+
+The coarse-grained capacity is:
+
+`CSM = N_phys / |Ω|`.
+
+For this system that is approximately `7.94×10^26 MU` total, and this is a one-time fixed total scale, not a production or emission rate.
+
+The division by `|Ω|` is fixed by symmetry constraints of the transition law. In this model, the 2-byte kernel action is transitive on Ω and the light-sphere geometry is isotropic, so the unique invariant coarse-graining is the uniform measure over Ω.
+
+### 11.3 Physical interpretation in dynamic terms
+
+In this formalism, temporal progression in the kernel is intrinsically ledger depth, not external wall-time input. This is the discrete-system counterpart to c = 1 natural/geometric unit formulations: time, state depth, and spatial resolution are unified in one coordinate discipline.
+
+The same section also supports a causal reach picture: under depth-2 action the full Ω is causally connected, so CSM is best read as a finite, isotropic physical occupancy capacity distributed across that manifold.
+
+## 12. Constitutional Structure of the Reachable Manifold
+
+The reachable manifold Ω, comprising 4096 states, possesses a precise constitutional geometry. It is neither a unity manifold nor an opposition manifold. Instead, it is a balance dominant manifold bounded by two exact constitutional poles, with maximal statistical occupancy in the intermediate region.
+
+### 11.1 The Dual Constitutional Poles
+
+The manifold is bounded by two disjoint extremal subsets, the horizons:
+
+1. **The equality horizon:** 64 states where A12 = B12. At this pole, chirality is zero. The active and passive gyrophases are identical.
+2. **The complement horizon:** 64 states where A12 = B12 ⊕ 0xFFF. At this pole, chirality is maximal. The active and passive gyrophases are exact logical complements; this is the pole of total opposition.
+
+These two poles are exact and real. Together they form a 128 state boundary. However, neither pole exhausts the sample space. If total opposition were absolute across the full manifold, common sourceness would be violated. The constitutional geometry resolves this: exact opposition exists, but it is confined to one structural boundary, leaving the common source intact across the broader manifold.
+
+### 11.2 The Relational Bulk
+
+The remaining 3968 states form the bulk of the manifold. In this region, the state is neither pure equality nor pure opposition. Chirality is partial, meaning the active and passive gyrophases are differentiated but not fully inverted relative to one another. The bulk constitutes the overwhelming majority of the reachable sample space.
+
+### 11.3 Shell Distribution and Maximal Balance
+
+The manifold is shell structured according to the ab_distance (the Hamming distance between A12 and B12). The population count follows an exact binomial distribution across 7 shells:
+
+| Shell | ab_distance | Population | Characterization |
+|-------|-------------|------------|------------------|
+| 0     | 0           | 64         | Equality horizon |
+| 1     | 2           | 384        | Near unity |
+| 2     | 4           | 960        | Intermediate |
+| 3     | 6           | 1280       | Equatorial maximum |
+| 4     | 8           | 960        | Intermediate |
+| 5     | 10          | 384        | Near opposition |
+| 6     | 12          | 64         | Complement horizon |
+
+The population counts are given exactly by the formula:
+
+```text
+count(d) = C(6, (12 - d) / 2) × 64
+```
+
+The shell populations exhibit exact symmetry:
+
+```text
+|Shell_k| = |Shell_(6-k)|
+```
+
+The manifold is densest at the equator (shell 3, ab_distance = 6), where the population reaches its maximum of 1280 states. This equator is not merely a geometric midpoint between the poles. It is the locus of maximal constitutional occupancy.
+
+### 11.4 The Complementarity Invariant
+
+For every state s ∈ Ω, the constitutional geometry obeys the exact complementarity invariant:
+
+```text
+horizon_distance(s) + ab_distance(s) = 12
+```
+
+This invariant binds the two constitutional directions into one exact law. As a state moves closer to exact equality, `ab_distance` decreases and `horizon_distance` increases. As a state moves closer to exact complementarity, `ab_distance` increases and `horizon_distance` decreases. The manifold therefore cannot collapse into either pole globally; the two limits are held in exact structural relation across the full sample space.
+
+### 11.5 The Full-Space Constitutional Theorem
+
+Let Ω be the reachable gyroscopic manifold with |Ω| = 4096.
+
+Then Ω has the following exact constitutional structure:
+
+1. Ω contains two exact and disjoint poles:
+   - the equality horizon, with 64 states where `A12 = B12`
+   - the complement horizon, with 64 states where `A12 = B12 ⊕ 0xFFF`
+2. The remaining 3968 states lie in the intermediate bulk and are neither pure equality nor pure complementarity.
+3. Ω is partitioned into 7 exact shells by `ab_distance`, with populations:
+
+```text
+64, 384, 960, 1280, 960, 384, 64
+```
+
+4. The unique maximal shell is the equatorial shell `ab_distance = 6`, with population 1280.
+
+Therefore exact unity and exact opposition both exist as real constitutional poles of Ω, but neither dominates the manifold. The statistically maximal organization of the reachable sample space is balanced partial differentiation.
+
+### 11.6 Relation to the Temporal Gauge
+
+This constitutional structure provides a natural constitutional interpretation of the four CGM temporal gauge phases:
+
+- **CS (Common Source):** grounds common sourceness of the whole manifold
+- **UNA (Unity Non-Absolute):** affirms exact unity without allowing unity to exhaust the manifold
+- **ONA (Opposition Non-Absolute):** affirms exact opposition without allowing opposition to exhaust the manifold
+- **BU (Balance Universal):** names the balance-dominant constitutional regime in which the manifold is maximally populated
+
+The architecture does not force a choice between sameness and antagonism. It establishes a common source, validates that differentiation is real, confirms that full opposition is possible, and demonstrates that most of the reachable reality lies in intermediate structured relation.

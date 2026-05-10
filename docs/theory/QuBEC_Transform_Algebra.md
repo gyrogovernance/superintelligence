@@ -871,41 +871,42 @@ Each 64-wide block projects onto the chirality register basis. A transformer lay
 ### 11.3 External tensor ingestion
 
 ```
-Input:  W       dense weight matrix, shape (rows, d)
+Input:  W       dense weight matrix, shape (rows, cols)
 
 Output: block_registry
 
-1. Pad d to next multiple of 64 if d mod 64 ≠ 0
-2. For each block b in range(d // 64):
-       W_block ← W[:, b·64 : (b+1)·64]
-       report  ← analyze_operator(W_block)   (Algorithm 9.3)
-       block_registry[b] ← (W_block, report)
+1. Pad rows and cols to next multiples of 64 when needed.
+2. For each output tile a and input tile b:
+       W_block ← W[a·64 : (a+1)·64, b·64 : (b+1)·64]
+       decomp  ← decompose64(W_block)
+       block_registry[a,b] ← (W_block, decomp)
 
 return block_registry
 ```
 
 ### 11.4 Hybrid block application
 
-Correct block application is the Section 8.2 identity for the block operator **W_block**. The registry **report** from Algorithm 9.3 only names which transform diagonalizes the **structured** part **P_Q(W_block)** when **W_block** lies exactly in that class; it must **not** be read as "if label is generic then **W_block @ x** is the definition of the product." For every label, compute **y_b = P_Q(W_block) · x_block + D_Q(W_block) · x_block**: native diagonal application for **P_Q**, K4 lattice direct evaluation for **D_Q**. Optional forwarding of a **stored** residual to an external backend is a deployment/storage choice; it is not a substitute for that sum when defining **W · x**.
+Correct block application is unconditional decomposition application. For each 64x64 block **W_block**:
+
+**apply64(W_block, x_block) = apply_shell(P_shell(W_block), x_block) + apply_wht_diag(P_chi(W_block) - P_shell(W_block), x_block) + apply_k4_lattice(W_block - P_chi(W_block), x_block)**.
+
+Registry metadata is cache-only and must not gate this identity.
 
 ```
-Input:  block_registry, x   input vector of width d
+Input:  block_registry, x   input vector of width cols
 
 Output: result vector
 
-1. For each block b in block_registry:
-       x_block <- x[b*64 : (b+1)*64]
-       (W_block, report) <- block_registry[b]    // as built in Algorithm 11.3
-
-       y_b <- native_section_8_2_apply(W_block, x_block, report)
-       // native_section_8_2_apply implements P_Q(W_block)*x_block + D_Q(W_block)*x_block
-       // using WHT / Krawtchouk / WHT+K4Char for the P_Q branch that matches W_block,
-       // and K4 lattice evaluation for D_Q. Do not branch on report.scr or SCR thresholds.
-
-2. return concatenate(y_b for all b)
+1. For each output tile a:
+       y_a <- 0
+       For each input tile b:
+           x_block <- x[b*64 : (b+1)*64]
+           (W_block, decomp) <- block_registry[a,b]
+           y_a <- y_a + apply64_from_decomp(decomp, x_block)
+2. write y_a into result[a*64 : (a+1)*64]
 ```
 
-A literal **if class ... else matmul** sketch is a **cost model illustration only** when all mass lies in one quotient; it is not the semantic specification of multiplication.
+A literal **if class ... else matmul** sketch is never the semantic specification of multiplication.
 
 ### 11.5 Derived application examples
 

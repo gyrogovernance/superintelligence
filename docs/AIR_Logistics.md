@@ -145,6 +145,8 @@ This grounding matters because it removes capacity from institutional discretion
 
 In practice, this capacity is inexhaustible on any human timescale. The Common Source Moment can support global baseline distribution for approximately 1.12 trillion years at current population and base-rate assumptions. The constraint on governance is therefore not capacity but quality: whether coordination events are correctly classified, properly routed, and coherently integrated.
 
+Because baseline capacity is abundant, the primary operational risk is the exclusion of real humans through defensive access mechanisms, rather than the fraudulent claiming of excess capacity. The design order is therefore: accessibility first, coherence second, repair third, exclusion last.
+
 #### 4.4 Shared Moments, Frame Commitments, and Divergence Detection
 
 AIR uses three operational certification layers.
@@ -244,6 +246,8 @@ AIR is a general framework applicable wherever human and artificial systems must
 **Without AIR:** An organisation implements an unconditional income programme. Payments are issued monthly. Recipients must trust that the organisation is calculating and issuing payments correctly. The organisation must maintain internal records and submit to periodic audits.
 
 **With AIR:** Payments are grants within shells. Each shell carries a cryptographic seal derived from the router. Recipients receive not just payments but verifiable receipts bound to router states. The organisation publishes shells and genealogies. Any party can replay the genealogy to verify that the correct payments were issued. Audits become computational rather than investigative.
+
+Where physical resources are constrained, AIR enables fair-use governance rules within Community Shells, ensuring settlement verification does not default to exclusionary price escalation.
 
 ---
 

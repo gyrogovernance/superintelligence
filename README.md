@@ -77,7 +77,7 @@ The state space is fixed and small: **4,096 reachable states**, determined by a 
 
 The kernel's computational medium is **QuBEC** (Quantum Bose-Einstein Condensate): a condensed computational state with six internal binary orientation modes (dipoles), a four-phase spinorial gauge structure, and exact ensemble stochasticity induced by deterministic byte dynamics. Together they replace costly continuous approximation with exact integer algebra on standard CPUs and GPUs, without qubits, cryogenics, or probabilistic hardware noise.
 
-> For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). For the kernel itself, see the [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md).
+> For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). For the kernel itself, see the [Kernel Specifications](docs/theory/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md).
 
 ---
 
@@ -186,8 +186,8 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Core Specifications
-- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) - How the kernel works
-- 📖 [Specifications Formalism](docs/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
+- 📖 [Kernel Specifications](/docs/Gyroscopic_ASI_Specs.md) - How the kernel works
+- 📖 [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
 - 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
 - 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
 - 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
@@ -199,6 +199,7 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
 - 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Monetary settlement from coordination
 - 📜 [Moments Genealogies Specification](docs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
+- 💳 [Pulse Wallet Specification](docs/AIR_Moments_Wallet.md) - Capacity wallet for grammar-compliant recognition and repair
 
 
 ### Quantum & Holographic SDK
@@ -223,6 +224,7 @@ All kernel properties are verified by exhaustive test suites (499 tests, all pas
 ### Supporting Theory
 - 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) - Shared coordination theory
 - 📖 [Analysis: Gyroscopic Multiplication](docs/references/Analysis_Gyroscopic_Multiplication.md) - Arithmetic layer and cross-layer structural analysis
+- 📖 [Analysis: Compact Geometry](docs/references/Analysis_Compact_Geometry.md) - Geometric foundations of state-space structure
 - 📖 [The Human Mark (THM)](docs/references/THM.md) - Human vs machine tagging
 - 📖 [The Human Mark: Paper](docs/references/THM_Paper.md) - Full tagging specification
 - 📖 [The Human Mark: Grammar](docs/references/THM_Grammar.md) - Parser and validation rules

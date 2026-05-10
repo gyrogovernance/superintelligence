@@ -255,3 +255,14 @@ So **m_a** and **Δ** (with ρ and δ_BU) are the central objects; the rest are 
 All of these are algebraic or geometric consequences of the aperture m_a, the closure ratio ρ, the aperture gap Δ, and the measured monodromy δ_BU, with no free parameters beyond the framework’s geometric definitions and the single measured value δ_BU.
 
 
+===
+
+Extra:
+
+In turns:
+
+CS: π/2 rad = 1/4 turn
+UNA: cos(π/4) → angle π/4 = 1/8 turn
+ONA: π/4 = 1/8 turn
+BU: m_a = 1/(2√(2π)) rad = 1/(4π√(2π)) turns
+In turns, CS = 1/4, UNA angle = 1/8, ONA = 1/8. The closure: 1/4 + 1/8 + 1/8 = 1/2 turn = π radians.
