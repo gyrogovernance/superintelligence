@@ -126,12 +126,12 @@ dmypy.json
 # External dependencies and tools
 codebase-mcp/
 
-# llama.cpp: tracked as a git submodule (pointer only in this repo; code lives on GitHub).
-# Do NOT ignore external/llama.cpp -- git needs that path for the submodule link.
-external/llama.cpp_backup/
-external/patches/
+# external/: only llama.cpp submodule (commit pointer) is tracked in superintelligence.
+# fwht, backups, patches, vendored trees, etc. stay local -- visible on disk, never pushed.
+external/*
+!external/llama.cpp
 
-# Native / llama build artifacts (submodule tree and local gyrolabe DLL)
+# Build artifacts inside the submodule checkout and local gyrolabe DLL
 external/llama.cpp/build/
 src/tools/gyroscopic/_build/
 
