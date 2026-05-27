@@ -125,8 +125,17 @@ dmypy.json
 
 # External dependencies and tools
 codebase-mcp/
-external/fwht/
-external/Fast-Walsh-Hadamard-Transform-master/
+
+# llama.cpp: tracked as a git submodule (pointer only in this repo; code lives on GitHub).
+# Do NOT ignore external/llama.cpp -- git needs that path for the submodule link.
+external/llama.cpp_backup/
+external/patches/
+
+# Native / llama build artifacts (submodule tree and local gyrolabe DLL)
+external/llama.cpp/build/
+src/tools/gyroscopic/_build/
+
+
 node_modules/
 
 # BabyLM: ignore all private agent and thread data
@@ -178,3 +187,4 @@ data/resonators/
 data/benchmarks/
 
 src/tools/gyroscopic/workflow/
+

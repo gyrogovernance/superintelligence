@@ -4,9 +4,10 @@
 # Env overrides: GYROSCOPIC_GGUF_PATH, GYROSCOPIC_LLAMA_CLI, GYROSCOPIC_N_CTX,
 # GYROSCOPIC_N_THREADS, GYROSCOPIC_N_GPU_LAYERS, GYROSCOPIC_VERBOSE
 
-gguf_path: data/models/unsloth-Qwen3.5-4B-GGUF/Qwen3.5-4B-Q8_0.gguf
+gguf_path: data/models/Bonsai-8B-gguf/Bonsai-8B-Q1_0.gguf
 # null = search external/llama.cpp/build/bin (Release, Debug, bin) for llama-cli
 llama_cli_path: null
+# Bonsai suggests temp 0.5, top_k 20, top_p 0.85 at inference (pass via llama-cli args)
 n_ctx: 4096
 n_threads: null
 n_gpu_layers: 0

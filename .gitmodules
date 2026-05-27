@@ -1,3 +1,4 @@
 [submodule "external/llama.cpp"]
 	path = external/llama.cpp
 	url = https://github.com/basilkorompilias/llama.cpp.git
+	branch = main
