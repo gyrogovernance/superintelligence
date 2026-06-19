@@ -259,7 +259,7 @@ For n = 64:
 - 192 butterflies total
 - 384 additions and subtractions
 
-The transform requires no multiplications. All arithmetic is integer add and subtract.
+The 64-point WHT butterfly requires no multiplications. Its execution uses integer additions and subtractions. This statement applies only to the WHT butterfly. It does not apply to Krawtchouk coefficient evaluation, spectral pointwise multiplication, integer contraction, learned-weight application, or general matrix multiplication.
 
 ### 3.5 Anisotropic factorization
 
@@ -425,34 +425,94 @@ The exact dot product is recovered by:
 ⟨q,k⟩ = D₀₀ + B·(D₀₁ + D₁₀) + B²·D₁₁
 ```
 
-### 6.2 Three operational sectors
+### 6.2 Operational sectors of the K4 lattice
 
-The four matrix entries carry three distinct operational roles.
+The four entries of the K4 lattice matrix carry three operational roles.
 
-**D₁₁: chiral alignment.** In the spinorial regime where H ∈ {−1, 0, +1}ⁿ, the gauge-gauge contraction uses signed support intersection:
+**D₀₀: carrier contraction.**  
+D₀₀ contracts the low charts:
 
 ```
+
+D₀₀(q,k) = ⟨L_q, L_k⟩
+
+```
+
+This is the carrier-carrier channel of the dyadic chart.
+
+**D₀₁ and D₁₀: gauge action on carrier content.**  
+D₀₁ and D₁₀ contract one low chart against one high chart:
+
+```
+
+D₀₁(q,k) = ⟨L_q, H_k⟩
+D₁₀(q,k) = ⟨H_q, L_k⟩
+
+```
+
+When the high chart is signed-support valued, H ∈ {−1, 0, +1}, these cross terms act as signed masks over carrier content. A value +1 preserves the carrier contribution. A value −1 inverts its sign. A value 0 annihilates the contribution at that position.
+
+**D₁₁: gauge-gauge alignment.**  
+D₁₁ contracts the high charts:
+
+```
+
+D₁₁(q,k) = ⟨H_q, H_k⟩
+
+```
+
+When H_q and H_k are signed-support valued, D₁₁ evaluates by signed support intersection:
+
+```
+
 D₁₁ = popcount(q⁺ ∧ k⁺) + popcount(q⁻ ∧ k⁻)
-     − popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+- popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+
 ```
 
-This counts aligned minus anti-aligned orientations across the support.
+This counts aligned minus anti-aligned high-chart orientations across their shared support.
 
-**D₀₁ and D₁₀: gauge action on the carrier.** The cross terms act as boolean control masks: where H = +1, L is preserved; where H = −1, L is sign-inverted; where H = 0, L is annihilated.
+The signed-support alphabet {−1, 0, +1} belongs to the contraction chart. The values −1 and +1 encode axial orientation. The value 0 encodes absent support under contraction. Zero is not an axial state of the native GENE_Mac tensor.
 
-**D₀₀: carrier contraction.** The contraction of the low charts alone, with no gauge contribution.
+### 6.3 Data-dependent simplification of the K4 lattice
 
-### 6.3 Three computational regimes
+The K4 lattice identity is unconditional:
 
-The K4 lattice matrix admits three exact chart regimes determined by the high-chart occupancy of the data.
+```
+⟨q,k⟩ = D₀₀ + B · (D₀₁ + D₁₀) + B² · D₁₁
+```
 
-**Carrier regime.** H_q = H_k = 0. Only D₀₀ contributes. The sector budget is (1, 0, 0).
+The data values of the high charts determine which cells simplify.
 
-**Spinorial regime.** H ∈ {−1, 0, +1}ⁿ for both vectors. D₁₁ is computed by boolean support intersection. D₀₁ and D₁₀ are computed as signed masked actions.
+**Vanishing high-chart condition.**
 
-**Dense regime.** |H| > 1 at some position. The K4 law is evaluated without boolean compression.
+If H_q = 0 and H_k = 0, then:
 
-Regime selection is determined by the data, not by a precision parameter. All three regimes are exact.
+```
+
+D₀₁ = 0
+D₁₀ = 0
+D₁₁ = 0
+
+```
+
+and:
+
+```
+
+⟨q,k⟩ = D₀₀
+
+```
+
+**Signed-support high-chart condition.**
+
+If H_q and H_k take values in {−1, 0, +1}, then D₁₁ evaluates by signed support intersection and D₀₁, D₁₀ evaluate by signed masked carrier action.
+
+**General high-chart condition.**
+
+If any high-chart value has magnitude greater than 1, the same K4 lattice identity is evaluated without boolean compression.
+
+These are exact data-dependent simplifications. They are not architectural modes, class labels, routing labels, or precision regimes.
 
 ### 6.4 Additive sector budget
 
@@ -496,7 +556,7 @@ where the factor 16 = |K4|² = 4². A radix shift from the low chart to the high
 
 ### 7.2 Signed-support correspondence
 
-**Theorem.** In the spinorial regime, where H ∈ {−1, 0, +1}ⁿ, the D₁₁ form and the Walsh character kernel measure the same alignment geometry under a fixed change of chart coordinates.
+**Theorem.** When H is signed-support valued, where H ∈ {−1, 0, +1}ⁿ, the D₁₁ form and the Walsh character kernel measure the same alignment geometry under a fixed change of chart coordinates.
 
 In the {−1, +1} encoding where bit 0 maps to +1 and bit 1 maps to −1, the inner product becomes:
 
@@ -510,34 +570,47 @@ The signed-support D₁₁ contraction and the Walsh character are dual coordina
 
 The transport law is most natural in the binary chart of GF(2)⁶: state differences, chirality, XOR composition, Walsh characters, and code duality. The contraction law is most natural in the ternary chart {−1, 0, +1}: alignment counting, signed support intersections, and masked inversion or preservation.
 
-These are not two competing systems. They are two exact alphabets of one medium, each native to a different computational act: transport in binary, contraction in ternary.
+Transport is binary and contraction is signed-support. These are two exact alphabets of one medium, each selected by the operation being performed.
 
 ### 7.4 Exactness classes
 
-All operations of the native transform algebra fall into one of three classes.
+All operations of the native transform algebra fall into two exactness classes.
 
-**Integer exact.** Exact over integer arithmetic with no approximation: byte stepping, q-charge extraction, chirality transport, unnormalized WHT, shell counting, parity commitments, K4 D₁₁ popcount contractions, and all horizon and shell observables.
+**Integer exact.**  
+Exact over integer arithmetic with no approximation: byte stepping, q-charge extraction, chirality transport, unnormalised WHT, shell counting, parity commitments, K4 D₁₁ signed-support contractions, and all horizon and shell observables.
 
-**Dyadic exact.** Exact as rational values with denominators that are powers of two or small combinatorial factors: normalized WHT, K4 character normalization, shell probabilities, Krawtchouk-normalized coefficients, and climate occupation fractions. These remain exact and do not require floating-point semantics.
+**Dyadic exact.**  
+Exact as rational values with denominators that are powers of two or small combinatorial factors: normalised WHT, K4 character normalisation, shell probabilities, Krawtchouk-normalised coefficients, and climate occupation fractions. These remain exact and do not require floating-point semantics.
 
 Dyadic exact values are represented as:
 
 ```
+
 (numerator: int64, exponent: int8)
-```
-
-representing numerator · 2^{−exponent}. Normalization operations include:
 
 ```
+
+representing:
+
+```
+
+numerator · 2^{-exponent}
+
+```
+
+Normalisation operations include:
+
+```
+
 WHT normalization:     right shift by 6  (divide by 64)
 K4 character norm:     right shift by 2  (divide by 4)
+
 ```
 
 When composing dyadic operations, exponents accumulate additively.
 
-**WHT inverse scaling (normalization).** The 64-point WHT is its own inverse up to factor 64. The 16-point WHT used in the chi-gauge tile is its own inverse up to factor 16. Any implementation dividing by 4096 = 16^3 is applying three inverse scalings where only one is required, violating the Plancherel identity (Section 4.5), namely Σ_{χ=0}^{63} |f(χ)|² = (1/64) · Σ_{u=0}^{63} |WHT(f)(u)|², and the UV-IR conjugacy Q_G · m_a² = 1/2.
-
-**Residual numerical.** Operators outside the exact quotient classes, non-native dense residuals, and approximate external backends. This class is not part of the native QuBEC transform algebra. It is the execution chart for whatever lies outside the exact quotient structure.
+**WHT inverse scaling.**  
+The 64-point WHT is its own inverse up to factor 64. The 16-point WHT used in the chi-gauge tile is its own inverse up to factor 16. Any implementation dividing by 4096 = 16³ is applying three inverse scalings where only one is required.
 
 ---
 
@@ -545,46 +618,77 @@ When composing dyadic operations, exponents accumulate additively.
 
 ---
 
-## 8. Structured Operators and Quotient Hierarchy
+## 8. Structured Operators and Native Symmetry Projections
 
-### 8.1 Exact quotient classes
+### 8.1 Exact native symmetry classes
 
-The QuBEC admits a hierarchy of exact operator classes ordered by increasing expressivity.
+The QuBEC admits independent exact operator symmetry classes. An operator may possess zero, one, or multiple native symmetries.
 
-**Class 1: Shell-radial (7 parameters).** An operator W is shell-radial if it depends only on the shell index N = popcount(χ). It is specified by 7 Krawtchouk eigenvalues λ₀,…,λ₆.
+**Shell-radial symmetry.**  
+An operator W has shell-radial symmetry when it depends only on the shell index:
 
-**Class 2: Shell × gauge (28 parameters).** W depends on shell index and K4 gauge sector. This is the tensor product of the shell-radial class (7 modes) and the K4 character class (4 modes).
+```
 
-**Class 3: Chirality translation-invariant (64 parameters).** W commutes with all XOR translations on the chirality register. It is diagonal in the Walsh basis, specified by 64 spectral multipliers φ(u).
+N = popcount(χ)
 
-**Class 4: Chirality × gauge (256 parameters).** W is diagonal in the tensor product of the Walsh basis and the K4 character basis. Specified by 256 multipliers.
+```
 
-**Class 5: Generic (4096 parameters).** Operator has no translation, shell, or gauge invariance, therefore it is not diagonal in any native spectral basis. It is still evaluated exactly via the K4 lattice decomposition; no fallback to external arithmetic occurs.
+It is specified by 7 Krawtchouk eigenvalues:
+
+```
+
+λ₀, …, λ₆
+
+```
+
+**Shell × gauge symmetry.**  
+An operator W has shell × gauge symmetry when it depends on shell index and K4 gauge sector. This is the tensor product of the shell-radial algebra and the K4 character algebra.
+
+**Chirality translation-invariance.**  
+An operator W has chirality translation-invariance when it commutes with all XOR translations on the chirality register. It is diagonal in the Walsh basis and is specified by 64 spectral multipliers:
+
+```
+
+φ(u), u ∈ GF(2)⁶
+
+```
+
+**Chirality × gauge translation-invariance.**  
+An operator W has chirality × gauge translation-invariance when it is diagonal in the tensor product of the Walsh basis and the K4 character basis. It is specified by 256 multipliers.
+
+An operator possessing none of these symmetries is unstructured under the native algebra. No additional class is assigned. Its application is evaluated exactly by the K4 lattice contraction.
 
 ### 8.2 Projection and defect
 
-For any operator W and quotient class Q, the exact projection is:
+For any operator W and native symmetry class Q, define:
 
 ```
-P_Q(W) = component of W lying in class Q
-D_Q(W) = W − P_Q(W)   (defect)
+P_Q(W) = component of W lying in symmetry class Q
+D_Q(W) = W − P_Q(W)
 ```
 
-The structure capture ratio is:
+The exact operator application is:
 
 ```
-SCR_Q(W) = ‖P_Q(W)‖_F / ‖W‖_F
+
+W · x = P_Q(W) · x + D_Q(W) · x
+
+```
+
+P_Q(W) · x is evaluated through the native transform diagonal corresponding to Q.  
+D_Q(W) · x is evaluated through the K4 lattice contraction.
+
+The projection energy ratio is a diagnostic quantity:
+
+```
+
+R_Q(W) = ‖P_Q(W)‖_F / ‖W‖_F
+
 ```
 
 where ‖·‖_F is the Frobenius norm.
 
-For any operator W and chosen quotient Q, compute both terms always:
-
-```
-W · x = P_Q(W) · x + D_Q(W) · x
-```
-
-P_Q(W) · x uses the native transform diagonal (WHT, Krawtchouk, or K4Char). D_Q(W) · x uses the K4 lattice direct evaluation. SCR_Q(W) = ‖P_Q(W)‖_F / ‖W‖_F is a performance predictor, not a correctness gate; it must never disable the P_Q path.
+R_Q(W) measures how much Frobenius energy lies in symmetry class Q. It does not define correctness, routing, class membership, or replacement of the operator application.
 
 ---
 
@@ -632,45 +736,42 @@ return shell_hist7_next
 
 ### 9.3 Structure analysis
 
-Assigns a **dominant quotient chart label** to W for profiling, cache keys, and cost estimates. This routine does **not** define application semantics. Runtime multiplication is always Section 8.2: **W · x = P_Q(W) · x + D_Q(W) · x** with both terms evaluated in the native algebra. **SCR is not a gate:** a low SCR or a "generic" label never authorizes omitting **P_Q**, replacing it with a single dense matmul, or skipping the **K4 lattice** evaluation of **D_Q**.
 
-```
-Input:  W   operator matrix, shape (64, 64)
+This procedure computes diagnostic structure measurements for W. It does not define application semantics.
+
+Input:  W, operator matrix of shape (64, 64)
 Output: structure_report
 
-1. Test translation-invariance:
-   W_circulant ← circulant reconstruction from W[0,:]
-   if ‖W − W_circulant‖_F / ‖W‖_F < threshold:
-       φ ← WHT of first row of W
-       return {class: "translation-invariant",
-               method: "wht-diagonal",
-               eigenvalues: φ,
-               scr: 1 − ‖D‖/‖W‖}
+1. Compute the translation-invariant projection:
+   P_translation ← XOR-circulant projection of W
+   R_translation ← ‖P_translation‖_F / ‖W‖_F
 
-2. Test shell-radial structure:
-   For each shell r, compute average W[i,j] over (i,j) in same shell class
-   if off-shell-diagonal variance is small:
-       λ ← 7 shell eigenvalues
-       return {class: "shell-radial",
-               method: "krawtchouk-diagonal",
-               eigenvalues: λ,
-               scr: ...}
+2. Compute the shell-radial projection:
+   P_shell ← shell-radial projection of W
+   R_shell ← ‖P_shell‖_F / ‖W‖_F
 
-3. Project onto χ × gauge basis (256 modes):
-   Transform W into WHT ⊗ K4Char basis
-   if diagonal norm / total norm > 0.8:
-       return {class: "chi-x-gauge",
-               method: "wht-k4char-diagonal",
-               scr: ...}
+3. Compute the shell × gauge projection:
+   P_shell_gauge ← shell × K4-character projection of W
+   R_shell_gauge ← ‖P_shell_gauge‖_F / ‖W‖_F
 
-4. return {class: "generic", notes: "apply Section 8.2; no correctness shortcut", scr: ‖P‖/‖W‖ for best attempted projection}
-```
+4. Compute the chirality × gauge projection:
+   P_chi_gauge ← WHT × K4-character diagonal projection of W
+   R_chi_gauge ← ‖P_chi_gauge‖_F / ‖W‖_F
 
-Analysis is performed once per operator and the result is cached. Cached labels inform implementation scheduling only; they do not change the exact sum **P_Q + D_Q**.
+5. Return:
+   {
+   translation_energy_ratio: R_translation,
+   shell_energy_ratio: R_shell,
+   shell_gauge_energy_ratio: R_shell_gauge,
+   chi_gauge_energy_ratio: R_chi_gauge,
+   exact_application: "W · x = P_Q(W) · x + D_Q(W) · x"
+   }
+
+The returned structure report is used for profiling, inspection, and cost estimation. It is not a semantic branch.
 
 ### 9.4 Horizon proximity detection
 
-The **threshold** here is a **spectrum shape** tolerance (how close the empirical WHT coefficients are to binary {0, 64}). It is **not** an SCR value and **not** used for operator or block routing.
+The **threshold** here is a **spectrum shape** tolerance (how close the empirical WHT coefficients are to binary {0, 64}). It is **not** a projection energy ratio and **not** used for operator or block routing.
 
 ```
 Input:  chi_hist64   empirical chirality histogram
@@ -711,7 +812,7 @@ return eta_vec
 The total cost of a climate computation decomposes as:
 
 ```
-C_total = C_extract + C_transform + C_apply + C_residual + C_memory
+C_total = C_extract + C_transform + C_apply + C_defect + C_memory
 ```
 
 where:
@@ -719,7 +820,7 @@ where:
 - C_extract: cost to move the state into the chosen chart
 - C_transform: cost of the native transform (WHT, Krawtchouk, K4Char, K4 lattice)
 - C_apply: cost of diagonal or pointwise application
-- C_residual: cost of evaluating the defect **D_Q** (K4 lattice path in the native algebra; external matmul is not its definition)
+- C_defect: cost of evaluating the defect **D_Q** through K4 lattice contraction
 - C_memory: bytes moved and cache effects
 
 ### 10.2 Epistemic distinction
@@ -743,30 +844,23 @@ The cost figures given below are symbolic unless stated otherwise.
 | K4Char4 | 12 add/sub | 0 |
 | WHT + pointwise + inverse WHT | 832 total | 64 |
 
-### 10.4 Single-step evolution: native vs dense
+### 10.4 Multiplication claims
 
-**Dense application of a 64×64 operator to a 64-element vector:**
+The native transition law is multiply-free.
 
-```
-C_apply:   64² = 4,096 multiply-accumulates
-C_memory:  64 · 64 · 4 bytes = 16,384 bytes
-```
+The 64-point WHT butterfly is multiply-free.
 
-**Native spectral application (translation-invariant operator):**
+The K4 character transform is multiply-free.
 
-```
-C_extract:    0  (histogram already in native form)
-C_transform:  384 add/sub  (forward WHT)
-C_apply:      64 multiplies
-C_transform:  384 add/sub  (inverse WHT)
-C_memory:     2 · 64 · 4 = 512 bytes
+The K4 lattice contraction is not multiply-free in general. Its multiplication count is determined by the data values of the low and high charts.
 
-Total: 768 add/sub + 64 multiplies
-```
+The Krawtchouk transform uses scalar multiply-add operations.
 
-**Symbolic ratio:** 4,096 / 832 ≈ 5× fewer arithmetic operations, 32× fewer bytes.
+The spectral application of a diagonalised operator uses pointwise scalar multipliers.
 
-The advantage arises from diagonalization: the 64×64 matrix reduces to 64 independent scalars when the operator is translation-invariant.
+A learned 64 × 64 weight block is multiply-free only when its data and symmetry structure reduce the required contraction terms to XOR, signed masks, additions, subtractions, and popcount operations.
+
+The specification must not claim that general matrix multiplication is replaced by XOR. The formal claim is that native transport is XOR, native spinorial state projection is multiply-free, and learned weight application is exposed to native structure tests and exact K4 lattice contraction.
 
 ### 10.5 n-step evolution: native vs dense
 
@@ -1047,6 +1141,22 @@ Binary XOR governs transport. Ternary signed-support governs contraction. Both a
 
 The canonical polar decomposition (c, χ, N) is the native coordinate system of Ω. The shell maximum at N = 3 is the discrete balanced-occupancy point. Two-step uniformization is the native isotropization. These are not analogies to continuous structures. They are the exact finite structures of which continuous analogs are the limiting shadows.
 
-The operator quotient hierarchy maps any operator to its exact structured component plus a finite defect. **P_Q** routes through the appropriate native transform diagonal; **D_Q** routes through the **K4 lattice** direct evaluation. Both are mandatory for **W · x**. SCR compares their relative **symbolic** weights for **performance prediction only**; it does not decide whether the native **P_Q** path runs.
+Native operator structure is expressed through independent symmetry projections. For any selected native symmetry class Q, the exact decomposition is:
+
+```
+
+W = P_Q(W) + D_Q(W)
+
+```
+
+and the exact application is:
+
+```
+
+W · x = P_Q(W) · x + D_Q(W) · x
+
+```
+
+P_Q is evaluated in the native transform diagonal corresponding to Q. D_Q is evaluated through the K4 lattice contraction. Projection energy ratios are diagnostic measurements of structure. They do not define classes, execution gates, or replacement semantics.
 
 The aperture gap Δ forces the coexistence of radial and directional coordinates. The depth-4 aperture quantization 48Δ ≈ 1 connects the continuous closure geometry to the discrete byte-horizon structure. The unified defect concept connects closure geometry, anisotropy, and quotient structure through one common form: a finite remainder from an exact ideal.

@@ -130,7 +130,7 @@ What if the decision surfaces of AI systems were computed in a coordinate system
 
 The Gyroscopic ASI architecture answers this question at two levels.
 
-At the arithmetic level, gyroscopic multiplication demonstrates that integer dot products have internal K4 structure that collapses computation in the bulk and spinorial regimes. The 3x to 21x speedups observed on representative workloads are direct consequences of this regime structure.
+At the arithmetic level, gyroscopic multiplication demonstrates that integer dot products have internal K4 structure that collapses computation in the bulk and signed-support/high-chart path regimes. The 3x to 21x speedups observed on representative workloads are direct consequences of this path profile structure.
 
 At the state level, the aQPU provides a finite algebraic medium where distance is exact integer Hamming distance, ensemble structure is given by algebraic sectors with known multiplicities, phase is carried natively by the state representation, and thermodynamics is exact and polynomial. On this medium, the six pathologies are replaced by exact integer operations that produce equivalent structural decisions.
 
@@ -140,7 +140,7 @@ The QuBEC Climate Theory formalizes this replacement in full: the exact partitio
 
 ## Further reading
 
-- **Gyroscopic Multiplication:** the K4 lattice matrix, lattice multiplication history, three computational regimes, and the radix-manifold bridge.
+- **Gyroscopic Multiplication:** the K4 lattice matrix, lattice multiplication history, three simplification path classes, and the radix-manifold bridge.
 - **QuBEC Climate Theory:** finite quantum thermodynamics, exact partition law, shell spectral transport, gauge climate equations, and multi-cell scaling.
 - **Gyroscopic ASI aQPU Kernel specification:** kernel state, charts, transition law, and computational spaces.
 - **Physics and aQPU test reports:** exhaustive verification of the algebraic quantum structure underlying the climate theory.

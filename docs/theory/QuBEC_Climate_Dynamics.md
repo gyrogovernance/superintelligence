@@ -745,18 +745,36 @@ Including gauge characters gives the product algebra of chirality translation-in
 64 · 4 = 256
 ```
 
-### 12.6 Generic operator and defect decomposition
+### 12.6 Unstructured local operators
 
-**Scope.** Here **one-cell** means one **local QuBEC register**: the 64-dimensional chirality chart GF(2)^6 at a single byte-horizon grain. Section 12 classifies **linear operators on that one 64-dimensional space** (one 64×64 block in the lowering of Sections 13.6 and 15). It is **not** a claim that the deployed system has only one register. **Multi-cellular** climate (Section 17, GyroGraph **cell_id**, per-cell rolling memories) repeats the **same** local algebra once per trajectory cell. **Wide tensors** repeat it **ceil(d/64)** times along an axis (each 64-wide tile gets its own operator instance). Readers should implement **per register / per block**, then compose across cells and blocks as the outer architecture specifies.
+A one-cell local operator is an operator on the 64-dimensional chirality chart GF(2)^6 at a single byte-horizon grain. Multi-cellular climate repeats this local algebra once per trajectory cell. Wide tensors repeat it per 64-wide tile along an axis.
 
-The local operator hierarchy (one 64-state register) is:
+The local native symmetry classes are:
 
-- shell-radial exact class: 7 parameters
-- shell x gauge exact class: 28 parameters
-- chirality translation-invariant exact class: 64 parameters
-- chirality x gauge translation-invariant exact class: 256 parameters
+- shell-radial symmetry
+- shell × gauge symmetry
+- chirality translation-invariant
+- chirality × gauge translation-invariant
 
-A generic local operator on one register decomposes into exact quotient-algebra content plus residual defect. The defect is the part not captured by the selected exact partition algebra. It is still evaluated **exactly** via the **K4 lattice** in the native arithmetic; **ambient dense** treatment is an optional offload when a remainder is **stored** and delegated, not the semantic substitute for native **D_Q**.
+An operator possessing none of these symmetries is unstructured under the native algebra. No separate class is assigned.
+
+For any selected native symmetry class Q:
+
+```
+
+W = P_Q(W) + D_Q(W)
+
+```
+
+and:
+
+```
+
+W · x = P_Q(W) · x + D_Q(W) · x
+
+```
+
+The projected component P_Q(W) is evaluated in its native transform chart. The defect D_Q(W) is evaluated exactly through the K4 lattice contraction.
 
 ---
 
@@ -804,26 +822,39 @@ This identity is exact for every int32 dot product. The K4 index set {00, 01, 10
 
 ### 13.3 Three operational roles
 
-The four entries of M carry three distinct operational roles.
+The four entries of M carry three operational roles.
 
-**D₁₁: chiral alignment.** When H takes values in {−1, 0, +1}, the gauge-gauge contraction is computed by signed support intersection:
+**D₀₀: carrier contraction.**
 
 ```
+D₀₀(q,k) = ⟨L_q, L_k⟩
+```
+
+The low chart contracts itself.
+
+**D₀₁ and D₁₀: gauge action on the carrier.**
+
+```
+
+D₀₁(q,k) = ⟨L_q, H_k⟩
+D₁₀(q,k) = ⟨H_q, L_k⟩
+
+```
+
+When H is signed-support valued, these cross terms act as signed masks over carrier content.
+
+**D₁₁: gauge-gauge alignment.**
+
+When H_q and H_k are signed-support valued, D₁₁ is computed by signed support intersection:
+
+```
+
 D₁₁ = popcount(q⁺ ∧ k⁺) + popcount(q⁻ ∧ k⁻)
-     − popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+- popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+
 ```
 
-This counts aligned orientations minus anti-aligned orientations: the same structural role as face alignment under the K4 spinorial group.
-
-**D₀₁ and D₁₀: gauge action on the carrier.** In the spinorial regime, the cross terms act as boolean control masks over the carrier content:
-
-- Where H = +1, L is preserved.
-- Where H = −1, L is sign-inverted.
-- Where H = 0, L is annihilated.
-
-This is the operational role of a gauge field acting on a state: selective preservation, inversion, or annihilation of carrier content under gauge control.
-
-**D₀₀: carrier contraction.** The contraction of the low charts alone, with no gauge contribution. Pure carrier transport.
+The values −1 and +1 encode axial orientation in the contraction chart. The value 0 encodes absent support under contraction.
 
 ### 13.4 Additive sector budget
 
@@ -844,28 +875,23 @@ The normalized budget:
 
 describes how the total weighted magnitude distributes across the three operational sectors. This is an exact arithmetic identity.
 
-### 13.5 Three computational regimes
+### 13.5 Data-dependent simplification
 
-The K4 lattice matrix admits three exact chart regimes determined by the high-chart occupancy.
-
-**Carrier regime.** H_q = 0 and H_k = 0.
+The K4 lattice identity is unconditional:
 
 ```
-M(q, k) = [ D₀₀  0 ]
-           [ 0    0 ]
+⟨q,k⟩ = D₀₀ + B · (D₀₁ + D₁₀) + B² · D₁₁
 ```
 
-Only D₀₀ contributes. The sector budget is (1, 0, 0). All gauge-scale content is absent.
+The high-chart values determine which cells simplify.
 
-**Spinorial regime.** H ∈ {−1, 0, +1}ⁿ for both vectors.
+If H_q = 0 and H_k = 0, only D₀₀ contributes.
 
-D₁₁ is realized by boolean support intersection (AND + POPCNT on sign masks). D₀₁ and D₁₀ are realized as signed masked actions. All four cells are computed exactly with compressed boolean arithmetic.
+If H_q and H_k take values in {−1, 0, +1}, then D₁₁ is evaluated by signed support intersection and D₀₁, D₁₀ by signed masked carrier action.
 
-**Dense regime.** |H| > 1 at some position.
+If any high-chart value has magnitude greater than 1, the same K4 law is evaluated without boolean compression.
 
-The same K4 law is evaluated without boolean compression. Correctness is unchanged.
-
-No approximation enters in the regime selection. The three regimes are exact chart specializations of one law. The regime of a pair (q, k) is determined by the high-chart occupancy of the data, not by a precision parameter.
+Simplification is exact and data-dependent. It is not a native class, class label, routing label, or arithmetic precision regime.
 
 ### 13.6 Width-64 structure
 
@@ -906,7 +932,7 @@ The architecture exposes exact quotient collapses:
 
 Each level of the chain discards a specific symmetry (family degeneracy, shadow projection, chirality detail) while preserving the relevant observable content.
 
-In the arithmetic layer, the three computational regimes provide a parallel quotient structure. Carrier data (H = 0) collapses the K4 matrix to a single cell. Spinorial data (H ∈ {−1, 0, +1}) admits boolean compression. Only dense data requires full-precision evaluation.
+In the arithmetic layer, the K4 lattice identity admits data-dependent simplification. Vanishing high charts eliminate three of four K4 cells. Signed-support high charts admit boolean compression. General high charts are evaluated without compression.
 
 ### 14.2 Sector identification
 
@@ -952,37 +978,49 @@ The lowering grain is width 64, using the structural coincidence established in 
 
 Given a learned 64-wide block W, compute:
 
-- shell profile across N = 0,...,6
+- shell profile across N = 0,…,6
 - gauge character profile on K4 sectors
 - 64-point WHT spectral profile
-- arithmetic regime profile through K4 lattice decomposition
-- residual defect indicators after quotient projections
+- K4 lattice chart profile through L/H decomposition
+- projection energy ratios for each native symmetry class
+- defect magnitude for each selected projection
+
+The analysis exposes structure in W. It does not assign W to a fixed class and does not define execution semantics.
 
 ### 15.3 Exact operator projections
 
-Project W into exact classes in increasing expressivity:
+For each native symmetry class Q, compute:
 
-1. shell-radial class (7)
-2. shell x gauge class (28)
-3. chirality translation-invariant class (64)
-4. chirality x gauge translation-invariant class (256)
+```
+P_Q(W)
+D_Q(W) = W − P_Q(W)
+R_Q(W) = ‖P_Q(W)‖_F / ‖W‖_F
+```
 
-Each projection is exact inside its class and yields an explicit residual defect.
+The available native symmetry projections are:
+
+1. shell-radial projection
+2. shell × gauge projection
+3. chirality translation-invariant projection
+4. chirality × gauge translation-invariant projection
+
+Each projection is exact inside its own symmetry class. The ratios R_Q(W) are diagnostic measurements.
 
 ### 15.4 Runtime execution policy
 
-Execute the **full** native identity at all times: **W · x = P_Q(W) · x + D_Q(W) · x** (QuBEC Transform Algebra, Section 8.2). Chart and regime choices only pick **which exact specialization** of the K4 law applies to the **data**, and which native diagonal implements **P_Q** when **W** lies in a quotient class. They are **not** detectors used to skip **P_Q** or replace **D_Q** with a stock matmul.
+The exact application identity is:
 
-Scheduling list (all exact, not gated on SCR):
+```
+W · x = P_Q(W) · x + D_Q(W) · x
+```
 
-- carrier regime path when high charts vanish
-- spinorial regime path when high charts are in {−1,0,+1}
-- shell-radial exact path for 7-parameter content
-- shell x gauge exact path for 28-parameter content
-- WHT-diagonal exact path for 64 or 256 multiplier content
-- K4 lattice evaluation for the defect **D_Q** on every application
+P_Q(W) · x is evaluated in the native transform chart for Q.
 
-The structured/residual split is an optional **deployment** boundary: the **P_Q** and **D_Q** pieces can both be computed natively, or a **stored** residual can be forwarded to an external backend (GPU dense path, tensor-network approximation, quantized inference engine) **without changing the defining sum**. That handoff is storage and engineering convenience, not "if structure capture is low, define the product elsewhere." The defect norm (Section 15.3) quantifies how much mass crosses an offload boundary when you choose to use one.
+D_Q(W) · x is evaluated through the K4 lattice contraction.
+
+Chart selection determines the exact coordinate system used for evaluation. It does not replace the defining product. It does not authorise skipping P_Q(W), dropping D_Q(W), or substituting a dense matrix multiplication as the semantic definition of W · x.
+
+The runtime scheduler may choose the lowest-cost exact evaluation available from the data and the measured structure report. That choice is an implementation decision. The semantic identity remains the same.
 
 ### 15.5 Routing and depth implications
 
@@ -1136,7 +1174,7 @@ The climate theory identifies three structural causes of computational cost. Eac
 
 **Resolution.** On Ω, density is constant at 0.5, eliminating normalization. Distance is a popcount, eliminating sqrt. Weighting is a polynomial in λ (the shell occupation parameter), eliminating exp. The Krawtchouk and Walsh-Hadamard transforms diagonalize all radial and additive processes exactly.
 
-In the arithmetic layer, the K4 lattice matrix provides the same resolution. The three computational regimes (carrier, spinorial, dense) are chart specializations. Carrier data eliminates three of four K4 cells. Spinorial data admits boolean compression. The regime selection is exact and data-determined.
+In the arithmetic layer, the K4 lattice matrix provides the same resolution. The three data-dependent simplifications are exact by construction. Vanishing high charts eliminate three of four K4 cells. Signed-support high charts admit boolean compression. The simplification path is exact and data-determined.
 
 ### 18.2 Ensemble mismatch
 

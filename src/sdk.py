@@ -9,7 +9,6 @@ This file keeps the public exposure compact and centered on:
 - Future-cone structure
 - Exact structural derivatives
 - State synthesis from rest
-- Native aQPU runtime entry points (RuntimeOps over tools.gyroscopic.ops)
 
 It is intentionally thin over src.constants and src.api.
 """
@@ -19,10 +18,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from functools import lru_cache
 from math import log2
-from typing import TYPE_CHECKING, TypeAlias
-
-if TYPE_CHECKING:
-    from src.tools.gyroscopic.ops import GyroGraphWordSignature
+from typing import TypeAlias
 
 from src.api import (
     ByteItem,
@@ -102,18 +98,6 @@ def byte_transition(state24: int, byte: int) -> int:
     return step_state_by_byte(int(state24) & MASK_STATE24, int(byte) & 0xFF)
 
 
-def compare_ledgers_pair(
-    a: bytes,
-    b: bytes,
-) -> tuple[int, int]:
-    """
-    SDK 7.3 / native parity: return (cmp, common_prefix_len) matching
-    gyrograph_compare_ledgers (0 equal, -1 a prefix, +1 diverge).
-    """
-    from src.tools.gyroscopic.ops import gyrograph_compare_ledgers_native
-
-    return gyrograph_compare_ledgers_native(a, b)
-
 ObservableInt: TypeAlias = Callable[[int], int]
 ObservableNum: TypeAlias = Callable[[int], int | float]
 
@@ -187,6 +171,14 @@ class MomentComparison:
     right_next_byte: int | None
     left_final_state24: int
     right_final_state24: int
+
+
+@dataclass(frozen=True)
+class Result:
+    moment: Moment
+    state: int
+    charts: dict[str, object]
+    provenance: dict[str, object]
 
 
 @dataclass(frozen=True)
@@ -626,65 +618,108 @@ def state_scan_from_state(
     return tuple(out)
 
 
+@dataclass(frozen=True)
+class PackedMatrix64:
+    """SDK 11.10 reference ABI: sign mask plus magnitude bit planes for 64-wide rows."""
+
+    w_sign: object
+    w_bp: object
+    scale_w: float
+    n_bits: int
+    n_rows: int
+
+
 def pack_matrix64(W, n_bits: int):
     import numpy as np
 
-    from src.tools.gyroscopic.pack_matrix import pack_matrix64 as _pack
+    n_bits_i = int(n_bits)
+    w = np.asarray(W, dtype=np.float64)
+    if w.ndim != 2 or w.shape[1] != 64:
+        raise ValueError("W must have shape [rows, 64]")
+    if n_bits_i < 1 or n_bits_i > 52:
+        raise ValueError("n_bits must be in 1..52")
 
-    return _pack(np.asarray(W), int(n_bits))
+    rows = int(w.shape[0])
+    scale_w = float(np.max(np.abs(w))) if w.size else 1.0
+    if scale_w <= 0.0:
+        scale_w = 1.0
+    wn = w / scale_w
+
+    signs = np.zeros(rows, dtype=np.uint64)
+    bp = np.zeros((rows, n_bits_i), dtype=np.uint64)
+    max_mag = (1 << n_bits_i) - 1
+
+    for r in range(rows):
+        row = wn[r]
+        for j in range(64):
+            v = float(row[j])
+            if v < 0.0:
+                signs[r] |= np.uint64(1) << np.uint64(j)
+            m = int(np.floor(abs(v) * float(max_mag) + 0.5))
+            if m > max_mag:
+                m = max_mag
+            for k in range(n_bits_i):
+                if (m >> k) & 1:
+                    bp[r, k] |= np.uint64(1) << np.uint64(j)
+
+    return PackedMatrix64(signs, bp, scale_w, n_bits_i, rows)
 
 
 def apply_packed64_gemv(packed, x):
     import numpy as np
 
-    from src.tools.gyroscopic.pack_matrix import apply_packed64_gemv as _gemv
+    xv = np.asarray(x, dtype=np.float64).ravel()
+    if xv.size != 64:
+        raise ValueError("x must have length 64")
 
-    return _gemv(packed, np.asarray(x))
+    max_mag = (1 << packed.n_bits) - 1
+    y = np.zeros(packed.n_rows, dtype=np.float64)
+
+    for r in range(packed.n_rows):
+        row = np.zeros(64, dtype=np.float64)
+        for j in range(64):
+            sgn = -1.0 if (int(packed.w_sign[r]) >> j) & 1 else 1.0
+            mag = 0
+            for k in range(packed.n_bits):
+                if (int(packed.w_bp[r, k]) >> j) & 1:
+                    mag |= 1 << k
+            row[j] = sgn * (float(mag) / float(max_mag))
+        y[r] = float(np.dot(row, xv)) * packed.scale_w
+
+    return y
 
 
 def dyadic_wht64_normalized(values: list[int]):
-    from src.tools.gyroscopic.dyadic_wht import wht64_dyadic_normalized
-
-    return wht64_dyadic_normalized(list(values))
+    return DyadicVector64(tuple(_wht64_int_forward(list(values))), 6)
 
 
-def shell_order_parameters_from_hist(shell_hist: list[int] | tuple[int, ...]):
-    """QuBEC climate order parameters rho, eta, m, Var(N) from shell_hist7 (docs Sections 3-5)."""
-    from src.tools.gyroscopic.climate import shell_order_parameters_from_hist as _f
+@dataclass(frozen=True)
+class DyadicVector64:
+    """Dyadic exact WHT coefficients with fixed exponent."""
 
-    return _f(shell_hist)
-
-
-def m2_empirical_from_chi_hist(chi_hist: list[int] | tuple[int, ...]) -> float:
-    """M2 effective support on the 64 chirality modes from chi_hist64 (native empirical estimator)."""
-    from src.tools.gyroscopic.climate import m2_empirical_from_chi_hist as _f
-
-    return _f(chi_hist)
+    numerators: tuple[int, ...]
+    exponent: int
 
 
-def m2_equilibrium_from_shell_hist(shell_hist: list[int] | tuple[int, ...]) -> float:
-    """Equilibrium M2 on Omega from shell_hist7: 4096 / (1 + eta^2)^6 (docs Section 5)."""
-    from src.tools.gyroscopic.climate import m2_equilibrium_from_shell_hist as _f
+def _wht64_int_forward(values: list[int]) -> list[int]:
+    if len(values) != 64:
+        raise ValueError("wht64_int_forward requires length 64")
 
-    return _f(shell_hist)
+    out = [int(x) for x in values]
+    h = 1
+    while h < 64:
+        for i in range(0, 64, 2 * h):
+            for j in range(h):
+                u = out[i + j]
+                v = out[i + j + h]
+                out[i + j] = u + v
+                out[i + j + h] = u - v
+        h *= 2
+    return out
 
 
-def cell_climate_from_histograms(
-    chi_hist64: list[int] | tuple[int, ...],
-    shell_hist7: list[int] | tuple[int, ...],
-    family_hist4: list[int] | tuple[int, ...],
-    *,
-    byte_ensemble_256: list[int] | tuple[int, ...] | None = None,
-):
-    """Per-cell climate observables: rho, eta, m, M2, shell/gauge spectra, optional byte anisotropy (Section 16)."""
-    from src.tools.gyroscopic.climate import cell_climate_from_histograms as _f
-
-    return _f(
-        chi_hist64,
-        shell_hist7,
-        family_hist4,
-        byte_ensemble_256=byte_ensemble_256,
-    )
+def wht64_int_forward(values: list[int]) -> list[int]:
+    return _wht64_int_forward(list(values))
 
 
 class TensorOps:
@@ -775,109 +810,13 @@ class SpectralOps:
     )
 
 
-class ClimateOps:
-    """QuBEC climate naming aligned with docs/theory/QuBEC_Climate_Dynamics.md.
-
-    rho = N_mean/6, eta = 1 - 2*rho, m = 2*rho - 1, Var(N) = 6*rho*(1-rho) (Sections 3-4).
-    M2 equilibrium vs empirical chirality support (Section 5). Bundled cell view (Section 16).
-    """
-
-    shell_order_parameters_from_hist = staticmethod(shell_order_parameters_from_hist)
-    m2_empirical_from_chi_hist = staticmethod(m2_empirical_from_chi_hist)
-    m2_equilibrium_from_shell_hist = staticmethod(m2_equilibrium_from_shell_hist)
-    cell_climate_from_histograms = staticmethod(cell_climate_from_histograms)
-
-
-def _gyroscopic_ops():
-    from src.tools.gyroscopic import ops as _ops
-
-    return _ops
-
-
-class RuntimeOps:
-    """Native GyroGraph/GyroLabe bindings and batched word4 paths (Quantum SDK spec Section 11)."""
-
-    @staticmethod
-    def initialize_native() -> None:
-        _gyroscopic_ops().gyromatmul_runtime_caps()
-
-    @staticmethod
-    def signature_from_bytes(data: bytes):
-        return _gyroscopic_ops().gyrograph_word_signature_from_bytes(data)
-
-    @staticmethod
-    def compose_signatures(left, right):
-        return _gyroscopic_ops().gyrograph_compose_signatures(left, right)
-
-    @staticmethod
-    def apply_signature(state24: int, sig: "GyroGraphWordSignature") -> int:
-        return _gyroscopic_ops().gyrograph_apply_signature(state24, sig)
-
-    @staticmethod
-    def apply_signature_to_rest(sig: "GyroGraphWordSignature") -> int:
-        return _gyroscopic_ops().gyrograph_apply_signature(GENE_MAC_REST, sig)
-
-    @staticmethod
-    def moment_from_ledger_native(ledger: bytes):
-        return _gyroscopic_ops().gyrograph_moment_from_ledger_native(ledger)
-
-    @staticmethod
-    def verify_moment_native(moment, ledger: bytes) -> bool:
-        return _gyroscopic_ops().gyrograph_verify_moment_native(moment, ledger)
-
-    @staticmethod
-    def compare_ledgers_native(a: bytes, b: bytes) -> tuple[int, int]:
-        return _gyroscopic_ops().gyrograph_compare_ledgers_native(a, b)
-
-    @staticmethod
-    def trace_word4_batch_indexed(*args, **kwargs):
-        return _gyroscopic_ops().gyrograph_trace_word4_batch_indexed(*args, **kwargs)
-
-    @staticmethod
-    def apply_trace_word4_batch_indexed(*args, **kwargs):
-        return _gyroscopic_ops().gyrograph_apply_trace_word4_batch_indexed(*args, **kwargs)
-
-    @staticmethod
-    def ingest_word4_batch_indexed(*args, **kwargs):
-        return _gyroscopic_ops().gyrograph_ingest_word4_batch_indexed(*args, **kwargs)
-
-    @staticmethod
-    def step_state24_by_byte(state24: int, byte: int) -> int:
-        return _gyroscopic_ops().gyrograph_step_state24_by_byte(state24, byte)
-
-    @staticmethod
-    def inverse_step_state24_by_byte(state24: int, byte: int) -> int:
-        return _gyroscopic_ops().gyrograph_inverse_step_state24_by_byte(state24, byte)
-
-    @staticmethod
-    def chirality_distance(state24_a: int, state24_b: int) -> int:
-        return (chirality_word6(state24_a) ^ chirality_word6(state24_b)).bit_count()
-
-    @staticmethod
-    def chirality_distances_along_trajectory(
-        payload: bytes | Iterable[int],
-        start_state24: int = GENE_MAC_REST,
-    ) -> list[int]:
-        seq = state_scan_from_state(payload, start_state24)
-        if len(seq) < 2:
-            return []
-        return [
-            RuntimeOps.chirality_distance(seq[i], seq[i + 1])
-            for i in range(len(seq) - 1)
-        ]
-
-    state_scan_from_state = staticmethod(state_scan_from_state)
-    q_class = staticmethod(q_word6)
-    q_map_for_items = staticmethod(q_word6_for_items)
-
-
 __all__ = [
     "ConstitutionalChart",
     "StateCharts",
     "Moment",
     "MomentComparison",
+    "Result",
     "byte_transition",
-    "compare_ledgers_pair",
     "FutureConeMeasure",
     "ReachabilityWitness",
     "OmegaState12",
@@ -908,13 +847,10 @@ __all__ = [
     "state_scan_from_state",
     "pack_matrix64",
     "apply_packed64_gemv",
+    "wht64_int_forward",
     "dyadic_wht64_normalized",
-    "shell_order_parameters_from_hist",
-    "m2_empirical_from_chi_hist",
-    "m2_equilibrium_from_shell_hist",
-    "cell_climate_from_histograms",
-    "ClimateOps",
-    "RuntimeOps",
+    "DyadicVector64",
+    "PackedMatrix64",
     "TensorOps",
     "StateOps",
     "MomentOps",

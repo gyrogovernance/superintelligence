@@ -1,41 +1,31 @@
-"""Gyrocrypt research helpers for structure probing."""
+"""Gyrocrypt — Simon + Shor on aQPU kernel. Run: python secret_lab_ignore/gyrocrypt/runner.py"""
 
-from .sha256_structure import (
-    chirality_histogram64,
-    chirality_words_histogram64,
-    digest_to_chirality6_mod6_parity,
-    digest_to_chirality6_words,
-    non_dc_energy_fraction,
-    random_messages,
-    random_block_words,
-    sha256_block_words_from_messages,
-    schedule_depth4_projection_lift,
-    schedule_omega_trajectory,
-    schedule_depth4_frame_signatures,
-    sha256_message_schedule,
-    sha256_round_chirality_trajectory,
-    sha256_round_profiles,
-    sha256_digests,
-    topk_energy_fractions,
-    wht64,
-)
+from __future__ import annotations
 
-__all__ = [
-    "chirality_histogram64",
-    "chirality_words_histogram64",
-    "digest_to_chirality6_mod6_parity",
-    "digest_to_chirality6_words",
-    "non_dc_energy_fraction",
-    "random_messages",
-    "random_block_words",
-    "sha256_block_words_from_messages",
-    "schedule_depth4_projection_lift",
-    "schedule_omega_trajectory",
-    "schedule_depth4_frame_signatures",
-    "sha256_message_schedule",
-    "sha256_round_chirality_trajectory",
-    "sha256_round_profiles",
-    "sha256_digests",
-    "topk_energy_fractions",
-    "wht64",
-]
+from typing import Optional, Tuple
+
+
+def simon(n_bits: int, secret: int) -> Optional[int]:
+    from kernel.simon import simon as _simon
+
+    return _simon(int(n_bits), int(secret))
+
+
+def period(N: int, base: int, Q: int | None = None) -> Optional[int]:
+    from kernel.shor import period as _period
+
+    return _period(int(N), int(base), Q)
+
+
+def factor(N: int, base: int | None = None) -> Optional[Tuple[int, int]]:
+    from kernel.shor import factor as _factor
+
+    return _factor(int(N), base)
+
+
+# Deprecated alias
+def orderfind(N: int, base: int, Q: int | None = None) -> Optional[int]:
+    return period(N, base, Q)
+
+
+__all__ = ["simon", "period", "factor", "orderfind"]

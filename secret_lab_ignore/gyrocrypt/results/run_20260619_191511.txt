@@ -1,0 +1,61 @@
+=========
+Gyrocrypt kernel
+=========
+=========
+Byte bridge / Gyrostate
+=========
+[PASS] Byte bridge roundtrip + Omega reachability
+[PASS] Depth-4 closure b^4 = id
+=========
+Holonomy wavefunction
+=========
+[PASS] K4 involutions + F = W2 o W2'
+[PASS] holographic reshape round-trip
+=========
+Horizon affine algebra (holonomy diagnostic)
+=========
+[PASS] q6 distinct=64 chi_order≤2 Ω depth1_max=4 depth4_sample_max=2
+=========
+Native C
+=========
+[PASS] native modexp uint64 + limbs
+[PASS] cyclic character χ(1)^N = 1
+[PASS] native sparse_cqft_peaks
+[PASS] shor_period_u64(7,15,4096) == 4
+[PASS] native modexp + audit period_reference N=143
+=========
+Simon
+=========
+[PASS] simon n=6,12,18,(60)
+=========
+Production period + factor (native spectral)
+=========
+[PASS] cqft64_fast smoke
+[PASS] production period N=15 r=4 path=CQFT_DENSE
+[OPEN] holonomy period N=15,7 → None (audit r=4); compiler bridge open
+[PASS] factor N=15 → (3,5)
+[INFO] N=143 production=60 holonomy=None compiled=False (arith ord=60)
+=========
+Audit: classical F_{G_X} scorer
+=========
+[PASS] audit period_reference N=143 r=60
+=========
+Shor large-N audit reference (867199)
+=========
+[PASS] audit period N=867199 (r=18018, path=DP_EXACT_DOUBLE, 81.9s)
+=========
+Holonomy vs audit N=867199
+=========
+[INFO] holonomy_period=None audit=18018 sig_order=None closure=None (86.2s)
+[OPEN] holonomy compiler/readout does not yet match audit at N=867199 — production fail-closed until bridge closes
+=========
+Horizon tensor gates (K11/K15, C)
+=========
+[PASS] N=15 exact DP y=1 k=65536 (tensor drift skipped: n_cells=1)
+[PASS] N=143 drift ratio=1.0 tensor/exact parity k=4369
+=========
+DLP (production fail-closed)
+=========
+[OPEN] dual-flow holonomy DLP readout not implemented
+
+[OK] all tests (311.7s)

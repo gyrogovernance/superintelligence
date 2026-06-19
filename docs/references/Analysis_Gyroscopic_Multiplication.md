@@ -527,22 +527,33 @@ The ordinary dot product is recovered by the radix projection:
 
 This identity is exact for every int32 dot product. The K4 index set {00, 01, 10, 11} is (ℤ/2)².
 
-#### 9.3 Three operational roles
+#### 9.3 Operational roles of the K4 lattice
 
-The four entries carry three distinct operational roles.
+The four entries carry three operational roles.
 
-**D₁₁: chiral alignment.** When H takes values in {−1, 0, +1}, the gauge-gauge contraction is computed by signed support intersection:
+**D₀₀: carrier contraction.**
+
+```
+D₀₀(q,k) = ⟨L_q, L_k⟩
+```
+
+**D₀₁ and D₁₀: gauge action on the carrier.**
+
+```
+D₀₁(q,k) = ⟨L_q, H_k⟩
+D₁₀(q,k) = ⟨H_q, L_k⟩
+```
+
+When the high chart is signed-support valued, H ∈ {−1, 0, +1}, these cross terms act as boolean control masks over the carrier content: where H = +1, L is preserved; where H = −1, L is sign-inverted; where H = 0, L is annihilated.
+
+**D₁₁: gauge-gauge alignment.**
+
+When H_q and H_k are signed-support valued, D₁₁ is computed by signed support intersection:
 
 ```
 D₁₁ = popcount(q⁺ ∧ k⁺) + popcount(q⁻ ∧ k⁻)
-     − popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+- popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
 ```
-
-This is aligned-minus-anti-aligned counting, the same algebraic form as chirality measurement on oriented pairs.
-
-**D₀₁ and D₁₀: gauge action on the carrier.** In the spinorial regime, the cross terms act as boolean control masks over the carrier content: where H = +1, L is preserved; where H = −1, L is sign-inverted; where H = 0, L is annihilated.
-
-**D₀₀: carrier contraction.** The contraction of the low charts alone, with no gauge contribution.
 
 #### 9.4 The additive sector budget
 
@@ -563,30 +574,34 @@ The normalized budget:
 
 This is an exact arithmetic identity describing how the total weighted magnitude distributes across the three operational sectors.
 
-#### 9.5 Three computational regimes
+#### 9.5 Data-dependent simplification
 
-The K4 lattice matrix admits three exact chart regimes determined by the high-chart occupancy.
+The K4 lattice matrix identity is unconditional:
 
-**Carrier regime.** H_q = 0 and H_k = 0.
+```
+⟨q,k⟩ = D₀₀ + B(D₀₁ + D₁₀) + B²D₁₁
+```
+
+The data values of the high charts determine which cells simplify.
+
+**Vanishing high-chart condition.**
 
 ```
 M(q, k) = [ D₀₀  0 ]
            [ 0    0 ]
 ```
 
-Only D₀₀ contributes. The budget is (1, 0, 0). This is the Nikhilam regime where all residuals vanish.
+Only D₀₀ contributes.
 
-**Spinorial regime.** H ∈ {−1, 0, +1}ⁿ for both vectors.
+**Signed-support high-chart condition.**
 
-D₁₁ is realized by boolean support intersection (AND + POPCNT on sign masks). D₀₁ and D₁₀ are realized as signed masked actions. All four cells are computed exactly with compressed boolean arithmetic.
+If H_q and H_k take values in {−1, 0, +1}, then D₁₁ is realized by signed support intersection. D₀₁ and D₁₀ are realized as signed masked carrier actions.
 
-**Dense regime.** |H| > 1 at some position.
+**General high-chart condition.**
 
-The same K4 law is evaluated without boolean compression. Correctness is unchanged.
+If any high-chart value has magnitude greater than 1, the same K4 law is evaluated without boolean compression.
 
-No approximation enters in the regime selection. The three regimes are exact chart specializations of one law.
-
-The carrier, spinorial, and dense regimes are not properties of weights to be detected. They are the three exact evaluations of the K4 lattice determined by the data values of H at runtime. Every Q8_0 dot product executes the full D₀₀ + B(D₀₁ + D₁₀) + B²D₁₁ form; the regime only selects which terms are zero by value, not by test.
+No approximation enters the evaluation. The simplification is an exact property of the data.
 
 ---
 
@@ -747,8 +762,8 @@ The aQPU kernel and SDK specifications develop the native state and runtime laye
 Practical execution proceeds in this order:
 
 1. state structure (native manifold and charts)
-2. operator structure (exact transport and partition algebras)
-3. arithmetic lowering (K4 lattice realization and regime selection)
+2. operator structure (exact transport and native symmetry projections)
+3. arithmetic lowering (K4 lattice realisation and data-dependent simplification)
 
 The MacWilliams identity for the self-dual [12,6,2] mask code provides a further cross-layer connection. In coding theory, the MacWilliams transform relates the weight distribution of a code to that of its dual, expressed in the Krawtchouk polynomial basis. In the finite manifold layer, the same Krawtchouk basis diagonalizes shell-radial climate transport. For a self-dual code, the MacWilliams transform becomes a self-consistency condition, and the Plancherel identity on GF(2)^6 guarantees conservation between chirality-space and spectral-space representations. These three structures (MacWilliams weight transform, Krawtchouk radial harmonics, Plancherel spectral conservation) are expressions of a single algebraic duality on the 6-mode register.
 

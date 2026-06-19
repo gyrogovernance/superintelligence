@@ -26,6 +26,27 @@ LAYER_MASK_12: int = 0xFFF
 MASK_STATE24: int = 0xFFFFFF
 
 # ================================================================
+# Byte structure masks (from Gyroscopic Byte Formalism)
+# ================================================================
+L0_BIT_0: int = 0x01  # Family bit 0 (controls A complement)
+L0_BIT_7: int = 0x80  # Family bit 7 (controls B complement)
+SHADOW_PARTNER_MASK: int = 0xFE  # Shadow partner XOR mask
+
+# ================================================================
+# Structural topology constants (from Gyroscopic Byte Formalism)
+# ================================================================
+LAYER_BITS: int = 12
+FAMILY_MASK: int = 0x03
+BYTE_COUNT: int = 256  # 256 valid byte instructions
+GAUGE_COUNT: int = 4
+
+# Integer-width masks
+UINT8_MASK: int = 0xFF
+UINT16_MASK: int = 0xFFFF
+UINT32_MASK: int = 0xFFFFFFFF
+UINT64_MASK: int = 0xFFFFFFFFFFFFFFFF
+
+# ================================================================
 # CGM bit masks (palindromic intron positions)
 # ================================================================
 
@@ -63,8 +84,27 @@ OMEGA_SIZE: int = 4096
 HORIZON_SIZE: int = 64
 BOUNDARY_SIZE: int = 128
 BULK_SIZE: int = OMEGA_SIZE - BOUNDARY_SIZE
+SHELL_MAX: int = CHIRALITY_QUBITS_6
+SHELL_COUNT: int = SHELL_MAX + 1  # 7
+SHELL_MIDPOINT: int = SHELL_COUNT >> 1
+COMPLEMENTARITY_SUM: int = LAYER_BITS
+SHELL_MAX_POPULATION: int = 1280
 
-PAIR_MASKS_12: tuple[int, ...] = tuple(0x3 << (2 * i) for i in range(6))
+# Physical capacity medium (CSM - Formalism §11)
+F_CS_HZ: int = 9_192_631_770
+N_PHYS: float = (4.0 / 3.0) * math.pi * float(F_CS_HZ) ** 3
+CSM_MU: float = N_PHYS / OMEGA_SIZE
+
+# Structural and aperture invariants
+DEPTH_CLOSURE: int = 4
+MASK_CODE_SIZE: int = 64
+SHADOW_STATES: int = 128
+Q_G: float = 4.0 * math.pi
+COMPLEMENT_MASK_12: int = LAYER_MASK_12
+
+PAIR_MASKS_12: tuple[int, ...] = tuple(
+    0x3 << (2 * i) for i in range(CHIRALITY_QUBITS_6)
+)
 GATE_NAMES: tuple[str, ...] = ("id", "S", "C", "F")
 
 
@@ -198,9 +238,9 @@ def micro_ref_to_mask12(micro_ref: int) -> int:
     6-bit payload -> 12-bit mask.
     Payload bit i controls dipole pair i (mask bits 2i and 2i+1).
     """
-    m = int(micro_ref) & 0x3F
+    m = int(micro_ref) & CHIRALITY_MASK_6
     mask12 = 0
-    for i in range(6):
+    for i in range(CHIRALITY_QUBITS_6):
         if (m >> i) & 1:
             mask12 |= 0x3 << (2 * i)
     return mask12 & LAYER_MASK_12
@@ -212,7 +252,7 @@ def expand_intron_to_mask12(intron: int) -> int:
 
 
 _MASK12_BY_INTRON: tuple[int, ...] = tuple(
-    expand_intron_to_mask12(i) for i in range(256)
+    expand_intron_to_mask12(i) for i in range(BYTE_COUNT)
 )
 
 
@@ -233,8 +273,8 @@ def _transition_internals(
     a12 = (int(state24) >> 12) & LAYER_MASK_12
     b12 = int(state24) & LAYER_MASK_12
     a_mut = (a12 ^ m12) & LAYER_MASK_12
-    invert_a = LAYER_MASK_12 if (intron & 0x01) else 0
-    invert_b = LAYER_MASK_12 if (intron & 0x80) else 0
+    invert_a = COMPLEMENT_MASK_12 if (intron & L0_BIT_0) else 0
+    invert_b = COMPLEMENT_MASK_12 if (intron & L0_BIT_7) else 0
     a_next = (b12 ^ invert_a) & LAYER_MASK_12
     b_next = (a_mut ^ invert_b) & LAYER_MASK_12
     next_state24 = pack_state(a_next, b_next)
@@ -266,8 +306,8 @@ def inverse_step_by_byte(state24: int, byte: int) -> int:
     m12 = _MASK12_BY_INTRON[intron]
     a_next = (int(state24) >> 12) & LAYER_MASK_12
     b_next = int(state24) & LAYER_MASK_12
-    invert_a = LAYER_MASK_12 if (intron & 0x01) else 0
-    invert_b = LAYER_MASK_12 if (intron & 0x80) else 0
+    invert_a = COMPLEMENT_MASK_12 if (intron & L0_BIT_0) else 0
+    invert_b = COMPLEMENT_MASK_12 if (intron & L0_BIT_7) else 0
     b_pred = (a_next ^ invert_a) & LAYER_MASK_12
     a_pred = ((b_next ^ invert_b) ^ m12) & LAYER_MASK_12
     return pack_state(a_pred, b_pred)
@@ -307,16 +347,16 @@ def archetype_distance(state24: int) -> int:
 
 
 def horizon_distance(a12: int, b12: int) -> int:
-    """Horizon distance: popcount(A12 ^ (B12 ^ 0xFFF)).
+    """Horizon distance: popcount(A12 ^ (B12 ^ COMPLEMENT_MASK_12)).
     Zero on the S-sector where chirality is maximal."""
-    return popcount(int(a12) ^ (int(b12) ^ LAYER_MASK_12))
+    return popcount(int(a12) ^ (int(b12) ^ COMPLEMENT_MASK_12))
 
 
 def is_on_horizon(state24: int) -> bool:
-    """Whether state satisfies A12 = B12 ^ 0xFFF
+    """Whether state satisfies A12 = B12 ^ COMPLEMENT_MASK_12
     (complement horizon, maximal chirality, S-sector)."""
     a, b = unpack_state(state24)
-    return a == (b ^ LAYER_MASK_12)
+    return a == (b ^ COMPLEMENT_MASK_12)
 
 
 def ab_distance(a12: int, b12: int) -> int:
@@ -326,7 +366,7 @@ def ab_distance(a12: int, b12: int) -> int:
 
 def complementarity_invariant(a12: int, b12: int) -> bool:
     """True iff horizon_distance + ab_distance == 12 (antipodal pole conservation)."""
-    return horizon_distance(a12, b12) + ab_distance(a12, b12) == 12
+    return horizon_distance(a12, b12) + ab_distance(a12, b12) == LAYER_BITS
 
 
 # ----------------------------------------
@@ -341,15 +381,15 @@ def apply_gate_S(state24: int) -> int:
 
 
 def apply_gate_C(state24: int) -> int:
-    """Gate C (complement-swap): (A, B) -> (B^F, A^F), F=0xFFF."""
+    """Gate C (complement-swap): (A, B) -> (B^F, A^F), F=COMPLEMENT_MASK_12."""
     a, b = unpack_state(state24)
-    return pack_state(b ^ LAYER_MASK_12, a ^ LAYER_MASK_12)
+    return pack_state(b ^ COMPLEMENT_MASK_12, a ^ COMPLEMENT_MASK_12)
 
 
 def apply_gate_F(state24: int) -> int:
     """Gate F = S o C (global complement): (A, B) -> (A^F, B^F)."""
     a, b = unpack_state(state24)
-    return pack_state(a ^ LAYER_MASK_12, b ^ LAYER_MASK_12)
+    return pack_state(a ^ COMPLEMENT_MASK_12, b ^ COMPLEMENT_MASK_12)
 
 
 def apply_gate(state24: int, name: str) -> int:
@@ -370,7 +410,7 @@ def apply_gate(state24: int, name: str) -> int:
 
 def component_density(component12: int) -> float:
     """Component density: popcount / 12."""
-    return popcount(int(component12)) / 12.0
+    return popcount(int(component12)) / LAYER_BITS
 
 
 # ================================================================

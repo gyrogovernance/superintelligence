@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from fractions import Fraction
-from math import comb
+from math import comb, sqrt
 from typing import Final, Union
 
 import numpy as np
@@ -20,16 +20,28 @@ import numpy as np
 from src.constants import (
     CHIRALITY_MASK_6,
     CHIRALITY_QUBITS_6,
+    L0_BIT_0,
+    L0_BIT_7,
     EPSILON_6,
     GENE_MAC_A12,
+    LAYER_BITS,
     LAYER_MASK_12,
+    MASK_CODE_SIZE,
+    MASK_STATE24,
+    SHELL_COUNT,
+    SHADOW_PARTNER_MASK,
+    SHADOW_STATES,
+    HORIZON_SIZE,
     apply_gate,
     byte_to_intron,
     dot12,
     expand_intron_to_mask12,
+    l0_parity,
     intron_family,
     intron_micro_ref,
+    BYTE_COUNT,
     pack_state,
+    UINT8_MASK,
     step_state_by_byte,
     unpack_state,
 )
@@ -39,7 +51,7 @@ from src.constants import (
 # ----------------------------------------
 
 INTRON_BY_BYTE: tuple[int, ...] = tuple(
-    byte_to_intron(b) for b in range(256)
+    byte_to_intron(b) for b in range(BYTE_COUNT)
 )
 FAMILY_BY_BYTE: tuple[int, ...] = tuple(
     intron_family(i) for i in INTRON_BY_BYTE
@@ -51,18 +63,18 @@ MASK12_BY_BYTE: tuple[int, ...] = tuple(
     expand_intron_to_mask12(i) for i in INTRON_BY_BYTE
 )
 EPS_A6_BY_BYTE: tuple[int, ...] = tuple(
-    EPSILON_6 if (INTRON_BY_BYTE[b] & 0x01) else 0
-    for b in range(256)
+    EPSILON_6 if (INTRON_BY_BYTE[b] & L0_BIT_0) else 0
+    for b in range(BYTE_COUNT)
 )
 EPS_B6_BY_BYTE: tuple[int, ...] = tuple(
-    EPSILON_6 if (INTRON_BY_BYTE[b] & 0x80) else 0
-    for b in range(256)
+    EPSILON_6 if (INTRON_BY_BYTE[b] & L0_BIT_7) else 0
+    for b in range(BYTE_COUNT)
 )
 
 
 def mask12_for_byte(byte: int) -> int:
     """12-bit Type-A mask for a given byte."""
-    return MASK12_BY_BYTE[int(byte) & 0xFF]
+    return MASK12_BY_BYTE[int(byte) & UINT8_MASK]
 
 
 # ----------------------------------------
@@ -164,14 +176,14 @@ def _compute_c_perp() -> tuple[int, ...]:
     masks = set(MASK12_BY_BYTE)
     return tuple(
         s
-        for s in range(1 << 12)
+    for s in range(1 << LAYER_BITS)
         if all(dot12(s, c) == 0 for c in masks)
     )
 
 
 C_PERP_12: tuple[int, ...] = _compute_c_perp()
-assert len(C_PERP_12) == 64, (
-    f"Expected |C_PERP_12|=64, got {len(C_PERP_12)}"
+assert len(C_PERP_12) == MASK_CODE_SIZE, (
+    f"Expected |C_PERP_12|={MASK_CODE_SIZE}, got {len(C_PERP_12)}"
 )
 
 
@@ -213,14 +225,14 @@ def trajectory_parity_commitment(
     for item in items:
         if isinstance(item, (bytes, bytearray, memoryview)):
             for b in item:
-                m = MASK12_BY_BYTE[int(b) & 0xFF]
+                m = MASK12_BY_BYTE[int(b) & UINT8_MASK]
                 if (idx & 1) == 0:
                     O ^= m
                 else:
                     E ^= m
                 idx += 1
         else:
-            m = MASK12_BY_BYTE[int(item) & 0xFF]
+            m = MASK12_BY_BYTE[int(item) & UINT8_MASK]
             if (idx & 1) == 0:
                 O ^= m
             else:
@@ -246,9 +258,9 @@ def trajectory_commitment_bytes(O: int, E: int, parity: int) -> bytes:
 def depth4_mask_projection48(b0: int, b1: int, b2: int, b3: int) -> int:
     """48-bit: 4 x 12-bit masks packed big-endian."""
     return (
-        (mask12_for_byte(b0) << 36)
-        | (mask12_for_byte(b1) << 24)
-        | (mask12_for_byte(b2) << 12)
+        (mask12_for_byte(b0) << (3 * LAYER_BITS))
+        | (mask12_for_byte(b1) << (2 * LAYER_BITS))
+        | (mask12_for_byte(b2) << LAYER_BITS)
         | mask12_for_byte(b3)
     )
 
@@ -271,12 +283,12 @@ def depth4_intron_sequence32(b0: int, b1: int, b2: int, b3: int) -> int:
 def so3_shadow_count(state24: int) -> int:
     """
     Count distinct 24-bit next states reachable by all 256 bytes.
-    Should be 128 from any state (SO(3)/SU(2) 2-to-1 projection).
+    Should be SHADOW_STATES from any state (SO(3)/SU(2) 2-to-1 projection).
     """
     seen = set()
-    for b in range(256):
+    for b in range(BYTE_COUNT):
         seen.add(step_state_by_byte(state24, b))
-    return len(seen)
+    return len(seen)  # Will equal SHADOW_STATES (128).
 
 
 # ----------------------------------------
@@ -292,7 +304,7 @@ def chirality_word6(state24: int) -> int:
     a12, b12 = unpack_state(state24)
     diff = (a12 ^ b12) & LAYER_MASK_12
     out = 0
-    for i in range(6):
+    for i in range(CHIRALITY_QUBITS_6):
         pair = (diff >> (2 * i)) & 0x3
         if pair == 0x3:
             out |= 1 << i
@@ -301,41 +313,28 @@ def chirality_word6(state24: int) -> int:
 
 def q_word6(byte: int) -> int:
     """
-    6-bit q-word from byte: C64 codeword (mask or mask^0xFFF by L0).
+    6-bit q-word from byte.
     Satisfies chirality_word6(step(s,b)) == chirality_word6(s) ^ q_word6(b) on Omega.
     """
-    b = int(byte) & 0xFF
-    intron = byte_to_intron(b)
-    l0 = (intron & 1) ^ ((intron >> 7) & 1)
-    q12 = mask12_for_byte(b) ^ (LAYER_MASK_12 if l0 else 0)
-    q12 &= LAYER_MASK_12
-    out = 0
-    for i in range(6):
-        pair = (q12 >> (2 * i)) & 0x3
-        if pair == 0x3:
-            out |= 1 << i
-    return out
+    intron = byte_to_intron(int(byte) & UINT8_MASK)
+    return intron_micro_ref(intron) ^ (EPSILON_6 if l0_parity(intron) else 0)
 
 
 def q_word12(byte: int) -> int:
     """
-    12-bit q-word before 6-bit collapse:
-      q12 = mask12(byte) XOR (0xFFF if L0 parity odd else 0)
+    12-bit q-word before 6-bit collapse.
     This is the commutation-class representative in C64.
     """
-    b = int(byte) & 0xFF
-    intron = byte_to_intron(b)
-    l0 = (intron & 1) ^ ((intron >> 7) & 1)
-    q12 = mask12_for_byte(b) ^ (LAYER_MASK_12 if l0 else 0)
-    return q12 & LAYER_MASK_12
+    return word6_to_pairdiag12(q_word6(byte))
 
 
 BYTES_BY_Q6: tuple[tuple[int, ...], ...] = tuple(
-    tuple(b for b in range(256) if q_word6(b) == q6) for q6 in range(64)
+    tuple(b for b in range(BYTE_COUNT) if q_word6(b) == q6)
+    for q6 in range(MASK_CODE_SIZE)
 )
 Q_KERNEL_BYTES: tuple[int, ...] = BYTES_BY_Q6[0]
 Q_WEIGHT_BY_BYTE: tuple[int, ...] = tuple(
-    q_word6(b).bit_count() for b in range(256)
+    q_word6(b).bit_count() for b in range(BYTE_COUNT)
 )
 
 
@@ -352,7 +351,7 @@ def q_word6_for_items(items: Iterable[ByteItem]) -> int:
             for b in item:
                 q ^= q_word6(b)
         else:
-            q ^= q_word6(int(item) & 0xFF)
+            q ^= q_word6(int(item) & UINT8_MASK)
     return q & CHIRALITY_MASK_6
 
 
@@ -404,8 +403,8 @@ def word_signature(items: Iterable[ByteItem]) -> WordSignature:
                 s = step_state_by_byte(s, b)
                 n += 1
         else:
-            s = step_state_by_byte(s, int(item) & 0xFF)
-            n += 1
+            s = step_state_by_byte(s, int(item) & UINT8_MASK)
+        n += 1
     tau_a12, tau_b12 = unpack_state(s)
     return WordSignature(
         parity=n & 1,
@@ -481,15 +480,15 @@ class OmegaState12:
 
     @property
     def optical_eq(self) -> Fraction:
-        return Fraction(self.shell, 6)
+        return Fraction(self.shell, CHIRALITY_QUBITS_6)
 
     @property
     def optical_comp(self) -> Fraction:
-        return Fraction(6 - self.shell, 6)
+        return Fraction(CHIRALITY_QUBITS_6 - self.shell, CHIRALITY_QUBITS_6)
 
     @property
     def optical_mu(self) -> Fraction:
-        return Fraction(2 * self.shell - 6, 6)
+        return Fraction(2 * self.shell - CHIRALITY_QUBITS_6, CHIRALITY_QUBITS_6)
 
 
 def is_in_omega24(state24: int) -> bool:
@@ -506,7 +505,7 @@ def is_in_omega24(state24: int) -> bool:
 
 
 def try_state24_to_omega12(state24: int) -> OmegaState12 | None:
-    s = int(state24) & 0xFFFFFF
+    s = int(state24) & MASK_STATE24
     a12, b12 = unpack_state(s)
 
     ua12 = a12 ^ GENE_MAC_A12
@@ -526,7 +525,7 @@ def try_state24_to_omega12(state24: int) -> OmegaState12 | None:
 def state24_to_omega12(state24: int) -> OmegaState12:
     omega = try_state24_to_omega12(state24)
     if omega is None:
-        raise ValueError(f"State {int(state24) & 0xFFFFFF:#08x} is not in Omega")
+        raise ValueError(f"State {int(state24) & MASK_STATE24:#08x} is not in Omega")
     return omega
 
 
@@ -593,7 +592,7 @@ def frobenius_component12(component12: int) -> int:
     """
     x = int(component12) & LAYER_MASK_12
     out = 0
-    for i in range(6):
+    for i in range(CHIRALITY_QUBITS_6):
         pair = (x >> (2 * i)) & 0x3
         out |= frobenius_pair(pair) << (2 * i)
     return out & LAYER_MASK_12
@@ -604,7 +603,7 @@ def is_reachable_component(component12: int) -> bool:
     True iff all 6 pairs are trace-1, i.e. each pair is 10 or 01.
     """
     x = int(component12) & LAYER_MASK_12
-    for i in range(6):
+    for i in range(CHIRALITY_QUBITS_6):
         pair = (x >> (2 * i)) & 0x3
         if not is_trace1_pair(pair):
             return False
@@ -620,7 +619,7 @@ def step_omega12_by_byte(
     else:
         u6, v6 = omega
 
-    b = int(byte) & 0xFF
+    b = int(byte) & UINT8_MASK
     u_next = v6 ^ EPS_A6_BY_BYTE[b]
     v_next = u6 ^ MICRO_REF_BY_BYTE[b] ^ EPS_B6_BY_BYTE[b]
     return OmegaState12(u6=u_next, v6=v_next)
@@ -636,7 +635,7 @@ def step_omega12_by_items(
             for b in item:
                 current = step_omega12_by_byte(current, b)
         else:
-            current = step_omega12_by_byte(current, int(item) & 0xFF)
+            current = step_omega12_by_byte(current, int(item) & UINT8_MASK)
     return current
 
 
@@ -695,8 +694,8 @@ def apply_omega_gate(
 
 OMEGA_STATES_4096: tuple[int, ...] = tuple(
     omega12_to_state24(OmegaState12(u6=u6, v6=v6))
-    for u6 in range(64)
-    for v6 in range(64)
+    for u6 in range(MASK_CODE_SIZE)
+    for v6 in range(MASK_CODE_SIZE)
 )
 
 
@@ -713,7 +712,7 @@ def k4_orbit(state24: int) -> frozenset[int]:
     """
     Full K4 orbit of a state under {id, S, C, F}.
     """
-    s = int(state24) & 0xFFFFFF
+    s = int(state24) & MASK_STATE24
     return frozenset((
         s,
         apply_gate(s, "S"),
@@ -726,7 +725,7 @@ def k4_stabilizer(state24: int) -> frozenset[str]:
     """
     Non-trivial K4 stabilizer of a state: subset of {"S","C","F"}.
     """
-    s = int(state24) & 0xFFFFFF
+    s = int(state24) & MASK_STATE24
     out: list[str] = []
     for name in ("S", "C", "F"):
         if apply_gate(s, name) == s:
@@ -756,7 +755,7 @@ def fixed_states_of_gate(gate_name: str) -> frozenset[int]:
 
 
 SHADOW_PARTNER_BY_BYTE: tuple[int, ...] = tuple(
-    (b ^ 0xFE) & 0xFF for b in range(256)
+    (b ^ SHADOW_PARTNER_MASK) & UINT8_MASK for b in range(BYTE_COUNT)
 )
 
 
@@ -765,14 +764,14 @@ def shadow_partner_byte(byte: int) -> int:
     Universal shadow partner of a byte.
     The partner produces the same 24-bit affine action on Omega.
     """
-    return SHADOW_PARTNER_BY_BYTE[int(byte) & 0xFF]
+    return SHADOW_PARTNER_BY_BYTE[int(byte) & UINT8_MASK]
 
 
 def shadow_partner_map() -> dict[int, int]:
     """
     Full byte -> partner involution over all 256 bytes.
     """
-    return {b: SHADOW_PARTNER_BY_BYTE[b] for b in range(256)}
+    return {b: SHADOW_PARTNER_BY_BYTE[b] for b in range(BYTE_COUNT)}
 
 
 def pack_omega12(omega: OmegaState12 | tuple[int, int]) -> int:
@@ -780,30 +779,32 @@ def pack_omega12(omega: OmegaState12 | tuple[int, int]) -> int:
         u6, v6 = omega.u6, omega.v6
     else:
         u6, v6 = omega
-    return ((u6 & CHIRALITY_MASK_6) << 6) | (v6 & CHIRALITY_MASK_6)
+    return ((u6 & CHIRALITY_MASK_6) << CHIRALITY_QUBITS_6) | (
+        v6 & CHIRALITY_MASK_6
+    )
 
 
 def unpack_omega12(packed: int) -> OmegaState12:
-    x = int(packed) & 0xFFF
+    x = int(packed) & LAYER_MASK_12
     return OmegaState12(
-        u6=(x >> 6) & CHIRALITY_MASK_6,
+        u6=(x >> CHIRALITY_QUBITS_6) & CHIRALITY_MASK_6,
         v6=x & CHIRALITY_MASK_6,
     )
 
 
 def pack_omega_signature12(sig: OmegaSignature12) -> int:
     return (
-        ((sig.parity & 1) << 12)
-        | ((sig.tau_u6 & CHIRALITY_MASK_6) << 6)
+        ((sig.parity & 1) << (2 * CHIRALITY_QUBITS_6))
+        | ((sig.tau_u6 & CHIRALITY_MASK_6) << CHIRALITY_QUBITS_6)
         | (sig.tau_v6 & CHIRALITY_MASK_6)
     )
 
 
 def unpack_omega_signature12(packed: int) -> OmegaSignature12:
-    x = int(packed) & 0x1FFF
+    x = int(packed) & ((1 << (1 + 2 * CHIRALITY_QUBITS_6)) - 1)
     return OmegaSignature12(
-        parity=(x >> 12) & 1,
-        tau_u6=(x >> 6) & CHIRALITY_MASK_6,
+        parity=(x >> (2 * CHIRALITY_QUBITS_6)) & 1,
+        tau_u6=(x >> CHIRALITY_QUBITS_6) & CHIRALITY_MASK_6,
         tau_v6=x & CHIRALITY_MASK_6,
     )
 
@@ -938,13 +939,13 @@ def shell_index_from_omega12(omega: OmegaState12) -> int:
 
 def shell_population(shell: int) -> int:
     w = int(shell)
-    if w < 0 or w > 6:
-        raise ValueError(f"shell must be in 0..6, got {shell}")
-    return comb(6, w) * 64
+    if w < 0 or w > CHIRALITY_QUBITS_6:
+        raise ValueError(f"shell must be in 0..{CHIRALITY_QUBITS_6}, got {shell}")
+    return comb(CHIRALITY_QUBITS_6, w) * HORIZON_SIZE
 
 
 SHELL_POPULATIONS_7: tuple[int, ...] = tuple(
-    shell_population(w) for w in range(7)
+    shell_population(w) for w in range(SHELL_COUNT)
 )
 
 
@@ -964,8 +965,14 @@ def shell_transition_probability(
     j = int(q_weight)
     wp = int(w_dst)
 
-    if not (0 <= w <= 6 and 0 <= j <= 6 and 0 <= wp <= 6):
-        raise ValueError("w_src, q_weight, w_dst must all be in 0..6")
+    if not (
+        0 <= w <= CHIRALITY_QUBITS_6
+        and 0 <= j <= CHIRALITY_QUBITS_6
+        and 0 <= wp <= CHIRALITY_QUBITS_6
+    ):
+        raise ValueError(
+            f"w_src, q_weight, w_dst must all be in 0..{CHIRALITY_QUBITS_6}"
+        )
 
     delta = w + j - wp
     if delta < 0 or (delta & 1):
@@ -974,21 +981,26 @@ def shell_transition_probability(
     t = delta // 2
     if t < 0 or t > min(w, j):
         return Fraction(0, 1)
-    if (j - t) < 0 or (j - t) > (6 - w):
+    if (j - t) < 0 or (j - t) > (CHIRALITY_QUBITS_6 - w):
         return Fraction(0, 1)
 
-    return Fraction(comb(w, t) * comb(6 - w, j - t), comb(6, j))
+    return Fraction(
+        comb(w, t) * comb(CHIRALITY_QUBITS_6 - w, j - t),
+        comb(CHIRALITY_QUBITS_6, j),
+    )
 
 
 def shell_transition_matrix_for_q_weight(
     q_weight: int,
 ) -> tuple[tuple[Fraction, ...], ...]:
     j = int(q_weight)
-    if not (0 <= j <= 6):
-        raise ValueError(f"q_weight must be in 0..6, got {q_weight}")
+    if not (0 <= j <= CHIRALITY_QUBITS_6):
+        raise ValueError(
+            f"q_weight must be in 0..{CHIRALITY_QUBITS_6}, got {q_weight}"
+        )
     return tuple(
-        tuple(shell_transition_probability(w, j, wp) for wp in range(7))
-        for w in range(7)
+        tuple(shell_transition_probability(w, j, wp) for wp in range(SHELL_COUNT))
+        for w in range(SHELL_COUNT)
     )
 
 
@@ -998,22 +1010,23 @@ def shell_markov_step(
 ) -> tuple[Fraction, ...]:
     """
     Push a shell distribution forward by one exact q-weight shell kernel.
-    Input distribution is over source shells 0..6.
-    Output distribution is over destination shells 0..6.
+    Input distribution is over source shells 0..CHIRALITY_QUBITS_6.
+    Output distribution is over destination shells 0..CHIRALITY_QUBITS_6.
     """
     d = tuple(Fraction(x) for x in distribution)
-    if len(d) != 7:
-        raise ValueError(f"Expected length-7 shell distribution, got {len(d)}")
+    if len(d) != SHELL_COUNT:
+        raise ValueError(f"Expected length-{SHELL_COUNT} shell distribution, got {len(d)}")
 
     T = shell_transition_matrix_for_q_weight(int(q_weight))
     return tuple(
-        Fraction(sum(d[w] * T[w][wp] for w in range(7)))
-        for wp in range(7)
+        Fraction(sum(d[w] * T[w][wp] for w in range(SHELL_COUNT)))
+        for wp in range(SHELL_COUNT)
     )
 
 
 FULL_BYTE_SHELL_DISTRIBUTION: tuple[Fraction, ...] = tuple(
-    Fraction(comb(6, w), 64) for w in range(7)
+    Fraction(comb(CHIRALITY_QUBITS_6, w), HORIZON_SIZE)
+    for w in range(SHELL_COUNT)
 )
 
 
@@ -1024,13 +1037,17 @@ FULL_BYTE_SHELL_DISTRIBUTION: tuple[Fraction, ...] = tuple(
 
 def _krawtchouk_6() -> tuple[tuple[int, ...], ...]:
     rows = []
-    for w in range(7):
+    for w in range(SHELL_COUNT):
         row = []
-        for k in range(7):
+        for k in range(SHELL_COUNT):
             val = 0
             for j in range(k + 1):
-                if j <= w and (k - j) <= (6 - w):
-                    val += ((-1) ** j) * comb(w, j) * comb(6 - w, k - j)
+                if j <= w and (k - j) <= (CHIRALITY_QUBITS_6 - w):
+                    val += (
+                        ((-1) ** j)
+                        * comb(w, j)
+                        * comb(CHIRALITY_QUBITS_6 - w, k - j)
+                    )
             row.append(val)
         rows.append(tuple(row))
     return tuple(rows)
@@ -1043,16 +1060,17 @@ def shell_krawtchouk_transform_exact(
     f_shell: Iterable[int | Fraction],
 ) -> tuple[Fraction, ...]:
     f = tuple(Fraction(x) for x in f_shell)
-    if len(f) != 7:
-        raise ValueError(f"Expected length-7 shell vector, got {len(f)}")
+    if len(f) != SHELL_COUNT:
+        raise ValueError(f"Expected length-{SHELL_COUNT} shell vector, got {len(f)}")
 
     out = []
-    for k in range(7):
+    for k in range(SHELL_COUNT):
         numer = sum(
-            Fraction(comb(6, w) * KRAWTCHOUK_7[w][k], 1) * f[w]
-            for w in range(7)
+            Fraction(comb(CHIRALITY_QUBITS_6, w) * KRAWTCHOUK_7[w][k], 1)
+            * f[w]
+            for w in range(SHELL_COUNT)
         )
-        denom = 64 * comb(6, k)
+        denom = HORIZON_SIZE * comb(CHIRALITY_QUBITS_6, k)
         out.append(numer / denom)
     return tuple(out)
 
@@ -1061,26 +1079,30 @@ def shell_krawtchouk_inverse_exact(
     coeffs: Iterable[int | Fraction],
 ) -> tuple[Fraction, ...]:
     c = tuple(Fraction(x) for x in coeffs)
-    if len(c) != 7:
-        raise ValueError(f"Expected length-7 spectral vector, got {len(c)}")
+    if len(c) != SHELL_COUNT:
+        raise ValueError(f"Expected length-{SHELL_COUNT} spectral vector, got {len(c)}")
 
     return tuple(
-        Fraction(sum(Fraction(KRAWTCHOUK_7[w][k], 1) * c[k] for k in range(7)))
-        for w in range(7)
+        Fraction(sum(Fraction(KRAWTCHOUK_7[w][k], 1) * c[k] for k in range(SHELL_COUNT)))
+        for w in range(SHELL_COUNT)
     )
 
 
 def shell_krawtchouk_transform_float(f_shell: Iterable[float]) -> tuple[float, ...]:
     f = tuple(float(x) for x in f_shell)
-    if len(f) != 7:
-        raise ValueError(f"Expected length-7 shell vector, got {len(f)}")
+    if len(f) != SHELL_COUNT:
+        raise ValueError(f"Expected length-{SHELL_COUNT} shell vector, got {len(f)}")
 
     out: list[float] = []
-    for k in range(7):
+    for k in range(SHELL_COUNT):
         numer = 0.0
-        for w in range(7):
-            numer += comb(6, w) * KRAWTCHOUK_7[w][k] * f[w]
-        denom = 64.0 * comb(6, k)
+        for w in range(SHELL_COUNT):
+            numer += (
+                comb(CHIRALITY_QUBITS_6, w)
+                * KRAWTCHOUK_7[w][k]
+                * f[w]
+            )
+        denom = float(HORIZON_SIZE) * comb(CHIRALITY_QUBITS_6, k)
         out.append(numer / denom)
     return tuple(out)
 
@@ -1101,7 +1123,7 @@ def bv_phase6(secret6: int) -> tuple[int, ...]:
       chi -> (-1)^(secret * chi)
     """
     s = int(secret6) & CHIRALITY_MASK_6
-    return tuple(walsh_sign6(s, chi) for chi in range(64))
+    return tuple(walsh_sign6(s, chi) for chi in range(MASK_CODE_SIZE))
 
 
 def dj_balanced_phase6(mask6: int = 0x20) -> tuple[int, ...]:
@@ -1110,11 +1132,14 @@ def dj_balanced_phase6(mask6: int = 0x20) -> tuple[int, ...]:
       chi -> (-1)^(mask * chi)
     """
     m = int(mask6) & CHIRALITY_MASK_6
-    return tuple(walsh_sign6(m, chi) for chi in range(64))
+    return tuple(walsh_sign6(m, chi) for chi in range(MASK_CODE_SIZE))
 
 
 _WALSH_HADAMARD64: Final[np.ndarray] = np.array(
-    [[walsh_sign6(q, r) / 8.0 for r in range(64)] for q in range(64)],
+    [
+        [walsh_sign6(q, r) / sqrt(float(HORIZON_SIZE)) for r in range(MASK_CODE_SIZE)]
+        for q in range(MASK_CODE_SIZE)
+    ],
     dtype=np.float64,
 )
 
@@ -1133,7 +1158,7 @@ def _verify_mask_structure() -> None:
     """Verify 64 distinct masks and 256 distinct (family, mask) pairs."""
     masks: set[int] = set()
     pairs: set[tuple[int, int]] = set()
-    for b in range(256):
+    for b in range(BYTE_COUNT):
         intron = byte_to_intron(b)
         m = mask12_for_byte(b)
         f = intron_family(intron)
