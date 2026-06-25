@@ -144,7 +144,7 @@ Every state in Ω has component density exactly 0.5 (popcount 6 out of 12 bits p
 
 The complement horizon is the set of states where A12 = B12 ⊕ 0xFFF (maximal chirality). It contains exactly 64 states. All complement horizon states have ab_distance = 12 (every dipole pair is anti-aligned). The rest state GENE_MAC_REST lies on this horizon.
 
-In the CGM interpretation (specification Appendix G.4), the complement horizon is where the archetype's structural effect is maximally expressed: the alternating bit pattern of GENE_MIC_S = 0xAA is projected across both components in opposite phase.
+In the CGM interpretation (Kernel specification §2.2.6), the complement horizon is where the archetype's structural effect is maximally expressed: the alternating bit pattern of GENE_MIC_S = 0xAA is projected across both components in opposite phase.
 
 ### 2.3 The Equality Horizon (UNA Degeneracy)
 
@@ -152,7 +152,7 @@ In the CGM interpretation (specification Appendix G.4), the complement horizon i
 
 The equality horizon is the set of states where A12 = B12 (zero chirality). It contains exactly 64 states. All equality horizon states have ab_distance = 0 (every dipole pair is aligned). The rest state does not lie on this horizon.
 
-In the CGM interpretation (specification Appendix G.4), the equality horizon is where the archetype's structural effect is maximally concealed: A and B are identical, and the underlying chirality has vanished from the observable state.
+In the CGM interpretation (Kernel specification §2.2.6), the equality horizon is where the archetype's structural effect is maximally concealed: A and B are identical, and the underlying chirality has vanished from the observable state.
 
 ### 2.4 Disjointness and Holography
 
@@ -251,7 +251,7 @@ The pointwise stabiliser bytes are confirmed exhaustively (`test_aQPU_1.py::Test
 - The only bytes that fix every equality horizon state are the two S-gate bytes {0xAA, 0x54}.
 - No other byte fixes an entire horizon pointwise.
 
-The CGM interpretation (specification Appendix G.3.5): Gate C stabilises the S-sector (opposition preserves the common source). Gate S stabilises the equality horizon (non-commutativity is invisible at its own boundary). Gate F stabilises neither pointwise (balance through dynamics, not stasis).
+The CGM interpretation (QuBEC Theory Part II §10.5): Gate C stabilises the S-sector (opposition preserves the common source). Gate S stabilises the equality horizon (non-commutativity is invisible at its own boundary). Gate F stabilises neither pointwise (balance through dynamics, not stasis).
 
 ### 3.5 K4 Orbit Stratification
 
@@ -794,7 +794,7 @@ These properties are the discrete realisation of the quantum no-cloning theorem:
 
 ## Part 14: C Engine and Low-Level Tensor Math (via SDK)
 
-`test_aQPU_SDK_1.py` verifies the GyroLabe C engine and operator algebra exposed through the SDK (`sdk.RuntimeOps`, `sdk.TensorOps`, `sdk.OperatorOps`). These tests require the compiled C library; they are skipped when the library is unavailable.
+`test_aQPU_SDK_1.py` verifies the native C engine and operator algebra exposed through the SDK (`sdk.RuntimeOps`, `sdk.TensorOps`, `sdk.OperatorOps`). These tests require the compiled C library; they are skipped when the library is unavailable.
 
 ### 14.1 C Engine Availability
 

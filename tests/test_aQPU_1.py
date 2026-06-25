@@ -1,7 +1,7 @@
 """
 aQPU tests: Algebraic Quantum Processing Unit structure.
 
-Tests the intrinsic quantum-algebraic properties documented in Appendix G:
+Tests the intrinsic quantum-algebraic properties in QuBEC Theory Part II §10 and Kernel specification §2.2.
 - Dual horizons (complement and equality) and their structural relationship
 - Four intrinsic gates {id, S, C, F} forming K4 = (Z/2)^2
 - Gate action on both horizons (stabilizers and permutations)

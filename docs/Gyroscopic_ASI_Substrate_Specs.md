@@ -118,7 +118,7 @@ The substrate is calibrated and evaluated against the following constants. The f
 | Complement horizon | \|H_complement\| | 64 | A = B XOR 0xFFF |
 | Equality horizon | \|H_equality\| | 64 | A = B |
 | Boundary states | \|H_complement union H_equality\| | 128 | Disjoint union |
-| Holographic identity | \|H\|^2 | 4,096 = 64^2 | Spec Appendix G.2 |
+| Holographic identity | \|H\|^² | 4,096 = 64² | QuBEC Theory Part I §1.4 |
 | Distinct masks | \|C64\| | 64 | Self-dual [12,6,2] code |
 | Shadow projection | distinct next states | 128 | From any fixed state |
 | Intrinsic gates | horizon-preserving bytes | 4 | {0xAA, 0x54, 0xD5, 0x2B} |

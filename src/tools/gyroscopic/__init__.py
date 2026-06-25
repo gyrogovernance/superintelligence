@@ -1,115 +1,89 @@
-"""Gyroscopic LLM helpers and domain layout.
-
-Core package for Gyroscopic execution. Two operational domains:
-
-Domain 1: GyroLabe (numeric transforms / structural operations / matmul)
- - Responsibilities: native transforms, structural operator analysis, QuBEC matmul
-   bridge, and low-level vec-dot kernels.
- - Python functions: gyrolabe_<op> (for domain helpers) and gyromatmul_<op>
-   (for kernels).
- - Python classes: GyroLabe<Name>.
- - C functions: gyrolabe_<op> or gyromatmul_<op>.
- - Error messages: "GyroLabe: ..."
-
-GyroMatMul is a responsibility namespace inside GyroLabe.
-
-Domain 2: GyroGraph (multicellular telemetry model)
- - Responsibilities: token -> word4 ingestion, Ω stepping, rolling χ/shell/family
-   memories, M2 / η climate updates, and trace/replay surfaces.
- - Python functions: gyrograph_<op>.
- - Python classes: GyroGraph<Name>.
- - C functions: gyrograph_<op>.
- - Error messages: "GyroGraph: ..."
-
-Prohibited patterns
- - No public Python name prefixed with bare "gyro_".
- - No public API names using intent-repeating prefixes from old drafts.
- - No public aliases that duplicate an existing canonical name.
-
-Shared C header (`gyrolabe.h`)
- - Shared inline helpers use the "gyro_" prefix and remain C-only.
- - "gyro_" is not part of the Python public API.
-
-This subpackage also wires the native llama.cpp C backend (llama-cli).
-QuBEC fast-path behavior is implemented in native ggml/llama.cpp and exposed via
-runtime diagnostics, not as a public Python matmul API.
-"""
+"""Gyroscopic: kernel and llama.cpp gravity-scale hook."""
 
 from __future__ import annotations
 
+import importlib
 from typing import TYPE_CHECKING
 
-from .config import (
-    GyroscopicLLMConfig,
-    get_gyroscopic_llm_config,
-    repo_root,
-    resolve_gguf_path,
-    resolve_llama_cli_path,
-)
-from .climate import (
-    cell_climate_from_histograms,
-    m2_empirical_from_chi_hist,
-    m2_equilibrium_from_shell_hist,
-    shell_order_parameters_from_hist,
-)
-from .loader import (
-    build_llama_cli_command,
-    run_llama_cli,
-    run_llama_cli_smoke,
-    run_llama_cli_version,
+if TYPE_CHECKING:
+    from .config import (
+        GyroscopicLLMConfig,
+        get_gyroscopic_llm_config,
+        repo_root,
+        resolve_gguf_path,
+        resolve_llama_cli_path,
+        resolve_llama_perplexity_path,
+    )
+    from .loader import (
+        build_llama_cli_command,
+        build_llama_perplexity_command,
+        parse_llama_perplexity_output,
+        run_llama_cli,
+        run_llama_cli_smoke,
+        run_llama_cli_version,
+        run_llama_perplexity,
+    )
+    from .ops import (
+        apply_K4,
+        build_native,
+        chirality_from_signs64,
+        gravity_g1,
+        gravity_scale,
+        step_omega12,
+    )
+
+_LAZY_SPEC: tuple[tuple[str, str], ...] = (
+    ("GyroscopicLLMConfig", "config"),
+    ("get_gyroscopic_llm_config", "config"),
+    ("repo_root", "config"),
+    ("resolve_gguf_path", "config"),
+    ("resolve_llama_cli_path", "config"),
+    ("resolve_llama_perplexity_path", "config"),
+    ("build_llama_cli_command", "loader"),
+    ("build_llama_perplexity_command", "loader"),
+    ("parse_llama_perplexity_output", "loader"),
+    ("run_llama_cli", "loader"),
+    ("run_llama_cli_smoke", "loader"),
+    ("run_llama_cli_version", "loader"),
+    ("run_llama_perplexity", "loader"),
+    ("apply_K4", "ops"),
+    ("build_native", "ops"),
+    ("chirality_from_signs64", "ops"),
+    ("gravity_g1", "ops"),
+    ("gravity_scale", "ops"),
+    ("step_omega12", "ops"),
 )
 
-if TYPE_CHECKING:
-    from .ops import (
-        GyroGraphMoment,
-        GyroGraphSLCP,
-        GyroLabeOperatorReport,
-        gyrograph_emit_slcp,
-        gyrograph_pack_moment,
-        gyrolabe_analyze_operator_64,
-    )
+_LAZY_EXPORTS: dict[str, str] = dict(_LAZY_SPEC)
 
 
 def __getattr__(name: str):
-    if name in (
-        "GyroGraphMoment",
-        "GyroGraphSLCP",
-        "GyroLabeOperatorReport",
-        "gyrograph_emit_slcp",
-        "gyrograph_pack_moment",
-        "gyrolabe_analyze_operator_64",
-    ):
-        from . import ops as _ops
-
-        return getattr(_ops, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    module_name = _LAZY_EXPORTS.get(name)
+    if module_name is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return getattr(importlib.import_module(f"{__name__}.{module_name}"), name)
 
 
-def gyromatmul_runtime_caps():
-    from . import ops as _ops
-
-    return _ops.gyromatmul_runtime_caps()
-
-
-__all__ = [
-    "GyroGraphMoment",
-    "GyroGraphSLCP",
-    "GyroLabeOperatorReport",
+__all__ = (
     "GyroscopicLLMConfig",
-    "cell_climate_from_histograms",
-    "m2_empirical_from_chi_hist",
-    "m2_equilibrium_from_shell_hist",
-    "shell_order_parameters_from_hist",
-    "build_llama_cli_command",
     "get_gyroscopic_llm_config",
-    "gyrograph_emit_slcp",
-    "gyrograph_pack_moment",
-    "gyrolabe_analyze_operator_64",
-    "gyromatmul_runtime_caps",
     "repo_root",
     "resolve_gguf_path",
     "resolve_llama_cli_path",
+    "resolve_llama_perplexity_path",
+    "build_llama_cli_command",
+    "build_llama_perplexity_command",
+    "parse_llama_perplexity_output",
     "run_llama_cli",
     "run_llama_cli_smoke",
     "run_llama_cli_version",
-]
+    "run_llama_perplexity",
+    "apply_K4",
+    "build_native",
+    "chirality_from_signs64",
+    "gravity_g1",
+    "gravity_scale",
+    "step_omega12",
+)
+
+assert frozenset(__all__) == frozenset(_LAZY_EXPORTS)

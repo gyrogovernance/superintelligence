@@ -66,7 +66,7 @@ GENE_MAC_B12: int = 0x555
 GENE_MAC_REST: int = (GENE_MAC_A12 << 12) | GENE_MAC_B12
 
 # ================================================================
-# Intrinsic gates (Appendix G: horizon-preserving operations)
+# Intrinsic gates (QuBEC Theory Part II §10)
 # ================================================================
 
 GATE_S_BYTES: tuple[int, int] = (0xAA, 0x54)   # Swap: (A,B) -> (B,A)

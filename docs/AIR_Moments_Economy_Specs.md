@@ -6,7 +6,7 @@ The Moments Economy is a monetary and settlement architecture in which the abili
 
 That envelope is called the Common Source Moment. It is derived from the caesium-133 atomic-second standard together with the finite verification space of the settlement system. The result is a fixed one-time capacity for recording and settling coordination. This capacity is not a metaphor. It is the explicit physical and geometric basis on which issuance is bounded.
 
-The settlement and verification substrate used in this architecture is the Gyroscopic infrastructure, comprising aQPU, GyroLabe, GyroGraph, and QuBEC. Within that infrastructure, the aQPU kernel serves as the deterministic verification component that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
+The settlement and verification substrate used in this architecture is the Gyroscopic infrastructure, comprising aQPU, Gyroscopic runtime, and QuBEC. Within that infrastructure, the aQPU kernel serves as the deterministic verification component that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
 
 The Moments Economy is an institutional record architecture as well as a distribution system. The same infrastructure that supports monetary settlement also supports complete governance records, including who acted, what was issued, what evidence was referenced, what corrections were made, and where disputes arose. This is why the architecture matters beyond economic policy narrowly understood. It offers a common method for settlement, audit, provenance, and institutional memory within one replayable medium.
 
@@ -55,7 +55,7 @@ The architecture draws on five related internal frameworks and specifications.
 
 **The Human Mark (THM):** An epistemic taxonomy used here to distinguish Direct human sources from Indirect artificial and mediated sources.
 
-**Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising aQPU, GyroLabe, GyroGraph, and QuBEC.
+**Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising aQPU, Gyroscopic runtime, and QuBEC.
 
 **Gyroscopic ASI aQPU Kernel:** The deterministic coordination kernel used in this architecture for shared moments, provenance, and replay.
 

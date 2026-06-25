@@ -1,4 +1,15 @@
-"""Load paths and llama.cpp (C backend) options for local GGUF models."""
+"""Paths and llama.cpp (C backend) options for local GGUF models.
+
+Defaults are baked in here. Override via environment only:
+
+  GYROSCOPIC_GGUF_PATH
+  GYROSCOPIC_LLAMA_CLI
+  GYROSCOPIC_LLAMA_PERPLEXITY
+  GYROSCOPIC_N_CTX
+  GYROSCOPIC_N_THREADS
+  GYROSCOPIC_N_GPU_LAYERS
+  GYROSCOPIC_VERBOSE
+"""
 
 from __future__ import annotations
 
@@ -8,14 +19,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-try:
-    import yaml
-except ImportError:  # pragma: no cover
-    yaml = None  # type: ignore[assignment]
-
-_CONFIG_FILENAME = "gyroscopic_llm.yaml"
 _DEFAULT_GGUF_REL = "data/models/Bonsai-8B-gguf/Bonsai-8B-Q1_0.gguf"
-_DEFAULT_LLAMA_PPL_REL = None
+_DEFAULT_N_CTX = 4096
+_DEFAULT_N_GPU_LAYERS = 0
+
+
+def _env_opt_path(name: str) -> str | None:
+    v = os.environ.get(name)
+    if not v:
+        return None
+    v = v.strip()
+    return v or None
+
+
+def _resolve_maybe_relative(root: Path, raw: str | None) -> Path | None:
+    if not raw:
+        return None
+    p = Path(raw)
+    return p if p.is_absolute() else root / p
 
 
 def repo_root() -> Path:
@@ -23,49 +44,29 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parent.parent.parent.parent
 
 
-def _config_path() -> Path:
-    return repo_root() / "config" / _CONFIG_FILENAME
-
-
 def _defaults_dict() -> dict[str, Any]:
     return {
         "gguf_path": _DEFAULT_GGUF_REL,
         "llama_cli_path": None,
-        "llama_perplexity_path": _DEFAULT_LLAMA_PPL_REL,
-        "n_ctx": 4096,
+        "llama_perplexity_path": None,
+        "n_ctx": _DEFAULT_N_CTX,
         "n_threads": None,
-        "n_gpu_layers": 0,
+        "n_gpu_layers": _DEFAULT_N_GPU_LAYERS,
         "verbose": False,
     }
 
 
-def _load_yaml_raw() -> dict[str, Any]:
-    path = _config_path()
-    if not path.is_file():
-        return _defaults_dict()
-    if yaml is None:
-        raise ImportError(
-            "PyYAML is required to load gyroscopic_llm.yaml. "
-            "Install with: pip install pyyaml"
-        )
-    data = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        return _defaults_dict()
-    out = _defaults_dict()
-    out.update(data)
-    return out
-
-
-def _default_llama_cli_candidates() -> list[Path]:
+def _default_llama_cli_candidates(*, backend: str = "gyroscopic") -> list[Path]:
     """Typical CMake output locations for ``llama-cli`` (build from ``external/llama.cpp``)."""
     root = repo_root()
+    build_dir = "build-stock" if backend == "stock" else "build"
     if sys.platform == "win32":
         return [
-            root / "external" / "llama.cpp" / "build" / "bin" / "Release" / "llama-cli.exe",
-            root / "external" / "llama.cpp" / "build" / "bin" / "Debug" / "llama-cli.exe",
-            root / "external" / "llama.cpp" / "build" / "bin" / "llama-cli.exe",
+            root / "external" / "llama.cpp" / build_dir / "bin" / "Release" / "llama-cli.exe",
+            root / "external" / "llama.cpp" / build_dir / "bin" / "Debug" / "llama-cli.exe",
+            root / "external" / "llama.cpp" / build_dir / "bin" / "llama-cli.exe",
         ]
-    return [root / "external" / "llama.cpp" / "build" / "bin" / "llama-cli"]
+    return [root / "external" / "llama.cpp" / build_dir / "bin" / "llama-cli"]
 
 
 def _default_llama_perplexity_candidates() -> list[Path]:
@@ -112,7 +113,7 @@ def _parse_config(data: dict[str, Any]) -> GyroscopicLLMConfig:
         llama_perplexity_path = raw_ppl.strip() or None
     else:
         raise TypeError("gyroscopic_llm: llama_perplexity_path must be a string or null")
-    n_ctx = int(data.get("n_ctx", 4096))
+    n_ctx = int(data.get("n_ctx", _DEFAULT_N_CTX))
     if n_ctx <= 0:
         raise ValueError(f"gyroscopic_llm: n_ctx must be positive, got {n_ctx}")
 
@@ -127,7 +128,7 @@ def _parse_config(data: dict[str, Any]) -> GyroscopicLLMConfig:
                 f"gyroscopic_llm: n_threads must be positive if set, got {n_threads}"
             )
 
-    n_gpu_layers = int(data.get("n_gpu_layers", 0))
+    n_gpu_layers = int(data.get("n_gpu_layers", _DEFAULT_N_GPU_LAYERS))
     if n_gpu_layers < 0:
         raise ValueError(
             f"gyroscopic_llm: n_gpu_layers must be >= 0, got {n_gpu_layers}"
@@ -150,11 +151,9 @@ def _apply_env(data: dict[str, Any]) -> dict[str, Any]:
     if os.environ.get("GYROSCOPIC_GGUF_PATH"):
         out["gguf_path"] = os.environ["GYROSCOPIC_GGUF_PATH"].strip()
     if os.environ.get("GYROSCOPIC_LLAMA_CLI"):
-        v = os.environ["GYROSCOPIC_LLAMA_CLI"].strip()
-        out["llama_cli_path"] = v if v else None
+        out["llama_cli_path"] = _env_opt_path("GYROSCOPIC_LLAMA_CLI")
     if os.environ.get("GYROSCOPIC_LLAMA_PERPLEXITY"):
-        v = os.environ["GYROSCOPIC_LLAMA_PERPLEXITY"].strip()
-        out["llama_perplexity_path"] = v if v else None
+        out["llama_perplexity_path"] = _env_opt_path("GYROSCOPIC_LLAMA_PERPLEXITY")
     if os.environ.get("GYROSCOPIC_N_CTX"):
         out["n_ctx"] = int(os.environ["GYROSCOPIC_N_CTX"].strip())
     if os.environ.get("GYROSCOPIC_N_THREADS"):
@@ -172,49 +171,55 @@ def _apply_env(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_gyroscopic_llm_config() -> GyroscopicLLMConfig:
-    """Load ``config/gyroscopic_llm.yaml`` if present, else defaults; then apply env overrides."""
-    raw = _apply_env(_load_yaml_raw())
-    return _parse_config(raw)
+    """Return defaults with ``GYROSCOPIC_*`` environment overrides applied."""
+    return _parse_config(_apply_env(_defaults_dict()))
 
 
 def resolve_gguf_path(cfg: GyroscopicLLMConfig) -> Path:
-    """Resolve ``cfg.gguf_path`` relative to the repo root when not absolute."""
+    """GGUF model path (CS anchor for the llama backend).
+
+    Resolve ``cfg.gguf_path`` relative to the repo root when not absolute.
+    """
     p = Path(cfg.gguf_path)
     if p.is_absolute():
         return p
     return repo_root() / p
 
 
-def resolve_llama_cli_path(cfg: GyroscopicLLMConfig) -> Path:
-    """Resolve the ``llama-cli`` executable (native C backend)."""
+def resolve_llama_cli_path(cfg: GyroscopicLLMConfig, *, backend: str = "gyroscopic") -> Path:
+    """Resolve the ``llama-cli`` executable (native C backend).
+
+    ``backend`` is ``"stock"`` (vanilla ``build-stock``) or ``"gyroscopic"`` (``build``).
+    """
     root = repo_root()
-    if cfg.llama_cli_path:
-        p = Path(cfg.llama_cli_path)
-        if not p.is_absolute():
-            p = root / p
+    if cfg.llama_cli_path and backend == "gyroscopic":
+        p = _resolve_maybe_relative(root, cfg.llama_cli_path)
+        assert p is not None
         if p.is_file():
             return p
         raise FileNotFoundError(
             "gyroscopic_llm: llama_cli_path is set but file not found: " + str(p)
         )
     tried: list[str] = []
-    for c in _default_llama_cli_candidates():
+    for c in _default_llama_cli_candidates(backend=backend):
         tried.append(str(c))
         if c.is_file():
             return c
+    build_hint = (
+        "build-stock (stock)" if backend == "stock" else "build (gyroscopic)"
+    )
     raise FileNotFoundError(
-        "gyroscopic_llm: llama-cli not found. Build llama.cpp under external/llama.cpp "
-        "(see external/llama.cpp/docs/build.md) or set llama_cli_path in config/gyroscopic_llm.yaml "
-        "or GYROSCOPIC_LLAMA_CLI. Tried:\n  " + "\n  ".join(tried)
+        "gyroscopic_llm: llama-cli not found for "
+        f"{backend} backend. Build external/llama.cpp/{build_hint} "
+        "or set GYROSCOPIC_LLAMA_CLI. Tried:\n  " + "\n  ".join(tried)
     )
 
 
 def resolve_llama_perplexity_path(cfg: GyroscopicLLMConfig) -> Path:
     root = repo_root()
     if cfg.llama_perplexity_path:
-        p = Path(cfg.llama_perplexity_path)
-        if not p.is_absolute():
-            p = root / p
+        p = _resolve_maybe_relative(root, cfg.llama_perplexity_path)
+        assert p is not None
         if p.is_file():
             return p
         raise FileNotFoundError(
@@ -231,6 +236,5 @@ def resolve_llama_perplexity_path(cfg: GyroscopicLLMConfig) -> Path:
         pass
     raise FileNotFoundError(
         "gyroscopic_llm: llama-perplexity not found. Build llama.cpp tools or set "
-        "llama_perplexity_path in config/gyroscopic_llm.yaml or GYROSCOPIC_LLAMA_PERPLEXITY. Tried:\n  "
-        + "\n  ".join(tried)
+        "GYROSCOPIC_LLAMA_PERPLEXITY. Tried:\n  " + "\n  ".join(tried)
     )

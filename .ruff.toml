@@ -39,5 +39,6 @@ exclude = [
 known-first-party = ["src"]
 
 [lint.flake8-tidy-imports]
-# Ban relative imports that could cause namespace confusion
-ban-relative-imports = false
+# Ban relative imports that could cause namespace confusion with parent modules.
+# Use a broader setting that avoids flagging same-module sibling imports.
+ban-relative-imports = "parents"

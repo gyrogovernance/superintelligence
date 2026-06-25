@@ -199,7 +199,7 @@ def print_post_download_usage(downloaded: list[str]) -> None:
         return
 
     print("\n" + "=" * 60)
-    print("USAGE WITH GYROLABE")
+    print("USAGE")
     print("=" * 60)
 
     for key in downloaded:
@@ -220,23 +220,9 @@ bolmo = AutoModelForCausalLM.from_pretrained(
 ).to("cuda")
 tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
 
-# GyroLabe coupling (same API as OLMo):
-from src.tools.gyrolabe import GyroLabe, CouplingConfig, generate
-
-labe = GyroLabe(bolmo, atlas_dir="data/atlas")
-labe.install()
-
-result = generate(
-    model=bolmo,
-    tokenizer=tokenizer,
-    labe=labe,
-    prompt="Language modeling is ",
-    max_new_tokens=128,
-    temperature=0.7,
-    top_k=40,
-)
-print(result.text)
-print(labe.stats())
+# Example generation:
+# outputs = bolmo.generate(**tokenizer("Language modeling is ", return_tensors="pt").to("cuda"), max_new_tokens=128)
+# print(tokenizer.decode(outputs[0]))
 """)
 
     print("NOTE: Bolmo uses trust_remote_code=True (custom modeling files).")

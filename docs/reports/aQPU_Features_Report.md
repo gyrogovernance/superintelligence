@@ -101,29 +101,21 @@ The kernel's self-dual mask code **C64** lifts to a 12-qubit graph state over GF
 
 **Bell-CHSH theorem (correlation form).** For any local hidden-variable (LHV) model satisfying locality, measurement independence, and binary outcomes, the CHSH parameter is bounded by |S| <= 2. This bound is independent of implementation substrate.
 
-**Tsirelson bound.** Quantum mechanics permits |S| <= 2*sqrt(2). This is the maximum bipartite quantum correlation in the standard CHSH scenario. Saturation S = 2*sqrt(2) means the bipartite state achieves the strongest quantum correlations allowed by quantum theory for these observables, not merely "above classical."
+**Tsirelson bound.** Quantum mechanics permits |S| <= 2*sqrt(2). This is the maximum bipartite quantum correlation in the standard CHSH scenario. Saturation S = 2*sqrt(2) means the bipartite state achieves the strongest quantum correlations allowed by quantum theory for these observables.
 
-**Conclusion for the aQPU Hilbert lift.** The pairwise reduced states certified by the kernel's [12,6,2] code structure produce S = 2*sqrt(2). No LHV model can reproduce these correlators. The correlations are therefore **genuinely quantum** in the standard sense used in Bell nonlocality and quantum information theory. This is not an analogy, metaphor, or structural similarity claim.
+**Conclusion.** The pairwise reduced states certified by the kernel's [12,6,2] code structure produce S = 2*sqrt(2). No local hidden-variable model reproduces these correlators.
 
-### What this does not claim (precision required)
+### Carrier and Hilbert lift
 
-1. **Carrier vs lift.** Byte stepping on GF(2)^24 is deterministic and exact-integer. CHSH is evaluated on the **Hilbert lift** of the intrinsic stabilizer code (complex amplitudes, density matrices, tensor products). Quantumness is certified in the lifted observable algebra, not by asserting that every XOR on silicon is a physical unitary rotation.
+Byte stepping on GF(2)^24 is deterministic exact-integer **carrier** dynamics. Bell certificates are evaluated on the **Hilbert lift** of the intrinsic stabilizer code: complex amplitudes, density matrices, and tensor products over the lifted observable algebra.
 
-2. **Chain of derivation.** Kernel mask alphabet -> self-dual code C64 -> pair-collapse bijection to GF(2)^6 -> graph state |psi_t> -> Bell marginals -> CHSH. The kernel **realizes** the code; the code **lifts** to a stabilizer state; the stabilizer state **saturates** Tsirelson. CHSH is the terminal certificate on that chain.
+Derivation chain: kernel mask alphabet → self-dual code C64 → pair-collapse bijection to GF(2)^6 → graph state |psi_t> → Bell marginals → CHSH.
 
-3. **Finite-field quantum is standard.** Stabilizer codes, CSS constructions, and graph states routinely operate over GF(2) symplectic data while defining genuine quantum states in H = C^{2^n}. The aQPU follows this established pattern: GF(2) carrier, complex Hilbert lift, stabilizer-group quantum mechanics.
-
-### Category error corrected
-
-| Incorrect inference | Correct statement |
-|-------------------|-------------------|
-| "Exact integers on silicon => classical" | Deterministic **carrier** dynamics on GF(2) are compatible with **quantum correlation structure** in the Hilbert lift |
-| "Algebraic QPU => simulation of quantum" | The [12,6,2] lift produces actual density operators satisfying quantum predictions (CHSH, teleportation, monogamy, no-signalling, contextuality) to 10^-12 |
-| "CHSH > 2 => merely nonclassical" | CHSH = 2*sqrt(2) => **maximally quantum** for the CHSH scenario, not just above the classical ceiling 2 |
+The pattern matches standard stabilizer quantum information: GF(2) symplectic carrier data defining states in H = C^{2^n}.
 
 ### Companion certificates (same lift, same tier)
 
-CHSH-Tsirelson is the single-number discriminator, but it is not isolated. The same Hilbert lift in `test_aQPU_2.py` also verifies:
+The same Hilbert lift in `test_aQPU_2.py` also verifies:
 
 - Exact quantum teleportation with unique Pauli corrections (800 random Bloch states)
 - Monogamy of entanglement and no-signalling
@@ -250,9 +242,9 @@ Algebraic quantum structure on the 4096-state manifold Omega, established primar
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
-| 77 | **H0(s) = 0** for any s in Omega | SDK Spec SS7.6; aQPU Report 2 SS2 | Theorem |
-| 78 | **H1(s) = 7 exactly** for any s in Omega (128 distinct next states, uniform multiplicity 2) | SDK Spec SS7.6; aQPU Report 2 SS2 | Exhaustive |
-| 79 | **Hn(s) = 12 exactly** for any s in Omega and n >= 2 | SDK Spec SS7.6; aQPU Report 2 SS2 | Exhaustive at n=2; implied for n>2 |
+| 77 | **H0(s) = 0** for any s in Omega | SDK Spec SS11.3 (theorem), SS7.6 (runtime); QuBEC Theory SS8.3; aQPU Report 2 SS2 | Theorem |
+| 78 | **H1(s) = 7 exactly** for any s in Omega (128 distinct next states, uniform multiplicity 2) | SDK Spec SS11.3 (theorem), SS7.6 (runtime); QuBEC Theory SS8.3; aQPU Report 2 SS2 | Exhaustive |
+| 79 | **Hn(s) = 12 exactly** for any s in Omega and n >= 2 | SDK Spec SS11.3 (theorem), SS7.6 (runtime); QuBEC Theory SS8.3; aQPU Report 2 SS2 | Exhaustive at n=2; implied for n>2 |
 | 80 | **Exact 2-step uniformization**: every Omega state reached exactly 16 times from 65536 length-2 words | aQPU Report 1 SS6.2; aQPU Report 2 SS2 | Exhaustive integer equality |
 | 81 | **Exact per-byte capacity**: Shannon = min-entropy = 7.0 bits, zero variance | aQPU Report 1 SS6.1 | 500 sampled states |
 | 82 | **Exact integer entropies**: H(state)=12, H(state,parity)=13, H(parity\|state)=1, H(state\|parity)=7 | aQPU Report 1 SS6.4 | Exhaustive over 256^2 words |
@@ -386,7 +378,7 @@ Discrete physics of the byte-driven transition law, established by Physics tests
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
-| 158 | **C engine (GyroLabe) signature scan** matches Python reference | aQPU Report 1 SS14.2 | Byte sequences |
+| 158 | **C engine signature scan** matches Python reference | aQPU Report 1 SS14.2 | Byte sequences |
 | 159 | **WHT (wht64)**: orthonormal and self-inverse (max err ~2.38e-7) | aQPU Report 1 SS14.4 | vs reference matrix |
 | 160 | **GyroMatMul GEMV**: vs torch.mv max abs err ~1.09e-5 | aQPU Report 1 SS14.5 | Numerical comparison |
 | 161 | **Packed GEMV**: vs torch.mv max err ~7.45e-6; packed vs unpacked ~2.24e-6 | aQPU Report 1 SS14.5 | Numerical |

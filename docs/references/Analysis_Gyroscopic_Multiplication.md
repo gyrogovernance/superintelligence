@@ -12,7 +12,7 @@
 
 This document examines the mathematical structure of multiplication through the lens of the Common Governance Model (CGM). The analysis establishes that multiplication is the orthogonal case of bilinear spanning, that root extraction recovers a shared measure from a higher-degree closure, and that the CGM aperture parameter arises as the exact derivative of the square root function at a full phase horizon.
 
-The arithmetic realization of these identifications is developed through the K4 lattice matrix: the canonical 2 x 2 decomposition of integer dot products into carrier, gauge-action, and chiral-alignment sectors. The scalar case satisfies exact rank-1 factorization (the common-source condition), while the vector case produces a nonzero chart defect decomposable via Cauchy-Binet into chart commutators that measure scale inhomogeneity across positions. The depth hierarchy of this decomposition traces the CGM constraint progression from common source through non-commutativity to balanced closure.
+Optional formal analysis of dyadic chart structure appears in Analysis of Gyroscopic Multiplication. That document is not an operational routing specification for QuBEC or the runtime.
 
 These identifications connect the CGM geometric invariants to the classical theory of roots of unity, continued fractions, Gram determinants, Hilbert space norms, quaternionic orientation spaces, and two-circle intersection geometry. Cross-domain resonances are examined in the transition from integrability to chaos in Hamiltonian dynamical systems, where a universal critical exponent of one half governs the onset of non-integrable behavior, and in the lemon billiard family, where the CGM monodromy constant appears as the shape parameter producing a uniquely balanced mixed-type phase space.
 
@@ -755,7 +755,7 @@ The multiplicative defect of the arithmetic chart and the swap-gyration structur
 
 This document develops the arithmetic layer: exact chart decomposition of integer contractions, common-source closure, and defect structure.
 
-The companion document `QuBEC_Climate_Dynamics` develops the operator and transport layer: shell, chirality, gauge, spectral dynamics, and exact partition operator classes.
+The companion document `QuBEC_Theory` develops the operator and transport layer: shell, chirality, gauge, spectral dynamics, and exact partition operator classes.
 
 The aQPU kernel and SDK specifications develop the native state and runtime layer: reachable manifold, transition law, execution surfaces, and observable records.
 

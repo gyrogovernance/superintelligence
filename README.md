@@ -67,7 +67,7 @@ A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Determini
 > **Verified:** 
 >> Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 >>>**Note:** 
->>>>Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics to simulate continuous physical quantum systems. This project does not belong to those categories. It represents a distinct class of computation: Algebraic Quantum Cellular Automata (aQCA). The aQPU does not simulate quantum mechanics by analogy; it is an exact, deterministic mathematical space that satisfies quantum axioms natively using strict integer logic over finite fields.
+>>>>Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics to simulate continuous physical quantum systems. This project does not belong to those categories. **Gyroscopic** is the infrastructure: an exact, deterministic substrate on finite Ω using strict integer logic over finite fields. The **aQPU** routes bytes on that substrate; the **Gyroscopic runtime** is the multicellular QCA execution layer for AI workloads.
 
 Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable: given a published append-only log of bytes, anyone can recompute the same state trajectory and check what was recorded.
 
@@ -77,24 +77,11 @@ The state space is fixed and small: **4,096 reachable states**, determined by a 
 
 The kernel's computational medium is **QuBEC** (Quantum Bose-Einstein Condensate): a condensed computational state with six internal binary orientation modes (dipoles), a four-phase spinorial gauge structure, and exact ensemble stochasticity induced by deterministic byte dynamics. Together they replace costly continuous approximation with exact integer algebra on standard CPUs and GPUs, without qubits, cryogenics, or probabilistic hardware noise.
 
-> For a high-level explanation of why the kernel matters for computing and governance, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). For the kernel itself, see the [Kernel Specifications](docs/theory/Gyroscopic_ASI_Specs.md) and the [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md).
+> For orientation, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). Normative specs are listed under **Core Specifications** in the Documentation section below.
 
 ---
 
-**GyroLabe** is the execution layer and neural model bridge built on top of the kernel. It has been successfully deployed on Bolmo-1B (a byte-native billion-parameter language model) to replace classical floating-point math at the model's decision surfaces.
-
-It provides:
-
-- **Zero-transcendental execution:** Bypasses expensive floating-point bottlenecks (like exponentials in softmax or square-roots in cosine similarity) by using exact integer algebra for model routing and token selection.
-- **Structural annotation for model I/O:** Model inputs and outputs are annotated using the kernel's algebraic byte structure.
-- **Replayable inference traces:** Inference can be tied to reproducible kernel-state trajectories for verification and audit.
-- **Hardware-near acceleration:** Native C/C++ backends with llama.cpp ggml integration, achieving 1.26 billion exact operations per second on standard commodity hardware. 100% native matmul routing on quantized models with zero parity mismatches, 284× faster encode and 1.15× faster decode than softmax.
-
-Crucially, GyroLabe does not operate as an external monitor evaluating a classical model's outputs. Its role is substitutional. It upgrades transformers by intercepting expensive continuous decision surfaces (such as floating-point matrix multiplications or softmax selections) and replacing them natively with exact discrete kinematics. The external model's interface is preserved, but its internal engine is swapped for the aQPU's Walsh-Hadamard XOR-convolutions and Plancherel condensation measures.
-
-> For the model bridge and execution layer, see the [GyroLabe Brief](docs/GyroLabe_Specs.md).
-
-**GyroGraph** is the Multicellular Quantum AI model built on top of the aQPU Kernel and GyroLabe. It organizes the algebraic quantum state space (Ω) into a multicellular, resonance-defined graph for runtime intelligence and structural observability.
+**Gyroscopic runtime** is the multicellular AI runtime built on the aQPU router. It organizes Ω into a resonance-defined cell pool for runtime intelligence and structural observability.
 
 It provides:
 
@@ -104,7 +91,7 @@ It provides:
 - **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration across four bridge domains: Applications, Databases, Networks, and Transformers.
 - **Real-time AI Control:** Uses exact structural state to dynamically manage LLM resource allocation (e.g., adjusting context patch sizes based on the exact thermodynamic state of the computation).
 
-> For the multicellular runtime intelligence layer, see the [GyroGraph Specification](docs/GyroGraph_Specs.md).
+> See **Core Specifications** below for the runtime document.
 
 ---
 
@@ -119,8 +106,9 @@ It provides:
 
 ---
 
-**Verified Computational Advantages:**
-All results below are verified by exhaustive computation over the entire reachable state space and all 256 byte operations, totalling over 1 million exact checks. They are strict structural invariants, not statistical estimates.
+**Verified Computational Advantages**
+
+All results below are verified by exhaustive computation over the entire reachable state space and all 256 byte operations. They are strict structural invariants, not statistical estimates.
 
 | Verified result | What it means |
 |-----------------|---------------|
@@ -133,10 +121,12 @@ All results below are verified by exhaustive computation over the entire reachab
 | **Constant-time commutativity test** | Two byte operations commute iff they share the same 6-bit topological `q-class`, making commutativity an O(1) structural lookup. |
 | **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
 | **Holographic boundary relation** | The state geometry satisfies |H|² = |Ω| = 64² = 4,096, enabling structural compression and compact boundary reasoning. |
-| **Universal quantum ingredients** | The verified kernel is not a simulation; it is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
+| **Universal quantum ingredients** | The verified kernel is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
 | **Standard silicon efficiency** | Achieves 1.26 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
 | **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
-| **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks; structured `P_Q` and residual `D_Q` components are evaluated through native transforms and K4 lattice arithmetic. |
+| **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks; structured `P_Q` and residual `D_Q` components are evaluated through native transforms and ordinary dot-product contraction where needed. |
+
+✅ **[aQPU Features Report](docs/reports/aQPU_Features_Report.md)** is the master catalog for all of the above and more. It inventories every verified quantum and physics feature with evidence source, verification tier (kernel pytest, science-repo executable, or formal manuscript), and experiment script where applicable. Use the summary table for headlines; use the Features Report when you need claim-level traceability across CHSH saturation, horizons, gates, wavefunction theorems, gravity invariants, and CGM modal structure.
 
 **Integrity and Tamper Detection:** The kernel includes a built-in self-dual [12,6,2] code and exact algebraic provenance checks. Integrity misses are structurally classified rather than opaque: substitutions reduce to shadow partners, adjacent swaps reduce to shared `q-class`, and deletions reduce to specific stabilizer conditions on the horizons.
 
@@ -181,19 +171,32 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 ### Start Here
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
+- ✅ [aQPU Features Report](docs/reports/aQPU_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
 - 🧪 [QuBEC Climate Control Brief](docs/theory/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
 - 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Core Specifications
-- 📖 [Kernel Specifications](/docs/Gyroscopic_ASI_Specs.md) - How the kernel works
-- 📖 [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md) - Byte formalism and proofs
-- 🔭 [GyroLabe Brief](docs/GyroLabe_Specs.md) - Model bridge and execution layer
-- 📖 [GyroGraph Specification](docs/GyroGraph_Specs.md) - Multicellular Quantum AI model runtime and resonance graph
-- 🌐 [Holographic Algorithm Formalization](docs/Gyroscopic_ASI_Holography.md) - State space encoding
-- 🧪 [QuBEC Climate Dynamics](docs/theory/QuBEC_Climate_Dynamics.md) - Finite occupation dynamics, transport, and operator partitions
-- 🧪 [QuBEC Transform Algebra](docs/theory/QuBEC_Transform_Algebra.md) - Transform surfaces and chart correspondence for one-cell climate evolution
 
+Read in layer order: **Kernel** → **SDK** → **QuBEC Theory** → **Runtime**.
+
+| | Document | Role | Primary audience |
+|---|----------|------|------------------|
+| 📖 | [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) | Normative byte law, state space, replay, and governance measurement | Kernel implementers |
+| 🧠 | [Quantum Computing SDK](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) | Computational contract: operations, semantics, conformance | SDK users and integrators |
+| 🧪 | [QuBEC Theory](docs/theory/QuBEC_Theory.md) | Mathematical foundation: thermodynamics, hardware-tier architecture, transport, transforms, operator lowering, quantum structure | Researchers and reviewers |
+| ⚙️ | [Gyroscopic Runtime Specification](docs/Gyroscopic_ASI_Runtime_Specs.md) | Multicellular QCA execution, bridges, and operational lowering | Runtime implementers |
+| 📐 | [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md) | Proofs, byte formalism, and formal lemmas | Formal verification |
+| 🌐 | [Holographic Algorithm Formalization](docs/theory/Gyroscopic_ASI_Holography.md) | State-space encoding and holographic dictionaries | Encoding and compression |
+
+The SDK is the API reference. QuBEC Theory is the textbook. They are complementary: programmers need the SDK contract; reviewers need the forcing theorems and climate algebra in Theory.
+
+- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md)
+- 🧠 [Quantum Computing SDK](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md)
+- 🧪 [QuBEC Theory](docs/theory/QuBEC_Theory.md)
+- ⚙️ [Gyroscopic Runtime Specification](docs/Gyroscopic_ASI_Runtime_Specs.md)
+- 📐 [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md)
+- 🌐 [Holographic Algorithm Formalization](docs/theory/Gyroscopic_ASI_Holography.md)
 
 ### Extensions
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
@@ -202,17 +205,21 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 💳 [Pulse Wallet Specification](docs/AIR_Moments_Wallet.md) - Capacity wallet for grammar-compliant recognition and repair
 
 
-### Quantum & Holographic SDK
-- 🧠 [Quantum Computing SDK Specification](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) - Three computational surfaces
-- 🔗 [SDK: Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) - Distributed model testing
-- 🌐 [SDK: The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) - Internet coordination layer
+### Additional SDK surfaces
+
+Core quantum SDK contract is in the table above. Extension specs:
+
+- 🔗 [Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) - Distributed model testing
+- 🌐 [The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) - Internet coordination layer
 
 ### Experimental
 - 🧬 [Substrate: Physical Memory Specification](docs/Gyroscopic_ASI_Substrate_Specs.md) - Memory and carrier layout
 
 ### Test Reports
+
 All kernel properties are verified by exhaustive test suites (499 tests, all passing) covering the full state space, operator algebra, and SDK surfaces.
 
+- ✅ [aQPU Features Report](docs/reports/aQPU_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
 - 📊 [Physics Tests Report](docs/reports/Physics_Tests_Report.md) - Kernel state verification
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
 - 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified (185 tests)
@@ -247,9 +254,9 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/api.py` : Precomputed tables, chirality register, word signatures, Walsh helpers, and public algebra API
 - `src/kernel.py` : Reference kernel execution and replay surfaces
 - `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
-- `src/tools/gyroscopic/` : Unified GyroLabe (native transforms, structured operator analysis, QuBEC matmul) and GyroGraph (multicellular telemetry, SLCP emission, resonance) surfaces; native llama.cpp bridge (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
+- `src/tools/gyroscopic/` : Gyroscopic kernel backend and runtime surfaces; llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
-- `docs/` : Specifications, reports, architecture notes, and supporting theory
+- `docs/` : Specifications, reports, and supporting theory
 - `tests/` : Exhaustive verification suites for kernel physics, aQPU properties, SDK surfaces, and governance measurement
 
 ---
@@ -266,7 +273,7 @@ The Python SDK surface is organized into `ClimateOps` (QuBEC climate helpers) an
 
 Native backend note: prebuilt Windows binaries are included for convenience. On macOS and Linux, the native backend builds automatically on first run when standard compiler tooling is available. If native build is unavailable, the exact Python fallback remains functional.
 
-For native build details (GyroLabe/GyroGraph unified backend), see:
+For native build details, see:
 - `src/tools/gyroscopic/` (native backend sources and helpers)
 - [llama.cpp Gyroscopic Backend](external/llama.cpp/ggml/src/ggml-gyroscopic/)
 

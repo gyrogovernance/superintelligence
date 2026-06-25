@@ -582,6 +582,7 @@ GYROSCOPIC_EXPORT int gyroscopic_sparse_cqft_peaks(
 #define GYRO_HORIZON_DIM 128
 #define GYRO_HORIZON_KEY_BITS 7
 #define GYRO_HORIZON_MAX_CELLS 8
+#define GYRO_FIXED_CSM_CELLS 4
 
 typedef enum {
  GYRO_DP_EXACT = 0,
@@ -595,6 +596,8 @@ typedef struct {
  const uint64_t *keys;
  int n_cells;
  int g_scratch[GYRO_HORIZON_MAX_CELLS];
+ uint32_t *touch_gen;
+ uint32_t gen;
 } GyroDpState;
 
 static size_t gyro_horizon_tensor_idx(const int *g, int n_cells) {
@@ -672,8 +675,10 @@ static void gyro_dp_step_digit(
  size_t state_len = st->state_len;
  int d;
 
- memset(nxt_re, 0, state_len * sizeof(double));
- memset(nxt_im, 0, state_len * sizeof(double));
+ if (st->mode == GYRO_DP_EXACT || st->touch_gen == NULL) {
+  memset(nxt_re, 0, state_len * sizeof(double));
+  memset(nxt_im, 0, state_len * sizeof(double));
+ }
 
  if (st->mode == GYRO_DP_EXACT) {
   uint64_t y;
@@ -694,6 +699,51 @@ static void gyro_dp_step_digit(
     double ntw_re;
     double ntw_im;
 
+    nxt_re[out_idx] += cr * tw_re - ci * tw_im;
+    nxt_im[out_idx] += cr * tw_im + ci * tw_re;
+    ntw_re = tw_re * wj_re - tw_im * wj_im;
+    ntw_im = tw_re * wj_im + tw_im * wj_re;
+    tw_re = ntw_re;
+    tw_im = ntw_im;
+   }
+  }
+  return;
+ }
+
+ if (st->touch_gen != NULL) {
+  uint64_t y;
+
+  st->gen++;
+  if (st->gen == 0u) {
+   memset(st->touch_gen, 0, state_len * sizeof(uint32_t));
+   st->gen = 1u;
+  }
+  for (y = 0u; y < n; ++y) {
+   size_t idx;
+   double cr;
+   double ci;
+   double tw_re;
+   double tw_im;
+
+   idx = gyro_dp_project(y, st);
+   cr = cur_re[idx];
+   ci = cur_im[idx];
+   if (fabs(cr) < 1e-15 && fabs(ci) < 1e-15) {
+    continue;
+   }
+   tw_re = 1.0;
+   tw_im = 0.0;
+   for (d = 0; d < 64; ++d) {
+    uint64_t y_next = gyro_mul_mod_ladder(y, powers_row[d], n);
+    size_t out_idx = gyro_dp_project(y_next, st);
+    double ntw_re;
+    double ntw_im;
+
+    if (st->touch_gen[out_idx] != st->gen) {
+     nxt_re[out_idx] = 0.0;
+     nxt_im[out_idx] = 0.0;
+     st->touch_gen[out_idx] = st->gen;
+    }
     nxt_re[out_idx] += cr * tw_re - ci * tw_im;
     nxt_im[out_idx] += cr * tw_im + ci * tw_re;
     ntw_re = tw_re * wj_re - tw_im * wj_im;
@@ -927,6 +977,55 @@ static int gyro_dp_suffix_run(
  return 1;
 }
 
+static int gyro_dp_suffix_run_bufs(
+ uint64_t n,
+ uint64_t Q,
+ uint64_t k,
+ int B,
+ uint64_t powers[GYRO_SHOR_DP_MAX_DIGITS][64],
+ const GyroDpState *st,
+ size_t init_idx,
+ double *cur_re,
+ double *cur_im,
+ double *nxt_re,
+ double *nxt_im,
+ double *out_re,
+ double *out_im)
+{
+ double *cur_re_p;
+ double *cur_im_p;
+ double *nxt_re_p;
+ double *nxt_im_p;
+ int j;
+
+ if (st == NULL || cur_re == NULL || cur_im == NULL
+  || nxt_re == NULL || nxt_im == NULL || out_re == NULL || out_im == NULL) {
+  return 0;
+ }
+
+ memset(cur_re, 0, st->state_len * sizeof(double));
+ memset(cur_im, 0, st->state_len * sizeof(double));
+ cur_re[init_idx] = 1.0;
+ cur_re_p = cur_re;
+ cur_im_p = cur_im;
+ nxt_re_p = nxt_re;
+ nxt_im_p = nxt_im;
+
+ for (j = 0; j < B; ++j) {
+  double wj_re;
+  double wj_im;
+
+  gyro_dp_phase_wj(k, Q, j, &wj_re, &wj_im);
+  gyro_dp_step_digit(
+   n, powers[j], wj_re, wj_im, st, cur_re_p, cur_im_p, nxt_re_p, nxt_im_p);
+  gyro_dp_buf_swap(&cur_re_p, &cur_im_p, &nxt_re_p, &nxt_im_p);
+ }
+
+ memcpy(out_re, cur_re_p, st->state_len * sizeof(double));
+ memcpy(out_im, cur_im_p, st->state_len * sizeof(double));
+ return 1;
+}
+
 static uint64_t gyro_pow64_mod(uint64_t base, uint64_t n) {
  uint64_t x = base % n;
  x = gyro_mul_mod_ladder(x, x, n);
@@ -945,6 +1044,49 @@ static int gyro_shor_digit_count(uint64_t Q) {
   ++B;
  }
  return B > 0 ? B : 1;
+}
+
+static int gyro_shor_n_cells_hint(uint64_t n)
+{
+ int bits = 0;
+ uint64_t x = n;
+
+ while (x) {
+  ++bits;
+  x >>= 1;
+ }
+ if (bits <= 0) {
+  return 1;
+ }
+ return (bits + 5) / 6;
+}
+
+static int gyro_shor_csm_n_cells(uint64_t n)
+{
+ int nc = gyro_shor_n_cells_hint(n);
+
+ if (nc > GYRO_FIXED_CSM_CELLS) {
+  nc = GYRO_FIXED_CSM_CELLS;
+ }
+ return nc;
+}
+
+static size_t gyro_horizon_tensor_map_size(int n_cells);
+
+static int gyro_shor_use_tensor_path(uint64_t n)
+{
+ int nc;
+ size_t map_size;
+
+ nc = gyro_shor_csm_n_cells(n);
+ if (nc < 2) {
+  return 0;
+ }
+ map_size = gyro_horizon_tensor_map_size(nc);
+ if (n > 2000000u) {
+  return 1;
+ }
+ return map_size <= 65536u;
 }
 
 static void gyro_shor_build_powers(
@@ -1093,46 +1235,58 @@ static uint32_t gyro_shor_beam_rational_scan(
 }
 
 /* Horizon tensor suffix readout via unified GyroDpState (n_cells 2..4). */
-static double gyro_horizon_tensor_mag2_y1_core(
- uint64_t base,
- uint64_t n,
+static int gyro_horizon_beam_ctx_build(GyroHorizonBeamCtx *ctx, uint64_t n);
+static double gyro_horizon_tensor_mag2_y1_ctx(
+ GyroHorizonBeamCtx *ctx,
  uint64_t Q,
  uint64_t k,
- const uint64_t *keys,
- int n_cells);
+ int B,
+ uint64_t powers[GYRO_SHOR_DP_MAX_DIGITS][64]);
+
+static uint32_t gyro_shor_tensor_rational_scan(
+ uint64_t a,
+ uint64_t n,
+ uint64_t Q,
+ int B,
+ uint64_t powers[GYRO_SHOR_DP_MAX_DIGITS][64],
+ GyroHorizonBeamCtx *ctx);
 
 typedef struct {
  int active;
  int n_cells;
+ uint64_t n_mod;
  uint64_t *keys;
+ size_t map_size;
+ int32_t *y_map;
+ GyroDpState st;
+ size_t one_idx;
+ double *dp_re;
+ double *dp_im;
+ double *dp_cur_re;
+ double *dp_cur_im;
+ double *dp_nxt_re;
+ double *dp_nxt_im;
+ uint32_t *touch_gen;
 } GyroHorizonBeamCtx;
 
 static void gyro_horizon_beam_ctx_init(GyroHorizonBeamCtx *ctx, uint64_t n) {
- ctx->active = 0;
- ctx->n_cells = 0;
- ctx->keys = NULL;
- if (n == 0u || n > (uint64_t) SIZE_MAX / sizeof(uint64_t)) {
-  return;
- }
- ctx->keys = (uint64_t *) malloc((size_t) n * sizeof(uint64_t));
- if (ctx->keys == NULL) {
-  return;
- }
- ctx->n_cells = gyroscopic_horizon_pack_keys_u64(n, ctx->keys, (int) n);
- if (ctx->n_cells >= 2 && ctx->n_cells <= 4) {
-  ctx->active = 1;
- } else {
-  free(ctx->keys);
-  ctx->keys = NULL;
-  ctx->n_cells = 0;
+ memset(ctx, 0, sizeof(*ctx));
+ if (!gyro_horizon_beam_ctx_build(ctx, n)) {
+  gyro_horizon_beam_ctx_free(ctx);
  }
 }
 
 static void gyro_horizon_beam_ctx_free(GyroHorizonBeamCtx *ctx) {
  free(ctx->keys);
- ctx->keys = NULL;
- ctx->active = 0;
- ctx->n_cells = 0;
+ free(ctx->y_map);
+ free(ctx->dp_re);
+ free(ctx->dp_im);
+ free(ctx->dp_cur_re);
+ free(ctx->dp_cur_im);
+ free(ctx->dp_nxt_re);
+ free(ctx->dp_nxt_im);
+ free(ctx->touch_gen);
+ memset(ctx, 0, sizeof(*ctx));
 }
 
 /* Dense radix-64 cyclic QFT readout on G_X=Z_Q (K1/K10/K12). No linear k-scan. */
@@ -1598,10 +1752,14 @@ static uint32_t gyro_shor_recover_period_beam(
  int n_scored;
  int i;
  const char *path_tag;
+ int n_cells_hint;
+ int use_tensor;
 
- use_exact = (n <= 2000000u);
- use_float = (!use_exact && n <= 1500000000u);
- path_tag = "TENSOR_BEAM";
+ n_cells_hint = gyro_shor_csm_n_cells(n);
+ use_tensor = gyro_shor_use_tensor_path(n);
+ use_exact = (!use_tensor && n <= 2000000u);
+ use_float = (!use_tensor && !use_exact && n <= 1500000000u);
+ path_tag = "CSM_TENSOR_BEAM";
  if (use_exact) {
   path_tag = "DP_EXACT_DOUBLE";
  } else if (use_float) {
@@ -1617,7 +1775,21 @@ static uint32_t gyro_shor_recover_period_beam(
  f_im2 = NULL;
  memset(&hctx, 0, sizeof(hctx));
 
- if (use_exact) {
+ if (use_tensor) {
+  gyro_horizon_beam_ctx_init(&hctx, n);
+  if (!hctx.active) {
+   return 0u;
+  }
+  {
+   uint32_t r_seed = gyro_shor_tensor_rational_scan(
+    a, n, Q, B, powers, &hctx);
+   if (r_seed != 0u) {
+    gyro_horizon_beam_ctx_free(&hctx);
+    gyro_shor_path_set("CSM_TENSOR_BEAM");
+    return r_seed;
+   }
+  }
+ } else if (use_exact) {
   exact_re = (double *) calloc((size_t) n, sizeof(double));
   exact_im = (double *) calloc((size_t) n, sizeof(double));
   exact_nxt_re = (double *) calloc((size_t) n, sizeof(double));
@@ -1658,12 +1830,6 @@ static uint32_t gyro_shor_recover_period_beam(
    free(f_im2);
    return 0u;
   }
- } else {
-  gyro_horizon_beam_ctx_init(&hctx, n);
-  if (!hctx.active) {
-   gyro_horizon_beam_ctx_free(&hctx);
-   return 0u;
-  }
  }
 
  gyro_shor_beam_params(n, B, &ms_depth, &beam_keep);
@@ -1683,9 +1849,17 @@ static uint32_t gyro_shor_recover_period_beam(
    beam_keep = 12;
   }
  }
+ if (use_tensor) {
+  if (ms_depth > 2) {
+   ms_depth = 2;
+  }
+  if (beam_keep > 12) {
+   beam_keep = 12;
+  }
+ }
  depth = ms_depth < B ? ms_depth : B;
  if (depth <= 0 || beam_keep <= 0) {
-  if (!use_exact && !use_float) {
+  if (use_tensor) {
    gyro_horizon_beam_ctx_free(&hctx);
   }
   free(exact_re);
@@ -1735,15 +1909,14 @@ static uint32_t gyro_shor_recover_period_beam(
      mag2 = gyro_shor_dp_mag2_y1_float(
       n, Q, kv, B, powers, f_re1, f_im1, f_re2, f_im2);
     } else {
-     mag2 = gyro_horizon_tensor_mag2_y1_core(
-      a, n, Q, kv, hctx.keys, hctx.n_cells);
+     mag2 = gyro_horizon_tensor_mag2_y1_ctx(&hctx, Q, kv, B, powers);
     }
     scored[n_scored].k = kv;
     scored[n_scored].mag2 = mag2;
     n_scored++;
     r = gyro_shor_try_k(a, n, Q, kv, mag2);
     if (r != 0u) {
-     if (!use_exact && !use_float) {
+     if (use_tensor) {
       gyro_horizon_beam_ctx_free(&hctx);
      }
      free(exact_re);
@@ -1770,7 +1943,7 @@ static uint32_t gyro_shor_recover_period_beam(
   }
  }
 
- if (!use_exact && !use_float) {
+ if (use_tensor) {
   gyro_horizon_beam_ctx_free(&hctx);
  }
  free(exact_re);
@@ -2074,145 +2247,110 @@ GYROSCOPIC_EXPORT uint64_t gyroscopic_horizon_key_u64(uint64_t n, uint64_t y)
  return gyro_horizon_pack_one_key(y % n, n_cells, phases);
 }
 
-#define GYRO_CHIR_HASH_CAP 262144u
-
-typedef struct {
- uint8_t used;
- uint64_t chi;
- uint64_t x;
-} GyroChiSlot;
-
-static uint64_t gyro_gcd_u64(uint64_t a, uint64_t b)
-{
- while (b != 0u) {
-  uint64_t t = a % b;
-  a = b;
-  b = t;
- }
- return a;
-}
-
-static uint32_t gyro_shor_peel_order(uint64_t a, uint64_t n, uint64_t g)
-{
- uint64_t r = g;
- uint64_t p;
-
- if (r < 2u || gyroscopic_exp_mod_ladder(a, r, n) != 1u) {
-  return 0u;
- }
- p = 2u;
- while (p * p <= r) {
-  while (r % p == 0u && gyroscopic_exp_mod_ladder(a, r / p, n) == 1u) {
-   r /= p;
-  }
-  if (p == 2u) {
-   p = 3u;
-  } else {
-   p += 2u;
-  }
- }
- if (r >= (uint64_t) UINT32_MAX) {
-  return 0u;
- }
- return (uint32_t) r;
-}
-
-/* Period via injective horizon chart χ(a^x): collision + gcd (O(√r) queries, O(1) RAM). */
-GYROSCOPIC_EXPORT uint32_t gyroscopic_shor_period_chirality_u64(
- uint64_t base,
+static size_t gyro_horizon_tensor_map_size(int n_cells);
+static int gyro_horizon_tensor_build_y_map(
  uint64_t n,
- uint32_t max_samples)
+ const uint64_t *keys,
+ int n_cells,
+ int32_t *y_map,
+ size_t map_size);
+
+static int gyro_horizon_pack_keys_csm_internal(
+ uint64_t n,
+ uint64_t *keys_out,
+ int cap,
+ int n_cells)
 {
- uint64_t a;
- uint64_t g_acc;
- uint64_t x;
+ uint8_t phases[GYRO_HORIZON_MAX_CELLS];
  uint64_t y;
- uint64_t chi;
- uint64_t prev_x;
- GyroChiSlot *tab;
- uint32_t samples;
- uint32_t i;
- uint32_t cap;
- uint32_t target;
+ int c;
 
- if (n <= 1u) {
-  gyro_shor_path_set("FAIL_CLOSED");
-  return 0u;
+ if (keys_out == NULL || n <= 1u || n_cells < 1 || n_cells > GYRO_FIXED_CSM_CELLS) {
+  return -1;
  }
- a = base % n;
- if (a == 0u || gyro_gcd_u64(a, n) != 1u) {
-  gyro_shor_path_set("FAIL_CLOSED");
-  return 0u;
+ if (cap < (int) n) {
+  return -1;
  }
- cap = GYRO_CHIR_HASH_CAP;
- tab = (GyroChiSlot *) calloc((size_t) cap, sizeof(GyroChiSlot));
- if (tab == NULL) {
-  gyro_shor_path_set("FAIL_CLOSED");
-  return 0u;
+ for (c = 0; c < n_cells; ++c) {
+  phases[c] = gyro_kern_phase_link(c, n);
  }
- target = max_samples;
- if (target == 0u) {
-  int bits = 0;
-  uint64_t t = n;
-  while (t) {
-   ++bits;
-   t >>= 1;
-  }
-  target = (uint32_t) cap;
-  if ((uint32_t) bits * 4096u > target) {
-   target = (uint32_t) bits * 4096u;
-  }
-  if (target > 1048576u) {
-   target = 1048576u;
-  }
+ for (y = 0u; y < n; ++y) {
+  keys_out[y] = gyro_horizon_pack_one_key(y, n_cells, phases);
  }
- g_acc = 0u;
- x = 1u;
- for (i = 0; i < target; ++i) {
-  size_t idx;
-  size_t probe;
+ return n_cells;
+}
 
-  y = gyroscopic_exp_mod_ladder(a, x, n);
-  chi = gyroscopic_horizon_key_u64(n, y);
-  idx = (size_t) ((chi ^ (chi >> 17) ^ (chi >> 33)) % (uint64_t) cap);
-  for (probe = 0; probe < (size_t) cap; ++probe) {
-   size_t slot = (idx + probe) % (size_t) cap;
-   if (!tab[slot].used) {
-    tab[slot].used = 1u;
-    tab[slot].chi = chi;
-    tab[slot].x = x;
-    break;
-   }
-   if (tab[slot].chi == chi) {
-    uint64_t d;
+static int gyro_horizon_beam_ctx_build(GyroHorizonBeamCtx *ctx, uint64_t n)
+{
+ int n_cells;
+ size_t map_size;
+ int g_one[GYRO_HORIZON_MAX_CELLS];
 
-    prev_x = tab[slot].x;
-    d = (x >= prev_x) ? (x - prev_x) : (prev_x - x);
-    if (d != 0u) {
-     g_acc = (g_acc == 0u) ? d : gyro_gcd_u64(g_acc, d);
-    }
-    break;
-   }
-  }
-  x = x * 6364136223846793005u + 1442695040888963407u;
-  if (x == 0u) {
-   x = 1u;
-  }
+ if (ctx == NULL || n <= 1u || n > (uint64_t) SIZE_MAX / sizeof(uint64_t)) {
+  return 0;
  }
- free(tab);
- if (g_acc < 2u) {
-  gyro_shor_path_set("FAIL_CLOSED");
-  return 0u;
+ n_cells = gyro_shor_csm_n_cells(n);
+ if (n_cells < 2 || n_cells > GYRO_FIXED_CSM_CELLS) {
+  return 0;
  }
- {
-  uint32_t r = gyro_shor_peel_order(a, n, g_acc);
-  if (r <= 1u) {
-   gyro_shor_path_set("FAIL_CLOSED");
-   return 0u;
-  }
-  gyro_shor_path_set("CHIRALITY_COLLISION");
-  return r;
+ ctx->keys = (uint64_t *) malloc((size_t) n * sizeof(uint64_t));
+ if (ctx->keys == NULL) {
+  return 0;
  }
+ if (gyro_horizon_pack_keys_csm_internal(n, ctx->keys, (int) n, n_cells) < 0) {
+  return 0;
+ }
+ map_size = gyro_horizon_tensor_map_size(n_cells);
+ ctx->y_map = (int32_t *) malloc(map_size * sizeof(int32_t));
+ ctx->dp_re = (double *) calloc(map_size, sizeof(double));
+ ctx->dp_im = (double *) calloc(map_size, sizeof(double));
+ ctx->dp_cur_re = (double *) calloc(map_size, sizeof(double));
+ ctx->dp_cur_im = (double *) calloc(map_size, sizeof(double));
+ ctx->dp_nxt_re = (double *) calloc(map_size, sizeof(double));
+ ctx->dp_nxt_im = (double *) calloc(map_size, sizeof(double));
+ ctx->touch_gen = (uint32_t *) calloc(map_size, sizeof(uint32_t));
+ if (ctx->y_map == NULL || ctx->dp_re == NULL || ctx->dp_im == NULL
+  || ctx->dp_cur_re == NULL || ctx->dp_cur_im == NULL
+  || ctx->dp_nxt_re == NULL || ctx->dp_nxt_im == NULL || ctx->touch_gen == NULL) {
+  return 0;
+ }
+ if (gyro_horizon_tensor_build_y_map(n, ctx->keys, n_cells, ctx->y_map, map_size) != 0) {
+  return 0;
+ }
+ gyro_horizon_tensor_cells_of_key(ctx->keys[1], n_cells, g_one);
+ ctx->one_idx = gyro_horizon_tensor_idx(g_one, n_cells);
+ memset(&ctx->st, 0, sizeof(ctx->st));
+ ctx->st.mode = GYRO_DP_TENSOR;
+ ctx->st.state_len = map_size;
+ ctx->st.y_map = ctx->y_map;
+ ctx->st.keys = ctx->keys;
+ ctx->st.n_cells = n_cells;
+ ctx->st.touch_gen = ctx->touch_gen;
+ ctx->st.gen = 0u;
+ ctx->n_cells = n_cells;
+ ctx->n_mod = n;
+ ctx->map_size = map_size;
+ ctx->active = 1;
+ return 1;
+}
+
+static double gyro_horizon_tensor_mag2_y1_ctx(
+ GyroHorizonBeamCtx *ctx,
+ uint64_t Q,
+ uint64_t k,
+ int B,
+ uint64_t powers[GYRO_SHOR_DP_MAX_DIGITS][64])
+{
+ if (ctx == NULL || !ctx->active || ctx->n_mod <= 1u || Q <= 1u || k >= Q) {
+  return 0.0;
+ }
+ if (!gyro_dp_suffix_run_bufs(
+   ctx->n_mod, Q, k, B, powers, &ctx->st, ctx->one_idx,
+   ctx->dp_cur_re, ctx->dp_cur_im, ctx->dp_nxt_re, ctx->dp_nxt_im,
+   ctx->dp_re, ctx->dp_im)) {
+  return 0.0;
+ }
+ return gyro_dp_mag2_at(ctx->dp_re, ctx->dp_im, ctx->one_idx);
 }
 
 /* Horizon tensor map + drift (uses unified gyro_dp_step_digit). */
@@ -2323,6 +2461,39 @@ static double gyro_horizon_tensor_mag2_y1_core(
  free(re);
  free(im);
  return mag2;
+}
+
+static uint32_t gyro_shor_tensor_rational_scan(
+ uint64_t a,
+ uint64_t n,
+ uint64_t Q,
+ int B,
+ uint64_t powers[GYRO_SHOR_DP_MAX_DIGITS][64],
+ GyroHorizonBeamCtx *ctx)
+{
+ uint32_t j;
+ uint64_t denom;
+
+ if (n <= 1u || ctx == NULL || !ctx->active) {
+  return 0u;
+ }
+ denom = n;
+ for (j = 1u; j <= 96u; ++j) {
+  uint64_t k;
+  double mag2;
+  uint32_t r;
+
+  k = (j * Q) / denom;
+  if (k <= 0u || k >= Q) {
+   continue;
+  }
+  mag2 = gyro_horizon_tensor_mag2_y1_ctx(ctx, Q, k, B, powers);
+  r = gyro_shor_try_k(a, n, Q, k, mag2);
+  if (r != 0u) {
+   return r;
+  }
+ }
+ return 0u;
 }
 
 static int gyro_horizon_tensor_step_drift_core(

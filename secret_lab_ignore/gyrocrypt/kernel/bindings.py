@@ -133,8 +133,6 @@ def _bind(lib: ctypes.CDLL) -> None:
     lib.gyroscopic_shor_last_path_tag.argtypes = []
     lib.gyroscopic_shor_dp_mag2_y1_u64.restype = ctypes.c_double
     lib.gyroscopic_shor_dp_mag2_y1_u64.argtypes = [_U64, _U64, _U64, _U64]
-    lib.gyroscopic_shor_period_chirality_u64.restype = ctypes.c_uint32
-    lib.gyroscopic_shor_period_chirality_u64.argtypes = [_U64, _U64, ctypes.c_uint32]
 
     u64p = ctypes.POINTER(_U64)
     lib.gyroscopic_horizon_pack_keys_u64.restype = ctypes.c_int
@@ -235,14 +233,6 @@ def shor_period_u64(base: int, n: int, Q: int) -> int:
     return int(_lib().gyroscopic_shor_period_u64(*_u64(base, n, Q)))
 
 
-def shor_period_chirality_u64(base: int, n: int, max_samples: int = 0) -> int:
-    return int(
-        _lib().gyroscopic_shor_period_chirality_u64(
-            _U64(int(base)), _U64(int(n)), ctypes.c_uint32(int(max_samples))
-        )
-    )
-
-
 def shor_last_path_tag() -> str:
     raw = _lib().gyroscopic_shor_last_path_tag()
     return raw.decode("ascii") if raw else "NONE"
@@ -332,7 +322,6 @@ __all__ = [
     "mul_mod_ladder",
     "sparse_cqft_peaks",
     "shor_period_u64",
-    "shor_period_chirality_u64",
     "shor_last_path_tag",
     "shor_dp_mag2_y1_u64",
     "horizon_pack_keys_u64",

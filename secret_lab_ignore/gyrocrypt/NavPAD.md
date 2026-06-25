@@ -383,7 +383,7 @@ Data flow is inward on ingress (disk → RAM → L3 → L2 → L1 → registers)
 
 **Resonance buckets in RAM.** Bucket membership and weight are shared across cells and available for graph queries and batch grouping.
 
-**Operator block registry in RAM.** Structure analysis reports for external operator blocks are cached at the L3/RAM tier for bridge scheduling. GyroLabe matmul uses its own weight registry with mandatory per-block analysis at tensor registration.
+**Operator block registry in RAM.** Structure analysis reports for external operator blocks are cached at the L3/RAM tier for bridge scheduling. Native matmul uses its own weight registry with mandatory per-block analysis at tensor registration.
 
 **Ingest log on disk.** The append-only (cell_id, word4) ledger enables deterministic replay.
 
@@ -479,7 +479,7 @@ Previous assistants wrote **implementation failures** into this pad as if they w
 
 **Supporting Theoretical Work:**
 - aQPU quick reference: `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`
-- QuBECs and Kernel: `docs/Gyroscopic_ASI_SDK_Quantum_Computing.md`, `docs/theory/QuBEC_Climate_Dynamics.md`
+- QuBECs and Kernel: `docs/Gyroscopic_ASI_SDK_Quantum_Computing.md`, `docs/theory/QuBEC_Theory.md`
 - Quantum Features (very helpful): `docs/reports/aQPU_Features_Report.md`
 - Methodologies and foundations: `docs/references/Analysis_aQPU_Wavefunction.md`, `docs/references/Analysis_Gravity_Note.md`, `docs/references/Analysis_Gyroscopic_Multiplication.md`
 - Other works in the repo may also help; searching the codebase is encouraged.
@@ -490,19 +490,17 @@ Previous assistants wrote **implementation failures** into this pad as if they w
 
 | File | Role |
 |------|------|
-| `kernel/core.py` | Byte bridge, ψ holonomy, WHT, CQFT Z_64 (~690 LoC) |
+| `kernel/core.py` | Byte bridge, ψ holonomy, WHT, CQFT Z_64 |
 | `kernel/simon.py` | Simon (GF(2)^{6B}) — wavefunction holonomy readout |
 | `kernel/shor.py` | **Production** facade: `period()`, `factor()` → native C only (never imports holonomy) |
-| `kernel/audit.py` | **Audit / falsification**: `period_reference()`, `dlp_mag2_reference()` — same native scorers, explicit reference path |
-| `kernel/holonomy.py` | **OPEN research**: `compile_factor_operator`, `gyro_period`, `holonomy_spectrum` — fail-closed until byte oracle compiler lands |
-| `kernel/native.c` | **Production spectral core** (~2610 LoC): modexp, sparse CQFT, unified radix DP (`GyroDpState`), Shor period, horizon key compile, tensor suffix, 2D DLP scorer |
-| `kernel/native.h` | C export surface (modexp, Shor, horizon tensor, DLP) |
+| `kernel/audit.py` | **Audit / falsification**: `period_reference()`, `dlp_mag2_reference()` |
+| `kernel/holonomy.py` | **OPEN research**: byte oracle compiler — fail-closed until CNOT carry ledger |
+| `kernel/native.c` | Production spectral core: modexp, CQFT, suffix DP, horizon tensor |
+| `kernel/native.h` | C export surface |
 | `kernel/bindings.py` | ctypes → `gyrocrypt_native.dll` |
-| `kernel/__init__.py` | Public exports: `simon`, `period`, `factor`, `period_reference`, `_default_Q` |
-| `runner.py` | Dual-track regression: native production PASS + holonomy `[OPEN]` gates |
-| `NO_DRIFT.md` | Wiring contract: do not amputate native core while holonomy compiler is open |
-
-**Retired / removed (2026-06 cleanup):** `horizon_mps.py`, carry MPO `.inc` testbed, `horizon_compare_u64`, per-B tensor2/3/4 drift wrappers, Python limb→χ compile tables (`core.py`), duplicate digit-loop DP paths in C, holonomy-era gutting of `native.c` to verify-only modexp (**reverted 2026-06-19**).
+| `kernel/__init__.py` | Public exports |
+| `runner.py` | Dual-track regression: production PASS + holonomy OPEN |
+| `NO_DRIFT.md` | Wiring contract |
 
 ---
 
@@ -523,19 +521,19 @@ Deliverable: **n=6..60 (B≤10)** PASS. O(64B) kernel queries.
 
 | Q range | Path | Mechanism |
 |---------|------|-----------|
-| Q ≤ 262144 (=64³) | Dense coset + radix-64 CQFT | `gyro_shor_recover_period_cqft` |
-| Q > 262144 | Pruned MS-digit beam | `gyro_horizon_tensor_mag2_y1_core` scores \|ψ_k(y=1)\|² per prefix; CF + verify |
+| Q ≤ 64³ | Dense coset + radix-64 CQFT | small Q path |
+| Q > 64³ | Pruned MS-digit beam | tensor suffix F_{G_X} on 128^n_cells grid |
 
-Unified substrate: **`GyroDpState`** — one `gyro_dp_step_digit` for exact ℤ_N and horizon-tensor 128^{n_cells} projection. Drift gate runs both modes in lockstep per digit (n_cells ≥ 2; n_cells=1 skips tensor drift).
+When n_cells ≥ 2 and (Q grid ≤ 64² or N > 2M), beam uses **CSM_TENSOR_BEAM** (fixed 128^n_cells ψ via GYRO_DP_TENSOR). Medium N uses exact DP when the CSM grid would exceed RAM.
 
 No Python coset enum, no numpy FFT, no O(k) linear scan rerunning DP.
 
 **Holonomy compiler — OPEN (`kernel/holonomy.py`, must not replace production):**
 
 ```
-compile_factor_operator(N,a)  →  search byte word W with inject holonomy = multiply-by-a
-gyro_period / holonomy_spectrum  →  K4 / horizon / Z₂ closure on Ω
-Status: FAIL_CLOSED — single-cell Ω affine cannot embed general (ℤ/Nℤ)* (see K16)
+compile_factor_operator(N,a)  →  byte oracle (OPEN — WIRE_TABULATE is K6 wiring only)
+gyro_period / holonomy_spectrum  →  closure readout on Ω
+Status: FAIL_CLOSED — single-cell Ω cannot embed general (ℤ/Nℤ)* (K16)
 Rule:   kernel/shor.py must NEVER import kernel/holonomy.py (NO_DRIFT.md)
 ```
 
@@ -633,13 +631,13 @@ Holonomy ψ / HQ WHT: `runner.py` regression (`test_wavefunction`).
 
 ### K6. Compile-table / carry / μ₁ charts without embedded mod-N exponent
 
-**Claim:** Per-cell carry contraction, μ₁ climate, ρ-aperture, or compile_multiplication alone encodes ord_N(a).
+**Claim:** Per-cell carry contraction, μ₁ climate, ρ-aperture, compile_multiplication, or macroscopic K4 defect phase in a single complex accumulator encodes ord_N(a) without suffix-DP interference.
 
-**Test:** Coherent vs mass mixtures; carry without mod-N reduction; XOR-conv on one-step μ₁; static ledger charts vs modexp walk.
+**Test:** Coherent vs mass mixtures; carry without mod-N reduction; XOR-conv on one-step μ₁; static ledger charts vs modexp walk; macroscopic phase path (mul and exp digit tables) vs suffix DP at N=15, N=143, N=867199.
 
-**Outcome:** ~64-step **chirality/limb** order when mod-N is missing; walk UNA sharper than χ but walk period ≠ ord_N(a); carry exit marginals still fail at N≈867199 within step cap.
+**Outcome:** ~64-step **chirality/limb** order when mod-N is missing; walk UNA sharper than χ but walk period ≠ ord_N(a); carry exit marginals still fail at N≈867199 within step cap. Macroscopic single-accumulator phase: no |Â(k)|² peak at true k at N=867199 (signal ≪ suffix DP); short-N hits are false positives.
 
-**Why:** Exponent chart requires **mod-N in U_f**. Carry is closer observable class than χ alone, but marginal histogram + Walsh is still not F_{G_X} on a coset. XOR-convolution composition is valid **transport law** once the distribution lives on G_X.
+**Why:** Exponent chart requires **mod-N in U_f** and **F_{G_X} interference** on the coset, not a phase dress on digit residues alone. Carry is closer observable class than χ alone, but marginal histogram + Walsh is still not F_{G_X} on a coset.
 
 ---
 
@@ -685,47 +683,57 @@ Holonomy ψ / HQ WHT: `runner.py` regression (`test_wavefunction`).
 
 **Test:** Packed U_f stepping; O(Q) oracle evals; character sums at k; N=15–867199 when Q fits.
 
-**Outcome:** Correct **object chain** (coset on G_X → F_{G_X} → CF) for bounded Q; cost O(Q) coset build + O(Q log Q) radix-64 CQFT — **not** O(Q) linear k-scan rerunning DP (`gyro_shor_recover_period` d-loop **removed** 2026-06). Dense CQFT cap Q≤262144=64³; **Q>262144** uses horizon-tensor MS beam (`gyro_shor_recover_period_beam`) — PASS N=143 Q=64⁴ r=60 (~19s suite).
+**Outcome:** Correct **object chain** (coset on G_X → F_{G_X} → CF) for bounded Q; cost O(Q) coset build + O(Q log Q) radix CQFT. Dense path capped at Q≤64³; larger Q uses pruned beam on suffix transfer.
 
-**Why:** Powered-oracle **evaluation** is legitimate substrate; **enumerating** k by re-running transfer DP per rational guess is the classical cheat (K2). Period must emerge from **one transform** on the coset, then CF on measured k/Q, then single verify. Scale needs suffix T_j(k) without storing ψ[Q].
-
----
-
-### K11. Oracle projection and quotient observables
-
-**Claim:** Single Ω state per residue, shell-only gravity, or chirality alone preserves enough information for strict Shor.
-
-**Test:** Full residue scan N=867199 (~4096 unique Ω states, massive collisions); gravity (shell,Z₂) vs full (u6,v6) on N=15; injectivity via `horizon_pack_keys_u64`; **tensor drift gate** `horizon_tensor_step_drift_u64` (exact O(N) DP vs unified tensor DP, per-digit ratio); **parity gate** `horizon_tensor_mag2_y1` vs `shor_dp_mag2_y1` at multiple k.
-
-**Outcome:** Joint multi-cell χ fixes **encoding injectivity** (867199/867199 distinct 128-state horizon keys) but not Fourier group (K1). Gravity shell **collapses** residues (e.g. 1 and 4 mod 15). **Keyed end-projection compare retired** (2026-06) — superseded by drift + parity. **Unified horizon tensor** (n_cells 2..4): mid-evolution drift **1.0** all digits at N=143 (B=2), N=8191 (B=3), N=867199 (B=4). Tensor vs exact \|ψ_k(y=1)\|² parity **1.0** at N=143 for sampled k. Carry/q6 MPO testbeds **removed** (K15).
-
-**Why:** Period readout requires either **injective** exponent–observable map or explicit quotient algebra with proven sufficiency. For injective keys on the tensor grid, exact ℤ_N and tensor suffix DP agree digit-by-digit via one `gyro_dp_step_digit`. Scaling beyond B=2 uses parametric n_cells (2→3→4), not separate code paths.
+**Why:** Powered-oracle **evaluation** is legitimate substrate; **enumerating** k by re-running transfer per rational guess is the classical cheat (K2). Period must emerge from **one transform** on the coset, then CF on measured k/Q, then single verify. Scale needs suffix T_j(k) without storing ψ[Q].
 
 ---
 
-### K15. Horizon tensor suffix DP (K11/K15, unified 2026-06)
+### K11. Oracle projection, horizon tensor suffix DP
 
-**Claim:** Montgomery radix-64 **carry alphabet** is the quantum virtual bond; MPO built by scanning all residues y∈[0,N−1] is a valid scale path; truncating to reported χ is honest aQPU entanglement.
+**Claim:** Single Ω state per residue, shell-only gravity, chirality collision+gcd, or quotient observables alone preserve strict Shor; or separate per-B tensor code paths are required.
 
-**Test:** Exact left-to-right radix-64 convolution trace vs `mul_mod_ladder` (C1 gate); **unified `GyroDpState`** exact vs tensor step drift; distinct horizon keys per N; beam period at large Q.
+**Test:** Residue collision scan at large N; gravity (shell,Z₂) vs full charts on small N; injective horizon keys; exact vs tensor suffix DP drift and |ψ_k(y=1)|² parity per digit.
 
-**Outcome:** C1 mismatch **0%** — convolution rules are exact generators. **n_cells=2, N=143**: drift **1.0** all digits. **n_cells=3, N=8191**: drift **1.0**. **n_cells=4, N=867199**: drift **1.0** (~6s). Carry-coupled MPO testbed **deleted**; classical carry χ was wrong bond label. Key compile + tensor DP + beam scoring live in **one** `native.c` (~2610 LoC). `horizon_compare_u64` (keyed end-ratio middleware) **removed** — drift + parity sufficient.
+**Outcome:** Multi-cell horizon keys are injective to N but do not change Fourier group (K1). Gravity shell collapses residues. Unified exact/tensor suffix DP agrees per digit (drift ratio 1.0; parity 1.0 at tested k). χ-collision period path rejected (K2).
 
-**Why (math):** Integer carry indexes limb arithmetic, not holographic quotient. For injective keys on 128^{n_cells}, the tensor grid is the exact interference carrier; one digit stepper projects y_next → tensor index or residue index. Polynomial scale uses analytic radix-64 transfer (C1-validated) + beam on T_j(k), not O(N) y-scan per k guess.
+**Why:** Period readout needs injective exponent–observable map or proven quotient algebra. Radix-64 carry is limb arithmetic; tensor grid is interference carrier when keys are injective — one digit stepper, parametric n_cells.
 
 ---
 
-### K16. Single-cell holonomy compiler vs native spectral production (2026-06-19)
+### K16. Single-cell holonomy compiler vs native spectral production
 
 **Claim:** Period finding can move entirely to a compile-by-search holonomy path: find byte word W on GENE_Mac with `apply(W, inject(y)) = inject(a·y mod N)` on phase-linked inject encoding, then read period from K4/horizon/Z₂ spectral closure on single-cell Ω.
 
-**Test:** `horizon_pack_keys_u64` injectivity; BFS multiply-by-7 on N=15 (depth≤6/8); bytes keeping embed manifold closed; full depth-4 Ω signature order scan (~16M words); `gyro_period` vs `period_reference` / native `period()` at N=15,143,867199.
+**Test:** Horizon injectivity; BFS multiply word at bounded depth; depth-4 Ω signature scan; holonomy period vs audit at rising N.
 
-**Outcome:** Inject y → horizon keys **works** (143/143 for N=143). Single-cell BFS **removed** (K16). Multi-cell `inject_residue_multicell` is **injective** N=15/143. `compile_factor_operator` → `MULTICELL_OPEN_B=*`, fail-closed. Native audit `period_reference` → r=4/60/18018. Production `shor.period()` stays native spectral until QuBEC compiler closes (NO_DRIFT).
+**Outcome:** Single-cell BFS fails. Multi-cell inject injective on tested N. Holonomy compile fail-closed; production stays native spectral.
 
-**Why:** Period on the true path requires **multi-cell carry-coupled** byte holonomy on QuBEC, not single-cell Ω affine nor classical `pow()` cosets in the holonomy hot path. Classical coset+CQFT in `native.c` remains **audit ground truth** only.
+**Why:** Period requires multi-cell carry-coupled byte holonomy, not single-cell affine. Native suffix DP remains audit substrate only.
 
-**Next open task:** Map limb carry of y ↦ a·y mod N into `MultiCellRouter` byte-ledger in `compile_factor_operator`.
+---
+
+### K17. Fake multi-cell ALU (chi readback + classical mul)
+
+**Claim:** `apply_multicell` can read `chirality_word6` as the 6-bit limb, compute `(y*a)%N` in Python, reinject with phase-linked bytes, set `compiled=True`, and iterate closure for period.
+
+**Test:** Inject/decode round-trip vs chi-as-limb readback on N=15,143.
+
+**Outcome:** Honest `decode_residue_multicell` round-trips **100%**. Chi-as-limb readback mismatches **15/15** and **143/143** — phase-linked inject stores limb XOR phase, not raw χ. The proposed ALU never calls `chirality_cnot_meas_ctrl`; it is classical mul with QuBEC dressing.
+
+**Why:** True oracle = reversible carry circuit on coupled cells via byte ledger + χ-controlled CNOT. Until `MulticellALUProgram.steps` is populated with that ledger, holonomy stays fail-closed; production stays native spectral (`NO_DRIFT`).
+
+---
+
+### K18. Wavefunction BFS oracle revival
+
+**Claim:** Re-run offline BFS for byte word implementing y↦a·y mod N on inject register; lift to `apply_word` on ℂ^4096; read period via holonomy closure or native tensor suffix DP (`gyro_dp_suffix_run`) in O(B·64) without O(r) iteration.
+
+**Test:** BFS multiply word at bounded depth; holonomy closure vs suffix DP readout.
+
+**Outcome:** BFS fails at tested depth. Holonomy closure still O(r) without compiled byte oracle. Suffix-only readout is audit path.
+
+**Why:** Hilbert lift does not create carry group structure. Period readout needs F_{G_X} on oracle-defined exponent register.
 
 ---
 
@@ -756,19 +764,19 @@ Holonomy ψ / HQ WHT: `runner.py` regression (`test_wavefunction`).
 
 ---
 
-### K14. Simulation vs deployment (honest ceiling)
+### K14. Simulation vs deployment ceiling
 
 **Claim:** Python reference proves RSA-scale quantum factoring.
 
-**Reality:** N=143 period in default suite ~17s (native rebuild + gates). Dense coset+CQFT for Q≤262144; horizon-tensor beam for larger Q. **Powered oracle as one continuous Moment ledger** for full exponent word remains open (modmul is audited per step in C, not byte-ledger router).
+**Outcome:** Default suite passes rising N on native suffix DP + beam. Full exponent as one continuous Moment ledger remains open.
 
-**Why:** This is **classical simulation cost**, not a quantum lower bound. Deployment path: unified C suffix DP + beam, not more Python tier labels.
+**Why:** Reported costs are classical simulation cost, not quantum lower bound. Deployment path is unified C suffix DP + beam.
 
 ---
 
 ### Legacy index (old F1–F81 → clusters above)
 
-For transcripts that still cite **F-numbers**: use this map once, then prefer **K1–K16** only.
+For transcripts that still cite **F-numbers**: use this map once, then prefer **K1–K18** only.
 
 | Cluster | Old IDs (representative) |
 |---------|--------------------------|
@@ -776,32 +784,26 @@ For transcripts that still cite **F-numbers**: use this map once, then prefer **
 | K2 | F4, F16, F42–43, F57, F66–67, F74 |
 | K3 | F3, F6, F12, F14, F48, F51 |
 | K4–K15 | F1–F80 — see cluster titles above |
-| K15 | carry MPO / classical carry bond / `.inc` testbed (2026-06) |
-| K16 | holonomy compile-by-search / single-cell Ω affine (2026-06-19) |
+| K16–K18 | holonomy compiler / fake ALU / BFS revival |
 
 ---
 
 ## §4 Engineering state
 
-**What runs today** (mechanism only — mathematical limits are §3). Last full runner: **2026-06-19** (~312s, includes N=867199 audit).
-
 | Capability | Entry | Status |
 |------------|-------|--------|
 | Simon GF(2)^{6B} | `simon()` | PASS n≤60 |
-| Period / factor (production) | `period()`, `factor()` via `shor.py` → native | PASS N=15 r=4, factor (3,5); N=143 r=60 |
-| Audit period reference | `period_reference()` | PASS N=143 r=60; N=867199 r=18018 (path=DP_EXACT_DOUBLE) |
-| Holonomy compiler | `compile_factor_operator`, `gyro_period` | **[OPEN]** fail-closed — K16 |
+| Period / factor (production) | `period()`, `factor()` | PASS N=15, N=143 |
+| Audit period reference | `period_reference()` | PASS N=143, N=867199 |
+| Holonomy compiler | `compile_factor_operator`, `gyro_period` | OPEN — K16 |
 | Native modexp + sparse CQFT | `bindings` | PASS |
-| Horizon key compile | `horizon_pack_keys_u64` | C O(N) one-time; n_cells = ⌈bits(N)/6⌉ |
-| Tensor drift gate | `horizon_tensor_step_drift_u64` | PASS N=143 — ratio **1.0** all digits (N=15: n_cells=1, skip) |
-| Tensor parity gate | `horizon_tensor_mag2_y1` vs `shor_dp_mag2_y1` | PASS N=143 sampled k |
-| Large Q period | `shor_period_u64` beam | PASS N=867199 r=18018 in default runner |
-| DLP production | `dlp_solve`, `gyro_dlp` | **Fail closed** — K8 |
-| ~~Horizon K11 compare~~ | ~~`horizon_compare_u64`~~ | **Removed** — superseded by drift + parity |
+| Horizon tensor drift + parity | `horizon_tensor_*` | PASS N=143 |
+| Large Q period | `shor_period_u64` | PASS N=867199 |
+| DLP production | `dlp_solve` | Fail closed — K8 |
 
-**Native C surface (`native.h`):** modexp, sparse_cqft_peaks, shor_period, shor_dp_mag2, horizon_pack_keys, horizon_tensor_mag2, horizon_tensor_step_drift, dlp_2d_tensor_mag2, shor_period_chirality.
+**Native C surface:** modexp, sparse_cqft_peaks, shor_period, shor_dp_mag2, horizon_pack_keys, horizon_tensor_mag2, horizon_tensor_step_drift, dlp_2d_tensor_mag2.
 
-> **Rule:** No dense 2^q cosets, NumPy FFT as primary readout, O(r) period search, holonomy replacing native production, or lossy quotient claimed as strict Shor (§3 K2–K3, K11–K12, K16). See `NO_DRIFT.md`.
+> **Rule:** No dense 2^q cosets, NumPy FFT as primary readout, O(r) period search, holonomy replacing production, or lossy quotient as strict Shor (§3 K2–K3, K11–K12, K16). See `NO_DRIFT.md`.
 
 ---
 
@@ -811,11 +813,11 @@ For transcripts that still cite **F-numbers**: use this map once, then prefer **
 
 **Three layers** (do not conflate — assistants often collapse these and then improvise classical fallbacks):
 
-| Layer | Question | Status (2026-06-19) |
-|-------|----------|---------------------|
-| **1 — Theory & substrate** | Is QuBEC / Ω / the honest Shor object (G_X=ℤ_Q, F_{G_X}) real and wired? | **Yes, demonstrated** — Simon to n=60; byte holonomy; cyclic character law; unified `GyroDpState`; horizon keys injective to N=867199 |
-| **2 — Algorithm delivery** | Does the strict spectral path recover period and factor at rising N,Q? | **In progress** — production PASS N=15/143/867199; holonomy compiler **OPEN** (K16); tensor drift **1.0** at N=143 |
-| **3 — §0 cryptanalytic demo** | Has this repo factored RSA-2048 or solved Curve25519 DLP? | **Not yet** — §0 target; **not** a verdict that aQPU cannot reach it |
+| Layer | Question | Status |
+|-------|----------|--------|
+| **1 — Theory & substrate** | QuBEC / Ω / honest Shor object (G_X, F_{G_X}) wired? | Demonstrated — Simon to n=60; cyclic character; unified suffix DP |
+| **2 — Algorithm delivery** | Strict spectral path recovers period at rising N,Q? | In progress — production PASS to N=867199; holonomy OPEN (K16) |
+| **3 — §0 cryptanalytic demo** | RSA-2048 factor or Curve25519 DLP in repo? | Not yet — §0 target |
 
 **Assistant rule:** Layer 3 = **not demonstrated in this codebase today**. It is **not** permission to (a) treat gate-model RAM walls as physics, (b) substitute NumPy FFT / gcd / k-scan / χ-WHT for F_{G_X}, or (c) conclude the program is classically bounded. §0 states the computational class is quantum-native; the task is **scale the delivered object**, not relabel classical mimicry as QuBEC.
 
@@ -834,9 +836,9 @@ Bars below = distance along layer 2 toward layer 3, not disproof of layer 1.
 | Radix64 modmul substrate (C) | done | K13 — verify + audit |
 | Simon GF(2)^{6B} | done | K13 |
 | Cyclic QFT on G_X=ℤ_Q (valid character) | partial | Q≤262144 dense; Q>262144 tensor beam |
-| Unified exact/tensor DP (`GyroDpState`) | done | drift 1.0 at n_cells 2..4 (K11, K15) |
-| Injective horizon readout + parity | done | keyed compare retired; tensor parity PASS |
-| Native period at N=867199 | done | r=18018, default runner ~82s |
+| Unified exact/tensor DP | done | drift 1.0 (K11) |
+| Injective horizon readout + parity | done | tensor parity PASS |
+| Native period at N=867199 | done | audit reference |
 | Holonomy byte oracle compiler | open | K16 — fail-closed; do not replace native |
 | Production factor at cryptanalytic scale | open | K10, K14 |
 | **RSA-2048** | open | §0 target |
@@ -869,11 +871,9 @@ python secret_lab_ignore/gyrocrypt/runner.py
 
 | Track | What it proves |
 |-------|----------------|
-| Production | `shor_period_u64`, `period()`, `factor()`, `period_reference()` — must PASS |
-| Holonomy OPEN | `compile_factor_operator`, `gyro_period` — must print `[OPEN]` until K16 bridge closes |
-| Tensor | drift + parity at N=143 (N=15 skips when n_cells=1) |
-
-Includes N=867199 audit period (~82s each for audit + holonomy compare). Full suite ~5 min.
+| Production | `period()`, `factor()`, `period_reference()` — must PASS |
+| Holonomy OPEN | `holonomy_e2e` — oracle wiring; suffix via audit path |
+| Tensor | drift + parity at N=143 |
 
 Output: `results/run_*.txt`. Mathematical lessons live in **§3 only**.
 

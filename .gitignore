@@ -131,7 +131,7 @@ codebase-mcp/
 external/*
 !external/llama.cpp
 
-# Build artifacts inside the submodule checkout and local gyrolabe DLL
+# Build artifacts inside the submodule checkout and local native DLL
 external/llama.cpp/build/
 src/tools/gyroscopic/_build/
 
@@ -187,4 +187,5 @@ data/resonators/
 data/benchmarks/
 
 src/tools/gyroscopic/workflow/
+src/tools/gyroscopic/backup/
 

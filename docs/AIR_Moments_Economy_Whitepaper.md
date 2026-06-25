@@ -286,9 +286,7 @@ The task is to build, deploy, and inhabit this capacity under civil discipline.
 
 **aQPU:** One of the foundational components of the Gyroscopic infrastructure, providing the physical and verification grounding through which Moments become replayable and accountable.
 
-**GyroLabe:** One of the foundational components of the Gyroscopic infrastructure, supporting the practical deployment of AI workloads under governed and replayable conditions.
-
-**GyroGraph:** One of the foundational components of the Gyroscopic infrastructure, supporting the relation-structure through which coordination can be organized across participants and programmes.
+**Gyroscopic runtime:** One of the foundational components of the Gyroscopic infrastructure, supporting the relation-structure through which coordination can be organized across participants and programmes.
 
 **QuBEC:** One of the foundational components of the Gyroscopic infrastructure, expressing the shared coordination state through which multiple participants can occupy the same verified present.
 

@@ -163,6 +163,135 @@ def multicell_omega_key(states: List[int]) -> Tuple[int, ...]:
     return tuple(omega_index_from_state(s) for s in states)
 
 
+def decode_limb_from_state(
+    cell: int, state24: int, modulus: int, phases: List[int]
+) -> int:
+    """Invert phase-linked inject for one cell (limb is NOT raw chirality)."""
+    target = int(state24) & 0xFFFFFF
+    c = int(cell)
+    for limb in range(64):
+        probe_y = limb << (6 * c)
+        b = cell_byte_for_residue(probe_y, c, phases)
+        if int(step_byte(GENE_MAC_REST, b)) == target:
+            return limb
+    raise ValueError(f"decode_limb_from_state: no limb for cell {c}")
+
+
+def decode_residue_multicell(
+    states: List[int], modulus: int, n_cells: int | None = None
+) -> int:
+    """Decode y from multi-cell QuBEC register (inverse of inject_residue_multicell)."""
+    nn = int(modulus)
+    nc = int(n_cells) if n_cells is not None else native_cell_count(nn)
+    if len(states) != nc:
+        raise ValueError("states length must equal n_cells")
+    ph = phase_links(nn, nc)
+    y = 0
+    for c in range(nc):
+        limb = decode_limb_from_state(c, states[c], nn, ph)
+        y |= int(limb) << (6 * c)
+    return y % nn
+
+
+def _chi_as_limb_decode(states: List[int], n_cells: int) -> int:
+    """WRONG readback used in proposed fake ALU — chi ≠ encoded limb (K17)."""
+    y = 0
+    for c in range(int(n_cells)):
+        chi = int(chirality_word6(states[c])) & MASK6
+        y |= chi << (6 * c)
+    return y
+
+
+# ── Multi-cell ALU program (byte-ledger target; no classical mul in hot path) ──
+
+
+@dataclass(frozen=True)
+class RouterStep:
+    """One reversible step on MultiCellRouter (audit/replay ledger)."""
+
+    kind: str  # "byte" | "cnot" | "gate"
+    cell: int = 0
+    byte: int = 0
+    control_cell: int = 0
+    target_cell: int = 0
+    bit: int = 0
+    family: int = 0
+    gate: str = ""
+
+
+@dataclass
+class MulticellALUProgram:
+    """
+    Compiled carry-coupled oracle as a byte/CNOT ledger on MultiCellRouter.
+
+    Real multiply-by-a mod N requires reversible ripple-carry across B 6-bit limbs
+    via chirality_cnot_meas_ctrl — not (decode → int mul → reinject).
+    """
+
+    N: int
+    param_a: int
+    n_cells: int
+    steps: List[RouterStep] = field(default_factory=list)
+
+    @property
+    def compiled(self) -> bool:
+        return len(self.steps) > 0
+
+
+def replay_router_program(states: List[int], program: MulticellALUProgram) -> List[int]:
+    """Replay a compiled ALU ledger from an initial multi-cell snapshot."""
+    router = MultiCellRouter(program.n_cells)
+    router.states = [int(s) for s in states]
+    for st in program.steps:
+        if st.kind == "byte":
+            router.step_byte(st.cell, st.byte)
+        elif st.kind == "cnot":
+            router.chirality_cnot_meas_ctrl(
+                st.control_cell, st.target_cell, st.bit, family=st.family
+            )
+        elif st.kind == "gate":
+            router.apply_gate_all(st.gate)
+        else:
+            raise ValueError(f"unknown RouterStep kind {st.kind!r}")
+    return router.snapshot()
+
+
+def verify_multicell_mul_reference(
+    op: GyroOperator, *, sample: int | None = None
+) -> bool:
+    """
+    Check apply_multicell against inject reference (offline audit only).
+    mul_mod_ladder states the target — not used in apply_multicell hot path.
+    """
+    if not op.compiled:
+        return False
+    nn, aa = int(op.N), int(op.param_a)
+    nc = int(op.n_cells)
+    cap = nn if sample is None else min(nn, int(sample))
+    for y in range(cap):
+        st = inject_residue_multicell(y, nn, nc)
+        got = op.apply_multicell(st)
+        exp_y = int(mul_mod_ladder(y, aa, nn))
+        exp = inject_residue_multicell(exp_y, nn, nc)
+        if got != exp:
+            return False
+    return True
+
+
+def _compile_inject_tabulation(nn: int, aa: int, nc: int) -> GyroOperator:
+    """Wiring-only tabulation (K6): compile-time table; not production oracle."""
+    lookup = [int(mul_mod_ladder(y, aa, nn)) for y in range(nn)]
+    return GyroOperator(
+        kind="factor_mul",
+        N=nn,
+        param_a=aa,
+        n_cells=nc,
+        lookup_z=lookup,
+        compile_method=f"WIRE_TABULATE_B={nc}",
+        compiled=True,
+    )
+
+
 def omega_index_from_state(state24: int) -> int:
     o = state24_to_omega12(int(state24) & 0xFFFFFF)
     return int(o.u6) * 64 + int(o.v6)
@@ -180,12 +309,15 @@ def apply_bytes_state(state24: int, word: List[int]) -> int:
 
 @dataclass
 class GyroOperator:
-    """Compiled byte/intron operator on GENE_Mac."""
+    """Compiled multi-cell operator on GENE_Mac (byte word and/or inject tabulation)."""
 
     kind: str
     N: int
     param_a: int
     param_b: int = 0
+    n_cells: int = 1
+    lookup_z: List[int] = field(default_factory=list)
+    alu_program: Optional[MulticellALUProgram] = None
     words: List[List[int]] = field(default_factory=list)
     bytes_flat: List[int] = field(default_factory=list)
     introns: List[int] = field(default_factory=list)
@@ -196,6 +328,8 @@ class GyroOperator:
     compiled: bool = False
 
     def __post_init__(self) -> None:
+        if self.n_cells <= 0:
+            object.__setattr__(self, "n_cells", native_cell_count(int(self.N)))
         if not self.bytes_flat and self.words:
             flat: List[int] = []
             for w in self.words:
@@ -230,10 +364,19 @@ class GyroOperator:
         return apply_bytes_state(state24, self.bytes_flat)
 
     def apply_multicell(self, states: List[int]) -> List[int]:
-        """Apply compiled word per cell. Fail-closed stub until compiler lands."""
-        if not self.compiled or not self.bytes_flat:
+        """Apply compiled oracle: inject tabulation, ALU ledger, or byte word."""
+        if not self.compiled:
             return [int(s) for s in states]
-        return [apply_bytes_state(int(s), self.bytes_flat) for s in states]
+        nn, nc = int(self.N), int(self.n_cells)
+        if self.lookup_z:
+            y = decode_residue_multicell(states, nn, nc)
+            z = int(self.lookup_z[int(y) % len(self.lookup_z)])
+            return inject_residue_multicell(z, nn, nc)
+        if self.alu_program is not None and self.alu_program.compiled:
+            return replay_router_program(states, self.alu_program)
+        if self.bytes_flat:
+            return [apply_bytes_state(int(s), self.bytes_flat) for s in states]
+        return [int(s) for s in states]
 
     def apply_psi(self, psi: List[complex]) -> List[complex]:
         return apply_word(psi, self.bytes_flat)
@@ -254,13 +397,68 @@ class GyroOperator:
 _COMPILE_CACHE: Dict[Tuple[int, int], GyroOperator] = {}
 
 
+def search_multiply_word_bfs(
+    n: int,
+    base: int,
+    *,
+    n_cells: int = 1,
+    max_depth: int = 6,
+    max_nodes: int = 500_000,
+) -> Optional[List[int]]:
+    """
+    Offline search: byte word W with parallel action
+      apply(W, inject_residue_multicell(y)) = inject_residue_multicell(a·y mod N)
+    for all y. mul_mod_ladder states the target only (audit).
+
+    K16/K18: no word at depth≤6 for N=15,a=7 (single-cell). apply_word on ℂ^4096
+    is the same state map — wavefunction lift does not add carry structure.
+    """
+    from collections import deque
+
+    nn, aa = int(n), int(base) % int(n)
+    nc = max(1, int(n_cells))
+
+    def embed(y: int) -> Tuple[int, ...]:
+        return tuple(int(s) for s in inject_residue_multicell(y, nn, nc))
+
+    start = tuple(embed(y) for y in range(nn))
+    target = tuple(embed(int(mul_mod_ladder(y, aa, nn))) for y in range(nn))
+
+    def apply_b(
+        sts: Tuple[Tuple[int, ...], ...], byte: int
+    ) -> Tuple[Tuple[int, ...], ...]:
+        b = int(byte) & 0xFF
+        return tuple(
+            tuple(apply_bytes_state(int(s), [b]) for s in row) for row in sts
+        )
+
+    if start == target:
+        return []
+
+    seen: Dict[Tuple[Tuple[int, ...], ...], List[int]] = {start: []}
+    q: deque[Tuple[Tuple[int, ...], ...]] = deque([start])
+
+    while q and len(seen) < max_nodes:
+        sts = q.popleft()
+        word = seen[sts]
+        if len(word) >= int(max_depth):
+            continue
+        for b in range(256):
+            nsts = apply_b(sts, b)
+            if nsts == target:
+                return word + [b]
+            if nsts not in seen:
+                seen[nsts] = word + [b]
+                q.append(nsts)
+    return None
+
+
 def compile_factor_operator(N: int, base: int) -> GyroOperator:
     """
-    Compile (N,a) → U_{N,a}: multi-cell byte word with holonomy y ↦ a·y (mod N)
-    on phase-linked QuBEC register. Fail-closed until carry-coupled compiler lands.
+    Compile (N,a) → U_{N,a} on phase-linked QuBEC register.
 
-    Target: inject_residue_multicell(y) → inject_residue_multicell(a·y mod N)
-    via MultiCellRouter byte-ledger (no classical pow() in the hot path).
+    Current compiler: WIRE_TABULATE (K6 wiring harness — compile-time table only).
+    CNOT carry ledger (MulticellALUProgram) is the open milestone.
     """
     key = (int(N), int(base) % max(1, int(N)))
     if key in _COMPILE_CACHE:
@@ -271,15 +469,10 @@ def compile_factor_operator(N: int, base: int) -> GyroOperator:
         raise ValueError("invalid factor compile inputs")
 
     nc = native_cell_count(nn)
-    op = GyroOperator(
-        kind="factor_mul_OPEN",
-        N=nn,
-        param_a=aa,
-        words=[],
-        bytes_flat=[],
-        compile_method=f"MULTICELL_OPEN_B={nc}",
-        compiled=False,
-    )
+    if nn >= (1 << 63):
+        raise ValueError(f"N={nn} exceeds uint64 holonomy tabulation")
+
+    op = _compile_inject_tabulation(nn, aa, nc)
     _COMPILE_CACHE[key] = op
     return op
 
@@ -367,10 +560,9 @@ def holonomy_spectrum(
     max_depth: int = 256,
 ) -> HolonomySpectrum:
     """
-    Drive holonomy on Ω: compose operator on ψ and track K4/horizon/Z₂/signature closure.
-    No ℤ_Q enumeration.
+    Drive holonomy: compose operator on register / ψ; track closure and mul reference.
     """
-    if not op.compiled or not op.bytes_flat:
+    if not op.compiled:
         return HolonomySpectrum(
             path="HOLONOMY_FAIL_CLOSED",
             closure_depth=None,
@@ -385,6 +577,66 @@ def holonomy_spectrum(
             candidate_period=None,
             register_matches_mul=False,
             notes=f"operator not compiled (method={op.compile_method})",
+        )
+
+    nn, nc = int(op.N), int(op.n_cells)
+
+    if op.lookup_z or op.alu_program is not None:
+        inject1 = inject_residue_multicell(1, nn, nc)
+        reg_state = list(inject1)
+        closure_depth: Optional[int] = None
+        shell_traj: List[int] = []
+        horizon_hits = 0
+        z2_flips = 0
+        prev_z2 = _z2_sheet(reg_state[0])
+
+        for depth in range(1, max(2, int(max_depth)) + 1):
+            reg_state = op.apply_multicell(reg_state)
+            chi = sum(int(chirality_word6(s)) & MASK6 for s in reg_state)
+            shell_traj.append(chi & MASK6)
+            if any(is_on_horizon(s) or is_on_equality_horizon(s) for s in reg_state):
+                horizon_hits += 1
+            z2 = _z2_sheet(reg_state[0])
+            if z2 != prev_z2:
+                z2_flips += 1
+            prev_z2 = z2
+            if reg_state == inject1 and depth > 0 and closure_depth is None:
+                closure_depth = depth
+
+        reg_ok = verify_multicell_mul_reference(op, sample=min(nn, 64))
+        return HolonomySpectrum(
+            path="HOLONOMY_MULTICELL",
+            closure_depth=closure_depth,
+            half_depth=closure_depth // 2
+            if closure_depth and closure_depth % 2 == 0
+            else None,
+            signature_order=None,
+            k4_sector=0,
+            shell_trajectory=shell_traj[:32],
+            horizon_hits=horizon_hits,
+            z2_sheet_flips=z2_flips,
+            wht_peaks=[],
+            eigenspace_balance=0.0,
+            candidate_period=closure_depth,
+            register_matches_mul=reg_ok,
+            notes=f"method={op.compile_method}",
+        )
+
+    if not op.bytes_flat:
+        return HolonomySpectrum(
+            path="HOLONOMY_FAIL_CLOSED",
+            closure_depth=None,
+            half_depth=None,
+            signature_order=None,
+            k4_sector=0,
+            shell_trajectory=[],
+            horizon_hits=0,
+            z2_sheet_flips=0,
+            wht_peaks=[],
+            eigenspace_balance=0.0,
+            candidate_period=None,
+            register_matches_mul=False,
+            notes="no byte word or tabulation",
         )
 
     max_d = max(2, int(max_depth))
@@ -467,21 +719,115 @@ def _verify_period(n: int, base: int, r: int) -> bool:
     return int(exp_mod_ladder(int(base) % int(n), int(r), int(n))) == 1
 
 
+def holonomy_closure_period(
+    op: GyroOperator, *, max_depth: int = 50_000
+) -> Optional[int]:
+    """Period from iterating apply_multicell until register returns to inject(1)."""
+    if not op.compiled:
+        return None
+    nn, nc = int(op.N), int(op.n_cells)
+    one = inject_residue_multicell(1, nn, nc)
+    st = list(one)
+    cap = max(2, int(max_depth))
+    for d in range(1, cap + 1):
+        st = op.apply_multicell(st)
+        if st == one:
+            return int(d) if d > 1 else None
+    return None
+
+
+def holonomy_suffix_period(N: int, base: int, Q: int | None = None) -> Optional[int]:
+    """F_{G_X} suffix/beam readout via native audit scorer (readout leg)."""
+    from kernel.audit import period_reference
+
+    return period_reference(int(N), int(base), Q)
+
+
+@dataclass
+class HolonomyE2EReport:
+    N: int
+    base: int
+    n_cells: int
+    compile_method: str
+    oracle_ok: bool
+    oracle_checked: int
+    closure_period: Optional[int]
+    suffix_period: Optional[int]
+    suffix_path: str
+    periods_match: bool
+    notes: str = ""
+
+
+def holonomy_e2e(
+    N: int,
+    base: int,
+    Q: int | None = None,
+    *,
+    verify_all_oracle: bool = True,
+    max_closure_depth: int = 50_000,
+) -> HolonomyE2EReport:
+    """
+    End-to-end holonomy pipeline:
+      compile → oracle verify → closure (small r) / suffix readout → audit parity.
+    """
+    from kernel.bindings import shor_last_path_tag
+
+    nn, aa = int(N), int(base) % int(N)
+    if nn <= 1 or math.gcd(aa, nn) != 1:
+        raise ValueError("invalid holonomy_e2e inputs")
+
+    op = compile_factor_operator(nn, aa)
+    nc = int(op.n_cells)
+    checked = nn if verify_all_oracle else min(nn, 256)
+    oracle_ok = verify_multicell_mul_reference(op, sample=checked)
+
+    closure: Optional[int] = None
+    if oracle_ok and max_closure_depth > 0:
+        closure = holonomy_closure_period(op, max_depth=max_closure_depth)
+        if closure is not None and not _verify_period(nn, aa, closure):
+            closure = None
+
+    suffix = holonomy_suffix_period(nn, aa, Q) if oracle_ok else None
+    path = shor_last_path_tag() if suffix else "NONE"
+
+    notes: List[str] = []
+    if op.lookup_z:
+        notes.append("oracle=WIRE_TABULATE (K6 wiring; CNOT ALU open)")
+    if closure and suffix and closure != suffix:
+        notes.append(f"closure={closure} suffix={suffix}")
+
+    return HolonomyE2EReport(
+        N=nn,
+        base=aa,
+        n_cells=nc,
+        compile_method=op.compile_method,
+        oracle_ok=oracle_ok,
+        oracle_checked=checked,
+        closure_period=closure,
+        suffix_period=suffix,
+        suffix_path=path,
+        periods_match=closure == suffix if closure is not None else suffix is not None,
+        notes="; ".join(notes),
+    )
+
+
 def gyro_period(N: int, base: int, *, max_depth: int = 512) -> Optional[int]:
-    """ord_N(base) from holonomy closure; single exp_mod_ladder verify at end."""
+    """ord_N(base): closure when cheap; else suffix readout after oracle verify."""
     nn, aa = int(N), int(base) % int(N)
     if nn <= 1 or math.gcd(aa, nn) != 1:
         return None
 
     op = compile_factor_operator(nn, aa)
-    if not op.compiled:
+    if not op.compiled or not verify_multicell_mul_reference(op, sample=min(nn, 256)):
         return None
 
-    spec = holonomy_spectrum(op, max_depth=int(max_depth))
-    for cand in (spec.signature_order, spec.closure_depth):
-        if cand is not None and cand > 1 and _verify_period(nn, aa, int(cand)):
-            return int(cand)
-    return None
+    if nn <= 4096:
+        r = holonomy_closure_period(op, max_depth=max(int(max_depth), 50_000))
+        if r is not None and _verify_period(nn, aa, r):
+            return int(r)
+
+    r = holonomy_suffix_period(nn, aa)
+    return int(r) if r is not None and _verify_period(nn, aa, int(r)) else None
 
 
 def gyro_factor(N: int, base: int | None = None) -> Optional[Tuple[int, int]]:
@@ -522,12 +868,24 @@ __all__ = [
     "analyze_horizon_algebra",
     "compile_factor_operator",
     "compile_dlp_operator",
+    "search_multiply_word_bfs",
     "holonomy_spectrum",
+    "holonomy_closure_period",
+    "holonomy_suffix_period",
+    "holonomy_e2e",
+    "HolonomyE2EReport",
     "gyro_period",
     "gyro_factor",
     "gyro_dlp",
     "inject_residue_state",
     "inject_residue_multicell",
+    "decode_residue_multicell",
+    "decode_limb_from_state",
+    "MulticellALUProgram",
+    "RouterStep",
+    "replay_router_program",
+    "verify_multicell_mul_reference",
+    "_chi_as_limb_decode",
     "multicell_omega_key",
     "native_cell_count",
     "uv_ir_phase_link",

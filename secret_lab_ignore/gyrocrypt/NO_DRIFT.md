@@ -19,10 +19,9 @@
 
 ## Open milestone
 
-`compile_factor_operator(N,a)` must compile multi-cell QuBEC holonomy:
-`inject_residue_multicell(y) → inject_residue_multicell(a·y mod N)` via `MultiCellRouter`
-byte-ledger (carry-coupled), with period from Ω spectral closure — **without** classical
-`pow()` / coset enumeration in the holonomy hot path.
+Open research compiler milestone: **CNOT carry ledger** (`MulticellALUProgram.steps`).
+Interim holonomy wiring: **WIRE_TABULATE** (K6 — compile-time table only; not production oracle).
+Suffix readout: native F_{G_X} via `holonomy_suffix_period` / audit.
 
 **Classical coset + CQFT in `native.c` is audit/falsification only** (`kernel/audit.py`).
 It must not be deleted while the holonomy compiler is open, and must not be routed

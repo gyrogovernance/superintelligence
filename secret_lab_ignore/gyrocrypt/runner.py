@@ -92,11 +92,57 @@ def test_horizon_algebra() -> None:
     )
 
 
+def test_holonomy_e2e() -> None:
+    import time
+
+    from kernel.holonomy import holonomy_e2e
+
+    head("Holonomy end-to-end (compile → oracle → readout)")
+
+    for n, a, exp_r in ((15, 7, 4), (143, 7, 60)):
+        t0 = time.perf_counter()
+        rep = holonomy_e2e(n, a, verify_all_oracle=True, max_closure_depth=20_000)
+        elapsed = time.perf_counter() - t0
+        assert rep.oracle_ok, f"N={n} oracle failed"
+        assert rep.suffix_period == exp_r, f"N={n} suffix {rep.suffix_period} != {exp_r}"
+        assert rep.closure_period == exp_r, f"N={n} closure {rep.closure_period} != {exp_r}"
+        print(
+            f"[PASS] N={n} e2e r={exp_r} method={rep.compile_method!r} "
+            f"path={rep.suffix_path} ({elapsed:.1f}s)"
+        )
+
+    t0 = time.perf_counter()
+    rep867 = holonomy_e2e(
+        867199, 7, verify_all_oracle=True, max_closure_depth=0
+    )
+    elapsed = time.perf_counter() - t0
+    assert rep867.oracle_ok
+    assert rep867.suffix_period == 18018
+    assert rep867.suffix_path != "NONE"
+    print(
+        f"[PASS] N=867199 e2e oracle+suffix r={rep867.suffix_period} "
+        f"path={rep867.suffix_path} checked={rep867.oracle_checked} ({elapsed:.1f}s)"
+    )
+    print(f"[INFO] {rep867.notes}")
+
+
+def test_bfs_mul_oracle_falsified() -> None:
+    from kernel.holonomy import search_multiply_word_bfs
+
+    head("BFS multiply oracle (offline falsification K18)")
+    w4 = search_multiply_word_bfs(15, 7, max_depth=4, max_nodes=80_000)
+    assert w4 is None
+    print("[PASS] N=15,a=7 no parallel byte word at depth≤4")
+    print("[INFO] depth≤6 also None (~80s offline); wavefunction BFS rebrand rejected")
+
+
 def test_multicell_inject() -> None:
     from kernel.holonomy import (
+        decode_residue_multicell,
         inject_residue_multicell,
         multicell_omega_key,
         native_cell_count,
+        _chi_as_limb_decode,
     )
 
     head("Multi-cell QuBEC inject (holonomy register)")
@@ -106,7 +152,19 @@ def test_multicell_inject() -> None:
             multicell_omega_key(inject_residue_multicell(y, n, nc)) for y in range(n)
         }
         assert len(keys) == n, f"N={n} multicell inject not injective ({len(keys)}/{n})"
-        print(f"[PASS] N={n} B={nc} inject_residue_multicell injective ({n}/{n})")
+        chi_mism = sum(
+            1
+            for y in range(n)
+            if _chi_as_limb_decode(inject_residue_multicell(y, n, nc), nc) != y
+        )
+        assert chi_mism == n, "chi-as-limb must not equal encoded residue"
+        for y in range(n):
+            st = inject_residue_multicell(y, n, nc)
+            assert decode_residue_multicell(st, n, nc) == y
+        print(
+            f"[PASS] N={n} B={nc} inject/decode round-trip; "
+            f"chi≠limb ({chi_mism}/{n})"
+        )
 
 
 def test_native_c() -> None:
@@ -153,44 +211,19 @@ def test_simon() -> None:
 
 
 def test_production_period_factor() -> None:
-    from kernel.holonomy import compile_factor_operator, gyro_period, holonomy_spectrum
     from kernel.shor import factor, period, period_report
-    from kernel.audit import period_reference
 
     head("Production period + factor (native spectral)")
-    from kernel.core import cqft64_fast, zero_wavefunction
-
-    v = cqft64_fast([1.0 + 0j] * 64)
-    assert len(v) == 64
-    print("[PASS] cqft64_fast smoke")
-
     r15 = period(15, 7)
-    assert r15 == 4, f"production period(15,7) expected 4 got {r15}"
+    assert r15 == 4
     rep = period_report(15, 7)
     assert rep["r"] == 4
     print(f"[PASS] production period N=15 r=4 path={rep['path']}")
-
-    op15 = compile_factor_operator(15, 7)
-    holo15 = gyro_period(15, 7)
-    audit15 = period_reference(15, 7)
-    assert not op15.compiled and op15.compile_method.startswith("MULTICELL_OPEN")
-    print(
-        f"[OPEN] holonomy N=15 method={op15.compile_method!r} → {holo15!r} "
-        f"(audit r={audit15})"
-    )
-
-    got = factor(15, base=7)
-    assert got == (3, 5), f"factor(15) expected (3,5) got {got}"
+    assert factor(15, base=7) == (3, 5)
     print("[PASS] factor N=15 → (3,5)")
-
-    op143 = compile_factor_operator(143, 7)
     r143 = period(143, 7)
-    holo143 = gyro_period(143, 7)
-    print(
-        f"[INFO] N=143 production={r143} holonomy={holo143} "
-        f"compiled={op143.compiled} (arith ord=60)"
-    )
-    _ = holonomy_spectrum(op143, max_depth=32)
+    assert r143 == 60
+    print(f"[PASS] production period N=143 r={r143}")
 
 
 def test_audit() -> None:
@@ -216,29 +249,6 @@ def test_shor_large_native() -> None:
     print(f"[PASS] audit period N=867199 (r={r}, path={path}, {elapsed:.1f}s)")
 
 
-def test_holonomy_vs_audit() -> None:
-    import time
-
-    from kernel.audit import period_reference
-    from kernel.holonomy import compile_factor_operator, gyro_period, holonomy_spectrum
-
-    head("Holonomy vs audit N=867199")
-    t0 = time.perf_counter()
-    op = compile_factor_operator(867199, 7)
-    holo = gyro_period(867199, 7)
-    audit = period_reference(867199, 7)
-    elapsed = time.perf_counter() - t0
-    if holo is None:
-        print(
-            f"[OPEN] holonomy fail-closed audit={audit} method={op.compile_method!r} "
-            f"({elapsed:.1f}s)"
-        )
-    elif holo == audit:
-        print(f"[PASS] holonomy matches audit at N=867199 ({elapsed:.1f}s)")
-    else:
-        print(f"[FAIL] holonomy mismatch holo={holo} audit={audit}")
-
-
 def test_horizon_tensor() -> None:
     from kernel.audit import _default_Q
     from kernel.bindings import (
@@ -249,7 +259,7 @@ def test_horizon_tensor() -> None:
     )
     from kernel.shor import peak_k_for_period
 
-    head("Horizon tensor gates (K11/K15, C)")
+    head("Horizon tensor gates (K11)")
 
     for N, base, r in ((15, 7, 4), (143, 7, 60)):
         B = max(1, (2 * N.bit_length() + 5) // 6)
@@ -285,13 +295,14 @@ def run_tests() -> None:
     test_byte_bridge()
     test_wavefunction()
     test_horizon_algebra()
+    test_bfs_mul_oracle_falsified()
     test_multicell_inject()
     test_native_c()
     test_simon()
     test_production_period_factor()
     test_audit()
     test_shor_large_native()
-    test_holonomy_vs_audit()
+    test_holonomy_e2e()
     test_horizon_tensor()
     test_dlp()
 

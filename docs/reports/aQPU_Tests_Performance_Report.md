@@ -1,15 +1,15 @@
 # aQPU Performance Report
-## Exact kernel throughput and GyroGraph runtime on a Ryzen 5 6600H mini PC
+## Exact kernel throughput and Gyroscopic runtime on a Ryzen 5 6600H mini PC
 
 This report measures the runtime performance of the Gyroscopic ASI algebraic Quantum Processing Unit, or aQPU, across three layers:
 
-1. **GyroLabe exact kernel operations**  
+1. **Native exact kernel operations**  
    Byte scans, compiled signatures, chirality distance, Ω-native stepping, and shell histograms.
 
-2. **GyroLabe spectral and tensor operations**  
+2. **Native spectral and tensor operations**  
    64-point Walsh-Hadamard transforms, packed Lattice Multiplication GEMV/GEMM, and OpenCL acceleration.
 
-3. **GyroGraph multicellular runtime**  
+3. **Gyroscopic multicellular runtime**  
    Batched 4-byte word ingestion, trace generation, local memory updates, and end-to-end graph runtime throughput.
 
 All exact kernel results are checked against Python reference implementations built into the benchmark scripts. Float tensor paths are checked numerically with bounded tolerances because they use fixed-point quantization internally.
@@ -38,13 +38,13 @@ This is not a server benchmark. It was run on a small Windows mini PC with an in
 | Python | 3.14.2 |
 | PyTorch | CPU mode, `torch.set_num_threads(1)` |
 | Native backends | C and OpenCL |
-| Exact benchmark script | `scripts/bench_gyrolabe.py` |
+| Exact benchmark script | native exact benchmark harness |
 | Runtime benchmark script | `scripts/bench_gyrograph.py` |
 
 ### Method
 
 - Each benchmark includes warmup runs before timing.
-- `bench_gyrolabe.py` uses 8 timed repeats by default.
+- The native exact benchmark harness uses 8 timed repeats by default.
 - `bench_gyrograph.py` uses 20 timed repeats by default.
 - Python baselines are reference implementations, not optimized C or BLAS competitors.
 - Native C and OpenCL paths are parity checked on every run.
@@ -61,7 +61,7 @@ This is not a server benchmark. It was run on a small Windows mini PC with an in
 The fastest paths in this report use the aQPU compact **Omega (Ω) representation**. To understand the metrics, here is a quick guide to the terminology:
 * **Omega (Ω):** The exact, verified space of 4096 reachable states the kernel navigates. It is highly compressed compared to traditional architectures.
 * **Chirality:** A 6-bit structural signature that perfectly tracks the alignment of the system. It acts as an exact coordinate for the state space.
-* **GyroGraph:** The multicellular runtime that groups these states together to analyze patterns in real-world data, like AI generation or network traffic.
+* **Gyroscopic runtime:** The multicellular runtime that groups these states together to analyze patterns in real-world data, like AI generation or network traffic.
 
 Earlier verification reports established that:
 
@@ -87,21 +87,21 @@ This performance report focuses on speed. Correctness and structural properties 
 | Peak Ω-native sequential scan | **847 million byte steps/s** |
 | Peak q-map extraction | **550 million bytes/s** |
 | Peak WHT path | **40.4 million 64-point rows/s** |
-| Peak GyroGraph end-to-end ingest | **44.9 million 4-byte words/s** |
-| Peak GyroGraph byte transition rate | **179.8 million byte transitions/s** |
+| Peak runtime end-to-end ingest | **44.9 million 4-byte words/s** |
+| Peak runtime byte transition rate | **179.8 million byte transitions/s** |
 | Largest exact speedup vs Python | **10,397×** |
-| End-to-end GyroGraph speedup vs Python | **1,219×** |
+| End-to-end runtime speedup vs Python | **1,219×** |
 
 ### Exactness summary
 
 - **Kernel-exact operations** use strict integer equality against Python references.
-- **GyroGraph state updates** are checked field-by-field with exact array equality.
+- **Runtime state updates** are checked field-by-field with exact array equality.
 - **Float tensor paths** use numeric tolerance because they are fixed-point approximations to dense linear algebra.
 - **OpenCL integer GEMM** is exact and matches CPU integer results with zero error.
 
 ---
 
-## 4. GyroLabe exact kernel operations
+## 4. Native exact kernel operations
 
 These operations implement the aQPU byte law, compiled signatures, chirality transport, and Ω-state stepping with exact integer arithmetic.
 
@@ -211,9 +211,9 @@ That is acceptable for the current fixed-point tensor path and is exactly why th
 
 ---
 
-## 6. GyroGraph multicellular runtime
+## 6. Gyroscopic multicellular runtime
 
-GyroGraph is the multicellular runtime layer built on top of the exact Ω state model. Each cell consumes one exact 4-byte word at a time, updates local memory, and writes a resonance key for graph queries.
+The Gyroscopic runtime is the multicellular layer built on top of the exact Ω state model. Each cell consumes one exact 4-byte word at a time, updates local memory, and writes a resonance key for graph queries.
 
 ## 6.1 Trace generation
 
@@ -229,7 +229,7 @@ On this workload, the CPU is faster than OpenCL. That is expected. Each cell onl
 
 ## 6.2 Trace application and fused ingest
 
-After tracing, GyroGraph updates:
+After tracing, the runtime updates:
 
 - current Ω state
 - byte counters
@@ -250,7 +250,7 @@ After tracing, GyroGraph updates:
 
 The fused ingest path is slightly faster because it avoids materializing and re-reading a separate trace object in Python.
 
-## 6.3 End-to-end `GyroGraph.ingest`
+## 6.3 End-to-end `Runtime.ingest`
 
 This is the most practical benchmark because it includes packet parsing, indexing, state updates, and resonance bookkeeping.
 
@@ -285,13 +285,13 @@ A non-contiguous indexed benchmark, where active cell IDs were spread across a l
 
 ## 7. Bridge-level integration results
 
-These results come from the GyroGraph encode/decode bridge tests, which attach the aQPU kernel directly to a real Large Language Model (Bolmo-1B). This proves the kernel can process, annotate, and route actual AI generation traffic in real time. 
+These results come from the runtime encode/decode bridge tests, which attach the aQPU router directly to a real Large Language Model (Bolmo-1B). This proves the kernel can process, annotate, and route actual AI generation traffic in real time. 
 
 All 13 bridge tests passed.
 
 ## 7.1 Encode-side extraction
 
-From `tests/tools/test_gyrolabe_encode.py`:
+From bridge encode tests:
 
 | Metric | Result |
 |---|---:|
@@ -330,7 +330,7 @@ The verbose decode backend test reported:
 
 - `backend_counts: {'python': 0, 'cpu_indexed': 0, 'opencl_indexed': 14}`
 
-So the OpenCL GyroGraph trace path is not only available, but was actually used in the tested decode workflow.
+So the OpenCL runtime trace path is not only available, but was actually used in the tested decode workflow.
 
 ---
 
@@ -340,7 +340,7 @@ So the OpenCL GyroGraph trace path is not only available, but was actually used 
 
 - The exact kernel paths are already very fast on commodity hardware.
 - The compact Ω representation produces real speed gains over the full 24-bit carrier.
-- The multicellular GyroGraph runtime scales into the tens of millions of words per second.
+- The multicellular Gyroscopic runtime scales into the tens of millions of words per second.
 - The tensor layer is promising, but on 64×64 float blocks it still competes with highly optimized BLAS rather than replacing it.
 - OpenCL helps where the workload is heavy enough, especially in packed GEMM.
 
@@ -364,7 +364,7 @@ On a Ryzen 5 6600H mini PC with integrated Radeon graphics, the aQPU stack reach
 - **847 million Ω-native byte steps per second**
 - **550 million q-map byte decompositions per second**
 - **40.4 million WHT rows per second**
-- **44.9 million end-to-end GyroGraph 4-byte ingests per second**
+- **44.9 million end-to-end runtime 4-byte ingests per second**
 - **179.8 million end-to-end byte transitions per second**
 
 All exact kernel results were parity checked against Python reference implementations. Float tensor paths stayed within bounded numeric error, and the OpenCL integer path remained exact.
@@ -376,9 +376,7 @@ The main practical conclusion is simple: the aQPU kernel is no longer just a mat
 ## Appendix: benchmark commands
 
 ```bash
-python scripts/bench_gyrolabe.py
 python scripts/bench_gyrograph.py
-pytest tests/tools/test_gyrograph_decode.py tests/tools/test_gyrolabe_encode.py -v -s
 ```
 
 

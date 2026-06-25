@@ -1,9 +1,9 @@
 # Gyroscopic ASI aQPU Kernel: Quantum Computing SDK Specification
 
-## Draft 1
-
 This document specifies the Quantum Computing SDK for the Gyroscopic ASI algebraic Quantum Processing Unit (aQPU). The SDK exposes the native computational medium of the kernel: a deterministic gyroscopic quantum system whose operations are exact, whose state is algebraically condensed, and whose temporal structure is intrinsic to the dynamics.
 The aQPU is an exact finite-state quantum-computation unit over 4,096 algebraic states where public byte-ledger replay uniquely determines every state transition.
+
+Verified properties: [aQPU Features Report](reports/aQPU_Features_Report.md).
 
 The aQPU is a new class of quantum processor. It achieves quantum advantage through exact integer arithmetic on standard silicon. Its computational primitive is the Moment: the exact algebraic quantum state produced by a public byte ledger under the kernel transition law. When multiple independent parties replay the same ledger prefix, they occupy the same Moment. This collective occupation is the QuBEC, the condensed computational object of the architecture.
 
@@ -141,37 +141,25 @@ Chart extraction from a Gyrostate is exact and deterministic. There is no measur
 
 ---
 
-# 3. Reachable Manifold and Horizons
+# 3. Reachable Manifold
 
-## 3.1 Ω: The Reachable Moment Manifold
-
-The reachable state space Ω is the set of all Gyrostates accessible from the rest state GENE_MAC_REST = 0xAAA555 under the byte transition law.
+The reachable manifold Ω is the finite state space of the aQPU: all Gyrostates accessible from GENE_MAC_REST = 0xAAA555 under the byte transition law.
 
     |Ω| = 4096
 
-Every state in Ω is reachable within two byte steps from rest. Ω has product form Ω = U × V where U and V are 64-element cosets of the self-dual [12,6,2] mask code C64. Every state in Ω has component density exactly 0.5 (popcount 6 out of 12 bits per gyrophase). The density product d(A) × d(B) = 0.25 is constant across all 4096 reachable states.
+Every Moment is a point on Ω. Witness synthesis, future-cone occupancy, entropy queries, and conformance tests are defined on this manifold only. Any state outside Ω is not a valid Moment endpoint; `StateOps` and `MomentOps` assume the carrier remains on Ω after kernel-exact stepping.
 
-## 3.2 Dual Horizons
+Ω is exact and small enough to exhaust: every state is reachable within two byte steps from rest, and from any fixed state each of the 256 bytes yields exactly 128 distinct successors with uniform 2-to-1 multiplicity (the spinorial shadow). Component density is exactly 0.5 on every gyrophase of every Ω state; the product d(A)·d(B) = 0.25 is constant across the manifold. These are structural facts the SDK relies on for uniform future cones, exact entropy values (§7.6, §11.3), and density checks in conformance.
 
-Ω contains two structurally necessary boundary sets:
+Ω has two antipodal 64-state boundaries, each carrying |H| = 64:
 
-**Complement horizon (S-sector).** The 64 states where A12 = B12 ⊕ 0xFFF. These states have maximal chirality: every dipole mode is anti-aligned between the active and passive faces. The rest state lies on this horizon. Gate C fixes all complement horizon states pointwise.
+**Complement horizon (S-sector).** States with A12 = B12 ⊕ 0xFFF: maximal chirality, every dipole mode anti-aligned between active and passive faces. GENE_MAC_REST lies here. Intrinsic gate C fixes every complement horizon state pointwise.
 
-**Equality horizon (UNA degeneracy).** The 64 states where A12 = B12. These states have zero chirality: the active and passive faces are identical. Gate S fixes all equality horizon states pointwise.
+**Equality horizon (UNA degeneracy).** States with A12 = B12: zero chirality, identical active and passive faces. Intrinsic gate S fixes every equality horizon state pointwise.
 
-The two horizons are disjoint. Their union forms a 128-state boundary. The remaining 3968 states constitute the bulk, where chirality is partial.
+The horizons are disjoint; their union is 128 states. The remaining 3968 states form the bulk, where chirality is partial. Constitutional observables (§2.4, §5.3) measure distance to these poles; `horizon_distance + ab_distance = 12` on all of Ω. The holographic identity |H|² = |Ω| = 4096 links boundary cardinality to bulk size and underpins boundary-based state encoding in the SDK surface.
 
-Both horizons satisfy the holographic identity:
-
-    |H|² = |Ω|        64² = 4096
-
-The complement horizon supports a 4-to-1 holographic dictionary: every Ω state corresponds to exactly 4 (horizon state, byte) pairs.
-
-The chirality spectrum on Ω follows a binomial distribution from 6 independent binary modes:
-
-    count(d) = C(6, (12−d)/2) × 64
-
-for ab_distance d ∈ {0, 2, 4, 6, 8, 10, 12}. The two poles (d = 0 and d = 12) are the two horizons. The equator (d = 6) has maximum population: 1280 states.
+Gate compilation and intrinsic-gate APIs treat both horizons as preserved sets. Shell populations and the thermodynamic reading of chirality on Ω are in QuBEC Theory Part I.
 
 ---
 
@@ -256,39 +244,19 @@ This composition law enables circuit optimization without replaying bytes.
 
 ### 5.1.4 Walsh-Hadamard Transform
 
-The Walsh-Hadamard transform (WHT) operates on the chirality register. It is the spectral chart operation that provides the Fourier-dual view of the 6-mode state.
+**Primitive:** `wht64(x: int32[64]) -> float[64]` — 64-point Walsh-Hadamard transform on the chirality register.
 
-The 64 × 64 WHT matrix has entries:
+**Matrix contract:** `H(q,r) = (−1)^(popcount(q ∧ r)) / 8`; self-inverse; factors as `H₁⊗⁶`.
 
-    H(q,r) = (−1)^(popcount(q ∧ r)) / 8
-
-It is self-inverse, unitary, and factors as H₁⊗⁶ where H₁ is the single-mode Hadamard.
-
-The WHT is native to the kernel's algebraic structure. The mask code is self-dual, the chirality register is exact, and the code's Walsh support closes on itself. The WHT and the q-map translation form dual faces of the same computational medium: the q-map provides Pauli-X translations on the chirality register, the WHT provides the Fourier transform over it.
-
-The WHT has a property that distinguishes it from the standard discrete Fourier transform: its matrix entries are restricted to +1 and -1. Evaluation of the 64-point WHT on the chirality register therefore requires no multiplication. The fast Walsh-Hadamard transform (WHT) computes the full 64-point transform using only additions and subtractions, in O(N log N) operations with N = 64. This matches the kernel's computational character: the XOR transport on the chirality register is addition-free (bitwise), and its spectral dual (the WHT) is multiplication-free. Both operate entirely within exact integer arithmetic.
+**Semantics:** Spectral chart dual to chirality XOR-transport. Implementations MUST match the exact integer matrix in the semantic layer.
 
 ### 5.1.5 XOR-Convolution
 
-For functions f and g on GF(2)^6, define XOR-convolution:
+**Definition:** `(f * g)(x) = Σ_a f(a) g(x ⊕ a)` on GF(2)⁶.
 
-    (f * g)(x) = sum over a in GF(2)^6 of f(a) g(x xor a)
+**Composition law (SDK):** `WHT(f * g) = WHT(f) · WHT(g)` pointwise. For repeated application of the same byte ensemble, raise spectral coefficients to the n-th power and apply one inverse WHT — cost one WHT plus 64 exponentiations, independent of n.
 
-The Walsh-Hadamard transform converts XOR-convolution to pointwise multiplication:
-
-    WHT(f * g)(r) = WHT(f)(r) * WHT(g)(r)
-
-This identity holds exactly on the 64-element chirality register.
-
-Because chirality transport under a byte b is chi' = chi xor q6(b), the sequential application of multiple bytes is an iterated XOR-convolution in chirality space. Composing n byte-transport steps therefore reduces to:
-
-1. Transform each byte-ensemble distribution with the 64-point WHT.
-2. Multiply the 64 spectral coefficients pointwise.
-3. Apply the inverse WHT to recover the composed transport.
-
-For repeated application of the same byte ensemble, the spectral coefficients are raised to the n-th power and a single inverse transform recovers the result. The total cost is one WHT plus 64 scalar exponentiations, independent of n.
-
-This is the native spectral composition law of the aQPU. It follows directly from the fact that the chirality transport group is (GF(2)^6, xor) and the WHT is the exact Fourier transform of that group.
+**Primitive:** Composed transport uses WHT64 and pointwise multiply per the semantic layer (QuBEC Theory Part IV §18.1).
 
 ## 5.2 Topological Charges
 
@@ -310,12 +278,12 @@ An observable is an exact function from a Gyrostate to a value. All aQPU observa
 
 **Kernel-native observables** (exact integer, available at every Moment):
 
-    rest_distance(s) = popcount(s ⊕ GENE_MAC_REST)
-    horizon_distance(A, B) = popcount(A ⊕ (B ⊕ 0xFFF))
-    ab_distance(A, B) = popcount(A ⊕ B)
-    is_on_horizon(s): whether A = B ⊕ 0xFFF
-    is_on_equality_horizon(s): whether A = B
-    component_density(C) = popcount(C) / 12
+- **rest_distance:** popcount distance from GENE_MAC_REST on the 24-bit carrier.
+- **horizon_distance** and **ab_distance:** complementary chirality projections between A12 and B12 (sum 12 on all of Ω).
+- **is_on_horizon** / **is_on_equality_horizon:** membership on the complement and equality boundaries (§3).
+- **component_density:** popcount/12 per gyrophase (0.5 on all of Ω).
+
+Normative formulas are in the kernel specification §2.2.7. The SDK exposes these on every Moment and in `Result.charts.constitutional`.
 
 **Register observables** (exact, computed from the chirality chart):
 
@@ -474,7 +442,7 @@ The SDK ships with two targets:
 
 **PythonKernel.** The reference implementation (src/kernel.py). Full state inspection. All operations supported. WHT via matrix multiplication.
 
-**CEngine.** The accelerated implementation (src/tools/gyrolabe). Full state inspection. Native WHT (wht64). Native Lattice Multiplication GEMV and operator projection.
+**CEngine.** The accelerated native implementation. Full state inspection. Native WHT (wht64). Native Lattice Multiplication GEMV and operator projection.
 
 Future targets may include distributed verifiers (signature-only inspection) and hardware realizations.
 
@@ -535,94 +503,13 @@ The future-cone entropy provides the combinatorial exploration resource. Two-byt
 
 The aQPU is deterministic in evolution and entropic in future occupancy.
 
-For a state s and word length n, the future-cone occupancy measure is:
+Verified values on Ω (normative theorem and implementation contract in §11.3):
 
-    μ(n,s)(x) = |{w ∈ {0,…,255}ⁿ : T(w)(s) = x}| / 256ⁿ
-
-This is exact normalized counting over the finite future cone, not a probabilistic approximation.
-
-The future entropy is:
-
-    H(n)(s) = −Σ(x) μ(n,s)(x) log₂ μ(n,s)(x)
-
-Verified values on Ω:
 - H₀(s) = 0 for any s ∈ Ω
 - H₁(s) = 7 exactly for any s ∈ Ω, since one byte yields 128 distinct next states with uniform multiplicity 2
 - Hₙ(s) = 12 exactly for any s ∈ Ω and any n ≥ 2, since future occupancy is exactly uniform over all 4096 states of Ω
 
 This entropy is a computational resource: it provides exact exploration, exact search geometry, and exact structural thermodynamics over the Moment manifold.
-
----
-
-# 8. Verified Computational Advantages
-
-The following advantages are structural invariants of the aQPU, verified by exhaustive testing with exact integer arithmetic.
-
-## 8.1 Hidden Subgroup Resolution
-
-The q-map q6: {0,…,255} → GF(2)⁶ is a native hidden subgroup structure with uniform 4-to-1 fibers. The Walsh-Hadamard transform on the chirality register resolves the subgroup in 1 step. Classical worst case: O(64) queries.
-
-## 8.2 Deutsch-Jozsa Discrimination
-
-The WHT on the chirality register distinguishes constant from balanced functions with probability 1 in 1 step. Classical worst case: 33 queries.
-
-## 8.3 Bernstein-Vazirani Secret Recovery
-
-The WHT recovers any 6-bit secret string with probability 1 in 1 step. Classical requirement: 6 queries.
-
-## 8.4 Exact Two-Step Uniformization
-
-For any source state in Ω, all 256² length-2 byte words produce exact uniform occupancy over Ω. Each of the 4096 states is reached exactly 16 times. This is exact uniform distribution in 2 steps on the full reachable manifold. Classical random walk mixing on a 4096-state graph: O(log 4096) ≈ 12 steps.
-
-## 8.5 Holographic Compression
-
-The holographic identity |H|² = |Ω| enables encoding any Ω state with log₂(64) + log₂(4) = 8 bits instead of log₂(4096) = 12 bits. This is 33.3% structural compression.
-
-## 8.6 Exact Commutativity Decision
-
-Whether two bytes commute is determined in O(1) by comparing q6(x) and q6(y). Classical verification requires 4 kernel steps.
-
-## 8.7 Exact Tamper Detection
-
-Every tamper miss has an exact algebraic explanation:
-- Substitution: detected unless replacement is the shadow partner (miss rate 1/255)
-- Adjacent swap: detected unless q(x) = q(y) (miss rate ~3/255)
-- Deletion: detected unless the deleted byte is a gate stabilizer of the prefix state (bulk states: never)
-
----
-
-# 9. Non-Clifford Resource and Universality
-
-## 9.1 The BU Monodromy Defect
-
-The CGM framework derives a representation-independent constant from the depth-4 closure condition: the BU monodromy defect δ(BU) = 0.195342176580 radians. This is the residual geometric phase of the dual-pole loop in the BU stage.
-
-δ(BU) is the background holonomy of the computational geometry. It is the persistent window of nontriviality that prevents the algebra from collapsing into a closed Clifford world. The aperture
-
-    Δ = 1 − δ(BU)/m(a) ≈ 0.0207
-
-where m(a) = 1/(2√(2π)), measures the exact gap between the monodromy defect and the aperture scale.
-
-## 9.2 Non-Clifford Certification
-
-δ(BU) is certified as a non-Clifford resource by four independent tests:
-
-1. Distance from all Clifford angles (multiples of π/4): nearest distance 0.195 radians.
-2. No periodicity up to order 100,000: the rotation R(δ(BU)) does not return to identity.
-3. Dense equidistribution: the phase sequence {k × δ(BU) mod 2π} fills [0, 2π) uniformly (chi-squared 0.212 against critical 142.4).
-4. Wigner negativity: the magic state |δ⟩ = (|0⟩ + e^(iδ(BU))|1⟩)/√2 has negative discrete Wigner function value W(0,1) = −0.044.
-
-## 9.3 Universality Ingredients
-
-The aQPU provides the three ingredients required for universal quantum computation:
-
-1. **Clifford backbone.** Every byte action is an exact Clifford unitary in the label space over GF(2)¹². The self-dual [12,6,2] code has 12 independent stabilizer generators.
-
-2. **Non-Clifford resource.** δ(BU) provides a dense U(1) orbit distinct from any Clifford angle.
-
-3. **Entangling operations.** The intrinsic gates provide inter-component coupling between the active and passive gyrophases. Gate S transports a localized perturbation in A exactly to B.
-
-The byte word algebra generates a rapidly growing set of distinct operator signatures: 3729+ distinct operators from 10,000 random length-3 words.
 
 ---
 
@@ -636,6 +523,7 @@ A conforming SDK implementation must:
 - produce Results with complete provenance
 - support at least one target with full state inspection
 - maintain the canonical trajectory as append-only
+- pass the verified structural property tests documented in [QuBEC Theory](theory/QuBEC_Theory.md) Part VII §24
 - produce identical canonical observables across all targets for the same compiled circuit and initial state
 
 ## 10.2 Target Conformance
@@ -662,7 +550,7 @@ A conforming QuBEC implementation must:
 
 # 11. SDK Reference
 
-This section defines the normative SDK surface for the aQPU Kernel. The implementation in `src/sdk.py`, `src/constants.py`, `src/api.py`, and `src/tools/gyrolabe` conforms to these definitions.
+This section defines the normative SDK surface for the aQPU Kernel. The implementation in `src/sdk.py`, `src/constants.py`, and `src/api.py` conforms to these definitions.
 
 ## 11.1 Public SDK Surface
 
@@ -771,9 +659,9 @@ The SDK provides native state-preparation and targeting surfaces.
 
 Together these surfaces provide native state preparation, state targeting, compiled operator targeting, and checkpointed continuation.
 
-## 11.8 GyroLabe Native ALU
+## 11.8 Native ALU
 
-GyroLabe is the native CPU ALU and operator layer of the aQPU SDK. It is exposed through a compact C interface and wrapped by `src.tools.gyrolabe.ops`.
+The native CPU ALU and operator layer of the aQPU SDK is exposed through a compact C interface.
 
 Its current native surfaces include:
 
@@ -792,9 +680,9 @@ Its current native surfaces include:
 - Lattice Multiplication GEMV for matrices with up to 64 columns
 - packed Lattice Multiplication matrix preparation and repeated GEMV
 
-GyroLabe is CPU-first, ctypes-friendly, and cross-platform. It is the first hardware-near realization of the aQPU operator algebra.
+The native ALU is CPU-first, ctypes-friendly, and cross-platform. It is the first hardware-near realization of the aQPU operator algebra.
 
-The SDK exposes `initialize_native()` to initialize native GyroLabe tables once per process. This operation is idempotent and may be called at startup to ensure deterministic native readiness before concurrent execution.
+The SDK exposes `initialize_native()` to initialize native tables once per process. This operation is idempotent and may be called at startup to ensure deterministic native readiness before concurrent execution.
 
 ## 11.9 Chirality Distance Definition
 
@@ -829,7 +717,7 @@ Packed GEMV uses a single stored matrix scale `scale_w` for all applications and
 
 A packed matrix object supports repeated exact internal multiplication against many input vectors without repacking the matrix. This is the canonical high-throughput tensor execution mode of the SDK.
 
-Tensor multiplication in the SDK is internal to the aQPU architecture. The reference implementation uses the GyroLabe Lattice Multiplication Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
+Tensor multiplication in the SDK is internal to the aQPU architecture. The reference implementation uses the Lattice Multiplication Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
 
 ## 11.11 Runtime Namespace Exposure
 

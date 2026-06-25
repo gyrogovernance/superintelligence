@@ -3,9 +3,11 @@
 
 Gyroscopic Artificial Superintelligence is a new class of computation achieving quantum advantage through a compact algebraic quantum processing unit (aQPU) kernel. The kernel is a deterministic byte-driven coordination medium that maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. Its internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain, executing on standard silicon with exact integer arithmetic rather than probabilistic approximation on quantum hardware.
 
-This document is the normative technical specification of the Gyroscopic ASI aQPU Kernel. It defines the kernel physics, the runtime router, replay rules, the application-layer governance measurement medium, and the AIR CLI program format. The kernel was previously designated as the Gyroscopic ASI aQPU Kernel. All technical content is continuous with prior versions under that name.
+This document is the normative technical specification of the Gyroscopic ASI aQPU Kernel. It defines the kernel physics, the runtime router, replay rules, the application-layer governance measurement medium, and the AIR CLI program format.
 
 Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
+
+Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC Theory](theory/QuBEC_Theory.md), [Runtime](Gyroscopic_ASI_Runtime_Specs.md). Verification inventory: [aQPU Features Report](reports/aQPU_Features_Report.md).
 
 ---
 
@@ -259,6 +261,8 @@ The archetype (GENE_Mic) is a common source in the strict operational sense: it 
 
 The archetype GENE_MIC_S is the unique common source of all transcription. No byte input produces a second independent archetype. The transcription rule `intron = byte ^ GENE_MIC_S` ensures that every intron is a mutation measured relative to the single archetype. This is the discrete realization of the quantum non-cloning theorem: the reference state cannot be perfectly copied by any operation within the system it defines.
 
+The archetype governs all measurement outcomes but cannot itself be directly observed as a state. At the complement horizon (A12 = B12 ^ 0xFFF), its alternating pattern is maximally expressed across both components in opposite phase. At the equality horizon (A12 = B12), chirality vanishes and the archetype's effect is maximally concealed. Both extremes are non-absolute (64 states each); the bulk of Omega carries intermediate chirality.
+
 ### 2.2.7 Canonical Derived Observables
 
 From the 24-bit state `s_t = (A12, B12)`, the following observables are defined as deterministic functions. These are the canonical constitutional observables exported by the kernel.
@@ -455,7 +459,7 @@ The current verified kernel properties are:
 
 ## 3.3 Operational Reachable Shared-Moment Space
 
-From rest (GENE_MAC_REST), the operational reachable shared-moment space Omega has 4096 states. The horizon (S-sector) within Omega is the set of states satisfying `A12 = B12 ^ 0xFFF`; it has 64 states and includes the rest state. A second boundary set, the equality horizon (`A12 = B12`, zero chirality), also has 64 states. Neither boundary set is absolute; each comprises 1/64 of Omega. The two sets are disjoint and antipodal (see Appendix G.2). |H|^2 = |Omega| = 4096. Omega is radius 2 from rest. Omega has product form U x V with 64-element factors induced by the 64-codeword mask space.
+From rest (GENE_MAC_REST), the operational reachable shared-moment space Omega has 4096 states. The horizon (S-sector) within Omega is the set of states satisfying `A12 = B12 ^ 0xFFF`; it has 64 states and includes the rest state. A second boundary set, the equality horizon (`A12 = B12`, zero chirality), also has 64 states. Neither boundary set is absolute; each comprises 1/64 of Omega. The two sets are disjoint and antipodal. |H|^2 = |Omega| = 4096. Omega is radius 2 from rest. Omega has product form U x V with 64-element factors induced by the 64-codeword mask space.
 
 ## 3.4 Algebraic Integrity
 
@@ -693,7 +697,7 @@ Edges are ordered as the six undirected pairs:
 
 All ledgers `y ∈ ℝ^6` and all GovernanceEvents must use this canonical ordering.
 
-This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel physics produces. See Appendix G.3 for the full gate structure.
+This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel physics produces. The four intrinsic gates {id, S, C, F} and their horizon action are specified in [QuBEC Theory](theory/QuBEC_Theory.md) Part II §10.
 
 ## 4.7 Hodge Decomposition on K₄
 
@@ -1045,7 +1049,7 @@ Opposition occurs without absolute contradiction.
 
 Modal form: S implies it is not necessary that `[L][R]S` is equivalent to the negation of `[R][L]S`.
 
-aQPU Kernel realization: the 64 distinct masks and family-controlled complements preserve differentiated paths. The discrete structure realizes CGM's 3D structure and 6 degrees of freedom through the 64 distinct masks (6 dipole pairs), 4 families (spinorial complement phases), and the K4 fiber that emerges intrinsically at depth 4 (Appendix G).
+aQPU Kernel realization: the 64 distinct masks and family-controlled complements preserve differentiated paths. The discrete structure realizes CGM's 3D structure and 6 degrees of freedom through the 64 distinct masks (6 dipole pairs), 4 families (spinorial complement phases), and the K4 fiber that emerges intrinsically at depth 4.
 
 ## A.4 Balance Universal Egress (BU-Egress)
 
@@ -1188,365 +1192,4 @@ Implementations MAY include a deterministic safeguard for near-zero gradient cas
 
 # Appendix F. CGM Byte Formalism
 
-The complete CGM Byte Formalism is incorporated by reference from `docs/Gyroscopic_ASI_Specs_Formalism.md`. That document is the authoritative specification of byte palindromy, boundary-bit family extraction, 6-bit payload runtime, depth-4 closure, and the current spinorial relation between GENE_Mic and GENE_Mac.
-
----
-
-# Appendix G. Algebraic Quantum Structure
-
-This appendix documents the intrinsic quantum-algebraic properties of the kernel that emerge from the transition law and the CGM constraints. These properties are not imposed by design but are discovered through exhaustive verification of the kernel physics. They ground the kernel's role as an algebraic quantum processing unit (aQPU).
-
-## G.1 The Kernel as Algebraic Quantum Processing Unit
-
-The kernel is not a simulation of quantum mechanics. It is an algebraic quantum system over GF(2): a deterministic finite-state machine whose internal structure satisfies discrete analogs of the axioms that characterize quantum systems in the continuous regime.
-
-The following quantum-structural properties are exhaustively verified by the physics tests:
-
-**Unitarity.** Every byte defines a bijection on the full 24-bit state space. The transition is exactly invertible given the byte. No information is lost or created. This is the discrete analog of unitary evolution.
-
-**Spinorial closure.** Every byte has order 4: applying any byte four times returns to the starting state. This is the discrete 720-degree closure of SU(2). The 4-family structure (4 complement phases per mask) realizes the spinorial double cover.
-
-**Non-cloning.** The archetype GENE_MIC_S = 0xAA is the unique common source of all transcription. No byte input produces a second independent archetype. The transcription rule `intron = byte ^ GENE_MIC_S` ensures that every intron is a mutation measured relative to the single archetype. The reference state cannot be perfectly copied by any operation within the system it defines. This is the discrete realization of the quantum no-cloning theorem: cloning would require an operation that duplicates the reference frame, but all operations are defined relative to that frame and cannot step outside it.
-
-**Complementarity.** The 128-way shadow projection (256 bytes map to 128 distinct next states from any fixed state, with exact 2-to-1 multiplicity) is the discrete SO(3)/SU(2) double cover. Full phase information requires the 32-bit register atom (24-bit state + 8-bit intron); the 24-bit Mac state alone is the spatial shadow.
-
-**Entanglement.** The Hilbert-space lift of the self-dual [12,6,2] code supports standard bipartite entanglement: product subsets yield zero von Neumann entropy on the reduced density matrix, while XOR-graph subsets yield maximal entropy log2(64) = 6 bits. The code's algebraic structure is compatible with entanglement-based protocols.
-
-**Constant density.** Every state in Omega has component density exactly 0.5 (popcount 6 out of 12 bits per component). The density product d_A x d_B = 0.25 is constant across all 4096 reachable states. No state has more "weight" in one component than the other. This constant-density property is a consequence of the pair-diagonal structure of the mask code: XOR with any codeword preserves the popcount of each component.
-
-The term "algebraic quantum processing unit" (aQPU) designates a system possessing these properties over a finite algebraic field. The kernel processes bytes through quantum-algebraic operations on a discrete state space whose structure is determined by the CGM constraints.
-
-## G.2 Dual Horizons
-
-The kernel state space Omega contains two structurally necessary boundary sets, each with 64 states.
-
-### G.2.1 The S-sector (complement horizon)
-
-**Definition:** A state (A12, B12) is on the complement horizon if and only if:
-
-```
-A12 == B12 ^ 0xFFF
-```
-
-This is the set of states where chirality is maximal: every bit position has opposite polarity in A and B. The rest state GENE_MAC_REST = (0xAAA, 0x555) satisfies this condition. The complement horizon is the discrete realization of the S-sector from the CGM paper: the observable horizon where the reference frame is fully established.
-
-Within Omega, the complement horizon consists of the 64 states:
-
-```
-H_complement = { (A_rest ^ c, B_rest ^ c) : c in C64 }
-```
-
-where C64 is the 64-element self-dual mask code.
-
-### G.2.2 The unity degeneracy (equality horizon)
-
-**Definition:** A state (A12, B12) is on the equality horizon if and only if:
-
-```
-A12 == B12
-```
-
-This is the set of states where chirality has locally vanished: the active and passive phases are identical. The rest state does NOT satisfy this condition. The equality horizon is the discrete realization of the UNA degeneracy: the boundary where non-absolute unity is locally realized.
-
-Within Omega, the equality horizon consists of the 64 states:
-
-```
-H_equality = { (A_rest ^ c, A_rest ^ c) : c in C64 }
-```
-
-equivalently { (B_rest ^ c, B_rest ^ c) : c in C64 } since 0xFFF is in C64.
-
-### G.2.3 Structural necessity of both horizons
-
-Neither horizon is absolute:
-
-```
-|H_complement| = |H_equality| = 64
-|Omega| = 4096
-Fraction per horizon: 64/4096 = 1/64 = 2^(-6)
-```
-
-The exponent 6 corresponds to the 6 degrees of freedom (6 dipole pairs). Each DoF independently contributes to the boundary condition; all 6 must be satisfied for a state to lie on either horizon.
-
-The two horizons are disjoint: no state satisfies both A == B and A == B ^ 0xFFF simultaneously (that would require 0xFFF == 0). Together they form a 128-state boundary:
-
-```
-|H_complement union H_equality| = 128 = 2^7
-```
-
-The remaining 3968 states constitute the bulk of Omega, where chirality is partial: neither fully expressed nor fully collapsed. This is the contingent middle required by UNA and ONA: unity exists but is non-absolute, opposition exists but is non-absolute, and the majority of states exhibit structured contingency between the two extremes.
-
-### G.2.4 The holographic ratio
-
-Both horizons independently satisfy the holographic relation:
-
-```
-|H|^2 = |Omega|
-64^2 = 4096
-```
-
-This is verified exhaustively by BFS and by the 4-to-1 holographic dictionary from the complement horizon. The same ratio holds for the equality horizon by the product structure of Omega.
-
-### G.2.5 Canonical observables
-
-The kernel exports two horizon distance observables:
-
-```python
-# S-sector distance (complement horizon, where chirality is maximal)
-horizon_distance(a12, b12) = popcount(a12 ^ (b12 ^ 0xFFF))
-
-# Unity degeneracy distance (equality horizon, where chirality vanishes)
-ab_distance(a12, b12) = popcount(a12 ^ b12)
-```
-
-A state is on the complement horizon when `horizon_distance == 0`. A state is on the equality horizon when `ab_distance == 0`.
-
-**Complementarity invariant:** `horizon_distance + ab_distance = 12` for all states universally. The two horizons are antipodal at the maximum distance of 12. This is the Bloch sphere pole-to-pole conservation: distance to one pole plus distance to the other equals the diameter.
-
-### G.2.6 Chirality transport law
-
-For states in Omega, the 12-bit difference A ⊕ B is always pair-diagonal (each pair is 00 or 11). This collapses to a 6-bit chirality word χ(s) with one bit per dipole pair. Under a byte transition T_b, the chirality word transforms by:
-
-`χ(T_b(s)) = χ(s) ⊕ q₆(b)`
-
-where q₆(b) is the 6-bit collapse of the commutation invariant q(b). This is an exact XOR transport law: the chirality register is a linear observable over GF(2)^6 that the byte algebra acts on by translation.
-
-### G.2.7 Chirality spectrum
-
-The `ab_distance` observable takes values {0, 2, 4, 6, 8, 10, 12} on Omega. The count at each value follows the binomial distribution:
-
-`count(d) = C(6, (12-d)/2) × 64`
-
-This is the spectrum of 6 independent chirality qubits, each contributing 0 (pair aligned) or 2 (pair anti-aligned) to the total distance. The two poles (d=0 and d=12) are the two horizons. The equator (d=6) has maximum population: C(6,3) × 64 = 1280 states. The spectrum is symmetric: count(d) = count(12−d).
-
-## G.3 The Four Intrinsic Gates
-
-### G.3.1 Horizon-preserving condition
-
-A byte preserves both horizons (maps complement horizon states to complement horizon states AND equality horizon states to equality horizon states) if and only if:
-
-```
-mask12(byte) == inv_a(byte) ^ inv_b(byte)
-```
-
-where `inv_a = 0xFFF` if intron bit 0 is set, else 0, and `inv_b = 0xFFF` if intron bit 7 is set, else 0.
-
-This condition yields exactly 4 bytes, verified exhaustively.
-
-### G.3.2 The four horizon-preserving bytes
-
-| Byte | Intron | Family | Micro-ref | Mask | inv_a | inv_b | Action |
-|------|--------|--------|-----------|------|-------|-------|--------|
-| 0xAA | 0x00 | 00 | 0 | 0x000 | 0 | 0 | S: (A, B) -> (B, A) |
-| 0x54 | 0xFE | 10 | 63 | 0xFFF | 0 | 0xFFF | S: (A, B) -> (B, A) |
-| 0xD5 | 0x7F | 01 | 63 | 0xFFF | 0xFFF | 0 | C: (A, B) -> (B^F, A^F) |
-| 0x2B | 0x81 | 11 | 0 | 0x000 | 0xFFF | 0xFFF | C: (A, B) -> (B^F, A^F) |
-
-where F = 0xFFF = LAYER_MASK_12.
-
-The 128-way shadow projection pairs {0xAA, 0x54} and {0xD5, 0x2B} into two shadow fibers, giving exactly two distinct operations on the 24-bit state.
-
-### G.3.3 Gate definitions
-
-**Gate S (Swap):**
-
-```
-S: (A, B) -> (B, A)
-```
-
-Realized by bytes {0xAA, 0x54}. Involution: S^2 = id.
-
-**Gate C (Complement-swap):**
-
-```
-C: (A, B) -> (B ^ 0xFFF, A ^ 0xFFF)
-```
-
-Realized by bytes {0xD5, 0x2B}. Involution: C^2 = id.
-
-**Gate F (Global complement):**
-
-```
-F = S o C = C o S: (A, B) -> (A ^ 0xFFF, B ^ 0xFFF)
-```
-
-Not directly realized by any single byte (every single byte includes a swap). Requires depth 2: one S-byte followed by one C-byte, or vice versa. Involution: F^2 = id.
-
-**Gate id (Identity):**
-
-```
-id: (A, B) -> (A, B)
-```
-
-Requires depth 2: applying any byte twice is NOT identity (it yields a symmetric translation). The identity requires either zero bytes or the depth-4 alternation (XYXY = id). At depth 4, every byte pair returns to identity.
-
-### G.3.4 The gate group
-
-The four gates form the Klein four-group K4 = (Z/2)^2:
-
-```
-{id, S, C, F}
-
-S^2 = C^2 = F^2 = id
-S o C = C o S = F
-S o F = F o S = C
-C o F = F o C = S
-```
-
-This is the same K4 that emerges as the depth-4 fiber (Section 3, Appendix A), the same K4 used in the governance measurement layer (Section 4.6), and the same (Z/2)^2 that indexes the net family-phase invariants (phi_a, phi_b).
-
-### G.3.5 Gate action on horizons
-
-| Gate | Complement horizon (S-sector) | Equality horizon (UNA degeneracy) |
-|------|-----------------------------|-----------------------------------|
-| id | Fixes all 64 pointwise | Fixes all 64 pointwise |
-| S | Permutes: 32 two-cycles, 0 fixed | Fixes all 64 pointwise |
-| C | Fixes all 64 pointwise | Permutes: 32 two-cycles, 0 fixed |
-| F | Permutes: 32 two-cycles, 0 fixed | Permutes: 32 two-cycles, 0 fixed |
-
-At the byte level, the pointwise stabilizers are exact: the only bytes that fix every complement horizon state are the two C-gate bytes {0xD5, 0x2B}, and the only bytes that fix every equality horizon state are the two S-gate bytes {0xAA, 0x54}. No other byte fixes an entire horizon pointwise.
-
-**Reading the table:**
-
-- Gate C is the stabilizer of the S-sector. It fixes every complement horizon state pointwise. Opposition (C/ONA) preserves the common source.
-- Gate S is the stabilizer of the unity degeneracy. It fixes every equality horizon state pointwise. Non-commutativity (S/UNA) is invisible at its own boundary.
-- Gate F stabilizes neither horizon pointwise. It is pure dynamics: balance through motion, not stasis. It transforms everything while preserving the horizon structure as a set.
-- Gate id stabilizes everything. The common source is the universal reference from which all measurement is defined.
-
-Each permutation produces exactly 32 two-cycles (64 states / 2 per cycle = 32 orbits), reflecting the involutory nature of the gates.
-
-### G.3.6 CGM stage correspondence
-
-| CGM Stage | Algebraic Property | Gate | Fixed-Point Set | Depth |
-|-----------|--------------------|------|-----------------|-------|
-| CS | Commutativity | id | All Omega | 0 (or 4: XYXY) |
-| UNA | Non-commutativity | S | A == B (64 states) | 1 |
-| ONA | Non-associativity | C | A == B^F (64 states) | 1 |
-| BU | Restored associativity | F = S o C | None | 2 |
-
-The ordering reflects the CGM dependency chain. See G.4 for the observability interpretation.
-
-- **CS (id):** Common source. The reference frame from which all operations are measured.
-
-- **UNA (S):** First departure. The swap gate tests whether A and B can be exchanged without consequence. The commutativity rate across the full byte algebra is 1/64 = 2^(-6). Equivalently, each byte commutes with exactly 4 of the 256 bytes (its q-class), giving 1024 commuting ordered pairs out of 65536 total.
-
-- **ONA (C):** Second departure. The complement-swap gate tests whether opposition is structured. The gyrogroup mediates the failure of associativity.
-
-- **BU (F = S o C):** Composition of non-commutativity and non-associativity. F has no fixed points; restoration is dynamic. Depth 2 to realize F (no single byte achieves it) matches the contingent middle between the horizons.
-
-This progression is the algebraic content of the CGM stage structure.
-
-### G.3.7 K4 orbit structure on Omega
-
-Under the K4 gate group, Omega partitions into orbits:
-
-- 32 orbits of size 2 on the complement horizon (each paired by gate S)
-- 32 orbits of size 2 on the equality horizon (each paired by gate C)
-- 992 orbits of size 4 in the bulk (all four gates produce distinct states)
-- Total: 1056 orbits covering all 4096 states
-
-Bulk states have trivial K4 stabilizer: no nontrivial gate fixes any bulk state. Horizon states have stabilizer of order 2 (C for complement, S for equality). This confirms that the horizons are the only structurally distinguished subsets under the gate group.
-
-## G.4 The Hidden Variable and Observability
-
-The archetype GENE_MIC_S = 0xAA determines all correlations in the kernel. Every intron, every mask, every state trajectory is defined relative to this single constant through `intron = byte ^ 0xAA`. The archetype functions structurally as a hidden variable: it determines all correlations but cannot itself be observed as a state.
-
-At the complement horizon (S-sector), the archetype's structural effect is maximally expressed: A and B are exact complements, reflecting the archetype's alternating bit pattern 10101010 projected across both components in opposite phase. The hidden variable is maximally visible in the state structure.
-
-At the equality horizon (UNA degeneracy), the archetype's structural effect is maximally concealed: A and B are identical, and the underlying chirality has vanished from the state. The hidden variable is hidden precisely where one would look for it: at the boundary where the swap gate acts as identity.
-
-This is the discrete measurement problem. The archetype governs all measurement outcomes but cannot itself be directly observed as a state. It is the reference frame, not an element of the state space. The non-cloning theorem prevents circumventing this: you cannot duplicate the reference frame by any operation defined within it.
-
-Both extremes are non-absolute (64 states each out of 4096). The bulk of Omega exhibits partial visibility of the hidden variable: intermediate chirality where the archetype's influence is detectable but not fully determinate. This is the structured contingency that the CGM constraints require.
-
-## G.5 Toroidal Monodromy
-
-The gate group K4 = (Z/2)^2 is the first homology group of the torus with Z/2 coefficients:
-
-```
-H_1(T^2, Z/2) = (Z/2)^2
-```
-
-The torus has two independent non-contractible cycles:
-
-- **Meridional cycle** (around the tube): corresponds to gate S (non-commutativity)
-- **Longitudinal cycle** (through the hole): corresponds to gate C (non-associativity)
-- **Diagonal cycle** (both simultaneously): corresponds to gate F = S o C (balance)
-- **Trivial cycle**: corresponds to id (common source)
-
-The BU monodromy defect δ_BU = 0.195342... (≈ 0.1953) radians is the holonomy of the diagonal cycle in the continuous CGM framework. After traversing both fundamental cycles (the full K4), the system acquires a residual geometric phase because the underlying byte algebra is non-commutative. The K4 gates themselves commute (S o C = C o S), but they are the quotient of the full 256-byte algebra, which is non-commutative for 63/64 of all pairs.
-
-The aperture A* = 1 − δ_BU/m_a ≈ 0.0207 is the normalized residual of this monodromy. The torus does not close perfectly. The 2.07% opening is the window through which observation is possible. Perfect closure would eliminate the aperture and make measurement impossible. This is quantized at the byte scale as 5/256 ≈ 0.0195 and at the depth-4 scale as 1/48 ≈ 0.0208.
-
-## G.6 Connection to the Horizon Lemma
-
-The gate action table (Section G.3.5) produces 32 two-cycles when a non-identity gate permutes a 64-state horizon. The number 32 = 2^5 is itself a dyadic horizon in the Horizon Lemma (Byte Formalism Section 7.4).
-
-The relevant portion of the horizon table at this scale:
-
-```
-32 (2^5, dyadic) -> 48 (3x16, predecessor of 64) -> 64 (2^6, dyadic) -> 96 (3x32, predecessor of 128) -> 128 (2^7, dyadic)
-```
-
-Each entry corresponds to a verified kernel structure:
-
-| Horizon | Form | Kernel realization |
-|---------|------|--------------------|
-| 32 | 2^5 | Gate orbits per horizon (32 two-cycles) |
-| 48 | 3 x 2^4 | Depth-4 mask projection bits (4 x 12) |
-| 64 | 2^6 | Payload space / horizon state count / mask code size |
-| 96 | 3 x 2^5 | Predecessor of shadow count; P_5 = 3 x 32 = (3/4) x 128 (this factorization is noted but not yet verified as structural) |
-| 128 | 2^7 | Shadow projection count (256 bytes -> 128 next states) |
-
-The predecessor horizons P_k = 3 x 2^(k-1) = (3/4) x 2^(k+1) encode the 2/3 ratio of chirality to space (Byte Formalism Section 7.3):
-
-- **2** = chirality (the two frames A and B; the spinorial double-cover; the two elements per gate orbit)
-- **3** = spatial dimensions (the X, Y, Z axes; the 3 rows per frame; the 3 rotational DoF from SU(2))
-
-The depth-4 mask projection (48 bits) is the predecessor of the payload horizon (64): 48 = (3/4) x 64. This expresses the fact that the depth-4 structure (4 bytes x 12-bit masks) lives at the boundary between the spatial structure (3 axes) and the chirality structure (2 frames), precisely where the CGM constraints force balanced closure.
-
-The gate orbit count (32) is half the horizon state count (64), reflecting the chirality fraction: each gate orbit pairs two states by exchanging or complementing the chirality. The factor of 2 is the same 2-to-1 that produces the shadow projection (256 -> 128) and the spinorial double-cover (SU(2) -> SO(3)).
-
-## G.7 Hardware Correspondence
-
-The kernel's algebraic quantum structure maps to hardware processing levels:
-
-| Level | Hardware | Kernel realization | Gate role |
-|-------|----------|--------------------|-----------|
-| Register | 32-bit CPU register | Register atom: 24-bit Mac + 8-bit intron | S and C operate at register width |
-| L1 Cache | 64-byte cache line | Payload space: 6-bit offset -> 64 masks | id selects cache line; family = tag |
-| Working Memory | RAM pages | Omega: 4096 reachable states | F traverses working memory |
-| Persistent Storage | Disk / ledger | Byte log: append-only history | Replay from storage reconstructs trajectory |
-
-The 4 gates correspond to the fundamental data-movement operations at the register level:
-
-- **id (CS):** No operation. The processor holds state without transformation. The reference against which all other operations are measured.
-- **S (UNA):** Register swap. Exchange the contents of two registers. The most primitive non-trivial operation in any instruction set.
-- **C (ONA):** Complement-and-swap. Bitwise negate both registers and exchange them. This combines logical negation with exchange: the operation that tests whether opposition is structured.
-- **F (BU):** Bitwise complement without swap. Negate both registers in place. This requires two instructions (swap then complement-swap, or vice versa), reflecting the depth-2 requirement for BU.
-
-The intron decomposition maps directly to cache addressing (Byte Formalism Section 8):
-
-- **Bits 1-6 (payload):** 6-bit cache line offset selecting one of 64 masks. This is the spatial content of the operation.
-- **Bits 0, 7 (family):** 2-bit cache tag selecting one of 4 complement phases. This is the chirality context of the operation.
-
-The alignment between the intron's 6-bit payload and hardware cache addressing (64-byte lines, 6-bit offset) is a structural correspondence, not a coincidence. Whether this correspondence has deeper implications for hardware-native implementations is an open question.
-
-## G.8 Processing Model
-
-In the aQPU model, computation proceeds as follows:
-
-**Input:** A byte enters the kernel. It is transcribed relative to the archetype: `intron = byte ^ 0xAA`. This transcription is the measurement of the byte against the common source.
-
-**Decomposition:** The intron separates into structural context (2-bit family from L0 boundary bits) and operational content (6-bit micro-reference from payload bits). This separation is the discrete analog of separating gauge freedom from physical degrees of freedom.
-
-**Mutation:** The 6-bit payload expands to a 12-bit mask through dipole-pair projection. The mask mutates the active component A, introducing variety (UNA). Only A is mutated; B is not directly affected by the input. This asymmetry is the irreducible chirality of the processing pipeline.
-
-**Gyration:** The components undergo complement-controlled swap. Family bit 0 controls whether A_next is complemented; family bit 7 controls whether B_next is complemented. This is the non-associative step (ONA): the gyration mediates the interaction between the mutated active phase and the preserved passive phase.
-
-**Closure:** After 4 bytes, the depth-4 alternation identity XYXY = id ensures balanced closure (BU). The 256 family combinations per fixed payload collapse to 4 distinct outcomes indexed by the net family-phase (phi_a, phi_b) in K4. The depth-4 frame is the minimal unit of complete processing.
-
-The 4 intrinsic gates {id, S, C, F} are the operations where the mutation step is either trivial (mask = 0) or maximal (mask = 0xFFF) and exactly compensated by the gyration phase. They preserve both horizons because they do not create partial chirality: they either leave chirality unchanged (id, C on complement horizon, S on equality horizon) or fully invert it (S on complement horizon, C on equality horizon, F on both). All other bytes create partial transformations that move states between the horizons, populating the contingent bulk of Omega.
-
-
-
+The complete CGM Byte Formalism is specified in `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`.

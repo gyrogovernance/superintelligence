@@ -33,7 +33,7 @@ A few concrete facts help explain what this means:
 - Each byte update is exactly invertible.
 - The same byte history always produces the same state history.
 
-This is not a statistical language model and not a simulation of noisy quantum hardware. It is a compact algebraic kernel with exact state transitions.
+This is a compact algebraic kernel with exact state transitions on a 4096-state manifold.
 
 The broader Gyroscopic ASI system uses this kernel as a common structural medium. In simple terms, if two parties replay the same byte sequence, they land in the same state. That gives them a shared computational reference point.
 
@@ -175,7 +175,7 @@ This gives the project real standing in quantum information, not just in systems
 
 ### H. Native C engine and GPU-aligned execution path
 
-The repository includes a native C implementation, exposed through GyroLabe, and tested against Python and OpenCL paths.
+The repository includes a native C implementation, tested against Python reference paths.
 
 That means the project is not only a theory layer. It already has a hardware-near execution surface.
 

@@ -1,0 +1,10 @@
+ok, let's recap on my scope before I show you our present codebase. Because it is important for you to be aligned. My scope is hard breakthroughs at scale - to showcase something substantial that people care - our teeth in leveraging our quantum algorithm and its features. It is not toy experiments, endless diagnostics, or unfinished implementations. I aim for end-to-end verifiable results that yield the most value. We prioritize quantum approaches than classical tricks, and a hard verification on that is: if a classical approach accomplishes trivially more or less the same results we don't do quantum computation properly and need to re-align. 
+
+Scope creeps - AI Assistants tend to:
+- read first our features and try to invent methods rather than reading how our architecture actually works and understanding the physics.
+- write classical tricks because they can't get the math to work and prefer in their results things to generally pass with green flags.
+- leave diagnostics everywhere, and consider even all false approaches as good science. I find this bloat and scope creep because it bloats our codebase and diverts us from our aim to construct an end-to-end clean implementation.
+
+Writing Style notes:
+- I don't like having 100 files, one for each method,. I prefer a clean architecture with files that have clean roles with canonical and commonly understood names - if some files become over 2k LoC I generally use prefixes to split something with common role in more parts, but from experience when a file gets over 2K it is because something from the previous creeps I said is the reason.
+- I don't like discussional editorial meta-comments in our code. AI assistants insist on naming variables in whatever name the find fit to make a claim (ex. "this_now_makes_sense_variable"). Or they leave things such as "this does not work" or stubs and forget about them. 

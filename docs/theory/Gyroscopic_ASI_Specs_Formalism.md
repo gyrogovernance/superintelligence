@@ -127,14 +127,14 @@ The payload-to-mask mapping has the following verified properties:
 
 ## 3. Boundary Bits and the "Only 6 Bits" Idea
 
-The key finding: **bits 0 and 7 are Left Identity (L0)**. They define identity and frame; they do not carry the dynamic transformation content. The **middle 6 bits (1..6)** carry the physical/chiral/dynamic information.
+Bits **0 and 7** are Left Identity (L0). They define identity and frame; they do not carry the dynamic transformation content. The **middle 6 bits (1..6)** carry the physical/chiral/dynamic information.
 
 Consequences:
 
 - If we **assign only the boundaries (0 and 7) to families** as fixed structural roles, the remaining **6 bits** are the ones that actually drive transformation.
 - At runtime we can therefore **organize processing around 6 bits of dynamic content**; the two boundary bits fix the "frame" and can be handled by the expansion and mask structure rather than by full 8-bit state.
 
-**Boundary bits are structural anchors, not dynamic content.** They do not change the tensor; they only select which family the transformation belongs to. This is the design choice that lets us treat the byte as **2 anchor bits + 6 payload bits**.
+**Boundary bits are structural anchors, not dynamic content.** They do not change the tensor; they only select which family the transformation belongs to. The byte is **2 anchor bits + 6 payload bits**.
 
 ---
 
@@ -146,9 +146,9 @@ Consequences:
 
 So every byte is mapped to a unique intron; `0xAA` is the reference byte (intron `0x00`).
 
-The intron is then **expanded** into a **12-bit Type A mask**. The expansion should respect the L0/payload split established in Section 2:
+The intron is then **expanded** into a **12-bit Type A mask** using the L0/payload split from Section 2.
 
-**Correct decomposition (per Appendix G):**
+**QuBEC decomposition:**
 
 - **Family index** (2 bits) = L0 boundary bits (positions 0 and 7):
   ```python
@@ -166,7 +166,7 @@ This gives: 4 families x 64 micro-references = 256 unique introns.
 
 The **payload bits (1-6)** define the transformation - which of the 64 micro-references to apply to A.
 
-**Important:** Only A is mutated by the entering byte. B is NOT mutated pre-gyration (the mask bottom 12 bits are always 0). B only changes during gyration.
+Only A is mutated by the entering byte. B is not mutated pre-gyration (the mask bottom 12 bits are always 0). B only changes during gyration.
 
 The **family bits (0,7)** do NOT define transformation content. Their role relates to the **L0 parity**:
 
@@ -275,7 +275,7 @@ Each 12-bit component unpacks to a `[2, 3, 2]` tensor (2 frames x 3 rows x 2 col
 | A12 (default) | `0xAAA` | `101010101010` | `[[[-1, 1], [-1, 1], [-1, 1]], [[ 1, -1], [ 1, -1], [ 1, -1]]]` |
 | B12 (default) | `0x555` | `010101010101` | Complement of A12 |
 
-The default state has A12 and B12 as **exact complements** (`A ^ B = 0xFFF`), meaning their tensor forms have opposite signs at every position. This encodes the fundamental **chirality** of the system. This rest state (GENE_MAC_REST) lies on the **complement horizon** (S-sector). On the full reachable set Omega (4096 states), the 12-bit difference A^B is pair-diagonal and collapses to a 6-bit chirality register with exact transport law; see Gyroscopic_ASI_Specs Appendix G.
+The default state has A12 and B12 as **exact complements** (`A ^ B = 0xFFF`), meaning their tensor forms have opposite signs at every position. This encodes the fundamental **chirality** of the system. This rest state (GENE_MAC_REST) lies on the **complement horizon** (S-sector). On the full reachable set Omega (4096 states), the 12-bit difference A^B is pair-diagonal and collapses to a 6-bit chirality register with exact transport law χ(T_b(s)) = χ(s) ⊕ q6(b).
 
 ### 5.5 The 24-Bit State
 
@@ -347,7 +347,7 @@ From a fixed 24-bit state (e.g. the archetype `0xAAA555`), applying all 256 byte
 
 ### 7.0 Kernel state-space horizons
 
-From rest (GENE_MAC_REST), the reachable 24-bit state set under the transition law is **Omega**, with exactly 4096 states. Omega has two antipodal 64-state boundaries: the **complement horizon** (A12 = B12 ^ 0xFFF, maximal chirality; contains rest) and the **equality horizon** (A12 = B12, zero chirality). Both satisfy the holographic relation |H|^2 = |Omega| (64^2 = 4096). For all states, horizon_distance + ab_distance = 12 (complementarity invariant). The kernel has four intrinsic gates {id, S, C, F} forming K4; S and C are realized by the horizon-preserving bytes {0xAA, 0x54} and {0xD5, 0x2B}. Full definitions, gate action, and chirality register: Gyroscopic_ASI_Specs Appendix G.
+From rest (GENE_MAC_REST), the reachable 24-bit state set under the transition law is **Omega**, with exactly 4096 states. Omega has two antipodal 64-state boundaries: the **complement horizon** (A12 = B12 ^ 0xFFF, maximal chirality; contains rest) and the **equality horizon** (A12 = B12, zero chirality). Both satisfy the holographic relation |H|^2 = |Omega| (64^2 = 4096). For all states, horizon_distance + ab_distance = 12 (complementarity invariant). The kernel has four intrinsic gates {id, S, C, F} forming K4; S and C are realized by the horizon-preserving bytes {0xAA, 0x54} and {0xD5, 0x2B}. Gate action and horizon stabilizers are in QuBEC Theory Part II §10.
 
 The CGM aperture gap is defined continuously as:
 
@@ -453,6 +453,8 @@ The intron's palindromic 4-pair partition (L0 / LI / FG / BG) naturally separate
 
 When scaling structures that preserve this **3+1 split** while staying aligned to dyadic (power-of-two) boundaries, the arithmetic pattern `3*2^k just below 4*2^k = 2^(k+2)` corresponds exactly to the predecessor horizons. This is why 48, 96, 384, etc. appear naturally as "one step before" 64, 128, 512, etc.
 
+**Kernel realization at this scale:** a non-identity gate permuting a 64-state horizon produces 32 two-cycles (32 = 2⁵); depth-4 mask projection is 48 bits = (3/4)×64; the byte shadow is 256 → 128 distinct next states. These match the dyadic and predecessor entries in the table above.
+
 ---
 
 ## 8. Hardware Alignment: 6-Bit Runtime and Cache Lines
@@ -491,8 +493,8 @@ In the CGM paper, the "Generatedness" lemma requires that all valid structure tr
 |--------|------|
 | Omega | Reachable 24-bit state set from rest; 4096 states. |
 | Dual horizons | Complement (A=B^0xFFF, 64 states) and equality (A=B, 64 states); antipodal; \|H\|^2 = \|Omega\|; horizon_distance + ab_distance = 12. |
-| Chirality register | 6-bit collapse of A^B on Omega; exact transport chi(T_b(s)) = chi(s) ^ q6(b). See Appendix G. |
-| Intrinsic gates | K4 {id, S, C, F}; S and C realized by bytes {0xAA, 0x54}, {0xD5, 0x2B}. See Appendix G. |
+| Chirality register | 6-bit collapse of A^B on Omega; exact transport chi(T_b(s)) = chi(s) ^ q6(b). |
+| Intrinsic gates | K4 {id, S, C, F}; S and C realized by bytes {0xAA, 0x54}, {0xD5, 0x2B}. |
 | Depth-4 closure | Any 4 components (bits, bytes, or 12-bit tensors) are always known. |
 | 4-byte frame | Prefix, Present, Past, Future. Projects to 48-bit tensor (4 x 12). |
 | BCH expansion | Discrete container for U_L U_R U_L U_R commutator cancellation. |

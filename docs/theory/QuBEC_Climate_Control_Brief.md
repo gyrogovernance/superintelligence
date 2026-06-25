@@ -48,13 +48,9 @@ A wall of multiply-accumulate operations that floods memory bandwidth on every c
 
 When a model generates a token, its query vector must be compared against every stored key in the context window. That comparison is a dot product, and it must be repeated for every query position against every key position, for every attention head, at every layer.
 
-The arithmetic is simple (multiply and add), but the data volume is enormous. For a context window of length N with head dimension D and H heads, each layer performs O(N^2 D H) multiply-accumulates. At long contexts, this operation dominates both compute time and memory bandwidth.
+Inner products over high-dimensional vectors dominate compute and memory bandwidth at scale. The same pattern appears in vector database retrieval, nearest-neighbor search, embedding comparison, and any system that measures similarity by inner product.
 
-Global warming is not just about floating-point cost. It is about data movement. The keys and values must be fetched from memory, streamed through the compute units, and the results written back. At scale, the memory bandwidth wall becomes the true physical limit, not the arithmetic throughput.
-
-This same pattern appears in vector database retrieval, in nearest-neighbor search, in embedding comparison, and in any system that measures similarity by inner product over high-dimensional vectors.
-
-The gyroscopic multiplication formalism shows that this cost has internal structure. Every int32 dot product decomposes through the K4 lattice matrix into bulk, gauge-action, and chiral-alignment sectors. When the data is bulk-dominated (high chart values are zero), the K4 matrix collapses to a single cell and the computation is dramatically cheaper. When the data is spinorial (high chart values in {-1, 0, 1}), boolean compression replaces dense arithmetic. Only truly dense data requires full-precision evaluation. These are not approximations; they are exact chart specializations of one arithmetic law. The observed speedups (3x to 21x on representative workloads) reflect the regime structure of real data, not numerical shortcuts.
+QuBEC climate theory does not treat integer dot products as four routed arithmetic channels. Chart selection applies to climate observables (shell, chirality, gauge), not to rewriting ordinary contractions into a separate lattice execution model.
 
 ### Argmax drought (serial selection)
 
@@ -68,7 +64,7 @@ At the output layer, this drought is most visible: hundreds of thousands of logi
 
 The same bottleneck appears in beam search, in attention masking, in sparse selection, and in any routing decision that must choose one path from many candidates.
 
-Many of these selection problems are not truly total-order max problems. They are sector-identification problems disguised as max problems. When the task is really nearest sector, matching orbit, correct shell, or horizon proximity, the aQPU's algebraic structure (Walsh-Hadamard transform, q-map, shell structure, hidden subgroup resolution) provides O(1) or O(log N) identification where flat argmax requires O(N).
+Many of these selection problems are not truly total-order max problems. They are sector-identification problems disguised as max problems. When the task is nearest sector, matching orbit, matching shell, or horizon proximity, the aQPU's algebraic structure (Walsh-Hadamard transform, q-map, shell structure, hidden subgroup resolution) provides O(1) or O(log N) identification where flat argmax requires O(N).
 
 ---
 
@@ -86,7 +82,7 @@ AI increasingly relies on conditional computation: mixture-of-experts models rou
 
 Each of these decisions creates a branch that the hardware cannot predict. The gating function's output depends on the current input in ways that have no simple pattern. The result is chronic pipeline underutilization.
 
-The deeper structural issue is that these routing decisions are being made in the wrong coordinate system. The decision is fundamentally a phase selection (which mode of operation to enter), but it is implemented as a floating-point threshold test followed by a conditional jump. The phase information is computed expensively and then discarded into a binary branch.
+The deeper structural issue is that these routing decisions are made in an unsuitable coordinate system. The decision is fundamentally a phase selection (which mode of operation to enter), but it is implemented as a floating-point threshold test followed by a conditional jump. The phase information is computed expensively and then discarded into a binary branch.
 
 In the aQPU formalism, phase is carried natively by the 2-bit gauge field (K4 family). Routing becomes deterministic phase-dependent transport rather than an unpredictable conditional jump.
 
@@ -130,17 +126,15 @@ What if the decision surfaces of AI systems were computed in a coordinate system
 
 The Gyroscopic ASI architecture answers this question at two levels.
 
-At the arithmetic level, gyroscopic multiplication demonstrates that integer dot products have internal K4 structure that collapses computation in the bulk and signed-support/high-chart path regimes. The 3x to 21x speedups observed on representative workloads are direct consequences of this path profile structure.
-
 At the state level, the aQPU provides a finite algebraic medium where distance is exact integer Hamming distance, ensemble structure is given by algebraic sectors with known multiplicities, phase is carried natively by the state representation, and thermodynamics is exact and polynomial. On this medium, the six pathologies are replaced by exact integer operations that produce equivalent structural decisions.
 
-The QuBEC Climate Theory formalizes this replacement in full: the exact partition function, the shell algebra, the Krawtchouk spectral basis, the gauge decomposition, and the multi-cell scaling law. Together, these provide the mathematical foundation for computing AI decision surfaces on exact finite structures rather than on floating-point approximations of continuous geometry.
+The [QuBEC Theory](QuBEC_Theory.md) formalizes this replacement in full: the exact partition function, the shell algebra, the Krawtchouk spectral basis, the gauge decomposition, and the multi-cell scaling law. Together, these provide the mathematical foundation for computing AI decision surfaces on exact finite structures rather than on floating-point approximations of continuous geometry.
 
 ---
 
 ## Further reading
 
-- **Gyroscopic Multiplication:** the K4 lattice matrix, lattice multiplication history, three simplification path classes, and the radix-manifold bridge.
-- **QuBEC Climate Theory:** finite quantum thermodynamics, exact partition law, shell spectral transport, gauge climate equations, and multi-cell scaling.
+- **Analysis of Gyroscopic Multiplication:** optional formal dyadic chart analysis (not an operational routing model).
+- **QuBEC Theory:** finite quantum thermodynamics, exact partition law, shell spectral transport, gauge climate equations, and multi-cell scaling.
 - **Gyroscopic ASI aQPU Kernel specification:** kernel state, charts, transition law, and computational spaces.
 - **Physics and aQPU test reports:** exhaustive verification of the algebraic quantum structure underlying the climate theory.

@@ -1,7 +1,3 @@
-You are right. That was a mistake. Here is the correct report.
-
----
-
 # QuBEC Climate Control Report
 ## Stress-Testing the aQPU Architecture on Bolmo-1B
 
@@ -22,7 +18,7 @@ This proves the aQPU is not just theoretical. It is a viable, hardware-efficient
 
 ## 1. What this report is
 
-The aQPU kernel and GyroGraph runtime have verified specifications, native implementations, and proven quantum advantages on standard silicon. This report answers a different question:
+The aQPU router and Gyroscopic runtime have verified specifications, native implementations, and proven quantum advantages on standard silicon. This report answers a different question:
 
 **Can this architecture take over real AI decision surfaces in a live language model, on commodity hardware, without collapsing output quality?**
 
@@ -32,7 +28,7 @@ The test chamber is Bolmo-1B, a byte-native billion-parameter language model. Tw
 
 2. **Decode token selection (Replacing Softmax and Argmax)**: Where the model decides which token to emit next. Classically, this forces a serial `softmax` (exponentials and division) over a 512-way vocabulary. We replaced this with exact algebraic q-sector identification.
 
-In the strict operating path, both decision surfaces now run with **zero transcendental function calls**. The model continues to produce coherent English text. The exact decode selector runs at **1.15x the speed of softmax + argmax**. The encode-side structural metric runs at **284.1x a cosine-style baseline**. All GyroGraph ingestion in the tested decode path ran on the **OpenCL GPU backend** with zero Python fallback.
+In the strict operating path, both decision surfaces now run with **zero transcendental function calls**. The model continues to produce coherent English text. The exact decode selector runs at **1.15x the speed of softmax + argmax**. The encode-side structural metric runs at **284.1x a cosine-style baseline**. All runtime ingestion in the tested decode path ran on the **OpenCL GPU backend** with zero Python fallback.
 
 ---
 
@@ -89,7 +85,7 @@ Bolmo is the right first target because:
 | OS | Windows 11 |
 | Python | 3.14.2 |
 | Native backends | C and OpenCL |
-| Tests | `test_gyrograph_decode.py`, `test_gyrolabe_encode.py` |
+| Tests | `test_gyrograph_decode.py` |
 
 All 13 tests passed in 88.64 seconds.
 
@@ -102,7 +98,7 @@ All 13 tests passed in 88.64 seconds.
 The encode bridge replaces the final boundary decision with an exact algebraic path:
 
 - **Adjacent chirality distance** replaces cosine similarity. Chirality distance is computed by XOR and popcount on 6-bit collapsed kernel states. No sqrt, no division, no floating-point arithmetic.
-- **M2-modulated thresholding** replaces sigmoid calibration. M2 is an exact integer measure of structural support computed from GyroGraph cell histograms.
+- **M2-modulated thresholding** replaces sigmoid calibration. M2 is an exact integer measure of structural support computed from runtime cell histograms.
 
 ### Exactness proof
 
@@ -151,7 +147,7 @@ M2 = 64   (condensed):    patch_count = 31
 M2 = 4096 (thermalized):  patch_count = 74
 ```
 
-The relationship is strictly monotonic. M2 is computed entirely from exact integer operations on GyroGraph cell histograms, requiring zero neural network weights. 
+The relationship is strictly monotonic. M2 is computed entirely from exact integer operations on runtime cell histograms, requiring zero neural network weights. 
 
 **Why this matters for AI scaling:** Patch count directly dictates the sequence length fed into the transformer, which controls the O(N squared) attention workload and KV-cache memory pressure. By demonstrating that M2 modulates patch size, we proved that an exact, cheap algebraic variable from the aQPU can dynamically govern a Large Language Model's most expensive compute allocations in real time.
 
@@ -265,7 +261,7 @@ In this test run, the bridged path was faster than raw generation. This is an en
 
 ## 8. Backend execution
 
-### GyroGraph OpenCL path
+### Runtime OpenCL path
 
 The test `test_gyrograph_opencl_backend_usage_verbose` confirms the decode bridge used the GPU trace backend:
 
@@ -273,11 +269,11 @@ The test `test_gyrograph_opencl_backend_usage_verbose` confirms the decode bridg
 backend_counts: {'python': 0, 'cpu_indexed': 0, 'opencl_indexed': 14}
 ```
 
-Zero Python fallback. Zero CPU-only fallback. All 14 GyroGraph ingestion operations ran through the OpenCL GPU backend.
+Zero Python fallback. Zero CPU-only fallback. All 14 runtime ingestion operations ran through the OpenCL GPU backend.
 
 ### OpenCL climate projection
 
-The test `test_gyrolabe_opencl_climate_projection_verbose` confirms the climate projection path matches the exact reference:
+The climate projection verbose test confirms the climate projection path matches the exact reference:
 
 ```
 batch_shape: (64, 64)

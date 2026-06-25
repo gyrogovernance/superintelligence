@@ -1,0 +1,77 @@
+=========
+Gyrocrypt kernel
+=========
+=========
+Byte bridge / Gyrostate
+=========
+[PASS] Byte bridge roundtrip + Omega reachability
+[PASS] Depth-4 closure b^4 = id
+=========
+Holonomy wavefunction
+=========
+[PASS] K4 involutions + F = W2 o W2'
+[PASS] holographic reshape round-trip
+=========
+Horizon affine algebra (holonomy diagnostic)
+=========
+[PASS] q6 distinct=64 chi_order≤2 Ω depth1_max=4 depth4_sample_max=2
+=========
+BFS multiply oracle (offline falsification K18)
+=========
+[PASS] N=15,a=7 no parallel byte word at depth≤4
+[INFO] depth≤6 also None (~80s offline); wavefunction BFS rebrand rejected
+=========
+Multi-cell QuBEC inject (holonomy register)
+=========
+[PASS] N=15 B=1 inject/decode round-trip; chi≠limb (15/15)
+[PASS] N=143 B=2 inject/decode round-trip; chi≠limb (143/143)
+=========
+Native C
+=========
+[PASS] native modexp uint64 + limbs
+[PASS] cyclic character χ(1)^N = 1
+[PASS] native sparse_cqft_peaks
+[PASS] shor_period_u64(7,15,4096) == 4
+[PASS] native modexp + audit period_reference N=143
+=========
+Simon
+=========
+[PASS] simon n=6,12,18,(60)
+=========
+Production period + factor (native spectral)
+=========
+[PASS] cqft64_fast smoke
+[PASS] production period N=15 r=4 path=CQFT_DENSE
+[PASS] holonomy N=15 r=4 method='INJECT_TABULATE_B=1' (audit=4)
+[PASS] factor N=15 → (3,5)
+[INFO] N=143 production=60 holonomy=60 method='INJECT_TABULATE_B=2'
+=========
+Audit: classical F_{G_X} scorer (reference only — uses modexp coset)
+=========
+[PASS] audit period_reference N=143 r=60
+=========
+Audit: large-N classical reference (867199)
+=========
+[PASS] audit period N=867199 (r=18018, path=DP_EXACT_DOUBLE, 84.4s)
+=========
+Holonomy end-to-end (compile → oracle → readout)
+=========
+[PASS] N=15 e2e r=4 method='INJECT_TABULATE_B=1' path=CQFT_DENSE (0.8s)
+[PASS] N=143 e2e r=60 method='INJECT_TABULATE_B=2' path=CQFT_DENSE (0.9s)
+[PASS] N=867199 e2e oracle+suffix r=18018 path=DP_EXACT_DOUBLE checked=867199 (205.4s)
+[INFO] oracle=INJECT_TABULATE (compile-time table; CNOT ALU open)
+=========
+Holonomy vs audit N=867199
+=========
+[PASS] holonomy matches audit at N=867199 r=18018 (169.3s)
+=========
+Horizon tensor gates (K11/K15, C)
+=========
+[PASS] N=15 exact DP y=1 k=65536 (tensor drift skipped: n_cells=1)
+[PASS] N=143 drift ratio=1.0 tensor/exact parity k=4369
+=========
+DLP (production fail-closed)
+=========
+[OPEN] dual-flow holonomy DLP readout not implemented
+
+[OK] all tests (502.3s)

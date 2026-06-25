@@ -76,12 +76,6 @@ GYROSCOPIC_EXPORT int gyroscopic_horizon_n_cells_u64(uint64_t n);
 
 GYROSCOPIC_EXPORT uint64_t gyroscopic_horizon_key_u64(uint64_t n, uint64_t y);
 
-GYROSCOPIC_EXPORT uint32_t gyroscopic_shor_period_chirality_u64(
-    uint64_t base,
-    uint64_t n,
-    uint32_t max_samples
-);
-
 GYROSCOPIC_EXPORT double gyroscopic_horizon_tensor_mag2_y1_u64(
     uint64_t base,
     uint64_t n,

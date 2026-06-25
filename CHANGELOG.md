@@ -12,6 +12,51 @@
 
 ---
 
+## [v2.0.8-Gyroscopic] – 2026-04-19 to 2026-06-25
+
+3 months of iterative Refinement and Consolidation of Concepts and Documentation:
+
+docs\Gyroscopic_ASI_Specs.md
+docs\Gyroscopic_ASI_SDK_Quantum_Computing.md
+docs\theory\QuBEC_Theory.md
+docs\theory\Gyroscopic_ASI_Specs_Formalism.md
+docs\reports\aQPU_Features_Report.md
+
+A new aQPU Kernel API has also been developed, which simulates a wavefunction:
+docs\references\Analysis_aQPU_Wavefunction.md
+
+Long Update of Gyroscopic.llama.cpp implementation (a lot has been tried out, others dismissed, the code has changed in many different ways and keeps changing):
+src\tools\gyroscopic\
+
+Not yet fully realized.
+
+A lot of progress has been made in using aQPU for our research in subatomic physics and on analyzing gravity (these files are reference - the work of our science experiments lives at https://github.com/gyrogovernance/science):
+docs\references\experiments\aqpu_gravity_analysis_1.py
+docs\references\experiments\aqpu_gravity_analysis_2.py
+docs\references\experiments\aqpu_gravity_analysis_3.py
+docs\references\experiments\aqpu_gravity_analysis_4.py
+docs\references\experiments\aqpu_gravity_analysis_5.py
+docs\references\experiments\aqpu_gravity_analysis_6.py
+docs\references\experiments\aqpu_gravity_analysis_7.py
+docs\references\experiments\aqpu_gravity_analysis.txt
+docs\references\experiments\aqpu_gravity_common.py
+docs\references\experiments\aqpu_gravity_runner.py
+docs\references\experiments\aqpu_wavefunction_1.py
+docs\references\experiments\aqpu_wavefunction_2.py
+docs\references\Analysis_Compact_Geometry.md
+docs\references\Analysis_Gravity_Note.md
+docs\references\Analysis_Gravity.md
+
+Latest leads we follow:
+- Shannon's Information Theory Bridges,
+- Simon's Quantum Algorithm native aQPU implementation,
+- Percolation Theory
+
+Other things we experimented:
+- Integer factorization and the discrete logarithm problem (DLP) for Post-Quantum Cryptography (PQC) and Fault-Tolerant Quantum Engineering using Gyroscopic ASI theory and aQPU Quantum Physical Features as Primitives.
+
+---
+
 ## [v2.0.7-Moments] – 2026-04-16
 
 ### New
@@ -34,22 +79,22 @@ Lands the formal QuBEC transform algebra, aligns the Python SDK with the Quantum
 ### 📜 Theory & Specification
 - **`QuBEC_Transform_Algebra.md`**: Establishes canonical coordinates `(c, χ, N)`, formalizes the four native transform surfaces (WHT, Krawtchouk, K4 character, K4 lattice), defines exactness classes (integer / dyadic / residual), and codifies the operator quotient hierarchy with symbolic cost semantics.
 - **`QuBEC_Climate_Dynamics.md`**: Derives finite thermodynamics (`Z₁(λ) = 64(1+λ)⁶`), order parameters (`ρ, m, η, M₂`), the 8-axis damping system (6 chirality + 2 gauge), and spectral transport laws for chirality and shell marginals.
-- **Spec Reframing**: `GyroLabe` is positioned as the native execution/lowering substrate; `GyroGraph` as the multicellular runtime and transformer-interoperability layer. Unified notation around `GF(2)⁶`, removed roadmap residue, and enforced strict theory/implementation separation across all docs.
+- **Spec Reframing**: `Gyroscopic` is positioned as the native execution/lowering substrate; `Gyroscopic runtime` as the multicellular runtime and transformer-interoperability layer. Unified notation around `GF(2)⁶`, removed roadmap residue, and enforced strict theory/implementation separation across all docs.
 
 ### 🐍 Python SDK & Runtime Surface
 - **`ClimateOps`**: Ships `cell_climate_from_histograms`, `m2_empirical_from_chi_hist`, `m2_equilibrium_from_shell_hist`, and `shell_order_parameters_from_hist`. Computes Rényi-2 effective support, equilibrium M₂, Krawtchouk shell spectra, K4 gauge spectra, and byte anisotropy directly over rolling histograms.
-- **`RuntimeOps` & `ops.py`**: Full `ctypes` binding layer exposing native surfaces: batch word4 ingestion, SLCP emission (single & batch), `gyrolabe_analyze_operator_64`, structured block application, K4 lattice contracts, canonical `(c, χ, N)` decomposition, and spectral evolution functions.
+- **`RuntimeOps` & `ops.py`**: Full `ctypes` binding layer exposing native surfaces: batch word4 ingestion, SLCP emission (single & batch), `gyroscopic_analyze_operator_64`, structured block application, K4 lattice contracts, canonical `(c, χ, N)` decomposition, and spectral evolution functions.
 - **`bridge.py`**: Native-vs-reference moment verification, SLCP serialization, and a **13-key interoperability output dict** (`block_class`, `scr`, `defect_norm`, `native_route`, `kv_priority`, `batch_group_id`, `gauge_anisotropy`, `chi_anisotropy`, `effective_support`, etc.).
 - **`persist.py`**: GYRG v2 snapshot/restore with explicit little-endian struct packing, kernel-law digests, and fixed wire format (`_CELL_V2_SIZE = 184`).
 - **`circuit.py`**: SDK circuit primitives (`ByteOp`, `GateOp`, `WHTOp`, `ConditionOp`) with exact byte compilation, peephole optimization, and word signature generation.
 - **`target.py`**: `TargetProfile` dataclass for `PythonKernel` / `CEngine` and moment equivalence testing across targets.
 
 ### ⚙️ Native C Backend & Hybrid Matmul
-- **`gyrolabe_qubec_matmul.c`**: Implements the exact hybrid contract `W·x = P_Q(W)·x + D_Q(W)·x`. Structured blocks route through WHT/Krawtchouk/K4Char diagonals; defects evaluate via packed K4 lattice GEMV. The `dq_lattice_empty` flag skips lattice math when `D_Q == 0` (exact). Configurable witness/parity tracking with `GYRO_WITNESS_PERIOD`.
-- **`gyrolabe_registry.c`**: Q8_0 tensor registration with per-block analysis (shell-radial, chi-invariant, generic). Packs residual `D_Q` into 16-bit sign/magnitude bitplanes for AVX2 lattice GEMV. Thread-unsafe registration (model-load only), thread-safe lookup during inference.
-- **`gyrolabe_transforms.c` / `gyrolabe_wht.c`**: 64-point WHT (float/int32, batched, AVX2/scalar paths), Krawtchouk-7 (int32/float forward & inverse), K4Char4 (4-point Hadamard), and K4 lattice contraction/dot.
-- **`gyrolabe_analysis.c`**: `gyrolabe_analyze_operator_64` computes exact quotient class, SCR (`‖P_Q‖_F / ‖W‖_F`), and defect norm. `gyrolabe_apply_structured_64` executes diagonalized application for chi-invariant, shell-radial, and chi×gauge classes.
-- **`gyrograph.c`**: Thread-safe batched word4 trace/ingest, SLCP emission, M₂ empirical/equilibrium computation, and ledger comparison. OpenMP-parallelized over cells when `n >= 2048`.
+- **`gyroscopic_kernel_qubec_matmul.c`**: Implements the exact hybrid contract `W·x = P_Q(W)·x + D_Q(W)·x`. Structured blocks route through WHT/Krawtchouk/K4Char diagonals; defects evaluate via packed K4 lattice GEMV. The `dq_lattice_empty` flag skips lattice math when `D_Q == 0` (exact). Configurable witness/parity tracking with `GYRO_WITNESS_PERIOD`.
+- **`gyroscopic_registry.c`**: Q8_0 tensor registration with per-block analysis (shell-radial, chi-invariant, generic). Packs residual `D_Q` into 16-bit sign/magnitude bitplanes for AVX2 lattice GEMV. Thread-unsafe registration (model-load only), thread-safe lookup during inference.
+- **`gyroscopic_transforms.c` / `gyroscopic_kernel_wht.c`**: 64-point WHT (float/int32, batched, AVX2/scalar paths), Krawtchouk-7 (int32/float forward & inverse), K4Char4 (4-point Hadamard), and K4 lattice contraction/dot.
+- **`gyroscopic_analysis.c`**: `gyroscopic_analyze_operator_64` computes exact quotient class, SCR (`‖P_Q‖_F / ‖W‖_F`), and defect norm. `gyroscopic_apply_structured_64` executes diagonalized application for chi-invariant, shell-radial, and chi×gauge classes.
+- **`gyrograph_kernel.c`**: Thread-safe batched word4 trace/ingest, SLCP emission, M₂ empirical/equilibrium computation, and ledger comparison. OpenMP-parallelized over cells when `n >= 2048`.
 - **`gyrograph_policy.c`**: `pthread_once` / `InitOnceExecuteOnce` guarded env policy loading for `GGML_GYROSCOPIC`, `GGML_GYROSCOPIC_STRICT`, and `GGML_GYROSCOPIC_TRACE`.
 
 ### 🦙 LLM Integration & Diagnostics
@@ -88,7 +133,7 @@ Lands the formal QuBEC transform algebra, aligns the Python SDK with the Quantum
 - **`dispatch_scanned`**: 20,069,632 blocks
 - **`registry_entries`**: 249 Q8_0 tensors registered
 - **`graph_m2_mean`**: 28.85 (live M₂ climate observable)
-- **`graph_cells`**: 1 active GyroGraph cell
+- **`graph_cells`**: 1 active Gyroscopic runtime cell
 
 **Climate Probe**:
 - ✅ `chirality_2step_uniform`: true (verified two-step mixing)
@@ -122,7 +167,7 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
   - effective support (`M2`)
   - gauge-spectrum helpers
   - decode-side climate summaries
-- Added **family-phase memory support** to GyroGraph’s multicellular state, enabling gauge-sensitive runtime summaries alongside chirality and shell memory.
+- Added **family-phase memory support** to Gyroscopic runtime’s multicellular state, enabling gauge-sensitive runtime summaries alongside chirality and shell memory.
 - Added dedicated climate documentation:
   - `docs/QuBEC_Climate_Control_Brief.md`
   - `docs/QuBEC_Climate_Theory.md`
@@ -136,8 +181,8 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 ### Changed
 - Upgraded encode-side control from structural biasing to a real **exact boundary-law actuator** modulated by QuBEC support state.
 - Upgraded decode-side control from paired quotient selection to a stricter **exact algebraic selection law** suitable for direct runtime use.
-- Extended GyroGraph from chirality-and-shell-only local memory to **chirality + shell + family-phase** local structural memory.
-- Strengthened the OpenCL path as an active runtime surface for GyroGraph decode tracing and climate projection.
+- Extended Gyroscopic runtime from chirality-and-shell-only local memory to **chirality + shell + family-phase** local structural memory.
+- Strengthened the OpenCL path as an active runtime surface for Gyroscopic runtime decode tracing and climate projection.
 - Consolidated the climate narrative around the practical replacement of expensive floating-point decision math with exact algebraic control on standard silicon.
 
 ### Fixed
@@ -178,12 +223,12 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ### Added
 - Introduced a clean **Bolmo-specialized bridge split**:
-  - `src/tools/gyrolabe/bridges/encode.py`
-  - `src/tools/gyrolabe/bridges/bolmo_config.py`
+  - `src/tools/gyroscopic/bridges/encode.py`
+  - `src/tools/gyroscopic/bridges/bolmo_config.py`
   - `src/tools/gyrograph/bridges/decode.py`
   - `src/tools/gyrograph/bridges/bolmo_config.py`
 - Added canonical bridge namespace exports:
-  - `src/tools/gyrolabe/bridges/__init__.py`
+  - `src/tools/gyroscopic/bridges/__init__.py`
   - `src/tools/gyrograph/bridges/__init__.py`
 - Added **encode-side structural boundary control** over Bolmo’s non-causal boundary predictor.
 - Added **decode-side paired content/phase quotient selection** for Bolmo’s fused 512-way output alphabet.
@@ -202,8 +247,8 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ### Changed
 - Replaced the old mixed-purpose Bolmo integration direction with a strict:
-  - **GyroLabe = Encode**
-  - **GyroGraph = Decode**
+  - **Gyroscopic = Encode**
+  - **Gyroscopic runtime = Decode**
   separation.
 - Reframed Bolmo as a **boundary-conditioned byte-to-patch transduction use case**, not a generic observatory target.
 - Upgraded the encode bridge from passive structural biasing to a real **boundary-law actuator**:
@@ -232,7 +277,7 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ### Removed
 - Removed obsolete / redundant bridge files:
-  - `src/tools/gyrolabe/bolmo_bridge.py`
+  - `src/tools/gyroscopic/bolmo_bridge.py`
   - `src/tools/gyrograph/bridges/applications.py`
   - `src/tools/gyrograph/bridges/databases.py`
   - `src/tools/gyrograph/bridges/networks.py`
@@ -247,9 +292,9 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ### Tests
 - Rebuilt the tool test surface around exactly two canonical files:
-  - `tests/tools/test_gyrolabe_encode.py`
+  - `tests/tools/test_gyroscopic_encode.py`
   - `tests/tools/test_gyrograph_decode.py`
-- `test_gyrolabe_encode.py` now validates:
+- `test_gyroscopic_encode.py` now validates:
   - exact byte-native field extraction
   - q/family/micro/shell histograms
   - boundary-field observability
@@ -285,10 +330,10 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ---
 
-## [v2.0.2-GyroGraph] – 2026-03-14
+## [v2.0.2-Gyroscopic runtime] – 2026-03-14
 
 ### Added
-- Added the first complete GyroGraph runtime intelligence layer as an Ω-native multicellular model built on the aQPU Kernel and QuBEC medium.
+- Added the first complete Gyroscopic runtime intelligence layer as an Ω-native multicellular model built on the aQPU router and QuBEC medium.
 - Added `src/tools/gyrograph/core.py` with:
   - cell pool allocation and lifecycle
   - Ω-native per-cell state storage
@@ -313,12 +358,12 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
   - `pack_word4`
   - `ensure_word4`
 - Added `src/tools/gyrograph/__init__.py` public exports for:
-  - `GyroGraph`
+  - `Gyroscopic runtime`
   - `SLCPRecord`
   - `ResonanceProfile`
   - serializer helpers
   - Applications bridge surfaces
-- Added native CPU backend `src/tools/gyrograph/gyrograph.c` implementing batched:
+- Added native CPU backend `src/tools/gyrograph/gyrograph_kernel.c` implementing batched:
   - Ω word4 trace
   - trace application to multicellular state
   - fused ingest over many cells
@@ -338,11 +383,11 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 - Added Databases and Networks bridge module stubs to establish the first bridge coverage layout.
 - Added snapshot persistence with kernel-law hash validation and separate optional ingest-log support.
 - Added support for chirality and shell rolling histories with O(1) update semantics and exact spectral extraction.
-- Added support for native and OpenCL hot paths in GyroGraph ingestion to ensure structural processing scales with runtime load rather than Python overhead.
+- Added support for native and OpenCL hot paths in Gyroscopic runtime ingestion to ensure structural processing scales with runtime load rather than Python overhead.
 
 ### Changed
-- Elevated GyroGraph from draft concept to implemented runtime layer across Python, C, and OpenCL paths.
-- Standardized GyroGraph around packed `omega12 : int32` as the primary live state representation for ABI-clean interoperability with the SDK and GyroLabe.
+- Elevated Gyroscopic runtime from draft concept to implemented runtime layer across Python, C, and OpenCL paths.
+- Standardized Gyroscopic runtime around packed `omega12 : int32` as the primary live state representation for ABI-clean interoperability with the SDK and Gyroscopic.
 - Structured the implementation around the exact runtime loop:
   - packet input
   - Ω stepping
@@ -351,10 +396,10 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
   - SLCP and graph queries
 - Aligned the implementation with the depth-4 ingestion model by making the 4-byte word the native bridge unit throughout the stack.
 - Refined the Applications bridge toward categorical structural event mapping instead of opaque ad hoc event handling.
-- Consolidated native multicellular execution around GyroLabe-compatible Ω surfaces rather than introducing a second kernel law.
+- Consolidated native multicellular execution around Gyroscopic-compatible Ω surfaces rather than introducing a second kernel law.
 
 ### Verified
-- Verified GyroGraph core and Applications bridge functionality through dedicated test coverage:
+- Verified Gyroscopic runtime core and Applications bridge functionality through dedicated test coverage:
   - bootstrap state
   - ingest vs SDK replay equivalence
   - ring warmup and replacement
@@ -368,10 +413,10 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
   - shell spectral and SDK view integration
   - applications bridge clustering and multi-role usage
 - Confirmed native CPU and OpenCL availability in runtime capability surfaces.
-- Confirmed that GyroGraph maintains exact structural agreement with SDK replay and Ω-state semantics.
+- Confirmed that Gyroscopic runtime maintains exact structural agreement with SDK replay and Ω-state semantics.
 
 ### Notes
-- This release establishes GyroGraph as the multicellular runtime observability layer of the Gyroscopic ASI stack.
+- This release establishes Gyroscopic runtime as the multicellular runtime observability layer of the Gyroscopic ASI stack.
 - The first implemented domain is Applications, with Python as the first runtime binding.
 - Databases and Networks bridge files are present as the next bridge surfaces and will be extended in subsequent work.
 - The native and OpenCL paths are included to support real runtime utilization, not just development conformance, and form the hardware-near execution basis for future domain scripts and actuator integrations.
@@ -557,7 +602,7 @@ Added tests for:
 - prefix comparison and divergence localization for ledgers via `compare_ledgers`
 
 #### Native runtime Ω/shell validation
-Added tests validating GyroLabe native/runtime parity for:
+Added tests validating Gyroscopic native/runtime parity for:
 - `state24 -> omega12 -> state24` batch conversion
 - Ω-step batch vs Python reference
 - Ω-signature batch application vs Python reference
@@ -595,7 +640,7 @@ The completed second-stage suite established:
 - exact orthogonality and inverse identities hold
 
 #### Runtime correctness
-- native GyroLabe Ω and shell surfaces are exactly consistent with Python reference semantics
+- native Gyroscopic Ω and shell surfaces are exactly consistent with Python reference semantics
 - batch Ω execution, Ω gate application, Ω signature scans, and shell histograms are correct
 
 ---
@@ -856,7 +901,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - **Verified computational advantages** (§8): hidden subgroup (1 vs 64), Deutsch-Jozsa (1 vs 33), Bernstein-Vazirani (1 vs 6), exact 2-step uniformization (2 vs ~12), holographic compression (8 vs 12 bits, 33.3%), commutativity decision (O(1) vs O(4)), exact tamper detection.
 - **Non-Clifford resource and universality** (§9): δ_BU monodromy defect, four independent non-Clifford certifications (Clifford distance, aperiodicity, equidistribution, Wigner negativity), universality ingredients (Clifford backbone, non-Clifford resource, entangling gates).
 - **Conformance** (§10): SDK, target, and QuBEC conformance requirements.
-- **SDK Reference** (§11): five public namespaces (StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps), exactness classes, future-cone uniformity theorem, native parallelism, signature application semantics, state scan, state preparation and targeting, GyroLabe native ALU, chirality distance, tensor surfaces (GEMV, packed GEMV), runtime namespace, theorem-backed witness synthesis.
+- **SDK Reference** (§11): five public namespaces (StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps), exactness classes, future-cone uniformity theorem, native parallelism, signature application semantics, state scan, state preparation and targeting, Gyroscopic native ALU, chirality distance, tensor surfaces (GEMV, packed GEMV), runtime namespace, theorem-backed witness synthesis.
 
 ---
 
@@ -867,13 +912,13 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - **`src/api.py`**: precomputed tables for all 256 bytes, chirality register helpers, q-class computation, word signatures, Walsh helpers.
 - **`src/kernel.py`**: reference kernel with spinorial transition law, forward/inverse stepping, single-step trace, depth-4 projections.
 - **`src/sdk.py`**: public SDK surface with StateOps, MomentOps, SpectralOps, TensorOps, RuntimeOps namespaces.
-- **`src/tools/gyrolabe/gyrolabe_codec.c`** and **`src/tools/gyrolabe/gyrolabe_mul.c`**: native C backend — signature scan, chirality distance, qmap extraction, WHT64, Lattice Multiplication GEMV (unpacked and packed), signature application.
-- **`src/tools/gyrolabe/gyrolabe_opencl.c`**: OpenCL backend — batched GEMM, integer-native i32 path.
-- **`src/tools/gyrolabe/ops.py`**: Python wrapper for GyroLabe C/OpenCL surfaces.
-- **`src/tools/gyrolabe/opencl_backend.py`**: OpenCL device management and kernel compilation.
-- **`src/tools/gyrolabe/bolmo_bridge.py`**: bridge for external model weight loading (Bolmo).
-- **`src/tools/gyrolabe/chat_gyrolabe.py`**: chat interface using GyroLabe backend.
-- **`src/tools/gyrolabe/run_gyrolabe.py`**: CLI runner for GyroLabe operations.
+- **`src/tools/gyroscopic/gyroscopic_codec.c`** and **`src/tools/gyroscopic/gyroscopic_mul.c`**: native C backend — signature scan, chirality distance, qmap extraction, WHT64, Lattice Multiplication GEMV (unpacked and packed), signature application.
+- **`src/tools/gyroscopic/gyroscopic_opencl.c`**: OpenCL backend — batched GEMM, integer-native i32 path.
+- **`src/tools/gyroscopic/ops.py`**: Python wrapper for Gyroscopic C/OpenCL surfaces.
+- **`src/tools/gyroscopic/opencl_backend.py`**: OpenCL device management and kernel compilation.
+- **`src/tools/gyroscopic/bolmo_bridge.py`**: bridge for external model weight loading (Bolmo).
+- **`src/tools/gyroscopic/chat_gyroscopic.py`**: chat interface using Gyroscopic backend.
+- **`src/tools/gyroscopic/run_gyroscopic.py`**: CLI runner for Gyroscopic operations.
 - **AIR Console** (`src/app/console/`): browser-based UI for program contract management (backend + frontend).
 
 #### Changed
@@ -889,7 +934,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 
 #### Added
 - **Physics test chain** (6 files): `test_physics_1.py` through `test_physics_6.py` — state representation, transcription, intron decomposition, mask expansion, self-dual [12,6,2] code, spinorial transition, bijectivity, shadow count, BFS/Ω topology, holographic ratio, affine algebra, spinorial 4-cycle, commutator holonomy, CGM constants bridge, DOF doubling law, depth-4 fiber bundle, intrinsic K₄ emergence.
-- **aQPU test chain** (5 files): `test_aQPU_1.py` through `test_aQPU_4.py`, `test_aQPU_SDK_1.py` — dual horizons, K₄ gates, chirality transport, commutativity rate, Hilbert lift (Bell pairs, CHSH at Tsirelson bound, teleportation, stabilizers, contextuality, MUBs), permutation structure, row-class theorem, channel capacity, exact uniformization, error/tamper detection, six-qubit register, operator family, non-Clifford certification, computational advantages, SDK/GyroLabe C engine verification.
+- **aQPU test chain** (5 files): `test_aQPU_1.py` through `test_aQPU_4.py`, `test_aQPU_SDK_1.py` — dual horizons, K₄ gates, chirality transport, commutativity rate, Hilbert lift (Bell pairs, CHSH at Tsirelson bound, teleportation, stabilizers, contextuality, MUBs), permutation structure, row-class theorem, channel capacity, exact uniformization, error/tamper detection, six-qubit register, operator family, non-Clifford certification, computational advantages, SDK/Gyroscopic C engine verification.
 - **Moments tests** (4 files): `test_moments_physics_1.py`, `test_moments_physics_2.py`, `test_moments_economy.py`, `test_moments_genealogy.py` — 6-spin isomorphism, exact Clifford unitaries, 8192-element operator family, depth-4 frame quotient, stabilizer structure, economic/genealogy certification.
 - **Holography tests** (3 files): `test_holography.py`, `test_holography_2.py`, `test_holography_3.py`.
 - **Measurement tests**: `test_measurement.py` — governance ledgers, Hodge decomposition, aperture.
@@ -922,11 +967,11 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - `docs/reports/aQPU_Tests_Report_1.md` — aQPU verification report (185 tests).
 - `docs/reports/Moments_Tests_Report.md` — moments verification report (88 tests).
 - `docs/reports/Alignment_Measurement_Report.md` — governance balance metrics.
-- `docs/reports/GyroLabe_Generation_Report.md` — native backend verification and benchmarks.
+- `docs/reports/Gyroscopic_Generation_Report.md` — native backend verification and benchmarks.
 
 ---
 
-### Performance (GyroLabe Benchmarks)
+### Performance (Gyroscopic Benchmarks)
 
 - **Signature scan**: up to 3,376× speedup over Python at n=65536.
 - **Chirality distance**: up to 1,568× speedup, 161M pairs/sec at n=262144.
@@ -1404,11 +1449,11 @@ This establishes that Bolmo’s boundary logic (for the 256×256 byte-pair regim
 
 ---
 
-## [v1.3.5-GyroLabe-Blomo] – 2026-02-20
+## [v1.3.5-Gyroscopic-Blomo] – 2026-02-20
 
 ## What we did
 
-Discovered Bolmo-1B (Allen AI's byte-level language model, 1.47B params) as the first architecture-native target for GyroLabe. Bolmo operates directly on bytes with no tokenizer abstraction, matching the kernel's byte-complete formalism exactly. We modded the vendor code for CPU compatibility and GyroLabe integration, built a complete structural observatory, and ran the full measurement suite.
+Discovered Bolmo-1B (Allen AI's byte-level language model, 1.47B params) as the first architecture-native target for Gyroscopic. Bolmo operates directly on bytes with no tokenizer abstraction, matching the kernel's byte-complete formalism exactly. We modded the vendor code for CPU compatibility and Gyroscopic integration, built a complete structural observatory, and ran the full measurement suite.
 
 This is the first time we have coupled the kernel to a model that speaks the same language natively (bytes), rather than translating through token_id & 0xFF.
 
@@ -1488,7 +1533,7 @@ Family clustering ratio = 0.9502 (<1 = families cluster in embedding space). Mas
 
 ## What was NOT changed
 
-No changes to kernel.py, atlas.py, gyrolabe.py, or constants.py. The observatory script (run_gyrolabe_experiments.py) was completely rewritten with 10 measurement blocks.
+No changes to kernel.py, atlas.py, gyroscopic.py, or constants.py. The observatory script (run_gyroscopic_experiments.py) was completely rewritten with 10 measurement blocks.
 
 ## Observatory script structure (new)
 
@@ -1679,11 +1724,11 @@ vendor (`data\models\Bolmo-1B-vendor\*`) → edited (`data\models\Bolmo-1B\*`) H
 
 ---
 
-## [v1.3.4-GyroLabe] – 2026-02-19
+## [v1.3.4-Gyroscopic] – 2026-02-19
 
 ## What we did
 
-Built a structural physics observatory for the coupled system. All work in `scripts/run_gyrolabe_experiments.py`. No changes to `kernel.py`, `atlas.py`, `gyrolabe.py`, or `constants.py`.
+Built a structural physics observatory for the coupled system. All work in `scripts/run_gyroscopic_experiments.py`. No changes to `kernel.py`, `atlas.py`, `gyroscopic.py`, or `constants.py`.
 
 Both levers were already live before today:
 - BU-Egress: mask in SwiGLU at 8 full-attention layers (CGM sigma + sigma-focus, promoted 2026-02-19)
@@ -1740,15 +1785,15 @@ What we have not done: use S_i as trajectory-level accumulated action. The monod
 
 ---
 
-## [v1.3.3-GyroLabe] – 2026-02-18
+## [v1.3.3-Gyroscopic] – 2026-02-18
 
 **Topic:** Stabilization of the Projection Mask Layer via CGM Invariants and Dynamic Focusing
 
 ---
 
-### 1. Implemented Changes (Promoted to `gyrolabe.py`)
+### 1. Implemented Changes (Promoted to `gyroscopic.py`)
 
-We finalized two major structural upgrades to the GyroLabe projection mechanism. These are now live in the codebase.
+We finalized two major structural upgrades to the Gyroscopic projection mechanism. These are now live in the codebase.
 
 #### A. CGM-Grounded Sigma Scaling
 **Change:** Replaced empirical sigma values `{2.0, 4.0, 3.0, 2.5}` with values derived strictly from the CGM stage actions relative to the aperture scale.
@@ -1770,7 +1815,7 @@ We finalized two major structural upgrades to the GyroLabe projection mechanism.
 
 ### 2. Experimental Arc & Findings
 
-We conducted two rounds of rigorous testing using `run_gyrolabe_experiments.py` to isolate the behavior of the **mask layer** (the radial function on Hamming geometry).
+We conducted two rounds of rigorous testing using `run_gyroscopic_experiments.py` to isolate the behavior of the **mask layer** (the radial function on Hamming geometry).
 
 #### Round 1: Broad Search
 *Tested:* Krawtchouk basis, predictive coding, fiber masks, phase blending, global regulators.
@@ -1803,7 +1848,7 @@ Throughout all tests, including those that failed on perplexity, the kernel's st
 *   `code_dist` $\approx 6.0$ (Topological alignment)
 *   `h_entropy` $\approx 6.8$ bits (Exploration)
 
-This confirms that GyroLabe is operating safely within the geometric bounds of the router kernel.
+This confirms that Gyroscopic is operating safely within the geometric bounds of the router kernel.
 
 ---
 
@@ -1814,9 +1859,9 @@ This confirms that GyroLabe is operating safely within the geometric bounds of t
 
 ---
 
-## [v1.3.2-GyroLabe] – 2026-02-16
+## [v1.3.2-Gyroscopic] – 2026-02-16
 
-Removed logit re-ranking from GyroLabe. Added differential mask modulation based on gauge transport distance. The kernel now steers only through activation masking.
+Removed logit re-ranking from Gyroscopic. Added differential mask modulation based on gauge transport distance. The kernel now steers only through activation masking.
 
 ### Successful Experiments
 
@@ -1843,14 +1888,14 @@ We decomposed the Gaussian mask profiles into Krawtchouk polynomial basis (the n
 
 ## Code Changes
 
-### gyrolabe.py
+### gyroscopic.py
 
 - Removed `_rerank_topk_logits_kernel_native` function
 - Removed re-ranking call from `generate()`
 - Added `_build_gaussian_lut()` and `_GAUSSIAN_LUT` (precomputed 4x4x13 table replacing runtime exp())
 - Changed `compute_mask()`: added `prev_h` parameter for differential modulation, removed `n_fiber` parameter (mask is now shape [256], broadcast happens at application site)
 - Changed `RoutedMLP`: receives mask via `set_mask()`, applies [256] mask broadcast across n_feat
-- Changed `GyroLabe`: tracks `_prev_h` for differential modulation
+- Changed `Gyroscopic`: tracks `_prev_h` for differential modulation
 
 ### kernel.py
 
@@ -1891,11 +1936,11 @@ Structural invariants held across all modes: mean_code_dist near 6.0, horizon en
 
 ---
 
-## [v1.3.1-GyroLabe] – 2026-02-14
+## [v1.3.1-Gyroscopic] – 2026-02-14
 
-## GyroLabe Formalization & Consolidation
+## Gyroscopic Formalization & Consolidation
 
-This release marks the formal consolidation of the **GyroLabe Holographic Coordination System**. We transitioned from experimental scripts to a rigorous mathematical formalism (CGM physics) where the GGG ASI Kernel acts as a geometric governor for the transformer. Instead of attempting to replace matrix multiplication entirely, we focused on downsizing bottlenecks by plugging the kernel as a routing mechanism on next-token generation.
+This release marks the formal consolidation of the **Gyroscopic Holographic Coordination System**. We transitioned from experimental scripts to a rigorous mathematical formalism (CGM physics) where the GGG ASI Kernel acts as a geometric governor for the transformer. Instead of attempting to replace matrix multiplication entirely, we focused on downsizing bottlenecks by plugging the kernel as a routing mechanism on next-token generation.
 
 We established a "common language" protocol where the kernel and model communicate via discrete bytes rather than arbitrary activation energies. The result is a closed-loop system where the kernel's geometry steers inference without destroying fluency, backed by extensive testing and 66 passing pytests.
 
@@ -1958,17 +2003,17 @@ We began with `test_gyro_2.py`, an experimental script coupling the Gyroscopic A
 - High correlation no longer meant damage—for 3D, corr≈0.65 with PPL improvement
 
 ### Published Artifacts
-- `src/tools/gyrolabe.py` - consolidated implementation
-- `tests/gyrolabe/test_gyrolabe.py` - 66 passing pytests
-- `scripts/run_gyrolabe.py` - runner with sweep capability
-- `docs/AIR_GyroLabe_Specs.md` - theoretical formalization
+- `src/tools/gyroscopic.py` - consolidated implementation
+- `tests/gyroscopic/test_gyroscopic.py` - 66 passing pytests
+- `scripts/run_gyroscopic.py` - runner with sweep capability
+- `docs/AIR_Gyroscopic_Specs.md` - theoretical formalization
 
 ### Architecture Summary
 The kernel and transformer now share a byte language. Kernel is advanced only by token choices. Masks are geometry-derived, applied in factored space (256 × 43). Extraction is telemetry confirming how much the model "listens." The coupling demonstrably improves some generations and leaves others nearly unchanged—exactly what an overseer, not a controller, should do.
 
 ---
 
-## [v1.3-GyroLabe] – 2026-02-09 2026-02-12
+## [v1.3-Gyroscopic] – 2026-02-09 2026-02-12
 
 ### Gyroscopic Experiments
 I decided to stop trying to replace matrixmul completely, and attempt to downsize its bottlenecks. I managed to plug the ASI Kernel as a routing mechanism on next-token generation with high quality results but not any optimization. It can affect governance, but it was not what I had as my scope. It could have a lot of benefits on pre-training, but I don't have the capacity to train from scratch. So, we'll see how this will evolve. 
