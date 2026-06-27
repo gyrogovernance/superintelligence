@@ -1,0 +1,27 @@
+---
+description: Read project specs before implementing gyroscopic / aQPU features
+alwaysApply: true
+---
+
+# Read Specs Before Guessing
+
+When working on gyroscopic llama.cpp, attention compression, KV cache, percolation, or aQPU physics — **read the specs first** whenever intent, scope, or implementation approach is unclear.
+
+## Canonical sources (in order)
+
+1. `src/tools/gyroscopic/NavPAD.md` — scope, what to build / not build
+2. `docs/notes/Intelligence/46/4_Leads.md` — SLCP KV, serializer, M₂; explicitly **not LSH**
+3. `docs/notes/Intelligence/46/5_Perlocation.md` — adaptive percolation from `chi_hist64`
+4. `docs/Gyroscopic_ASI_Runtime_Specs.md` — runtime hooks (§19–21)
+5. `docs/theory/QuBEC_Theory.md` — M̂₂ = W²/Σh², η via WHT (§5.2, §21.3)
+
+## Hard constraints
+
+- **No classical ML heuristics** dressed in gyroscopic names (static `dmax`, bucket LSH, fake `exp(-distance)` percolation).
+- **M₂ and η** come from live `chi_hist64` occupation; aperture widens/narrows from entropy, not env tunables.
+- **C hot path** in `external/llama.cpp/ggml/src/ggml-gyroscopic/`; Python is build/bench only unless spec says otherwise.
+- Do **not** edit NavPAD §0 Author's Notes.
+
+## When stuck
+
+Search the spec for the exact term (M₂, chi_hist64, SLCP, percolation, serializer) before writing new code. If the spec and code disagree, fix the code to match the spec unless the user explicitly overrides.

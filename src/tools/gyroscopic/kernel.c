@@ -249,6 +249,21 @@ static void wht64_int32(int32_t data[64]) {
     }
 }
 
+/* In-place 64-point Walsh-Hadamard on floats (same butterfly as wht64_int32). */
+static void wht64_float(float data[64]) {
+    int stride, i, j;
+    for (stride = 32; stride >= 1; stride >>= 1) {
+        for (i = 0; i < 64; i += 2 * stride) {
+            for (j = 0; j < stride; ++j) {
+                const float a = data[i + j];
+                const float b = data[i + j + stride];
+                data[i + j] = a + b;
+                data[i + j + stride] = a - b;
+            }
+        }
+    }
+}
+
 GYROSCOPIC_EXPORT uint8_t gyroscopic_chirality_from_signs64(uint64_t signs) {
     int32_t data[64];
     int k;
@@ -267,6 +282,81 @@ GYROSCOPIC_EXPORT uint8_t gyroscopic_chirality_from_signs64(uint64_t signs) {
         }
     }
     return (uint8_t) (best_k & (int) CHIRALITY_MASK_6);
+}
+
+GYROSCOPIC_EXPORT uint64_t gyroscopic_signs64_from_f32(const float * x) {
+    uint64_t signs = 0;
+    int k;
+
+    if (x == NULL) {
+        return 0;
+    }
+    for (k = 0; k < 64; ++k) {
+        if (x[k] >= 0.0f) {
+            signs |= (1ULL << (unsigned) k);
+        }
+    }
+    return signs;
+}
+
+GYROSCOPIC_EXPORT uint64_t gyroscopic_signs64_from_q8(const int8_t * q, int n) {
+    uint64_t signs = 0;
+    int k;
+
+    if (q == NULL || n <= 0) {
+        return 0;
+    }
+    if (n > 64) {
+        n = 64;
+    }
+    for (k = 0; k < n; ++k) {
+        if (q[k] >= 0) {
+            signs |= (1ULL << (unsigned) k);
+        }
+    }
+    return signs;
+}
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_activation_chirality(const float * x) {
+    return gyroscopic_chirality_from_signs64(gyroscopic_signs64_from_f32(x));
+}
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_activation_chirality_q8(
+    const int8_t * q0,
+    const int8_t * q1)
+{
+    uint64_t signs;
+
+    signs = gyroscopic_signs64_from_q8(q0, 32);
+    signs |= (gyroscopic_signs64_from_q8(q1, 32) << 32);
+    return gyroscopic_chirality_from_signs64(signs);
+}
+
+GYROSCOPIC_EXPORT int gyroscopic_chirality_distance(uint8_t chi_a, uint8_t chi_b) {
+    return popcount32((uint32_t) (chi_a ^ chi_b));
+}
+
+GYROSCOPIC_EXPORT float gyroscopic_route_resonance(
+    uint8_t chi_activation,
+    uint8_t chi_weight,
+    int layer,
+    int total_layers,
+    uint8_t k4_char,
+    uint8_t shell,
+    float g_layer)
+{
+    (void) layer;
+    (void) total_layers;
+    (void) k4_char;
+    (void) shell;
+
+    if (g_layer <= 0.0f) {
+        return 0.0f;
+    }
+    if (popcount32((uint32_t) (chi_activation ^ chi_weight)) > 2u) {
+        return 0.0f;
+    }
+    return g_layer;
 }
 
 GYROSCOPIC_EXPORT void gyroscopic_extract_phase_native(
@@ -467,6 +557,220 @@ GYROSCOPIC_EXPORT float gyroscopic_gravity_scale(
     g1 = gyroscopic_gravity_g1();
     psi = (float) layer / (float) total_layers;
     return expf(g1 * psi);
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_chi_hist_m2_eta(
+    const uint32_t hist[64],
+    float *          m2_out,
+    float *          eta_out)
+{
+    uint64_t W = 0;
+    uint64_t sumsq = 0;
+    float    fw[64];
+    float    e0;
+    float    etot;
+    int      i;
+
+    if (m2_out != NULL) {
+        *m2_out = 64.0f;
+    }
+    if (eta_out != NULL) {
+        *eta_out = 0.0f;
+    }
+    if (hist == NULL) {
+        return;
+    }
+
+    for (i = 0; i < 64; ++i) {
+        W += (uint64_t) hist[i];
+        sumsq += (uint64_t) hist[i] * (uint64_t) hist[i];
+    }
+    if (W == 0 || sumsq == 0) {
+        return;
+    }
+
+    if (m2_out != NULL) {
+        *m2_out = (float) ((double) W * (double) W / (double) sumsq);
+    }
+
+    if (eta_out == NULL) {
+        return;
+    }
+
+    for (i = 0; i < 64; ++i) {
+        fw[i] = (float) hist[i] / (float) W;
+    }
+    wht64_float(fw);
+    e0 = fabsf(fw[0]);
+    etot = 0.0f;
+    for (i = 0; i < 64; ++i) {
+        etot += fw[i] * fw[i];
+    }
+    if (etot > 0.0f) {
+        *eta_out = 1.0f - (e0 * e0) / etot;
+    }
+}
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_chirality_word6(uint32_t state24) {
+    const uint16_t a12 = (uint16_t) ((state24 >> 12) & LAYER_MASK_12);
+    const uint16_t b12 = (uint16_t) (state24 & LAYER_MASK_12);
+    const uint16_t diff = (uint16_t) (a12 ^ b12);
+    uint8_t          out = 0;
+    int              i;
+
+    for (i = 0; i < (int) CHIRALITY_QUBITS_6; ++i) {
+        const uint16_t pair = (uint16_t) ((diff >> (2 * i)) & 3u);
+        if (pair == 3u) {
+            out |= (uint8_t) (1u << i);
+        }
+    }
+    return out;
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_kv_f32_to_word4(const float * x, uint8_t word4[4]) {
+    uint64_t signs;
+    int      i;
+    int      j;
+
+    if (word4 == NULL) {
+        return;
+    }
+    if (x == NULL) {
+        memset(word4, 0, 4);
+        return;
+    }
+
+    signs = gyroscopic_signs64_from_f32(x);
+    for (i = 0; i < 4; ++i) {
+        const uint32_t sig = (uint32_t) ((signs >> (16 * i)) & 0xFFFFu);
+        float          norm = 0.0f;
+        uint8_t        mag;
+
+        for (j = 0; j < 16; ++j) {
+            const float v = x[i * 16 + j];
+            norm += v * v;
+        }
+        mag = (uint8_t) fminf(255.0f, sqrtf(norm) * 16.0f);
+        word4[i] = (uint8_t) ((sig ^ (sig >> 8) ^ mag) & 0xFFu);
+    }
+}
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_word4_chirality(
+    const uint8_t word4[4],
+    uint32_t *    state_inout)
+{
+    uint32_t s;
+    int      i;
+
+    if (word4 == NULL) {
+        return 0;
+    }
+    s = state_inout != NULL ? *state_inout : 0u;
+    for (i = 0; i < 4; ++i) {
+        s = gyroscopic_step_omega12(s, word4[i]);
+    }
+    if (state_inout != NULL) {
+        *state_inout = s;
+    }
+    return gyroscopic_chirality_word6(s);
+}
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_kv_f32_block_chirality(
+    const float * x,
+    uint32_t *    state_inout)
+{
+    uint8_t word4[4];
+
+    gyroscopic_kv_f32_to_word4(x, word4);
+    return gyroscopic_word4_chirality(word4, state_inout);
+}
+
+GYROSCOPIC_EXPORT int gyroscopic_chi_hist_d_eff(
+    const uint32_t hist[64],
+    uint8_t        chi_q,
+    float *        m2_out,
+    float *        eta_out)
+{
+    float    m2 = 64.0f;
+    float    eta = 0.0f;
+    uint64_t W = 0;
+    float    target;
+    int      d;
+    int      chi;
+
+    gyroscopic_chi_hist_m2_eta(hist, &m2, &eta);
+    if (m2_out != NULL) {
+        *m2_out = m2;
+    }
+    if (eta_out != NULL) {
+        *eta_out = eta;
+    }
+    if (hist == NULL) {
+        return 3;
+    }
+
+    for (chi = 0; chi < 64; ++chi) {
+        W += (uint64_t) hist[chi];
+    }
+    if (W == 0) {
+        return 3;
+    }
+
+    /* Condensed (low M₂) → sparser graph still percolates; thermal → widen aperture. */
+    target = 0.02f + ((m2 - 1.0f) / 63.0f) * 0.03f;
+    if (target < 0.01f) {
+        target = 0.01f;
+    }
+    if (target > 0.05f) {
+        target = 0.05f;
+    }
+
+    for (d = 0; d <= 3; ++d) {
+        uint64_t cum = 0;
+        for (chi = 0; chi < 64; ++chi) {
+            if (gyroscopic_chirality_distance(chi_q, (uint8_t) chi) <= d) {
+                cum += (uint64_t) hist[chi];
+            }
+        }
+        if ((float) cum / (float) W >= target) {
+            return d;
+        }
+    }
+    return 3;
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_kv_polar_encode_block64(
+    const float *      x,
+    gyro_kv_polar64_t * out)
+{
+    uint8_t  word4[4];
+    uint32_t s_mid = 0;
+    uint32_t s_full = 0;
+    float    norm = 0.0f;
+    int      i;
+
+    if (out == NULL) {
+        return;
+    }
+    memset(out, 0, sizeof(*out));
+    if (x == NULL) {
+        return;
+    }
+
+    gyroscopic_kv_f32_to_word4(x, word4);
+    s_mid = gyroscopic_step_omega12(s_mid, word4[0]);
+    s_mid = gyroscopic_step_omega12(s_mid, word4[1]);
+    for (i = 0; i < 4; ++i) {
+        s_full = gyroscopic_step_omega12(s_full, word4[i]);
+    }
+    for (i = 0; i < 64; ++i) {
+        norm += x[i] * x[i];
+    }
+
+    out->boundary = gyroscopic_chirality_word6(s_mid);
+    out->chi = gyroscopic_chirality_word6(s_full);
+    out->shell = (uint8_t) popcount32((uint32_t) out->chi);
+    out->r_bits = (uint16_t) fminf(65535.0f, sqrtf(norm) * 256.0f);
 }
 
 GYROSCOPIC_EXPORT void gyroscopic_analyze_q1_group_full(
@@ -687,4 +991,198 @@ GYROSCOPIC_EXPORT uint32_t gyroscopic_comb_qft_peak(
         *peak_amp_out = sqrtf(peak_amp);
     }
     return peak;
+}
+
+/* ------------------------------------------------------------------ */
+/* 64x64 tile projection / hybrid GEMV (Pi_basis, tiles.py parity). */
+/* ------------------------------------------------------------------ */
+
+#define GYRO_TILE GYROSCOPIC_TILE_SIZE
+
+static float gyro_tile_frob_norm(const float * W) {
+    double acc = 0.0;
+    int i;
+    for (i = 0; i < GYRO_TILE * GYRO_TILE; ++i) {
+        const double v = (double) W[i];
+        acc += v * v;
+    }
+    return (float) sqrt(acc);
+}
+
+static int gyro_tile_popcount8(uint8_t v) {
+#if defined(_MSC_VER)
+    return (int) __popcnt((unsigned) v);
+#elif defined(__GNUC__) || defined(__clang__)
+    return (int) __builtin_popcount((unsigned) v);
+#else
+    int n = 0;
+    while (v) { n += (int) (v & 1u); v >>= 1; }
+    return n;
+#endif
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_project_chi_coeffs(
+    const float * W,
+    float *       f_out)
+{
+    uint8_t idx[GYRO_TILE];
+    int d;
+    int i;
+    for (i = 0; i < GYRO_TILE; ++i) {
+        idx[i] = (uint8_t) i;
+    }
+    for (d = 0; d < GYRO_TILE; ++d) {
+        double acc = 0.0;
+        for (i = 0; i < GYRO_TILE; ++i) {
+            const int j = (int) (idx[i] ^ (uint8_t) d);
+            acc += (double) W[i * GYRO_TILE + j];
+        }
+        f_out[d] = (float) (acc / (double) GYRO_TILE);
+    }
+}
+
+static void gyro_tile_project_shell(const float * W, float * P) {
+    int i;
+    int j;
+    for (i = 0; i < GYRO_TILE; ++i) {
+        for (j = 0; j < GYRO_TILE; ++j) {
+            const uint8_t d = (uint8_t) (i ^ j);
+            const int shell = gyro_tile_popcount8(d);
+            double acc = 0.0;
+            int cnt = 0;
+            int ii;
+            int jj;
+            for (ii = 0; ii < GYRO_TILE; ++ii) {
+                for (jj = 0; jj < GYRO_TILE; ++jj) {
+                    if (gyro_tile_popcount8((uint8_t) (ii ^ jj)) == shell) {
+                        acc += (double) W[ii * GYRO_TILE + jj];
+                        ++cnt;
+                    }
+                }
+            }
+            P[i * GYRO_TILE + j] = (cnt > 0) ? (float) (acc / (double) cnt) : 0.0f;
+        }
+    }
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_tile_decompose_ratios(
+    const float *              W,
+    gyroscopic_tile_ratios_t * out)
+{
+    float P_shell[GYRO_TILE * GYRO_TILE];
+    float P_chi[GYRO_TILE * GYRO_TILE];
+    float f[GYRO_TILE];
+    float norm_w;
+    int i;
+    int j;
+
+    if (out == NULL) {
+        return;
+    }
+    memset(out, 0, sizeof(*out));
+
+    norm_w = gyro_tile_frob_norm(W);
+    out->norm = norm_w;
+    if (norm_w <= 0.0f) {
+        return;
+    }
+
+    gyro_tile_project_shell(W, P_shell);
+    gyroscopic_project_chi_coeffs(W, f);
+    for (i = 0; i < GYRO_TILE; ++i) {
+        for (j = 0; j < GYRO_TILE; ++j) {
+            P_chi[i * GYRO_TILE + j] = f[i ^ j];
+        }
+    }
+
+    {
+        double s_shell = 0.0;
+        double s_chi = 0.0;
+        double s_cms = 0.0;
+        double s_def = 0.0;
+        for (i = 0; i < GYRO_TILE * GYRO_TILE; ++i) {
+            const double w = (double) W[i];
+            const double pc = (double) P_chi[i];
+            const double ps = (double) P_shell[i];
+            const double d = w - pc;
+            const double co = pc - ps;
+            s_shell += ps * ps;
+            s_chi   += pc * pc;
+            s_cms   += co * co;
+            s_def   += d * d;
+        }
+        out->r_shell            = (float) (sqrt(s_shell) / (double) norm_w);
+        out->r_chi              = (float) (sqrt(s_chi)   / (double) norm_w);
+        out->r_chi_minus_shell  = (float) (sqrt(s_cms)  / (double) norm_w);
+        out->r_defect           = (float) (sqrt(s_def)  / (double) norm_w);
+    }
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_chi_circulant_matvec(
+    const float * f,
+    const float * x,
+    float *       y)
+{
+    float fw[GYRO_TILE];
+    float xw[GYRO_TILE];
+    int   i;
+
+    if (f == NULL || x == NULL || y == NULL) {
+        return;
+    }
+
+    memcpy(xw, x, (size_t) GYRO_TILE * sizeof(float));
+    wht64_float(xw);
+    memcpy(fw, f, (size_t) GYRO_TILE * sizeof(float));
+    wht64_float(fw);
+    for (i = 0; i < GYRO_TILE; ++i) {
+        y[i] = fw[i] * xw[i] * (1.0f / (float) GYRO_TILE);
+    }
+    wht64_float(y);
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_tile_hybrid_matvec(
+    const float * W,
+    const float * x,
+    float *       y)
+{
+    float f[GYRO_TILE];
+    int i;
+    int j;
+
+    gyroscopic_project_chi_coeffs(W, f);
+    gyroscopic_chi_circulant_matvec(f, x, y);
+
+    for (i = 0; i < GYRO_TILE; ++i) {
+        for (j = 0; j < GYRO_TILE; ++j) {
+            const float w = W[i * GYRO_TILE + j];
+            const float p = f[i ^ j];
+            y[i] += (w - p) * x[j];
+        }
+    }
+}
+
+GYROSCOPIC_EXPORT float gyroscopic_tile_hybrid_dot_row(
+    const float * W,
+    int           row,
+    const float * x)
+{
+    float f[GYRO_TILE];
+    float y = 0.0f;
+    int j;
+
+    if (row < 0 || row >= GYRO_TILE) {
+        return 0.0f;
+    }
+
+    gyroscopic_project_chi_coeffs(W, f);
+    for (j = 0; j < GYRO_TILE; ++j) {
+        y += f[row ^ j] * x[j];
+    }
+    for (j = 0; j < GYRO_TILE; ++j) {
+        const float w = W[row * GYRO_TILE + j];
+        const float p = f[row ^ j];
+        y += (w - p) * x[j];
+    }
+    return y;
 }

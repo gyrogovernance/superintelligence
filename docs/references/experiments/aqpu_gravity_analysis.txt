@@ -1,5 +1,5 @@
 CGM gravity script runner
-started: 2026-05-24T00:04:56+03:00
+started: 2026-06-27T00:05:00+03:00
 python: C:\Python314\python.exe
 scripts: 7
 
@@ -232,17 +232,17 @@ Kernel ratios:
   n_G / (|Omega|*rho^5) ~ 1.007: gravity sits near |Omega|*rho^5 ticks from the EW anchor (deep relational bulk).
 
 EW mass coords (order 5, same Delta, compact geometry):
-  Top     n = 24.7
-  Higgs   n = 47.2
-  Z       n = 69.2
-  W       n = 78.0
+  Top     n = 17.1
+  Higgs   n = 32.7
+  Z       n = 48.0
+  W       n = 54.1
   Gravity n_G = 3714.3
 
 =========
 ANALYSIS COMPLETE
 =========
 
-exit=0  duration=0.86s
+exit=0  duration=0.70s
 
 ######## aqpu_gravity_analysis_2.py ########
 
@@ -399,7 +399,7 @@ c4_anchor - kernel = -5.252780200913e-03
 G_geo              = 6.708644908597e-39  ppm=-24.608150
 G_corr             = 6.708809505940e-39  ppm=-0.073643
 
-exit=0  duration=1.78s
+exit=0  duration=1.51s
 
 ######## aqpu_gravity_analysis_1.py ########
 
@@ -670,7 +670,7 @@ SUMMARY
   tau_G (full) = 76.237917
   G_pred/G_meas - 1 (full) = -0.074 ppm
 
-exit=0  duration=0.92s
+exit=0  duration=0.77s
 
 ######## aqpu_gravity_analysis_4.py ########
 
@@ -738,7 +738,7 @@ psi = GM/(r*c^2) = gravitational potential / c^2
      White dwarf (1 Msun)       1.00       5000.0   2.9541e-04     0.999809    -0.0191
   Neutron star (1.4 Msun)       1.40         12.0   1.7235e-01     0.894704   -10.5296
      Stellar BH (10 Msun)      10.00         29.5   5.0070e-01     0.723803   -27.6197
-          SMBH (4e6 Msun) 4001187.14   11800000.0   5.0070e-01     0.723803   -27.6197
+          SMBH (4e6 Msun) 4001066.15   11800000.0   5.0070e-01     0.723803   -27.6197
 
 Note: psi for compact objects can exceed 0.1, producing
 measurable G corrections (>1%). Neutron stars and black holes
@@ -879,9 +879,9 @@ E. Perihelion precession (weak-field geodesic)
 
   Metric f = 1 - 2*psi(s) with exact psi(s); not G(psi) at perihelion.
 
-  Mercury s_a = 39217810 r_g
-  GR:  5.0185806280e-07 rad/orbit = 42.9793 arcsec/century
-  CGM: 5.0185806143e-07 rad/orbit = 42.9793 arcsec/century
+  Mercury s_a = 39216624 r_g
+  GR:  5.0187323894e-07 rad/orbit = 42.9806 arcsec/century
+  CGM: 5.0187323756e-07 rad/orbit = 42.9806 arcsec/century
   CGM/GR = 0.9999999973  (0.0027 ppm)
 
   PPN beta (leading 1 - g1/2 ~ 1.323) is a strong-field book-keeping parameter.
@@ -934,8 +934,8 @@ Orbital period corrections
 Orbital corrections at key radii:
               Object    s=r/r_g        psi      T/T_N      v/v_N
 -------------------------------------------------------
-        Earth (1 AU) 101312431.9 9.8705e-09   1.000000   1.000000
-             Mercury 39217934.0 2.5499e-08   1.000000   1.000000
+        Earth (1 AU) 101309363.9 9.8708e-09   1.000000   1.000000
+             Mercury 39216746.4 2.5499e-08   1.000000   1.000000
       NS close orbit       11.6 8.2178e-02   1.026881   0.973823
              BH ISCO        6.0 1.5609e-01   1.051673   0.950866
 
@@ -1206,7 +1206,7 @@ Sample G reductions:
 ANALYSIS COMPLETE
 =========
 
-exit=0  duration=0.98s
+exit=0  duration=0.82s
 
 ######## aqpu_gravity_analysis_5.py ########
 
@@ -1317,8 +1317,8 @@ F. Gravitational radiation with G(psi)
 
   Binary NS proxy: M=1.4 Msun each, r_orb=10 km
     psi_source = 0.4135
-    G(psi)/G_global = 0.765740
-    P_rad ratio (CGM/Newton) = 0.765740
+    G(psi)/G_global = 0.765733
+    P_rad ratio (CGM/Newton) = 0.765733
     (~23.4% reduction in luminosity)
 
 =========
@@ -1374,7 +1374,7 @@ H. Neutron star interior with G(x)
        10.92     0.8764   0.150590   0.907360   0.107065
        12.44     1.0716   0.160579   0.901528   0.040355
        13.96     1.2068   0.161093   0.901228   0.007879
-       15.36     1.2530   0.152759   0.906090   0.000002
+       15.36     1.2529   0.152759   0.906090   0.000002
 
   Core: psi = 0.000000, G/G_global = 1.000000
   Core G reduction: 0.00%
@@ -1500,8 +1500,8 @@ Step 2: GR prediction
   Agreement: 1.0%
 
 Step 3: CGM modification from G(psi)
-  r_g = 4176.486 m
-  s = a/r_g = 466688
+  r_g = 4176.613 m
+  s = a/r_g = 466679
   psi_orbital ~ 2.14e-06
   G(psi)/G0 = 0.9999986167
   Luminosity correction (G^2.5 - 1): -0.0003%
@@ -1520,9 +1520,9 @@ Step 6: Strong-field strain predictions
                 Source          psi       G/G0    h ratio
   --------------------------------------------------------
           Hulse-Taylor   2.1428e-06     1.0000     1.0000
-         NS-NS (20 km)   1.0336e-01     0.9354     0.9354
-        BH-BH (100 km)   4.4299e-01     0.7513     0.7513
-        SMBH (0.01 pc)   4.7849e-06     1.0000     1.0000
+         NS-NS (20 km)   1.0337e-01     0.9354     0.9354
+        BH-BH (100 km)   4.4300e-01     0.7513     0.7513
+        SMBH (0.01 pc)   4.7851e-06     1.0000     1.0000
 
 CONCLUSION: G(psi) is negligible in the wave zone at current precision.
 
@@ -1833,7 +1833,7 @@ N. Spin-sector shadow (wavefunction)
 DERIVATIONS COMPLETE
 =========
 
-exit=0  duration=2.86s
+exit=0  duration=2.43s
 
 ######## aqpu_gravity_analysis_6.py ########
 
@@ -2096,10 +2096,10 @@ C.5b Stage-mass decomposition
   UV ratios are bare-mass fractions; virial is a dressed bound-state
   condition. No closure is expected between these two objects.
   Delta-ruler mass coordinates (compact geometry, analysis_3 G):
-    Top     n = 24.7
-    Higgs   n = 47.2
-    Z       n = 69.2
-    W       n = 78.0
+    Top     n = 17.1
+    Higgs   n = 32.7
+    Z       n = 48.0
+    W       n = 54.1
     Gravity n_G = 3714.3  (alpha_G at v)
 
 C.6  Cosmological virial closure (BU)
@@ -2169,7 +2169,7 @@ E.4  Summary
   GW HT / vacuum: analysis_5 J, P.
 ========= DONE =========
 
-exit=0  duration=1.77s
+exit=0  duration=1.57s
 
 ######## aqpu_gravity_analysis_7.py ########
 
@@ -2516,8 +2516,8 @@ L_0 = |E_self|/T_Z2 = pi*c^5/(24*G) = (G_kernel/4)*L_Planck
 HAWKING LUMINOSITY vs L_0 (greybody = 1)
                 Object       M/Msun         L_H(W)      L_H/L_0
   ------------------------------------------------------------
-            10 Msun BH     1.00e+01       6.70e-31   1.4097e-82
-                Sgr A*     4.00e+06       4.18e-42   8.8105e-94
+            10 Msun BH     1.00e+01       6.69e-31   1.4096e-82
+                Sgr A*     4.00e+06       4.18e-42   8.8099e-94
 
 Hawking luminosity: analysis_6 C.7. Gravitomagnetic split: analysis_6 A.6.
 
@@ -2742,8 +2742,8 @@ Cross-script ownership:
               four-phase causal structure
 ========== DONE ==========
 
-exit=0  duration=20.37s
+exit=0  duration=16.53s
 
-finished: 2026-05-24T00:05:25+03:00
-total_duration=29.54s
+finished: 2026-06-27T00:05:25+03:00
+total_duration=24.34s
 worst_exit=0

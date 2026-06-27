@@ -1,0 +1,322 @@
+===== PATCH 1 =====
+OLD:
+#include "ops.h"
+
+#include "ggml-cpu.h"
+
+NEW:
+#include "ops.h"
+
+#include "gyro_kv_chi.h"
+#include "ggml-cpu.h"
+
+===== PATCH 2 =====
+OLD:
+                from_float(
+                        (const float *) ((char *) src0->data +  i*nb01 + i02*nb02 + i03*nb03),
+                                        ((char *)  dst->data + i1*nb1  + i02*nb2  + i03*nb3), nc);
+            }
+        }
+    }
+}
+
+void ggml_compute_forward_set_rows(
+
+NEW:
+                const float * row_f32 =
+                        (const float *) ((char *) src0->data +  i*nb01 + i02*nb02 + i03*nb03);
+
+                from_float(
+                        row_f32,
+                        ((char *)  dst->data + i1*nb1  + i02*nb2  + i03*nb3), nc);
+
+                if (gyro_kv_chi_is_k_cache(dst)) {
+                    gyro_kv_chi_on_k_write_f32(dst, i1, (int) i02, row_f32, (int) nc);
+                }
+            }
+        }
+    }
+}
+
+void ggml_compute_forward_set_rows(
+
+===== PATCH 3 =====
+OLD:
+        const float * pq = (const float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
+        q_to_vec_dot(pq, Q_q, DK);
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            float s; // KQ value
+
+            const char * k_data = (const char *) k->data + ( ic*nbk1 + ik2*nbk2 + ik3*nbk3);
+            kq_vec_dot(DK, &s, 0, k_data, 0, Q_q, 0, 1);
+
+NEW:
+        const float * pq = (const float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
+        q_to_vec_dot(pq, Q_q, DK);
+
+        const int gyro_d_eff = gyro_kv_chi_effective_dmax(
+            pq, (int) DK, k, (int) ik2, ic_start, ic_end);
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            if (!gyro_kv_chi_resonates(pq, (int) DK, k, (int) ik2, ic, gyro_d_eff)) {
+                continue;
+            }
+
+            float s; // KQ value
+
+            const char * k_data = (const char *) k->data + ( ic*nbk1 + ik2*nbk2 + ik3*nbk3);
+            kq_vec_dot(DK, &s, 0, k_data, 0, Q_q, 0, 1);
+
+===== PATCH 4 =====
+OLD:
+            if (mask) {
+                ggml_vec_add_f32(tile_rows * KV_TILE_SZ, KQ, KQ, mask32);
+            }
+
+            bool skip[Q_TILE_SZ] = {};
+
+NEW:
+            if (mask) {
+                ggml_vec_add_f32(tile_rows * KV_TILE_SZ, KQ, KQ, mask32);
+            }
+
+            if (gyro_kv_chi_enabled()) {
+                float * Q_f32 = (float *) Q_q;
+                for (int tq = 0; tq < tile_rows; tq++) {
+                    const float * pq = Q_f32 + tq * DK;
+                    const int d_eff = gyro_kv_chi_effective_dmax(
+                        pq, (int) DK, k, ik2, ic, ic + kv_tile);
+                    for (int tk = 0; tk < kv_tile; tk++) {
+                        if (!gyro_kv_chi_resonates(pq, (int) DK, k, ik2, ic + tk, d_eff)) {
+                            KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                        }
+                    }
+                }
+            }
+
+            bool skip[Q_TILE_SZ] = {};
+
+===== PATCH 5 =====
+OLD:
+        const float * pq = (const float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
+        q_to_vec_dot(pq, Q_q, DK);
+
+        const int gyro_d_eff = gyro_kv_chi_effective_dmax(
+            pq, (int) DK, k, (int) ik2, ic_start, ic_end);
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            if (!gyro_kv_chi_resonates(pq, (int) DK, k, (int) ik2, ic, gyro_d_eff)) {
+                continue;
+            }
+
+NEW:
+        const float * pq = (const float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
+        q_to_vec_dot(pq, Q_q, DK);
+
+        uint8_t chi_q[GYRO_KV_MAX_SLICES];
+        int     chi_q_n = 0;
+        const int gyro_dmax = gyro_kv_chi_dmax();
+        if (gyro_kv_chi_enabled()) {
+            chi_q_n = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+        }
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            if (gyro_kv_chi_enabled() &&
+                !gyro_kv_chi_resonates_q(chi_q, chi_q_n, k, (int) ik2, ic, (int) DK, gyro_dmax)) {
+                continue;
+            }
+
+===== PATCH 6 =====
+OLD:
+            if (gyro_kv_chi_enabled()) {
+                float * Q_f32 = (float *) Q_q;
+                for (int tq = 0; tq < tile_rows; tq++) {
+                    const float * pq = Q_f32 + tq * DK;
+                    const int d_eff = gyro_kv_chi_effective_dmax(
+                        pq, (int) DK, k, ik2, ic, ic + kv_tile);
+                    for (int tk = 0; tk < kv_tile; tk++) {
+                        if (!gyro_kv_chi_resonates(pq, (int) DK, k, ik2, ic + tk, d_eff)) {
+                            KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                        }
+                    }
+                }
+            }
+
+NEW:
+            if (gyro_kv_chi_enabled()) {
+                float *       Q_f32 = (float *) Q_q;
+                const int     dmax  = gyro_kv_chi_dmax();
+                uint8_t       chi_q[GYRO_KV_MAX_SLICES];
+                for (int tq = 0; tq < tile_rows; tq++) {
+                    const float * pq = Q_f32 + tq * DK;
+                    const int     ns = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+                    for (int tk = 0; tk < kv_tile; tk++) {
+                        if (!gyro_kv_chi_resonates_q(
+                                chi_q, ns, k, ik2, ic + tk, (int) DK, dmax)) {
+                            KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                        }
+                    }
+                }
+            }
+
+===== PATCH 7 =====
+OLD:
+                if (gyro_kv_chi_is_k_cache(dst)) {
+
+NEW:
+                if (gyro_kv_cache_tensor(dst)) {
+
+===== PATCH 8 =====
+OLD:
+        uint8_t chi_q[GYRO_KV_MAX_SLICES];
+        int     chi_q_n = 0;
+        const int gyro_dmax = gyro_kv_chi_dmax();
+        if (gyro_kv_chi_enabled()) {
+            chi_q_n = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+        }
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            if (gyro_kv_chi_enabled() &&
+                !gyro_kv_chi_resonates_q(chi_q, chi_q_n, k, (int) ik2, ic, (int) DK, gyro_dmax)) {
+                continue;
+            }
+
+NEW:
+        uint8_t chi_q[GYRO_KV_MAX_SLICES];
+        uint8_t keep_bm[(GYRO_KV_MAX_POS + 7) / 8];
+        int     chi_q_n = 0;
+        const int gyro_dmax = gyro_kv_chi_dmax();
+        const bool gyro_ix = gyro_kv_chi_index_enabled();
+        if (gyro_kv_chi_enabled()) {
+            chi_q_n = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+            if (gyro_ix) {
+                gyro_kv_chi_fill_keep_bitmap(
+                    k, (int) ik2, chi_q, chi_q_n, gyro_dmax, (int) DK, keep_bm, ic_end, NULL);
+            }
+        }
+
+        // online softmax / attention
+        // loop over n_kv and n_head_kv
+        // ref: https://arxiv.org/pdf/2112.05682.pdf
+
+        for (int64_t ic = ic_start; ic < ic_end; ++ic) {
+            const float mv = mp ? slope*GGML_CPU_FP16_TO_FP32(mp[ic]) : 0.0f;
+            if (mv == -INFINITY) {
+                continue;
+            }
+
+            if (gyro_kv_chi_enabled()) {
+                if (gyro_ix) {
+                    if (!gyro_kv_chi_keep_at(keep_bm, ic)) {
+                        continue;
+                    }
+                } else if (!gyro_kv_chi_resonates_q(
+                               chi_q, chi_q_n, k, (int) ik2, ic, (int) DK, gyro_dmax)) {
+                    continue;
+                }
+            }
+
+===== PATCH 9 =====
+OLD:
+        float * K_f32  = V32 + KV_TILE_SZ * DV;
+
+        memset(VKQ32, 0, Q_TILE_SZ * DV * sizeof(float));
+
+NEW:
+        float * K_f32  = V32 + KV_TILE_SZ * DV;
+
+        uint8_t chi_q[GYRO_KV_MAX_SLICES];
+        uint8_t keep_bm[(GYRO_KV_MAX_POS + 7) / 8];
+        const int64_t n_kv = k->ne[1];
+        const bool gyro_ix = gyro_kv_chi_index_enabled();
+
+        memset(VKQ32, 0, Q_TILE_SZ * DV * sizeof(float));
+
+===== PATCH 10 =====
+OLD:
+            if (gyro_kv_chi_enabled()) {
+                float *       Q_f32 = (float *) Q_q;
+                const int     dmax  = gyro_kv_chi_dmax();
+                uint8_t       chi_q[GYRO_KV_MAX_SLICES];
+                for (int tq = 0; tq < tile_rows; tq++) {
+                    const float * pq = Q_f32 + tq * DK;
+                    const int     ns = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+                    for (int tk = 0; tk < kv_tile; tk++) {
+                        if (!gyro_kv_chi_resonates_q(
+                                chi_q, ns, k, ik2, ic + tk, (int) DK, dmax)) {
+                            KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                        }
+                    }
+                }
+            }
+
+NEW:
+            if (gyro_kv_chi_enabled()) {
+                float *       Q_f32 = (float *) Q_q;
+                const int     dmax  = gyro_kv_chi_dmax();
+                for (int tq = 0; tq < tile_rows; tq++) {
+                    const float * pq = Q_f32 + tq * DK;
+                    const int     ns = gyro_kv_chi_compute_q(pq, (int) DK, chi_q);
+                    if (gyro_ix) {
+                        gyro_kv_chi_fill_keep_bitmap(
+                            k, ik2, chi_q, ns, dmax, (int) DK, keep_bm, n_kv, NULL);
+                    }
+                    for (int tk = 0; tk < kv_tile; tk++) {
+                        if (gyro_ix) {
+                            if (!gyro_kv_chi_keep_at(keep_bm, ic + tk)) {
+                                KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                            }
+                        } else if (!gyro_kv_chi_resonates_q(
+                                       chi_q, ns, k, ik2, ic + tk, (int) DK, dmax)) {
+                            KQ[tq * KV_TILE_SZ + tk] = -INFINITY;
+                        }
+                    }
+                }
+            }
+

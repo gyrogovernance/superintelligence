@@ -238,3 +238,21 @@ def resolve_llama_perplexity_path(cfg: GyroscopicLLMConfig) -> Path:
         "gyroscopic_llm: llama-perplexity not found. Build llama.cpp tools or set "
         "GYROSCOPIC_LLAMA_PERPLEXITY. Tried:\n  " + "\n  ".join(tried)
     )
+
+
+def production_gyroscopic_env(
+    *,
+    stats: bool = False,
+) -> dict[str, str]:
+    """Environment for production gyroscopic inference on Bonsai-8B-Q1_0."""
+    env: dict[str, str] = {
+        "GGML_GYROSCOPIC": "1",
+        "GYROSCOPIC_KV_CHI": "1",
+        "GYROSCOPIC_KV_CHI_INDEX": "1",
+        "GYROSCOPIC_KV_PREFILTER_DECODE_ONLY": "1",
+        "GYROSCOPIC_GRAVITY_ATTN": "1",
+        "GYROSCOPIC_TOTAL_LAYERS": "36",
+    }
+    if stats:
+        env["GYROSCOPIC_KV_CHI_STATS"] = "1"
+    return env

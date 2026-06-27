@@ -127,13 +127,44 @@ def _bind(lib: ctypes.CDLL) -> None:
     lib.gyroscopic_chirality_from_signs64.restype = u8
     lib.gyroscopic_chirality_from_signs64.argtypes = [ctypes.c_uint64]
 
+    lib.gyroscopic_signs64_from_f32.restype = ctypes.c_uint64
+    lib.gyroscopic_signs64_from_f32.argtypes = [ctypes.POINTER(ctypes.c_float)]
+
+    lib.gyroscopic_activation_chirality.restype = u8
+    lib.gyroscopic_activation_chirality.argtypes = [ctypes.POINTER(ctypes.c_float)]
+
+    lib.gyroscopic_chirality_distance.restype = ctypes.c_int
+    lib.gyroscopic_chirality_distance.argtypes = [u8, u8]
+
+    lib.gyroscopic_chirality_word6.restype = u8
+    lib.gyroscopic_chirality_word6.argtypes = [ctypes.c_uint32]
+
+    fptr = ctypes.POINTER(ctypes.c_float)
+    u32p = ctypes.POINTER(ctypes.c_uint32)
+    lib.gyroscopic_kv_f32_to_word4.restype = None
+    lib.gyroscopic_kv_f32_to_word4.argtypes = [ctypes.POINTER(ctypes.c_float), ctypes.POINTER(u8)]
+
+    lib.gyroscopic_word4_chirality.restype = u8
+    lib.gyroscopic_word4_chirality.argtypes = [ctypes.POINTER(u8), u32p]
+
+    lib.gyroscopic_kv_f32_block_chirality.restype = u8
+    lib.gyroscopic_kv_f32_block_chirality.argtypes = [ctypes.POINTER(ctypes.c_float), u32p]
+
+    hist64 = ctypes.c_uint32 * 64
+    lib.gyroscopic_chi_hist_d_eff.restype = ctypes.c_int
+    lib.gyroscopic_chi_hist_d_eff.argtypes = [hist64, u8, fptr, fptr]
+
+    lib.gyroscopic_route_resonance.restype = ctypes.c_float
+    lib.gyroscopic_route_resonance.argtypes = [
+        u8, u8, ctypes.c_int, ctypes.c_int, u8, u8, ctypes.c_float,
+    ]
+
     lib.gyroscopic_gravity_g1.restype = ctypes.c_float
     lib.gyroscopic_gravity_g1.argtypes = []
 
     lib.gyroscopic_gravity_scale.restype = ctypes.c_float
     lib.gyroscopic_gravity_scale.argtypes = [ctypes.c_int, ctypes.c_int, u8, u8]
 
-    fptr = ctypes.POINTER(ctypes.c_float)
     lib.gyroscopic_cyclic_qft.restype = None
     lib.gyroscopic_cyclic_qft.argtypes = [fptr, fptr, ctypes.c_int]
 
@@ -146,6 +177,36 @@ def _bind(lib: ctypes.CDLL) -> None:
     lib.gyroscopic_multiplicative_period.argtypes = [u64, u64, u64]
     lib.gyroscopic_comb_qft_peak.restype = ctypes.c_uint32
     lib.gyroscopic_comb_qft_peak.argtypes = [u64, ctypes.c_int, ctypes.POINTER(ctypes.c_float)]
+
+    tile = 64
+    f32a = ctypes.c_float * (tile * tile)
+    f32v = ctypes.c_float * tile
+
+    class TileRatios(ctypes.Structure):
+        _fields_ = [
+            ("r_shell", ctypes.c_float),
+            ("r_chi", ctypes.c_float),
+            ("r_chi_minus_shell", ctypes.c_float),
+            ("r_defect", ctypes.c_float),
+            ("norm", ctypes.c_float),
+        ]
+
+    lib.gyroscopic_project_chi_coeffs.restype = None
+    lib.gyroscopic_project_chi_coeffs.argtypes = [f32a, f32v]
+
+    lib.gyroscopic_tile_decompose_ratios.restype = None
+    lib.gyroscopic_tile_decompose_ratios.argtypes = [f32a, ctypes.POINTER(TileRatios)]
+
+    lib.gyroscopic_chi_circulant_matvec.restype = None
+    lib.gyroscopic_chi_circulant_matvec.argtypes = [f32v, f32v, f32v]
+
+    lib.gyroscopic_tile_hybrid_matvec.restype = None
+    lib.gyroscopic_tile_hybrid_matvec.argtypes = [f32a, f32v, f32v]
+
+    lib.gyroscopic_tile_hybrid_dot_row.restype = ctypes.c_float
+    lib.gyroscopic_tile_hybrid_dot_row.argtypes = [f32a, ctypes.c_int, f32v]
+
+    lib.TileRatios = TileRatios
 
 
 def step_omega12(state24: int, byte: int) -> int:
@@ -162,6 +223,65 @@ def apply_K4(psi: list[float], gate: int) -> list[float]:
 
 def chirality_from_signs64(signs: int) -> int:
     return int(_lib().gyroscopic_chirality_from_signs64(signs & 0xFFFFFFFFFFFFFFFF))
+
+
+def activation_chirality(x: list[float]) -> int:
+    if len(x) != 64:
+        raise ValueError("activation vector must be length 64")
+    buf = (ctypes.c_float * 64)(*x)
+    return int(_lib().gyroscopic_activation_chirality(buf))
+
+
+def chirality_distance(a: int, b: int) -> int:
+    return int(_lib().gyroscopic_chirality_distance(a & 0xFF, b & 0xFF))
+
+
+def chirality_word6(state24: int) -> int:
+    return int(_lib().gyroscopic_chirality_word6(state24 & 0xFFFFFF))
+
+
+def kv_f32_block_chirality(x: list[float], state24: int | None = None) -> tuple[int, int]:
+    """Serialize 64-float block through word4→Ω; return (chi6, state24_out)."""
+    if len(x) != 64:
+        raise ValueError("block must be length 64")
+    buf = (ctypes.c_float * 64)(*x)
+    s = ctypes.c_uint32(state24 or 0)
+    chi = int(_lib().gyroscopic_kv_f32_block_chirality(buf, ctypes.byref(s)))
+    return chi, int(s.value)
+
+
+def chi_hist_d_eff(hist: list[int], chi_q: int) -> tuple[int, float, float]:
+    """Percolation-aware Hamming aperture from 64-bin occupation histogram."""
+    if len(hist) != 64:
+        raise ValueError("hist must be length 64")
+    hbuf = (ctypes.c_uint32 * 64)(*hist)
+    m2 = ctypes.c_float()
+    eta = ctypes.c_float()
+    d = int(_lib().gyroscopic_chi_hist_d_eff(hbuf, chi_q & 0x3F, ctypes.byref(m2), ctypes.byref(eta)))
+    return d, float(m2.value), float(eta.value)
+
+
+def route_resonance(
+    chi_act: int,
+    chi_weight: int,
+    layer: int,
+    total_layers: int,
+    g_layer: float,
+    *,
+    k4_char: int = 0,
+    shell: int = 0,
+) -> float:
+    return float(
+        _lib().gyroscopic_route_resonance(
+            chi_act & 0xFF,
+            chi_weight & 0xFF,
+            int(layer),
+            int(total_layers),
+            k4_char & 0xFF,
+            shell & 0xFF,
+            ctypes.c_float(g_layer),
+        )
+    )
 
 
 def gravity_g1() -> float:
@@ -205,3 +325,34 @@ def comb_qft_peak(period: int, q_bits: int) -> tuple[int, float] | None:
     if peak == 0:
         return None
     return peak, float(amp.value)
+
+
+TILE_SIZE = 64
+
+
+def tile_hybrid_matvec(W: list[float], x: list[float]) -> list[float]:
+    """64x64 hybrid matvec via native kernel (P_chi + defect)."""
+    n = TILE_SIZE
+    if len(W) != n * n or len(x) != n:
+        raise ValueError(f"W must be {n*n} and x must be {n}")
+    Wb = (ctypes.c_float * (n * n))(*[float(v) for v in W])
+    xb = (ctypes.c_float * n)(*[float(v) for v in x])
+    yb = (ctypes.c_float * n)()
+    _lib().gyroscopic_tile_hybrid_matvec(Wb, xb, yb)
+    return list(yb)
+
+
+def tile_decompose_ratios(W: list[float]) -> dict[str, float]:
+    n = TILE_SIZE
+    if len(W) != n * n:
+        raise ValueError(f"W must be length {n*n}")
+    Wb = (ctypes.c_float * (n * n))(*[float(v) for v in W])
+    out = _lib().TileRatios()
+    _lib().gyroscopic_tile_decompose_ratios(Wb, ctypes.byref(out))
+    return {
+        "r_shell": float(out.r_shell),
+        "r_chi": float(out.r_chi),
+        "r_chi_minus_shell": float(out.r_chi_minus_shell),
+        "r_defect": float(out.r_defect),
+        "norm": float(out.norm),
+    }
