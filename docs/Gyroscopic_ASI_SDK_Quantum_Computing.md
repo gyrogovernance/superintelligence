@@ -248,7 +248,7 @@ This composition law enables circuit optimization without replaying bytes.
 
 ### 5.1.4 Walsh-Hadamard Transform
 
-**Primitive:** `wht64(x: int32[64]) -> float[64]` — 64-point Walsh-Hadamard transform on the chirality register.
+**Primitive:** `wht64(x: int32[64]) -> float[64]`, a 64-point Walsh-Hadamard transform on the chirality register.
 
 **Matrix contract:** `H(q,r) = (−1)^(popcount(q ∧ r)) / 8`; self-inverse; factors as `H₁⊗⁶`.
 
@@ -258,7 +258,7 @@ This composition law enables circuit optimization without replaying bytes.
 
 **Definition:** `(f * g)(x) = Σ_a f(a) g(x ⊕ a)` on GF(2)⁶.
 
-**Composition law (SDK):** `WHT(f * g) = WHT(f) · WHT(g)` pointwise. For repeated application of the same byte ensemble, raise spectral coefficients to the n-th power and apply one inverse WHT — cost one WHT plus 64 exponentiations, independent of n.
+**Composition law (SDK):** `WHT(f * g) = WHT(f) · WHT(g)` pointwise. For repeated application of the same byte ensemble, raise spectral coefficients to the n-th power and apply one inverse WHT, at a cost of one WHT plus 64 exponentiations, independent of n.
 
 **Primitive:** Composed transport uses WHT64 and pointwise multiply per the semantic layer (QuBEC Theory Part IV §18.1).
 

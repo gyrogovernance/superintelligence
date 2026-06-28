@@ -649,8 +649,8 @@ def holonomy_spectrum(
     nn = int(op.N)
     inject1 = inject_residue_state(1, nn)
     reg_state = inject1
-    closure_depth: Optional[int] = None
-    shell_traj: List[int] = []
+    reg_closure_depth: Optional[int] = None
+    reg_shell_traj: List[int] = []
     horizon_hits = 0
     z2_flips = 0
     prev_z2 = _z2_sheet(reg_state)
@@ -661,7 +661,7 @@ def holonomy_spectrum(
         reg_state = op.apply_state24(reg_state)
 
         chi = int(chirality_word(reg_state)) & MASK6
-        shell_traj.append(int(shell_index_from_chirality6(chi)))
+        reg_shell_traj.append(int(shell_index_from_chirality6(chi)))
         if (
             is_on_horizon(reg_state)
             or is_on_equality_horizon(reg_state)
@@ -674,14 +674,14 @@ def holonomy_spectrum(
             z2_flips += 1
         prev_z2 = z2
 
-        if reg_state == inject1 and depth > 0 and closure_depth is None:
-            closure_depth = depth
+        if reg_state == inject1 and depth > 0 and reg_closure_depth is None:
+            reg_closure_depth = depth
 
     hist = _chirality_histogram(psi)
     peaks = top_nontrivial_peaks(wht64_dc_free(hist), k=8)
     balance = _eigenspace_balance(psi)
 
-    half = closure_depth // 2 if closure_depth and closure_depth % 2 == 0 else None
+    half = reg_closure_depth // 2 if reg_closure_depth and reg_closure_depth % 2 == 0 else None
 
     reg_ok = True
     for y in range(min(nn, 64)):
@@ -691,18 +691,18 @@ def holonomy_spectrum(
             reg_ok = False
             break
 
-    candidate = sig_order if sig_order else closure_depth
+    candidate = sig_order if sig_order else reg_closure_depth
     notes: List[str] = []
-    if sig_order and closure_depth and sig_order != closure_depth:
-        notes.append(f"sig_order={sig_order} reg_closure={closure_depth}")
+    if sig_order and reg_closure_depth and sig_order != reg_closure_depth:
+        notes.append(f"sig_order={sig_order} reg_closure={reg_closure_depth}")
 
     return HolonomySpectrum(
         path="HOLONOMY_SPECTRUM",
-        closure_depth=closure_depth,
+        closure_depth=reg_closure_depth,
         half_depth=half,
         signature_order=sig_order,
         k4_sector=int(op.omega_signature.parity),
-        shell_trajectory=shell_traj[:32],
+        shell_trajectory=reg_shell_traj[:32],
         horizon_hits=horizon_hits,
         z2_sheet_flips=z2_flips,
         wht_peaks=peaks,

@@ -58,7 +58,7 @@ Alignment Infrastructure Routing has three layers.
 
 The hQVM Kernel is the coordination backbone. It provides a finite space of 4,096 reachable states that serve as universal coordination points for distributed work.
 
-A shared state (or "Moment") is a reproducible coordinate that any participant can compute from the same activity log. The kernel's algebraic structure ensures that event order matters: two projects with identical deliverable counts but different execution sequences follow different trajectories through the state space. This non-commutativity provides structural provenance—proving not only *what* was done, but *how* the governance process unfolded over time.
+A shared state (or "Moment") is a reproducible coordinate that any participant can compute from the same activity log. The kernel's algebraic structure ensures that event order matters: two projects with identical deliverable counts but different execution sequences follow different trajectories through the state space. This non-commutativity provides structural provenance, proving not only *what* was done, but *how* the governance process unfolded over time.
 
 The kernel provides several structural guarantees:
 
@@ -277,22 +277,22 @@ Acceptance criteria, evaluation standards, payment decisions, and all policy jud
 ## Documentation & Links
 
 ### hQVM Kernel Specification
-- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md) — Complete technical specification of the hQVM Kernel
-- [**hQVM Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md) — Use cases and deployment scenarios
-- [**hQVM Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports) — Test results confirming the kernel's holonomic gate structure, CHSH saturation, and structural quantum advantages on Ω
+- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md): Complete technical specification of the hQVM Kernel
+- [**hQVM Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md): Use cases and deployment scenarios
+- [**hQVM Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports): Test results confirming the kernel's holonomic gate structure, CHSH saturation, and structural quantum advantages on Ω
 
 ### Classification Framework (The Human Mark)
-- [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md) — Core taxonomy of four displacement risks
-- [**Formal Grammar**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Grammar.md) — PEG specification for tagging and validation
-- [**Specifications Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Specs.md) — Implementation guidance for systems and evaluations
-- [**Terminology Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Terms.md) — Mark-consistent framing for 250+ AI safety terms
+- [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md): Core taxonomy of four displacement risks
+- [**Formal Grammar**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Grammar.md): PEG specification for tagging and validation
+- [**Specifications Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Specs.md): Implementation guidance for systems and evaluations
+- [**Terminology Guidance**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_Terms.md): Mark-consistent framing for 250+ AI safety terms
 
 ### Proof of Concept
-- [**The Human Mark in the Wild**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_InTheWild.md) — Analysis of 655 jailbreak prompts with THM classifications
-- [**Dataset on Hugging Face**](https://huggingface.co/datasets/gyrogovernance/thm_Jailbreaks_inTheWild) — Annotated corpus for training and evaluation
+- [**The Human Mark in the Wild**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM_InTheWild.md): Analysis of 655 jailbreak prompts with THM classifications
+- [**Dataset on Hugging Face**](https://huggingface.co/datasets/gyrogovernance/thm_Jailbreaks_inTheWild): Annotated corpus for training and evaluation
 
 ### References
-- [**GGG Paper**](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md) — Theoretical foundations and governance framework
+- [**GGG Paper**](https://github.com/gyrogovernance/tools/blob/main/docs/post-agi-economy/GGG_Paper.md): Theoretical foundations and governance framework
 
 ---
 

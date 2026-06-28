@@ -493,5 +493,5 @@ The Hodge ledgers decompose governance dynamics into gradient and cycle componen
 
 The CSM provides the physical capacity medium, derived from atomic constants with the speed of light canceling exactly. The coverage margin exceeds a trillion years of global Unconditional High Income at current population scales. The Hilbert space lift exhibits standard bipartite structure, with zero entropy for product subsets and maximal entropy (6 bits) for bijection graphs.
 
-The kernel is a Holonomic Quantum Virtual Machine (hQVM) whose computational properties—spinorial closure, exact two-step uniformisation, holographic compression, and intrinsic error detection—are all realised on standard silicon with deterministic integer arithmetic.
+The kernel is a Holonomic Quantum Virtual Machine (hQVM) whose computational properties (spinorial closure, exact two-step uniformisation, holographic compression, and intrinsic error detection) are all realised on standard silicon with deterministic integer arithmetic.
 

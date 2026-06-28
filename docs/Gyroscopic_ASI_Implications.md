@@ -96,7 +96,7 @@ The kernel's hQVM structure provides native primitives for AI interpretability. 
 These are exact structural computations, not statistical approximations. When an AI system reports its position in the 4,096-state Ω, it simultaneously reveals which of the 64 q-equivalence classes governs its current computation, providing a universal coordinate system for circuit comparison across architectures. Models instrumented to report kernel positions and q-classes can therefore expose a compact, mechanistic summary of their internal dynamics without revealing raw weights or activations.
 
 ### 5.3 Constitutional training and pruning
-Structural properties can be used as optimization targets. Models can be trained to maintain a target aperture of 0.0207, baking alignment into the fabric of the computation. Pruning becomes a matter of structural necessity: parameters that never activate at critical structural positions—such as horizon states or depth-four closure points—are redundant and can be removed without compromising the integrity of the intelligence.
+Structural properties can be used as optimization targets. Models can be trained to maintain a target aperture of 0.0207, baking alignment into the fabric of the computation. Pruning becomes a matter of structural necessity: parameters that never activate at critical structural positions (such as horizon states or depth-four closure points) are redundant and can be removed without compromising the integrity of the intelligence.
 
 **Implication:** The router gives AI alignment a concrete objective: navigate toward geometrically stable configurations. The same finite geometry provides a phase reference and codebook structure that can be reused for quantum routing and error-resilient simulation, although those applications are beyond the scope of this document. Alignment becomes navigation rather than constraint, following the landscape rather than fighting it.
 
@@ -108,7 +108,7 @@ The router does not store the world; it stores the auditable sequence of the wor
 
 - **Fixed Infrastructure:** The kernel dynamics and constants are a one-time cost. They never grow regardless of the volume of events or the number of participants.
 - **Log Growth:** The system accumulates history at 1 byte per step (the byte log) and roughly 200 bytes per governance record (the event log). 
-- **Storage Strategy:** At global scale, high-volume systems use rollup and commitment strategies. The coordination layer remains lightweight—storing only bytes and apertures—while the raw detail remains in domain-specific systems.
+- **Storage Strategy:** At global scale, high-volume systems use rollup and commitment strategies. The coordination layer remains lightweight, storing only bytes and apertures, while the raw detail remains in domain-specific systems.
 
 The holographic dictionary provides exact compression: any state in Ω encodes as an 8-bit pair (6-bit equality-horizon anchor plus a 2-bit dictionary index) instead of the 24 bits required for the full kernel state. The dual horizons (equality and complement, 64 states each) together with the uniform 4-to-1 reconstruction dictionary provide complete coverage of Ω with mathematical certainty. Abundance emerges from the elimination of coordination loss. A small shared prefix coordinates systems proportional to their payload, ensuring that as our capabilities scale, our governance remains traceable and whole.
 

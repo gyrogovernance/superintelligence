@@ -131,6 +131,7 @@
     "research_backup_do_not_use",
 
     "docs/build",
+    "docs/references/experiments",
     "site",
 
     ".ipynb_checkpoints",

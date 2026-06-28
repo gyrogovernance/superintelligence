@@ -1,6 +1,6 @@
 
 
-# Deep Analysis: hQVM Quantum SDK — Tests, Results, and Implications
+# Deep Analysis: hQVM Quantum SDK, Tests, Results, and Implications
 
 ## Overview
 
@@ -23,7 +23,7 @@ horizon_distance = 0, ab_distance = 12, sum = 12
 
 ### Insight
 
-The rest state is maximally chiral — every dipole mode is anti-aligned between A and B. It sits on the complement horizon (the "S-sector" from the CGM paper). The complementarity invariant `horizon_distance + ab_distance = 12` is verified at every tested state. This isn't a design choice; it's a structural theorem — the two distances are projections of the same chirality observable onto antipodal poles, and they must sum to the diameter (12 = 2 × 6 modes).
+The rest state is maximally chiral: every dipole mode is anti-aligned between A and B. It sits on the complement horizon (the "S-sector" from the CGM paper). The complementarity invariant `horizon_distance + ab_distance = 12` is verified at every tested state. This isn't a design choice; it's a structural theorem: the two distances are projections of the same chirality observable onto antipodal poles, and they must sum to the diameter (12 = 2 × 6 modes).
 
 The Ω-chart coordinates confirm: rest = `(u6=0, v6=63)`, shell 6. The rest state lives at one pole of a 6-dimensional binary Bloch sphere.
 
@@ -46,7 +46,7 @@ This holds from ANY state in Ω, not just rest. The tests verify this on multipl
 
 **This is the single most important computational result.** From any starting state, two bytes of input produce exact uniform coverage of all 4096 reachable states. Each of the 4096 states is hit exactly 16 times out of 65536 two-byte words. Classical random walks on a 4096-state graph need O(log 4096) ≈ 12 steps to approach uniformity. The hQVM achieves mathematical exactness in 2.
 
-The length-1 result — 128 distinct next states with multiplicity 2 — is the SO(3)/SU(2) shadow projection. Every byte action is a bijection on the 24-bit carrier, but when projected to the Ω manifold, pairs of bytes (shadow partners) collapse to the same permutation. This is the discrete double-cover: 256 SU(2) elements project to 128 SO(3) rotations.
+The length-1 result (128 distinct next states with multiplicity 2) is the SO(3)/SU(2) shadow projection. Every byte action is a bijection on the 24-bit carrier, but when projected to the Ω manifold, pairs of bytes (shadow partners) collapse to the same permutation. This is the discrete double-cover: 256 SU(2) elements project to 128 SO(3) rotations.
 
 The jump from 7 bits (length 1) to 12 bits (length 2) is the full entropic resource of the architecture becoming available. A classical optimization loop that needs to explore Ω gets exact uniform coverage in 2 kernel steps with zero sampling noise.
 
@@ -66,7 +66,7 @@ The transport table is **identical** for every state in Ω. The first 8 q-values
 
 ### Insight
 
-The chirality register χ ∈ GF(2)⁶ is an **exact linear observable** under the byte transition rule. The state-independence of the q-map means the chirality transport rule is a group homomorphism — the byte algebra acts on GF(2)⁶ by translation, and this translation depends only on the byte, not on the state.
+The chirality register χ ∈ GF(2)⁶ is an **exact linear observable** under the byte transition rule. The state-independence of the q-map means the chirality transport rule is a group homomorphism: the byte algebra acts on GF(2)⁶ by translation, and this translation depends only on the byte, not on the state.
 
 This is structurally analogous to the Heisenberg picture in quantum mechanics: the observable transforms linearly while the state is fixed. The q-map is the "Heisenberg generator" of the chirality observable.
 
@@ -110,7 +110,7 @@ u_next = v ⊕ ε_a(b)
 v_next = u ⊕ μ(b) ⊕ ε_b(b)
 ```
 
-This is a swap-plus-translation on GF(2)⁶ × GF(2)⁶ — dramatically simpler than the 24-bit transition rule. The exhaustive verification proves this isn't an approximation; it's an exact algebraic isomorphism between the carrier dynamics restricted to Ω and the compact affine dynamics on GF(2)⁶ × GF(2)⁶.
+This is a swap-plus-translation on GF(2)⁶ × GF(2)⁶, dramatically simpler than the 24-bit transition rule. The exhaustive verification proves this isn't an approximation; it's an exact algebraic isomorphism between the carrier dynamics restricted to Ω and the compact affine dynamics on GF(2)⁶ × GF(2)⁶.
 
 ---
 
@@ -134,7 +134,7 @@ The shell transition matrices are stochastic and diagonalized by Krawtchouk poly
 
 ### Insight
 
-This is the complete discrete harmonic analysis of the hQVM. The 7-level shell structure (chirality weight 0 through 6) is the discrete analog of latitude bands on a sphere. The Krawtchouk polynomials play the role of spherical harmonics — they are the eigenfunctions of the transition operator at each q-weight.
+This is the complete discrete harmonic analysis of the hQVM. The 7-level shell structure (chirality weight 0 through 6) is the discrete analog of latitude bands on a sphere. The Krawtchouk polynomials play the role of spherical harmonics: they are the eigenfunctions of the transition operator at each q-weight.
 
 The "source-independence" result is profound: averaging over all 256 bytes, the one-step shell distribution is C(6,w)/64 **regardless of the starting shell**. This proves the one-step uniform mixing at the shell level. It's the mechanism underlying the 2-step uniformization: one step randomizes the shell, and one more step fills in the within-shell degree of freedom.
 
@@ -142,7 +142,7 @@ The horizon transport tests make this concrete:
 - **From equality horizon (shell 0):** q-weight j maps to shell j exactly
 - **From complement horizon (shell 6):** q-weight j maps to shell 6−j exactly
 
-These are the pole-to-pole and pole-to-equator transport rules — the geodesics of the discrete chirality sphere.
+These are the pole-to-pole and pole-to-equator transport rules, the geodesics of the discrete chirality sphere.
 
 ---
 
@@ -187,7 +187,7 @@ The 256-byte alphabet has an exact fiber bundle structure:
 
 The first projection (4:1) is the shadow partnership: `b ⊕ 0xFE` gives the same Ω-permutation. The second projection (2:1) is the family-phase collapse: the two Ω-maps in each q-fiber differ only in the complement phase (ε₆ on both coordinates).
 
-The commutativity rate 1/64 = 2⁻⁶ is determined by the 6 degrees of freedom. Each of the 6 chirality qubits independently contributes to potential non-commutativity. This matches the CGM's prediction that non-commutativity is "non-absolute" — it exists (63/64 of pairs don't commute) but isn't total (1/64 do commute, and those that commute do so for algebraic reasons).
+The commutativity rate 1/64 = 2⁻⁶ is determined by the 6 degrees of freedom. Each of the 6 chirality qubits independently contributes to potential non-commutativity. This matches the CGM's prediction that non-commutativity is "non-absolute": it exists (63/64 of pairs don't commute) but isn't total (1/64 do commute, and those that commute do so for algebraic reasons).
 
 The q-fiber structure also means every commutation neighborhood is a coset of the same size-4 group in GF(2)⁶, confirmed by `test_same_q_fiber_same_commutation_neighborhood`.
 
@@ -210,7 +210,7 @@ Odd sector: Generated from even sector by composing with swap
 
 The operator algebra on Ω factorizes into even (parity 0) and odd (parity 1) sectors. Even operators are translations on GF(2)⁶ × GF(2)⁶; odd operators are swap-translations.
 
-The even sector has a clean product structure: `(common_shift, chirality_translation) ∈ GF(2)⁶ × GF(2)⁶`. The 64 shell-preserving operators are exactly those with zero chirality translation (τᵤ = τᵥ). This means shell-preservation is controlled by a single 6-bit observable — the chirality shift.
+The even sector has a clean product structure: `(common_shift, chirality_translation) ∈ GF(2)⁶ × GF(2)⁶`. The 64 shell-preserving operators are exactly those with zero chirality translation (τᵤ = τᵥ). This means shell-preservation is controlled by a single 6-bit observable, the chirality shift.
 
 The 16-to-1 multiplicity from 65536 two-byte words to 4096 signatures means: for each even operator on Ω, there are exactly 16 distinct two-byte words that implement it. This uniform multiplicity is a consequence of the shadow partnership (2×) and the family-phase structure (2× per byte = 4× per word, but constrained to 16× total).
 
@@ -230,7 +230,7 @@ The full finite field GF(2⁶) = GF(64) structure on the chirality register:
 
 ### Insight
 
-The chirality register isn't just a vector space GF(2)⁶ — it supports full field arithmetic. This means:
+The chirality register isn't just a vector space GF(2)⁶: it supports full field arithmetic. This means:
 - Division is possible (every nonzero element has a unique multiplicative inverse)
 - There's a discrete logarithm structure (primitive roots)
 - The Frobenius automorphism generates the Galois group Gal(GF(64)/GF(2)) ≅ ℤ/6ℤ
@@ -257,9 +257,9 @@ The GF(4) mode layer tests confirm that on reachable components, the pair-level 
 
 ### Insight
 
-The kernel-exact integer operations (stepping, signatures, chirality) are mathematically exact — zero error, proven by exhaustive verification. The tensor/spectral operations (WHT, Lattice Multiplication GEMV) use fixed-point quantization but achieve errors below 10⁻⁴ even at 8-bit precision, and below 10⁻⁶ at 16-bit precision.
+The kernel-exact integer operations (stepping, signatures, chirality) are mathematically exact, with zero error, proven by exhaustive verification. The tensor/spectral operations (WHT, Lattice Multiplication GEMV) use fixed-point quantization but achieve errors below 10⁻⁴ even at 8-bit precision, and below 10⁻⁶ at 16-bit precision.
 
-The WHT self-inverse property (H² = I) verified to 2.4 × 10⁻⁷ confirms the normalization (1/8 = 1/√64) is correct. The Lattice Multiplication engine achieves near-IEEE-754 accuracy through the AND+POPCNT decomposition — every dot product is computed by bitwise AND of magnitude Lattice Multiplications followed by hardware POPCNT, which is exact in integer arithmetic. The only error source is the initial fixed-point quantization.
+The WHT self-inverse property (H² = I) verified to 2.4 × 10⁻⁷ confirms the normalization (1/8 = 1/√64) is correct. The Lattice Multiplication engine achieves near-IEEE-754 accuracy through the AND+POPCNT decomposition: every dot product is computed by bitwise AND of magnitude Lattice Multiplications followed by hardware POPCNT, which is exact in integer arithmetic. The only error source is the initial fixed-point quantization.
 
 The OpenCL GPU path matches CPU to 1.9 × 10⁻⁶, confirming cross-platform reproducibility of the tensor engine.
 
@@ -294,7 +294,7 @@ The SDK specification claims several quantum advantages. Here's what the tests v
 
 1. **Hidden subgroup resolution (1 step vs O(64) classical):** The q-map is a native 4-to-1 function on the chirality register. The WHT resolves the hidden subgroup in one transform. The WHT self-inverse and orthonormality tests confirm the mechanism.
 
-2. **Exact 2-step uniformization (2 steps vs O(12) classical):** Proven exhaustively. This isn't an approximation to uniform — it IS uniform, with exact multiplicity 16 per state.
+2. **Exact 2-step uniformization (2 steps vs O(12) classical):** Proven exhaustively. This isn't an approximation to uniform; it IS uniform, with exact multiplicity 16 per state.
 
 3. **Exact commutativity decision (O(1) vs 4 steps):** `q₆(x) = q₆(y)` is computed by table lookup. The test `test_bytes_commute_iff_q_classes_match` proves this is both necessary and sufficient.
 
@@ -304,7 +304,7 @@ The SDK specification claims several quantum advantages. Here's what the tests v
 
 The 7-level shell is a discrete Bloch sphere. The two poles (shells 0 and 6) are the dual horizons. The equator (shell 3, 1280 states) is the bulk maximum. The Krawtchouk polynomials are the discrete spherical harmonics on this sphere.
 
-The test `test_full_byte_average_shell_law_is_binomial_and_source_independent` proves the most important structural fact: **the one-step ergodic measure on shells is the binomial distribution C(6,w)/64, independent of the source shell.** This means the shell dynamics is ergodic in exactly one step — no mixing time, no convergence, no approximation.
+The test `test_full_byte_average_shell_law_is_binomial_and_source_independent` proves the most important structural fact: **the one-step ergodic measure on shells is the binomial distribution C(6,w)/64, independent of the source shell.** This means the shell dynamics is ergodic in exactly one step: no mixing time, no convergence, no approximation.
 
 This is why the 2-step uniformization works: step 1 randomizes the shell coordinate, step 2 randomizes the within-shell coordinate. Both are exact, both are source-independent. The total entropy goes from 0 → 7 → 12 bits in exactly two steps.
 
@@ -313,7 +313,7 @@ This is why the 2-step uniformization works: step 1 randomizes the shell coordin
 The tests implicitly verify the discrete realization of the CGM constraints:
 
 - **CS (Common Source):** GENE_MIC_S = 0xAA as unique transcription origin; non-cloning verified by the structure of the q-map
-- **UNA (Non-absolute unity):** Commutativity rate 1/64 — non-trivial but bounded
+- **UNA (Non-absolute unity):** Commutativity rate 1/64, non-trivial but bounded
 - **ONA (Non-absolute opposition):** Dual horizons with |H| = 64, neither absolute
 - **BU (Balanced closure):** XYXY = id for all 65,536 pairs, b⁴ = id for all 256 bytes
 
@@ -335,6 +335,6 @@ For completeness, areas where the test suite could be extended:
 
 ## Summary
 
-The 122 tests confirm that the hQVM Kernel is an exactly solvable finite algebraic quantum system. Its key structural invariants — depth-4 closure, 2-step uniformization, exact chirality transport, Krawtchouk spectral decomposition, and the K4 gate group — are not approximations or statistical tendencies but mathematical identities verified by exhaustive computation over the complete state space and operator algebra. The system achieves its claimed computational advantages through algebraic structure rather than probabilistic interference, and the C-native tensor engine provides hardware-aligned execution with quantization errors below 10⁻⁶.
+The 122 tests confirm that the hQVM Kernel is an exactly solvable finite algebraic quantum system. Its key structural invariants (depth-4 closure, 2-step uniformization, exact chirality transport, Krawtchouk spectral decomposition, and the K4 gate group) are not approximations or statistical tendencies but mathematical identities verified by exhaustive computation over the complete state space and operator algebra. The system achieves its claimed computational advantages through algebraic structure rather than probabilistic interference, and the C-native tensor engine provides hardware-aligned execution with quantization errors below 10⁻⁶.
 
 

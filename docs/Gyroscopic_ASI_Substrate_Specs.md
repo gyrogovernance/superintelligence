@@ -25,7 +25,7 @@ The Gyroscopic ASI hQVM Kernel, the AIR coordination framework, and the Moments 
 
 This specification operates within the scientific and architectural commitments established in three prior frameworks:
 
-1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations—Governance, Information, Inference, and Intelligence—on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
+1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations (Governance, Information, Inference, and Intelligence) on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
 
 2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Direct** and **Indirect** sources of authority and agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not originate, decide, or authorize.
 

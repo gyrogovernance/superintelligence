@@ -460,7 +460,7 @@ The architecture eliminates the characteristic failure modes of unbounded learni
 
 Alignment is not a policy overlay. It is a consequence of operating within a closed system whose invariants are mathematically verified. An agent that maintains aperture near the target value, whose genealogy replays correctly, and whose ledgers cohere across domains is aligned by construction.
 
-The hQVM Kernel is a Holonomic Quantum Virtual Machine (hQVM) with proven computational advantages—single-step hidden-subgroup resolution on the chirality register, exact two-step uniformisation over Ω, and holographic compression of 12-bit states to 8 effective bits—that give the agent a structurally powerful, replayable medium on standard silicon.
+The hQVM Kernel is a Holonomic Quantum Virtual Machine (hQVM) with proven computational advantages (single-step hidden-subgroup resolution on the chirality register, exact two-step uniformisation over Ω, and holographic compression of 12-bit states to 8 effective bits) that give the agent a structurally powerful, replayable medium on standard silicon.
 
 The architecture is complete and ready for implementation.
 

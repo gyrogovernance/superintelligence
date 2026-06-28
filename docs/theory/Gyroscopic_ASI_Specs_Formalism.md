@@ -73,7 +73,7 @@ So the byte has a **palindromic** structure: Left Identity at the boundaries (bi
 
 **Families** are defined by the **L0 boundary bits** (positions 0 and 7). These 2 bits give 4 combinations, partitioning the 256 introns into **4 families of 64** each.
 
-The **bit pairs** (L0, LI, FG, BG) are groupings of bit **positions** by their gyrogroup role. They are NOT families — they describe the structural role of each bit position.
+The **bit pairs** (L0, LI, FG, BG) are groupings of bit **positions** by their gyrogroup role. They are NOT families; they describe the structural role of each bit position.
 
 ```python
 L0_MASK = 0b10000001  # bits 0, 7 - Left Identity (boundary) -> defines families
@@ -98,7 +98,7 @@ Frame 0:  [-1, 1]  [-1, 1]  [-1, 1]   <- pairs 0, 1, 2
 Frame 1:  [ 1,-1]  [ 1,-1]  [ 1,-1]   <- pairs 3, 4, 5
 ```
 
-Each pair is 2 bits in the 12-bit representation. When a payload bit is set, it **flips that entire pair** — both bits together. The pair `[-1, 1]` (bits `10`) becomes `[1, -1]` (bits `01`).
+Each pair is 2 bits in the 12-bit representation. When a payload bit is set, it **flips that entire pair**, both bits together. The pair `[-1, 1]` (bits `10`) becomes `[1, -1]` (bits `01`).
 
 **The algebra:** This organizes 256 introns into a structured space:
 

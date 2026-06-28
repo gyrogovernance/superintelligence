@@ -103,7 +103,7 @@ The kernel's self-dual mask code **C64** lifts to a 12-qubit graph state over GF
 
 **Tsirelson bound.** Quantum mechanics permits |S| <= 2*sqrt(2). This is the maximum bipartite quantum correlation in the standard CHSH scenario. Saturation S = 2*sqrt(2) means the bipartite state achieves the strongest quantum correlations allowed by quantum theory for these observables.
 
-**Conclusion (Hilbert lift).** The pairwise reduced states of the kernel's [12,6,2] graph-state lift produce S = 2*sqrt(2). These **lift-level correlators** are Bell-incompatible: no LHV model reproduces the correlation functions Tr(rho A (x) B) of this stabilizer state. This is a quantum-information certificate on the intrinsic code structure — not a laboratory Bell experiment on separated devices.
+**Conclusion (Hilbert lift).** The pairwise reduced states of the kernel's [12,6,2] graph-state lift produce S = 2*sqrt(2). These **lift-level correlators** are Bell-incompatible: no LHV model reproduces the correlation functions Tr(rho A (x) B) of this stabilizer state. This is a quantum-information certificate on the intrinsic code structure, not a laboratory Bell experiment on separated devices.
 
 ### Carrier and Hilbert lift
 

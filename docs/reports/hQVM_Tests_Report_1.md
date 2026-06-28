@@ -83,15 +83,15 @@ The bit packing maps +1 to bit value 0 and −1 to bit value 1 (specification §
 
 ### 1.2 Six Axis-Orientation Qubits
 
-Each axis-orientation pair in the tensor — for example, Frame 0, Axis X: [-1, +1] or [+1, -1] — is a two-level system whose ±1 values are the eigenvalues. There are six such pairs per component:
+Each axis-orientation pair in the tensor (for example, Frame 0, Axis X: [-1, +1] or [+1, -1]) is a two-level system whose ±1 values are the eigenvalues. There are six such pairs per component:
 
 ```
-Frame 0, Axis X: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 0
-Frame 0, Axis Y: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 1
-Frame 0, Axis Z: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 2
-Frame 1, Axis X: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 3
-Frame 1, Axis Y: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 4
-Frame 1, Axis Z: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 5
+Frame 0, Axis X: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 0)
+Frame 0, Axis Y: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 1)
+Frame 0, Axis Z: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 2)
+Frame 1, Axis X: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 3)
+Frame 1, Axis Y: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 4)
+Frame 1, Axis Z: orientation ∈ {[-1,+1], [+1,-1]}    (qubit 5)
 ```
 
 The pair-diagonal property observed in bit space (each 2-bit pair is always 00 or 11, never 01 or 10) is a consequence of this structure: both bits of a pair encode the same ±1 axis state.
