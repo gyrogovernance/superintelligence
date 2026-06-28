@@ -37,14 +37,7 @@ import warnings
 from pathlib import Path
 from typing import cast
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO = _find_repo_root(Path(__file__).resolve().parent)
+_REPO = Path(__file__).resolve().parents[1]
 _EXPERIMENTS = Path(__file__).resolve().parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))

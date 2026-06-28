@@ -20,41 +20,21 @@ T10. q(W₂(m)) = 63 for all m: each half-word fully inverts chirality.
 from __future__ import annotations
 
 import sys
-import importlib.util
 from pathlib import Path
 from typing import Final
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO = _find_repo_root(Path(__file__).resolve().parent)
+_REPO = Path(__file__).resolve().parents[1]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-
-def _load_gravity_common():
-    module_path = Path(__file__).resolve().with_name("hqvm_gravity_common.py")
-    module_name = "hqvm_gravity_common"
-    spec = importlib.util.spec_from_file_location(module_name, module_path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Could not load module from {module_path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
-
-from src.constants import (
+from gyroscopic.hQVM.constants import (
     GENE_MAC_REST, GENE_MIC_S, GENE_MAC_A12, GENE_MAC_B12,
     LAYER_MASK_12, CHIRALITY_MASK_6, MASK_STATE24,
     step_state_by_byte, unpack_state, byte_to_intron,
     intron_family, intron_micro_ref,
     is_on_horizon, is_on_equality_horizon,
 )
-from src.api import (
+from gyroscopic.hQVM.api import (
     chirality_word6, q_word6, q_word6_for_items,
     is_in_omega24, mask12_for_byte, omega_word_signature,
     state24_to_omega12, omega12_to_state24,
@@ -525,8 +505,9 @@ def run_sweep(omega: list[int]) -> None:
 # ════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
-    gravity_common = _load_gravity_common()
-    gravity_common.configure_stdout_utf8()
+    from hqvm_gravity_common import configure_stdout_utf8
+
+    configure_stdout_utf8()
     print("hQVM K4 Structure & Depth-4 Confinement")
     print("=" * 42)
     omega = _omega()
@@ -567,9 +548,9 @@ def optical_depth_from_canonical_trajectory() -> None:
     from fractions import Fraction
     from math import comb, gcd
 
-    gravity_common = _load_gravity_common()
+    from hqvm_gravity_common import tau_cycle_per_delta_exact
 
-    tau_frac = gravity_common.tau_cycle_per_delta_exact()
+    tau_frac = tau_cycle_per_delta_exact()
     numer = 4 * sum(comb(6, k) ** 3 for k in range(1, 6))
     denom = 64 * sum(comb(6, k) ** 2 for k in range(7))
     g = gcd(numer, denom)

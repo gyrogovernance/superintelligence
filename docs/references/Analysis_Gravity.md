@@ -6,7 +6,7 @@ Physics provides accurate field equations for gravity but treats three foundatio
 
 The Common Governance Model (CGM) rests on a single axiom: reality is organized by a common capacity for freedom. The conditions for this freedom to manifest generate the observable features of spacetime and information. Physical conservation and informational coherence are two readings of one underlying order, the Preservation of Ancestry. Preservation requires a strict operational sequence, which we identify as a four-phase causal cycle. Gravity, including its coupling strength, dimensional profile, and causal structure, follows from the requirement to complete this cycle.
 
-A finite-state algorithm called the Holonomic Quantum Virtual Machine (hQVM) kernel (hQVM) realises these conditions computationally. The kernel supplies the exact combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from the closure structure of CGM.
+A finite-state algorithm called the Holonomic Quantum Virtual Machine kernel (hQVM) realises these conditions computationally. The kernel supplies the combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from the closure structure of CGM.
 
 This analysis establishes the following results:
 
@@ -197,7 +197,7 @@ Isotropic pressure occupies the trace sector. Five independent trace-free compon
 
 ## 5. The hQVM Kernel
 
-The field theory derived above requires exact combinatorial normalization. The abstract conditions of ancestry preservation must find a finite realization that yields precise numerical invariants. The Holonomic Quantum Virtual Machine (hQVM) kernel provides this realization. It translates the Hilbert-style axiomatization of the Common Governance Model into an executable integer algebra over a finite field, mapping an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. The continuum field equations emerge as the limit of this discrete substrate.
+The field theory derived above requires exact combinatorial normalization. The abstract conditions of ancestry preservation must find a finite realization that yields precise numerical invariants. The Holonomic Quantum Virtual Machine kernel provides this realization. It translates the Hilbert-style axiomatization of the Common Governance Model into an executable integer algebra over a finite field, mapping an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. The continuum field equations emerge as the limit of this discrete substrate.
 
 ### 5.0 Discrete Differential Geometry Dictionary
 
@@ -807,7 +807,7 @@ The framework also derives a refractive index for the vacuum, n = 1/√(1 − 2�
 
 Coupling constants emerge from the BU invariants Q_G, δ_BU, and m_a as derived parameters. The gravitational coupling follows from kernel invariants, aperture geometry, and one energy anchor (v). The electromagnetic coupling follows from the same aperture geometry at a different depth. Their product is fixed by the closure ratio alone. The shell structure produces both a monopole (1 component) and a quadrupole (5 components) decomposition, providing the spectral room required to accommodate the full Standard Model. The companion compact geometry analysis (Analysis_Compact_Geometry.md) places electroweak, lepton, and quark mass coordinates on the same Δ ruler, with the W/Z ratio recovering Δ to 8.34 × 10⁻¹⁰. The CKM closure ansatz and a full SU(3) colour derivation are active research leads pending predeclared null-model audits.
 
-CGM admits two readings of the same closure structure. In the physical reading, the BU condition yields gravity as the field enforcing ancestry-preserving balance under displacement. In the informational reading, the same BU condition is intelligence, defined operationally as preserving ancestry while maintaining both identity and individuality under recursive operations (Section 2.1). The hQVM kernel realises this cycle as an exact transport rule with replayable provenance. Curvature is the derived observable of transport non-commutativity, measured by plaquette holonomy and accumulated as the Regge action τ_G (Section 5.6). The coupling G(ψ) is the continuum projection of this accumulated holonomy under the aperture ruler.
+CGM admits two readings of the same closure structure. In the physical reading, the BU condition yields gravity as the field enforcing ancestry-preserving balance under displacement. In the informational reading, the same BU condition is intelligence, defined operationally as preserving ancestry while maintaining both identity and individuality under recursive operations (Section 2.1). The hQVM kernel realises this cycle as a transport rule with replayable provenance. Curvature is the derived observable of transport non-commutativity, measured by plaquette holonomy and accumulated as the Regge action τ_G (Section 5.6). The coupling G(ψ) is the continuum projection of this accumulated holonomy under the aperture ruler.
 
 ---
 ## Appendix A: Formal Modal Logic

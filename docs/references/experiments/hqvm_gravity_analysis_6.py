@@ -21,14 +21,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import minimize_scalar
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO = _find_repo_root(Path(__file__).resolve().parent)
+_REPO = Path(__file__).resolve().parents[1]
 _EXPERIMENTS = Path(__file__).resolve().parent
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
@@ -36,6 +29,7 @@ if str(_EXPERIMENTS) not in sys.path:
     sys.path.insert(0, str(_EXPERIMENTS))
 
 from hqvm_gravity_analysis_2 import enumerate_omega
+from hqvm_compact_geom_core import electroweak_coords
 from hqvm_gravity_common import (
     configure_stdout_utf8,
     Q_G,
@@ -65,10 +59,9 @@ from hqvm_gravity_common import (
     trace_word_steps,
     FA_STF,
     TR_SIGMA_SHELL,
-    electroweak_coords,
 )
-from src.api import chirality_word6
-from src.constants import CHIRALITY_MASK_6, step_state_by_byte
+from gyroscopic.hQVM.api import chirality_word6
+from gyroscopic.hQVM.constants import CHIRALITY_MASK_6, step_state_by_byte
 
 configure_stdout_utf8()
 

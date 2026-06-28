@@ -12,7 +12,7 @@
 
 This document examines the mathematical structure of multiplication through the lens of the Common Governance Model (CGM). The analysis establishes that multiplication is the orthogonal case of bilinear spanning, that root extraction recovers a shared measure from a higher-degree closure, and that the CGM aperture parameter arises as the exact derivative of the square root function at a full phase horizon.
 
-Optional formal analysis of dyadic chart structure appears in Analysis of Gyroscopic Multiplication. That document is not an operational routing specification for QuBEC or the runtime.
+The arithmetic realization of these identifications is developed through the K4 lattice matrix: the canonical 2 x 2 decomposition of integer dot products into carrier, gauge-action, and chiral-alignment sectors. The scalar case satisfies exact rank-1 factorization (the common-source condition), while the vector case produces a nonzero chart defect decomposable via Cauchy-Binet into chart commutators that measure scale inhomogeneity across positions. The depth hierarchy of this decomposition traces the CGM constraint progression from common source through non-commutativity to balanced closure.
 
 These identifications connect the CGM geometric invariants to the classical theory of roots of unity, continued fractions, Gram determinants, Hilbert space norms, quaternionic orientation spaces, and two-circle intersection geometry. Cross-domain resonances are examined in the transition from integrability to chaos in Hamiltonian dynamical systems, where a universal critical exponent of one half governs the onset of non-integrable behavior, and in the lemon billiard family, where the CGM monodromy constant appears as the shape parameter producing a uniquely balanced mixed-type phase space.
 
@@ -353,7 +353,7 @@ For n = 3, the non-trivial cube roots of unity have real part −1/2 and imagina
 
 The cube roots form an equilateral triangle inscribed in the unit circle. The altitude of this triangle, √3/2, is the maximal orthogonal extension and appears throughout the CGM framework as the three-dimensional projection factor.
 
-#### 6.5 Fourth roots and depth-four closure
+#### 6.5 Fourth roots and depth-four order
 
 For n = 4, the cyclotomic polynomial is:
 
@@ -527,33 +527,22 @@ The ordinary dot product is recovered by the radix projection:
 
 This identity is exact for every int32 dot product. The K4 index set {00, 01, 10, 11} is (ℤ/2)².
 
-#### 9.3 Operational roles of the K4 lattice
+#### 9.3 Three operational roles
 
-The four entries carry three operational roles.
+The four entries carry three distinct operational roles.
 
-**D₀₀: carrier contraction.**
-
-```
-D₀₀(q,k) = ⟨L_q, L_k⟩
-```
-
-**D₀₁ and D₁₀: gauge action on the carrier.**
-
-```
-D₀₁(q,k) = ⟨L_q, H_k⟩
-D₁₀(q,k) = ⟨H_q, L_k⟩
-```
-
-When the high chart is signed-support valued, H ∈ {−1, 0, +1}, these cross terms act as boolean control masks over the carrier content: where H = +1, L is preserved; where H = −1, L is sign-inverted; where H = 0, L is annihilated.
-
-**D₁₁: gauge-gauge alignment.**
-
-When H_q and H_k are signed-support valued, D₁₁ is computed by signed support intersection:
+**D₁₁: chiral alignment.** When H takes values in {−1, 0, +1}, the gauge-gauge contraction is computed by signed support intersection:
 
 ```
 D₁₁ = popcount(q⁺ ∧ k⁺) + popcount(q⁻ ∧ k⁻)
-- popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
+     − popcount(q⁺ ∧ k⁻) − popcount(q⁻ ∧ k⁺)
 ```
+
+This is aligned-minus-anti-aligned counting, the same algebraic form as chirality measurement on oriented pairs.
+
+**D₀₁ and D₁₀: gauge action on the carrier.** In the spinorial regime, the cross terms act as boolean control masks over the carrier content: where H = +1, L is preserved; where H = −1, L is sign-inverted; where H = 0, L is annihilated.
+
+**D₀₀: carrier contraction.** The contraction of the low charts alone, with no gauge contribution.
 
 #### 9.4 The additive sector budget
 
@@ -574,34 +563,30 @@ The normalized budget:
 
 This is an exact arithmetic identity describing how the total weighted magnitude distributes across the three operational sectors.
 
-#### 9.5 Data-dependent simplification
+#### 9.5 Three computational regimes
 
-The K4 lattice matrix identity is unconditional:
+The K4 lattice matrix admits three exact chart regimes determined by the high-chart occupancy.
 
-```
-⟨q,k⟩ = D₀₀ + B(D₀₁ + D₁₀) + B²D₁₁
-```
-
-The data values of the high charts determine which cells simplify.
-
-**Vanishing high-chart condition.**
+**Carrier regime.** H_q = 0 and H_k = 0.
 
 ```
 M(q, k) = [ D₀₀  0 ]
            [ 0    0 ]
 ```
 
-Only D₀₀ contributes.
+Only D₀₀ contributes. The budget is (1, 0, 0). This is the Nikhilam regime where all residuals vanish.
 
-**Signed-support high-chart condition.**
+**Spinorial regime.** H ∈ {−1, 0, +1}ⁿ for both vectors.
 
-If H_q and H_k take values in {−1, 0, +1}, then D₁₁ is realized by signed support intersection. D₀₁ and D₁₀ are realized as signed masked carrier actions.
+D₁₁ is realized by boolean support intersection (AND + POPCNT on sign masks). D₀₁ and D₁₀ are realized as signed masked actions. All four cells are computed exactly with compressed boolean arithmetic.
 
-**General high-chart condition.**
+**Dense regime.** |H| > 1 at some position.
 
-If any high-chart value has magnitude greater than 1, the same K4 law is evaluated without boolean compression.
+The same K4 law is evaluated without boolean compression. Correctness is unchanged.
 
-No approximation enters the evaluation. The simplification is an exact property of the data.
+No approximation enters in the regime selection. The three regimes are exact chart specializations of one law.
+
+The carrier, spinorial, and dense regimes are not properties of weights to be detected. They are the three exact evaluations of the K4 lattice determined by the data values of H at runtime. Every Q8_0 dot product executes the full D₀₀ + B(D₀₁ + D₁₀) + B²D₁₁ form; the regime only selects which terms are zero by value, not by test.
 
 ---
 
@@ -755,15 +740,15 @@ The multiplicative defect of the arithmetic chart and the swap-gyration structur
 
 This document develops the arithmetic layer: exact chart decomposition of integer contractions, common-source closure, and defect structure.
 
-The companion document `QuBEC_Theory` develops the operator and transport layer: shell, chirality, gauge, spectral dynamics, and exact partition operator classes.
+The companion document `QuBEC_Climate_Dynamics` develops the operator and transport layer: shell, chirality, gauge, spectral dynamics, and exact partition operator classes.
 
 The hQVM kernel and SDK specifications develop the native state and runtime layer: reachable manifold, transition rule, execution surfaces, and observable records.
 
 Practical execution proceeds in this order:
 
 1. state structure (native manifold and charts)
-2. operator structure (exact transport and native symmetry projections)
-3. arithmetic lowering (K4 lattice realisation and data-dependent simplification)
+2. operator structure (exact transport and partition algebras)
+3. arithmetic lowering (K4 lattice realization and regime selection)
 
 The MacWilliams identity for the self-dual [12,6,2] mask code provides a further cross-layer connection. In coding theory, the MacWilliams transform relates the weight distribution of a code to that of its dual, expressed in the Krawtchouk polynomial basis. In the finite manifold layer, the same Krawtchouk basis diagonalizes shell-radial climate transport. For a self-dual code, the MacWilliams transform becomes a self-consistency condition, and the Plancherel identity on GF(2)^6 guarantees conservation between chirality-space and spectral-space representations. These three structures (MacWilliams weight transform, Krawtchouk radial harmonics, Plancherel spectral conservation) are expressions of a single algebraic duality on the 6-mode register.
 
@@ -866,10 +851,10 @@ The CGM dual-pole monodromy defect is δ_BU = 0.195342 radians. The lemon billia
 | Geometry | Two-circle intersection | Two modal operators |
 | Regular structures | Exactly 3 island chains | 3 rotational DOF (su(2)) |
 | Mixed phase space | Regular tori coexist with chaotic sea | 97.93% closure, 2.07% aperture |
-| No stickiness | Clean separation, no partial barriers | Clean depth-four closure |
+| No stickiness | Clean separation, no partial barriers | Clean depth-four order |
 | Semiclassical condensation | Mixed states decay as power law | Aperture is fixed geometric invariant |
 
-The three island chains at B = 0.1953 are particularly notable. Three is the number of independent generators in su(2), the Lie algebra that the CGM framework derives as the unique solution to its foundational constraints.
+The three island chains at B = 0.1953 are particularly notable. Three is the number of independent generators in su(2), the Lie algebra that the CGM framework derives as the unique solution to its foundational conditions.
 
 #### P2.4 Status
 
@@ -928,7 +913,7 @@ Leonel et al. propose four questions for investigating dynamical phase transitio
 
 #### P3.5 The lemon billiard as open problem
 
-Leonel et al. explicitly identify the lemon billiard as an open problem. The CGM framework suggests a specific prediction: the critical value of the shape parameter is B = δ_BU = 0.195342, determined by the toroidal holonomy of the depth-four closure cycle. Computing the critical exponent and order parameter of the lemon billiard as a function of B would constitute a direct test.
+Leonel et al. explicitly identify the lemon billiard as an open problem. The CGM framework suggests a specific prediction: the critical value of the shape parameter is B = δ_BU = 0.195342, determined by the toroidal holonomy of the depth-four order cycle. Computing the critical exponent and order parameter of the lemon billiard as a function of B would constitute a direct test.
 
 ---
 
@@ -1088,4 +1073,4 @@ Ungar, A. A. (2008). Analytic Hyperbolic Geometry and Albert Einstein's Special 
 
 ### Gyroscopic ASI Framework
 
-Gyroscopic ASI hQVM Kernel specification and Quantum Computing SDK specification. Repository: github.com/gyrogovernance/superintelligence
+Gyroscopic ASI hQVM Kernel specification and Holonomic Quantum Computing SDK specification. Repository: github.com/gyrogovernance/superintelligence

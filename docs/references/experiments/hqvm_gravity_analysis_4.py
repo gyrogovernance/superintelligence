@@ -24,20 +24,17 @@ from fractions import Fraction
 from math import comb, exp, log, log10, pi, sqrt
 from pathlib import Path
 
+from typing import Any
+
+import astropy.constants as astro_constants
+import astropy.units as u
 import numpy as np
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.constants import (
+from gyroscopic.hQVM.constants import (
     APERTURE_GAP,
     DELTA_BU,
     HORIZON_SIZE,
@@ -71,15 +68,23 @@ d_BU = DELTA_BU
 m_a = M_A
 c4 = Fraction(-7, 4)
 
-# Physical constants: SI constants and unit conversions; EW/UV anchors from gravity_common
+# Physical constants: SI from astropy; EW/UV anchors from gravity_common
+def _astro(name: str) -> Any:
+    return getattr(astro_constants, name)
+
+
+GEV = u.GeV
 v = v_EW
 G_global = g_pred_from_tau(tau_g_with_c4(C4_REF))
-c_SI = 299792458.0
-G_SI = 6.67430e-11
-M_sun_kg = 1.98847e30
-GeV_per_kg = 5.60958885e26
-m_per_GeVinv = 1.973269804e-16
-ALPHA_CODATA = 7.2973525693e-3
+_c = _astro("c")
+_G = _astro("G")
+_hbar = _astro("hbar")
+_M_sun = _astro("M_sun")
+c_SI = _c.to_value(u.m / u.s)
+G_SI = _G.to_value(u.m**3 / u.kg / u.s**2)
+M_sun_kg = _M_sun.to_value(u.kg)
+GeV_per_kg = (_c**2).to_value(GEV / u.kg)
+m_per_GeVinv = (_hbar * _c).to_value(u.m * GEV)
 
 # Derived
 tau_G_leading = tau_g_with_c4(0.0)
@@ -547,7 +552,7 @@ def alpha_zeta_consistency_chain():
     print("=" * 9)
     print()
     print("  Kernel identity alpha*zeta = rho^4/(pi sqrt(3)): analysis_3 section F")
-    az = verify_alpha_zeta_product(alpha_codata=ALPHA_CODATA)
+    az = verify_alpha_zeta_product(alpha_codata=float(_astro("alpha").value))
     print(f"  identity verified: {az['exact']}")
     print()
 

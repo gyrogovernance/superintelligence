@@ -24,25 +24,19 @@ from fractions import Fraction
 from math import comb, gcd, log, pi
 from pathlib import Path
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO = _find_repo_root(Path(__file__).resolve().parent)
+_REPO = Path(__file__).resolve().parents[1]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from src.api import (
+from gyroscopic.hQVM.api import (
     FULL_BYTE_SHELL_DISTRIBUTION,
     KRAWTCHOUK_7,
     shell_transition_matrix_for_q_weight,
     shell_transition_probability,
 )
-from src.constants import APERTURE_GAP, DELTA_BU, M_A, RHO
+from gyroscopic.hQVM.constants import APERTURE_GAP, DELTA_BU, M_A, RHO
 
+from hqvm_compact_geom_core import electroweak_coords
 from hqvm_gravity_common import (
     C4_REF,
     G_meas,
@@ -58,7 +52,6 @@ from hqvm_gravity_common import (
     trace_word_steps,
     v_EW,
     verify_alpha_zeta_product,
-    electroweak_coords,
 )
 
 Delta = APERTURE_GAP

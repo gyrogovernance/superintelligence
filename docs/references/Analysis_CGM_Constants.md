@@ -1,4 +1,4 @@
-# Analysis: CGM Constants — Mathematical Structure and the Aperture
+# Analysis: CGM Constants: Mathematical Structure and the Aperture
 
 This document is an extensive mathematical analysis of the fundamental constants of the Common Governance Model (CGM), with particular emphasis on the aperture parameter and how all quantities derive from and connect to it. Notation uses Unicode symbols throughout; no LaTeX.
 
@@ -19,11 +19,11 @@ Within CGM, observation is treated as a self-referential process: spacetime obse
 - CS (Common Source): α = s_p = π/2  
 - UNA (Unity Non-Absolute): β such that u_p = cos(π/4) = 1/√2  
 - ONA (Opposition Non-Absolute): γ = o_p = π/4  
-- BU (Balance Universal): the balance condition that closes the gyrotriangle
+- BU (Balance Universal): the balance condition that closes the gyrotriangle algebraically
 
-The **gyrotriangle defect** is δ = π − (α + β + γ) = π − (π/2 + π/4 + π/4) = 0. Closure is exact: the three angles sum to π, so the defect vanishes. This uniquely fixes the angular structure.
+The **gyrotriangle defect** is δ = π − (α + β + γ) = π − (π/2 + π/4 + π/4) = 0. Algebraic closure is exact: the three angles sum to π, so the defect vanishes. This uniquely fixes the angular structure. At BU the six kinematic degrees of freedom (three rotational from UNA, three translational from ONA) are coordinated at depth-four commutative closure. A separate **vibrational** degree of motion remains: bounded back-and-forth oscillation about that closed configuration, not a seventh kinematic DOF.
 
-The amplitude A of the oscillation that fits within one observable horizon is constrained by the requirement that left and right SU(2) phase ranges (each 2π) combine with the chiral seed α = π/2. The condition is:
+The amplitude A of that oscillation, which fits within one observable horizon, is constrained by the requirement that left and right SU(2) phase ranges (each 2π) combine with the chiral seed α = π/2. The condition is:
 
 **A² × (2π)_L × (2π)_R = α**
 
@@ -107,8 +107,8 @@ Numerically, Δ ≈ 0.020699553913. This is the dimensionless **gap** (about 2.0
 
 Interpretation:
 
-- **ρ**: fraction of the aperture “used” by the BU dual-pole path (closure).  
-- **Δ**: fraction of the aperture “open” (aperture gap). Observation is possible precisely because Δ > 0; full closure would leave no room for observation. So Δ is both the small parameter in perturbation and the geometric reason observation can occur.
+- **ρ**: fraction of the aperture scale “used” by the BU dual-pole monodromy (structural closure in phase).  
+- **Δ**: fractional **vibrational** amplitude remaining open (about 2.07%). Observation is possible precisely because Δ > 0; if the monodromy saturated the full aperture scale with no residual oscillation, there would be no room for observation. So Δ is both the perturbation expansion parameter and the geometric measure of vibrational motion at BU.
 
 ### 2.4 Relation to Q_G and m_a
 
@@ -226,7 +226,7 @@ Numerically, ζ ≈ 23.155240145865. So ζ is **exactly** determined by the aper
 
 ### 6.2 Einstein–Hilbert Connection
 
-From the Einstein–Hilbert action quantization in the CGM framework, the dimensionless action is expressed as S_EH/(E₀ T₀) = (σ K ξ)/ζ, with quantization S_EH = κ ν S_geometric. This yields ζ = (σ K ξ)/(ν S_geometric). For the canonical choice (ν, σ, ξ) = (3, 1, 1) and K = 12π, one obtains ζ = π/S_geo, and hence ζ = 2/(m_a √3) = 16√(2π/3), consistent with the definition above. So the aperture m_a, through S_geo, sets the gravitational coupling scale ζ in dimensionless form.
+From the Einstein–Hilbert action quantization in the CGM framework, the dimensionless action is expressed as S_EH/(E₀ T₀) = (σ K ξ)/ζ, with quantization S_EH = κ ν S_geometric. This yields ζ = (σ K ξ)/(ν S_geometric). For the canonical choice (ν, σ, ξ) = (3, 1, 1) and K = 12π, one obtains **ζ = (12π)/(3 S_geometric) = 4π/S_geometric**. Identifying S_geometric with **S_geo = m_a π √3/2** gives **ζ = Q_G/S_geo** with **Q_G = 4π**, i.e. **ζ = 8/(m_a √3) = 16√(2π/3)**. Therefore the aperture m_a, through S_geo, sets the gravitational coupling scale ζ in dimensionless form.
 
 ---
 
@@ -253,16 +253,3 @@ So **m_a** and **Δ** (with ρ and δ_BU) are the central objects; the rest are 
 6. **48² quantization** → **48 Δ ≈ 1**; pentagonal symmetry → **λ₀/Δ = 1/√5**.
 
 All of these are algebraic or geometric consequences of the aperture m_a, the closure ratio ρ, the aperture gap Δ, and the measured monodromy δ_BU, with no free parameters beyond the framework’s geometric definitions and the single measured value δ_BU.
-
-
-===
-
-Extra:
-
-In turns:
-
-CS: π/2 rad = 1/4 turn
-UNA: cos(π/4) → angle π/4 = 1/8 turn
-ONA: π/4 = 1/8 turn
-BU: m_a = 1/(2√(2π)) rad = 1/(4π√(2π)) turns
-In turns, CS = 1/4, UNA angle = 1/8, ONA = 1/8. The closure: 1/4 + 1/8 + 1/8 = 1/2 turn = π radians.

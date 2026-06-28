@@ -21,25 +21,13 @@ import sys
 from fractions import Fraction
 from math import comb, exp, log, sqrt
 from pathlib import Path
-from dataclasses import dataclass
 
 import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import brentq
 from scipy.special import lambertw
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
-
-from src.constants import (
+from gyroscopic.hQVM.constants import (
     GENE_MAC_A12,
     GENE_MAC_B12,
     GENE_MAC_REST,
@@ -52,12 +40,16 @@ from src.constants import (
     is_on_horizon,
     is_on_equality_horizon,
 )
-from src.api import (
+from gyroscopic.hQVM.api import (
     chirality_word6,
     q_word6,
     q_word6_for_items,
     state24_to_omega12,
 )
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 TR_SIGMA_SHELL = [0, 0.416667, 0.666667, 0.75, 0.666667, 0.416667, 0]
 FA_STF = math.sqrt(6) / 9
@@ -133,35 +125,6 @@ K4_CHANNEL_FLAGS = [
     ("z", 1, 1, 0),
     ("w", 1, 1, 1),
 ]
-
-
-@dataclass(frozen=True)
-class ElectroweakCoords:
-    order: int
-    n_top: float
-    n_higgs: float
-    n_z: float
-    n_w: float
-
-
-def electroweak_coords(delta: float, order: int = 5) -> ElectroweakCoords:
-    """
-    Compact-geometry style EW mass coordinates on the Delta ruler.
-    n_x = -ln(m_x / v_EW) / Delta.
-    """
-    masses_gev = {
-        "top": 172.76,
-        "higgs": 125.25,
-        "z": 91.1876,
-        "w": 80.379,
-    }
-    return ElectroweakCoords(
-        order=int(order),
-        n_top=-math.log(masses_gev["top"] / v_EW) / float(delta),
-        n_higgs=-math.log(masses_gev["higgs"] / v_EW) / float(delta),
-        n_z=-math.log(masses_gev["z"] / v_EW) / float(delta),
-        n_w=-math.log(masses_gev["w"] / v_EW) / float(delta),
-    )
 
 
 def configure_stdout_utf8():

@@ -2,7 +2,7 @@
 """
 Run all executable CGM gravity scripts and save combined stdout/stderr to a text file.
 
-Scripts (in run order): analysis_3, 2, 1, 4, 5, 6, 7.
+Scripts (in run order): analysis_3, 2, 1, 4, 5, 6, 7, 8, 9, 10.
 Skips hqvm_gravity_common.py (library only).
 """
 
@@ -15,14 +15,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 _EXPERIMENTS = Path(__file__).resolve().parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
@@ -39,6 +32,9 @@ GRAVITY_SCRIPTS: tuple[str, ...] = (
     "hqvm_gravity_analysis_5.py",
     "hqvm_gravity_analysis_6.py",
     "hqvm_gravity_analysis_7.py",
+    "hqvm_gravity_analysis_8.py",
+    "hqvm_gravity_analysis_9.py",
+    "hqvm_gravity_analysis_10.py",
 )
 
 

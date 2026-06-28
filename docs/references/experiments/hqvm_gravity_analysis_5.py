@@ -20,14 +20,7 @@ from pathlib import Path
 import numpy as np
 from scipy.integrate import solve_ivp
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 

@@ -90,7 +90,7 @@ The axioms of CGM are constructive. The necessity of preserving ancestry under o
 
 ## 2. Computational Theory
 
-The necessity of preserving ancestry under operational displacement forces a specific computational architecture. An algorithmic kernel (Holonomic Quantum Virtual Machine (hQVM)) [12] realises the CGM conditions computationally. The kernel supplies the exact combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from compact geometry.
+The necessity of preserving ancestry under operational displacement forces a specific computational architecture. An algorithmic kernel (Holonomic Quantum Virtual Machine hQVM) [12] realises the CGM conditions computationally. The kernel supplies the combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from compact geometry.
 
 **2.1. The Common Source and the Archetype**
 
@@ -369,7 +369,7 @@ where α₀ is the base electromagnetic coupling and ζ is the gravitational ape
 
 This analysis has derived the gravitational field, its coupling constants, and its observational signatures from a single foundational requirement: the preservation of ancestry through identity and individuality. Gravity is the emergent balance that allows coherent observation to persist against operational displacement.
 
-The necessity of this preservation forces a specific computational architecture. The Holonomic Quantum Virtual Machine (hQVM) kernel is the minimal finite system satisfying the conditions for coherent observation. Its structure is a mathematical consequence of the spinorial double cover, the SE(3) algebra of spatial generators, and the depth-4 commutator closure. The kernel supplies exact combinatorial invariants that anchor the continuous field theory without free parameters.
+The necessity of this preservation forces a specific computational architecture. The Holonomic Quantum Virtual Machine kernel is the minimal finite system satisfying the conditions for coherent observation. Its structure is a mathematical consequence of the spinorial double cover, the SE(3) algebra of spatial generators, and the depth-4 commutator closure. The kernel supplies combinatorial invariants that anchor the continuous field theory without free parameters.
 
 The quantum of gravity and the aperture gap fix the dimensionless coupling through the discrete Gauss law and the symmetric trace-free attenuation across the bulk shells. The dimensional gravitational coupling requires only the electroweak scale as a single energy anchor. The resulting position-dependent coupling weakens where the gravitational field is strongest, acting as a geometric regulator that resolves the divergent self-energy of Newtonian gravity into the exact finite result.
 

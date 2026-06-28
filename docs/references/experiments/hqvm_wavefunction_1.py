@@ -32,18 +32,11 @@ from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Final
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.constants import (
+from gyroscopic.hQVM.constants import (
     GENE_MAC_REST,
     GENE_MIC_S,
     GENE_MAC_A12,
@@ -60,7 +53,7 @@ from src.constants import (
     is_on_equality_horizon,
     apply_gate,
 )
-from src.api import (
+from gyroscopic.hQVM.api import (
     chirality_word6,
     q_word6,
     q_word6_for_items,

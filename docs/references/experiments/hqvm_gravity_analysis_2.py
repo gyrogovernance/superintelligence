@@ -36,18 +36,11 @@ from pathlib import Path
 
 import numpy as np
 
-def _find_repo_root(start: Path) -> Path:
-    for candidate in (start, *start.parents):
-        if (candidate / "src").is_dir():
-            return candidate
-    raise RuntimeError("Could not locate repository root containing src/")
-
-
-_REPO = _find_repo_root(Path(__file__).resolve().parent)
+_REPO = Path(__file__).resolve().parents[1]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
-from src.constants import (
+from gyroscopic.hQVM.constants import (
     GENE_MAC_REST,
     GENE_MIC_S,
     GENE_MAC_A12,
@@ -57,7 +50,7 @@ from src.constants import (
     is_on_horizon,
 )
 
-from src.api import (
+from gyroscopic.hQVM.api import (
     chirality_word6,
     q_word6_for_items,
     state24_to_omega12,
