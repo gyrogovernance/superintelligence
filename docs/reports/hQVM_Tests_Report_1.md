@@ -96,7 +96,7 @@ Frame 1, Axis Z: orientation ∈ {[-1,+1], [+1,-1]}    — qubit 5
 
 The pair-diagonal property observed in bit space (each 2-bit pair is always 00 or 11, never 01 or 10) is a consequence of this structure: both bits of a pair encode the same ±1 axis state.
 
-The six axis-orientation qubits correspond to the six generators of the se(3) Lie algebra: three rotational (Frame 0, from SU(2)) and three translational (Frame 1, from ℝ³). The CGM paper derives that operational coherence requires a progression from 1 degree of freedom (chirality, CS stage) to 3 (rotational, UNA stage) to 6 (rotational + translational, ONA stage), yielding the semidirect product SE(3) = SU(2) ⋉ ℝ³. Each payload bit of a byte executes a discrete π-rotation around one of these se(3) basis vectors. The Degrees of Freedom Doubling Law (established in the Physics Tests Report, Part 10) confirms this progression with exact integer state counts: 2^(2×1) = 4 at CS, 2^(2×3) = 64 at UNA, 2^(2×6) = 4096 at ONA.
+The six axis-orientation qubits correspond to the six generators of the se(3) Lie algebra: three rotational (Frame 0, from SU(2)) and three translational (Frame 1, from ℝ³). The CGM paper derives that operational coherence requires a progression from 1 degree of freedom (chirality, CS stage) to 3 (rotational, UNA stage) to 6 (rotational + translational, ONA stage), yielding the semidirect product SE(3) = SU(2) ⋉ ℝ³. Each payload bit of a byte executes a discrete π-rotation around one of these se(3) basis vectors. The Degrees of Freedom Doubling Theorem (established in the Physics Tests Report, Part 10) confirms this progression with exact integer state counts: 2^(2×1) = 4 at CS, 2^(2×3) = 64 at UNA, 2^(2×6) = 4096 at ONA.
 
 ### 1.3 The Two-Component Topology
 
@@ -270,7 +270,7 @@ The CGM interpretation (QuBEC Theory Part II §10.5): Gate C stabilises the S-se
 
 ---
 
-## Part 4: The Chirality Transport Law and Commutativity
+## Part 4: The Chirality Transport Rule and Commutativity
 
 ### 4.1 The 6-Bit Chirality Register
 
@@ -416,7 +416,7 @@ All odd-weight errors are detected. The minimum undetected error has weight 2 (s
 
 `test_hQVM_3.py::TestExactErrorEnumerator::test_pair_flip_destinations_are_c64` confirms: pair-flip errors in either A or B always stay in Ω, and the resulting displacement is always a C64 codeword.
 
-### 7.2 The Exact Perturbation Law
+### 7.2 The Exact Perturbation Rule
 
 `test_hQVM_3.py::TestExactPerturbationLaw::test_exact_per_bit_decomposition` verifies exhaustively (all 256 bytes, all 8 bit positions):
 

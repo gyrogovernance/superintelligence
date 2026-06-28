@@ -635,7 +635,7 @@ The total cost of computing the n-step climate evolution is one WHT (to obtain t
 
 For non-stationary ensembles (where the byte bath changes at each step), the composition remains exact: the spectral multipliers at each step are multiplied pointwise. The total cost is O(n x 64 log 64) via repeated WHT and pointwise multiplication, compared to O(n x 64^2) for dense matrix application.
 
-This spectral composition law is the computational consequence of the kernel's transport being a group action on (GF(2)^6, xor).
+This spectral composition identity is the computational consequence of the kernel's transport being a group action on (GF(2)^6, xor).
 
 ---
 
@@ -840,7 +840,7 @@ H(u,χ) = (−1)^{popcount(u ∧ χ)} / 8
 
 **Corollary.** The WHT is not a tool applied to the chirality register. It is the unique exact spectral dual of the transport rule.
 
-### 12.3 Composition law
+### 12.3 Composition rule
 
 Byte transport is XOR-translation (Part II §6a.1). Sequential composition is XOR-convolution on GF(2)⁶, diagonalized by the WHT (Theorem §12.2):
 
