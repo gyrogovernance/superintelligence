@@ -1,4 +1,4 @@
-# tests/test_aQPU_SDK_2.py
+# tests/test_hQVM_SDK_2.py
 from __future__ import annotations
 
 from collections import Counter
@@ -382,7 +382,7 @@ class TestShellAndOpticalLayer:
                 )
                 averaged.append(p)
             averaged = tuple(averaged)
-            print(f"\nsource shell {w} averaged one-byte shell law:")
+            print(f"\nsource shell {w} averaged one-byte shell rule:")
             print(f"  {averaged}")
             assert averaged == expected
 

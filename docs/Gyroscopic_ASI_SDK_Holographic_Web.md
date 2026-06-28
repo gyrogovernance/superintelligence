@@ -8,7 +8,7 @@
 
 The contemporary internet operates on an unbounded state space. Every application manages its own databases, its own caches, its own session models, and its own coordination protocols. URLs can be any string. Component trees can grow to arbitrary depth. Cache keys are heuristic hashes with no guarantee of uniqueness. The result is a coordination infrastructure that is expensive to verify, impossible to replay, and fundamentally resistant to formal reasoning.
 
-The Holographic Web is an alternative architecture. It is founded on a single proposition: all internet coordination can be expressed as paths through a finite, pre-computed geometric structure. This structure is the Gyroscopic ASI aQPU Kernel, a deterministic finite-state coordination kernel derived from the Common Governance Model. The kernel provides 4,096 canonical reachable coordination states, 256 transition operations, and a complete pre-computed transition table. Every coordination event on the internet, from a button click to a financial settlement to an AI inference, can be represented as a byte that advances this kernel from one state to another.
+The Holographic Web is an alternative architecture. It is founded on a single proposition: all internet coordination can be expressed as paths through a finite, pre-computed geometric structure. This structure is the Gyroscopic ASI hQVM Kernel, a deterministic finite-state coordination kernel derived from the Common Governance Model. The kernel provides 4,096 canonical reachable coordination states, 256 transition operations, and a complete pre-computed transition table. Every coordination event on the internet, from a button click to a financial settlement to an AI inference, can be represented as a byte that advances this kernel from one state to another.
 
 The architecture inverts the conventional relationship between applications and state. In the current web, applications define and manage state. In the Holographic Web, the kernel defines state, and applications project it onto displays. This inversion transforms coordination from an open engineering problem into a closed mathematical structure with exact properties: determinism, reversibility, finite bounds, and intrinsic verifiability.
 
@@ -51,9 +51,9 @@ The kernel exhibits a holographic relationship between a boundary and a bulk. At
 - an equality horizon of 64 states where the two 12-bit components are equal (A = B), and  
 - a complement horizon of 64 states where the components are bitwise complements (A = B XOR 0xFFF).
 
-The intrinsic swap gate has the equality horizon as its fixed-point set; the complement-swap gate has the complement horizon as its fixed-point set. Together these 128 boundary states form a protected code space for chirality and provenance.
+The holonomic swap gate has the equality horizon as its fixed-point set; the complement-swap gate has the complement horizon as its fixed-point set. Together these 128 boundary states form a protected code space for chirality and provenance.
 
-The bulk is the full ontology of 4,096 states. The holographic dictionary is a proven bijection between the bulk Ω and the product of the 64-state equality horizon with a 64-element family subalphabet of bytes. The reconstruction formula is explicit and algebraic. The cardinalities follow a perfect square law: 4,096 equals 64 times 64.
+The bulk is the full ontology of 4,096 states. The holographic dictionary is a proven bijection between the bulk Ω and the product of the 64-state equality horizon with a 64-element family subalphabet of bytes. The reconstruction formula is explicit and algebraic. The cardinalities follow a perfect square relation: 4,096 equals 64 times 64.
 
 This dictionary has direct computational implications. Any coordination state can be encoded as a boundary anchor on the equality horizon (one of 64 states) plus a single family-indexed byte (one of 64 transitions in the subalphabet). The complement horizon provides a dual boundary that carries the same information in a chirality-maximising encoding. Verification of the boundary guarantees the integrity of the bulk.
 
@@ -61,9 +61,9 @@ This dictionary has direct computational implications. Any coordination state ca
 
 The kernel's 256 byte operations partition into four classes via the depth-4 fiber structure. For fixed payload geometry, the 4^4 family-phase combinations collapse to exactly four distinct output states indexed by the net family-phase invariants (phi_a, phi_b) in (Z/2)^2, which is the K4 vertex set. The kernel of this function is a 64-element subcode, and the quotient structure is isomorphic to the Klein four-group.
 
-Under the spinorial transition law, the equality horizon partitions into four vertex classes of 16 states each. Each class generates a wedge in the bulk whose size depends on whether one counts the strict equality horizon cover (1,024 states per wedge, 4,096 in total) or the one-step fanout including dual complement-horizon images (2,048 states per wedge, 8,192 states counting the two-fold cover). In both viewpoints, each vertex class owns exactly one quarter of the equality-horizon cover, and the four wedges together span the full reachable ontology.
+Under the spinorial transition rule, the equality horizon partitions into four vertex classes of 16 states each. Each class generates a wedge in the bulk whose size depends on whether one counts the strict equality horizon cover (1,024 states per wedge, 4,096 in total) or the one-step fanout including dual complement-horizon images (2,048 states per wedge, 8,192 states counting the two-fold cover). In both viewpoints, each vertex class owns exactly one quarter of the equality-horizon cover, and the four wedges together span the full reachable ontology.
 
-This K4 structure is not an external imposition. It emerges from the algebra of the mask code and is verified exhaustively across the entire state space. The same tetrahedral geometry appears in the kernel physics, in the domain ledgers, in the constitutional capacities, and in the application domains. This recurrence is a consequence of the underlying mathematical constraints.
+This K4 structure is not an external imposition. It emerges from the algebra of the mask code and is verified exhaustively across the entire state space. The same tetrahedral geometry appears in the kernel dynamics, in the domain ledgers, in the constitutional capacities, and in the application domains. This recurrence is a consequence of the underlying mathematical constraints.
 
 ---
 
@@ -119,7 +119,7 @@ The GGG Console is the reference implementation of the Holographic Web. It is a 
 
 ### 4.1 Identity and Economy
 
-The Console provides each user with an Identity Anchor, a structural coordinate derived by routing their identifier through the kernel from the archetype. This anchor is not stored in a database. It is computed deterministically from the identifier and the kernel physics.
+The Console provides each user with an Identity Anchor, a structural coordinate derived by routing their identifier through the kernel from the archetype. This anchor is not stored in a database. It is computed deterministically from the identifier and the kernel dynamics.
 
 Economic activity occurs through Shells and Grants as specified in the Moments Economy. A Shell is a time-bounded capacity container with a cryptographic seal computed by routing its contents through the kernel. A Grant is a specific allocation of Moment-Units to an identity. The seal binds the grants to a structural position, making the distribution replayable and verifiable.
 
@@ -133,7 +133,7 @@ Every AI action is therefore a kernel transition. The action moves the shared st
 
 The Console displays the aperture of the governance ledgers at the current Moment as a real-time alignment indicator. Moments themselves are always aligned, as they represent deterministic kernel states. The aperture, computed from the domain ledgers, measures whether governance activity maintains structural alignment. If the aperture deviates significantly from the target value of approximately 0.0207, this indicates displacement in the governance layer. The Console can warn the user, flag the interaction for review, or block actions that would cause excessive displacement.
 
-This approach addresses AI safety at the coordination layer rather than at the model layer. The AI model may be a black box, but its actions in the coordination space are fully transparent. The kernel physics constrain how AI actions are recorded and audited in the coordination medium, and the Genealogy records what the AI has done. The underlying self-dual [12,6,2] code provides intrinsic tamper detection: all odd-weight bit errors in the state are detected unconditionally; substitution of a byte in the genealogy is detected unless it is replaced by the unique shadow partner (probability 1/255); and deletion is detected unless it removes a stabiliser byte on a boundary state. These guarantees apply equally to AI-emitted and human-emitted bytes.
+This approach addresses AI safety at the coordination layer rather than at the model layer. The AI model may be a black box, but its actions in the coordination space are fully transparent. The kernel dynamics constrain how AI actions are recorded and audited in the coordination medium, and the Genealogy records what the AI has done. The underlying self-dual [12,6,2] code provides intrinsic tamper detection: all odd-weight bit errors in the state are detected unconditionally; substitution of a byte in the genealogy is detected unless it is replaced by the unique shadow partner (probability 1/255); and deletion is detected unless it removes a stabiliser byte on a boundary state. These guarantees apply equally to AI-emitted and human-emitted bytes.
 
 ### 4.3 Developer Interface
 
@@ -153,9 +153,9 @@ Developers can test their tools by replaying Genealogies. Any bug report can inc
 
 The kernel operates on a 24-bit state split into two 12-bit components, designated A and B. The archetype state has A equal to 0xAAA and B equal to 0x555. These components are bitwise complements.
 
-The transition law proceeds in defined steps. Given a current state and an input byte, the kernel first computes the intron by XORing the byte with 0xAA. It then expands the intron to a 12-bit mask for the A component using a canonical expansion function. The B mask is always zero. The kernel mutates A by XORing it with the mask. Finally, the kernel performs spinorial gyration: the next A becomes B XOR (0xFFF if the intron's bit 0 is set, else 0), and the next B becomes the mutated A XOR (0xFFF if the intron's bit 7 is set, else 0).
+The transition rule proceeds in defined steps. Given a current state and an input byte, the kernel first computes the intron by XORing the byte with 0xAA. It then expands the intron to a 12-bit mask for the A component using a canonical expansion function. The B mask is always zero. The kernel mutates A by XORing it with the mask. Finally, the kernel performs spinorial gyration: the next A becomes B XOR (0xFFF if the intron's bit 0 is set, else 0), and the next B becomes the mutated A XOR (0xFFF if the intron's bit 7 is set, else 0).
 
-This transition law is bijective on the 24-bit carrier for each byte. Every state has exactly one predecessor and one successor under each byte operation. The reference byte 0xAA produces a zero mask and acts as a pure swap: (A, B) -> (B, A). The other horizon-preserving bytes {0x54, 0xD5, 0x2B} realise the same swap, complement-swap, and complement-swap operations respectively, forming the four intrinsic K4 gates {id, S, C, F} together with depth-2 composition. The inverse of any byte operation is given by a closed-form algebraic expression on (A, B) and the intron; it is no longer a simple conjugation by 0xAA.
+This transition rule is bijective on the 24-bit carrier for each byte. Every state has exactly one predecessor and one successor under each byte operation. The reference byte 0xAA produces a zero mask and acts as a pure swap: (A, B) -> (B, A). The other horizon-preserving bytes {0x54, 0xD5, 0x2B} realise the same swap, complement-swap, and complement-swap operations respectively, forming the four holonomic K4 gates {id, S, C, F} together with depth-2 composition. The inverse of any byte operation is given by a closed-form algebraic expression on (A, B) and the intron; it is no longer a simple conjugation by 0xAA.
 
 The kernel exhibits a depth-four identity: for any two bytes x and y, applying the sequence x, y, x, y returns to the direct state. This closure property is verified for all ordered byte pairs. The trajectory of any byte sequence can be computed in closed form from the XOR parity of masks at odd and even positions together with the spinorial family bits.
 
@@ -163,7 +163,7 @@ The kernel exhibits a depth-four identity: for any two bytes x and y, applying t
 
 The equality horizon contains exactly 64 states satisfying the condition A equals B. The complement horizon contains 64 states satisfying the condition A equals B XOR 0xFFF. The one-step neighbourhood of these dual horizons under all 256 byte actions covers the entire ontology of 4,096 reachable states. This is verified exhaustively.
 
-The holographic dictionary provides the encoding. For any state in Ω there exists a unique equality-horizon state and a unique byte in the 64-element family subalphabet such that applying that byte to the equality-horizon state produces the bulk state. The complement horizon carries the same information in a maximally chiral encoding and is related by intrinsic K4 gates. This reconstruction is verified for all 4,096 states.
+The holographic dictionary provides the encoding. For any state in Ω there exists a unique equality-horizon state and a unique byte in the 64-element family subalphabet such that applying that byte to the equality-horizon state produces the bulk state. The complement horizon carries the same information in a maximally chiral encoding and is related by holonomic K4 gates. This reconstruction is verified for all 4,096 states.
 
 The equality horizon partitions into four vertex classes of 16 states each via the vertex charge function. Each class generates a wedge of 1,024 bulk states in the strict equality-horizon cover; when the dual complement images are included each wedge has 2,048 states in the two-fold cover. The wedges are disjoint on the equality horizon and together their equality-horizon cover is the full ontology.
 
@@ -171,7 +171,7 @@ The equality horizon partitions into four vertex classes of 16 states each via t
 
 Each domain ledger is a six-dimensional vector on the edges of K4. The signed incidence matrix B has four rows (vertices) and six columns (edges). The gradient projection matrix is one-quarter times B-transpose times B. The cycle projection matrix is the identity minus the gradient projection. These are exact closed-form expressions requiring no numerical approximation.
 
-These governance structures (ledgers, Hodge decomposition, aperture, ecology projector) belong to the measurement medium at the application layer. They are optional from the perspective of the kernel physics, but are treated here as constitutive for the Holographic Web architecture.
+These governance structures (ledgers, Hodge decomposition, aperture, ecology projector) belong to the measurement medium at the application layer. They are optional from the perspective of the kernel dynamics, but are treated here as constitutive for the Holographic Web architecture.
 
 The aperture of a ledger is the squared norm of its cycle component divided by the squared norm of the full ledger. If the ledger is zero, the aperture is defined as zero. The kernel's intrinsic aperture, derived from the weight distribution of the mask code, is 5/256, approximately 0.01953. This is within 5.6 percent of the CGM target aperture of approximately 0.0207.
 
@@ -185,15 +185,15 @@ The CSM is this microcell count divided by the ontology size of 4,096, yielding 
 
 For comparison, the global annual demand for Unconditional High Income at 87,600 Moment-Units per person for 8.1 billion people is approximately 7.1 times 10 to the 14th power. The CSM capacity can support this demand for approximately 1.12 trillion years. Capacity is not a binding constraint.
 
-### 5.5 aQPU Computational Properties
+### 5.5 hQVM Computational Properties
 
-The kernel is not merely a finite-state lookup table. It is an algebraic quantum processing unit (aQPU): a deterministic finite-state machine over GF(2) whose internal structure satisfies discrete analogues of quantum axioms. Every byte defines a bijection on the 24-bit carrier (discrete unitarity). Every byte has order 4 on Ω (spinorial closure). The archetype 0xAA cannot be duplicated by any operation defined within the system (discrete non-cloning). From any fixed state, the 256 bytes map to exactly 128 distinct successors with uniform 2-to-1 multiplicity, realising the SO(3)/SU(2) double cover as a discrete complementarity between the 24-bit carrier and its 32-bit (state + intron) lift.
+The kernel is not merely a finite-state lookup table. It is a Holonomic Quantum Virtual Machine (hQVM): a deterministic finite-state machine over GF(2) whose internal structure satisfies discrete analogues of quantum axioms. Every byte defines a bijection on the 24-bit carrier (discrete unitarity). Every byte has order 4 on Ω (spinorial closure). The archetype 0xAA cannot be duplicated by any operation defined within the system (discrete non-cloning). From any fixed state, the 256 bytes map to exactly 128 distinct successors with uniform 2-to-1 multiplicity, realising the SO(3)/SU(2) double cover as a discrete complementarity between the 24-bit carrier and its 32-bit (state + intron) lift.
 
 These algebraic properties give the kernel concrete computational advantages over classical baselines. Hidden-subgroup structure in the byte algebra is resolved in a single step on the chirality register where comparable classical procedures require many more queries. Exact two-step uniformisation over Ω yields a perfectly mixed distribution in two transitions, whereas generic classical random walks on 4,096 states require about 12 steps to approach uniformity. The holographic structure compresses the 12-bit carrier representation to 8 effective bits (6-bit boundary coordinate plus a 2-bit dictionary index), achieving a 33 percent structural compression without loss.
 
-The kernel exports a native 6-bit chirality register that satisfies an exact linear transport law: for every byte b and state s in Ω, the chirality of the successor satisfies χ(T_b(s)) = χ(s) ⊕ q₆(b), where q₆(b) is a byte-dependent 6-bit word. This register is the substrate for single-step Deutsch-Jozsa and Bernstein-Vazirani analogues and provides a constant-time commutativity test: two bytes commute if and only if their q₆-words are equal.
+The kernel exports a native 6-bit chirality register that satisfies an exact linear transport rule: for every byte b and state s in Ω, the chirality of the successor satisfies χ(T_b(s)) = χ(s) ⊕ q₆(b), where q₆(b) is a byte-dependent 6-bit word. This register is the substrate for single-step Deutsch-Jozsa and Bernstein-Vazirani analogues and provides a constant-time commutativity test: two bytes commute if and only if their q₆-words are equal.
 
-Finally, the CGM monodromy defect δ_BU ≈ 0.1953 rad acts as a non-Clifford resource on top of a Clifford backbone formed by the self-dual [12,6,2] mask code. Combined with the entangling horizon gates S and C from the intrinsic K4 gate group, the kernel possesses all three ingredients for algebraic universality on standard silicon while preserving determinism and replayability.
+Finally, the CGM monodromy defect δ_BU ≈ 0.1953 rad acts as a non-Clifford resource on top of a Clifford backbone formed by the self-dual [12,6,2] mask code. Combined with the entangling horizon gates S and C from the holonomic K4 gate group, the kernel possesses all three ingredients for algebraic universality on standard silicon while preserving determinism and replayability.
 
 ---
 
@@ -205,7 +205,7 @@ The same byte sequence applied from GENE_MAC_REST always produces the same state
 
 ### 6.2 Reversibility
 
-Every byte operation has an algebraic inverse. Under the spinorial transition law this inverse is computed directly from the current state, the intron, and the 12-bit mask: given (A_next, B_next) and byte x, the predecessor components are recovered by undoing the conditional complements and then unmutating A. This allows perfect undo operations without maintaining history stacks. Any state can be traced backward through its Genealogy to the archetype.
+Every byte operation has an algebraic inverse. Under the spinorial transition rule this inverse is computed directly from the current state, the intron, and the 12-bit mask: given (A_next, B_next) and byte x, the predecessor components are recovered by undoing the conditional complements and then unmutating A. This allows perfect undo operations without maintaining history stacks. Any state can be traced backward through its Genealogy to the archetype.
 
 ### 6.3 Finite Bounds
 
@@ -233,7 +233,7 @@ The kernel achieves exact uniformisation in two steps. Starting from the archety
 
 ### 7.1 Kernel Implementation
 
-A conforming kernel implementation must satisfy the requirements specified in the Gyroscopic ASI aQPU Kernel Specification. The state packing must follow the prescribed bit layout. The transcription must use the constant 0xAA. The expansion function must produce 64 distinct 12-bit masks from the 6-bit micro-reference, with 4 families giving 256 distinct (family, mask) pairs. Only the A component receives the mask; B is not directly mutated by the input. The transition must follow the mutation-then-gyration sequence exactly.
+A conforming kernel implementation must satisfy the requirements specified in the Gyroscopic ASI hQVM Kernel Specification. The state packing must follow the prescribed bit layout. The transcription must use the constant 0xAA. The expansion function must produce 64 distinct 12-bit masks from the 6-bit micro-reference, with 4 families giving 256 distinct (family, mask) pairs. Only the A component receives the mask; B is not directly mutated by the input. The transition must follow the mutation-then-gyration sequence exactly.
 
 The kernel can be implemented in any language. The reference implementation is in Python. A TypeScript implementation enables browser-side execution. A Rust or WebAssembly implementation enables high-performance server-side execution.
 
@@ -245,7 +245,7 @@ Genealogies are append-only logs. The byte log is a sequence of values from 0 to
 
 Storage requirements scale with history length, not with state complexity. A byte log of one million entries occupies approximately one megabyte. An event log with detailed metadata occupies more but remains linear in the number of events.
 
-Genealogies may be stored locally, in distributed storage, or in blockchain-like structures for additional integrity guarantees. The kernel physics provide the verification layer; the storage layer provides durability.
+Genealogies may be stored locally, in distributed storage, or in blockchain-like structures for additional integrity guarantees. The kernel dynamics provide the verification layer; the storage layer provides durability.
 
 ### 7.3 Projection Layer
 
@@ -271,7 +271,7 @@ The Holographic Web is an architecture for internet coordination founded on a fi
 
 The architecture does not require replacing the existing internet. It provides a coordination layer that applications can adopt incrementally. An application using the kernel gains determinism, reversibility, and verifiability. An application using Genealogies gains portable, self-sovereign history. An application using the full governance geometry gains intrinsic alignment metrics.
 
-The CSM capacity analysis demonstrates that the architecture is not constrained by coordination throughput. The kernel's algebraic properties provide exact guarantees rather than heuristic approximations. The holographic structure enables efficient verification through boundary-to-bulk compression. The kernel is an algebraic quantum processing unit whose proven computational advantages—including single-step hidden-subgroup resolution on the chirality register, exact two-step uniformisation, and native error detection via the self-dual [12,6,2] code—provide structural guarantees that no classical coordination medium of comparable size can match.
+The CSM capacity analysis demonstrates that the architecture is not constrained by coordination throughput. The kernel's algebraic properties provide exact guarantees rather than heuristic approximations. The holographic structure enables efficient verification through boundary-to-bulk compression. The kernel is a Holonomic Quantum Virtual Machine (hQVM) whose proven computational advantages—including single-step hidden-subgroup resolution on the chirality register, exact two-step uniformisation, and native error detection via the self-dual [12,6,2] code—provide structural guarantees that no classical coordination medium of comparable size can match.
 
 The Holographic Web represents a transition from coordination as an open engineering problem to coordination as a closed mathematical structure. The structure is complete, verified, and ready for implementation.
 

@@ -50,7 +50,7 @@ This section establishes the exact combinatorial and spectral structure of the f
 
 ### 2.1 Reachable Manifold and Dual Horizons
 
-The CGM finite kernel is a deterministic algebraic system whose state is a 24-bit register formed from two conjugate 12-bit gyrophases, denoted A and B. The kernel evolves by applying bytes (8-bit instruction units) under a fixed transition law. The reachable manifold Omega is the set of states accessible from the rest state under this byte transition law.
+The CGM finite kernel is a deterministic algebraic system whose state is a 24-bit register formed from two conjugate 12-bit gyrophases, denoted A and B. The kernel evolves by applying bytes (8-bit instruction units) under a fixed transition rule. The reachable manifold Omega is the set of states accessible from the rest state under this byte transition rule.
 
 Exhaustive enumeration gives:
 
@@ -777,7 +777,7 @@ selects the unique path (5, 8, 14). Broad carrier-budget conditions alone yield 
 
 Let M_q be the shell transition matrix at Hamming weight q, let Tr(M_q) be its trace, and let Tr(M_q^2) be the return trace sum over i,k of (M_q)_{ik}(M_q)_{ki}. Define the carrier trace C(q) to be Tr(M_q) when it is non-zero, otherwise Tr(M_q^2).
 
-The following identities are exact rational consequences of the transition law:
+The following identities are exact rational consequences of the transition rule:
 
 | q | Tr(M_q) | Tr(M_q^2) | C(q)   | byte count 4*C(6,q) |
 | - | ------- | --------- | ------ | --------------------: |
@@ -1199,9 +1199,9 @@ Scope boundaries and deferred channels are listed in Section 9.
 
 All numeric tables and probe summaries are generated from the executable workflow in this repository:
 
-* `experiments/aqpu_compact_geom_core.py`
-* `experiments/aqpu_compact_geom_kernel.py`
-* `experiments/aqpu_compact_geom_report.py`
+* `experiments/hqvm_compact_geom_core.py`
+* `experiments/hqvm_compact_geom_kernel.py`
+* `experiments/hqvm_compact_geom_report.py`
 
 The script-level inputs are fixed in this report and echoed in the executable output. Appendix A reproduces the raw probe outputs and extended audit tables used for the closures, null-model ranking, and lepton carrier derivations. No table entries are tuned by hand after generation; formatting only is adjusted for readability.
 
@@ -1332,4 +1332,4 @@ See the main text for the derivation context of each formula and the governing a
 2. E. Tiesinga, P. J. Mohr, D. B. Newell, and B. N. Taylor, *The 2022 CODATA Recommended Values of the Fundamental Physical Constants*, Web Version 9.0, NIST, 2024.
 3. P. J. Mohr, E. Tiesinga, D. B. Newell, and B. N. Taylor, *CODATA Internationally Recommended 2022 Values of the Fundamental Physical Constants*, NIST, published May 8, 2024.
 4. B. Korompilias, *Common Governance Model: Mathematical Physics Framework*, Zenodo DOI: 10.5281/zenodo.17521384.
-5. Analysis code: experiments/aqpu_compact_geom_core.py, experiments/aqpu_compact_geom_kernel.py, and experiments/aqpu_compact_geom_report.py.
+5. Analysis code: experiments/hqvm_compact_geom_core.py, experiments/hqvm_compact_geom_kernel.py, and experiments/hqvm_compact_geom_report.py.

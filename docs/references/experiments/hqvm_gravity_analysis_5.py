@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Field derivations for nonlinear CGM gravity (companion to aqpu_gravity_analysis_4.py).
+Field derivations for nonlinear CGM gravity (companion to hqvm_gravity_analysis_4.py).
 
 E_ref from Delta-ruler quantile, STF tau, conservation, PDE, redshift, radiation,
 MU density, neutron-star TOV, analytic point-mass exterior, modified Gauss law,
 variational EFE, SEP, gravitomagnetic spin, full system summary, shadow.
 
-Companion to aqpu_gravity_analysis_4.py. Kernel theorems: aqpu_gravity_analysis_3.py.
+Companion to hqvm_gravity_analysis_4.py. Kernel theorems: hqvm_gravity_analysis_3.py.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ _REPO_ROOT = _find_repo_root(Path(__file__).resolve().parent)
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from aqpu_gravity_common import (
+from hqvm_gravity_common import (
     KAPPA_KERNEL,
     KAPPA_METRIC,
     W2_SHELL_DISPLACEMENT,
@@ -47,7 +47,7 @@ from aqpu_gravity_common import (
     tau_cycle_per_delta_exact,
     tau_g_with_c4,
 )
-from aqpu_gravity_analysis_4 import (
+from hqvm_gravity_analysis_4 import (
     Delta,
     E_CS,
     EHT_SHADOW,
@@ -87,7 +87,7 @@ def print_e_ref_quantile_note() -> None:
     print("=" * 9)
     print()
     print("  E_ref(psi) = E_CS * (v/E_CS)^(1-psi)")
-    print("  Derivation: aqpu_gravity_analysis_4.py section S (three-premise proof).")
+    print("  Derivation: hqvm_gravity_analysis_4.py section S (three-premise proof).")
     print("  Deleted: shell-centroid E_ref (mean != quantile on log decades).")
     print()
 
@@ -180,7 +180,7 @@ def nonlinear_pde_general():
     print("    G(psi) = G_kernel exp(-tau_G(1-psi)) / E_ref(psi)^2")
     print("    E_ref(psi) = E_CS (v/E_CS)^(1-psi)")
     print()
-    print("  Point mass (rho = M delta(r)): analytic psi(s) in aqpu_gravity_common; analysis_4 tables.")
+    print("  Point mass (rho = M delta(r)): analytic psi(s) in hqvm_gravity_common; analysis_4 tables.")
     print("    du/ds = -G(psi(u))/G_global / s^2")
     print()
     print("  Extended density rho(r) propto r^n:")
@@ -303,7 +303,7 @@ def neutron_star_interior():
     print("H. Neutron star interior with G(x)")
     print("=" * 9)
     print()
-    print("  Point-mass exterior uses exact psi(s) (aqpu_gravity_common).")
+    print("  Point-mass exterior uses exact psi(s) (hqvm_gravity_common).")
     print("  This section keeps numerical TOV for the coupled interior.")
     print()
     M_ns = 1.4 * M_sun_kg

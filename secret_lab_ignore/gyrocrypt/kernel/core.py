@@ -1,7 +1,7 @@
 """
-kernel/core.py — aQPU kernel: byte bridge, wavefunction holonomy, WHT, MultiCellRouter.
+kernel/core.py — hQVM kernel: byte bridge, wavefunction holonomy, WHT, MultiCellRouter.
 
-This module is the Python realization of the aQPU computational primitives specified
+This module is the Python realization of the hQVM computational primitives specified
 in the Gyroscopic ASI SDK (docs/Gyroscopic_ASI_SDK_Quantum_Computing.md). It provides
 four overlapping computational surfaces over the same 4096-state manifold Ω:
 
@@ -14,7 +14,7 @@ horizon_distance, ab_distance, rest_distance, commutator_defect. WHT via wht64_f
 wht64_dc_free removes DC before spectral analysis.
 
 ─────────────────────────────────────────────────────────────────────────────────
-II. WAVEFUNCTION HOLONOMY — QuBEC-native (Analysis_aQPU_Wavefunction.md, T1–T10)
+II. WAVEFUNCTION HOLONOMY — QuBEC-native (Analysis_hQVM_Wavefunction.md, T1–T10)
 ─────────────────────────────────────────────────────────────────────────────────
 QuBEC = occupied Shared Moment on Ω. Wavefunction holonomy is the Hilbert lift
 on that manifold — an advanced kernel path that bypasses the byte stream while
@@ -341,7 +341,7 @@ def from_holographic(holo: List[List[complex]]) -> List[complex]:
 
 
 # ── Residue ↔ Chirality bridge ──
-# Projects modular-arithmetic residues into the aQPU's 6-bit chirality space.
+# Projects modular-arithmetic residues into the hQVM's 6-bit chirality space.
 
 
 def state_to_hq(state24: int) -> Tuple[int, int]:
@@ -468,7 +468,7 @@ def _delta_bu_twiddle(k: int, N: int) -> complex:
 
     Semantic Fourier object for strict order-finding: χ(1)^N = 1 and
     χ(a+b) = χ(a)χ(b). δ_BU is the non-Clifford monodromy resource used
-    to synthesize these phases in the aQPU operator layer — it does not
+    to synthesize these phases in the hQVM operator layer — it does not
     replace the 2π cyclic closure of the exponent group.
 
     Shor peak condition: k/Q ≈ m/r (continued fractions on k/Q).

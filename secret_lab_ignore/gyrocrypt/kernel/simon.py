@@ -1,5 +1,5 @@
 """
-Native aQPU Simon on GF(2)^{6B}.
+Native hQVM Simon on GF(2)^{6B}.
 
 Oracle: depth-4 W₂ half-word (fam 00 → fam 01) from GENE_MAC_REST; shadow partner
 on the fam-01 byte enforces 2-to-1 via SO(3)/SU(2) byte fiber (T5/T8).

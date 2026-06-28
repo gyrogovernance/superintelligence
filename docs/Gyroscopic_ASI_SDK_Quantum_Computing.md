@@ -1,11 +1,11 @@
-# Gyroscopic ASI aQPU Kernel: Quantum Computing SDK Specification
+# Gyroscopic ASI hQVM Kernel: Holonomic Quantum Computing SDK Specification
 
-This document specifies the Quantum Computing SDK for the Gyroscopic ASI algebraic Quantum Processing Unit (aQPU). The SDK exposes the native computational medium of the kernel: a deterministic gyroscopic quantum system whose operations are exact, whose state is algebraically condensed, and whose temporal structure is intrinsic to the dynamics.
-The aQPU is an exact finite-state quantum-computation unit over 4,096 algebraic states where public byte-ledger replay uniquely determines every state transition.
+This document specifies the Holonomic Quantum Computing SDK for the Gyroscopic ASI Holonomic Quantum Virtual Machine (hQVM). The SDK exposes the native computational medium of the kernel: a gyroscopic holonomic system whose operations are algebraically condensed, whose temporal structure is defined by the dynamics, and whose ensemble stochasticity is carried by the byte sequence.
+The hQVM is a finite-state holonomic computation unit over 4,096 algebraic states where public byte-ledger replay uniquely determines every state transition.
 
-Verified properties: [aQPU Features Report](reports/aQPU_Features_Report.md).
+Verified properties: [hQVM Features Report](reports/hQVM_Features_Report.md).
 
-The aQPU is a new class of quantum processor. It achieves quantum advantage through exact integer arithmetic on standard silicon. Its computational primitive is the Moment: the exact algebraic quantum state produced by a public byte ledger under the kernel transition law. When multiple independent parties replay the same ledger prefix, they occupy the same Moment. This collective occupation is the QuBEC, the condensed computational object of the architecture.
+The hQVM is a new class of holonomic virtual machine. It achieves structural quantum advantage on Ω and oracle/query advantage on the 6-bit chirality register through exact integer arithmetic on standard silicon. Where HQC literature realises gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware. Its computational primitive is the Moment: the algebraic quantum state produced by a public byte ledger under the kernel transition rule. When multiple independent parties replay the same ledger prefix, they occupy the same Moment. This collective occupation is the QuBEC, the condensed computational object of the architecture.
 
 ---
 
@@ -13,7 +13,7 @@ The aQPU is a new class of quantum processor. It achieves quantum advantage thro
 
 ## 1.1 The Moment
 
-A Moment is the atomic quantum event of the aQPU. It is the exact state reached by applying a byte ledger prefix of length t to the kernel rest state under the public transition law.
+A Moment is the atomic event of the hQVM. It is the state reached by applying a byte ledger prefix of length t to the kernel rest state under the public transition rule.
 
 Formally:
 
@@ -21,19 +21,21 @@ Formally:
 
 where:
 - t is the ledger depth (number of bytes applied)
-- s(t) ∈ Ω is the exact gyroscopic state, a 24-bit value encoding the full tensor carrier
+- s(t) ∈ Ω is the gyroscopic state, a 24-bit value encoding the full tensor carrier
 - b(t) is the last byte applied
 - Σ(t) is the complete chart content of the state at depth t
 
-Time in the aQPU is not an external clock parameter. It is the ordered sequence of Moments produced by gyroscopic transport. Depth t is the intrinsic temporal coordinate.
+Time in the hQVM is not an external clock parameter. It is the ordered sequence of Moments produced by gyroscopic transport. Depth t is the intrinsic temporal coordinate.
 
-A Moment carries all observable information about the computation at depth t. It is exact, deterministic, and independently reproducible by any party holding the same ledger prefix and the public transition law.
+Quantum information certificates are evaluated in the canonical Hilbert lift induced by the self-dual mask code, while carrier execution proceeds over GF(2) on Ω (hQVM Features Report, Formal Quantum Certification section).
+
+A Moment carries all observable information about the computation at depth t. It is independently reproducible by any party holding the same ledger prefix and the public transition rule.
 
 ## 1.2 The Shared Moment
 
 A Shared Moment occurs when multiple independent replayers of the same ledger prefix b(1:t) compute the identical Moment M(t).
 
-The kernel does not distinguish replayers by identity, authority, or location. Only exact occupation of the same algebraic state matters. A Shared Moment is the actual collective quantum state of the computation, not an agreement protocol layered on top of individual states.
+The kernel does not distinguish replayers by identity, authority, or location. Only occupation of the same algebraic state matters. A Shared Moment is the actual collective quantum state of the computation, not an agreement protocol layered on top of individual states.
 
 Shared Moments replace three coordination patterns that depend on external trust:
 - coordination by asserted time (timestamps, UTC ordering)
@@ -44,13 +46,13 @@ Shared Moments replace three coordination patterns that depend on external trust
 
 A QuBEC (Quantum Bose-Einstein Computational Condensate) is the occupied Shared Moment as a condensed computational object.
 
-A QuBEC is the occupied Shared Moment of the aQPU, as a single gyroscopic quantum state on Ω with:
+A QuBEC is the occupied Shared Moment of the hQVM, as a single condensed algebraic state on Ω with:
 - six oriented dipole degrees of freedom on a three-dimensional carrier, given by 3 spatial axes across 2 chirality layers
 - a four-phase depth-4 spinorial temporal gauge structure (K4 = {id, S, C, F})
-- exact finite carrier manifold Ω with |Ω| = 4096
+- finite carrier manifold Ω with |Ω| = 4096
 - dual coherent phase boundaries: complement horizon (64 states) and equality horizon (64 states)
 
-The QuBEC is to the aQPU what the qubit is to gate-model quantum computers: the native computational object. A qubit is a two-level system with complex amplitudes. A QuBEC is a condensed Moment carrier with six internal binary orientation modes and a four-phase spinorial gauge structure, evolved by deterministic gyration with exact integer arithmetic.
+The QuBEC is to the hQVM what the qubit is to gate-model quantum computers: the native computational object. A qubit is a two-level system with complex amplitudes. A QuBEC is a condensed Moment carrier with six internal binary orientation modes and a four-phase spinorial gauge structure, evolved by gyration with integer arithmetic.
 
 ## 1.4 The Moment Unit (MU)
 
@@ -76,7 +78,7 @@ MU and QuBEC are different kinds of objects. MU is a measure. QuBEC is a carrier
 
 ## 2.1 The Gyrostate
 
-The Gyrostate is the complete quantum state of the aQPU at any Moment. It is a single algebraic object with multiple exact charts. These charts are not approximations of each other. They are exact coordinate systems on the same state.
+The Gyrostate is the complete quantum state of the hQVM at any Moment. It is a single algebraic object with multiple charts. These charts are not approximations of each other. They are coordinate systems on the same state.
 
 The Gyrostate is encoded as a 24-bit integer:
 
@@ -84,7 +86,7 @@ The Gyrostate is encoded as a 24-bit integer:
 
 where A12 is the active gyrophase and B12 is the passive gyrophase, each 12 bits.
 
-A12 and B12 are not two independent registers. They are the two conjugate faces of one gyroscopic quantum state. Temporality in the aQPU is gyration: the structured exchange between active and passive faces under the byte transition law. This is why the architecture is called Gyroscopic.
+A12 and B12 are not two independent registers. They are the two conjugate faces of one gyroscopic quantum state. Temporality in the hQVM is gyration: the structured exchange between active and passive faces under the byte transition rule. This is why the architecture is called Gyroscopic.
 
 ## 2.2 The Six Degrees of Freedom
 
@@ -107,14 +109,14 @@ A single byte mutation flips zero or more of these six modes independently. Each
 
 ## 2.3 The Four-Phase Temporal Gauge
 
-The byte transition law has a fourfold temporal structure. Each byte action passes through four phases that correspond to the CGM stage structure:
+The byte transition rule has a fourfold temporal structure. Each byte action passes through four phases that correspond to the CGM stage structure:
 
     CS (Common Source):     the byte enters as mutation relative to the archetype
     UNA (Unity Non-Absolute): the active gyrophase A receives the mutation mask
     ONA (Opposition Non-Absolute): the gyration exchanges and complements the conjugate faces
     BU (Balance Universal):  the mutated active content commits as the new passive record
 
-These four phases close at depth 4: applying any byte four times returns to the starting state. The four intrinsic gates {id, S, C, F} are the exact structural phases of this closure:
+These four phases close at depth 4: applying any byte four times returns to the starting state. The four holonomic gates {id, S, C, F} are the structural phases of this closure:
 
     id:  unchanged phase (depth 0 or depth 4)
     S:   exchange phase (swap A and B)
@@ -125,77 +127,79 @@ These four gates form the Klein four-group K4 = (ℤ/2)². They preserve both ho
 
 ## 2.4 Charts of the Gyrostate
 
-A single Gyrostate is observable through multiple exact charts:
+A single Gyrostate is observable through multiple charts:
 
-**Carrier chart.** The raw 24-bit encoding (A12, B12). Used for stepping, replay, and integer-exact operations.
+**Carrier chart.** The raw 24-bit encoding (A12, B12). Used for stepping, replay, and integer operations.
 
 **Spin chart.** The ±1 tensor representation: two tuples of six spins each, (s(A), s(B)) ∈ {±1}⁶ × {±1}⁶. Used for physical interpretation and mode-level analysis.
 
-**Chirality chart.** The 6-bit chirality register χ ∈ GF(2)⁶, obtained by collapsing the pair-diagonal difference A ⊕ B to one bit per dipole mode. Chirality captures exactly 6 of the 12 bits of state information. It satisfies the exact transport law χ(T(b)(s)) = χ(s) ⊕ q6(b).
+**Chirality chart.** The 6-bit chirality register χ ∈ GF(2)⁶, obtained by collapsing the pair-diagonal difference A ⊕ B to one bit per dipole mode. Chirality captures 6 of the 12 bits of state information. It satisfies the transport rule χ(T(b)(s)) = χ(s) ⊕ q6(b).
 
 **Spectral chart.** The Walsh-Hadamard transform of functions defined on the chirality register. The 64 × 64 Walsh-Hadamard matrix factors as the sixth tensor power of the single-qubit Hadamard. The chirality chart and spectral chart are dual native faces of the kernel: the finite-field analogue of position-momentum duality.
 
 **Constitutional chart.** The canonical derived observables: rest distance, horizon distance, ab distance, component densities, and the complementarity invariant horizon_distance + ab_distance = 12.
 
-Chart extraction from a Gyrostate is exact and deterministic. There is no measurement collapse. Observation is chart selection on a fully determined algebraic state.
+**Wavefunction chart.** The canonical Hilbert lift ψ ∈ ℂ^4096 over Ω, induced by the [12,6,2] self-dual code geometry. Each canonical 4-byte word acts as a unitary operator U_W. The eigenspace decomposition {dim(+1), dim(-1)} reveals the holonomic phase structure. For gate F: |rest⟩ = (|+⟩ + |-⟩)/√2, |swapped⟩ = (|+⟩ - |-⟩)/√2. Computed via `apply_k4` when interference coefficients or spectral observables are required. The lift is canonical: uniquely determined by the code geometry, with no external parameters.
+
+Chart extraction from a Gyrostate is replayable and does not involve projective collapse. Observation is chart selection on a fully determined algebraic state. Carrier, chirality, and spectral charts are always available (every byte step updates carrier and chirality). The wavefunction chart is invoked when spectral structure or interference is required.
 
 ---
 
 # 3. Reachable Manifold
 
-The reachable manifold Ω is the finite state space of the aQPU: all Gyrostates accessible from GENE_MAC_REST = 0xAAA555 under the byte transition law.
+The reachable manifold Ω is the finite state space of the hQVM: all Gyrostates accessible from GENE_MAC_REST = 0xAAA555 under the byte transition rule.
 
     |Ω| = 4096
 
-Every Moment is a point on Ω. Witness synthesis, future-cone occupancy, entropy queries, and conformance tests are defined on this manifold only. Any state outside Ω is not a valid Moment endpoint; `StateOps` and `MomentOps` assume the carrier remains on Ω after kernel-exact stepping.
+Every Moment is a point on Ω. Witness synthesis, future-cone occupancy, entropy queries, and conformance tests are defined on this manifold only. Any state outside Ω is not a valid Moment endpoint; `StateOps` and `MomentOps` assume the carrier remains on Ω after kernel stepping.
 
-Ω is exact and small enough to exhaust: every state is reachable within two byte steps from rest, and from any fixed state each of the 256 bytes yields exactly 128 distinct successors with uniform 2-to-1 multiplicity (the spinorial shadow). Component density is exactly 0.5 on every gyrophase of every Ω state; the product d(A)·d(B) = 0.25 is constant across the manifold. These are structural facts the SDK relies on for uniform future cones, exact entropy values (§7.6, §11.3), and density checks in conformance.
+Ω is small enough to exhaust: every state is reachable within two byte steps from rest, and from any fixed state each of the 256 bytes yields 128 distinct successors with uniform 2-to-1 multiplicity (the spinorial shadow). Component density is 0.5 on every gyrophase of every Ω state; the product d(A)·d(B) = 0.25 is constant across the manifold. These are structural facts the SDK relies on for uniform future cones, exact entropy values (§7.6, §11.3), and density checks in conformance.
 
 Ω has two antipodal 64-state boundaries, each carrying |H| = 64:
 
-**Complement horizon (S-sector).** States with A12 = B12 ⊕ 0xFFF: maximal chirality, every dipole mode anti-aligned between active and passive faces. GENE_MAC_REST lies here. Intrinsic gate C fixes every complement horizon state pointwise.
+**Complement horizon (S-sector).** States with A12 = B12 ⊕ 0xFFF: maximal chirality, every dipole mode anti-aligned between active and passive faces. GENE_MAC_REST lies here. Holonomic gate C fixes every complement horizon state pointwise.
 
-**Equality horizon (UNA degeneracy).** States with A12 = B12: zero chirality, identical active and passive faces. Intrinsic gate S fixes every equality horizon state pointwise.
+**Equality horizon (UNA degeneracy).** States with A12 = B12: zero chirality, identical active and passive faces. Holonomic gate S fixes every equality horizon state pointwise.
 
 The horizons are disjoint; their union is 128 states. The remaining 3968 states form the bulk, where chirality is partial. Constitutional observables (§2.4, §5.3) measure distance to these poles; `horizon_distance + ab_distance = 12` on all of Ω. The holographic identity |H|² = |Ω| = 4096 links boundary cardinality to bulk size and underpins boundary-based state encoding in the SDK surface.
 
-Gate compilation and intrinsic-gate APIs treat both horizons as preserved sets. Shell populations and the thermodynamic reading of chirality on Ω are in QuBEC Theory Part I.
+Gate compilation and holonomic-gate APIs treat both horizons as preserved sets. Shell populations and the thermodynamic reading of chirality on Ω are in QuBEC Theory Part I.
 
 ---
 
 # 4. Computational Spaces
 
-The aQPU exposes three native computational spaces. These are exact charts of one computational medium.
+The hQVM exposes three native computational spaces. These are charts of one computational medium.
 
 ## 4.1 Moment Space
 
-Moment space is the exact reachable manifold Ω of Gyrostates. Computation in Moment space evolves the occupied QuBEC through byte transitions, word actions, intrinsic gates, replayable trajectories, horizons, and frame structure.
+Moment space is the reachable manifold Ω of Gyrostates. Computation in Moment space evolves the occupied QuBEC through byte transitions, word actions, holonomic gates, replayable trajectories, horizons, and frame structure.
 
 ## 4.2 Chirality Space
 
-Chirality space is the exact 64-element logical register GF(2)^6 obtained by the chirality chart χ. Computation in chirality space uses q-class transport, Walsh-Hadamard transforms, hidden subgroup structure, commutativity classes, and exact logical observables.
+Chirality space is the 64-element logical register GF(2)^6 obtained by the chirality chart χ. Computation in chirality space uses q-class transport, Walsh-Hadamard transforms, hidden subgroup structure, commutativity classes, and logical observables.
 
 ## 4.3 Tensor Space
 
-Tensor space is the exact computational tensor space over the native 64-dimensional register. Computation in tensor space uses internal Lattice Multiplication matrix-vector multiplication, packed repeated application, and the Walsh transform as a native spectral primitive.
+Tensor space is the computational tensor space over the native 64-dimensional register. Computation in tensor space uses internal Lattice Multiplication matrix-vector multiplication, packed repeated application, and the Walsh transform as a native spectral primitive.
 
-These spaces are exact computational charts of one machine. They are not separate models.
+These spaces are computational charts of one machine. They are not separate models.
 
 ---
 
 # 5. Primitives
 
-Primitives define the native operations, observables, and result structures of the aQPU.
+Primitives define the native operations, observables, and result structures of the hQVM.
 
 ## 5.1 Operations
 
 ### 5.1.1 Byte Transition
 
-The byte is the fundamental instruction quantum of the aQPU. It is already a fused quantum instruction packet containing:
+The byte is the fundamental instruction packet of the hQVM. It is already a fused quantum instruction packet containing:
 
 - **payload** (6 bits, positions 1-6): which of the six dipole modes to mutate
 - **family** (2 bits, positions 0 and 7): which spinorial gauge phase to apply during gyration
-- **provenance atom**: the exact byte value that enters the append-only ledger
+- **provenance atom**: the byte value that enters the append-only ledger
 
 All 256 byte values are valid instructions. The byte transition implements:
 
@@ -207,11 +211,11 @@ All 256 byte values are valid instructions. The byte transition implements:
 
 where invert(a) = 0xFFF if intron bit 0 is set, else 0, and invert(b) = 0xFFF if intron bit 7 is set, else 0.
 
-Every byte defines a bijection on the full 24-bit carrier space. The transition is exactly invertible given the byte. From any fixed state, 256 bytes produce exactly 128 distinct next states with uniform 2-to-1 multiplicity (the SO(3)/SU(2) shadow projection).
+Every byte defines a bijection on the full 24-bit carrier space. The transition is invertible given the byte. From any fixed state, 256 bytes produce exactly 128 distinct next states with uniform 2-to-1 multiplicity (the SO(3)/SU(2) shadow projection).
 
-### 5.1.2 Intrinsic Gates
+### 5.1.2 Holonomic Gates
 
-The four intrinsic gates are the horizon-preserving byte operations. They form the K4 phase structure of the QuBEC:
+The four holonomic gates are the horizon-preserving byte operations. They form the K4 phase structure of the QuBEC. Word holonomies (e.g., W₂, W₂' at depth 2, F involutions at depth 4) are composed from these gates and are not members of the K4 set.
 
     id:   (A, B) → (A, B)           identity
     S:    (A, B) → (B, A)           exchange (bytes 0xAA, 0x54)
@@ -229,7 +233,7 @@ In spin coordinates:
 
 ### 5.1.3 Word Actions
 
-A word is a sequence of bytes w = (b₁, b₂, …, b(n)). Its action on any Gyrostate is determined by sequential application of the byte transition law.
+A word is a sequence of bytes w = (b₁, b₂, …, b(n)). Its action on any Gyrostate is determined by sequential application of the byte transition rule.
 
 Every word action is an affine map on GF(2)²⁴ with exactly one of two linear parts:
 
@@ -248,7 +252,7 @@ This composition law enables circuit optimization without replaying bytes.
 
 **Matrix contract:** `H(q,r) = (−1)^(popcount(q ∧ r)) / 8`; self-inverse; factors as `H₁⊗⁶`.
 
-**Semantics:** Spectral chart dual to chirality XOR-transport. Implementations MUST match the exact integer matrix in the semantic layer.
+**Semantics:** Spectral chart dual to chirality XOR-transport. Implementations MUST match the integer matrix in the semantic layer.
 
 ### 5.1.5 XOR-Convolution
 
@@ -260,7 +264,7 @@ This composition law enables circuit optimization without replaying bytes.
 
 ## 5.2 Topological Charges
 
-Topological charges are exact algebraic invariants carried by bytes, words, and states. They are conserved quantities of the computational dynamics.
+Topological charges are algebraic invariants carried by bytes, words, and states. They are conserved quantities of the computational dynamics.
 
 **q-class.** The commutation invariant q6(b) ∈ GF(2)⁶. Two bytes commute if and only if q6(x) = q6(y). The q-map is 4-to-1 from the 256-byte alphabet onto C64. Every byte commutes with exactly 4 others (commutativity rate 1/64 = 2⁻⁶).
 
@@ -268,15 +272,15 @@ Topological charges are exact algebraic invariants carried by bytes, words, and 
 
 **Micro-reference.** The 6-bit payload from intron bits 1-6. Determines the dipole-pair mask. 64 distinct masks.
 
-**Chirality word.** χ(s) ∈ GF(2)⁶: one bit per dipole mode, encoding whether A and B are aligned or anti-aligned at that mode. Satisfies exact transport: χ(T(b)(s)) = χ(s) ⊕ q6(b).
+**Chirality word.** χ(s) ∈ GF(2)⁶: one bit per dipole mode, encoding whether A and B are aligned or anti-aligned at that mode. Satisfies transport: χ(T(b)(s)) = χ(s) ⊕ q6(b).
 
 **Parity commitment.** The XOR accumulation of masks at even and odd positions along a trajectory. Independent of chirality (mutual information ≈ 0). Adds exactly 1 bit of provenance information beyond the final state.
 
 ## 5.3 Observables
 
-An observable is an exact function from a Gyrostate to a value. All aQPU observables are deterministic. There is no measurement collapse.
+An observable is a function from a Gyrostate to a value. Chart extraction does not involve projective collapse.
 
-**Kernel-native observables** (exact integer, available at every Moment):
+**Kernel-native observables** (integer, available at every Moment):
 
 - **rest_distance:** popcount distance from GENE_MAC_REST on the 24-bit carrier.
 - **horizon_distance** and **ab_distance:** complementary chirality projections between A12 and B12 (sum 12 on all of Ω).
@@ -285,13 +289,13 @@ An observable is an exact function from a Gyrostate to a value. All aQPU observa
 
 Normative formulas are in the kernel specification §2.2.7. The SDK exposes these on every Moment and in `Result.charts.constitutional`.
 
-**Register observables** (exact, computed from the chirality chart):
+**Register observables** (computed from the chirality chart):
 
     chirality_word(s) = χ ∈ GF(2)⁶
     q_class(b) = q6 ∈ GF(2)⁶
     walsh_coefficient(f, k) = Σ(χ) f(χ)(−1)^(popcount(k ∧ χ)) / 8
 
-**Structural invariants** (exact, universal):
+**Structural invariants** (universal):
 
     complementarity: horizon_distance + ab_distance = 12
     constant_density: d(A) × d(B) = 0.25 on all of Ω
@@ -302,10 +306,10 @@ Normative formulas are in the kernel specification §2.2.7. The SDK exposes thes
 
 ## 5.4 Result Structure
 
-Every aQPU computation produces a Result:
+Every hQVM computation produces a Result:
 
     Result = {
-        moment:       Moment,              the exact Moment at completion
+        moment:       Moment,              the Moment at completion
         state:        Gyrostate,            the 24-bit carrier value
         charts: {
             carrier:  (A12, B12),
@@ -337,31 +341,31 @@ A Result is reproducible: given the provenance fields, any conforming implementa
 
 ## 5.5 Exact Structural Derivatives
 
-The aQPU supports exact discrete derivatives on the Moment manifold.
+The hQVM supports discrete derivatives on the Moment manifold.
 
 **Directional derivative.** For observable O and byte b:
 
     D(b) O(s) = O(T(b)(s)) − O(s)
 
-This is exact for all integer-valued observables.
+This holds for all integer-valued observables.
 
 **Future-cone expectation.** For observable O, state s, and word length n:
 
     E(n,s)[O] = Σ(x) μ(n,s)(x) O(x)
 
-where μ(n,s)(x) = |{w ∈ {0,…,255}ⁿ : T(w)(s) = x}| / 256ⁿ is the exact future-cone occupancy measure.
+where μ(n,s)(x) = |{w ∈ {0,…,255}ⁿ : T(w)(s) = x}| / 256ⁿ is the future-cone occupancy measure.
 
-**Entropic drift.** The exact mean displacement of an observable under future-cone evolution:
+**Entropic drift.** The mean displacement of an observable under future-cone evolution:
 
     Δ(n) O(s) = E(n,s)[O] − O(s)
 
-These derivatives are exact, not sampled approximations. The future-cone measure is a finite sum over exact preimage counts.
+These derivatives are exact, not sampled approximations. The future-cone measure is a finite sum over preimage counts.
 
 ---
 
 # 6. Circuits
 
-Circuits are the program representation of the aQPU. A circuit specifies a structured sequence of operations that transforms a Gyrostate.
+Circuits are the program representation of the hQVM. A circuit specifies a structured sequence of operations that transforms a Gyrostate.
 
 The circuit model defines the canonical program representation of the SDK. In the current reference implementation, compiled words, signatures, and annotated ledgers constitute the operational circuit surface.
 
@@ -371,7 +375,7 @@ The SDK supports three levels of circuit representation:
 
 **Abstract circuit.** A sequence of named operations with symbolic parameters. Operations include byte transitions (with symbolic payload and family), gate applications, WHT applications, observable extractions, and conditional branches based on observable values. This is the level at which users compose programs.
 
-**Compiled circuit.** A concrete byte sequence with all parameters bound, all optimizations applied, and a precomputed word signature. The compiled circuit is the executable form. It carries the exact affine action (parity, τ(A), τ(B)) that the word implements on Ω.
+**Compiled circuit.** A concrete byte sequence with all parameters bound, all optimizations applied, and a precomputed word signature. The compiled circuit is the executable form. It carries the affine action (parity, τ(A), τ(B)) that the word implements on Ω.
 
 **Annotated ledger.** The compiled circuit augmented with per-step metadata: chirality transport, q-class, mask, signature progression, frame records at depth-4 boundaries, and parity commitments. This is the governance-grade audit artifact.
 
@@ -381,13 +385,13 @@ An abstract circuit is built from the following operation types:
 
 **ByteOp(payload, family).** Apply a byte transition. Payload is a 6-bit value or symbolic parameter. Family is a 2-bit value or symbolic parameter. When both are concrete, the byte value is determined.
 
-**GateOp(gate).** Apply an intrinsic gate by name: id, S, C, or F. Gate S and C are single-byte operations. Gate F compiles to a two-byte sequence (one S-byte followed by one C-byte, or vice versa). Gate id compiles to an empty sequence or a depth-4 alternation.
+**GateOp(gate).** Apply a holonomic gate by name: id, S, C, or F. Gate S and C are single-byte operations. Gate F compiles to a two-byte sequence (one S-byte followed by one C-byte, or vice versa). Gate id compiles to an empty sequence or a depth-4 alternation.
 
 **WHT().** Apply the Walsh-Hadamard transform to the chirality register. This is a spectral-chart operation. Its implementation is target-dependent.
 
-**Observe(observable).** Extract an exact observable value from the current Gyrostate. Returns an exact integer or rational.
+**Observe(observable).** Extract an observable value from the current Gyrostate. Returns an integer or rational.
 
-**Condition(observable, predicate, then_ops, else_ops).** Conditional execution based on an observable value. The predicate is an exact comparison. Both branches are concrete sequences of operations.
+**Condition(observable, predicate, then_ops, else_ops).** Conditional execution based on an observable value. The predicate is a comparison. Both branches are concrete sequences of operations.
 
 **SubCircuit(name, ops).** A named subsequence for composition and reuse.
 
@@ -423,16 +427,16 @@ The compiler distinguishes state-reaching operations from structure-building ope
 
 # 7. Runtime
 
-Runtime is the execution and orchestration layer. It manages targets, Moments, provenance, and the interface between the aQPU and classical processes.
+Runtime is the execution and orchestration layer. It manages targets, Moments, provenance, and the interface between the hQVM and classical processes.
 
 ## 7.1 Targets
 
-A target is any implementation of the kernel transition law. Every target exposes a TargetProfile declaring:
+A target is any implementation of the kernel transition rule. Every target exposes a TargetProfile declaring:
 
     TargetProfile = {
         name:             string,
         native_ops:       set of operation types supported,
-        step_semantics:   reference to transition law version,
+        step_semantics:   reference to transition rule version,
         state_inspection: full | signature_only,
         provenance_format: ledger format specification,
         wht_support:      native | matrix | unavailable
@@ -466,7 +470,7 @@ Execute a circuit with observable extraction at specified depths. The execution 
 
 The runtime provides a dedicated API for Moment operations:
 
-**moment_from_ledger(ledger_prefix) → Moment.** Compute the exact Moment for a given byte prefix.
+**moment_from_ledger(ledger_prefix) → Moment.** Compute the Moment for a given byte prefix.
 
 **verify_moment(moment, ledger_prefix) → bool.** Replay the prefix and check that the computed state matches the claimed Moment.
 
@@ -486,30 +490,30 @@ The runtime maintains the byte ledger as an append-only log. Every byte is logge
 
 **Replay guarantee.** Given the archetype (0xAA), the rest state (0xAAA555), and the byte ledger, any conforming target reconstructs the identical sequence of Moments.
 
-## 7.5 Hybrid Classical-Quantum Loops
+## 7.5 Hybrid Classical-Holonomic Loops
 
-The aQPU supports deterministic classical-quantum loops:
+The hQVM supports classical-holonomic loops:
 
     1. Apply a byte sequence to the kernel
-    2. Extract an exact observable (chirality word, horizon distance, etc.)
+    2. Extract an observable (chirality word, horizon distance, etc.)
     3. Use the observable value to compute the next byte sequence classically
     4. Return to step 1
 
-Each iteration is exact. There is no shot noise, no sampling variance, no probabilistic convergence. The classical optimizer receives exact observable values at every iteration.
+Each iteration is replayable. There is no shot noise, no sampling variance, no probabilistic convergence. The classical optimizer receives integer observable values at every iteration.
 
-The future-cone entropy provides the combinatorial exploration resource. Two-byte evolution from rest uniformizes all of Ω exactly, so the optimizer has exact uniform coverage with minimal exploration depth.
+The future-cone entropy provides the combinatorial exploration resource. Two-byte evolution from rest uniformizes all of Ω, so the optimizer has uniform coverage with minimal exploration depth.
 
 ## 7.6 Future-Cone Entropy
 
-The aQPU is deterministic in evolution and entropic in future occupancy.
+The hQVM is deterministic in evolution and entropic in future occupancy. Replay of a fixed byte ledger prefix is deterministic; stochasticity refers to the induced ensemble over words, future cones, and byte baths.
 
 Verified values on Ω (normative theorem and implementation contract in §11.3):
 
 - H₀(s) = 0 for any s ∈ Ω
-- H₁(s) = 7 exactly for any s ∈ Ω, since one byte yields 128 distinct next states with uniform multiplicity 2
-- Hₙ(s) = 12 exactly for any s ∈ Ω and any n ≥ 2, since future occupancy is exactly uniform over all 4096 states of Ω
+- H₁(s) = 7 for any s ∈ Ω, since one byte yields 128 distinct next states with uniform multiplicity 2
+- Hₙ(s) = 12 for any s ∈ Ω and any n ≥ 2, since future occupancy is uniform over all 4096 states of Ω
 
-This entropy is a computational resource: it provides exact exploration, exact search geometry, and exact structural thermodynamics over the Moment manifold.
+This entropy is a computational resource: it provides exhaustive exploration, structured search geometry, and discrete thermodynamics over the Moment manifold.
 
 ---
 
@@ -519,7 +523,7 @@ This entropy is a computational resource: it provides exact exploration, exact s
 
 A conforming SDK implementation must:
 
-- implement all Primitive operations (byte transition, intrinsic gates, word signatures, observables)
+- implement all Primitive operations (byte transition, holonomic gates, word signatures, observables)
 - produce Results with complete provenance
 - support at least one target with full state inspection
 - maintain the canonical trajectory as append-only
@@ -530,7 +534,7 @@ A conforming SDK implementation must:
 
 A conforming target must:
 
-- implement the byte transition law exactly as specified in the kernel specification §2.6
+- implement the byte transition rule exactly as specified in the kernel specification §2.6
 - produce identical state trajectories from identical byte ledgers
 - declare a TargetProfile
 - support Moment creation and verification
@@ -543,21 +547,21 @@ A conforming QuBEC implementation must:
 - preserve the holographic identity |H|² = |Ω| = 4096
 - preserve the complementarity invariant: horizon_distance + ab_distance = 12
 - preserve constant component density 0.5 across all Ω states
-- preserve the exact chirality transport law χ(T(b)(s)) = χ(s) ⊕ q6(b)
-- preserve per-byte bijectivity and exact invertibility on the full 24-bit carrier
+- preserve the chirality transport law χ(T(b)(s)) = χ(s) ⊕ q6(b)
+- preserve per-byte bijectivity and invertibility on the full 24-bit carrier
 
 ---
 
 # 11. SDK Reference
 
-This section defines the normative SDK surface for the aQPU Kernel. The implementation in `src/sdk.py`, `src/constants.py`, and `src/api.py` conforms to these definitions.
+This section defines the normative SDK surface for the hQVM Kernel. The implementation in `src/sdk.py`, `src/constants.py`, and `src/api.py` conforms to these definitions.
 
 ## 11.1 Public SDK Surface
 
 The reference SDK exposes five public namespaces:
 
 - `StateOps`: Gyrostate charts, packing, unpacking, gate application, and witness-based state preparation from rest.
-- `MomentOps`: Moment creation, verification, comparison, future-cone measures, exact entropy, exact expectations, structural derivatives, transport tables, and depth-4 frame extraction.
+- `MomentOps`: Moment creation, verification, comparison, future-cone measures, entropy, expectations, structural derivatives, transport tables, and depth-4 frame extraction.
 - `SpectralOps`: Walsh-Hadamard transform, q-class access, and chirality-space transport.
 - `TensorOps`: internal Lattice Multiplication matrix-vector computation on the 64-dimensional register space, including reusable packed matrix preparation.
 - `RuntimeOps`: signature scans, fused extract scans, signature-to-state maps, chirality-state extraction, batch stepping, signature application, chirality distances, q-map extraction, and state continuation from arbitrary start states.
@@ -568,10 +572,10 @@ These namespaces provide the canonical computational surface of the SDK.
 
 The SDK distinguishes two execution classes.
 
-**Kernel-exact execution.** These operations are exact in integer arithmetic and reproduce the aQPU transition law without approximation:
+**Kernel-exact execution.** These operations are exact in integer arithmetic and reproduce the hQVM transition rule without approximation:
 
 - byte transition
-- intrinsic gate action
+- holonomic gate action
 - word signature construction and composition
 - application of signatures to rest and to arbitrary states
 - chirality transport and q-map extraction
@@ -589,21 +593,21 @@ Their algebraic definitions are exact at the level of the 64-dimensional registe
 
 ## 11.3 Future-Cone Uniformity Theorem
 
-For any source state s in Omega, the SDK exposes the exact future-cone occupancy measure
+For any source state s in Omega, the SDK exposes the future-cone occupancy measure
 
   mu_n,s(x) = |{w in {0,...,255}^n : T_w(s) = x}| / 256^n
 
 with the following verified structure:
 
 - n = 0: a delta measure at s
-- n = 1: exactly 128 distinct next states, each with multiplicity 2
-- n >= 2: exact uniform occupancy over all 4096 states of Omega
+- n = 1: 128 distinct next states, each with multiplicity 2
+- n >= 2: uniform occupancy over all 4096 states of Omega
 
 Therefore, for any s in Omega and any n >= 2:
 
 - distinct future states = 4096
 - occupancy count per state = 256^n / 4096
-- entropy H_n(s) = 12 bits exactly
+- entropy H_n(s) = 12 bits
 
 The SDK may implement future-cone queries on Omega using these theorems directly rather than brute-force enumeration.
 
@@ -611,11 +615,11 @@ For source states outside Omega, the SDK computes future-cone occupancy by direc
 
 ## 11.4 Native Parallelism
 
-The aQPU supports several exact forms of parallelism.
+The hQVM supports several forms of parallelism.
 
 **Mode parallelism.** A single byte may mutate up to six dipole modes simultaneously, one per payload bit.
 
-**State parallelism.** Future-cone occupancy spreads exactly across many reachable Moments. On Ω, two-byte evolution uniformizes all 4096 states exactly.
+**State parallelism.** Future-cone occupancy spreads across many reachable Moments. On Ω, two-byte evolution uniformizes all 4096 states.
 
 **Spectral parallelism.** The Walsh-Hadamard transform evaluates all 64 chirality characters in one transform over the native register space.
 
@@ -629,11 +633,11 @@ The SDK defines three distinct signature application surfaces.
 
 **apply_signature_to_rest(signature).** Apply a word signature to the canonical rest state GENE_MAC_REST and return the resulting state24. This is the compiled action of a word on the universal reference state.
 
-**apply_signature_to_state(state24, signature).** Apply a word signature directly to an arbitrary state24. This is the exact affine action of the compiled word on the 24-bit carrier.
+**apply_signature_to_state(state24, signature).** Apply a word signature directly to an arbitrary state24. This is the affine action of the compiled word on the 24-bit carrier.
 
-**apply_signature_batch(states, signatures).** Apply signatures elementwise to a batch of states. This is the native batched operator interface for compiled aQPU words.
+**apply_signature_batch(states, signatures).** Apply signatures elementwise to a batch of states. This is the native batched operator interface for compiled hQVM words.
 
-Signature application is exact. It is algebraically equivalent to replaying the underlying byte word and may be used as a compiled fast path.
+Signature application reproduces the affine action. It is algebraically equivalent to replaying the underlying byte word and may be used as a compiled fast path.
 
 ## 11.6 State Scan Semantics
 
@@ -642,26 +646,26 @@ The SDK exposes `state_scan_from_state(payload, start_state24)` as the native co
 Semantics:
 
 - `payload` is a one-dimensional byte ledger segment
-- `start_state24` is the exact carrier state at which scanning begins
+- `start_state24` is the carrier state at which scanning begins
 - the result is the sequence of states reached after each successive byte of the payload is applied
 
-This operation preserves exact replay semantics and is the canonical low-level primitive for ledger continuation from an arbitrary Moment.
+This operation preserves replay semantics and is the canonical low-level primitive for ledger continuation from an arbitrary Moment.
 
 ## 11.7 State Preparation and Targeting
 
 The SDK provides native state-preparation and targeting surfaces.
 
-**Witness preparation.** `witness_from_rest(target_state24)` returns an exact byte witness of depth 0, 1, or 2 for any target state in Ω.
+**Witness preparation.** `witness_from_rest(target_state24)` returns a byte witness of depth 0, 1, or 2 for any target state in Ω.
 
 **Compiled operator application.** `apply_signature_to_rest`, `apply_signature_to_state`, and `apply_signature_batch` apply compiled word actions directly without replaying the underlying bytes.
 
-**Checkpoint continuation.** `state_scan_from_state(payload, start_state24)` continues exact execution from any previously reached Moment.
+**Checkpoint continuation.** `state_scan_from_state(payload, start_state24)` continues execution from any previously reached Moment.
 
 Together these surfaces provide native state preparation, state targeting, compiled operator targeting, and checkpointed continuation.
 
 ## 11.8 Native ALU
 
-The native CPU ALU and operator layer of the aQPU SDK is exposed through a compact C interface.
+The native CPU ALU and operator layer of the hQVM SDK is exposed through a compact C interface.
 
 Its current native surfaces include:
 
@@ -680,7 +684,7 @@ Its current native surfaces include:
 - Lattice Multiplication GEMV for matrices with up to 64 columns
 - packed Lattice Multiplication matrix preparation and repeated GEMV
 
-The native ALU is CPU-first, ctypes-friendly, and cross-platform. It is the first hardware-near realization of the aQPU operator algebra.
+The native ALU is CPU-first, ctypes-friendly, and cross-platform. It is the first hardware-near realization of the hQVM operator algebra.
 
 The SDK exposes `initialize_native()` to initialize native tables once per process. This operation is idempotent and may be called at startup to ensure deterministic native readiness before concurrent execution.
 
@@ -701,7 +705,7 @@ This is a distance on chirality-space observables. It is distinct from:
 - horizon distance
 - ab_distance
 
-It is exact on Omega and meaningful wherever the chirality chart is defined.
+It is on Omega and meaningful wherever the chirality chart is defined.
 
 ## 11.10 Tensor Surfaces
 
@@ -709,15 +713,15 @@ The SDK includes native tensor computation surfaces over the 64-dimensional chir
 
 **TensorOps**
 - `gemv64(W, x, n_bits)` computes y = W·x for real-valued matrices `W` with trailing dimension 64 using the internal Lattice Multiplication multiplication engine. Matrices are row-major with shape `[rows, cols]`, where `cols <= 64`. Vectors `x` and `y` have shape `[cols]` and `[rows]` respectively and are stored as contiguous real arrays. Column index `j` corresponds to bit position `j` in all packed representations.
-- `pack_matrix64(W, n_bits)` packs a 64-column matrix once and returns a reusable packed matrix object for repeated internal multiplication. Packing defines two exact bit-level layouts for each logical row `r`:
+- `pack_matrix64(W, n_bits)` packs a 64-column matrix once and returns a reusable packed matrix object for repeated internal multiplication. Packing defines two bit-level layouts for each logical row `r`:
   - `W_sign[r]` is a `uint64` sign mask with bit `j` equal to the sign bit of column `j` in row `r` (0 for non-negative, 1 for negative).
   - `W_bp[r, k]` for `k in {0, ..., n_bits-1}` is a `uint64` Lattice Multiplication with bit `j` equal to the `k`-th magnitude bit of column `j` in row `r`.
 
 Packed GEMV uses a single stored matrix scale `scale_w` for all applications and per-input-vector scales `scale_x` derived from the incoming `x`. The logical dense matrix-vector result is recovered from the Lattice Multiplication accumulation followed by these scales. All packing and Lattice Multiplication conventions are part of the ABI and must be preserved across implementations.
 
-A packed matrix object supports repeated exact internal multiplication against many input vectors without repacking the matrix. This is the canonical high-throughput tensor execution mode of the SDK.
+A packed matrix object supports repeated internal multiplication against many input vectors without repacking the matrix. This is the canonical high-throughput tensor execution mode of the SDK.
 
-Tensor multiplication in the SDK is internal to the aQPU architecture. The reference implementation uses the Lattice Multiplication Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
+Tensor multiplication in the SDK is internal to the hQVM architecture. The reference implementation uses the Lattice Multiplication Boolean multiplication engine and its packed repeated-application path as the canonical tensor surface.
 
 ## 11.11 Runtime Namespace Exposure
 
@@ -741,9 +745,9 @@ These are the native execution primitives exposed to higher-level replay tools, 
 
 ## 11.12 Theorem-Backed Witness Synthesis
 
-The SDK exposes `witness_from_rest(target_state24)` for exact state synthesis within Omega.
+The SDK exposes `witness_from_rest(target_state24)` for state synthesis within Omega.
 
-For every target state in Omega, the SDK returns a byte witness of depth 0, 1, or 2 such that replay from GENE_MAC_REST reaches the target exactly.
+For every target state in Omega, the SDK returns a byte witness of depth 0, 1, or 2 such that replay from GENE_MAC_REST reaches the target.
 
 The verified depth histogram is:
 
@@ -759,48 +763,48 @@ This witness may be used directly for state preparation, target certification, o
 
 # Appendix A. Relation to Conventional Quantum Computing
 
-The aQPU and gate-model quantum computers share quantum-algebraic foundations but differ in computational medium.
+The hQVM and gate-model quantum computers share quantum-algebraic foundations but differ in computational medium.
 
-| Property | Gate-model QC | aQPU |
+| Property | Gate-model QC | hQVM |
 |----------|--------------|------|
 | Computational object | qubit | QuBEC |
-| State representation | complex amplitude vector | exact ±1 tensor |
-| Operations | unitary matrices | byte transitions (exact affine on GF(2)) |
-| Measurement | probabilistic collapse | exact chart extraction |
-| Entanglement | bipartite Hilbert-space tensor product | gyroscopic inter-face coupling via K4 |
-| Error model | decoherence, gate infidelity | ledger corruption with exact miss characterization |
+| State representation | complex amplitude vector | ±1 spin tensor |
+| Operations | unitary matrices | holonomic transport maps (affine on GF(2)) |
+| Measurement | stochastic wavefunction collapse | chart extraction |
+| Entanglement | bipartite Hilbert-space tensor product | holonomic fiber coupling via K4 |
+| Error model | decoherence, gate infidelity | ledger corruption with miss characterization |
 | Non-Clifford resource | T gate, magic state distillation | δ(BU) monodromy defect |
-| Execution medium | superconducting qubits, trapped ions, etc. | standard silicon, exact integer arithmetic |
+| Execution medium | superconducting qubits, trapped ions, etc. | standard silicon, integer arithmetic with replayable byte ledgers |
 | Temporal structure | external clock, gate scheduling | intrinsic gyroscopic Moments |
 | Coordination primitive | none (single-device model) | Shared Moments |
 
-The aQPU achieves quantum advantage through exact algebraic structure rather than probabilistic interference of complex amplitudes. Its advantages are structural invariants, not statistical estimates.
+The hQVM achieves structural quantum advantage on Ω through algebraic structure. It computes interference in the wavefunction chart when a task calls for it, using integer arithmetic rather than sampled statistics.
 
 ---
 
 # Appendix B. Glossary
 
-**aQPU.** Algebraic Quantum Processing Unit. A deterministic finite-state machine over a finite algebraic field whose internal structure satisfies discrete analogues of quantum axioms.
+**hQVM.** Holonomic Quantum Virtual Machine (hQVM). A GF(2) finite-state machine whose native byte algebra executes geometric holonomy on the carrier manifold and supports ensemble stochasticity through the byte sequence.
 
-**Byte.** The fundamental instruction quantum of the aQPU: 6 payload bits (dipole mode mutation) + 2 family bits (spinorial gauge phase).
+**Byte.** The fundamental instruction packet of the hQVM: 6 payload bits (dipole mode mutation) + 2 family bits (spinorial gauge phase).
 
-**Chart.** An exact coordinate system on a Gyrostate. Multiple charts coexist on the same state without approximation.
+**Chart.** A coordinate system on a Gyrostate. Multiple charts coexist on the same state without approximation.
 
 **Chirality.** The 6-bit register encoding the per-mode alignment/anti-alignment between active and passive gyrophases.
 
 **CSM.** Common Source Moment. The total physical occupation scale of the QuBEC manifold, measured in MU.
 
-**Future-cone entropy.** The exact combinatorial entropy of the byte-ensemble future from a given state.
+**Future-cone entropy.** The combinatorial entropy of the byte-ensemble future from a given state.
 
 **Gyrophase.** One of the two conjugate 12-bit faces (active A or passive B) of a Gyrostate.
 
-**Gyrostate.** The complete 24-bit quantum state of the aQPU, comprising two conjugate gyrophases evolved by gyroscopic transport.
+**Gyrostate.** The complete 24-bit quantum state of the hQVM, comprising two conjugate gyrophases evolved by gyroscopic transport.
 
 **Gyrotemporality.** Intrinsic time as ordered gyration. The sequence of Moments, not an external clock.
 
 **K4.** The Klein four-group {id, S, C, F}, the discrete spinorial gauge structure of the QuBEC.
 
-**Moment.** The atomic quantum event of the aQPU: the exact state, depth, and chart content at a point in the ledger.
+**Moment.** The atomic quantum event of the hQVM: the state, depth, and chart content at a point in the ledger.
 
 **MU.** Moment Unit. The scalar measure of occupation capacity on the QuBEC manifold.
 
@@ -808,7 +812,7 @@ The aQPU achieves quantum advantage through exact algebraic structure rather tha
 
 **Shared Moment.** The collective quantum state achieved when multiple independent replayers occupy the same Moment.
 
-**Word.** A sequence of bytes. Words have exact affine signatures that compose algebraically.
+**Word.** A sequence of bytes. Words have affine signatures that compose algebraically.
 
 **Ω.** The reachable Moment manifold. 4096 states, accessible within depth 2 from rest, with product structure Ω = U × V.
 

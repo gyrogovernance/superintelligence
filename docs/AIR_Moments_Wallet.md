@@ -136,7 +136,7 @@ A settlement or governance action follows a defined sequence.
 4.  If capacity is insufficient or a rule is breached, routing is declined and the user is informed.
 5.  If present, the AI explains consequences and action risk; otherwise the terminal or operator presents the rule consequences directly.
 6.  The user creates a Decision Attestation.
-7.  The local aQPU Kernel computes the event-state transition from the grammar-valid decision bytes.
+7.  The local hQVM Kernel computes the event-state transition from the grammar-valid decision bytes.
 8.  The wallet updates the relevant Claim state locally to `reserved` or `routed` according to Shell rules, pending counterparty verification.
 9.  The counterparty independently computes the event-state transition and verifies the Shared Moment.
 10. A Settlement Receipt is created and linked to the claim state.
@@ -238,7 +238,7 @@ If approved, the wallet generates a Consent Attestation bound to a Shared Moment
 
 The wallet is a distributed interface stack that preserves explicit authority boundaries. Only the grammar-compliant recognition and settlement loop is required for minimum viable operation; AI and cloud services are optional support layers.
 
-*   **Local settlement layer:** Holds Identity Anchor, local aQPU Kernel, and Shell state. It supports offline computation, signing, proximity exchange, and provisional settlement.
+*   **Local settlement layer:** Holds Identity Anchor, local hQVM Kernel, and Shell state. It supports offline computation, signing, proximity exchange, and provisional settlement.
 *   **Edge AI model:** Handles voice/text intent, action classification, rule checks, and consequences explanation.
 *   **Routing layer:** Uses local protocols and tools for context-sensitive referrals and scheduling.
 *   **Extended governance layer:** Escalates policy interpretation or multi-party negotiation to stronger models when needed, with minimum context only.

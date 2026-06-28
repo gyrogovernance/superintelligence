@@ -2,7 +2,7 @@
 
 **Why Current Safety Evaluations Cannot Verify Alignment, and What Can**
 
-**Document Type:** Foundational Theorem  
+**Document Type:** Structural Analysis  
 **Scope:** Governance Geometry, Measurement Theory, Alignment Architecture  
 **Verified by:** `tests/test_measurement.py`, `tests/test_physics_2.py`
 
@@ -24,7 +24,7 @@ The argument proceeds in three stages:
 
 3. **Epistemic Sufficiency.** We show that the six-dimensional governance geometry is sufficient to construct and recognise aligned states. Aperture is scale-invariant: it measures structural shape rather than magnitude. This property allows alignment to be assessed consistently across systems of vastly different sizes.
 
-The practical implication is direct. The AIR architecture, which implements this geometry, provides a measurement framework capable of verifying alignment. Scalar evaluations, however refined, cannot substitute for this geometric structure because they lack the dimensionality required to represent the alignment observable. The kernel that implements this geometry is an algebraic quantum processing unit whose self-dual [12,6,2] code provides intrinsic error detection and whose exact two-step uniformization ensures structural convergence, properties that scalar evaluations cannot replicate regardless of their sophistication.
+The practical implication is direct. The AIR architecture, which implements this geometry, provides a measurement framework capable of verifying alignment. Scalar evaluations, however refined, cannot substitute for this geometric structure because they lack the dimensionality required to represent the alignment observable. The kernel that implements this geometry is a Holonomic Quantum Virtual Machine (hQVM) whose self-dual [12,6,2] code provides intrinsic error detection and whose exact two-step uniformization ensures structural convergence, properties that scalar evaluations cannot replicate regardless of their sophistication.
 
 This finding reframes the alignment problem. Safety is not a score to be maximised. It is a geometric configuration to be maintained. The question shifts from "how do we make the number higher" to "how do we preserve the structural balance that defines coherent governance."
 
@@ -190,7 +190,7 @@ The findings above describe observables. This section interprets them in terms o
 
 ### 9.1 The Kernel
 
-The kernel is an algebraic quantum processing unit (aQPU): a deterministic, reversible coordination medium operating on a compact reachable shared-moment space Ω of 4,096 states with a 64-state horizon satisfying the holographic identity \|H\|² = \|Ω\|. Its self-dual [12,6,2] mask code realises exact Clifford unitaries and provides intrinsic error detection. The kernel's physics realises the CGM alignment invariant at the discrete level: the intrinsic aperture A_kernel = 5/256 approximates A* within 5.6%, arising from combinatorial structure rather than training.
+The kernel is a Holonomic Quantum Virtual Machine (hQVM): a replayable coordination medium operating on a compact reachable shared-moment space Ω of 4,096 states with a 64-state horizon satisfying the holographic identity \|H\|² = \|Ω\|. Its self-dual [12,6,2] mask code realises exact Clifford unitaries and provides intrinsic error detection. The kernel's dynamics realise the CGM alignment invariant at the discrete level: the intrinsic aperture A_kernel = 5/256 approximates A* within 5.6%, arising from combinatorial structure rather than training.
 
 The kernel provides the stable epistemic ground. It embodies the target.
 
@@ -218,7 +218,7 @@ The GGG/AIR architecture treats safety as a symmetry to be preserved. By mapping
 
 The limitations exhibited in this report arise from the way scalar projections interact with the governance geometry. The counterexamples we construct show that, within this framework, no amount of additional data, compute, or optimisation of a single scalar can substitute for an epistemic representation that preserves the six-dimensional structure and aperture.
 
-The aQPU Kernel strengthens this conclusion by providing structural guarantees beyond those available to generic finite-state systems. Its exact two-step uniformization ensures that coordination convergence is structurally guaranteed. Its 6-bit chirality register provides a native observable for tracking structural drift between the dual horizons through an exact transport law. These properties mean that the alignment measurement infrastructure is not merely a theoretical requirement but is supported by a computational medium with proven advantages over classical coordination baselines.
+The hQVM Kernel strengthens this conclusion by providing structural guarantees beyond those available to generic finite-state systems. Its exact two-step uniformization ensures that coordination convergence is structurally guaranteed. Its 6-bit chirality register provides a native observable for tracking structural drift between the dual horizons through an exact transport rule. These properties mean that the alignment measurement infrastructure is not merely a theoretical requirement but is supported by a computational medium with proven advantages over classical coordination baselines.
 
 Within the CGM framework, epistemic geometry is the necessary condition for alignment.
 

@@ -1,4 +1,4 @@
-# Gyroscopic ASI aQPU Kernel - Physics Test Results & Analysis
+# Gyroscopic ASI hQVM Kernel - Physics Test Results & Analysis
 
 ## Executive Summary
 
@@ -6,7 +6,7 @@
 
 **Atlas Size: 64.25 MB** (Ontology: 65,536 states | Epistemology: 16.7M transitions | Phenomenology: 256 masks)
 
-The Gyroscopic ASI aQPU Kernel has demonstrated structural properties aligning with quantum computing, quantum gravity, nuclear physics, and cosmology. The system successfully bridges three architectural layers:
+The Gyroscopic ASI hQVM Kernel has demonstrated structural properties aligning with quantum computing, quantum gravity, nuclear physics, and cosmology. The system successfully bridges three architectural layers:
 
 - **Kernel Layer** (24-bit geometric memory, 256-byte vocabulary)
 - **Atlas Layer** (65,536-state ontology, epistemology lookup table)

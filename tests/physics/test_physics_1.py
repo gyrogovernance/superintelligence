@@ -1,5 +1,5 @@
 """
-Physics tests 1: Conformance and correctness of the kernel physics.
+Physics tests 1: Conformance and correctness of the kernel dynamics.
 
 Strict baseline for:
 - State representation (pack/unpack)

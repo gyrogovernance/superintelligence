@@ -1,11 +1,11 @@
 ---
-description: Read project specs before implementing gyroscopic / aQPU features
+description: Read project specs before implementing gyroscopic / hQVM features
 alwaysApply: true
 ---
 
 # Read Specs Before Guessing
 
-When working on gyroscopic llama.cpp, attention compression, KV cache, percolation, or aQPU physics — **read the specs first** whenever intent, scope, or implementation approach is unclear.
+When working on gyroscopic llama.cpp, attention compression, KV cache, percolation, or hQVM physics — **read the specs first** whenever intent, scope, or implementation approach is unclear.
 
 ## Canonical sources (in order)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-aqpu_wavefunction_1.py
-aQPU wavefunction holonomy diagnostics.
+hqvm_wavefunction_1.py
+hQVM wavefunction holonomy diagnostics.
 
 Structural principles (corrected):
 - CS (GENE_Mic/0xAA) = reference frame, not a state in Ω
@@ -824,7 +824,7 @@ def run_chirality_preservation(omega: list[int]) -> None:
 
     q_total = q_word6_for_items(canonical)
     print(f"  Canonical word cumulative q-transport: 0x{q_total:02X} = {q_total}")
-    print(f"  Chirality transport law: chi(U_W|s>) = chi(|s>) XOR q(W) = chi(|s>)")
+    print(f"  Chirality transport rule: chi(U_W|s>) = chi(|s>) XOR q(W) = chi(|s>)")
     print()
 
     # Verify for all states
@@ -970,7 +970,7 @@ def run_probe_suite(omega: list[int]) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    print("aQPU Wavefunction Holonomy Diagnostic")
+    print("hQVM Wavefunction Holonomy Diagnostic")
     print("=" * 9)
     print(f"GENE_MIC_S (CS frame):  0x{GENE_MIC_S:02X}")
     print(f"GENE_MAC_REST (carrier): 0x{GENE_MAC_REST:06X}  NOT CS")

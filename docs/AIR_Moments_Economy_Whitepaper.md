@@ -270,7 +270,7 @@ The task is to build, deploy, and inhabit this capacity under civil discipline.
 
 ## Appendix: Key Definitions
 
-**Common Source Moment (CSM):** The physically grounded total settlement envelope derived from the caesium-133 atomic standard and the finite verification space of the aQPU Kernel.
+**Common Source Moment (CSM):** The physically grounded total settlement envelope derived from the caesium-133 atomic standard and the finite verification space of the hQVM Kernel.
 
 **Moment-Unit (MU):** The accounting unit used inside the Moments Economy. It is mapped to international dollars as a legibility and fair-rate convention.
 
@@ -284,7 +284,7 @@ The task is to build, deploy, and inhabit this capacity under civil discipline.
 
 **Fair-Use Governance:** The governance of physical constraints through scoped rules, local priorities, ecological limits, and production coordination, rather than exclusionary price escalation.
 
-**aQPU:** One of the foundational components of the Gyroscopic infrastructure, providing the physical and verification grounding through which Moments become replayable and accountable.
+**hQVM:** One of the foundational components of the Gyroscopic infrastructure, providing the physical and verification grounding through which Moments become replayable and accountable.
 
 **Gyroscopic runtime:** One of the foundational components of the Gyroscopic infrastructure, supporting the relation-structure through which coordination can be organized across participants and programmes.
 

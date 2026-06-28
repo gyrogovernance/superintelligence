@@ -12,6 +12,18 @@
 
 ---
 
+## [v2.0.9-Holonomic_QVM] – 2026-06-26 to 2026-06-28
+
+The Gyroscopic kernel is now positioned as a **Holonomic Quantum Virtual Machine (hQVM)** within the Holonomic Quantum Computing paradigm (Zanandi and Rasetti 1999; Pachos et al. 2000). Computation proceeds via geometric phases (monodromies) of closed SE(3) spinorial loops on a reversible GF(2) finite-state machine. This grounding connects the kernel's native algebra to the established HQC literature on geometric gate realization and holonomy-based universality.
+
+- **aQPU → hQVM** across the entire repository (code, docs, filenames, tests)
+- **HQC positioning** added to core specifications and key reports, establishing that the hQVM instantiates HQC geometric structure on standard silicon
+- **Three Computational Charts** (Carrier, Chirality, Wavefunction) and **Code-first hierarchy** (CODE → ALGEBRA → WAVEFUNCTION) formalized as normative specification text
+- **Wavefunction chart** added to Specs Formalism and QuBEC Theory as the chart where holonomic phases and eigenspace decomposition are manifest
+- All specifications, SDK documents, theory documents, reports, AIR application-layer documents, source code, and test suites updated consistently
+
+---
+
 ## [v2.0.8-Gyroscopic] – 2026-04-19 to 2026-06-25
 
 3 months of iterative Refinement and Consolidation of Concepts and Documentation:
@@ -20,40 +32,40 @@ docs\Gyroscopic_ASI_Specs.md
 docs\Gyroscopic_ASI_SDK_Quantum_Computing.md
 docs\theory\QuBEC_Theory.md
 docs\theory\Gyroscopic_ASI_Specs_Formalism.md
-docs\reports\aQPU_Features_Report.md
+docs\reports\hQVM_Features_Report.md
 
-A new aQPU Kernel API has also been developed, which simulates a wavefunction:
-docs\references\Analysis_aQPU_Wavefunction.md
+A new hQVM Kernel API has also been developed, which simulates a wavefunction:
+docs\references\Analysis_hQVM_Wavefunction.md
 
 Long Update of Gyroscopic.llama.cpp implementation (a lot has been tried out, others dismissed, the code has changed in many different ways and keeps changing):
 src\tools\gyroscopic\
 
 Not yet fully realized.
 
-A lot of progress has been made in using aQPU for our research in subatomic physics and on analyzing gravity (these files are reference - the work of our science experiments lives at https://github.com/gyrogovernance/science):
-docs\references\experiments\aqpu_gravity_analysis_1.py
-docs\references\experiments\aqpu_gravity_analysis_2.py
-docs\references\experiments\aqpu_gravity_analysis_3.py
-docs\references\experiments\aqpu_gravity_analysis_4.py
-docs\references\experiments\aqpu_gravity_analysis_5.py
-docs\references\experiments\aqpu_gravity_analysis_6.py
-docs\references\experiments\aqpu_gravity_analysis_7.py
-docs\references\experiments\aqpu_gravity_analysis.txt
-docs\references\experiments\aqpu_gravity_common.py
-docs\references\experiments\aqpu_gravity_runner.py
-docs\references\experiments\aqpu_wavefunction_1.py
-docs\references\experiments\aqpu_wavefunction_2.py
+A lot of progress has been made in using hQVM for our research in subatomic physics and on analyzing gravity (these files are reference - the work of our science experiments lives at https://github.com/gyrogovernance/science):
+docs\references\experiments\hqvm_gravity_analysis_1.py
+docs\references\experiments\hqvm_gravity_analysis_2.py
+docs\references\experiments\hqvm_gravity_analysis_3.py
+docs\references\experiments\hqvm_gravity_analysis_4.py
+docs\references\experiments\hqvm_gravity_analysis_5.py
+docs\references\experiments\hqvm_gravity_analysis_6.py
+docs\references\experiments\hqvm_gravity_analysis_7.py
+docs\references\experiments\hqvm_gravity_analysis.txt
+docs\references\experiments\hqvm_gravity_common.py
+docs\references\experiments\hqvm_gravity_runner.py
+docs\references\experiments\hqvm_wavefunction_1.py
+docs\references\experiments\hqvm_wavefunction_2.py
 docs\references\Analysis_Compact_Geometry.md
 docs\references\Analysis_Gravity_Note.md
 docs\references\Analysis_Gravity.md
 
 Latest leads we follow:
 - Shannon's Information Theory Bridges,
-- Simon's Quantum Algorithm native aQPU implementation,
+- Simon's Quantum Algorithm native hQVM implementation,
 - Percolation Theory
 
 Other things we experimented:
-- Integer factorization and the discrete logarithm problem (DLP) for Post-Quantum Cryptography (PQC) and Fault-Tolerant Quantum Engineering using Gyroscopic ASI theory and aQPU Quantum Physical Features as Primitives.
+- Integer factorization and the discrete logarithm problem (DLP) for Post-Quantum Cryptography (PQC) and Fault-Tolerant Quantum Engineering using Gyroscopic ASI theory and hQVM Quantum Physical Features as Primitives.
 
 ---
 
@@ -209,7 +221,7 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
   - decode bridge full-step throughput: **84,493 tokens/s** at batch 16
 
 ### Scope outcome
-- Established the first live **AI usage stress test** where aQPU algebra directly replaces classical decision math at real model control surfaces.
+- Established the first live **AI usage stress test** where hQVM algebra directly replaces classical decision math at real model control surfaces.
 - Confirmed that the architecture can steer:
   - boundary formation
   - token selection
@@ -333,7 +345,7 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 ## [v2.0.2-Gyroscopic runtime] – 2026-03-14
 
 ### Added
-- Added the first complete Gyroscopic runtime intelligence layer as an Ω-native multicellular model built on the aQPU router and QuBEC medium.
+- Added the first complete Gyroscopic runtime intelligence layer as an Ω-native multicellular model built on the hQVM router and QuBEC medium.
 - Added `src/tools/gyrograph/core.py` with:
   - cell pool allocation and lifecycle
   - Ω-native per-cell state storage
@@ -425,7 +437,7 @@ This is a **correctness proof**, not a speed benchmark. The 3× runtime overhead
 
 ## [v2.0.1-Gyroscopic_ASI_Quantum] – 2026-03-12
 
-Completed the compact Ω/shell program for the aQPU Kernel and integrated the remaining exact algebraic surfaces into the SDK. This release closes the implementation of the compact physical chart stack and its exact structural verification layer.
+Completed the compact Ω/shell program for the hQVM Kernel and integrated the remaining exact algebraic surfaces into the SDK. This release closes the implementation of the compact physical chart stack and its exact structural verification layer.
 
 ### Program Definition Finalized
 
@@ -517,7 +529,7 @@ No namespace expansion was introduced beyond the agreed `StateOps` / `MomentOps`
 
 ### Testing
 
-### Added Testing Program: `tests/test_aQPU_SDK_2.py`
+### Added Testing Program: `tests/test_hQVM_SDK_2.py`
 
 Implemented the exact second-stage SDK verification suite covering the compact Ω/shell layer end-to-end.
 
@@ -613,7 +625,7 @@ Added tests validating Gyroscopic native/runtime parity for:
 
 ---
 
-### Verified Results from `test_aQPU_SDK_2.py`
+### Verified Results from `test_hQVM_SDK_2.py`
 
 The completed second-stage suite established:
 
@@ -647,11 +659,11 @@ The completed second-stage suite established:
 
 ### Validation Status
 
-- `tests/test_aQPU_SDK_2.py`: **43/43 passed**
+- `tests/test_hQVM_SDK_2.py`: **43/43 passed**
 
 This stage completed the exact SDK/runtime verification of the compact Ω-chart and shell algebra before the later discovery-oriented structural test expansion.
 
-#### `tests/test_aQPU_SDK_3.py`
+#### `tests/test_hQVM_SDK_3.py`
 
 Added and completed the exact compact-physics verification and discovery suite.
 
@@ -755,7 +767,7 @@ The completed suite establishes the following exact executable results.
 
 ### Validation Status
 
-- `tests/test_aQPU_SDK_3.py`: **33/33 passed**
+- `tests/test_hQVM_SDK_3.py`: **33/33 passed**
 - Full compact Ω/shell implementation delta: **complete**
 - No kernel transition law changes were required
 - No C/OpenCL runtime changes were required for this release
@@ -764,7 +776,7 @@ The completed suite establishes the following exact executable results.
 
 ### Net Result
 
-This release completes the executable compact-physics layer of the aQPU architecture:
+This release completes the executable compact-physics layer of the hQVM architecture:
 
 - exact Ω-chart
 - exact Ω-signature algebra
@@ -775,7 +787,7 @@ This release completes the executable compact-physics layer of the aQPU architec
 - exact even/odd sector factorization
 - exact shell spectral law
 
-The aQPU now has a fully implemented and rigorously tested compact algebraic runtime from `Carrier24` down through `Omega12`, `Chirality6`, and `Shell7`.
+The hQVM now has a fully implemented and rigorously tested compact algebraic runtime from `Carrier24` down through `Omega12`, `Chirality6`, and `Shell7`.
 
 ---
 
@@ -783,7 +795,7 @@ The aQPU now has a fully implemented and rigorously tested compact algebraic run
 
 ### Summary
 
-Major architecture revision. The kernel transitions from a 65,536-state ontology with 256 distinct masks and precomputed atlas artifacts to a compact 4,096-state spinorial kernel with 64 masks, 4 family-controlled complement phases, dual horizons, intrinsic K₄ gate geometry, and a full algebraic quantum processing unit (aQPU) SDK. The governance measurement layer, AIR program format, and application runtime are preserved and updated for the new kernel physics. All prior test suites are replaced by a unified verification chain of 185 aQPU tests, 6 physics test files, and 4 moments test files: all passing.
+Major architecture revision. The kernel transitions from a 65,536-state ontology with 256 distinct masks and precomputed atlas artifacts to a compact 4,096-state spinorial kernel with 64 masks, 4 family-controlled complement phases, dual horizons, intrinsic K₄ gate geometry, and a full Holonomic Quantum Virtual Machine (hQVM) SDK. The governance measurement layer, AIR program format, and application runtime are preserved and updated for the new kernel physics. All prior test suites are replaced by a unified verification chain of 185 hQVM tests, 6 physics test files, and 4 moments test files: all passing.
 
 ---
 
@@ -864,7 +876,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 ### Algebraic Quantum Structure (New Appendix G)
 
 #### Added
-- **§G.1 – aQPU definition**: unitarity, spinorial closure (order 4), non-cloning, complementarity (128-way shadow as SO(3)/SU(2) double cover), entanglement compatibility, constant density.
+- **§G.1 – hQVM definition**: unitarity, spinorial closure (order 4), non-cloning, complementarity (128-way shadow as SO(3)/SU(2) double cover), entanglement compatibility, constant density.
 - **§G.2 – Dual horizons**: full specification of complement and equality horizons, structural necessity, holographic ratio, chirality transport law, chirality spectrum with binomial distribution.
 - **§G.3 – Four intrinsic gates**: horizon-preserving condition, gate bytes, gate definitions (S, C, F, id), K₄ Cayley table, gate action on horizons with fixed-point/two-cycle census, CGM stage correspondence, K₄ orbit stratification on Ω.
 - **§G.4 – Hidden variable and observability**: archetype as structural hidden variable, visibility at complement horizon, concealment at equality horizon.
@@ -934,13 +946,13 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 
 #### Added
 - **Physics test chain** (6 files): `test_physics_1.py` through `test_physics_6.py` — state representation, transcription, intron decomposition, mask expansion, self-dual [12,6,2] code, spinorial transition, bijectivity, shadow count, BFS/Ω topology, holographic ratio, affine algebra, spinorial 4-cycle, commutator holonomy, CGM constants bridge, DOF doubling law, depth-4 fiber bundle, intrinsic K₄ emergence.
-- **aQPU test chain** (5 files): `test_aQPU_1.py` through `test_aQPU_4.py`, `test_aQPU_SDK_1.py` — dual horizons, K₄ gates, chirality transport, commutativity rate, Hilbert lift (Bell pairs, CHSH at Tsirelson bound, teleportation, stabilizers, contextuality, MUBs), permutation structure, row-class theorem, channel capacity, exact uniformization, error/tamper detection, six-qubit register, operator family, non-Clifford certification, computational advantages, SDK/Gyroscopic C engine verification.
+- **hQVM test chain** (5 files): `test_hQVM_1.py` through `test_hQVM_4.py`, `test_hQVM_SDK_1.py` — dual horizons, K₄ gates, chirality transport, commutativity rate, Hilbert lift (Bell pairs, CHSH at Tsirelson bound, teleportation, stabilizers, contextuality, MUBs), permutation structure, row-class theorem, channel capacity, exact uniformization, error/tamper detection, six-qubit register, operator family, non-Clifford certification, computational advantages, SDK/Gyroscopic C engine verification.
 - **Moments tests** (4 files): `test_moments_physics_1.py`, `test_moments_physics_2.py`, `test_moments_economy.py`, `test_moments_genealogy.py` — 6-spin isomorphism, exact Clifford unitaries, 8192-element operator family, depth-4 frame quotient, stabilizer structure, economic/genealogy certification.
 - **Holography tests** (3 files): `test_holography.py`, `test_holography_2.py`, `test_holography_3.py`.
 - **Measurement tests**: `test_measurement.py` — governance ledgers, Hodge decomposition, aperture.
 - **App/CLI tests**: `test_app.py`, `test_aci_cli.py`, `test_tools.py`.
 - **Test utilities**: `_physics_utils.py`, `_moments_utils.py`, `_research_utils.py`, `conftest.py`.
-- **Test status**: **all tests passing** (185 aQPU + physics suite + moments suite + holography + measurement + app).
+- **Test status**: **all tests passing** (185 hQVM + physics suite + moments suite + holography + measurement + app).
 
 #### Removed
 - Legacy test references to `ontology.npy`, `epistemology.npy`, `phenomenology.npz`.
@@ -955,7 +967,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - `docs/Gyroscopic_ASI_Specs_Formalism.md` — byte formalism, depth-4 closure, aperture quantization, hardware alignment.
 - `docs/Gyroscopic_ASI_SDK_Quantum_Computing.md` — Quantum Computing SDK specification.
 - `docs/Gyroscopic_ASI_Holography.md` — holographic algorithm formalization.
-- `docs/Gyroscopic_ASI_Implications.md` — aQPU implications and potential.
+- `docs/Gyroscopic_ASI_Implications.md` — hQVM implications and potential.
 - `docs/Gyroscopic_ASI_SDK_Network.md` — multi-agent holographic network SDK.
 - `docs/Gyroscopic_ASI_SDK_Holographic_Web.md` — holographic web SDK.
 - `docs/Gyroscopic_ASI_Substrate_Specs.md` — physical memory/substrate specification.
@@ -964,7 +976,7 @@ Major architecture revision. The kernel transitions from a 65,536-state ontology
 - `docs/AIR_Moments_Economy_Specs.md` — Moments Economy architecture.
 - `docs/AIR_Moments_Genealogies_Specs.md` — Moments Genealogies specification.
 - `docs/reports/Physics_Tests_Report.md` — physics verification report.
-- `docs/reports/aQPU_Tests_Report_1.md` — aQPU verification report (185 tests).
+- `docs/reports/hQVM_Tests_Report_1.md` — hQVM verification report (185 tests).
 - `docs/reports/Moments_Tests_Report.md` — moments verification report (88 tests).
 - `docs/reports/Alignment_Measurement_Report.md` — governance balance metrics.
 - `docs/reports/Gyroscopic_Generation_Report.md` — native backend verification and benchmarks.
@@ -1945,7 +1957,7 @@ This release marks the formal consolidation of the **Gyroscopic Holographic Coor
 We established a "common language" protocol where the kernel and model communicate via discrete bytes rather than arbitrary activation energies. The result is a closed-loop system where the kernel's geometry steers inference without destroying fluency, backed by extensive testing and 66 passing pytests.
 
 ### Starting Point
-We began with `test_gyro_2.py`, an experimental script coupling the Gyroscopic ASI aQPU Kernel kernel to a transformer. The kernel produced masks over hidden dimensions, applied them to token representations, and extracted bytes from activations to advance kernel state. Multiple projection modes existed (circular, code, wedge, holographic, dynamic), but the coupling was ad-hoc and the two systems lacked a shared protocol.
+We began with `test_gyro_2.py`, an experimental script coupling the Gyroscopic ASI hQVM Kernel kernel to a transformer. The kernel produced masks over hidden dimensions, applied them to token representations, and extracted bytes from activations to advance kernel state. Multiple projection modes existed (circular, code, wedge, holographic, dynamic), but the coupling was ad-hoc and the two systems lacked a shared protocol.
 
 ### What Failed
 
@@ -2132,7 +2144,7 @@ Successfully transitioned from broad "holonomy astronomy" to targeted **Mechanis
 *   **Interface Calibration:** Compared `low8` ($token\_id \& 0xFF$) vs. `bytes4` (Agent canonical) mappings. Found `low8` currently exhibits stronger mechanistic alignment with the model internals.
 *   **Metric Coupling:** Identified a **~3.5 gear ratio** between OLMo's activation metric and CGM's geometric constants ($\delta_{meas} \approx 0.055$ vs $\delta_{BU} \approx 0.195$), providing a baseline for metric calibration.
 
-**Status:** Decisive Pass. The Router is verified as a mechanistic MRI coil for the Transformer bulk. Next target: **Attention Berry Phase Analysis.**
+**Status:** Decisive Pass. The Kernel is verified as a mechanistic MRI coil for the Transformer bulk. Next target: **Attention Berry Phase Analysis.**
 
 ---
 
@@ -2371,7 +2383,7 @@ Revived and Updated Gyroscopic.
 ## [v1.2.2-SDK] – 2026-01-20
 
 ### Added
-- Added `docs\Gyroscopic_ASI_SDK_Holographic_Web.md` - The Holographic Web architecture specification for internet coordination. The document presents an alternative architecture where all internet coordination is expressed as paths through a finite, pre-computed geometric structure (the Gyroscopic ASI aQPU Kernel kernel), inverting the conventional relationship between applications and state to transform coordination into a closed mathematical structure with exact properties: determinism, reversibility, finite bounds, and intrinsic verifiability.
+- Added `docs\Gyroscopic_ASI_SDK_Holographic_Web.md` - The Holographic Web architecture specification for internet coordination. The document presents an alternative architecture where all internet coordination is expressed as paths through a finite, pre-computed geometric structure (the Gyroscopic ASI hQVM Kernel kernel), inverting the conventional relationship between applications and state to transform coordination into a closed mathematical structure with exact properties: determinism, reversibility, finite bounds, and intrinsic verifiability.
 
 ---
 ## [v1.2.2-SDK] – 2026-01-17
@@ -2502,7 +2514,7 @@ Revisiting equations for the Moments Economy.
 
 # v1.0 Release: Production-Ready Alignment Infrastructure Routing
 
-This release marks the first stable version of the Gyroscopic ASI aQPU Kernel, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
+This release marks the first stable version of the Gyroscopic ASI hQVM Kernel, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
 
 ## Core Achievement: Verified Deterministic Coordination
 
@@ -2529,7 +2541,7 @@ All 135 tests pass, providing exhaustive verification of the kernel's structural
 ## Complete Documentation Suite
 
 ### Technical Specifications
-- **Gyroscopic ASI aQPU Kernel - Kernel Specifications** (`docs/Gyroscopic_ASI_Specs.md`): Complete normative specification with conformance profiles, kernel physics, atlas artifacts, and governance measurement substrate
+- **Gyroscopic ASI hQVM Kernel - Kernel Specifications** (`docs/Gyroscopic_ASI_Specs.md`): Complete normative specification with conformance profiles, kernel physics, atlas artifacts, and governance measurement substrate
 - **Router Implications & Potential** (`docs/Gyroscopic_ASI_Implications.md`): Use cases, deployment scenarios, and technical research directions
 - **Substrate: Physical Memory Specification** (`docs/Gyroscopic_ASI_Substrate_Specs.md`): Future development architecture for physical memory implementation
 
@@ -2649,7 +2661,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 * Documented complete operational runtime including Coordinator, tools, and audit logs
 * Consolidated build procedures and reference helpers into appendices
 * Fixed section numbering and cross-references throughout
-* See [Gyroscopic ASI aQPU Kernel - Kernel Specification](/docs/Gyroscopic_ASI_Specs.md) for complete normative specification
+* See [Gyroscopic ASI hQVM Kernel - Kernel Specification](/docs/Gyroscopic_ASI_Specs.md) for complete normative specification
 
 **General Corrections & Improvements**
 * Improved integration between specification and implementation
@@ -2751,9 +2763,9 @@ Still working on the Specs and cleaning up the old codebase.
 ADDED: guides\GyroASI_Substrate_Specs.md
 This is a revision of an old study, and a refinement so it can match the overal GyroASI specifications, but also our Post-AGI Gyroscopic Global Governance framework.
 
-> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to Gyroscopic ASI aQPU Kernel. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. We may read our latest specs draft here: 
+> ⚠️ **NEWS:** The whole GyroASI development is in the process of being repurposed and renamed to Gyroscopic ASI hQVM Kernel. After extensive research and a lot of experiments we have concluded that ASI is not meant to be another model, but a routing mechanism. We may read our latest specs draft here: 
 
-📖 [Gyroscopic ASI aQPU Kernel - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
+📖 [Gyroscopic ASI hQVM Kernel - Preliminary Specs](/docs/Gyroscopic_ASI_Router.md)
 
 ---
 

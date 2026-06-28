@@ -54,42 +54,42 @@ Modern AI treats the computer as a passive engine for evaluating frozen paramete
 * Intelligence is stored in live occupation and resonance.
 * The machine is the active substrate, making static parameters unnecessary.
 * Inference is not a computed score or a probabilistic guess; it is the physical gyration itself.
-* The exact XOR crossover, where the passive past constrains the mutated present to commit the future, is the native act of intelligence.
+* The XOR crossover, where the passive past constrains the mutated present to commit the future, is the native act of intelligence.
 
 This fundamental shift transforms training, deployment, and optimization. The result is not merely a language model, but a **universal computational condenser**. Because all scientific and industrial domains eventually become computational artifacts, this architecture can index, compress, and reorganize the core structure of science, engineering, governance, and digital infrastructure.
 
 ---
 
-# ⚙️ Gyroscopic AGI/ASI aQPU Kernel
+# ⚙️ Gyroscopic AGI/ASI hQVM Kernel
 
-A Compact Algebraic Quantum Processing Unit for post-AGI coordination. Deterministic, byte-driven, and runs on ordinary hardware.
+A Compact Holonomic Quantum Virtual Machine (hQVM) for post-AGI coordination. Byte-driven, deterministically replayable, and runs on ordinary hardware.
 
 > **Verified:** 
->> Quantum Advantage, Holographic Compression, and Universal Quantum Computation do not require a multi-million-dollar cryogenic chandelier. They are fundamental geometric properties of discrete information processing that can run on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
+>> Algebraic quantum structure, holographic compression, and universal quantum computation ingredients do not require a multi-million-dollar cryogenic chandelier. They are geometric properties of discrete information processing on standard silicon. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
 >>>**Note:** 
->>>>Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics to simulate continuous physical quantum systems. This project does not belong to those categories. **Gyroscopic** is the infrastructure: an exact, deterministic substrate on finite Ω using strict integer logic over finite fields. The **aQPU** routes bytes on that substrate; the **Gyroscopic runtime** is the multicellular QCA execution layer for AI workloads.
+>>>>Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics to simulate continuous physical quantum systems. This project does not belong to those categories. **Gyroscopic** is the infrastructure. It is an exact integer substrate on finite Ω using strict integer logic over finite fields. The **hQVM** routes bytes on that substrate by computing via the geometric phases of closed loops. The **Gyroscopic runtime** is the multicellular QCA execution layer for AI workloads.
 
 Today, AI often acts as an opaque pipeline: information and decisions flow through systems that are hard to audit. The kernel makes coordination auditable: given a published append-only log of bytes, anyone can recompute the same state trajectory and check what was recorded.
 
-The **aQPU** (algebraic Quantum Processing Unit) is a compact, finite-state kernel that turns byte logs into a single, reproducible state. It delivers proven computational advantages in execution speed, structural compression, and intrinsic tamper detection. Two parties with the same log always get the identical state; no trusted server or timestamp is required. It uses exact integer arithmetic (no analog qubits, no probabilistic hardware), and its design intrinsically satisfies the foundational axioms of quantum computation (unitarity, non-cloning, contextuality, and complementarity) over a finite algebraic field. This has been verified by exhaustive tests across its entire state space.
+The **hQVM** (Holonomic Quantum Virtual Machine) is a compact, finite-state kernel that turns byte logs into a single, reproducible state. It delivers proven computational advantages in execution speed, structural compression, and intrinsic tamper detection. Two parties with the same log always get the identical state without requiring a trusted server or timestamp. It uses exact integer arithmetic and does not rely on analog qubits or hardware noise. Its design intrinsically satisfies the foundational axioms of quantum computation through holonomic loops (Zanardi and Rasetti 1999; Pachos et al. 2000), including unitarity, non-cloning, contextuality, and complementarity, over a finite algebraic field. Where HQC literature realises these gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as an exact GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware. Exhaustive tests across its entire state space have verified this.
 
 The state space is fixed and small: **4,096 reachable states**, determined by a compact representation (three axes, left/right handedness, and six degrees of freedom). Any sequence of events (each represented as a byte) drives the state along a unique, reproducible path through this manifold. The kernel does not use learned models. It scales by fixed geometry rather than learned approximation.
 
-The kernel's computational medium is **QuBEC** (Quantum Bose-Einstein Condensate): a condensed computational state with six internal binary orientation modes (dipoles), a four-phase spinorial gauge structure, and exact ensemble stochasticity induced by deterministic byte dynamics. Together they replace costly continuous approximation with exact integer algebra on standard CPUs and GPUs, without qubits, cryogenics, or probabilistic hardware noise.
+The kernel's computational medium is **QuBEC** (Quantum Bose-Einstein Condensate): a condensed computational state with six internal binary orientation modes (dipoles), a four-phase spinorial gauge structure, and intrinsic ensemble stochasticity induced by the byte law. One step yields a 128-state future cone; two steps yield uniformization over all 4,096 reachable states. Together they replace costly continuous approximation with integer algebra on standard CPUs and GPUs, without qubits, cryogenics, or probabilistic hardware noise.
 
 > For orientation, see the [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md). Normative specs are listed under **Core Specifications** in the Documentation section below.
 
 ---
 
-**Gyroscopic runtime** is the multicellular AI runtime built on the aQPU router. It organizes Ω into a resonance-defined cell pool for runtime intelligence and structural observability.
+**Gyroscopic runtime** is the multicellular AI runtime built on the hQVM router. It organizes Ω into a resonance-defined cell pool for runtime intelligence and structural observability.
 
 It provides:
 
-- **Quantum Cellular Automaton execution:** Cells evolve under the exact aQPU byte law, consuming runtime input as 4-byte words to navigate the discrete quantum state space.
-- **Local structural memories per cell:** Rolling chirality and shell memories providing exact spectral views (Walsh-Hadamard and shell Krawtchouk surfaces) without floating-point approximations.
+- **Quantum Cellular Automaton execution:** Cells evolve under the hQVM byte law, consuming runtime input as 4-byte words to navigate the holonomic state space.
+- **Local structural memories per cell:** Rolling chirality and shell memories providing spectral views (Walsh-Hadamard and shell Krawtchouk surfaces) without floating-point approximations.
 - **Resonance-defined graph structure:** Dynamic graph topology induced by resonance profiles over quantum-native observables (e.g., chirality, shell, state coincidence).
 - **SLCP reports and graph queries:** Exact Spectral Light-Cone Parametrization records and resonance-based graph queries, providing structural AI orchestration across four bridge domains: Applications, Databases, Networks, and Transformers.
-- **Real-time AI Control:** Uses exact structural state to dynamically manage LLM resource allocation (e.g., adjusting context patch sizes based on the exact thermodynamic state of the computation).
+- **Real-time AI Control:** Uses structural state to dynamically manage LLM resource allocation (e.g., adjusting context patch sizes based on the thermodynamic state of the computation).
 
 > See **Core Specifications** below for the runtime document.
 
@@ -97,38 +97,38 @@ It provides:
 
 ## 🔬 Why This Matters for Computer Science
 
-- **Processing**: Deterministic stream-processing with exact replay, compact state updates, and composable operator signatures, suitable for event sourcing, reproducible workflows, and governance-grade logs.
+- **Processing**: Replayable stream-processing with deterministic recomputation, compact state updates, and composable operator signatures, suitable for event sourcing, reproducible workflows, and governance-grade logs.
 - **Speed**: Byte words compile into operators, commutativity resolves through compact invariants, and the full reachable geometry is covered in only 2 steps, reducing structural work compared to classical search and replay.
-- **Security**: Tamper-aware logs, exact divergence localization, replay-based verification, and compact provenance surfaces, grounded in a finite, enumerable state space with built-in error detection.
+- **Security**: Tamper-aware logs, divergence localization, replay-based verification, and compact provenance surfaces, grounded in a finite, enumerable state space with built-in error detection.
 - **Compression**: Structural compression through compact state geometry, holographic boundary dictionaries, and operator compilation, enabling lossless but storage-efficient coordination records.
-- **Networks**: Replay-based synchronization, shared deterministic moments, and exact branch comparison across distributed participants using shared coordination state computed from append-only logs.
-- **Machine Learning**: Eliminates structural computational bottlenecks by substituting floating-point heuristics with exact algebraic selection. Provides an interpretable finite latent layer, exact spectral primitives, and an audit-friendly bridge with verifiable provenance over model I/O traces.
+- **Networks**: Replay-based synchronization, shared replayable moments, and branch comparison across distributed participants using shared coordination state computed from append-only logs.
+- **Machine Learning**: Eliminates structural computational bottlenecks by substituting floating-point heuristics with algebraic selection. Provides an interpretable finite latent layer, spectral primitives, and an audit-friendly bridge with verifiable provenance over model I/O traces.
 
 ---
 
-**Verified Computational Advantages**
+**Verified Results**
 
-All results below are verified by exhaustive computation over the entire reachable state space and all 256 byte operations. They are strict structural invariants, not statistical estimates.
+All results below are verified by exhaustive computation over the entire reachable state space and all 256 byte operations. Oracle/query separations (Deutsch–Jozsa, Bernstein–Vazirani, hidden subgroup on the chirality register) are documented in the [hQVM Features Report](docs/reports/hQVM_Features_Report.md) §9a.
 
 | Verified result | What it means |
 |-----------------|---------------|
-| **499 exhaustive tests passing** | The full verification suite covers the entire reachable state space and all 256 byte operations, totalling over 1 million exact checks. |
-| **4,096 reachable states** | The full operational manifold from rest is finite, exact, and exhaustively testable. |
-| **2-step exact uniformization** | Any state in the reachable manifold can spread over the entire state space in exactly 2 byte steps, with perfect 16-to-1 multiplicity. |
-| **128 distinct next states per byte layer** | From any fixed state, the 256-byte alphabet projects to exactly 128 distinct next states with exact 2-to-1 symmetry. |
-| **Depth ≤ 2 witness for every reachable state** | Every reachable state can be synthesized from rest with a byte witness of depth 0, 1, or 2. |
-| **Exact compiled operator signatures** | Byte words collapse into exact affine signatures that can be composed and applied directly without replaying the full word. |
-| **Constant-time commutativity test** | Two byte operations commute iff they share the same 6-bit topological `q-class`, making commutativity an O(1) structural lookup. |
-| **Native spectral register** | The kernel exposes a logical register with exact Walsh-Hadamard and shell spectral structure for 64-dimensional state analysis. |
-| **Holographic boundary relation** | The state geometry satisfies |H|² = |Ω| = 64² = 4,096, enabling structural compression and compact boundary reasoning. |
-| **Universal quantum ingredients** | The verified kernel is an exact algebraic quantum system supporting stabilizer structure, entangling gate behavior, contextuality, teleportation-compatible lifts, and a native non-Clifford resource over GF(2). |
-| **Standard silicon efficiency** | Achieves 1.26 billion exact operations per second and 180 million multicellular byte transitions per second on a commodity mini-PC. |
-| **Zero-transcendental AI control** | Successfully replaced `softmax` and `cosine similarity` with exact integer algebra at the decision surfaces of a live 1B-parameter language model without degrading language coherence. |
-| **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks; structured `P_Q` and residual `D_Q` components are evaluated through native transforms and ordinary dot-product contraction where needed. |
+| **499 tests passing** | Exhaustive coverage of the reachable state space and all 256 byte operations (over 10⁶ exact checks). |
+| **4,096 reachable states** | Finite, exhaustively testable manifold from rest. |
+| **2-step uniformization** | All 4096 states reached in exactly 2 byte steps with 16-to-1 multiplicity. |
+| **128 next states per byte** | 256-byte alphabet projects to 128 distinct next states with 2-to-1 symmetry. |
+| **Depth ≤ 2 state synthesis** | Every reachable state has a byte witness of depth 0, 1, or 2. |
+| **Compiled operator signatures** | Byte words collapse into affine signatures that compose without replay. |
+| **O(1) commutativity test** | Commute iff same 6-bit q-class: one lookup. |
+| **Native spectral register** | Exact Walsh-Hadamard and shell spectral structure on a 64-dimensional register. |
+| **Holographic boundary** | \|H\|² = \|Ω\| = 64² = 4096; 8-bit state encoding (33% compression). |
+| **Universal holonomic ingredients** | Stabilizer structure, entangling gates, contextuality, teleportation lifts, non-Clifford δ_BU phase. |
+| **1.26B ops/s on commodity mini-PC** | Native throughput on standard silicon. |
+| **Zero-transcendental AI control** | Replaced softmax and cosine similarity with integer algebra in a live 1B-parameter LLM. |
+| **64-wide hybrid lowering** | External tensors tile into native 64-wide blocks with structured P_Q + residual D_Q contraction. |
 
-✅ **[aQPU Features Report](docs/reports/aQPU_Features_Report.md)** is the master catalog for all of the above and more. It inventories every verified quantum and physics feature with evidence source, verification tier (kernel pytest, science-repo executable, or formal manuscript), and experiment script where applicable. Use the summary table for headlines; use the Features Report when you need claim-level traceability across CHSH saturation, horizons, gates, wavefunction theorems, gravity invariants, and CGM modal structure.
+✅ **[hQVM Features Report](docs/reports/hQVM_Features_Report.md)** is the master catalog: every verified feature with evidence source, verification tier, and experiment script.
 
-**Integrity and Tamper Detection:** The kernel includes a built-in self-dual [12,6,2] code and exact algebraic provenance checks. Integrity misses are structurally classified rather than opaque: substitutions reduce to shadow partners, adjacent swaps reduce to shared `q-class`, and deletions reduce to specific stabilizer conditions on the horizons.
+**Integrity and Tamper Detection:** Built-in self-dual [12,6,2] code with provenance checks. Substitutions reduce to shadow partners, adjacent swaps to shared q-class, deletions to horizon stabilizer conditions.
 
 ---
 
@@ -158,7 +158,7 @@ Contributors map their work to four governance capacities, which act as a career
 
 Moments Economy is part of Gyroscopic Collective Superintelligence broader framework. It extends the same replayable coordination infrastructure into economic distribution, making money a function of verified coordination capacity rather than debt issuance.
 
-A fixed total supply of **7.94 × 10²⁶ Moment-Units (MU)**, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the aQPU. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base. Its native commodity is the **AI Generated Token**: a verified inference event from the intersection of human experience and AI processing. No debt issuance, no discretionary monetary policy. Every settlement is a replayable, verifiable history.
+A fixed total supply of **7.94 × 10²⁶ Moment-Units (MU)**, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the hQVM. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base. Its native commodity is the **AI Generated Token**: a verified inference event from the intersection of human experience and AI processing. No debt issuance, no discretionary monetary policy. Every settlement is a replayable, verifiable history.
 
 CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person, tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
 
@@ -170,8 +170,8 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 
 ### Start Here
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
-- 🔮 [aQPU Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
-- ✅ [aQPU Features Report](docs/reports/aQPU_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
+- 🔮 [hQVM Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
+- ✅ [hQVM Features Report](docs/reports/hQVM_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
 - 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
 - 🧪 [QuBEC Climate Control Brief](docs/theory/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
 - 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
@@ -189,14 +189,6 @@ Read in layer order: **Kernel** → **SDK** → **QuBEC Theory** → **Runtime**
 | 📐 | [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md) | Proofs, byte formalism, and formal lemmas | Formal verification |
 | 🌐 | [Holographic Algorithm Formalization](docs/theory/Gyroscopic_ASI_Holography.md) | State-space encoding and holographic dictionaries | Encoding and compression |
 
-The SDK is the API reference. QuBEC Theory is the textbook. They are complementary: programmers need the SDK contract; reviewers need the forcing theorems and climate algebra in Theory.
-
-- 📖 [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md)
-- 🧠 [Quantum Computing SDK](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md)
-- 🧪 [QuBEC Theory](docs/theory/QuBEC_Theory.md)
-- ⚙️ [Gyroscopic Runtime Specification](docs/Gyroscopic_ASI_Runtime_Specs.md)
-- 📐 [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md)
-- 🌐 [Holographic Algorithm Formalization](docs/theory/Gyroscopic_ASI_Holography.md)
 
 ### Extensions
 - 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
@@ -217,15 +209,15 @@ Core quantum SDK contract is in the table above. Extension specs:
 
 ### Test Reports
 
-All kernel properties are verified by exhaustive test suites (499 tests, all passing) covering the full state space, operator algebra, and SDK surfaces.
+All kernel properties verified by exhaustive test suites (499 tests, all passing).
 
-- ✅ [aQPU Features Report](docs/reports/aQPU_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
+- ✅ [hQVM Features Report](docs/reports/hQVM_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
 - 📊 [Physics Tests Report](docs/reports/Physics_Tests_Report.md) - Kernel state verification
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
-- 📊 [aQPU Verification Report](docs/reports/aQPU_Tests_Report_1.md) - Algebraic properties verified (185 tests)
-- 📊 [aQPU Verification Report II](docs/reports/aQPU_Tests_Report_2.md) - Extended kernel and SDK tests (122 tests)
+- 📊 [hQVM Verification Report](docs/reports/hQVM_Tests_Report_1.md) - Algebraic properties verified (185 tests)
+- 📊 [hQVM Verification Report II](docs/reports/hQVM_Tests_Report_2.md) - Extended kernel and SDK tests (122 tests)
 - 📊 [QuBEC Climate Tests Report](docs/reports/QuBEC_Climate_Tests_Report.md) - Climate helper and transport diagnostics validation
-- 📊 [aQPU Speed Tests Report](docs/reports/aQPU_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
+- 📊 [hQVM Speed Tests Report](docs/reports/hQVM_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
 - 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
 ### Supporting Theory
@@ -257,7 +249,7 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/tools/gyroscopic/` : Gyroscopic kernel backend and runtime surfaces; llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
 - `docs/` : Specifications, reports, and supporting theory
-- `tests/` : Exhaustive verification suites for kernel physics, aQPU properties, SDK surfaces, and governance measurement
+- `tests/` : Exhaustive verification suites for kernel physics, hQVM properties, SDK surfaces, and governance measurement
 
 ---
 
@@ -271,7 +263,7 @@ The public SDK surface is exposed through `src/sdk.py`. The native compute backe
 
 The Python SDK surface is organized into `ClimateOps` (QuBEC climate helpers) and `RuntimeOps` (native kernel entry points) namespaces, aligned with the Quantum Computing SDK specification. See `src/sdk.py` and `src/tools/gyroscopic/ops.py`.
 
-Native backend note: prebuilt Windows binaries are included for convenience. On macOS and Linux, the native backend builds automatically on first run when standard compiler tooling is available. If native build is unavailable, the exact Python fallback remains functional.
+Native backend note: prebuilt Windows binaries are included for convenience. On macOS and Linux, the native backend builds automatically on first run when standard compiler tooling is available. If native build is unavailable, the Python fallback remains functional.
 
 For native build details, see:
 - `src/tools/gyroscopic/` (native backend sources and helpers)
@@ -352,10 +344,10 @@ MIT Licence - see [LICENSE](LICENSE) for details.
 ```bibtex
 @software{Gyroscopic_ASI_2026,
   author = {Basil Korompilias},
-  title = {Gyroscopic ASI aQPU Kernel},
+  title = {Gyroscopic ASI hQVM Kernel},
   year = {2026},
   url = {https://github.com/gyrogovernance/superintelligence},
-  note = {Deterministic routing kernel for Post-AGI coordination through physics-based state transitions and canonical observables}
+  note = {Holonomic Quantum Virtual Machine for Post-AGI coordination through physics-based state transitions and geometric loop computation}
 }
 ```
 

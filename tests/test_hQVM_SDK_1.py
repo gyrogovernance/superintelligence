@@ -35,7 +35,7 @@ from src.constants import (
     is_on_equality_horizon,
     is_on_horizon,
 )
-from tests.test_aQPU_1 import _bfs_omega
+from tests.test_hQVM_1 import _bfs_omega
 
 
 def _bytes_from_items(items: Iterable[int]) -> bytes:

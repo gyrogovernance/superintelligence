@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-aqpu_gravity_analysis_3.py
+hqvm_gravity_analysis_3.py
 
 Kernel-derived theorems for the gravitational coupling (exact Fractions):
 
@@ -43,7 +43,7 @@ from src.api import (
 )
 from src.constants import APERTURE_GAP, DELTA_BU, M_A, RHO
 
-from aqpu_gravity_common import (
+from hqvm_gravity_common import (
     C4_REF,
     G_meas,
     H_size,
@@ -115,7 +115,7 @@ def sigma_shell(w: int) -> dict[str, Fraction]:
 
 
 def holonomy_arch_path(micro_ref: int) -> list[int]:
-    """arch_shell along 8-step Z2 holonomy (aqpu_gravity_common convention)."""
+    """arch_shell along 8-step Z2 holonomy (hqvm_gravity_common convention)."""
     return [
         int(row["arch_shell"])
         for row in trace_word_steps(cycle_word_for_micro(micro_ref), micro_ref=micro_ref)[
@@ -265,7 +265,7 @@ def prove_odd_shell_krawtchouk(results: dict[int, dict]) -> None:
 
 
 def tau_cycle_per_delta_float_holonomy() -> float:
-    """Cross-check via aqpu_gravity_common.kappa_binom_step (float Delta)."""
+    """Cross-check via hqvm_gravity_common.kappa_binom_step (float Delta)."""
     total = 0.0
     total_w = 0.0
     for m in range(N_MICRO):

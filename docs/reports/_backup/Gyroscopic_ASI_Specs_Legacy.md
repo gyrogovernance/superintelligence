@@ -1,7 +1,7 @@
-# Gyroscopic ASI aQPU Kernel
+# Gyroscopic ASI hQVM Kernel
 ## Kernel Specification
 
-This document is the normative technical specification of the Gyroscopic ASI aQPU Kernel. It includes the kernel physics, atlas artifacts, replay rules, and the application-layer governance measurement medium.
+This document is the normative technical specification of the Gyroscopic ASI hQVM Kernel. It includes the kernel physics, atlas artifacts, replay rules, and the application-layer governance measurement medium.
 
 Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
 
@@ -13,11 +13,11 @@ Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as r
 
 Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lack internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
 
-The Gyroscopic ASI aQPU Kernel represents a different paradigm. It treats intelligence as an intrinsic structural property that emerges from the recursive alignment of operational operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a provably finite and fully discovered state space where alignment is constitutive. Coherence is not a policy choice but a requirement of the internal physics of the state space.
+The Gyroscopic ASI hQVM Kernel represents a different paradigm. It treats intelligence as an intrinsic structural property that emerges from the recursive alignment of operational operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a provably finite and fully discovered state space where alignment is constitutive. Coherence is not a policy choice but a requirement of the internal physics of the state space.
 
 ## 1.2 What the Router Is
 
-The Gyroscopic ASI aQPU Kernel is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
+The Gyroscopic ASI hQVM Kernel is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
 Operationally, the Router is a deterministic finite-state coordination kernel. It maps an append-only byte ledger to a reproducible state trajectory on a finite closed state space. A kernel instance begins its trajectory from a universal, unconditioned spatial configuration known as the Macro Archetype (the GENE_Mac topology at rest). From this perfectly symmetric 24-bit canvas, it applies a fixed transition rule to each incoming byte, expanding the 8-bit signals into geometric transformations. This process yields a deterministic state at each step together with a compact routing signature and canonical governance observables that any party can recompute.
 

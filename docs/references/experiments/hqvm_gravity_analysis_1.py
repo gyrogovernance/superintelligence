@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-aqpu_gravity_analysis_1.py
+hqvm_gravity_analysis_1.py
 
 CGM gravity coupling analysis:
 
@@ -44,7 +44,7 @@ from src.constants import (
     GENE_MAC_B12,
 )
 
-from aqpu_gravity_common import (
+from hqvm_gravity_common import (
     AF,
     CHI6_FULL,
     Delta,
@@ -398,7 +398,7 @@ def part_c_kernel_transport() -> None:
     print("C.2  tau_cycle")
     tau_frac = tau_cycle_per_delta_exact()
     tau_cycle_exact = float(tau_frac) * Delta
-    print("  Definitive derivation: aqpu_gravity_analysis_3.py section C")
+    print("  Definitive derivation: hqvm_gravity_analysis_3.py section C")
     print(f"  tau_cycle/Delta = {tau_frac} = {float(tau_frac):.12f}")
 
     print()
@@ -457,7 +457,7 @@ def part_c_kernel_transport() -> None:
 
     print()
     print("C.6  N_cycles (from analysis_3 section D)")
-    print("  Definitive derivation: aqpu_gravity_analysis_3.py section D")
+    print("  Definitive derivation: hqvm_gravity_analysis_3.py section D")
     n_cycles, tau_cycle_exp, tau_g_full, tau_od = kernel_exposure_constants()
     print(f"  tau_cycle/Delta     = {tau_od} (exact rational)")
     print(f"  N_cycles            = {n_cycles:.4f}  (exposure count)")

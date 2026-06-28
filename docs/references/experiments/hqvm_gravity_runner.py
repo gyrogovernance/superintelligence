@@ -3,7 +3,7 @@
 Run all executable CGM gravity scripts and save combined stdout/stderr to a text file.
 
 Scripts (in run order): analysis_3, 2, 1, 4, 5, 6, 7.
-Skips aqpu_gravity_common.py (library only).
+Skips hqvm_gravity_common.py (library only).
 """
 
 from __future__ import annotations
@@ -27,18 +27,18 @@ _EXPERIMENTS = Path(__file__).resolve().parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from aqpu_gravity_common import configure_stdout_utf8
+from hqvm_gravity_common import configure_stdout_utf8
 
-DEFAULT_OUTPUT = _EXPERIMENTS / "aqpu_gravity_analysis.txt"
+DEFAULT_OUTPUT = _EXPERIMENTS / "hqvm_gravity_analysis.txt"
 
 GRAVITY_SCRIPTS: tuple[str, ...] = (
-    "aqpu_gravity_analysis_3.py",
-    "aqpu_gravity_analysis_2.py",
-    "aqpu_gravity_analysis_1.py",
-    "aqpu_gravity_analysis_4.py",
-    "aqpu_gravity_analysis_5.py",
-    "aqpu_gravity_analysis_6.py",
-    "aqpu_gravity_analysis_7.py",
+    "hqvm_gravity_analysis_3.py",
+    "hqvm_gravity_analysis_2.py",
+    "hqvm_gravity_analysis_1.py",
+    "hqvm_gravity_analysis_4.py",
+    "hqvm_gravity_analysis_5.py",
+    "hqvm_gravity_analysis_6.py",
+    "hqvm_gravity_analysis_7.py",
 )
 
 

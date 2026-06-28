@@ -8,7 +8,7 @@
 
 ## 1. Overview
 
-**GyroNN** (Gyroscopic Neural Network) is a dual-stream byte-level causal language model that combines **exact finite-state-machine physics** with **learned neural representations**. It is the neural agent layer built on top of the Gyroscopic ASI aQPU Kernel kernel. Unlike standard language models that learn byte structure from data, GyroNN *computes* structural invariants from a single constant (`0xAA`) and learns probability distributions conditioned on that structure.
+**GyroNN** (Gyroscopic Neural Network) is a dual-stream byte-level causal language model that combines **exact finite-state-machine physics** with **learned neural representations**. It is the neural agent layer built on top of the Gyroscopic ASI hQVM Kernel kernel. Unlike standard language models that learn byte structure from data, GyroNN *computes* structural invariants from a single constant (`0xAA`) and learns probability distributions conditioned on that structure.
 
 **Model type:** `gyronn` (registered in HuggingFace AutoConfig)  
 **Deployed size:** ~3.9M parameters, ~16MB on disk  
@@ -216,9 +216,9 @@ Curriculum generation requires the L3 table (`data/layers/l3_packed_u24.bin`, ~1
 
 ---
 
-## 9. Relation to Gyroscopic ASI aQPU Kernel
+## 9. Relation to Gyroscopic ASI hQVM Kernel
 
-GyroNN implements the **agent layer** of Gyroscopic ASI. The aQPU Kernel (kernel) provides:
+GyroNN implements the **agent layer** of Gyroscopic ASI. The hQVM Kernel (kernel) provides:
 
 - 65,536 states, 256 byte operations
 - Deterministic transition table

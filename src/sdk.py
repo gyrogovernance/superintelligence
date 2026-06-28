@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 """
-High-level Quantum SDK surface for the Gyroscopic ASI aQPU.
+High-level Quantum SDK surface for the Gyroscopic ASI hQVM.
 
 This file keeps the public exposure compact and centered on:
 - Moments

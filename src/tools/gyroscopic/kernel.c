@@ -23,7 +23,7 @@
 #endif
 
 /* ------------------------------------------------------------------ */
-/* Transition-law tables (ported bit-exactly from src/constants.py).  */
+/* Transition-rule tables (ported bit-exactly from src/constants.py).  */
 /* intron = byte ^ 0xAA ; mask12 from 6-bit payload (bits 1..6).      */
 /* ------------------------------------------------------------------ */
 
@@ -84,7 +84,7 @@ static int popcount32(uint32_t x) {
 }
 
 /* ================================================================== */
-/* 1. Verified transition law.                                        */
+/* 1. Verified transition rule.                                        */
 /* ================================================================== */
 
 GYROSCOPIC_EXPORT uint32_t gyroscopic_step_omega12(uint32_t state24, uint8_t byte) {

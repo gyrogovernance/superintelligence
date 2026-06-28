@@ -3,7 +3,7 @@ started: 2026-06-27T00:05:00+03:00
 python: C:\Python314\python.exe
 scripts: 7
 
-######## aqpu_gravity_analysis_3.py ########
+######## hqvm_gravity_analysis_3.py ########
 
 CGM gravity analysis 3: Kernel-derived theorems
 Delta = 0.020699553913, rho = 0.979300446087
@@ -244,7 +244,7 @@ ANALYSIS COMPLETE
 
 exit=0  duration=0.70s
 
-######## aqpu_gravity_analysis_2.py ########
+######## hqvm_gravity_analysis_2.py ########
 
 CGM Gravity: Kernel Theorems and Classification
 =========
@@ -401,7 +401,7 @@ G_corr             = 6.708809505940e-39  ppm=-0.073643
 
 exit=0  duration=1.51s
 
-######## aqpu_gravity_analysis_1.py ########
+######## hqvm_gravity_analysis_1.py ########
 
 ==========
 CGM gravity analysis 1: c4 closure, rho^5 structure, G prediction
@@ -534,7 +534,7 @@ C.1  chi6 bit stats (per step)
   step 8: n=64  P(bit=1) b0..b5 = 1.000 1.000 1.000 1.000 1.000 1.000
 
 C.2  tau_cycle
-  Definitive derivation: aqpu_gravity_analysis_3.py section C
+  Definitive derivation: hqvm_gravity_analysis_3.py section C
   tau_cycle/Delta = 7591/7392 = 1.026920995671
 
 C.3  Shell displacement
@@ -563,7 +563,7 @@ C.5  Per-family tau (depth-4 word)
   mean tau_word: 0.009408891  var: 0.000000e+00
 
 C.6  N_cycles (from analysis_3 section D)
-  Definitive derivation: aqpu_gravity_analysis_3.py section D
+  Definitive derivation: hqvm_gravity_analysis_3.py section D
   tau_cycle/Delta     = 7591/7392 (exact rational)
   N_cycles            = 3586.5179  (exposure count)
   N * tau_cycle       = 76.237917
@@ -672,7 +672,7 @@ SUMMARY
 
 exit=0  duration=0.77s
 
-######## aqpu_gravity_analysis_4.py ########
+######## hqvm_gravity_analysis_4.py ########
 
 CGM gravity analysis 4: nonlinear G(psi), metric, shadow
 Delta = 0.020699553913, rho = 0.979300446087
@@ -1208,7 +1208,7 @@ ANALYSIS COMPLETE
 
 exit=0  duration=0.82s
 
-######## aqpu_gravity_analysis_5.py ########
+######## hqvm_gravity_analysis_5.py ########
 
 CGM gravity analysis 5: field derivations
 tau_G = 76.237917,  n_vc = 1857.13,  2*Delta*n_vc = 76.883484
@@ -1218,7 +1218,7 @@ A. E_ref(psi) (Delta ruler quantile)
 =========
 
   E_ref(psi) = E_CS * (v/E_CS)^(1-psi)
-  Derivation: aqpu_gravity_analysis_4.py section S (three-premise proof).
+  Derivation: hqvm_gravity_analysis_4.py section S (three-premise proof).
   Deleted: shell-centroid E_ref (mean != quantile on log decades).
 
 =========
@@ -1276,7 +1276,7 @@ D. Nonlinear PDE (general static spherical)
     G(psi) = G_kernel exp(-tau_G(1-psi)) / E_ref(psi)^2
     E_ref(psi) = E_CS (v/E_CS)^(1-psi)
 
-  Point mass (rho = M delta(r)): analytic psi(s) in aqpu_gravity_common; analysis_4 tables.
+  Point mass (rho = M delta(r)): analytic psi(s) in hqvm_gravity_common; analysis_4 tables.
     du/ds = -G(psi(u))/G_global / s^2
 
   Extended density rho(r) propto r^n:
@@ -1343,7 +1343,7 @@ G. MU density bridge rho_MU(psi)
 H. Neutron star interior with G(x)
 =========
 
-  Point-mass exterior uses exact psi(s) (aqpu_gravity_common).
+  Point-mass exterior uses exact psi(s) (hqvm_gravity_common).
   This section keeps numerical TOV for the coupled interior.
 
   M = 1.4 Msun, R = 12 km, r_g = 2067.3 m
@@ -1835,7 +1835,7 @@ DERIVATIONS COMPLETE
 
 exit=0  duration=2.43s
 
-######## aqpu_gravity_analysis_6.py ########
+######## hqvm_gravity_analysis_6.py ########
 
 CGM gravity analysis 6: Antimatter, GW, Virial, Self-energy
 Delta = 0.020699553913, rho = 0.979300446087
@@ -1851,7 +1851,7 @@ A.1  Antimatter involution C
 
 A.2  Gravitoelectric invariants (EVEN under C)
 ----------------------------------------------
-  D=24 displacement, q(F)=0, cycle->REST: aqpu_gravity_analysis_2 S1/S4.
+  D=24 displacement, q(F)=0, cycle->REST: hqvm_gravity_analysis_2 S1/S4.
   Mass popcount(A12) even under face-swap: verified on Omega in A.5.
 
 A.3  H_spin observable (ODD under C on chi6)
@@ -1912,11 +1912,11 @@ A.5  H_spin parity on full Omega (BFS from analysis_2)
 
 A.6  Chiral gravitomagnetic coupling
 ------------------------------------
-  ||pi||^2/Tr^2 = 2/75 (bulk): aqpu_gravity_analysis_3 B.
+  ||pi||^2/Tr^2 = 2/75 (bulk): hqvm_gravity_analysis_3 B.
   delta_B_g/B_g = (4/75)*psi^2 at psi=0.15 (NS surface): 0.001200  (0.1200%)
 ========= B. Gravitational wave extensions =========
 
-  Vacuum Gauss / HT strain calibration: aqpu_gravity_analysis_5 J, P.
+  Vacuum Gauss / HT strain calibration: hqvm_gravity_analysis_5 J, P.
 
 
 B.0  Quadrupole shell spectrum and 8-byte Z2 holonomy
@@ -2158,7 +2158,7 @@ E.2  Checks unique to this script
   Hawking L ratio < 1: 0.7432 = True
   Exterior I = 1/2 all g1: True
 
-  Scalar-tensor action (psi slaved): aqpu_gravity_analysis_5 S.
+  Scalar-tensor action (psi slaved): hqvm_gravity_analysis_5 S.
 
 
 E.4  Summary
@@ -2171,7 +2171,7 @@ E.4  Summary
 
 exit=0  duration=1.57s
 
-######## aqpu_gravity_analysis_7.py ########
+######## hqvm_gravity_analysis_7.py ########
 
 CGM gravity analysis 7: Refractive vacuum and time-light conversion
 Delta = 0.020699553913, rho = 0.979300446087, g1 = -0.645568
@@ -2542,7 +2542,7 @@ DERIVATION CHAIN FOR c:
   (no hbar required).
 
 LIGHT vs PHOTON:
-Light (c) is the maximum refresh rate of the aQPU manifold:
+Light (c) is the maximum refresh rate of the hQVM manifold:
 1 state per tick rendered as spatial translation.
 It is a property of the spacetime continuum itself.
 
@@ -2570,7 +2570,7 @@ J. The four-phase causal cycle
 J.1 KERNEL FRAME TO CONTINUOUS CHANNEL MAPPING
 --------------------------------------------------------------
 
-The aQPU depth-4 frame (Prefix, Present, Past, Future)
+The hQVM depth-4 frame (Prefix, Present, Past, Future)
 maps to the four CGM stages and their continuous channels:
 
   Phase     Kernel operation          Continuous channel

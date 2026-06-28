@@ -1,8 +1,8 @@
-# tests/test_aQPU_2.py
+# tests/test_hQVM_2.py
 """
-aQPU tests 2: Hilbert-lift quantum foundations.
+hQVM tests 2: Hilbert-lift quantum foundations.
 
-These tests extend the algebraic quantum processing unit (aQPU) analysis
+These tests extend the hQVM analysis
 beyond kernel dynamics into the verified Hilbert-lift consequences of the
 self-dual [12,6,2] code and the 6-pair graph-state structure.
 
@@ -21,10 +21,10 @@ Deliberately does NOT retest:
 - kernel stepping
 - Omega topology
 - K4 gate action
-- chirality transport law
+- chirality transport rule
 - code size / duality / syndromes
 - depth-4 alternation
-Those are already covered by the existing physics and aQPU test files.
+Those are already covered by the existing physics and hQVM test files.
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ import pytest
 from src.api import MASK12_BY_BYTE, chirality_word6, q_word6
 from src.constants import step_state_by_byte
 
-from tests.test_aQPU_1 import _bfs_omega
+from tests.test_hQVM_1 import _bfs_omega
 
 C64 = set(int(m) & 0xFFF for m in MASK12_BY_BYTE)
 
@@ -677,7 +677,7 @@ class TestMutuallyUnbiasedBases:
 
 class TestPeresMerminContextuality:
     """
-    The 2-qubit sectors used by the aQPU support state-independent contextuality.
+    The 2-qubit sectors used by the hQVM support state-independent contextuality.
     """
 
     def test_peres_mermin_square_operator_identities(self) -> None:
@@ -825,7 +825,7 @@ class TestPauliGroupOnChiralityRegister:
     """
     The induced action on the 6-bit chirality register is exactly the
     Pauli-X translation subgroup: T_b shifts chi by q6(b) via XOR.
-    The chirality transport law chi(T_b(s)) = chi(s) xor q6(b) is the
+    The chirality transport rule chi(T_b(s)) = chi(s) xor q6(b) is the
     classical shadow of this Pauli action.
     """
 

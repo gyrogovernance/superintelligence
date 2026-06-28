@@ -3,11 +3,11 @@ Physics tests 5: CGM constants bridge + frame-level emergence.
 
 Bridge (constants.py <-> CGM theory):
   (1) continuous invariants, (2) aperture quantization chain,
-  (3) DOF doubling law, (4) optical conjugacy on Omega.
+  (3) DOF doubling theorem, (4) optical conjugacy on Omega.
 
 Frame physics (depth-4 PP-PF, not covered as theorems elsewhere):
   Depth-4 closed form, net family-phase (phi_a, phi_b) survival,
-  mask-projection gauge blindness, exact commutation law,
+  mask-projection gauge blindness, exact commutation rule,
   exact commutator defect formula, optical conjugacy via Omega = U x V,
   universal family-cycle (4-step sign flip, 8-step identity).
 """
@@ -204,7 +204,7 @@ class TestDOFDoublingLaw:
 
 class TestOpticalConjugacyOnOmega:
     """
-    Optical conjugacy (density law) on Omega using the proven product form:
+    Optical conjugacy (density rule) on Omega using the proven product form:
       Omega = U x V where U = A_rest xor C64 and V = B_rest xor C64.
     No BFS; reachability is covered elsewhere.
     """

@@ -1,11 +1,11 @@
 """
 Moments physics: tests that resolve open questions about the Router as a physical system.
 
-The Router is a classical realization of exact stabilizer-class quantum dynamics on a paired
+The Kernel is a classical realization of exact stabilizer-class quantum dynamics on a paired
 6-spin system. These tests are not restatements of existing physics tests; they test new claims:
 
 1. Boundary vs volume normalization of physical capacity (holographic prediction).
-2. 6-spin representation: isomorphism, transition law, magnetization, correlations.
+2. 6-spin representation: isomorphism, transition rule, magnetization, correlations.
 3. Depth-4 frame as certification atom (strictly more informative than raw state).
 4. CSM capacity with |Omega| = 4096.
 
@@ -150,7 +150,7 @@ class TestSixSpinIsomorphism:
 
     def test_transition_in_spin_coordinates(self):
         """
-        Verify the spin-coordinate transition law against the bit-level kernel
+        Verify the spin-coordinate transition rule against the bit-level kernel
         for all 256 bytes from rest.
         """
         a_rest, b_rest = unpack_state(GENE_MAC_REST)

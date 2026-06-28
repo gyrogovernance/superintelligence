@@ -64,7 +64,7 @@ At the output layer, this drought is most visible: hundreds of thousands of logi
 
 The same bottleneck appears in beam search, in attention masking, in sparse selection, and in any routing decision that must choose one path from many candidates.
 
-Many of these selection problems are not truly total-order max problems. They are sector-identification problems disguised as max problems. When the task is nearest sector, matching orbit, matching shell, or horizon proximity, the aQPU's algebraic structure (Walsh-Hadamard transform, q-map, shell structure, hidden subgroup resolution) provides O(1) or O(log N) identification where flat argmax requires O(N).
+Many of these selection problems are not truly total-order max problems. They are sector-identification problems disguised as max problems. When the task is nearest sector, matching orbit, matching shell, or horizon proximity, the hQVM's algebraic structure (Walsh-Hadamard transform, q-map, shell structure, hidden subgroup resolution) provides O(1) or O(log N) identification where flat argmax requires O(N).
 
 ---
 
@@ -84,7 +84,7 @@ Each of these decisions creates a branch that the hardware cannot predict. The g
 
 The deeper structural issue is that these routing decisions are made in an unsuitable coordinate system. The decision is fundamentally a phase selection (which mode of operation to enter), but it is implemented as a floating-point threshold test followed by a conditional jump. The phase information is computed expensively and then discarded into a binary branch.
 
-In the aQPU formalism, phase is carried natively by the 2-bit gauge field (K4 family). Routing becomes deterministic phase-dependent transport rather than an unpredictable conditional jump.
+In the hQVM formalism, phase is carried natively by the 2-bit gauge field (K4 family). Routing becomes deterministic phase-dependent transport rather than an unpredictable conditional jump.
 
 ### Distance freeze (sqrt)
 
@@ -126,15 +126,15 @@ What if the decision surfaces of AI systems were computed in a coordinate system
 
 The Gyroscopic ASI architecture answers this question at two levels.
 
-At the state level, the aQPU provides a finite algebraic medium where distance is exact integer Hamming distance, ensemble structure is given by algebraic sectors with known multiplicities, phase is carried natively by the state representation, and thermodynamics is exact and polynomial. On this medium, the six pathologies are replaced by exact integer operations that produce equivalent structural decisions.
+At the state level, the hQVM provides a finite algebraic medium where distance is integer Hamming distance, ensemble structure is given by algebraic sectors with known multiplicities, phase is carried natively by the state representation, and thermodynamics is polynomial. On this medium, the six pathologies are replaced by integer operations that produce equivalent structural decisions.
 
-The [QuBEC Theory](QuBEC_Theory.md) formalizes this replacement in full: the exact partition function, the shell algebra, the Krawtchouk spectral basis, the gauge decomposition, and the multi-cell scaling law. Together, these provide the mathematical foundation for computing AI decision surfaces on exact finite structures rather than on floating-point approximations of continuous geometry.
+The [QuBEC Theory](QuBEC_Theory.md) formalizes this replacement in full: the exact partition function, the shell algebra, the Krawtchouk spectral basis, the gauge decomposition, and the multi-cell scaling rule. Together, these provide the mathematical foundation for computing AI decision surfaces on exact finite structures rather than on floating-point approximations of continuous geometry.
 
 ---
 
 ## Further reading
 
 - **Analysis of Gyroscopic Multiplication:** optional formal dyadic chart analysis (not an operational routing model).
-- **QuBEC Theory:** finite quantum thermodynamics, exact partition law, shell spectral transport, gauge climate equations, and multi-cell scaling.
-- **Gyroscopic ASI aQPU Kernel specification:** kernel state, charts, transition law, and computational spaces.
-- **Physics and aQPU test reports:** exhaustive verification of the algebraic quantum structure underlying the climate theory.
+- **QuBEC Theory:** finite quantum thermodynamics, partition rule, shell spectral transport, gauge climate equations, and multi-cell scaling.
+- **Gyroscopic ASI hQVM Kernel specification:** kernel state, charts, transition rule, and computational spaces.
+- **Physics and hQVM test reports:** exhaustive verification of the algebraic quantum structure underlying the climate theory.

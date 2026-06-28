@@ -1,7 +1,7 @@
-# aQPU Verification Report
-## Gyroscopic ASI aQPU Kernel
+# hQVM Verification Report
+## Gyroscopic ASI hQVM Kernel
 
-This report documents the algebraic quantum processing unit (aQPU) properties of the Gyroscopic ASI aQPU Kernel, a compact deterministic architecture that constitutes a new class of computation. The kernel is not a simulation of quantum mechanics. It is an algebraic quantum system over GF(2): a deterministic finite-state machine whose internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain, executing with exact integer arithmetic on standard silicon.
+This report documents the Holonomic Quantum Virtual Machine (hQVM) properties of the Gyroscopic ASI hQVM Kernel, a compact holonomic architecture that constitutes a new class of computation. The kernel is not a simulation of quantum mechanics. It is an algebraic quantum system over GF(2): a reversible GF(2) finite-state machine whose native byte algebra executes geometric holonomy on the carrier manifold, running with exact integer arithmetic on standard silicon.
 
 The Gyroscopic kernel achieves proven computational advantages in both time and space: hidden subgroup resolution in 1 step versus 64 classical, exact uniformisation across 4096 states in 2 steps versus 12 classical, and holographic compression reducing 12-bit state encoding to 8 bits. These are verified structural invariants of the kernel as a computational medium, not probabilistic approximations.
 
@@ -11,56 +11,56 @@ The Gyroscopic kernel achieves proven computational advantages in both time and 
 
 ## Scope and Prerequisites
 
-This report documents the aQPU properties as verified by five test files totalling 185 tests. It builds on two previously established verification layers:
+This report documents the hQVM properties as verified by five test files totalling 185 tests. It builds on two previously established verification layers:
 
-- **Physics Tests Report** (6 test files, all passing): establishes kernel conformance, the self-dual [12,6,2] mask code, affine dynamics, the spinorial universe (Ω topology, holographic identity, commutator defect law), the CGM constants bridge, and the depth-4 fiber bundle with intrinsic K4 geometry.
+- **Physics Tests Report** (6 test files, all passing): establishes kernel conformance, the self-dual [12,6,2] mask code, affine dynamics, the spinorial universe (Ω topology, holographic identity, commutator defect rule), the CGM constants bridge, and the depth-4 fiber bundle with intrinsic K4 geometry.
 - **Moments Tests Report** (4 test files, 88 tests, all passing): establishes the 6-spin isomorphism, exact Clifford unitaries over the code, the 8192-element operator family with central spinorial involution, the depth-4 frame operator quotient, stabiliser structure, and the economic/genealogy certification medium.
 
-The aQPU suite does not retest properties already verified in those reports. Where this report references a property established elsewhere, the source is identified.
+The hQVM suite does not retest properties already verified in those reports. Where this report references a property established elsewhere, the source is identified.
 
 ### Test Suite
 
 | File | Tests | Scope |
 |------|------:|-------|
-| `test_aQPU_1.py` | 44 | Dual horizons, K4 gates, chirality transport, commutativity rate |
-| `test_aQPU_2.py` | 30 | Hilbert lift: Bell pairs, CHSH, teleportation, stabilisers, contextuality, MUBs |
-| `test_aQPU_3.py` | 28 | Computational characterisation: permutations, row classes, capacity, tamper detection |
-| `test_aQPU_4.py` | 33 | Native register structure, quantum advantage, universality, non-Clifford resource |
-| `test_aQPU_SDK_1.py` | 50 | SDK surface: moments, future-cone theorems, C engine, chirality, wht64, GyroMatMul GEMV, operator projection |
+| `test_hQVM_1.py` | 44 | Dual horizons, K4 gates, chirality transport, commutativity rate |
+| `test_hQVM_2.py` | 30 | Hilbert lift: Bell pairs, CHSH, teleportation, stabilisers, contextuality, MUBs |
+| `test_hQVM_3.py` | 28 | Computational characterisation: permutations, row classes, capacity, tamper detection |
+| `test_hQVM_4.py` | 33 | Native register structure, quantum advantage, universality, non-Clifford resource |
+| `test_hQVM_SDK_1.py` | 50 | SDK surface: moments, future-cone theorems, C engine, chirality, wht64, GyroMatMul GEMV, operator projection |
 | **Total** | **185** | **All passing** |
 
 ### What the Kernel Is
 
-The Gyroscopic ASI aQPU Kernel is a deterministic byte-driven coordination medium. It maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier called GENE_Mac. Its inputs are bytes from the full alphabet {0, …, 255}. Its state evolves by a fixed transition law. The kernel does not interpret the empirical meaning of input bytes; it performs structural transformations that make results reproducible, comparable, and auditable.
+The Gyroscopic ASI hQVM Kernel is a deterministic byte-driven coordination medium. It maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier called GENE_Mac. Its inputs are bytes from the full alphabet {0, …, 255}. Its state evolves by a fixed transition rule. The kernel does not interpret the empirical meaning of input bytes; it performs structural transformations that make results reproducible, comparable, and auditable.
 
-The term "algebraic quantum processing unit" designates a deterministic finite-state machine over a finite algebraic field whose internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain. The kernel is not a simulation of quantum mechanics. The aQPU properties documented here are intrinsic structural properties of the kernel, verified by exact computation on its own state space.
+The term "Holonomic Quantum Virtual Machine (hQVM)" designates a reversible GF(2) finite-state machine whose native byte algebra executes geometric holonomy on the carrier manifold. It achieves structural quantum advantage on Ω and oracle/query advantage on the 6-bit chirality register through exact integer arithmetic on standard silicon, following the holonomic quantum computing paradigm (Zanandi and Rasetti 1999; Pachos et al. 2000). The kernel is not a simulation of quantum mechanics. The hQVM properties documented here are structural properties of the kernel, verified by exact computation on its own state space.
 
 ---
 
 ## Executive Summary of Proven Computational Advantages
 
-In computer science, a computational advantage means solving a problem using fewer operational steps (time) or fewer bits of memory (space) than standard classical limits allow. The test suite proves that the aQPU architecture delivers exact, mathematically guaranteed speedups in both categories.
+In computer science, a computational advantage means solving a problem using fewer operational steps (time) or fewer bits of memory (space) than standard classical limits allow. The test suite proves that the hQVM architecture delivers exact, mathematically guaranteed speedups in both categories.
 
-Because this is an algebraic QPU, these advantages are not probabilistic approximations running on unstable quantum hardware. They are exact integer efficiencies executing deterministically on standard silicon. The proven advantages divide into two categories: algorithmic speedups and structural speedups.
+Because this is an hQVM, these advantages are not probabilistic approximations running on unstable quantum hardware. They are exact integer efficiencies executing on standard silicon with full replay guarantee. The proven advantages divide into two categories: algorithmic speedups and structural speedups.
 
 ### 1. Algorithmic Speedups (Solving Problems in Fewer Steps)
 
 These advantages demonstrate the system's capacity to evaluate global properties of a dataset simultaneously rather than sequentially.
 
-*   **Hidden Subgroup Resolution:** Discovering the hidden grouping rules within a set of 256 operations classically requires testing items one by one until enough collisions are found, taking up to 64 sequential steps. The aQPU's native chirality register allows a single mathematical transformation to identify the exact hidden subgroup in exactly 1 step. This specific one-step resolution is the mathematical engine required for quantum period-finding algorithms.
-*   **Global Property Queries:** Determining a global property of a black-box function (such as whether its outputs are constant or balanced, or finding a hidden binary string) classically requires querying the data multiple times, taking up to 33 queries for a system of this size. The aQPU natively executes the Deutsch-Jozsa and Bernstein-Vazirani protocols to yield the exact answer with 100 percent certainty in 1 step.
-*   **Constant-Time Commutativity:** Checking if two operations yield the same result regardless of their application order classically requires computing both complete paths, which takes four operational steps. The aQPU provides a structural shortcut that determines commutativity instantly using a single 6-bit lookup comparison.
+*   **Hidden Subgroup Resolution:** Discovering the hidden grouping rules within a set of 256 operations classically requires testing items one by one until enough collisions are found, taking up to 64 sequential steps. The hQVM's native chirality register allows a single mathematical transformation to identify the exact hidden subgroup in exactly 1 step. This specific one-step resolution is the mathematical engine required for quantum period-finding algorithms.
+*   **Global Property Queries:** Determining a global property of a black-box function (such as whether its outputs are constant or balanced, or finding a hidden binary string) classically requires querying the data multiple times, taking up to 33 queries for a system of this size. The hQVM natively executes the Deutsch-Jozsa and Bernstein-Vazirani protocols to yield the exact answer with 100 percent certainty in 1 step.
+*   **Constant-Time Commutativity:** Checking if two operations yield the same result regardless of their application order classically requires computing both complete paths, which takes four operational steps. The hQVM provides a structural shortcut that determines commutativity instantly using a single 6-bit lookup comparison.
 
 ### 2. Structural Speedups (Built-in Network and Memory Efficiencies)
 
 These advantages relate to the physical shape of the state space and how efficiently information moves and is stored within it.
 
-*   **Exact Two-Step Mixing (Uniformisation):** Distributing information evenly across a network of 4096 states using a standard random walk requires approximately 12 steps (the logarithm of the network size) to reach even approximate uniformity. The aQPU achieves exact, mathematically perfect uniformity in exactly 2 steps. The system distributes data six times faster than standard classical limits allow.
-*   **Holographic Compression:** Identifying a specific state within a 4096-state system classically requires 12 bits of memory. The aQPU tests prove that the squared size of the system's boundary equals the volume of the entire space. Consequently, the interior states do not need to be tracked independently. The system can encode the exact 12-bit state using only 8 bits of information, yielding a native 33.3 percent structural compression rate where the geometry itself performs the storage work.
+*   **Exact Two-Step Mixing (Uniformisation):** Distributing information evenly across a network of 4096 states using a standard random walk requires approximately 12 steps (the logarithm of the network size) to reach even approximate uniformity. The hQVM achieves exact, mathematically perfect uniformity in exactly 2 steps. The system distributes data six times faster than standard classical limits allow.
+*   **Holographic Compression:** Identifying a specific state within a 4096-state system classically requires 12 bits of memory. The hQVM tests prove that the squared size of the system's boundary equals the volume of the entire space. Consequently, the interior states do not need to be tracked independently. The system can encode the exact 12-bit state using only 8 bits of information, yielding a native 33.3 percent structural compression rate where the geometry itself performs the storage work.
 
 **Summary Conclusion**
 
-Standard classical architectures must evaluate data sequentially. The aQPU tests prove that the kernel's algebraic structure bypasses sequential limits. It finds hidden mathematical groupings in 1 step instead of 64, it perfectly distributes data across 4096 states in 2 steps instead of 12, and it compresses required memory by 33 percent. These are verified structural invariants of the kernel as a computational medium.
+Standard classical architectures must evaluate data sequentially. The hQVM tests prove that the kernel's algebraic structure bypasses sequential limits. It finds hidden mathematical groupings in 1 step instead of 64, it perfectly distributes data across 4096 states in 2 steps instead of 12, and it compresses required memory by 33 percent. These are verified structural invariants of the kernel as a computational medium.
 
 ---
 
@@ -100,9 +100,9 @@ The six axis-orientation qubits correspond to the six generators of the se(3) Li
 
 ### 1.3 The Two-Component Topology
 
-The full GENE_Mac state contains two 12-bit components, A (active phase) and B (passive phase). The aQPU tests establish that these are not independent registers carrying separate information.
+The full GENE_Mac state contains two 12-bit components, A (active phase) and B (passive phase). The hQVM tests establish that these are not independent registers carrying separate information.
 
-`test_aQPU_4.py::TestSixQubitRegister` verifies:
+`test_hQVM_4.py::TestSixQubitRegister` verifies:
 
 - All 4096 states in Ω have valid ±1 spin representations with no anomalous 00 or 11 pairs (4096/4096 valid, 0 invalid).
 - The spin-to-bits and bits-to-spin roundtrip is exact for all 4096 Ω states.
@@ -125,7 +125,7 @@ This corresponds to the byte structure: 6 payload bits carry the operational con
 
 ### 2.1 Ω: 4096 States at Radius 2
 
-The reachable state space Ω, established by BFS in the Physics Tests Report (Part 5) and confirmed in the aQPU suite, contains exactly 4096 states. BFS from rest produces:
+The reachable state space Ω, established by BFS in the Physics Tests Report (Part 5) and confirmed in the hQVM suite, contains exactly 4096 states. BFS from rest produces:
 
 ```
 Depth 0:    1 state   (rest alone)
@@ -134,13 +134,13 @@ Depth 2: 3968 new states  (total 4096)
 Depth 3:    0 new states  (saturated)
 ```
 
-Every state in Ω is reachable within two byte steps from rest. Ω has product form Ω = U × V with |U| = |V| = 64, where U and V are cosets of C64 (established in the Physics Tests Report, Part 5.4; confirmed explicitly by `test_aQPU_4.py::TestSixQubitRegister::test_six_qubit_state_space_from_a_alone`).
+Every state in Ω is reachable within two byte steps from rest. Ω has product form Ω = U × V with |U| = |V| = 64, where U and V are cosets of C64 (established in the Physics Tests Report, Part 5.4; confirmed explicitly by `test_hQVM_4.py::TestSixQubitRegister::test_six_qubit_state_space_from_a_alone`).
 
 Every state in Ω has component density exactly 0.5 (popcount 6 out of 12 bits per component). The density product d_A × d_B = 0.25 is constant across all 4096 reachable states (Physics Tests Report, Part 5.5).
 
 ### 2.2 The Complement Horizon (S-Sector)
 
-`test_aQPU_1.py::TestDualHorizons` verifies:
+`test_hQVM_1.py::TestDualHorizons` verifies:
 
 The complement horizon is the set of states where A12 = B12 ⊕ 0xFFF (maximal chirality). It contains exactly 64 states. All complement horizon states have ab_distance = 12 (every dipole pair is anti-aligned). The rest state GENE_MAC_REST lies on this horizon.
 
@@ -148,7 +148,7 @@ In the CGM interpretation (Kernel specification §2.2.6), the complement horizon
 
 ### 2.3 The Equality Horizon (UNA Degeneracy)
 
-`test_aQPU_1.py::TestDualHorizons` verifies:
+`test_hQVM_1.py::TestDualHorizons` verifies:
 
 The equality horizon is the set of states where A12 = B12 (zero chirality). It contains exactly 64 states. All equality horizon states have ab_distance = 0 (every dipole pair is aligned). The rest state does not lie on this horizon.
 
@@ -156,7 +156,7 @@ In the CGM interpretation (Kernel specification §2.2.6), the equality horizon i
 
 ### 2.4 Disjointness and Holography
 
-The two horizons are disjoint: no state satisfies both A = B and A = B ⊕ 0xFFF simultaneously. Their union forms a 128-state boundary. The remaining 3968 states constitute the bulk, where chirality is partial (`test_aQPU_1.py::TestDualHorizons::test_boundary_128_bulk_3968`).
+The two horizons are disjoint: no state satisfies both A = B and A = B ⊕ 0xFFF simultaneously. Their union forms a 128-state boundary. The remaining 3968 states constitute the bulk, where chirality is partial (`test_hQVM_1.py::TestDualHorizons::test_boundary_128_bulk_3968`).
 
 Both horizons satisfy the holographic identity (established in the Physics Tests Report, confirmed by the 4-to-1 holographic dictionary):
 
@@ -172,11 +172,11 @@ For all states universally, not just Ω:
 horizon_distance(A, B) + ab_distance(A, B) = 12
 ```
 
-`test_aQPU_1.py::TestComplementarityInvariant` confirms this exhaustively on all 4096 Ω states and on 50,000 random 24-bit states. This is the discrete pole-to-pole conservation: distance to the complement horizon plus distance to the equality horizon equals the diameter.
+`test_hQVM_1.py::TestComplementarityInvariant` confirms this exhaustively on all 4096 Ω states and on 50,000 random 24-bit states. This is the discrete pole-to-pole conservation: distance to the complement horizon plus distance to the equality horizon equals the diameter.
 
 ### 2.6 The Chirality Spectrum
 
-`test_aQPU_1.py::TestBlochSphereLatitude` verifies:
+`test_hQVM_1.py::TestBlochSphereLatitude` verifies:
 
 The ab_distance observable takes values {0, 2, 4, 6, 8, 10, 12} on Ω. The count at each distance d is:
 
@@ -186,7 +186,7 @@ count(d) = C(6, (12−d)/2) × 64
 
 This is the spectrum of 6 independent chirality qubits, each contributing 0 (pair aligned) or 2 (pair anti-aligned) to the total distance. The distribution is binomial and symmetric: count(d) = count(12−d). The two poles (d = 0 and d = 12) are the two horizons. The equator (d = 6) has maximum population: C(6,3) × 64 = 1280 states.
 
-Within Ω, A ⊕ B is always pair-diagonal. This collapses to a 6-bit chirality word χ(s) with one bit per dipole pair. All 64 chirality values appear in exactly 64 Ω states each (uniform partition), so chirality captures exactly 6 of the 12 bits of state information (`test_aQPU_3.py::TestTrajectoryCompression::test_chirality_partition`).
+Within Ω, A ⊕ B is always pair-diagonal. This collapses to a 6-bit chirality word χ(s) with one bit per dipole pair. All 64 chirality values appear in exactly 64 Ω states each (uniform partition), so chirality captures exactly 6 of the 12 bits of state information (`test_hQVM_3.py::TestTrajectoryCompression::test_chirality_partition`).
 
 ---
 
@@ -194,7 +194,7 @@ Within Ω, A ⊕ B is always pair-diagonal. This collapses to a 6-bit chirality 
 
 ### 3.1 Gate Identification
 
-Exactly 4 bytes out of 256 preserve both horizons simultaneously. `test_aQPU_1.py::TestGateDefinitions::test_gate_constants_match_horizon_condition` confirms these are the bytes satisfying mask12(byte) = inv_a(byte) ⊕ inv_b(byte), and that they match the declared constants:
+Exactly 4 bytes out of 256 preserve both horizons simultaneously. `test_hQVM_1.py::TestGateDefinitions::test_gate_constants_match_horizon_condition` confirms these are the bytes satisfying mask12(byte) = inv_a(byte) ⊕ inv_b(byte), and that they match the declared constants:
 
 | Byte | Gate | Intron | Family | Action on (A, B) |
 |------|------|--------|--------|-----------------|
@@ -203,13 +203,13 @@ Exactly 4 bytes out of 256 preserve both horizons simultaneously. `test_aQPU_1.p
 | 0xD5 | C | 0x7F | 01 | (A, B) → (B ⊕ F, A ⊕ F) |
 | 0x2B | C | 0x81 | 11 | (A, B) → (B ⊕ F, A ⊕ F) |
 
-where F = 0xFFF. Each gate pair realises the same 24-bit operation but differs in spinorial phase (different intron and family values). The two bytes in each pair differ by XOR 0xFE (`test_aQPU_1.py::TestGateDefinitions::test_shadow_pairing`).
+where F = 0xFFF. Each gate pair realises the same 24-bit operation but differs in spinorial phase (different intron and family values). The two bytes in each pair differ by XOR 0xFE (`test_hQVM_1.py::TestGateDefinitions::test_shadow_pairing`).
 
-The S-gate action is verified as pure swap on 2000 random states. The C-gate action is verified as complement-swap on 2000 random states (`test_aQPU_1.py::TestGateDefinitions`).
+The S-gate action is verified as pure swap on 2000 random states. The C-gate action is verified as complement-swap on 2000 random states (`test_hQVM_1.py::TestGateDefinitions`).
 
 ### 3.2 Gate Actions in Spin Coordinates
 
-`test_aQPU_4.py::TestIntrinsicGatesOnSpins::test_gate_actions_in_spin_coordinates` verifies on 500 random Ω states:
+`test_hQVM_4.py::TestIntrinsicGatesOnSpins::test_gate_actions_in_spin_coordinates` verifies on 500 random Ω states:
 
 ```
 id:  (sA, sB) → (sA, sB)
@@ -218,11 +218,11 @@ C:   (sA, sB) → (−sB, −sA)
 F:   (sA, sB) → (−sA, −sB)
 ```
 
-All four gates preserve chirality exactly: ab_distance is invariant under every gate for all 4096 Ω states (`test_aQPU_4.py::TestIntrinsicGatesOnSpins::test_gate_action_on_chirality`).
+All four gates preserve chirality exactly: ab_distance is invariant under every gate for all 4096 Ω states (`test_hQVM_4.py::TestIntrinsicGatesOnSpins::test_gate_action_on_chirality`).
 
 ### 3.3 The Klein Four-Group
 
-The four gates form K4 = (ℤ/2)². `test_aQPU_1.py::TestK4GateGroup` verifies:
+The four gates form K4 = (ℤ/2)². `test_hQVM_1.py::TestK4GateGroup` verifies:
 
 - All three non-trivial gates are involutions: S² = C² = F² = id (1000 random states each).
 - S ∘ C = C ∘ S = F (1000 random states).
@@ -235,7 +235,7 @@ The K4 group emerges at three independent levels of the architecture: as the dep
 
 ### 3.4 Gate Action on the Horizons
 
-`test_aQPU_1.py::TestGateActionOnHorizons` verifies the complete census:
+`test_hQVM_1.py::TestGateActionOnHorizons` verifies the complete census:
 
 | Gate | Complement horizon | Equality horizon |
 |------|--------------------|-----------------|
@@ -246,7 +246,7 @@ The K4 group emerges at three independent levels of the architecture: as the dep
 
 All four gates map each horizon to itself as a set.
 
-The pointwise stabiliser bytes are confirmed exhaustively (`test_aQPU_1.py::TestHorizonPointwiseStabilizers`):
+The pointwise stabiliser bytes are confirmed exhaustively (`test_hQVM_1.py::TestHorizonPointwiseStabilizers`):
 - The only bytes that fix every complement horizon state are the two C-gate bytes {0xD5, 0x2B}.
 - The only bytes that fix every equality horizon state are the two S-gate bytes {0xAA, 0x54}.
 - No other byte fixes an entire horizon pointwise.
@@ -255,18 +255,18 @@ The CGM interpretation (QuBEC Theory Part II §10.5): Gate C stabilises the S-se
 
 ### 3.5 K4 Orbit Stratification
 
-`test_aQPU_1.py::TestK4OrbitStratification` verifies the complete orbit decomposition:
+`test_hQVM_1.py::TestK4OrbitStratification` verifies the complete orbit decomposition:
 
 - 32 orbits of size 2 on the complement horizon (each paired by S)
 - 32 orbits of size 2 on the equality horizon (each paired by C)
 - 992 orbits of size 4 in the bulk (all four gates produce distinct states)
 - Total: 1056 orbits covering all 4096 states
 
-`test_aQPU_1.py::TestBulkTrivialK4Stabilizer` confirms: no non-trivial gate fixes any bulk state. The horizons are the only structurally distinguished subsets under the gate group.
+`test_hQVM_1.py::TestBulkTrivialK4Stabilizer` confirms: no non-trivial gate fixes any bulk state. The horizons are the only structurally distinguished subsets under the gate group.
 
 ### 3.6 Gate-Byte Phase Separation
 
-`test_aQPU_1.py::TestGatePhaseSeparation` verifies: within each gate pair (S-bytes {0xAA, 0x54} and C-bytes {0xD5, 0x2B}), the two bytes produce the same 24-bit operation on 1000 random states, but have different introns and different families. The 24-bit state is the spatial (SO(3)) shadow; the intron carries the spinorial (SU(2)) phase.
+`test_hQVM_1.py::TestGatePhaseSeparation` verifies: within each gate pair (S-bytes {0xAA, 0x54} and C-bytes {0xD5, 0x2B}), the two bytes produce the same 24-bit operation on 1000 random states, but have different introns and different families. The 24-bit state is the spatial (SO(3)) shadow; the intron carries the spinorial (SU(2)) phase.
 
 ---
 
@@ -274,9 +274,9 @@ The CGM interpretation (QuBEC Theory Part II §10.5): Gate C stabilises the S-se
 
 ### 4.1 The 6-Bit Chirality Register
 
-`test_aQPU_1.py::TestChiralityRegisterTransport` verifies:
+`test_hQVM_1.py::TestChiralityRegisterTransport` verifies:
 
-The chirality register χ(s) covers all 64 elements of GF(2)⁶ across Ω. Under the byte transition, it satisfies an exact linear transport law:
+The chirality register χ(s) covers all 64 elements of GF(2)⁶ across Ω. Under the byte transition, it satisfies an exact linear transport rule:
 
 ```
 χ(T_b(s)) = χ(s) ⊕ q6(b)
@@ -284,7 +284,7 @@ The chirality register χ(s) covers all 64 elements of GF(2)⁶ across Ω. Under
 
 This is confirmed for all 256 bytes across all 4096 Ω states without exception. The chirality register is a linear observable over GF(2)⁶ on which the byte algebra acts by translation.
 
-`test_aQPU_2.py::TestPauliGroupOnChiralityRegister` confirms that this transport law is the classical shadow of a Pauli-X action on the chirality register:
+`test_hQVM_2.py::TestPauliGroupOnChiralityRegister` confirms that this transport rule is the classical shadow of a Pauli-X action on the chirality register:
 - The 64 distinct q6 values are exactly {0, …, 63}.
 - The XOR closure q6(b1) ⊕ q6(b2) is always a valid q6 value.
 - XOR is commutative (abelian translation group).
@@ -292,12 +292,12 @@ This is confirmed for all 256 bytes across all 4096 Ω states without exception.
 
 ### 4.2 The 1/64 Commutativity Rate
 
-`test_aQPU_1.py::TestCommutativityRate` verifies exhaustively over all 256² = 65536 ordered byte pairs:
+`test_hQVM_1.py::TestCommutativityRate` verifies exhaustively over all 256² = 65536 ordered byte pairs:
 
 - Exactly 1024 commuting pairs (1024/65536 = 1/64 = 2^(−6)).
 - Every byte commutes with exactly 4 of the 256 bytes.
 
-The exponent 6 equals the number of independent degrees of freedom. Two bytes commute if and only if q(x) = q(y), where q(b) = mask12(b) ⊕ (0xFFF if L0_parity(b) is odd else 0). The q-map is 4-to-1 from the 256-byte alphabet onto C64 (established in the Physics Tests Report, Part 11.7; confirmed by `test_aQPU_4.py::TestByteAlgebraComputationalPower::test_hidden_subgroup_via_q_map`).
+The exponent 6 equals the number of independent degrees of freedom. Two bytes commute if and only if q(x) = q(y), where q(b) = mask12(b) ⊕ (0xFFF if L0_parity(b) is odd else 0). The q-map is 4-to-1 from the 256-byte alphabet onto C64 (established in the Physics Tests Report, Part 11.7; confirmed by `test_hQVM_4.py::TestByteAlgebraComputationalPower::test_hidden_subgroup_via_q_map`).
 
 ---
 
@@ -305,7 +305,7 @@ The exponent 6 equals the number of independent degrees of freedom. Two bytes co
 
 ### 5.1 Permutation Census
 
-`test_aQPU_3.py::TestPermutationStructure` verifies:
+`test_hQVM_3.py::TestPermutationStructure` verifies:
 
 - 256 bytes produce exactly 128 distinct permutations on the 4096-state Ω.
 - Multiplicity is uniform: every permutation is realised by exactly 2 bytes.
@@ -316,7 +316,7 @@ The exponent 6 equals the number of independent degrees of freedom. Two bytes co
 
 ### 5.2 The Exact Row-Class Theorem
 
-`test_aQPU_3.py::TestExactRowClassStructure` verifies:
+`test_hQVM_3.py::TestExactRowClassStructure` verifies:
 
 The uniform transition matrix on Ω (all 256 byte transitions summed, normalised by 256) has exactly 32 distinct rows and matrix rank 32. The explanation derives from the product structure Ω = U × V:
 
@@ -329,9 +329,9 @@ y' = x ⊕ μ ⊕ p_b      (μ uniform over GF(2)⁶, p_b ∈ {0, ε})
 
 The row depends only on {y, y ⊕ ε}, giving |GF(2)⁶| / |⟨ε⟩| = 64/2 = 32 distinct row types. Every row class is confirmed to be determined by exactly one {y, y ⊕ ε} pair.
 
-`test_aQPU_3.py::TestExactRowClassStructure::test_family_restricted_row_classes` confirms: when restricted to family-0 bytes (64 bytes with p_a = p_b = 0), the ε-quotient disappears and the matrix has 64 distinct rows and rank 64.
+`test_hQVM_3.py::TestExactRowClassStructure::test_family_restricted_row_classes` confirms: when restricted to family-0 bytes (64 bytes with p_a = p_b = 0), the ε-quotient disappears and the matrix has 64 distinct rows and rank 64.
 
-The row-class lattice under controlled byte subsets (`test_aQPU_3.py::TestExactRowClassStructure::test_row_class_lattice_under_byte_subsets`) reveals:
+The row-class lattice under controlled byte subsets (`test_hQVM_3.py::TestExactRowClassStructure::test_row_class_lattice_under_byte_subsets`) reveals:
 
 | Subset | Bytes | Distinct rows |
 |--------|------:|:-------------:|
@@ -342,7 +342,7 @@ The row-class lattice under controlled byte subsets (`test_aQPU_3.py::TestExactR
 | bit0=1 | 128 | 64 |
 | Each single family | 64 | 64 |
 
-Boundary bit 7 produces the ε-quotient collapse from 64 to 32. Bit 0 does not. This asymmetry reflects the chirality of the transition law: bit 7 controls the complement applied to the B component output (invert_b), while bit 0 controls the complement on A_next (invert_a). The ε-quotient arises from bit 7 because it determines whether B_next receives a global complement, collapsing two distinct code coordinates into one equivalence class.
+Boundary bit 7 produces the ε-quotient collapse from 64 to 32. Bit 0 does not. This asymmetry reflects the chirality of the transition rule: bit 7 controls the complement applied to the B component output (invert_b), while bit 0 controls the complement on A_next (invert_a). The ε-quotient arises from bit 7 because it determines whether B_next receives a global complement, collapsing two distinct code coordinates into one equivalence class.
 
 ---
 
@@ -350,13 +350,13 @@ Boundary bit 7 produces the ε-quotient collapse from 64 to 32. Bit 0 does not. 
 
 ### 6.1 Per-Byte Capacity
 
-`test_aQPU_3.py::TestChannelCapacity::test_per_byte_capacity` verifies on 500 sampled states:
+`test_hQVM_3.py::TestChannelCapacity::test_per_byte_capacity` verifies on 500 sampled states:
 
 From any state in Ω, all 256 bytes produce exactly 128 distinct next states with exactly uniform 2-to-1 multiplicity. Shannon entropy and min-entropy are both exactly 7.0 bits, with zero variance across all sampled states. The channel operates at maximum capacity for 128 outputs.
 
 ### 6.2 Exact Two-Step Uniformisation
 
-`test_aQPU_3.py::TestExactTwoStepUniformization` verifies by exhaustive enumeration of all 256² = 65536 length-2 words from rest:
+`test_hQVM_3.py::TestExactTwoStepUniformization` verifies by exhaustive enumeration of all 256² = 65536 length-2 words from rest:
 
 Each of the 4096 Ω states is reached by exactly 16 words. The distribution is not approximately uniform. It is exactly uniform, confirmed by integer equality on all 4096 output counts.
 
@@ -364,11 +364,11 @@ In a structural comparison: a generic classical random walk on a 4096-state grap
 
 ### 6.3 Depth-4 Output Distribution
 
-`test_aQPU_3.py::TestChannelCapacity::test_depth4_output_distribution` verifies with 200,000 random 4-byte words from rest: all 4096 states reached, Shannon entropy 11.9855 bits (sample-limited; the true value is exactly 12.0 bits, as implied by the exact two-step uniformisation result).
+`test_hQVM_3.py::TestChannelCapacity::test_depth4_output_distribution` verifies with 200,000 random 4-byte words from rest: all 4096 states reached, Shannon entropy 11.9855 bits (sample-limited; the true value is exactly 12.0 bits, as implied by the exact two-step uniformisation result).
 
 ### 6.4 Exact Integer Information Measures
 
-`test_aQPU_3.py::TestFingerprintDiscrimination::test_conditional_entropies_length2_exact` computes exact conditional entropies for length-2 trajectories (exhaustive over all 256² words):
+`test_hQVM_3.py::TestFingerprintDiscrimination::test_conditional_entropies_length2_exact` computes exact conditional entropies for length-2 trajectories (exhaustive over all 256² words):
 
 ```
 H(state)            = 12.000000 bits   (log₂(4096))
@@ -380,11 +380,11 @@ Distinct (state, parity) pairs: 8192 = 4096 × 2
 
 These are exact integers. The parity commitment adds exactly 1 bit of information beyond the final state, uniformly across all 4096 states.
 
-`test_aQPU_3.py::TestFingerprintDiscrimination::test_parity_vs_chirality_mutual_information` confirms that chirality and parity are effectively independent: mutual information I(χ; parity) = 0.014 bits ≈ 0 (measured on 200,000 random trajectories). They carry distinct aspects of trajectory information.
+`test_hQVM_3.py::TestFingerprintDiscrimination::test_parity_vs_chirality_mutual_information` confirms that chirality and parity are effectively independent: mutual information I(χ; parity) = 0.014 bits ≈ 0 (measured on 200,000 random trajectories). They carry distinct aspects of trajectory information.
 
 ### 6.5 Trajectory Compression
 
-`test_aQPU_3.py::TestTrajectoryCompression::test_provenance_redundancy_by_length`:
+`test_hQVM_3.py::TestTrajectoryCompression::test_provenance_redundancy_by_length`:
 
 | Length | Input bits | Distinct outputs | Output bits | Bits/byte |
 |--------|-----------|-----------------|------------|----------|
@@ -401,7 +401,7 @@ Beyond length 2, additional bytes contribute zero new state information. They do
 
 ### 7.1 The Exact Error Enumerator
 
-`test_aQPU_3.py::TestExactErrorEnumerator` verifies:
+`test_hQVM_3.py::TestExactErrorEnumerator` verifies:
 
 Because Ω has product form U × V with both factors being C64 cosets, errors that keep a state within Ω are exactly characterised. The undetected weight enumerator is (1 + z²)^12: the fraction of weight-w errors that are undetected is C(12, w/2) / C(24, w) if w is even, and 0 if w is odd.
 
@@ -414,11 +414,11 @@ Because Ω has product form U × V with both factors being C64 cosets, errors th
 
 All odd-weight errors are detected. The minimum undetected error has weight 2 (single pair flip). Observed values match theoretical values within the standard error of the sampled estimate (512 states sampled).
 
-`test_aQPU_3.py::TestExactErrorEnumerator::test_pair_flip_destinations_are_c64` confirms: pair-flip errors in either A or B always stay in Ω, and the resulting displacement is always a C64 codeword.
+`test_hQVM_3.py::TestExactErrorEnumerator::test_pair_flip_destinations_are_c64` confirms: pair-flip errors in either A or B always stay in Ω, and the resulting displacement is always a C64 codeword.
 
 ### 7.2 The Exact Perturbation Law
 
-`test_aQPU_3.py::TestExactPerturbationLaw::test_exact_per_bit_decomposition` verifies exhaustively (all 256 bytes, all 8 bit positions):
+`test_hQVM_3.py::TestExactPerturbationLaw::test_exact_per_bit_decomposition` verifies exhaustively (all 256 bytes, all 8 bit positions):
 
 Flipping one bit of a byte changes the chirality transport q6 by:
 - **Payload bits (positions 1-6):** exactly 1 chirality bit.
@@ -430,13 +430,13 @@ These values are exact (verified to 10^(−10) precision). The overall mean chir
 (6 × 1 + 2 × 6) / 8 = 18/8 = 2.25 chirality bits
 ```
 
-The corresponding state distance is exactly 2 × chirality distance (pair-diagonal mapping). The ratio state_distance / chirality_distance = 2.000 is confirmed constant over trajectory lengths 1 through 32 with zero collision rate (`test_aQPU_3.py::TestExactPerturbationLaw::test_spreading_is_length_independent`).
+The corresponding state distance is exactly 2 × chirality distance (pair-diagonal mapping). The ratio state_distance / chirality_distance = 2.000 is confirmed constant over trajectory lengths 1 through 32 with zero collision rate (`test_hQVM_3.py::TestExactPerturbationLaw::test_spreading_is_length_independent`).
 
 Boundary bits contribute 6× more disturbance than payload bits because flipping a boundary bit toggles the ε-complement on one component, affecting all 6 dipole pairs simultaneously.
 
 ### 7.3 Exact Tamper Detection Mechanisms
 
-`test_aQPU_3.py::TestTamperDetection` verifies three tamper categories. In each case, every miss has an exact algebraic explanation.
+`test_hQVM_3.py::TestTamperDetection` verifies three tamper categories. In each case, every miss has an exact algebraic explanation.
 
 **Substitution** (`test_substitution_mechanism`): Missed if and only if the replacement is the shadow partner (the other byte implementing the same 24-bit permutation). Every byte has exactly one shadow partner (differing by XOR 0xFE). Theoretical miss rate: 1/255 ≈ 0.39%. Observed: 222 misses in 50,000 trials, all 222 attributable to shadow partners.
 
@@ -451,13 +451,13 @@ Observed: 51 misses in 50,000 trials, all 51 explained by the gate stabiliser co
 
 ### 7.4 Adversarial Steering
 
-`test_aQPU_3.py::TestAdversarialSteering::test_steering_and_exact_multiplicity` verifies by exhaustive enumeration of all 256² length-2 words from rest:
+`test_hQVM_3.py::TestAdversarialSteering::test_steering_and_exact_multiplicity` verifies by exhaustive enumeration of all 256² length-2 words from rest:
 
 - Depth-2 covers all of Ω (4096 states).
 - Byte-path multiplicity is exactly uniform: every target receives exactly 16 byte-paths.
 - State-path multiplicity is exactly uniform: every target has exactly 4 distinct intermediate states.
 
-`test_aQPU_3.py::TestAdversarialSteering::test_horizon_maintenance` verifies: from any complement horizon state, exactly 4 of 256 bytes keep the state on the horizon (fraction 4/256 = 1/64, uniform across all 64 horizon states).
+`test_hQVM_3.py::TestAdversarialSteering::test_horizon_maintenance` verifies: from any complement horizon state, exactly 4 of 256 bytes keep the state on the horizon (fraction 4/256 = 1/64, uniform across all 64 horizon states).
 
 ---
 
@@ -465,7 +465,7 @@ Observed: 51 misses in 50,000 trials, all 51 explained by the gate stabiliser co
 
 ### 8.1 Graph State Factorisation
 
-`test_aQPU_2.py::TestGraphStateFactorization` verifies:
+`test_hQVM_2.py::TestGraphStateFactorization` verifies:
 
 The pair-diagonal collapse of C64 codewords from 12 bits to 6 bits is a bijection onto GF(2)⁶ (64 codewords map to 64 distinct 6-bit words).
 
@@ -484,7 +484,7 @@ Verified for t ∈ {0, 0b101010, 0b111111, 0b010101} to precision 10^(−12). Ad
 
 ### 8.2 Bell Inequality Violation
 
-`test_aQPU_2.py::TestBellCHSH` verifies:
+`test_hQVM_2.py::TestBellCHSH` verifies:
 
 Both Bell pair types saturate the CHSH inequality at the Tsirelson bound:
 
@@ -495,13 +495,13 @@ CHSH(|Ψ⁺⟩) = 2√2 = 2.828427...   (to precision 10^(−12))
 
 This exceeds the classical bound of 2 and equals the quantum-mechanical maximum. All 6 pair factors of the graph state with t = 0b101010 individually saturate the Tsirelson bound.
 
-`test_aQPU_2.py::TestBellCHSH::test_no_measurements_exceed_tsirelson` confirms by exhaustive search over a discrete measurement angle grid (10 angles per setting, 10⁴ total combinations) that no CHSH value exceeds 2√2.
+`test_hQVM_2.py::TestBellCHSH::test_no_measurements_exceed_tsirelson` confirms by exhaustive search over a discrete measurement angle grid (10 angles per setting, 10⁴ total combinations) that no CHSH value exceeds 2√2.
 
 The saturation of the Tsirelson bound rules out local hidden-variable models for the pairwise correlations and confirms that the code structure demands maximal quantum correlations.
 
 ### 8.3 Quantum Teleportation
 
-`test_aQPU_2.py::TestTeleportationProtocol` verifies:
+`test_hQVM_2.py::TestTeleportationProtocol` verifies:
 
 For each of the 8 combinations (2 Bell resource types × 4 measurement outcomes), a unique Pauli correction {I, X, Z, XZ} exists that recovers the input state. The correction is identified from a generic probe state and then confirmed to work for:
 - 6 standard basis and phase states (|0⟩, |1⟩, |+⟩, |−⟩, |+i⟩, |−i⟩)
@@ -511,7 +511,7 @@ All overlaps equal 1.0 to precision 10^(−10).
 
 ### 8.4 Monogamy and No-Signalling
 
-`test_aQPU_2.py::TestMonogamyAndNoSignalling` verifies:
+`test_hQVM_2.py::TestMonogamyAndNoSignalling` verifies:
 
 - Same-pair marginals are pure Bell states (purity = 1.0 to precision 10^(−12)).
 - Cross-pair marginals (A_k with B_l, k ≠ l) are maximally mixed: ρ = I₄/4 (precision 10^(−12)). Each Alice qubit is maximally entangled with exactly one Bob qubit.
@@ -520,7 +520,7 @@ All overlaps equal 1.0 to precision 10^(−10).
 
 ### 8.5 Stabiliser Structure
 
-`test_aQPU_2.py::TestGraphStateStabilizer` verifies:
+`test_hQVM_2.py::TestGraphStateStabilizer` verifies:
 
 The graph state has 12 generators, two per pair:
 - X-type: X_{A_k} X_{B_k} (phase +1)
@@ -532,7 +532,7 @@ The X-type translation subgroup has GF(2) rank 6 and 64 elements, matching C64. 
 
 ### 8.6 Contextuality
 
-`test_aQPU_2.py::TestPeresMerminContextuality` verifies:
+`test_hQVM_2.py::TestPeresMerminContextuality` verifies:
 
 The Peres-Mermin square of nine 2-qubit observables:
 
@@ -548,7 +548,7 @@ Any noncontextual hidden-variable assignment that assigns definite ±1 values co
 
 ### 8.7 Mutually Unbiased Bases
 
-`test_aQPU_2.py::TestMutuallyUnbiasedBases` verifies:
+`test_hQVM_2.py::TestMutuallyUnbiasedBases` verifies:
 
 The 64 × 64 Walsh-Hadamard matrix on the chirality register is unitary (H H^T = I₆₄ to precision 10^(−12)). It factors as the tensor sixth power of the single-qubit Hadamard H₁ = [[1,1],[1,−1]]/√2.
 
@@ -564,7 +564,7 @@ A third MUB is constructed via a phase gate composed with the Hadamard. The over
 
 The Moments Tests Report (Part VI) establishes that the byte alphabet generates exactly 8192 operators: 4096 even-parity (identity linear part) and 4096 odd-parity (swap linear part), forming a semidirect product. The central spinorial involution (4-family cycle = global complement) commutes with all bytes.
 
-`test_aQPU_4.py::TestOperatorFamily::test_operator_family_size` confirms from the aQPU perspective:
+`test_hQVM_4.py::TestOperatorFamily::test_operator_family_size` confirms from the hQVM perspective:
 - Length-1 words (single bytes) produce 128 distinct odd-parity operators (the 256 bytes collapse via the 2-to-1 shadow).
 - Length-2 words produce 4096 distinct even-parity translations.
 - Total distinct operators reachable at depth ≤ 2: 128 + 4096 = 4224.
@@ -573,19 +573,19 @@ The remaining 8192 − 4224 = 3968 operators require depth ≥ 3 to reach (the f
 
 ### 9.2 Even Operators as Translations
 
-`test_aQPU_4.py::TestOperatorFamily::test_even_operators_as_6qubit_unitaries` verifies:
+`test_hQVM_4.py::TestOperatorFamily::test_even_operators_as_6qubit_unitaries` verifies:
 
 The 4096 even operators have identity linear part: (A, B) → (A ⊕ τ_A, B ⊕ τ_B). The set of (τ_A, τ_B) pairs is exactly C64 × C64 (the full Cartesian product of the two 64-element code cosets). This means A and B can be independently translated within their respective cosets by length-2 byte words.
 
 ### 9.3 Single-Byte Operations are Product
 
-`test_aQPU_4.py::TestOperatorFamily::test_single_byte_intra_register_coupling` verifies:
+`test_hQVM_4.py::TestOperatorFamily::test_single_byte_intra_register_coupling` verifies:
 
 For each of the 256 bytes, the test perturbs one input spin of A at a time (keeping B at rest) and counts how many output spins change. Result: 0 of 256 bytes show multi-qubit coupling within a component. Each byte acts as independent single-qubit operations on each of the 6 axis-orientation pairs.
 
-`test_aQPU_4.py::TestOperatorFamily::test_depth2_intra_register_coupling` extends this to 2000 random 2-byte words with the same result: 0 entangling words detected. Intra-component coupling is absent at depth ≤ 2.
+`test_hQVM_4.py::TestOperatorFamily::test_depth2_intra_register_coupling` extends this to 2000 random 2-byte words with the same result: 0 entangling words detected. Intra-component coupling is absent at depth ≤ 2.
 
-The entangling power of the byte algebra operates between the A and B manifolds through the gate structure. Gate S swaps A and B, propagating any perturbation in A into B. Gate C additionally applies a global sign flip. `test_aQPU_4.py::TestNativeUniversalComputation::test_topological_entanglement_via_intrinsic_gates` confirms: a localised perturbation in A (flipping pair 0, mask 0x003) is transported exactly to B by gate S, producing the same pair flip in the B output. A and B cannot be treated as independent classical registers; the gate operations make them topologically correlated.
+The entangling power of the byte algebra operates between the A and B manifolds through the gate structure. Gate S swaps A and B, propagating any perturbation in A into B. Gate C additionally applies a global sign flip. `test_hQVM_4.py::TestNativeUniversalComputation::test_topological_entanglement_via_intrinsic_gates` confirms: a localised perturbation in A (flipping pair 0, mask 0x003) is transported exactly to B by gate S, producing the same pair flip in the B output. A and B cannot be treated as independent classical registers; the gate operations make them topologically correlated.
 
 ---
 
@@ -605,7 +605,7 @@ The same constant, raised to the fourth power and normalised by m_a, yields the 
 
 ### 10.2 Distance from Clifford Angles
 
-`test_aQPU_4.py::TestNonCliffordAndUniversality::test_delta_bu_not_clifford_angle` verifies:
+`test_hQVM_4.py::TestNonCliffordAndUniversality::test_delta_bu_not_clifford_angle` verifies:
 
 δ_BU is far from all Clifford angles (multiples of π/4):
 
@@ -623,17 +623,17 @@ Clifford operations (Hadamard, phase, CNOT) form a finite group and are efficien
 
 ### 10.3 Dense U(1) Orbit
 
-`test_aQPU_4.py::TestNonCliffordAndUniversality::test_high_order_non_periodicity` verifies:
+`test_hQVM_4.py::TestNonCliffordAndUniversality::test_high_order_non_periodicity` verifies:
 
 The rotation R(δ_BU) does not return to identity for any k ≤ 100,000. The closest return is at k = 22,805, distance 4.59 × 10^(−5) rad (non-negligible: the ratio to 2π/100000 is 0.73). This confirms the absence of low-order periodicity.
 
-`test_aQPU_4.py::TestNonCliffordAndUniversality::test_dense_phase_equidistribution` verifies:
+`test_hQVM_4.py::TestNonCliffordAndUniversality::test_dense_phase_equidistribution` verifies:
 
 The phase sequence {k × δ_BU mod 2π : k = 1, …, 50000} equidistributes over [0, 2π). Binned into 100 equal intervals: range [498, 502] against an expected 500, chi-squared = 0.212 against a critical value of 142.4. This confirms that R(δ_BU) generates a dense subgroup of U(1), which is a necessary condition for the Solovay-Kitaev approximation theorem.
 
 ### 10.4 Magic State and Negative Wigner Function
 
-`test_aQPU_4.py::TestNonCliffordAndUniversality::test_magic_state_wigner_negativity` verifies:
+`test_hQVM_4.py::TestNonCliffordAndUniversality::test_magic_state_wigner_negativity` verifies:
 
 The state |δ⟩ = (|0⟩ + e^(i × δ_BU)|1⟩) / √2 has discrete Wigner function:
 
@@ -649,7 +649,7 @@ W(0,1) is negative. Negative Wigner function values certify a state as a non-sta
 
 ### 10.5 The Aperture and the Non-Clifford Resource
 
-`test_aQPU_4.py::TestNonCliffordAndUniversality::test_aperture_as_universality_window` confirms:
+`test_hQVM_4.py::TestNonCliffordAndUniversality::test_aperture_as_universality_window` confirms:
 
 ```
 |δ_BU − m_a| = 0.004128963621
@@ -666,7 +666,7 @@ The byte-scale quantisation of the aperture is 5/256 ≈ 0.01953, and the depth-
 
 ### 11.1 Oracle Query Advantages
 
-`test_aQPU_4.py::TestByteAlgebraComputationalPower` establishes three oracle-model advantages on the native 6-bit chirality register.
+`test_hQVM_4.py::TestByteAlgebraComputationalPower` establishes three oracle-model advantages on the native 6-bit chirality register.
 
 **Deutsch-Jozsa** (`test_deutsch_jozsa_on_chirality`):
 
@@ -707,25 +707,25 @@ The Walsh transform of the kernel indicator function gives uniform non-zero ampl
 
 ### 11.2 Commutativity Decision
 
-`test_aQPU_4.py::TestByteAlgebraComputationalPower::test_commutativity_as_computational_resource`:
+`test_hQVM_4.py::TestByteAlgebraComputationalPower::test_commutativity_as_computational_resource`:
 
 The q-map provides an O(1) algorithm for deciding whether two bytes commute: compute q6(x) and q6(y), compare. Classical testing requires applying both orderings to a test state (4 kernel steps). Confirmed correct on all 5000 tested pairs (5000/5000).
 
 ### 11.3 Native Period Structure
 
-`test_aQPU_4.py::TestNativeQuantumAdvantage::test_factorization_period_finding_isomorphism`:
+`test_hQVM_4.py::TestNativeQuantumAdvantage::test_depth_4_holonomic_closure`:
 
-Every byte has topological period 4 on Ω: T_b^4 = id for all b. This is universal across the entire alphabet. The period structure is the algebraic backbone required by period-finding algorithms. The aQPU does not need to search for the period; it is built into the transition law.
+Every byte has topological period 4 on Ω: T_b^4 = id for all b. This is universal depth-4 holonomic closure built into the transition rule.
 
 ### 11.4 Structural Mixing Advantage
 
-`test_aQPU_4.py::TestStructuralAdvantage::test_two_step_uniformization_advantage`:
+`test_hQVM_4.py::TestStructuralAdvantage::test_two_step_uniformization_advantage`:
 
 Exact uniformisation in 2 steps versus O(log 4096) ≈ 12 steps for a generic classical random-walk baseline on a 4096-state graph. The distribution after 2 steps is exactly uniform (every count = 16, verified by integer equality), not approximately uniform.
 
 ### 11.5 Holographic Compression
 
-`test_aQPU_4.py::TestStructuralAdvantage::test_holographic_compression_advantage`:
+`test_hQVM_4.py::TestStructuralAdvantage::test_holographic_compression_advantage`:
 
 The holographic identity |H|² = |Ω| provides structural compression:
 
@@ -739,13 +739,13 @@ The holographic dictionary covers all of Ω with exactly uniform multiplicity 4.
 
 ### 11.6 State Separation
 
-`test_aQPU_3.py::TestStateSeparation::test_universal_separation`:
+`test_hQVM_3.py::TestStateSeparation::test_universal_separation`:
 
 Every byte distinguishes every distinct state pair, verified on 1000 sampled pairs with all 256 bytes. This follows from per-byte bijectivity on the full 2^24 carrier.
 
-`test_aQPU_3.py::TestStateSeparation::test_byte_preserves_hamming_distance` confirms: Hamming distance between states is preserved under every byte operation (500 random (s, t, b) triples).
+`test_hQVM_3.py::TestStateSeparation::test_byte_preserves_hamming_distance` confirms: Hamming distance between states is preserved under every byte operation (500 random (s, t, b) triples).
 
-The exact pairwise distance distribution on Ω follows from the product structure and the weight enumerator of C64 × C64. The distribution at Hamming distance 2k is C(12, k) / 4096, with mean distance exactly 12.0 and total fraction exactly 1.0 (`test_aQPU_3.py::TestStateSeparation::test_exact_omega_pairwise_distance_distribution`).
+The exact pairwise distance distribution on Ω follows from the product structure and the weight enumerator of C64 × C64. The distribution at Hamming distance 2k is C(12, k) / 4096, with mean distance exactly 12.0 and total fraction exactly 1.0 (`test_hQVM_3.py::TestStateSeparation::test_exact_omega_pairwise_distance_distribution`).
 
 ---
 
@@ -753,7 +753,7 @@ The exact pairwise distance distribution on Ω follows from the product structur
 
 ### 12.1 The Three Required Components
 
-The standard universality theorem for quantum computation requires three ingredients: a Clifford backbone, a non-Clifford resource, and entangling operations. The aQPU test suite, together with the previously established physics and moments results, confirms all three.
+The standard universality theorem for quantum computation requires three ingredients: a Clifford backbone, a non-Clifford resource, and entangling operations. The hQVM test suite, together with the previously established physics and moments results, confirms all three.
 
 **Clifford backbone.** The Moments Tests Report (Part VI) establishes that every byte action is an exact Clifford unitary in the label space over GF(2)^12. Clifford conjugation properties are verified exhaustively for all 256 bytes on all 4096 labels. The self-dual [12,6,2] code has 6 pair generators spanning the code (GF(2) rank 6), and 12 Pauli stabiliser generators (X-type and Z-type) that all commute (symplectic product zero for all pairs, GF(2) rank 12).
 
@@ -763,13 +763,13 @@ The standard universality theorem for quantum computation requires three ingredi
 
 ### 12.2 Dense Operator Generation
 
-`test_aQPU_4.py::TestNativeUniversalComputation::test_computational_universality_via_word_algebra` verifies:
+`test_hQVM_4.py::TestNativeUniversalComputation::test_computational_universality_via_word_algebra` verifies:
 
-From 10,000 random length-3 byte words, 3729 distinct operator signatures are generated on a 10-state truncation of Ω. The word signature composition law is confirmed to match concatenation for 500 random word pairs (`test_aQPU_4.py::TestPublicAPIConsistency::test_word_signature_composition_matches_concatenation`). The rapid growth of distinct operator signatures with word length, combined with the non-Clifford phase δ_BU, supports the conclusion that the byte word algebra generates a dense subgroup of the relevant operator group on the 6-qubit register.
+From 10,000 random length-3 byte words, 3729 distinct operator signatures are generated on a 10-state truncation of Ω. The word signature composition rule is confirmed to match concatenation for 500 random word pairs (`test_hQVM_4.py::TestPublicAPIConsistency::test_word_signature_composition_matches_concatenation`). The rapid growth of distinct operator signatures with word length, combined with the non-Clifford phase δ_BU, supports the conclusion that the byte word algebra generates a dense subgroup of the relevant operator group on the 6-qubit register.
 
 ### 12.3 Public API Consistency
 
-`test_aQPU_4.py::TestPublicAPIConsistency` verifies:
+`test_hQVM_4.py::TestPublicAPIConsistency` verifies:
 
 - `word6_to_pairdiag12` and `pairdiag12_to_word6` are exact inverses on all 64 values.
 - `q_word12` collapse matches `q_word6` for all 256 bytes.
@@ -780,7 +780,7 @@ From 10,000 random length-3 byte words, 3729 distinct operator signatures are ge
 
 ## Part 13: Non-Cloning Properties
 
-`test_aQPU_1.py::TestNonCloning` verifies:
+`test_hQVM_1.py::TestNonCloning` verifies:
 
 - No byte is its own intron: byte ⊕ 0xAA ≠ byte for any byte (transcription has no fixed points).
 - Exactly one byte produces intron 0x00: the archetype 0xAA itself (the archetype is the unique zero-mutation source).
@@ -794,7 +794,7 @@ These properties are the discrete realisation of the quantum no-cloning theorem:
 
 ## Part 14: C Engine and Low-Level Tensor Math (via SDK)
 
-`test_aQPU_SDK_1.py` verifies the native C engine and operator algebra exposed through the SDK (`sdk.RuntimeOps`, `sdk.TensorOps`, `sdk.OperatorOps`). These tests require the compiled C library; they are skipped when the library is unavailable.
+`test_hQVM_SDK_1.py` verifies the native C engine and operator algebra exposed through the SDK (`sdk.RuntimeOps`, `sdk.TensorOps`, `sdk.OperatorOps`). These tests require the compiled C library; they are skipped when the library is unavailable.
 
 ### 14.1 C Engine Availability
 
@@ -856,7 +856,7 @@ All 185 tests pass. Properties are organised by the evidential layer in which th
 
 A defining strength of the verified structure is **exactness**: many results are not approximate numerics but exact structural equalities. These include: the 4096-state Ω; two 64-state horizons (complement and equality); 128 distinct permutations from 256 bytes (uniform 2-to-1); exactly 32 row classes (64 under family-0 restriction); exact 2-step uniformisation (every state reached exactly 16 times); exact 1-bit parity beyond state at length 2; exact 4-to-1 q-fibers and holographic dictionary; and exactly 16 byte-paths and 4 state-paths per target. The report's conclusions rest on these exact counts and identities wherever cited.
 
-### Kernel-Native Verified Structure (aQPU Tests + Physics/Moments Reports)
+### Kernel-Native Verified Structure (hQVM Tests + Physics/Moments Reports)
 
 **Native register:**
 - GENE_Mac is a ±1 tensor with 6 axis-orientation qubits per component.
@@ -903,7 +903,7 @@ A defining strength of the verified structure is **exactness**: many results are
 
 **Error detection:**
 - Undetected enumerator: (1 + z²)^12. All odd-weight errors detected.
-- Perturbation law: boundary 6×, payload 1×, mean 2.25 chirality bits per bit flip. Ratio 2.000 exact.
+- Perturbation rule: boundary 6×, payload 1×, mean 2.25 chirality bits per bit flip. Ratio 2.000 exact.
 
 **Tamper detection:**
 - Substitution: 1/255 miss rate, shadow partners only.
@@ -916,7 +916,7 @@ A defining strength of the verified structure is **exactness**: many results are
 - Equality horizon: redundant information. Complement horizon: relational information.
 - Horizons structurally isolated under all gate operations.
 
-### Hilbert-Lift Verified Consequences (aQPU Test File 2)
+### Hilbert-Lift Verified Consequences (hQVM Test File 2)
 
 - Graph state factorises into 6 independent Bell pairs (tensor product, exact to 10^(−12)).
 - CHSH violation at Tsirelson bound 2√2 for both Bell pair types and all 6 graph state pairs.
@@ -928,7 +928,7 @@ A defining strength of the verified structure is **exactness**: many results are
 - Peres-Mermin contextuality: row products +I, column 2 product −I. Noncontextual assignment impossible.
 - MUBs: computational and Hadamard bases mutually unbiased. Walsh-Hadamard = H₁^(⊗6). Third MUB exists.
 
-### Computational Consequences (aQPU Test Files 3 and 4)
+### Computational Consequences (hQVM Test Files 3 and 4)
 
 **Operator family:**
 - 128 odd-parity (length-1) + 4096 even-parity (length-2) = 4224 operators at depth ≤ 2.
@@ -950,7 +950,7 @@ A defining strength of the verified structure is **exactness**: many results are
 - Dense operator generation: 3729+ distinct signatures from 10,000 random 3-byte words.
 - Word signature composition matches concatenation (500 random pairs).
 
-**C engine and tensor math (aQPU Test File 5):**
+**C engine and tensor math (hQVM Test File 5):**
 - Native library loads; GyroMatMul symbols present.
 - Signature scan, extract-scan fused, chirality distance (pair, batch, adjacent).
 - wht64 orthonormal, self-inverse, batch-capable.
@@ -963,13 +963,13 @@ A defining strength of the verified structure is **exactness**: many results are
 - Bernstein-Vazirani: 1 Walsh step vs classical 6 queries. All secrets recovered with probability 1.
 - Hidden subgroup: native 4-to-1 q-map, kernel = 4 gate bytes. Walsh transform resolves in O(1).
 - Commutativity decision: O(1) via q-map vs O(4) classical. 5000/5000 correct.
-- Period finding: universal period 4 built into transition law.
+- Period finding: universal period 4 built into transition rule.
 - Mixing: 2 steps vs generic O(log n) ≈ 12-step baseline. Exact uniformisation.
 - Holographic compression: 8 bits vs 12 bits per state (33.3% reduction).
 - State separation: every byte distinguishes every distinct pair. Hamming distance preserved.
 
 ---
 
-*All results documented in this report are backed by passing tests. Properties established in the Physics Tests Report or Moments Tests Report are referenced, not retested. Properties newly established by the aQPU suite are cited to specific test classes and methods. Where the report asserts counts, multiplicities, or structural identities, they are exact (integer equalities, exact ranks, exact uniformisation), not approximate. The 185 aQPU tests, together with the previously verified kernel physics and moments tests, confirm that the Gyroscopic ASI aQPU Kernel kernel possesses the structural properties of an algebraic quantum processing unit.*
+*All results documented in this report are backed by passing tests. Properties established in the Physics Tests Report or Moments Tests Report are referenced, not retested. Properties newly established by the hQVM suite are cited to specific test classes and methods. Where the report asserts counts, multiplicities, or structural identities, they are exact (integer equalities, exact ranks, exact uniformisation), not approximate. The 185 hQVM tests, together with the previously verified kernel dynamics and moments tests, confirm that the Gyroscopic ASI hQVM Kernel possesses the structural properties of a Holonomic Quantum Virtual Machine (hQVM) as defined by the holonomic quantum computing paradigm (Zanardi and Rasetti 1999; Pachos et al. 2000), realized on a discrete GF(2) substrate.*
 
 

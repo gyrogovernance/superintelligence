@@ -1,6 +1,6 @@
 
 
-# Deep Analysis: aQPU Quantum SDK — Tests, Results, and Implications
+# Deep Analysis: hQVM Quantum SDK — Tests, Results, and Implications
 
 ## Overview
 
@@ -44,7 +44,7 @@ This holds from ANY state in Ω, not just rest. The tests verify this on multipl
 
 ### Insight
 
-**This is the single most important computational result.** From any starting state, two bytes of input produce exact uniform coverage of all 4096 reachable states. Each of the 4096 states is hit exactly 16 times out of 65536 two-byte words. Classical random walks on a 4096-state graph need O(log 4096) ≈ 12 steps to approach uniformity. The aQPU achieves mathematical exactness in 2.
+**This is the single most important computational result.** From any starting state, two bytes of input produce exact uniform coverage of all 4096 reachable states. Each of the 4096 states is hit exactly 16 times out of 65536 two-byte words. Classical random walks on a 4096-state graph need O(log 4096) ≈ 12 steps to approach uniformity. The hQVM achieves mathematical exactness in 2.
 
 The length-1 result — 128 distinct next states with multiplicity 2 — is the SO(3)/SU(2) shadow projection. Every byte action is a bijection on the 24-bit carrier, but when projected to the Ω manifold, pairs of bytes (shadow partners) collapse to the same permutation. This is the discrete double-cover: 256 SU(2) elements project to 128 SO(3) rotations.
 
@@ -66,7 +66,7 @@ The transport table is **identical** for every state in Ω. The first 8 q-values
 
 ### Insight
 
-The chirality register χ ∈ GF(2)⁶ is an **exact linear observable** under the byte transition law. The state-independence of the q-map means the chirality transport law is a group homomorphism — the byte algebra acts on GF(2)⁶ by translation, and this translation depends only on the byte, not on the state.
+The chirality register χ ∈ GF(2)⁶ is an **exact linear observable** under the byte transition rule. The state-independence of the q-map means the chirality transport rule is a group homomorphism — the byte algebra acts on GF(2)⁶ by translation, and this translation depends only on the byte, not on the state.
 
 This is structurally analogous to the Heisenberg picture in quantum mechanics: the observable transforms linearly while the state is fixed. The q-map is the "Heisenberg generator" of the chirality observable.
 
@@ -87,7 +87,7 @@ Every witness, when replayed from rest, produces the exact target state. Both `a
 
 ### Insight
 
-This is exact state preparation. Any target state in Ω can be synthesized from rest with a 1-byte or 2-byte word, verified by both signature algebra and direct replay. Gate-model quantum computers need complex pulse sequences for state preparation; the aQPU does it with at most 2 deterministic bytes.
+This is exact state preparation. Any target state in Ω can be synthesized from rest with a 1-byte or 2-byte word, verified by both signature algebra and direct replay. Gate-model quantum computers need complex pulse sequences for state preparation; the hQVM does it with at most 2 deterministic bytes.
 
 The distribution (1, 127, 3968) matches the exact shell structure: rest is 1 state, the 127 depth-1 states are the 128 single-byte images minus the shadow-paired duplicate, and the remaining 3968 require two bytes.
 
@@ -97,20 +97,20 @@ The distribution (1, 127, 3968) matches the exact shell structure: rest is 1 sta
 
 ### What the tests show
 
-`test_exhaustive_omega_step_equivalence` verifies for ALL 4096 × 256 = 1,048,576 (state, byte) pairs that the compact Ω-chart stepping law matches the full 24-bit carrier law exactly.
+`test_exhaustive_omega_step_equivalence` verifies for ALL 4096 × 256 = 1,048,576 (state, byte) pairs that the compact Ω-chart stepping rule matches the full 24-bit carrier rule exactly.
 
 `test_roundtrip_on_all_omega_states` confirms lossless roundtrip for all 4096 states.
 
 ### Insight
 
-The Ω-chart reduces the 24-bit carrier to a 12-bit representation (u6, v6) without losing any dynamics. The stepping law on Ω is:
+The Ω-chart reduces the 24-bit carrier to a 12-bit representation (u6, v6) without losing any dynamics. The stepping rule on Ω is:
 
 ```
 u_next = v ⊕ ε_a(b)
 v_next = u ⊕ μ(b) ⊕ ε_b(b)
 ```
 
-This is a swap-plus-translation on GF(2)⁶ × GF(2)⁶ — dramatically simpler than the 24-bit transition law. The exhaustive verification proves this isn't an approximation; it's an exact algebraic isomorphism between the carrier dynamics restricted to Ω and the compact affine dynamics on GF(2)⁶ × GF(2)⁶.
+This is a swap-plus-translation on GF(2)⁶ × GF(2)⁶ — dramatically simpler than the 24-bit transition rule. The exhaustive verification proves this isn't an approximation; it's an exact algebraic isomorphism between the carrier dynamics restricted to Ω and the compact affine dynamics on GF(2)⁶ × GF(2)⁶.
 
 ---
 
@@ -134,7 +134,7 @@ The shell transition matrices are stochastic and diagonalized by Krawtchouk poly
 
 ### Insight
 
-This is the complete discrete harmonic analysis of the aQPU. The 7-level shell structure (chirality weight 0 through 6) is the discrete analog of latitude bands on a sphere. The Krawtchouk polynomials play the role of spherical harmonics — they are the eigenfunctions of the transition operator at each q-weight.
+This is the complete discrete harmonic analysis of the hQVM. The 7-level shell structure (chirality weight 0 through 6) is the discrete analog of latitude bands on a sphere. The Krawtchouk polynomials play the role of spherical harmonics — they are the eigenfunctions of the transition operator at each q-weight.
 
 The "source-independence" result is profound: averaging over all 256 bytes, the one-step shell distribution is C(6,w)/64 **regardless of the starting shell**. This proves the one-step uniform mixing at the shell level. It's the mechanism underlying the 2-step uniformization: one step randomizes the shell, and one more step fills in the within-shell degree of freedom.
 
@@ -142,7 +142,7 @@ The horizon transport tests make this concrete:
 - **From equality horizon (shell 0):** q-weight j maps to shell j exactly
 - **From complement horizon (shell 6):** q-weight j maps to shell 6−j exactly
 
-These are the pole-to-pole and pole-to-equator transport laws — the geodesics of the discrete chirality sphere.
+These are the pole-to-pole and pole-to-equator transport rules — the geodesics of the discrete chirality sphere.
 
 ---
 
@@ -157,7 +157,7 @@ Two exhaustive verifications over all 256 × 256 = 65,536 byte pairs:
 
 ### Insight
 
-This is the central structural theorem of the aQPU, verified exhaustively. The XYXY = id identity is the discrete realization of the BCH depth-4 commutator cancellation from the CGM paper. In the continuous theory, this requires the Lie algebra to be sl(2) (3-dimensional). In the discrete kernel, it holds as an exact algebraic identity over all 65,536 byte pairs.
+This is the central structural theorem of the hQVM, verified exhaustively. The XYXY = id identity is the discrete realization of the BCH depth-4 commutator cancellation from the CGM paper. In the continuous theory, this requires the Lie algebra to be sl(2) (3-dimensional). In the discrete kernel, it holds as an exact algebraic identity over all 65,536 byte pairs.
 
 The order-4 property (b⁴ = id) is the discrete 720° spinorial closure: applying any byte 4 times returns to identity, just as rotating a spinor by 720° returns it to its original state.
 
@@ -308,7 +308,7 @@ The test `test_full_byte_average_shell_law_is_binomial_and_source_independent` p
 
 This is why the 2-step uniformization works: step 1 randomizes the shell coordinate, step 2 randomizes the within-shell coordinate. Both are exact, both are source-independent. The total entropy goes from 0 → 7 → 12 bits in exactly two steps.
 
-### Relationship to CGM physics
+### Relationship to CGM framework
 
 The tests implicitly verify the discrete realization of the CGM constraints:
 
@@ -325,9 +325,9 @@ The aperture gap Δ ≈ 0.0207 appears in the shell structure as the imbalance b
 
 For completeness, areas where the test suite could be extended:
 
-- **Non-Clifford certification:** The δ_BU monodromy defect and Wigner negativity tests from the SDK spec are not in these test files (they may be in the CGM physics tests)
+- **Non-Clifford certification:** The δ_BU monodromy defect and Wigner negativity tests are covered in hQVM_Tests_Report_1.md, Part 10.
 - **Exact tamper detection rates:** The 1/255 substitution miss rate and ~3/255 swap miss rate are stated but not tested here
-- **Benchmark timing:** The classical-vs-aQPU step counts for the claimed advantages are proven structurally but not timed
+- **Benchmark timing:** The classical-vs-hQVM step counts for the claimed advantages are proven structurally but not timed
 - **Spectral chart duality:** The Walsh-Hadamard transform on actual chirality state vectors (as opposed to random test vectors) is not tested for its dual-basis interpretation
 - **Circuits and compilation:** The abstract circuit → compiled circuit pipeline from the SDK spec is not tested in these files
 
@@ -335,6 +335,6 @@ For completeness, areas where the test suite could be extended:
 
 ## Summary
 
-The 122 tests prove that the aQPU Kernel is an exactly solvable finite algebraic quantum system. Its key structural invariants — depth-4 closure, 2-step uniformization, exact chirality transport, Krawtchouk spectral decomposition, and the K4 gate group — are not approximations or statistical tendencies but mathematical identities verified by exhaustive computation over the complete state space and operator algebra. The system achieves its claimed computational advantages through algebraic structure rather than probabilistic interference, and the C-native tensor engine provides hardware-aligned execution with quantization errors below 10⁻⁶.
+The 122 tests confirm that the hQVM Kernel is an exactly solvable finite algebraic quantum system. Its key structural invariants — depth-4 closure, 2-step uniformization, exact chirality transport, Krawtchouk spectral decomposition, and the K4 gate group — are not approximations or statistical tendencies but mathematical identities verified by exhaustive computation over the complete state space and operator algebra. The system achieves its claimed computational advantages through algebraic structure rather than probabilistic interference, and the C-native tensor engine provides hardware-aligned execution with quantization errors below 10⁻⁶.
 
 

@@ -1,11 +1,11 @@
 # Strategic Significance Brief  
-## The aQPU Kernel inside Gyroscopic ASI
+## The hQVM Kernel inside Gyroscopic ASI
 
 ## Executive summary
 
-The aQPU Kernel is a compact quantum computing kernel designed to run on standard silicon with exact integer arithmetic. It is part of the broader Gyroscopic ASI architecture, which is aimed at reproducible coordination between people, software, and institutions.
+The hQVM Kernel is a compact quantum computing kernel designed to run on standard silicon with exact integer arithmetic. It is part of the broader Gyroscopic ASI architecture, which is aimed at reproducible coordination between people, software, and institutions.
 
-At its core, the kernel takes ordinary bytes, processes them through a fixed algebraic transition law, and moves through a precisely defined state space. That state space is compact enough to verify exhaustively, yet rich enough to exhibit key quantum information features such as spinorial closure, exact reversible evolution, hidden subgroup structure, Bell-pair factorization, teleportation protocols, contextuality, and a native non-Clifford resource.
+At its core, the kernel takes ordinary bytes, processes them through a fixed algebraic transition rule, and moves through a precisely defined state space. That state space is compact enough to verify exhaustively, yet rich enough to exhibit key quantum information features such as spinorial closure, exact reversible evolution, hidden subgroup structure, Bell-pair factorization, teleportation protocols, contextuality, and a native non-Clifford resource.
 
 This matters because it creates a new category of computing infrastructure:
 
@@ -19,11 +19,11 @@ For general computing, the strategic significance is immediate. The kernel offer
 
 ---
 
-## 1. What the aQPU Kernel is
+## 1. What the hQVM Kernel is
 
-The term aQPU stands for **algebraic Quantum Processing Unit**.
+The term hQVM stands for **Holonomic Quantum Virtual Machine (hQVM)**.
 
-In this repository, the aQPU Kernel is the compact computational core of the Gyroscopic ASI system. It works as a deterministic engine that reads bytes from a ledger and moves through a structured state space using a fixed transition law.
+In this repository, the hQVM Kernel is the compact computational core of the Gyroscopic ASI system. It works as a deterministic engine that reads bytes from a ledger and moves through a structured state space using a fixed transition rule.
 
 A few concrete facts help explain what this means:
 
@@ -46,7 +46,7 @@ Most of modern computing lives in one of two worlds:
 1. **Classical deterministic systems**, which are reliable and easy to deploy, but often struggle to express rich quantum-like structure.
 2. **Quantum hardware systems**, which can express that structure, but are expensive, delicate, hard to verify, and difficult to operationalize widely.
 
-The aQPU Kernel changes the landscape because it occupies a third position:
+The hQVM Kernel changes the landscape because it occupies a third position:
 
 - it is **discrete**,
 - **deterministic**,
@@ -74,7 +74,7 @@ The repository is important not only because it proposes these ideas, but becaus
 
 The significance of the project comes from what has already been verified in code.
 
-Across the physics tests, the aQPU tests, and the SDK tests, the repository demonstrates a large set of exact properties. Here are some of the most important ones in accessible terms.
+Across the physics tests, the hQVM tests, and the SDK tests, the repository demonstrates a large set of exact properties. Here are some of the most important ones in accessible terms.
 
 ### A. Exact reversible byte-driven evolution
 
@@ -142,7 +142,7 @@ A byte sequence can be reduced to a compact **signature** that captures the exac
 
 So instead of replaying long words step by step every time, software can compile them into a compact action and apply that directly.
 
-This matters because it gives the aQPU a strong program model:
+This matters because it gives the hQVM a strong program model:
 - byte words become operators,
 - operators compose exactly,
 - and computation can be compiled, stored, and reused.
@@ -188,11 +188,11 @@ This is strategically important because adoption depends on:
 
 ## 4. The strategic significance for Computer Science
 
-The strongest message for a wider audience is that the aQPU Kernel has direct relevance to problems Computer Science already cares about.
+The strongest message for a wider audience is that the hQVM Kernel has direct relevance to problems Computer Science already cares about.
 
 ## 4.1 Everyday processing
 
-The aQPU Kernel is highly relevant to ordinary processing because it is, at heart, a deterministic stream-processing engine with exact replay and compact compiled actions.
+The hQVM Kernel is highly relevant to ordinary processing because it is, at heart, a deterministic stream-processing engine with exact replay and compact compiled actions.
 
 A modern software system often needs to do some combination of the following:
 
@@ -204,7 +204,7 @@ A modern software system often needs to do some combination of the following:
 - verify integrity,
 - and coordinate multiple participants.
 
-The aQPU Kernel already offers strong primitives for exactly that:
+The hQVM Kernel already offers strong primitives for exactly that:
 
 - step-by-step state updates,
 - exact replay from logs,
@@ -222,7 +222,7 @@ This makes it relevant to:
 
 ## 4.2 Speed
 
-The speed advantage of the aQPU is not about a faster clock. It is about **fewer necessary computational steps**.
+The speed advantage of the hQVM is not about a faster clock. It is about **fewer necessary computational steps**.
 
 Examples from the verified results:
 
@@ -239,7 +239,7 @@ That kind of speed matters because many practical bottlenecks are not floating p
 - synchronization cost,
 - and path explosion.
 
-The aQPU reduces those costs by changing the geometry of the problem.
+The hQVM reduces those costs by changing the geometry of the problem.
 
 ## 4.3 Security and tamper detection
 
@@ -268,7 +268,7 @@ That is highly relevant to:
 
 ## 4.4 Lossless compression
 
-The aQPU offers structural compression rather than only statistical compression.
+The hQVM offers structural compression rather than only statistical compression.
 
 There are several layers to this:
 
@@ -314,7 +314,7 @@ The broader Gyroscopic ASI framing is especially important here. The kernel supp
 
 The machine learning implications are substantial.
 
-The aQPU is not a replacement for all machine learning. It is a new kind of substrate that can support and improve parts of it.
+The hQVM is not a replacement for all machine learning. It is a new kind of substrate that can support and improve parts of it.
 
 ### Exact latent structure
 The kernel exposes a compact 6-bit logical register and a well-defined shell geometry. This creates an interpretable latent space.
@@ -343,7 +343,7 @@ For Gyroscopic ASI specifically, this is central. The kernel is a structural med
 
 Many advanced computing systems become difficult to trust because they are too large to inspect directly.
 
-The aQPU is strategically important because it is compact enough to verify deeply.
+The hQVM is strategically important because it is compact enough to verify deeply.
 
 That means the project can offer something unusual in computing:
 
@@ -368,7 +368,7 @@ This is one of the reasons the project has long-term significance. Compact kerne
 
 ## 6. Why standard silicon matters
 
-A major strategic point is that the aQPU runs on ordinary hardware.
+A major strategic point is that the hQVM runs on ordinary hardware.
 
 That has several consequences:
 
@@ -395,7 +395,7 @@ This makes the project far more strategically important than a result that only 
 
 Gyroscopic ASI is broader than a single compute primitive. It is a framework for human-machine coordination with a strong emphasis on traceability, variety, accountability, integrity, and shared moments.
 
-Within that broader architecture, the aQPU Kernel plays the role of a **common structural engine**.
+Within that broader architecture, the hQVM Kernel plays the role of a **common structural engine**.
 
 Its importance inside Gyroscopic ASI comes from the fact that it provides:
 
@@ -412,7 +412,7 @@ That makes it suitable as the kernel beneath:
 - shared audit surfaces,
 - and reproducible institutional workflows.
 
-In other words, the aQPU Kernel is not only a quantum-inspired compute core. It is also the structural heart of a reproducible coordination architecture.
+In other words, the hQVM Kernel is not only a quantum-inspired compute core. It is also the structural heart of a reproducible coordination architecture.
 
 ---
 
@@ -450,7 +450,7 @@ For promotion, this is important. The repository is not only presenting a vision
 
 ## 9. Near-term opportunities
 
-The aQPU Kernel already suggests a strong roadmap across several fronts.
+The hQVM Kernel already suggests a strong roadmap across several fronts.
 
 ## Computing and infrastructure
 - deterministic stream processing
@@ -495,7 +495,7 @@ The aQPU Kernel already suggests a strong roadmap across several fronts.
 
 ## 10. Final perspective
 
-The strategic significance of the aQPU Kernel is that it gives computing a new compact core with unusual properties all at once:
+The strategic significance of the hQVM Kernel is that it gives computing a new compact core with unusual properties all at once:
 
 - exact,
 - reversible,

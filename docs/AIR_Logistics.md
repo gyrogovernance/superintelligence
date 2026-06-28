@@ -21,7 +21,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - **Gyroscopic Global Governance** provides the domain architecture. It applies the governance capacities across four coupled domains: economy, employment, education, and ecology.
 
-- The **Gyroscopic ASI aQPU Kernel** provides the coordination kernel. It is a deterministic finite-state system that routes coordination events through a closed space of possibilities, enabling replay and verification.
+- The **Gyroscopic ASI hQVM Kernel** provides the coordination kernel. It is a deterministic finite-state system that routes coordination events through a closed space of possibilities, enabling replay and verification.
 
 - The **Moments Economy** provides the economic architecture. It grounds capacity allocation in physical constants rather than institutional policy, and implements distribution through verifiable records.
 
@@ -108,7 +108,7 @@ AIR implements the canonical ontology through a set of concrete mechanisms. Thes
 
 #### 4.1 The Gyroscopic ASI Kernel
 
-At the core of AIR is the Gyroscopic ASI aQPU Kernel. This is a deterministic finite-state coordination kernel with the following properties:
+At the core of AIR is the Gyroscopic ASI hQVM Kernel. This is a deterministic finite-state coordination kernel with the following properties:
 
 - It represents coordination as a sequence of states on a deterministic 24-bit carrier. From the rest condition, the shared-moment reachable space used operationally has 4,096 states, with two 64-state boundary horizons (the equality horizon where A = B, and the complement horizon where A = B XOR 0xFFF).
 - It updates its state in response to single-byte inputs, with 256 possible input values.
@@ -121,11 +121,11 @@ The router does not interpret what the input bytes mean. It applies fixed transf
 
 In practical terms, the router provides a canonical coordination log. Each governance event corresponds to one or more bytes. The history of a project, organisation, or system corresponds to a sequence of bytes applied to the router. Anyone with access to that sequence can replay it from the starting state and arrive at exactly the same final state. This eliminates dependence on trusted intermediaries: verification is a matter of computation, not testimony.
 
-The kernel's coordination medium has structural properties that strengthen its governance role. The self-dual [12,6,2] mask code detects all odd-weight bit errors in states unconditionally, providing intrinsic tamper detection. From any starting state, two consecutive byte steps distribute the coordination state exactly uniformly across all 4,096 reachable states, ensuring rapid structural convergence without central orchestration. The kernel also supports a 6-bit chirality register that tracks structural divergence between parties through an exact transport law, enabling early detection of coordination drift before full state disagreement becomes visible.
+The kernel's coordination medium has structural properties that strengthen its governance role. The self-dual [12,6,2] mask code detects all odd-weight bit errors in states unconditionally, providing intrinsic tamper detection. From any starting state, two consecutive byte steps distribute the coordination state exactly uniformly across all 4,096 reachable states, ensuring rapid structural convergence without central orchestration. The kernel also supports a 6-bit chirality register that tracks structural divergence between parties through an exact transport rule, enabling early detection of coordination drift before full state disagreement becomes visible.
 
 #### 4.2 Genealogies
 
-A **Genealogy** is a byte-complete replay record for an actor, project, or system. Its canonical kernel-native core is the byte log. Application-layer event logs may be bound to aQPU Kernel states or depth-4 frames, but they are not part of the kernel-native definition.
+A **Genealogy** is a byte-complete replay record for an actor, project, or system. Its canonical kernel-native core is the byte log. Application-layer event logs may be bound to hQVM Kernel states or depth-4 frames, but they are not part of the kernel-native definition.
 
 Because the router is deterministic, the genealogy can be replayed at any time. An auditor, regulator, or third party can load the byte log, run it through a conforming router implementation, and verify that the claimed trajectory is accurate. The event log can then be checked against this trajectory to confirm that events are correctly bound.
 
@@ -133,7 +133,7 @@ For stronger certification, genealogies SHOULD be segmented into depth-4 frames.
 
 Genealogies replace informal histories and narrative accounts with replayable records. They are portable: any system running the same router implementation can load a genealogy and reproduce its coordination history. They are also durable: because they consist only of byte sequences and event records, they can be stored indefinitely and verified at any future time.
 
-When two parties share the same byte-log prefix, they compute the same aQPU Kernel state and therefore share the same moment. When they diverge, frame comparison localizes the divergence to the affected 4-byte frame. This gives AIR both shared coordination and precise fork localization.
+When two parties share the same byte-log prefix, they compute the same hQVM Kernel state and therefore share the same moment. When they diverge, frame comparison localizes the divergence to the affected 4-byte frame. This gives AIR both shared coordination and precise fork localization.
 
 #### 4.3 Physical Grounding of Capacity
 
@@ -151,9 +151,9 @@ Because baseline capacity is abundant, the primary operational risk is the exclu
 
 AIR uses three operational certification layers.
 
-First, the aQPU Kernel state gives a shared moment for coordination. When two parties share the same byte-log prefix, they compute the same aQPU Kernel state and therefore share a structural "now."
+First, the hQVM Kernel state gives a shared moment for coordination. When two parties share the same byte-log prefix, they compute the same hQVM Kernel state and therefore share a structural "now."
 
-Second, depth-4 frame records (mask48, φ_a, φ_b) give stronger provenance and exact divergence localization. Each frame is computed from four consecutive bytes and is deterministic. Different byte histories can collapse to the same final aQPU Kernel state, but they produce different frame records. Frame comparison localizes divergence to the affected 4-byte frame.
+Second, depth-4 frame records (mask48, φ_a, φ_b) give stronger provenance and exact divergence localization. Each frame is computed from four consecutive bytes and is deterministic. Different byte histories can collapse to the same final hQVM Kernel state, but they produce different frame records. Frame comparison localizes divergence to the affected 4-byte frame.
 
 Third, parity commitments provide compact algebraic integrity checks over longer trajectories. A trajectory parity commitment is a triple (O, E, parity), where O and E are 12-bit XOR sums of masks at even and odd byte positions, and parity is the trajectory length modulo 2.
 
@@ -187,7 +187,7 @@ A **Grant** is a record of a single allocation: a payment, a capacity assignment
 
 A **Shell** is a container that groups grants over a defined scope, such as a time period or a programme. It carries a cryptographic seal computed by routing its contents through the alignment router. This seal binds the shell to a specific coordination state, making it tamper-evident. Anyone can verify a shell by replaying its contents and checking that the computed seal matches. Shell seals are computed over canonically sorted Grant receipts. Grant insertion order does not affect the seal.
 
-A **Moment** is a reproducible aQPU Kernel state at a specific byte-log prefix. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. Moments are the shared temporal anchors of AIR replay.
+A **Moment** is a reproducible hQVM Kernel state at a specific byte-log prefix. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. Moments are the shared temporal anchors of AIR replay.
 
 These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moments provide anchors for before-and-after comparisons. The entire system operates without requiring trust in any particular institution: verification is computational.
 
@@ -209,7 +209,7 @@ Examples of how AIR supports specific standards:
 
 **Quality management (such as ISO 9001):** The standard requires documented processes and evidence of their execution. AIR provides genealogies that record exactly how processes ran, not just how they were specified. Replayable genealogies, deterministic shell seals, and frame-level divergence localization provide quantitative and inspectable evidence of governance process integrity over time.
 
-**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. A claimed state, seal, or history can be independently checked by replay from rest under the public transition law and canonical serialization rules.
+**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. A claimed state, seal, or history can be independently checked by replay from rest under the public transition rule and canonical serialization rules.
 
 **Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear classification of Direct and Indirect sources through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
 

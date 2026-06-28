@@ -570,7 +570,7 @@ PROOF: EPISTEMIC SELF-NORMALIZATION
 PASSED
 tests/test_moments.py::test_router_static_structure_anchors 
 ----------
-aQPU Kernel Anchors
+hQVM Kernel Anchors
 ----------
 Ontology size |Ω|: 65,536
 Byte alphabet: 256

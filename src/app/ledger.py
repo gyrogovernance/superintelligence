@@ -5,7 +5,7 @@ Stores per-domain edge vectors y_D in R^6.
 
 The K4 Hodge decomposition, aperture definition, and target aperture A* = 0.0207
 are application-layer constructs that remain valid independently of the kernel
-transition law (Gyroscopic_ASI_Specs, Appendix C).
+transition rule (Gyroscopic_ASI_Specs, Appendix C).
 
 Geometry:
 - Incidence matrix B (4x6) for K4 graph

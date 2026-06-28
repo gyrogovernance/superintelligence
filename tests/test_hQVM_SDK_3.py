@@ -533,7 +533,7 @@ class TestHorizonTransportByQWeight:
 class TestShellSpectralEigenvalues:
     def test_exact_krawtchouk_eigenvalue_formula(self) -> None:
         """
-        Exact shell spectral law:
+        Exact shell spectral rule:
             T_j K_k = (K_j(k) / C(6,j)) K_k
         where:
             T_j = shell transition matrix for q-weight j

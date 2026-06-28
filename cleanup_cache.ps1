@@ -1,4 +1,4 @@
-# Safe cache cleanup script for aQPU Kernel development
+# Safe cache cleanup script for hQVM Kernel development
 # This removes only cache/temp files, not source code
 # Run with: .\cleanup_cache.ps1
 

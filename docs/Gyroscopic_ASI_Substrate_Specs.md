@@ -1,4 +1,4 @@
-# Gyroscopic ASI aQPU Kernel: Physical Substrate Specification
+# Gyroscopic ASI hQVM Kernel: Physical Substrate Specification
 
 **Document ID:** GYROSI-SUBSTRATE-SPEC-001  
 **Revision:** 4.0  
@@ -12,11 +12,11 @@
 
 ### 1.1 Context and Position in Architecture
 
-This document defines the specifications of the Gyroscopic ASI aQPU Physical Substrate, an experimental physical memory layer that provides persistent, path-dependent, and auditable storage for aQPU kernel states and genealogical records. The substrate is not a model, agent, or computation engine. It is a molecular infrastructure that provides physical persistence for the canonical digital objects defined in the Gyroscopic ASI aQPU Kernel Specification.
+This document defines the specifications of the Gyroscopic ASI hQVM Physical Substrate, an experimental physical memory layer that provides persistent, path-dependent, and auditable storage for hQVM kernel states and genealogical records. The substrate is not a model, agent, or computation engine. It is a molecular infrastructure that provides physical persistence for the canonical digital objects defined in the Gyroscopic ASI hQVM Kernel Specification.
 
-The substrate is implemented as a photochromic molecular gel enclosed in optically addressable tanks and controlled by an aQPU substrate controller. It stores information in the form of physical phase states which evolve under defined optical operations. These operations are evaluated for fidelity against the public digital aQPU reference implementation.
+The substrate is implemented as a photochromic molecular gel enclosed in optically addressable tanks and controlled by an hQVM substrate controller. It stores information in the form of physical phase states which evolve under defined optical operations. These operations are evaluated for fidelity against the public digital hQVM reference implementation.
 
-The Gyroscopic ASI aQPU Kernel, the AIR coordination framework, and the Moments Economy operate without this substrate. This substrate is an optional experimental hardware realization layer. Its purpose is to provide a physical medium for storing or sensing kernel states, depth-4 frame records, and byte-ledger segments with properties not available in conventional digital storage: path-dependent encoding, multi-decade retention, and volumetric density.
+The Gyroscopic ASI hQVM Kernel, the AIR coordination framework, and the Moments Economy operate without this substrate. This substrate is an optional experimental hardware realization layer. Its purpose is to provide a physical medium for storing or sensing kernel states, depth-4 frame records, and byte-ledger segments with properties not available in conventional digital storage: path-dependent encoding, multi-decade retention, and volumetric density.
 
 - Must retain rich, recursive, multi-scale context over time;
 - Require historical traceability across decisions and knowledge formations;
@@ -30,13 +30,13 @@ This specification operates within the scientific and architectural commitments 
 2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Direct** and **Indirect** sources of authority and agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not originate, decide, or authorize.
 
 3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
-4. **Gyroscopic ASI aQPU Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition law, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
+4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition law, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
 
 These frameworks are fully specified in the GyroGovernance repositories ([tools](https://github.com/gyrogovernance/tools), [science](https://github.com/gyrogovernance/science)), but this document is functionally self-contained and focused on physical implementation.
 
 ### 1.2 Purpose and Scope
 
-The Gyroscopic ASI aQPU Physical Substrate provides a generative physical memory system that exhibits:
+The Gyroscopic ASI hQVM Physical Substrate provides a generative physical memory system that exhibits:
 
 - **Path dependence:** The order of write operations affects the resulting physical state. Unlike classical memory that stores content only, this substrate stores **transformation history**.
 - **Depth-four closure:** The kernel's depth-4 alternation identity (applying any two bytes in the pattern x,y,x,y returns to the starting state) can be physically verified through optical measurements, providing hardware-level coherence checking.
@@ -44,12 +44,12 @@ The Gyroscopic ASI aQPU Physical Substrate provides a generative physical memory
 - **Multi-decade retention:** Molecular formulation supports persistent memory without power, suitable for long-term context preservation.
 - **Verifiability:** States are measurable and comparable via optical interference, angular divergence, and trace logs.
 
-The substrate is intentionally not a language model, processor, or reasoning agent. It provides physical persistence and path-dependent encoding for the canonical digital aQPU kernel objects. Higher-level coordination, routing, and governance are handled by the digital kernel and application layers.
+The substrate is intentionally not a language model, processor, or reasoning agent. It provides physical persistence and path-dependent encoding for the canonical digital hQVM kernel objects. Higher-level coordination, routing, and governance are handled by the digital kernel and application layers.
 
 This specification defines:
 
 - The physical architecture and optical operations of the substrate  
-- Its interaction with the aQPU substrate controller (command translation, state management, conformance verification)  
+- Its interaction with the hQVM substrate controller (command translation, state management, conformance verification)  
 - The expected measurements and invariants derived from CGM  
 - The types of memory states, their representation and observability  
 - A full **test protocol** validating compliance with depth-two path dependence, depth-four closure, monodromy balance, and physical stability
@@ -65,7 +65,7 @@ These substrate specifications draw formal constraints from the:
 - **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, monodromy defect δ_BU, canonical aperture A*)
 - **The Human Mark (THM):** defining ontological source-type distinctions for AI governance risk classification
 - **Gyroscopic Global Governance (GGG):** defining the operational significance of aperture, alignment, and post-AGI equilibrium
-- **Gyroscopic ASI aQPU Kernel Specification:** defining the 24-bit state model, spinorial transition law, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
+- **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition law, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
 
 Formal citations to these works are provided in the References section (Section 23).
 
@@ -98,9 +98,9 @@ This specification depends on the following external definitions:
 - The derivation of invariant values from operational coherence requirements
 - The prohibition on absolute opposition (θ = π), which follows from the ONA constraint
 
-**Gyroscopic ASI aQPU Kernel Specification:** The normative digital reference implementation defining the state model, transition law, mask code, and all kernel invariants. See `docs/Gyroscopic_ASI_Specs.md`.
+**Gyroscopic ASI hQVM Kernel Specification:** The normative digital reference implementation defining the state model, transition law, mask code, and all kernel invariants. See `docs/Gyroscopic_ASI_Specs.md`.
 
-**aQPU Substrate Controller:** The hardware control interface that translates between canonical byte operations and physical optical parameters. The controller implements the public aQPU transition law and manages state readout, quantization, and conformance verification.
+**hQVM Substrate Controller:** The hardware control interface that translates between canonical byte operations and physical optical parameters. The controller implements the public hQVM transition law and manages state readout, quantization, and conformance verification.
 
 ---
 

@@ -1,4 +1,4 @@
-"""Gyrocrypt — Simon + Shor on aQPU kernel. Run: python secret_lab_ignore/gyrocrypt/runner.py"""
+"""Gyrocrypt — Simon + Shor on hQVM kernel. Run: python secret_lab_ignore/gyrocrypt/runner.py"""
 
 from __future__ import annotations
 

@@ -14,7 +14,7 @@ Ownership:
   analysis_2: theorem registry
   analysis_1: G prediction, transport
   analysis_5: field derivations, spin-sector shadow (companion)
-Constants: aqpu_gravity_common.py, gyroscopic.aQPU.
+Constants: hqvm_gravity_common.py, gyroscopic.hQVM.
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ from src.constants import (
     OMEGA_SIZE,
     RHO,
 )
-from aqpu_gravity_common import (
+from hqvm_gravity_common import (
     C4_REF,
     E_CS,
     G_kernel,
@@ -64,7 +64,7 @@ from aqpu_gravity_common import (
     zeta_from_alpha,
 )
 
-# CGM invariants (aQPU kernel + gravity_common)
+# CGM invariants (hQVM kernel + gravity_common)
 Delta = APERTURE_GAP
 rho_val = RHO
 d_BU = DELTA_BU
@@ -982,7 +982,7 @@ def null_geodesic_shadow(s_vals, u_vals):
     print(f"  b_CGM/b_GR = {b_cgm/b_gr:.4f}  (area ratio {(b_cgm/b_gr)**2:.4f})")
     print()
 
-    from aqpu_gravity_analysis_5 import shadow_spin_table
+    from hqvm_gravity_analysis_5 import shadow_spin_table
 
     shadow_spin_table(s_vals, u_vals, EHT_SHADOW)
 

@@ -1,9 +1,9 @@
 """
-aQPU tests: Algebraic Quantum Processing Unit structure.
+hQVM tests: hQVM structure.
 
 Tests the intrinsic quantum-algebraic properties in QuBEC Theory Part II §10 and Kernel specification §2.2.
 - Dual horizons (complement and equality) and their structural relationship
-- Four intrinsic gates {id, S, C, F} forming K4 = (Z/2)^2
+- Four holonomic gates {id, S, C, F} forming K4 = (Z/2)^2
 - Gate action on both horizons (stabilizers and permutations)
 - Bloch sphere latitude distribution from 6 independent chirality qubits
 - Complementarity invariant: horizon_distance + ab_distance = 12
@@ -219,7 +219,7 @@ class TestGateDefinitions:
                 assert ta == (b ^ F) and tb == (a ^ F)
 
     def test_shadow_pairing(self):
-        """Each gate pair differs by 0xFE (shadow fiber law)."""
+        """Each gate pair differs by 0xFE (shadow fiber rule)."""
         assert GATE_S_BYTES[0] ^ GATE_S_BYTES[1] == 0xFE
         assert GATE_C_BYTES[0] ^ GATE_C_BYTES[1] == 0xFE
 
@@ -473,13 +473,13 @@ class TestHorizonPointwiseStabilizers:
 
 
 # ================================================================
-# 6-bit chirality register transport law
+# 6-bit chirality register transport rule
 # ================================================================
 
 
 class TestChiralityRegisterTransport:
     """
-    Exact 6-bit transport law on Omega:
+    Exact 6-bit transport rule on Omega:
       chi(T_b(s)) = chi(s) ^ q6(b)
     """
 

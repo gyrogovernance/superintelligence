@@ -1,4 +1,4 @@
-# src package - Gyroscopic ASI aQPU Kernel
+# src package - Gyroscopic ASI hQVM Kernel
 
 from . import api as api
 from . import constants as constants

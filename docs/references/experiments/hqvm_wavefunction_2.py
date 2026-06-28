@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-aqpu_wavefunction_2.py
+hqvm_wavefunction_2.py
 K4 Operator Structure and Depth-4 Confinement.
 
 Theorems verified by exhaustive computation on Ω (4096 states):
@@ -37,8 +37,8 @@ if str(_REPO) not in sys.path:
 
 
 def _load_gravity_common():
-    module_path = Path(__file__).resolve().with_name("aqpu_gravity_common.py")
-    module_name = "aqpu_gravity_common"
+    module_path = Path(__file__).resolve().with_name("hqvm_gravity_common.py")
+    module_name = "hqvm_gravity_common"
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     if spec is None or spec.loader is None:
         raise ImportError(f"Could not load module from {module_path}")
@@ -527,7 +527,7 @@ def run_sweep(omega: list[int]) -> None:
 def main() -> None:
     gravity_common = _load_gravity_common()
     gravity_common.configure_stdout_utf8()
-    print("aQPU K4 Structure & Depth-4 Confinement")
+    print("hQVM K4 Structure & Depth-4 Confinement")
     print("=" * 42)
     omega = _omega()
     print(f"|Omega| = {len(omega)}")

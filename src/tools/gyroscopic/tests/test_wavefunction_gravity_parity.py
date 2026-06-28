@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parity: gyroscopic kernel gravity metadata vs aqpu_gravity_common."""
+"""Parity: gyroscopic kernel gravity metadata vs hqvm_gravity_common."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ ROOT = _repo_root()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from docs.references.experiments import aqpu_gravity_common as gc
+from docs.references.experiments import hqvm_gravity_common as gc
 
 
 def _wht64_int32(data: list[int]) -> list[int]:

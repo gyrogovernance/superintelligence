@@ -367,11 +367,11 @@ class TestPhysicalCapacityModels:
 
 
 # -----
-# 5. Generated AQPU operator family
+# 5. Generated HQVM operator family
 # -----
 
 
-class TestGeneratedAQPUOperatorFamily:
+class TestGeneratedHQVMOperatorFamily:
     """Exact generated operator family of the byte alphabet."""
 
     def test_word_signature_recovers_full_action(self):

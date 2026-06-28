@@ -6,7 +6,7 @@ The Moments Economy is a monetary and settlement architecture in which the abili
 
 That envelope is called the Common Source Moment. It is derived from the caesium-133 atomic-second standard together with the finite verification space of the settlement system. The result is a fixed one-time capacity for recording and settling coordination. This capacity is not a metaphor. It is the explicit physical and geometric basis on which issuance is bounded.
 
-The settlement and verification substrate used in this architecture is the Gyroscopic infrastructure, comprising aQPU, Gyroscopic runtime, and QuBEC. Within that infrastructure, the aQPU kernel serves as the deterministic verification component that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
+The settlement and verification substrate used in this architecture is the Gyroscopic infrastructure, comprising hQVM, Gyroscopic runtime, and QuBEC. Within that infrastructure, the hQVM kernel serves as the deterministic verification component that maps append-only byte histories to reproducible state trajectories. Because replay is exact, independently held records can be checked without relying on a central ledger authority. Distribution, provenance, consultation, and correction can therefore be published as structural objects that any conforming party can verify by replay.
 
 The Moments Economy is an institutional record architecture as well as a distribution system. The same infrastructure that supports monetary settlement also supports complete governance records, including who acted, what was issued, what evidence was referenced, what corrections were made, and where disputes arose. This is why the architecture matters beyond economic policy narrowly understood. It offers a common method for settlement, audit, provenance, and institutional memory within one replayable medium.
 
@@ -55,9 +55,9 @@ The architecture draws on five related internal frameworks and specifications.
 
 **The Human Mark (THM):** An epistemic taxonomy used here to distinguish Direct human sources from Indirect artificial and mediated sources.
 
-**Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising aQPU, Gyroscopic runtime, and QuBEC.
+**Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising hQVM, Gyroscopic runtime, and QuBEC.
 
-**Gyroscopic ASI aQPU Kernel:** The deterministic coordination kernel used in this architecture for shared moments, provenance, and replay.
+**Gyroscopic ASI hQVM Kernel:** The deterministic coordination kernel used in this architecture for shared moments, provenance, and replay.
 
 **Gyroscope Protocol:** A classification framework used to describe work in terms of governance management, information curation, inference interaction, and intelligence cooperation.
 
@@ -244,7 +244,7 @@ The **Byte Log** is the canonical append-only sequence of bytes. It is the prima
 
 The **Event Log** is the application-layer annotation bound to specific verification states or to depth-4 frame records. It records meanings, decisions, classifications, references, and justifications that the kernel itself does not interpret.
 
-An **Identity Anchor** links an identity to a structural coordinate within the Gyroscopic infrastructure. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and an aQPU Anchor, which is the state obtained by routing that identifier from rest through the aQPU verification component.
+An **Identity Anchor** links an identity to a structural coordinate within the Gyroscopic infrastructure. It consists of an Identity Identifier, which is a collision-resistant hash of the identity string, and an hQVM Anchor, which is the state obtained by routing that identifier from rest through the hQVM verification component.
 
 A **Grant** is a record of a single MU allocation. It contains an identity label, an Identity Identifier, a Kernel Anchor, an MU amount, and the relevant shell context. The canonical Grant receipt is:
 
@@ -268,7 +268,7 @@ Any party with access to the published artefacts can verify a Shell through the 
 
 * Load the published Header and Grants.
 * Reconstruct the canonical byte sequence by converting Grants into canonical receipts and sorting them.
-* Route that sequence through a conforming aQPU component instance from GENE_MAC_REST.
+* Route that sequence through a conforming hQVM component instance from GENE_MAC_REST.
 * Compare the resulting state with the published Seal.
 
 A match confirms that the published structural object corresponds to its canonical contents. A mismatch proves that the Header or at least one Grant differs from the published claim.
@@ -287,7 +287,7 @@ Public programmes MUST publish, at defined intervals, the Byte Logs, Event Logs,
 
 ## 8. Coordination levels
 
-At the **individual** level, any person or organisation may operate as a node within the Gyroscopic infrastructure. Each maintains a local aQPU verification instance and its own logs.
+At the **individual** level, any person or organisation may operate as a node within the Gyroscopic infrastructure. Each maintains a local hQVM verification instance and its own logs.
 
 At the **project** level, a shared context of contribution is defined. Participants agree on a canonical Byte Log and Event Log. Divergence is detected by replay. Where distinct histories collapse to the same final state, frame records localise the divergence.
 
@@ -359,11 +359,11 @@ The self-dual `[12,6,2]` mask code detects all odd-weight bit errors in states, 
 
 ### 11.4 Chirality transport
 
-The 6-bit chirality register satisfies an exact transport law that enables early detection of divergence between parties before full state disagreement becomes visible.
+The 6-bit chirality register satisfies an exact transport rule that enables early detection of divergence between parties before full state disagreement becomes visible.
 
 ### 11.5 Provenance
 
-A state or seal has valid provenance if and only if it is reproducibly reachable from the rest state by the claimed byte history under the public transition law and canonical serialization rules.
+A state or seal has valid provenance if and only if it is reproducibly reachable from the rest state by the claimed byte history under the public transition rule and canonical serialization rules.
 
 The economic architecture uses these invariants as the basis for settlement verification. It does not require semantic consensus in order to establish structural truth.
 
@@ -409,7 +409,7 @@ Interoperability is defined by the ability to replay. Systems are interoperable 
 
 Conforming systems MUST:
 
-* use the shared Gyroscopic infrastructure specifications, including the aQPU verification specification,
+* use the shared Gyroscopic infrastructure specifications, including the hQVM verification specification,
 * use canonical byte replay rules,
 * use canonical serialization for Identity Anchors, Grants, Shells, and Archives,
 * use SHA-256 for Identity Identifier computation,
@@ -459,11 +459,11 @@ The transition is therefore staged rather than abrupt. The same infrastructure t
 
 The Moments Economy establishes money as a function of coordination capacity rather than credit. Value derives from structural coherence rather than debt obligation. Human agents retain authority and accountability over governance decisions. Artificial systems contribute derivatively within auditable bounds.
 
-The Gyroscopic infrastructure provides the shared coordination substrate for the Moments Economy, while the aQPU verification component provides shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
+The Gyroscopic infrastructure provides the shared coordination substrate for the Moments Economy, while the hQVM verification component provides shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
 
 Under the capacity analysis presented here, capacity is not a realistic limiting factor on human timescales. The central challenges are governance quality, registry integrity, publication discipline, and institutional design.
 
-Implementation begins with the aQPU Kernel specification and reference implementation, the AIR coordination infrastructure, and the THM and Gyroscope frameworks referenced throughout this document.
+Implementation begins with the hQVM Kernel specification and reference implementation, the AIR coordination infrastructure, and the THM and Gyroscope frameworks referenced throughout this document.
 
 Pilot programmes, public-interest fiscal hosts, NGO channels, research networks, and municipal or institutional experiments may adopt AIR first for coordination and verification, thereby establishing the records on which a Moments Economy can later settle.
 
@@ -488,7 +488,7 @@ Pilot programmes, public-interest fiscal hosts, NGO channels, research networks,
 
 **Genealogy:** The byte-complete replay history of an actor, project, or programme, optionally accompanied by event bindings, frame records, and integrity commitments.
 
-**GENE_MAC_REST:** The universal tensor rest state `0xAAA555` from which all aQPU Kernel trajectories begin.
+**GENE_MAC_REST:** The universal tensor rest state `0xAAA555` from which all hQVM Kernel trajectories begin.
 
 **GENE_MIC_S:** The transcription constant `0xAA` used to compute introns by `byte XOR 0xAA`.
 
@@ -508,7 +508,7 @@ Pilot programmes, public-interest fiscal hosts, NGO channels, research networks,
 
 **Parity Commitment:** A compact trajectory integrity commitment useful for integrity checking but not a unique history certificate.
 
-**Seal:** A structural commitment for a Shell computed by replaying canonical contents through the aQPU Kernel.
+**Seal:** A structural commitment for a Shell computed by replaying canonical contents through the hQVM Kernel.
 
 **Shared Moment:** A reproducible verification state computed from a shared byte-log prefix.
 
@@ -550,7 +550,7 @@ The fixed CSM supports global UHI for approximately 1.12 trillion years. Capacit
 
 ## Appendix C: Kernel mechanics summary
 
-The aQPU Kernel operates on a 24-bit state packed as two 12-bit components `(A, B)` from the rest state `0xAAA555`.
+The hQVM Kernel operates on a 24-bit state packed as two 12-bit components `(A, B)` from the rest state `0xAAA555`.
 
 A byte transition consists of:
 
@@ -559,7 +559,7 @@ A byte transition consists of:
 3. mutation of the active component,
 4. family-controlled gyration between active and passive components.
 
-The kernel is deterministic, invertible, replayable, and exact under fixed-width integer arithmetic.
+The kernel is replayable, invertible, and exact under fixed-width integer arithmetic.
 
 Its economic relevance lies in four properties:
 
@@ -577,7 +577,7 @@ The Shell Seal is computed from the Shell's canonical contents through the follo
 1. Convert each Grant into its canonical receipt: `identity_id || kernel_anchor || amount_mu`.
 2. Sort the canonical receipts lexicographically by the byte representation of the Identity Identifier.
 3. Concatenate the Shell Header and the sorted receipts to form the canonical Shell byte sequence.
-4. Route that sequence through a conforming aQPU Kernel instance beginning from `GENE_MAC_REST` (`0xAAA555`).
+4. Route that sequence through a conforming hQVM Kernel instance beginning from `GENE_MAC_REST` (`0xAAA555`).
 5. Record the resulting 3-byte (24-bit) state as the Shell Seal.
 
 Because the canonical receipts are sorted before routing, the Shell Seal is invariant to the order in which Grants were originally added to the Shell.

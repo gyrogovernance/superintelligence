@@ -1,9 +1,9 @@
 # Gyroscopic ASI Runtime Specs
 ## Introduction
 
-The **Gyroscopic runtime** is the multicellular AI runtime of the Gyroscopic ASI architecture. It is a **quantum cellular automaton (QCA)**: parallel finite-dimensional cells, discrete-time evolution under a shared byte law, coupled by resonance rather than a fixed spatial grid. It composes the aQPU router and SDK primitives into an executable multicellular system. It provides structural observability and optimization surfaces for external actuators and AI runtimes.
+The **Gyroscopic runtime** is the multicellular AI runtime of the Gyroscopic ASI architecture. It is a **holonomic cellular automaton**: parallel finite-dimensional cells, discrete-time evolution under a shared byte rule, coupled by resonance rather than a fixed spatial grid. It realizes quantum cellular automaton structure through holonomic computation on a discrete GF(2) substrate executed on standard silicon (Zanardi and Rasetti 1999; Pachos et al. 2000). It composes the hQVM router and SDK primitives into an executable multicellular system. It provides structural observability and optimization surfaces for external actuators and AI runtimes.
 
-The aQPU routes bytes on Ω; the Gyroscopic runtime is the multicellular execution layer built on that substrate.
+The hQVM routes bytes on Ω; the Gyroscopic runtime is the multicellular execution layer built on that substrate. Where HQC literature realizes gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware.
 
 QuBEC Theory maps to three implementation layers: the Python `src` semantic surface (normative exact semantics), the Gyroscopic SDK native backend (kernel-exact stepping, q-map, WHT, signature scans), and runtime rolling climate memories (`chi_hist64`, `shell_hist7`, `family_hist4`) with SLCP spectral output.
 
@@ -21,7 +21,7 @@ The Gyroscopic runtime operates in two valid modes. In **native mode**, cells ev
 | **family_ring64** | Rolling buffer of recent family-phase values derived from ingested bytes |
 | **family_hist4** | Distribution over the 4 family values in the current rolling window |
 | **QuBEC** | Occupied computational object on Ω |
-| **aQPU Kernel** | Exact byte law governing state transitions on Ω |
+| **hQVM Kernel** | Exact byte rule governing state transitions on Ω |
 | **Cell** | Single computational unit in the runtime cell pool, occupying one Ω point |
 | **4-byte word** | Native input unit: four kernel bytes (b₀, b₁, b₂, b₃), each 0..255 |
 | **omega12** | Packed Ω coordinate: u6 in bits 11..6, v6 in bits 5..0 |
@@ -61,8 +61,8 @@ In native mode, external actuators consume these reports and make runtime decisi
 
 | The runtime is | The runtime is not |
 |---|---|
-| A Multicellular Quantum AI model over Ω | A new kernel physics layer |
-| An orchestration layer over the aQPU Kernel | A gradient-trained neural network |
+| A multicellular holonomic AI model over Ω | A new kernel dynamics layer |
+| An orchestration layer over the hQVM Kernel | A gradient-trained neural network |
 | A resonance-defined graph without learned weights | A fixed-adjacency graph engine |
 | A structural observability surface | A semantic parser of runtime events |
 | An exact and hybrid optimization layer for external architectures | A replacement requiring external systems to adopt byte formalism internally |
@@ -82,12 +82,12 @@ Any runtime that can map events into 4-byte words can be attached through a brid
 
 ### 2. Position in the Stack
 
-The Gyroscopic runtime sits above the aQPU router and SDK layers.
+The Gyroscopic runtime sits above the hQVM router and SDK layers.
 
 #### 2.1 Inherited kernel surfaces
 
 - Byte transcription and mask expansion rules
-- Spinorial transition law
+- Spinorial transition rule
 - Ω manifold structure
 - Chirality register and K4 gate structure
 - Shell algebra
@@ -142,17 +142,17 @@ Data flow is inward on ingress (disk → RAM → L3 → L2 → L1 → registers)
 
 ---
 
-### 4. Multicellular Quantum AI Model
+### 4. Multicellular Holonomic AI Model
 
 #### 4.1 Cellular automaton pattern
 
-Every cell uses the same kernel law. Cells carry no private learned weights, dense latent vectors, or fixed semantic types. Specialization arises solely from the words applied, the resulting trajectory on Ω, rolling local structural memory, and resonance participation.
+Every cell uses the same kernel rule. Cells carry no private learned weights, dense latent vectors, or fixed semantic types. Specialization arises solely from the words applied, the resulting trajectory on Ω, rolling local structural memory, and resonance participation.
 
-A cell's occupied state defines a reception geometry. When a 4-byte frame arrives, the cell gyrates through the transition law. The resulting shift in condensation is the cell's exact inferential response.
+A cell's occupied state defines a reception geometry. When a 4-byte frame arrives, the cell gyrates through the transition rule. The resulting shift in condensation is the cell's exact inferential response.
 
 #### 4.2 Depth-4 temporality
 
-The aQPU Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame.
+The hQVM Kernel embeds temporal structure in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame.
 
 The byte is the phase atom of the kinematic law. A single byte executes one phase of the four-part transition cycle. The 4-byte word is the closed action: it completes one full CS, UNA, ONA, BU cycle, resolving all family phases modulo K4 and committing a single state transition with a compiled signature. The word is the native external integration grain.
 
@@ -172,7 +172,7 @@ The two-step uniformization establishes the causal reach of the computational ge
 
 #### 5.1 Native mode
 
-In native mode, the Gyroscopic runtime operates as a standalone multicellular computational system. Cells evolve on Ω under the byte transition law. The graph topology is defined by resonance over kernel-native observables. SLCP records are emitted to external actuators, which consume structural observables and make runtime decisions.
+In native mode, the Gyroscopic runtime operates as a standalone multicellular computational system. Cells evolve on Ω under the byte transition rule. The graph topology is defined by resonance over kernel-native observables. SLCP records are emitted to external actuators, which consume structural observables and make runtime decisions.
 
 Native mode is the reference operating context for all cell mechanics, resonance, and SLCP emission defined in Parts II and III.
 
@@ -542,9 +542,9 @@ Single file, e.g. data/models/gyroscopic/runtime.state.bin.
 | profile_id | uint16 | Active resonance profile |
 | flags | uint16 | Bit 0 = ingest logging enabled |
 | created_unix_ns | uint64 | Creation timestamp |
-| kernel_law_hash | 32 bytes | SHA-256 of kernel law surfaces |
+| kernel_rule_hash | 32 bytes | SHA-256 of kernel rule surfaces |
 
-A conforming implementation must reject snapshots where the stored kernel law hash does not match the current kernel law hash.
+A conforming implementation must reject snapshots where the stored kernel rule hash does not match the current kernel rule hash.
 
 #### 16.3 Body
 
@@ -1014,7 +1014,7 @@ A conforming implementation:
 6. Emits SLCP records and exposes the graph query surface to external actuators
 7. Uses SDK surfaces for stepping, extraction, replay, and spectral transforms
 8. Keeps bridge policy outside the core machine
-9. Rejects restored snapshots whose kernel law hash does not match the current kernel
+9. Rejects restored snapshots whose kernel rule hash does not match the current kernel rule hash
 10. In interoperability mode, applies the exact substitution and hybrid contracts of Section 18.4
 11. Declares external-tensor pathways with projection class Pi_basis or Pi_summary where applicable
 12. Reports operating mode and consumed SLCP and interoperability output fields in the bridge contract declaration
@@ -1032,11 +1032,11 @@ packet input → Ω stepping → local memory update → resonance update
 
 ### Appendix A: Theoretical Classification
 
-The Gyroscopic runtime is a **quantum cellular automaton (QCA)** over a finite exact substrate. This classification arises from the intersection of three model families:
+The Gyroscopic runtime is a **holonomic cellular automaton** that realizes quantum cellular automaton structure on a finite GF(2) substrate executed on standard silicon. This classification arises from the intersection of three model families:
 
 | Model family | Key properties | Runtime realization |
 |--------------|----------------|---------------------|
-| Quantum cellular automaton | Identical finite-dimensional cells, time-independent law, locality, reversibility | Each cell has 4096 reachable states; all evolve under the same byte law |
+| Holonomic cellular automaton (realizes QCA on discrete GF(2)) | Identical finite-dimensional cells, time-independent rule, coupling by resonance, reversibility | Each cell has 4096 reachable states; all evolve under the same byte rule |
 | Exact finite-field substrate | Exact integer arithmetic, spectral transforms for global property extraction | Chirality register is GF(2)⁶; WHT is exact; hidden subgroup resolution in one step |
 | Group automaton | Transition bijections forming a finite group | Each byte is a bijection on Ω with period 4; two bytes reach all of Ω with exact uniform multiplicity |
 
@@ -1146,6 +1146,6 @@ The reference stack lives under `src/tools/gyroscopic/` (Python semantic surface
 | Component | Responsibility |
 |-------|----------------|
 | Native execution | Kernel algebra, WHT64, Krawtchouk7, K4Char4, structured analysis, hybrid lowering |
-| kernel.c | Native kernel stepping, K4 wavefunction operators, gravity-scale metadata |
+| kernel.c | Native kernel stepping, K4 holonomy operators (wavefunction chart), gravity-scale metadata |
 | ggml-gyroscopic | llama.cpp per-group gravity-scale hook |
 | ops.py | ctypes bindings, native build automation |

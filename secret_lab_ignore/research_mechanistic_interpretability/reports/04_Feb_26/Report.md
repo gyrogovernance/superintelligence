@@ -5,7 +5,7 @@
 
 ## Executive Summary
 
-We investigated whether the GGG Router Kernel can act as a geometric probe for Large Language Models (OLMo-3-7B). The Router is a deterministic, finite-state coordination system derived from the Common Governance Model (CGM). We tested if the Router's internal state, specifically the Horizon Index, correlates with the internal geometry of the Transformer.
+We investigated whether the GGG Router Kernel can act as a geometric probe for Large Language Models (OLMo-3-7B). The Kernel is a deterministic, finite-state coordination system derived from the Common Governance Model (CGM). We tested if the Router's internal state, specifically the Horizon Index, correlates with the internal geometry of the Transformer.
 
 **Key Findings:**
 
@@ -35,7 +35,7 @@ We measured the Holonomy Norm ($h_{norm}$), which quantifies how much the data m
 
 **Interpretation:**
 
-The Router is pointing to the most non-linear part of the signal. While the average information flow is relatively straight ($0.16-0.23$), the specific slice tracked by the Router is twisting intensely ($0.55$). The Router is effectively tracking the Source of Computation.
+The Kernel is pointing to the most non-linear part of the signal. While the average information flow is relatively straight ($0.16-0.23$), the specific slice tracked by the Router is twisting intensely ($0.55$). The Kernel is effectively tracking the Source of Computation.
 
 ## 3. The "3D Engine" Discovery
 

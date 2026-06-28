@@ -1,4 +1,4 @@
-# CGM Wavefunction Analysis: Spectral Structure of the aQPU Kernel
+# CGM Wavefunction Analysis: Spectral Structure of the hQVM Kernel
 
 **Citation:** Korompilias, B. (2025). Common Governance Model: Mathematical Physics Framework. Zenodo. https://doi.org/10.5281/zenodo.17521384
 
@@ -6,7 +6,7 @@
 
 ## 1. Introduction and Scope
 
-This analysis presents the wavefunction structure of the Gyroscopic ASI aQPU kernel as a concrete finite-dimensional realization of the Common Governance Model (CGM) conditions. All results are verified by exhaustive computation on the 4096-state reachable manifold Ω using exact integer arithmetic.
+This analysis presents the wavefunction structure of the Gyroscopic ASI hQVM kernel as a concrete finite-dimensional realization of the Common Governance Model (CGM) conditions. All results are verified by exhaustive computation on the 4096-state reachable manifold Ω using exact integer arithmetic.
 
 The central finding is that the CGM constraint structure manifests in the kernel as a **Klein four-group (K4) of operators** acting on a Hilbert space over Ω. The BU-Egress/Ingress duality, far from being two sequential stages, emerges as two dual readings of a single depth-4 spectral property: the W₂ involution that pairs the two constitutional poles of Ω.
 
@@ -418,7 +418,7 @@ decomposes into kernel invariants:
 - |Ω| = 4096: the manifold size
 - Δ ≈ 0.0207: the aperture gap
 - ρ⁵: the STF attenuation (5 bulk shells × ρ per shell)
-- (1 − 4ρΔ²): the K4 correction (4 intrinsic gates, each contributing ρΔ²)
+- (1 − 4ρΔ²): the K4 correction (4 holonomic gates, each contributing ρΔ²)
 
 The K4 correction factor is the spectral signature of the Z2 holonomy structure. Without it (using only |Ω| · Δ · ρ⁵), the Refractive Depth is 76.366; with it, the value drops to 76.238, matching the required 2 ln(E_CS/v_EW) = 76.238 to 25 ppm.
 
@@ -496,4 +496,4 @@ All theorems verified on 4096 states using exact integer arithmetic with no free
 
 ---
 
-*Document prepared as a formal analysis of the aQPU kernel wavefunction structure within the Common Governance Model framework.*
+*Document prepared as a formal analysis of the hQVM kernel wavefunction structure within the Common Governance Model framework.*

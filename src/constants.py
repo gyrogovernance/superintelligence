@@ -1,6 +1,6 @@
 # src/constants.py
 """
-Gyroscopic ASI aQPU Kernel physics: Theoretical constants and transition laws.
+Gyroscopic ASI hQVM Kernel dynamics: Theoretical constants and transition rules.
 
 24-bit state kernel with CGM byte formalism decomposition,
 dipole-pair mask expansion, algebraic primitives.
@@ -257,7 +257,7 @@ _MASK12_BY_INTRON: tuple[int, ...] = tuple(
 
 
 # ================================================================
-# Transition law (spinorial: family controls gyration complement)
+# Transition rule (spinorial: family controls gyration complement)
 # ================================================================
 
 
@@ -394,7 +394,7 @@ def apply_gate_F(state24: int) -> int:
 
 def apply_gate(state24: int, name: str) -> int:
     """
-    Apply intrinsic gate by name: "id", "S", "C", "F".
+    Apply holonomic gate by name: "id", "S", "C", "F".
     K4 = (Z/2)^2; id and F not realizable by a single byte.
     """
     if name == "id":

@@ -1,4 +1,4 @@
-# Holography Algorithm: Verified Structure of the Gyroscopic ASI aQPU Kernel Kernel
+# Holography Algorithm: Verified Structure of the Gyroscopic ASI hQVM Kernel Kernel
 
 **Scope.**  
 This report summarizes the holographic structure of the Router kernel as established by three test suites:

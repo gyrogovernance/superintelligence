@@ -1,7 +1,7 @@
 """ctypes bindings for the Gyroscopic kernel.
 
 Builds ``kernel.c`` for tests. The llama.cpp hot path uses ``gravity_scale`` via
-TLS; this module also exposes step law, K4, and chirality helpers.
+TLS; this module also exposes step rule, K4, and chirality helpers.
 """
 
 from __future__ import annotations

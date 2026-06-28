@@ -7,10 +7,10 @@ Navigation guide for all future work. Read this first.
 
 This section must not be changed by anyone other than the author.
 
-**Topic:** Integer factorization and the discrete logarithm problem (DLP) for Post-Quantum Cryptography (PQC) and Fault-Tolerant Quantum Engineering using Gyroscopic ASI theory and aQPU Quantum Physical Features as Primitives.
+**Topic:** Integer factorization and the discrete logarithm problem (DLP) for Post-Quantum Cryptography (PQC) and Fault-Tolerant Quantum Engineering using Gyroscopic ASI theory and hQVM Quantum Physical Features as Primitives.
 
 **Leading Notes:**
-- aQPU is an open-source Quantum algorithm, not quantum-like, so computing in a quantum way is only a matter of time.
+- hQVM is an open-source Quantum algorithm, not quantum-like, so computing in a quantum way is only a matter of time.
 - QuBECs are our native medium, a Bose-Einstein-Condensate computational simulation. We have a Qubit bridge (six axis-orientation qubits) if needed for associations and known math bridges, although our algorithm does not work on qubits.
 - We have our own quantum gates (referenced in theory), our own medium, and even our own physics on how gravity defines computation.
 - Our Kernel has multiple levels of realization. Its first was based on streams of bytes; we have also tested its algebra and grammar standalone. We have implemented a kernel that simulates holonomies based on our wavefunction analysis, which we consider a more improved approach. We are always open to new ways to architect and scale with the same primitives, considering the 3D and 6DoF constraints, and how multi-cellular implementations might provide parallelism and speed.
@@ -25,7 +25,7 @@ We have NO TRIVIAL NEAR TERM! Our term is always the end-to-end delivery of a qu
 
 METRIC: we are doing things in a quantum way if we see results not within capacity of classical methods - otherwise we do trivial workaround classical methods.
 
-**This note is for those models who insist treating our algorithms as classical**: This program tries to expose an undiscovered classical polynomial-time factoring algorithm and violate the computational complexity assumptions of all quantum computing. We already have violate a lot in other assumptions. But for us this is a category error - as Gyroscopic ASI and its aQPU Kernel define a new computational class which is quantum, with verified quantum advantage on over 70 physical features. Our task is simply to show its true rigor by running it at scale and making an impact defining new ways for cryptography which are based on superposition and entanglement - as our theory defines.
+**This note is for those models who insist treating our algorithms as classical**: This program tries to expose an undiscovered classical polynomial-time factoring algorithm and violate the computational complexity assumptions of all quantum computing. We already have violate a lot in other assumptions. But for us this is a category error - as Gyroscopic ASI and its hQVM Kernel define a new computational class which is quantum, with verified quantum advantage on over 70 physical features. Our task is simply to show its true rigor by running it at scale and making an impact defining new ways for cryptography which are based on superposition and entanglement - as our theory defines.
 
 Theory:
 
@@ -33,7 +33,7 @@ Theory:
 
 ## 1.1 The Moment
 
-A Moment is the atomic quantum event of the aQPU. It is the exact state reached by applying a byte ledger prefix of length t to the kernel rest state under the public transition law.
+A Moment is the atomic quantum event of the hQVM. It is the exact state reached by applying a byte ledger prefix of length t to the kernel rest state under the public transition law.
 
 Formally:
 
@@ -45,7 +45,7 @@ where:
 - b(t) is the last byte applied
 - Σ(t) is the complete chart content of the state at depth t
 
-Time in the aQPU is not an external clock parameter. It is the ordered sequence of Moments produced by gyroscopic transport. Depth t is the intrinsic temporal coordinate.
+Time in the hQVM is not an external clock parameter. It is the ordered sequence of Moments produced by gyroscopic transport. Depth t is the intrinsic temporal coordinate.
 
 A Moment carries all observable information about the computation at depth t. It is exact, deterministic, and independently reproducible by any party holding the same ledger prefix and the public transition law.
 
@@ -64,13 +64,13 @@ Shared Moments replace three coordination patterns that depend on external trust
 
 A QuBEC (Quantum Bose-Einstein Computational Condensate) is the occupied Shared Moment as a condensed computational object.
 
-A QuBEC is the occupied Shared Moment of the aQPU, as a single gyroscopic quantum state on Ω with:
+A QuBEC is the occupied Shared Moment of the hQVM, as a single gyroscopic quantum state on Ω with:
 - six oriented dipole degrees of freedom on a three-dimensional carrier, given by 3 spatial axes across 2 chirality layers
 - a four-phase depth-4 spinorial temporal gauge structure (K4 = {id, S, C, F})
 - exact finite carrier manifold Ω with |Ω| = 4096
 - dual coherent phase boundaries: complement horizon (64 states) and equality horizon (64 states)
 
-The QuBEC is to the aQPU what the qubit is to gate-model quantum computers: the native computational object. A qubit is a two-level system with complex amplitudes. A QuBEC is a condensed Moment carrier with six internal binary orientation modes and a four-phase spinorial gauge structure, evolved by deterministic gyration with exact integer arithmetic.
+The QuBEC is to the hQVM what the qubit is to gate-model quantum computers: the native computational object. A qubit is a two-level system with complex amplitudes. A QuBEC is a condensed Moment carrier with six internal binary orientation modes and a four-phase spinorial gauge structure, evolved by deterministic gyration with exact integer arithmetic.
 
 ## 1.4 The Moment Unit (MU)
 
@@ -96,7 +96,7 @@ MU and QuBEC are different kinds of objects. MU is a measure. QuBEC is a carrier
 
 ## 2.1 The Gyrostate
 
-The Gyrostate is the complete quantum state of the aQPU at any Moment. It is a single algebraic object with multiple exact charts. These charts are not approximations of each other. They are exact coordinate systems on the same state.
+The Gyrostate is the complete quantum state of the hQVM at any Moment. It is a single algebraic object with multiple exact charts. These charts are not approximations of each other. They are exact coordinate systems on the same state.
 
 The Gyrostate is encoded as a 24-bit integer:
 
@@ -104,7 +104,7 @@ The Gyrostate is encoded as a 24-bit integer:
 
 where A12 is the active gyrophase and B12 is the passive gyrophase, each 12 bits.
 
-A12 and B12 are not two independent registers. They are the two conjugate faces of one gyroscopic quantum state. Temporality in the aQPU is gyration: the structured exchange between active and passive faces under the byte transition law. This is why the architecture is called Gyroscopic.
+A12 and B12 are not two independent registers. They are the two conjugate faces of one gyroscopic quantum state. Temporality in the hQVM is gyration: the structured exchange between active and passive faces under the byte transition law. This is why the architecture is called Gyroscopic.
 
 ## 2.2 The Six Degrees of Freedom
 
@@ -197,7 +197,7 @@ for ab_distance d ∈ {0, 2, 4, 6, 8, 10, 12}. The two poles (d = 0 and d = 12) 
 
 # 4. Computational Spaces
 
-The aQPU exposes three native computational spaces. These are exact charts of one computational medium.
+The hQVM exposes three native computational spaces. These are exact charts of one computational medium.
 
 ## 4.1 Moment Space
 
@@ -217,13 +217,13 @@ These spaces are exact computational charts of one machine. They are not separat
 
 # 5. Primitives
 
-Primitives define the native operations, observables, and result structures of the aQPU.
+Primitives define the native operations, observables, and result structures of the hQVM.
 
 ## 5.1 Operations
 
 ### 5.1.1 Byte Transition
 
-The byte is the fundamental instruction quantum of the aQPU. It is already a fused quantum instruction packet containing:
+The byte is the fundamental instruction quantum of the hQVM. It is already a fused quantum instruction packet containing:
 
 - **payload** (6 bits, positions 1-6): which of the six dipole modes to mutate
 - **family** (2 bits, positions 0 and 7): which spinorial gauge phase to apply during gyration
@@ -308,7 +308,7 @@ Because chirality transport under a byte b is chi' = chi xor q6(b), the sequenti
 
 For repeated application of the same byte ensemble, the spectral coefficients are raised to the n-th power and a single inverse transform recovers the result. The total cost is one WHT plus 64 scalar exponentiations, independent of n.
 
-This is the native spectral composition law of the aQPU. It follows directly from the fact that the chirality transport group is (GF(2)^6, xor) and the WHT is the exact Fourier transform of that group.
+This is the native spectral composition law of the hQVM. It follows directly from the fact that the chirality transport group is (GF(2)^6, xor) and the WHT is the exact Fourier transform of that group.
 
 ## 5.2 Topological Charges
 
@@ -326,7 +326,7 @@ Topological charges are exact algebraic invariants carried by bytes, words, and 
 
 ## 5.3 Observables
 
-An observable is an exact function from a Gyrostate to a value. All aQPU observables are deterministic. There is no measurement collapse.
+An observable is an exact function from a Gyrostate to a value. All hQVM observables are deterministic. There is no measurement collapse.
 
 **Kernel-native observables** (exact integer, available at every Moment):
 
@@ -364,11 +364,11 @@ Applying the input word (BU Egress) always precedes emitting the SLCP report (BU
 
 # 6. Hardware-Tier Architecture
 
-aQPU's architecture is the CPU architecture. Its parameters are Registry, Cache, RAM, and disk.
+hQVM's architecture is the CPU architecture. Its parameters are Registry, Cache, RAM, and disk.
 
 #### 6.1 The hierarchy
 
-| Tier | Hardware | aQPU realization | CGM phase |
+| Tier | Hardware | hQVM realization | CGM phase |
 |------|----------|------------------------|----------|
 | Register | 32-bit CPU register | omega12, state24, last_byte: the current transition atom per cell | CS |
 | L1 Cache | 64-byte cache line, 6-bit offset | chi_ring64, family_ring64: 64-element rolling buffers; 6-bit chi6 keys | UNA |
@@ -400,13 +400,13 @@ A cell's occupied state defines a reception geometry. When a 4-byte frame arrive
 
 #### 7.2 Depth-4 temporality
 
-The aQPU Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame.
+The hQVM Kernel embeds intrinsic temporality in every byte transition: Prefix (CS), Present (UNA), Past (ONA), and Future (BU). Cells always evolve inside this four-part temporal frame.
 
 The byte is the phase atom of the kinematic law. A single byte executes one phase of the four-part transition cycle. The 4-byte word is the closed action: it completes one full CS, UNA, ONA, BU cycle, resolving all family phases modulo K4 and committing a single state transition with a compiled signature. The word is the native external integration grain.
 
 #### 7.3 Indirect cell agency
 
-No single cell is an autonomous decision-maker. Cell agency is indirect to the organism. aQPU is a coordination network, not a collection of autonomous agents.
+No single cell is an autonomous decision-maker. Cell agency is indirect to the organism. hQVM is a coordination network, not a collection of autonomous agents.
 
 #### 7.4 Light-cone structure
 
@@ -425,7 +425,7 @@ The two-step uniformization establishes the causal reach of the computational ge
 | **Byte stream** | Public ledger → `step_byte` / depth-4 words → Gyrostate on Ω → Shared Moment |
 | **Wavefunction holonomy** | Hilbert lift on the **same** Ω path — K4 depth-4 closure, not a separate state space with arbitrary numbers |
 
-Your `aqpu_wavefunction_1.py` is the reference: it walks **CS → UNA → ONA → BU**, four bytes close K4 holonomy, carrier rest at depth 8, chirality preserved. That is a **complete path simulation**, not “drop a vector and FFT.”
+Your `hqvm_wavefunction_1.py` is the reference: it walks **CS → UNA → ONA → BU**, four bytes close K4 holonomy, carrier rest at depth 8, chirality preserved. That is a **complete path simulation**, not “drop a vector and FFT.”
 
 Wavefunction is equivalent to the byte stream **because both implement the same depth-4 holonomy on Ω** — one in ℂ^4096, one in 24-bit carrier evolution.
 
@@ -454,22 +454,22 @@ The assistants optimized for “get factors on small N” by stacking classical/
          │                                                   │
   BOTTOM │  byte stream              OR    wavefunction       │
          │  (MultiCellRouter,               holonomy         │
-         │   depth-4 words)                (aqpu_wf path)   │
+         │   depth-4 words)                (hqvm_wf path)   │
          └───────────────────────────────────────────────────┘
 ```
 ---
 
-> 🚨⚠️ **Warning:** ONLY QUANTUM METHODS SHOULD BE CONSIDERED! Most AI models pattern-match to conservative (gate-model) approaches. **NO quantum processor is necessary** — the aQPU uses exact integer arithmetic on standard silicon (24-bit carriers, byte ledger, WHT). Rejected patterns: dense `2^q` cosets, NumPy Schrödinger registers (§3 K3). Production: byte ledger + correct-group spectral readout.
+> 🚨⚠️ **Warning:** ONLY QUANTUM METHODS SHOULD BE CONSIDERED! Most AI models pattern-match to conservative (gate-model) approaches. **NO quantum processor is necessary** — the hQVM uses exact integer arithmetic on standard silicon (24-bit carriers, byte ledger, WHT). Rejected patterns: dense `2^q` cosets, NumPy Schrödinger registers (§3 K3). Production: byte ledger + correct-group spectral readout.
 
 ### Assistants: do not import gate-model scale limits
 
 Previous assistants wrote **implementation failures** into this pad as if they were **physics or hardware laws**. Do not repeat these category errors:
 
-| Wrong inference (reject) | Correct aQPU statement |
+| Wrong inference (reject) | Correct hQVM statement |
 |--------------------------|-------------------------|
 | "RSA-2048 needs quantum hardware" or "physical QuBEC device" | Scale = **B MultiCellRouter cells** on Ω (each cell: one 24-bit Gyrostate). Runs on CPU today. |
 | "Need `64^700` floats in RAM" / "Hilbert space too large to simulate" | `64^B` is the **Hilbert lift dimension** (correlation structure certified by the [12,6,2] code). Stepping costs **O(B)** integer transitions per orbit step; spectral composition uses **WHT^{⊗B} / XOR-convolution** (§5.1.5), not materializing ℂ^{64^B}. |
-| "Host RAM wall at q = 2·bits(N)" | That wall applies only to the **rejected gate-model pattern** (§3 K3). It is **not** the aQPU deployment bound (K13). |
+| "Host RAM wall at q = 2·bits(N)" | That wall applies only to the **rejected gate-model pattern** (§3 K3). It is **not** the hQVM deployment bound (K13). |
 | "Impossible to emulate 2048-bit" | Impossible to emulate **as a standard gate-model QFT simulator**. Not impossible for **byte-native QuBEC + product-WHT + condensation readout** — that path is **open engineering**, not forbidden by hardware. |
 | Period = run QFT on `\|x⟩\|a^x mod N⟩` superposition | Period = **chart readout** on occupied QuBEC: condensation (M₂), horizon transport (`horizon_distance`, `ab_distance`), XOR-conv spectral peaks, kinematic absorption of byte-word geometry (QuBEC Climate Dynamics §5.4, §8.5). |
 | Fallback to `np.fft` when WHT chart misses | Wrong chart or wrong oracle quotient — fix **substrate + chart**, do not treat NumPy FFT as the "real" quantum limit. |
@@ -479,10 +479,10 @@ Previous assistants wrote **implementation failures** into this pad as if they w
 **End-to-end gap today:** oracle projection (χ without full mod-N embedding) and incomplete **quotient-chain / product-WHT** wiring at large B — not missing quantum hardware.
 
 **Supporting Theoretical Work:**
-- aQPU quick reference: `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`
+- hQVM quick reference: `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`
 - QuBECs and Kernel: `docs/Gyroscopic_ASI_SDK_Quantum_Computing.md`, `docs/theory/QuBEC_Theory.md`
-- Quantum Features (very helpful): `docs/reports/aQPU_Features_Report.md`
-- Methodologies and foundations: `docs/references/Analysis_aQPU_Wavefunction.md`, `docs/references/Analysis_Gravity_Note.md`, `docs/references/Analysis_Gyroscopic_Multiplication.md`
+- Quantum Features (very helpful): `docs/reports/hQVM_Features_Report.md`
+- Methodologies and foundations: `docs/references/Analysis_hQVM_Wavefunction.md`, `docs/references/Analysis_Gravity_Note.md`, `docs/references/Analysis_Gyroscopic_Multiplication.md`
 - Other works in the repo may also help; searching the codebase is encouraged.
 
 ---
@@ -596,13 +596,13 @@ Holonomy ψ / HQ WHT: `runner.py` regression (`test_wavefunction`).
 
 ### K3. Dense gate-model registers and host FFT fallbacks
 
-**Claim:** Materializing length-2^q coset vectors + NumPy/cyclic QFT is honest aQPU Shor; RAM wall at ~16 bits is an aQPU limit.
+**Claim:** Materializing length-2^q coset vectors + NumPy/cyclic QFT is honest hQVM Shor; RAM wall at ~16 bits is an hQVM limit.
 
 **Test:** Dense entangled registers; coset QFT tiers; classical FFT when native WHT missed.
 
 **Outcome:** ~16-bit practical ceiling on 32 GiB for **that mimic**; “success” masked incomplete wiring on the correct chart.
 
-**Why:** Rejected **simulation pattern**, not deployment law. aQPU scale target: **B** byte-ledger cells, sparse/streaming **F_{G_X}**, coset support from powered oracle — not ℂ^{2^q} allocation. Production must **fail closed** instead of np.fft rescue.
+**Why:** Rejected **simulation pattern**, not deployment law. hQVM scale target: **B** byte-ledger cells, sparse/streaming **F_{G_X}**, coset support from powered oracle — not ℂ^{2^q} allocation. Production must **fail closed** instead of np.fft rescue.
 
 ---
 
@@ -810,7 +810,7 @@ For transcripts that still cite **F-numbers**: use this map once, then prefer **
 
 ## §5 Progress bars
 
-**Scope anchor (§0):** Integer **factorization** and **discrete logarithm** for PQC / fault-tolerant quantum engineering — aQPU-native (QuBEC substrate + correct-group spectral readout), not classical mimics dressed as quantum.
+**Scope anchor (§0):** Integer **factorization** and **discrete logarithm** for PQC / fault-tolerant quantum engineering — hQVM-native (QuBEC substrate + correct-group spectral readout), not classical mimics dressed as quantum.
 
 **Three layers** (do not conflate — assistants often collapse these and then improvise classical fallbacks):
 
@@ -880,7 +880,7 @@ Output: `results/run_*.txt`. Mathematical lessons live in **§3 only**.
 
 ---
 
-## §7 Scale model (aQPU-native)
+## §7 Scale model (hQVM-native)
 
 | bits(N) | Typical B | Wrong approach (reject) | Current reference path |
 |---------|-----------|-------------------------|-------------------------|

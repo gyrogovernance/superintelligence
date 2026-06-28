@@ -55,8 +55,8 @@ import numpy as np
 from scipy.integrate import IntegrationWarning, quad, solve_ivp
 from scipy.optimize import brentq
 
-from aqpu_gravity_analysis_4 import G_SI, M_sun_kg, c_SI
-from aqpu_gravity_common import (
+from hqvm_gravity_analysis_4 import G_SI, M_sun_kg, c_SI
+from hqvm_gravity_common import (
     C4_REF,
     Delta,
     E_CS,
@@ -79,7 +79,7 @@ from aqpu_gravity_common import (
 configure_stdout_utf8()
 
 # ============================================================
-# CGM constants (from aqpu_gravity_common)
+# CGM constants (from hqvm_gravity_common)
 # ============================================================
 delta_BU = d_BU
 D = 24
@@ -762,7 +762,7 @@ def section_I():
     print("  (no hbar required).")
     print()
     print("LIGHT vs PHOTON:")
-    print("Light (c) is the maximum refresh rate of the aQPU manifold:")
+    print("Light (c) is the maximum refresh rate of the hQVM manifold:")
     print("1 state per tick rendered as spatial translation.")
     print("It is a property of the spacetime continuum itself.")
     print()
@@ -801,7 +801,7 @@ def section_J():
     print("J.1 KERNEL FRAME TO CONTINUOUS CHANNEL MAPPING")
     print("-" * 62)
     print()
-    print("The aQPU depth-4 frame (Prefix, Present, Past, Future)")
+    print("The hQVM depth-4 frame (Prefix, Present, Past, Future)")
     print("maps to the four CGM stages and their continuous channels:")
     print()
     print("  Phase     Kernel operation          Continuous channel")

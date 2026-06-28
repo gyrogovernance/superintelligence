@@ -90,7 +90,7 @@ The axioms of CGM are constructive. The necessity of preserving ancestry under o
 
 ## 2. Computational Theory
 
-The necessity of preserving ancestry under operational displacement forces a specific computational architecture. An algorithmic kernel (algebraic Quantum Processing Unit aQPU) [12] realises the CGM conditions computationally. The kernel supplies the exact combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from compact geometry.
+The necessity of preserving ancestry under operational displacement forces a specific computational architecture. An algorithmic kernel (Holonomic Quantum Virtual Machine (hQVM)) [12] realises the CGM conditions computationally. The kernel supplies the exact combinatorial invariants needed to anchor a continuous field theory, fixing physical constants directly from compact geometry.
 
 **2.1. The Common Source and the Archetype**
 
@@ -150,7 +150,7 @@ State = (A, B)   where A, B ∈ {0,1}¹²
 
 where A is the active face and B is the passive record face.
 
-The transition law is the discrete realization of the gyrogroup composition. The left transition mutates the active face while the right transition applies the complement-and-swap gyration, pulling the past forward and committing the mutated present to the passive record.
+The transition rule is the discrete realization of the gyrogroup composition. The left transition mutates the active face while the right transition applies the complement-and-swap gyration, pulling the past forward and committing the mutated present to the passive record.
 
 ```text
 A_mut = A ⊕ Mask
@@ -188,7 +188,7 @@ The two-pass structure implies that the bulk degrees of freedom accessible to th
 
 where G is the gravitational coupling constant and Q_G = 4π is the horizon flux quantum. The factor 2 records the two depth-four passes of the holonomy cycle.
 
-This closure structure defines intelligence operationally. Intelligence is the capacity to preserve ancestry while maintaining both identity and individuality under recursive operations. The single-byte transition law realises this cycle as four required acts:
+This closure structure defines intelligence operationally. Intelligence is the capacity to preserve ancestry while maintaining both identity and individuality under recursive operations. The single-byte transition rule realises this cycle as four required acts:
 
 ```text
 Measure:   intron = byte XOR 0xAA            (CS, common reference)
@@ -369,7 +369,7 @@ where α₀ is the base electromagnetic coupling and ζ is the gravitational ape
 
 This analysis has derived the gravitational field, its coupling constants, and its observational signatures from a single foundational requirement: the preservation of ancestry through identity and individuality. Gravity is the emergent balance that allows coherent observation to persist against operational displacement.
 
-The necessity of this preservation forces a specific computational architecture. The algebraic Quantum Processing Unit kernel is the minimal finite system satisfying the conditions for coherent observation. Its structure is a mathematical consequence of the spinorial double cover, the SE(3) algebra of spatial generators, and the depth-4 commutator closure. The kernel supplies exact combinatorial invariants that anchor the continuous field theory without free parameters.
+The necessity of this preservation forces a specific computational architecture. The Holonomic Quantum Virtual Machine (hQVM) kernel is the minimal finite system satisfying the conditions for coherent observation. Its structure is a mathematical consequence of the spinorial double cover, the SE(3) algebra of spatial generators, and the depth-4 commutator closure. The kernel supplies exact combinatorial invariants that anchor the continuous field theory without free parameters.
 
 The quantum of gravity and the aperture gap fix the dimensionless coupling through the discrete Gauss law and the symmetric trace-free attenuation across the bulk shells. The dimensional gravitational coupling requires only the electroweak scale as a single energy anchor. The resulting position-dependent coupling weakens where the gravitational field is strongest, acting as a geometric regulator that resolves the divergent self-energy of Newtonian gravity into the exact finite result.
 
@@ -412,7 +412,7 @@ The dimensional proof establishes n = 3 as the unique spatial dimension satisfyi
 
 ## Appendix B: Proof of the Shell Displacement Invariant D = 24
 
-The main text states that the shell displacement D = 24 is invariant across all mass configurations, fixing the discrete Gauss law. This appendix derives that invariant from the kernel transition law [12].
+The main text states that the shell displacement D = 24 is invariant across all mass configurations, fixing the discrete Gauss law. This appendix derives that invariant from the kernel transition rule [12].
 
 The 24-bit state (A, B) decomposes into two 12-bit gyrophases over a 2 x 3 x 2 binary grid. The 6-bit chirality register χ = A ⊕ B collapses to one bit per dipole pair. The Hamming distance between A and B distributes the 4096 reachable states across seven concentric shells, with populations following the binomial distribution |shell_k| = C(6,k) x 64.
 

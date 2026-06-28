@@ -1,7 +1,7 @@
 # Moments Economy and Genealogy Verification Report
-## Gyroscopic ASI aQPU Kernel
+## Gyroscopic ASI hQVM Kernel
 
-This report documents the economic medium and genealogy certification layer of the Gyroscopic ASI aQPU Kernel, validating the complete chain from physical constants through the compact kernel to the settlement medium and depth-4 frame certification. The Gyroscopic architecture achieves quantum advantage through exact algebraic structure on standard silicon; this report verifies that the economic and certification layers inherit and preserve that exactness.
+This report documents the economic medium and genealogy certification layer of the Gyroscopic ASI hQVM Kernel, validating the complete chain from physical constants through the compact kernel to the settlement medium and depth-4 frame certification. The Gyroscopic architecture achieves structural quantum advantage on Ω through exact algebraic structure on standard silicon; this report verifies that the economic and certification layers inherit and preserve that exactness.
 
 **Status:** All tests passing (88/88)
 
@@ -12,7 +12,7 @@ This report documents the economic medium and genealogy certification layer of t
 The Moments Economy and Genealogy test suite validates the complete chain from physical constants through the compact kernel to the economic medium and the genealogy certification layer. All 88 tests pass across four files, confirming:
 
 1. **Physical Foundation:** The CSM capacity derivation is mathematically sound, invariant under choice of speed of light, and grounded in the cesium-133 hyperfine transition frequency.
-2. **aQPU Kernel Structure:** The reachable state space Omega has 4,096 states with a 64-state horizon satisfying the holographic identity |H|^2 = |Omega|. The aQPU Kernel realizes exact stabilizer-class quantum dynamics on a paired 6-spin system.
+2. **hQVM Kernel Structure:** The reachable state space Omega has 4,096 states with a 64-state horizon satisfying the holographic identity |H|^2 = |Omega|. The hQVM Kernel realizes exact stabilizer-class quantum dynamics on a paired 6-spin system.
 3. **Economic Parameters:** MU, UHI, and tier definitions are internally consistent and match the specification.
 4. **Medium Integrity:** Identity Anchors, Grants, Shells, Archives, and meta-routing behave deterministically with tamper evidence.
 5. **Genealogy Certification:** Depth-4 frame records provide strictly stronger certification than final-state-only seals, with exact divergence localization.
@@ -55,7 +55,7 @@ python -m pytest tests/test_moments_physics_1.py tests/test_moments_physics_2.py
 | Constant | Value | Source |
 |----------|-------|--------|
 | f_Cs | 9,192,631,770 Hz | SI second definition (Cs-133 hyperfine transition) |
-| \|Omega\| | 4,096 | aQPU Kernel reachable state space (BFS-verified) |
+| \|Omega\| | 4,096 | hQVM Kernel reachable state space (BFS-verified) |
 | \|H\| | 64 | Horizon set (fixed points of reference byte) |
 
 ### CSM Capacity Derivation
@@ -72,7 +72,7 @@ N_phys = V / lambda^3 = (4/3)pi * f_Cs^3 = 3.253930 * 10^30
 
 The speed of light c cancels exactly. This is stress-tested with c, 2c, and 0.1c in `test_c_cancellation_unchanged`, confirming relative error below 10^-14.
 
-**Step 2: aQPU Kernel Coarse-Graining**
+**Step 2: hQVM Kernel Coarse-Graining**
 
 The uniform division by |Omega| = 4,096 yields the Common Source Moment:
 
@@ -82,7 +82,7 @@ CSM = N_phys / |Omega| = 7.944165 * 10^26 MU
 
 ### Boundary vs Volume Capacity
 
-The aQPU Kernel satisfies the holographic identity |H|^2 = |Omega| (64^2 = 4096). This implies a specific relationship between boundary-normalized and volume-normalized capacities:
+The hQVM Kernel satisfies the holographic identity |H|^2 = |Omega| (64^2 = 4096). This implies a specific relationship between boundary-normalized and volume-normalized capacities:
 
 ```
 N_vol  = (4/3)pi * f_Cs^3 = 3.253930 * 10^30
@@ -189,11 +189,11 @@ CSM capacity can be notionally partitioned across 3 domains (Economy, Employment
 
 ### Identity Anchors
 
-An Identity Anchor is a pair: (SHA-256 hash of name, aQPU Kernel state after routing the hash from rest).
+An Identity Anchor is a pair: (SHA-256 hash of name, hQVM Kernel state after routing the hash from rest).
 
 - Same name always produces the same anchor (determinism).
 - Different names produce different anchors (separation).
-- The kernel anchor is a valid 6-character hex aQPU Kernel state.
+- The kernel anchor is a valid 6-character hex hQVM Kernel state.
 
 ### Grants
 
@@ -208,7 +208,7 @@ A Grant is a record of a single MU allocation: identity label, identity identifi
 A Shell is a time-bounded capacity container. Its seal is computed by:
 1. Sorting grants by identity_id.
 2. Concatenating header + sorted canonical receipts.
-3. Routing the result through a fresh aQPU Kernel from the archetype.
+3. Routing the result through a fresh hQVM Kernel from the archetype.
 4. Recording the final state_hex (6 characters).
 
 Verified properties:
@@ -223,7 +223,7 @@ Verified properties:
 The core verification procedure:
 1. Given published shell data (header, grants, seal).
 2. Independently reconstruct the canonical byte sequence.
-3. Route through a fresh aQPU Kernel from archetype.
+3. Route through a fresh hQVM Kernel from archetype.
 4. Compare: computed seal must match published seal.
 
 Verified: published seal `6a596a` matches independently verified seal `6a596a`.
@@ -289,7 +289,7 @@ Comparison with state-level detection over 500 test cases:
 
 A genealogy provides three independent certification layers:
 
-1. **Final state** (shared moment): 24-bit aQPU Kernel state for coordination.
+1. **Final state** (shared moment): 24-bit hQVM Kernel state for coordination.
 2. **Frame sequence** (depth-4 certification): sequence of (mask48, phi_a, phi_b) records.
 3. **Parity commitment** (algebraic integrity): (O, E, parity) where O and E are 12-bit XOR sums of masks at even/odd positions.
 
@@ -396,7 +396,7 @@ This is the depth-4 closure principle: 6 bits of family information cancel at de
 
 ## Part VII: Golden Vectors (Regression Anchors)
 
-The following pinned values serve as regression anchors. If any change, the kernel transition law or serialization has changed.
+The following pinned values serve as regression anchors. If any change, the kernel transition rule or serialization has changed.
 
 | Object | Input | Expected Output |
 |--------|-------|-----------------|
@@ -523,7 +523,7 @@ parity = length mod 2
 ### Algebraic Invariants
 
 1. 6-spin isomorphism: exact on all 4,096 Omega states.
-2. Spin-coordinate transition law: verified for all 256 bytes from rest and 200 random states.
+2. Spin-coordinate transition rule: verified for all 256 bytes from rest and 200 random states.
 3. Correlation matrix: identity within blocks, zero across blocks.
 4. Self-dual [12,6,2] code: 6 generators, GF(2) rank 6.
 5. Stabilizer: 12 commuting generators, GF(2) rank 12.
@@ -546,7 +546,7 @@ parity = length mod 2
 
 ### Golden Vector Stability
 
-7 regression anchors pinned with exact expected values. Any change in these values indicates a change in the kernel transition law or serialization format.
+7 regression anchors pinned with exact expected values. Any change in these values indicates a change in the kernel transition rule or serialization format.
 
 ---
 
@@ -562,7 +562,7 @@ pytest
 ### Required Source Modules
 
 ```
-src/constants.py    # Kernel physics and transition law
+src/constants.py    # Kernel dynamics and transition rule
 src/api.py          # Precomputed tables, dual code, projections
 src/router.py       # Stateful byte router
 ```

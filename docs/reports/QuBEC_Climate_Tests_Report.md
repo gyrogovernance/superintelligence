@@ -1,24 +1,24 @@
 # QuBEC Climate Control Report
-## Stress-Testing the aQPU Architecture on Bolmo-1B
+## Stress-Testing the hQVM Architecture on Bolmo-1B
 
-## Executive Summary: The Strategic Breakthrough
+## Executive Summary
 Modern AI is structurally bottlenecked by Euclidean floating-point math. Operations like `softmax` (exponentials) and `cosine similarity` (square roots and division) dominate compute costs, destroy exact reproducibility, and force reliance on massive datacenter GPUs. 
 
-This report proves that these classical math bottlenecks are not strictly necessary to generate coherent AI language. 
+This report demonstrates that these classical math bottlenecks are not strictly necessary to generate coherent AI language. 
 
-By attaching the Gyroscopic aQPU architecture to Bolmo-1B (a byte-native billion-parameter language model), we successfully replaced the model's root decision algorithms with exact, discrete quantum-algebraic operations. Running entirely on a standard Ryzen mini-PC, we demonstrated that:
+By attaching the Gyroscopic hQVM architecture to Bolmo-1B (a byte-native billion-parameter language model), we successfully replaced the model's root decision algorithms with exact, discrete quantum-algebraic operations. Running entirely on a standard Ryzen mini-PC, we demonstrated that:
 1. **Transcendental math can be eliminated:** We removed floating-point `exp` and `sqrt` from the model's encode and decode decision surfaces, replacing them with exact integer algebra.
 2. **Speed increases natively:** The exact algebraic selector runs faster (1.15x) than the classical `softmax` plus `argmax` baseline, and the exact distance metric is over 284x faster than a cosine-style baseline.
 3. **Model quality survives:** The LLM continues to generate coherent, non-degenerate English text.
-4. **Structural state controls resource allocation:** A purely algebraic variable from the aQPU (the M2 effective support) now dynamically controls the LLM's patch-size, directly managing its attention and memory workload.
+4. **Structural state controls resource allocation:** A purely algebraic variable from the hQVM (the M2 effective support) now dynamically controls the LLM's patch-size, directly managing its attention and memory workload.
 
-This proves the aQPU is not just theoretical. It is a viable, hardware-efficient control layer for real neural networks.
+This demonstrates the hQVM is not just theoretical. It is a viable, hardware-efficient control layer for real neural networks.
 
 ---
 
 ## 1. What this report is
 
-The aQPU router and Gyroscopic runtime have verified specifications, native implementations, and proven quantum advantages on standard silicon. This report answers a different question:
+The hQVM router and Gyroscopic runtime have verified specifications, native implementations, and proven structural quantum advantages on standard silicon. This report answers a different question:
 
 **Can this architecture take over real AI decision surfaces in a live language model, on commodity hardware, without collapsing output quality?**
 
@@ -28,7 +28,7 @@ The test chamber is Bolmo-1B, a byte-native billion-parameter language model. Tw
 
 2. **Decode token selection (Replacing Softmax and Argmax)**: Where the model decides which token to emit next. Classically, this forces a serial `softmax` (exponentials and division) over a 512-way vocabulary. We replaced this with exact algebraic q-sector identification.
 
-In the strict operating path, both decision surfaces now run with **zero transcendental function calls**. The model continues to produce coherent English text. The exact decode selector runs at **1.15x the speed of softmax + argmax**. The encode-side structural metric runs at **284.1x a cosine-style baseline**. All runtime ingestion in the tested decode path ran on the **OpenCL GPU backend** with zero Python fallback.
+In the strict operating path, both decision surfaces now run with **zero transcendental function calls**. The model continues to produce coherent English text. The exact decode selector runs at **1.15x the speed of softmax + argmax**. The encode-side structural metric runs at **284.1x a non-BLAS cosine-style baseline** (see §5 for measurement methodology). All runtime ingestion in the tested decode path ran on the **OpenCL GPU backend** with zero Python fallback.
 
 ---
 
@@ -49,7 +49,7 @@ We categorize these recurring bottlenecks as six "climate hazards." These are op
 
 These hazards are not bugs. They are structural consequences of forcing Euclidean floating-point arithmetic onto problems whose native geometry is often finite, algebraic, and discrete.
 
-The aQPU kernel provides a finite algebraic medium where these mismatches do not arise. Distance is Hamming distance on a 6-bit register. Ensemble structure is given by 64 algebraic sectors and 7 shells with exact multiplicities. Phase is carried by a 2-bit gauge structure native to every byte. The reachable state space contains exactly 4096 states, all verified exhaustively.
+The hQVM kernel provides a finite algebraic medium where these mismatches do not arise. Distance is Hamming distance on a 6-bit register. Ensemble structure is given by 64 algebraic sectors and 7 shells with exact multiplicities. Phase is carried by a 2-bit gauge structure native to every byte. The reachable state space contains exactly 4096 states, all verified exhaustively.
 
 ---
 
@@ -67,7 +67,7 @@ The output vocabulary has **512 entries**: 256 byte values, each in two forms (n
 
 Bolmo is the right first target because:
 
-- it is **byte-native**, matching the aQPU kernel's byte-level formalism directly
+- it is **byte-native**, matching the hQVM kernel's byte-level formalism directly
 - the boundary predictor classically uses **cosine similarity** (sqrt, division), which is a direct climate hazard
 - the LM head classically uses **softmax** (exp, division) followed by serial argmax
 - the fused 512-way vocabulary maps cleanly onto the kernel's q-sector and phase decomposition
@@ -149,7 +149,7 @@ M2 = 4096 (thermalized):  patch_count = 74
 
 The relationship is strictly monotonic. M2 is computed entirely from exact integer operations on runtime cell histograms, requiring zero neural network weights. 
 
-**Why this matters for AI scaling:** Patch count directly dictates the sequence length fed into the transformer, which controls the O(N squared) attention workload and KV-cache memory pressure. By demonstrating that M2 modulates patch size, we proved that an exact, cheap algebraic variable from the aQPU can dynamically govern a Large Language Model's most expensive compute allocations in real time.
+**Why this matters for AI scaling:** Patch count directly dictates the sequence length fed into the transformer, which controls the O(N squared) attention workload and KV-cache memory pressure. By demonstrating that M2 modulates patch size, we proved that an exact, cheap algebraic variable from the hQVM can dynamically govern a Large Language Model's most expensive compute allocations in real time.
 
 ---
 
@@ -354,7 +354,7 @@ These internal operations account for the majority of the model's total compute.
 
 This case study demonstrates that the six computational climate hazards, when they appear at model decision surfaces, are not physical necessities. They are artifacts of forcing Euclidean floating-point arithmetic onto problems that have native algebraic structure.
 
-When the decision surfaces of a real byte-native language model are moved into the aQPU's finite algebraic medium, the operations that cause those hazards are replaced by exact integer algebra. The model continues to produce coherent language. The exact paths are operationally competitive or faster than their classical counterparts. And the structural state of the occupied QuBEC directly governs the model's segmentation behavior through exact feedback.
+When the decision surfaces of a real byte-native language model are moved into the hQVM's finite algebraic medium, the operations that cause those hazards are replaced by exact integer algebra. The model continues to produce coherent language. The exact paths are operationally competitive or faster than their classical counterparts. And the structural state of the occupied QuBEC directly governs the model's segmentation behavior through exact feedback.
 
 The limitation is explicit: this applies to the decision surfaces, not to the internal transformer computation. The attention mechanism, normalization layers, and activation functions inside Bolmo still run classically. Addressing those layers without output instability is the primary open challenge.
 

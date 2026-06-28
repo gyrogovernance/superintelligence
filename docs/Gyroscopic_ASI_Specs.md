@@ -1,13 +1,13 @@
-# Gyroscopic ASI aQPU Kernel
+# Gyroscopic ASI hQVM Kernel
 ## Specification
 
-Gyroscopic Artificial Superintelligence is a new class of computation achieving quantum advantage through a compact algebraic quantum processing unit (aQPU) kernel. The kernel is a deterministic byte-driven coordination medium that maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. Its internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain, executing on standard silicon with exact integer arithmetic rather than probabilistic approximation on quantum hardware.
+Gyroscopic Artificial Superintelligence is a new class of computation achieving structural quantum advantage through a compact Holonomic Quantum Virtual Machine (hQVM) kernel. The kernel is a byte-driven coordination medium that maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. The kernel is holonomic because closed byte paths induce reproducible holonomies on the reachable manifold Ω (Zanardi and Rasetti 1999; Pachos et al. 2000; wavefunction verification in hQVM Features Report). Its internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain. It executes on standard silicon with exact integer arithmetic and ensemble stochasticity induced by the byte sequence, without relying on analogue control or shot sampling. Where HQC literature realises gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware. Replay of a fixed byte ledger prefix is deterministic; stochasticity refers to the induced ensemble over words, future cones, and byte baths.
 
-This document is the normative technical specification of the Gyroscopic ASI aQPU Kernel. It defines the kernel physics, the runtime router, replay rules, the application-layer governance measurement medium, and the AIR CLI program format.
+This document is the normative technical specification of the Gyroscopic ASI hQVM Kernel. It defines the kernel dynamics, the runtime router, replay rules, the application-layer governance measurement medium, and the AIR CLI program format.
 
 Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
 
-Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC Theory](theory/QuBEC_Theory.md), [Runtime](Gyroscopic_ASI_Runtime_Specs.md). Verification inventory: [aQPU Features Report](reports/aQPU_Features_Report.md).
+Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC Theory](theory/QuBEC_Theory.md), [Runtime](Gyroscopic_ASI_Runtime_Specs.md). Verification inventory: [hQVM Features Report](reports/hQVM_Features_Report.md).
 
 ---
 
@@ -17,15 +17,31 @@ Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC T
 
 Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lack internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
 
-The Gyroscopic ASI aQPU Kernel represents a different paradigm. It treats intelligence as an intrinsic structural property that emerges from the recursive alignment of operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a deterministic byte-driven state trajectory on the 24-bit GENE_Mac tensor carrier where alignment is constitutive. Coherence is not a policy choice but a requirement of the internal physics of the state space.
+The Gyroscopic ASI hQVM Kernel represents a different paradigm. It treats intelligence as a structural property that emerges from the recursive alignment of operations. Grounded in the Common Governance Model (CGM), the framework demonstrates how intelligence emerges naturally from the self-referential dynamics of structured space. Rather than approximating a target function, the router navigates a byte-driven state trajectory on the 24-bit GENE_Mac tensor carrier where alignment is constitutive. Coherence is not a policy choice but a requirement of the kernel dynamics of the state space.
 
-## 1.2 What the aQPU Kernel Is
+## 1.2 What the hQVM Kernel Is
 
-The Gyroscopic ASI aQPU Kernel is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
+The Gyroscopic ASI hQVM Kernel is a multi-domain network coordination algorithm that establishes the structural conditions for a collective superintelligence governance regime of humans and machines (Superintelligence, Bostrom 2014; Gyroscopic Global Governance, Korompilias 2025). It is designed for focused and well-distributed coordination of interventions, amplifying rather than outperforming single-agent potential while preserving the constitutive conditions of governance and intelligibility.
 
-Operationally, the aQPU Kernel is a deterministic byte-driven coordination kernel. It maintains an append-only byte ledger and begins from a universal rest configuration, GENE_MAC_REST. From that 24-bit canvas it applies the spinorial transition law byte by byte, decomposing each byte (after transcription) into a 6-bit payload and a 2-bit family phase. This process yields a reproducible state trajectory, a compact routing signature, and replayable observables that any party can recompute.
+Operationally, the hQVM Kernel is a byte-driven coordination kernel. It maintains an append-only byte ledger and begins from a universal rest configuration, GENE_MAC_REST. From that 24-bit canvas it applies the spinorial transition rule byte by byte, decomposing each byte (after transcription) into a 6-bit payload and a 2-bit family phase. This process yields a reproducible state trajectory, a compact routing signature, and replayable observables that any party can recompute.
 
 The kernel is designed to support governance-grade coordination across the GGG domains of Economy, Employment, Education, and Ecology. It does not interpret the empirical meaning of the input bytes. Instead, it performs structural transformations that make results reproducible, comparable, and auditable, while keeping authorization and accountability under Direct human agency at the application layer.
+
+### 1.2a The Three Computational Charts
+
+The hQVM kernel is one mathematical object (manifold Ω, byte rule) viewed through three computational charts. These are not alternative execution modes; they are coordinate systems on the same state.
+
+**Carrier chart.** The 24-bit Gyrostate on Ω. This is the execution substrate. Byte transitions are integer operations on GF(2)^24. Carrier execution is mandatory: every transition is a byte step.
+
+**Chirality chart.** The 6-bit register χ ∈ GF(2)^6 extracted from the carrier. This is the logical qubit layer. The Walsh-Hadamard transform acts as the native abelian QFT on this register. Native algorithm family: GF(2) HSP (Deutsch-Jozsa, Bernstein-Vazirani, Simon). Cyclic algorithms (Shor-type period finding) are a frontier, not a capability.
+
+**Wavefunction chart.** The canonical Hilbert lift ψ ∈ ℂ^4096 induced by the [12,6,2] self-dual code geometry. Canonical 4-byte words act as unitary operators with eigenspace structure {2048(+1), 2048(-1)}. This chart reveals holonomic phases and interference structure not visible in carrier coordinates. The lift is canonical: uniquely determined by the code geometry, with no external parameters. Computed via `apply_k4` when spectral observables or interference coefficients are required.
+
+The code-first hierarchy:
+
+    CODE        [12,6,2] self-dual stabilizer code (24-bit carrier on Ω)
+      → ALGEBRA stabilizer group, K4 holonomic gates, Clifford + δ_BU magic
+        → WAVEFUNCTION canonical Hilbert lift (CHSH, holonomy)
 
 ## 1.3 ASI Definition in This System
 
@@ -53,7 +69,7 @@ Shared moments coordinate through reproducible computation. Participants do not 
 
 ## 1.5 Geometric Provenance
 
-A state has geometric provenance if and only if it is reproducibly reachable from GENE_MAC_REST by the claimed byte sequence under the kernel transition law. Replay failure invalidates the provenance claim. The final state alone does not uniquely determine history.
+A state has geometric provenance if and only if it is reproducibly reachable from GENE_MAC_REST by the claimed byte sequence under the kernel transition rule. Replay failure invalidates the provenance claim. The final state alone does not uniquely determine history.
 
 This creates a clear separation of layers. The kernel-native layer verifies deterministic replay, divergence detection, and seal and frame-record consistency. Authorization and accountability remain application-layer responsibilities under Direct human agency. The kernel provides a common structural basis for policy enforcement but does not decide policy itself.
 
@@ -68,7 +84,7 @@ The router provides the missing medium for multi-domain coordination required fo
 ## 1.7 Design Requirements
 
 A conforming kernel satisfies the following structural requirements:
-*   **Deterministic:** The same rest state and byte ledger always produce the same state trajectory.
+*   **Replayable:** The same rest state and byte ledger always produce the same state trajectory. Ensemble stochasticity is carried by the byte sequence, not by the transition mechanism.
 *   **Byte-complete:** Every byte value from 0 to 255 is a valid input instruction.
 *   **Nonsemantic:** The kernel does not parse language or apply policy. It transforms bytes structurally.
 *   **Portable:** The transition rule is defined using fixed-width bit operations such as XOR, shifts, and masking.
@@ -88,11 +104,11 @@ The total space is the Cartesian product: 4 families x 64 micro-references = 256
 
 This structure is palindromic. The 8 bit positions of the byte (after transcription) group into four paired **bit groups** (L0, LI, FG, BG) that align with the CGM stage structure: structural anchors at the boundaries, chirality next, then dynamics and balance in the middle. **Families** are defined by the L0 boundary bits (0, 7); the decomposition is applied after transcription. This palindromic pattern is not imposed by the kernel. It is revealed by the transcription rule (§2.3) and documented in Appendix F.
 
-Any system that processes bytes must handle this structure, whether it makes the decomposition explicit (as the aQPU Kernel does) or absorbs it implicitly into learned parameters (as neural language models do). The aQPU Kernel's contribution is to make the constitutional structure of the byte visible, auditable, and available as a first-class computational object at every stage of processing.
+Any system that processes bytes must handle this structure, whether it makes the decomposition explicit (as the hQVM Kernel does) or absorbs it implicitly into learned parameters (as neural language models do). The hQVM Kernel's contribution is to make the constitutional structure of the byte visible, auditable, and available as a first-class computational object at every stage of processing.
 
 ---
 
-# 2. Kernel Physics
+# 2. Kernel Dynamics
 
 ## 2.1 State Model
 
@@ -115,7 +131,7 @@ B12 = state24 & 0xFFF
 
 In this specification, bit `k` of a 12-bit component is defined as `(word >> k) & 1`; bit 0 is the least significant bit and bit 11 is the most significant bit.
 
-This two-component form is essential. The transition rule treats A and B asymmetrically, which is how the kernel realizes chirality as a structural feature of the physics.
+This two-component form is essential. The transition rule treats A and B asymmetrically, which is how the kernel realizes chirality as a structural feature of the dynamics.
 
 ### 2.1.2 Dual-frame geometry
 
@@ -289,7 +305,7 @@ where `popcount(x)` returns the number of set bits in `x`. The horizon (S-sector
 
 **Complementarity invariant:** For all states, `horizon_distance + ab_distance = 12`. The two distances are complementary projections of the same chirality observable. A state that is close to the complement horizon (low `horizon_distance`) is necessarily far from the equality horizon (high `ab_distance`), and vice versa.
 
-These observables are constitutional in that they are defined solely from the kernel's fixed-width state representation and transition law. They are exact, replayable from the ledger, and do not depend on model internals or asserted identity claims.
+These observables are constitutional in that they are defined solely from the kernel's fixed-width state representation and transition rule. They are replayable from the ledger, and do not depend on model internals or asserted identity claims.
 
 ## 2.3 Byte Interface and Transcription
 
@@ -362,9 +378,9 @@ def micro_ref_to_mask12(micro_ref):
 
 There are 64 distinct masks. The zero mask occurs at micro-reference 0. There are 256 distinct (family, mask) pairs. The 64 masks form a 6-dimensional linear code in 12-bit space; the dual code has 64 codewords. Valid masks have zero syndrome against the dual; non-zero syndrome detects corruption.
 
-## 2.6 Transition Law
+## 2.6 Transition Rule
 
-The spinorial transition law specifies the single-step update from `(A12, B12)` under a byte input.
+The spinorial transition rule specifies the single-step update from `(A12, B12)` under a byte input.
 
 ### 2.6.1 Forward transition
 
@@ -410,7 +426,7 @@ From any fixed 24-bit state, the 256 bytes yield exactly 128 distinct next 24-bi
 
 ## 2.7 Minimality and Structural Rationale
 
-This kernel physics is minimal in three senses: computational, structural, and governance-relevant.
+This kernel dynamics is minimal in three senses: computational, structural, and governance-relevant.
 
 ### 2.7.1 Computational minimality
 Only fixed-width operations are used:
@@ -424,7 +440,7 @@ This makes the kernel portable, fast, and suitable for exhaustive verification.
 Only one component receives the mutation mask before the gyration step. That asymmetry is the smallest mechanism that introduces chirality in the dynamics while keeping the system reversible.
 
 ### 2.7.3 Governance relevance
-The two-component structure and deterministic update rule are what allow shared moments:
+The two-component structure and update rule are what allow shared moments:
 - same bytes imply same state
 - disagreement is detectable
 - audit can be performed by replay
@@ -452,7 +468,7 @@ The current verified kernel properties are:
 - 256 distinct (family, mask) pairs
 - dipole flip property
 - per-byte bijection on full 24-bit carrier
-- inverse exactly reverses forward transition
+- inverse reverses the forward transition
 - T_0xAA involution
 - 128-way shadow from any fixed state
 - 4-byte intron sequence bijectivity
@@ -485,7 +501,7 @@ Structural validity is determined by deterministic replay: divergence detection,
 
 This section specifies how the router operates as a complete coordination system in practice. It defines the runtime stepping and replay procedures, the governance measurement medium built from domain ledgers and aperture, and the orchestration and connector surfaces through which events enter the system.
 
-This section does not embed policy decisions into kernel physics. Policy enters through application-layer event production and remains accountable to Direct human agency.
+This section does not embed policy decisions into kernel dynamics. Policy enters through application-layer event production and remains accountable to Direct human agency.
 
 ## 4.1 Kernel Runtime and Routing Signature
 
@@ -511,7 +527,7 @@ A conforming implementation MUST support:
 
 ## 4.2 Replay and Audit
 
-The kernel is deterministic. Given the same archetype and the same byte ledger, every conforming implementation computes the same state trajectory.
+The kernel is replayable. Given the same archetype and the same byte ledger, every conforming implementation computes the same state trajectory. Ensemble stochasticity enters through the byte sequence, not through the transition mechanism.
 
 ### 4.2.1 Forward replay
 
@@ -538,7 +554,7 @@ B_pred = A_next ^ invert_a
 A_pred = (B_next ^ invert_b) ^ mask12
 ```
 
-Given the final state and the full byte sequence, the full trajectory can be reconstructed backwards exactly.
+Given the final state and the full byte sequence, the full trajectory can be reconstructed backwards.
 
 ### 4.2.3 Non-uniqueness of history from final state alone
 
@@ -656,7 +672,7 @@ Tools are application-layer components. The kernel does not interpret tool outpu
 Edge mappings (which signals affect which K₄ edges) are explicit policy choices, not hidden semantics. A conforming implementation MUST:
 - make edge mappings visible and auditable
 - record mapping policy in event metadata
-- allow mappings to be edited without changing kernel physics
+- allow mappings to be edited without changing kernel dynamics
 
 Example mappings are provided in Appendix D. These are illustrative, not normative.
 
@@ -697,7 +713,7 @@ Edges are ordered as the six undirected pairs:
 
 All ledgers `y ∈ ℝ^6` and all GovernanceEvents must use this canonical ordering.
 
-This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel physics produces. The four intrinsic gates {id, S, C, F} and their horizon action are specified in [QuBEC Theory](theory/QuBEC_Theory.md) Part II §10.
+This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel dynamics produces. The four holonomic gates {id, S, C, F} and their horizon action are specified in [QuBEC Theory](theory/QuBEC_Theory.md) Part II §10.
 
 ## 4.7 Hodge Decomposition on K₄
 
@@ -792,13 +808,13 @@ The kernel provides structural reproducibility. The application layer uses that 
 
 ### 4.10.1 Four displacement categories
 
-Kernel-native failures are: replay mismatch, binding mismatch, seal mismatch, frame-record mismatch, or invalid claimed provenance under deterministic replay. THM displacement categories (GTD, IVD, IAD, IID) remain application-layer diagnoses. They are computed from:
+Kernel-native failures are: replay mismatch, binding mismatch, seal mismatch, frame-record mismatch, or invalid claimed provenance under replay. THM displacement categories (GTD, IVD, IAD, IID) remain application-layer diagnoses. They are computed from:
 - event provenance classification under THM
 - ledger structure through `y_grad` and `y_cycle`
 - aperture deviation from the target A*
 - cross-domain coupling rules specified by GGG at the governance layer
 
-This specification defines the measurement medium. It does not encode policy decisions into kernel physics.
+This specification defines the measurement medium. It does not encode policy decisions into kernel dynamics.
 
 ### 4.10.2 Application-layer displacement diagnosis
 
@@ -848,7 +864,7 @@ with `invert_a = 0xFFF if (intron & 0x01) else 0` and `invert_b = 0xFFF if (intr
 
 Dynamics:
 - per-byte bijection on full 24-bit carrier
-- inverse exactly reverses forward transition
+- inverse reverses the forward transition
 - from any fixed state, 256 bytes produce exactly 128 distinct next states
 
 ## 5.2 Profile M: Governance Measurement Conformance
@@ -862,8 +878,8 @@ Domain ledgers:
 
 Geometry:
 - use the canonical K₄ vertex and edge order defined in §4.6
-- compute `P_grad` and `P_cycle` exactly as specified in §4.7 with `W = I_6`
-- compute aperture `A_D` exactly as specified in §4.8
+- compute `P_grad` and `P_cycle` as specified in §4.7 with `W = I_6`
+- compute aperture `A_D` as specified in §4.8
 
 Replay integrity:
 - same event sequence implies the same ledgers and apertures
@@ -873,7 +889,7 @@ Prohibitions:
 - MUST NOT use a non-identity weight matrix W for aperture
 - MUST NOT apply confidence as a second weighting mechanism beyond `magnitude × confidence`
 
-## 5.3 Profile R: Runtime aQPU Kernel Conformance
+## 5.3 Profile R: Runtime hQVM Kernel Conformance
 
 A conforming runtime router implementation MUST satisfy:
 
@@ -1006,7 +1022,7 @@ A conforming implementation MUST:
 ## 6.1 Scope
 
 This specification defines:
-- the kernel transition physics
+- the kernel transition dynamics
 - the runtime router contract
 - replay and audit rules
 - the application-layer governance measurement medium
@@ -1033,7 +1049,7 @@ Right transitions preserve the horizon; left transitions alter it.
 
 Modal form: S implies `[R]S` is equivalent to S, and `[L]S` is not equivalent to S.
 
-aQPU Kernel realization: Type A mutation prior to gyration corresponds to an altering modality. Type B not receiving a direct mask corresponds to a preserving modality. The resulting asymmetry is the minimal computational realization of chirality.
+hQVM Kernel realization: Type A mutation prior to gyration corresponds to an altering modality. Type B not receiving a direct mask corresponds to a preserving modality. The resulting asymmetry is the minimal computational realization of chirality.
 
 ## A.2 Unity Non-Absolute (UNA)
 
@@ -1041,7 +1057,7 @@ At depth two, order matters but not absolutely.
 
 Modal form: S implies it is not necessary that `[L][R]S` is equivalent to `[R][L]S`.
 
-aQPU Kernel realization: depth-2 non-commutativity; order of byte application affects the outcome.
+hQVM Kernel realization: depth-2 non-commutativity; order of byte application affects the outcome.
 
 ## A.3 Opposition Non-Absolute (ONA)
 
@@ -1049,7 +1065,7 @@ Opposition occurs without absolute contradiction.
 
 Modal form: S implies it is not necessary that `[L][R]S` is equivalent to the negation of `[R][L]S`.
 
-aQPU Kernel realization: the 64 distinct masks and family-controlled complements preserve differentiated paths. The discrete structure realizes CGM's 3D structure and 6 degrees of freedom through the 64 distinct masks (6 dipole pairs), 4 families (spinorial complement phases), and the K4 fiber that emerges intrinsically at depth 4.
+hQVM Kernel realization: the 64 distinct masks and family-controlled complements preserve differentiated paths. The discrete structure realizes CGM's 3D structure and 6 degrees of freedom through the 64 distinct masks (6 dipole pairs), 4 families (spinorial complement phases), and the K4 fiber that emerges intrinsically at depth 4.
 
 ## A.4 Balance Universal Egress (BU-Egress)
 
@@ -1059,7 +1075,7 @@ aQPU Kernel realization: the 64 distinct masks and family-controlled complements
 
 The balanced state reconstructs prior distinctions.
 
-aQPU Kernel realization: deterministic replay from the byte ledger reconstructs full trajectories, and inverse stepping reconstructs them backwards exactly given the byte sequence (§4.2).
+hQVM Kernel realization: replay from the byte ledger reconstructs full trajectories, and inverse stepping reconstructs them backwards exactly given the byte sequence (§4.2).
 
 ---
 
@@ -1077,7 +1093,7 @@ Key numerics of the current kernel:
 
 ## B.2 Test Suite Details
 
-Current verified properties are established by the physics and moments reports. Test suite size and runtime are implementation details that may vary across environments and are not normative.
+Current verified properties are established by the kernel dynamics and moments reports. Test suite size and runtime are implementation details that may vary across environments and are not normative.
 
 ---
 

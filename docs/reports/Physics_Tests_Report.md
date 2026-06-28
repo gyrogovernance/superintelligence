@@ -1,9 +1,9 @@
 # Physics Verification Report
-## Gyroscopic ASI aQPU Kernel
+## Gyroscopic ASI hQVM Kernel
 
-This report documents the verified physics of the Gyroscopic ASI aQPU Kernel, a compact algebraic quantum processing unit that achieves quantum advantage through exact structural properties on standard silicon. The kernel is a deterministic byte-driven coordination medium mapping an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor. Every property documented here is established by exhaustive testing with exact integer arithmetic.
+This report documents the verified physics of the Gyroscopic ASI hQVM Kernel, a compact Holonomic Quantum Virtual Machine (hQVM) that achieves structural quantum advantage on Ω through exact structural properties on standard silicon. The kernel is a replayable byte-driven coordination medium mapping an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor. Every property documented here is established by exhaustive testing with exact integer arithmetic.
 
-The six physics test files constitute a complete verification chain. All tests pass, confirming that the discrete byte-driven kernel faithfully realises the continuous CGM theoretical framework. The tests move from basic conformance (test_physics_1) through algebraic structure (test_physics_2, test_physics_3) to research diagnostics (test_physics_4), the theory bridge (test_physics_5), and depth-4 fiber geometry (test_physics_6). Together they establish that the kernel is not merely a correct implementation of its specification but a genuine discrete realisation of the CGM physics within a compact state space of 4096 reachable states, 64 horizon states, and exact holographic identity |H|^2 = |Omega|.
+The six physics test files constitute a complete verification chain. All tests pass, confirming that the discrete byte-driven kernel faithfully realises the continuous CGM theoretical framework. The tests move from basic conformance (test_physics_1) through algebraic structure (test_physics_2, test_physics_3) to research diagnostics (test_physics_4), the theory bridge (test_physics_5), and depth-4 fiber geometry (test_physics_6). Together they establish that the kernel is not merely a correct implementation of its specification but a genuine discrete realisation of the CGM framework within a compact state space of 4096 reachable states, 64 horizon states, and exact holographic identity |H|^2 = |Omega|.
 
 ## Test Suite Overview and Context
 
@@ -27,7 +27,7 @@ A12_rest = 0xAAA = 101010101010 (binary)
 B12_rest = 0x555 = 010101010101 (binary)
 ```
 
-The complement relation A12_rest XOR B12_rest = 0xFFF holds exactly. This encodes the fundamental chirality: every bit position has opposite polarity in A and B at rest, implementing the CS axiom that the system has an intrinsic left-right asymmetry. This chirality becomes operationally significant in the transition law (Part 4), where only A receives the mutation mask before gyration.
+The complement relation A12_rest XOR B12_rest = 0xFFF holds exactly. This encodes the fundamental chirality: every bit position has opposite polarity in A and B at rest, implementing the CS axiom that the system has an intrinsic left-right asymmetry. This chirality becomes operationally significant in the transition rule (Part 4), where only A receives the mutation mask before gyration.
 
 The pack/unpack tests confirm:
 - Round-trip fidelity: pack(unpack(s)) = s for all valid inputs
@@ -223,7 +223,7 @@ This is a pure swap: (A, B) -> (B, A). The test confirms:
 - Fixed points: any state with A = B is fixed by 0xAA (since swap(A,A) = (A,A))
 - Involution: applying 0xAA twice returns to the original state, since swap(swap(A,B)) = (A,B)
 
-Note that fixed points of 0xAA are states where A12 = B12, not where A12 = B12 XOR 0xFFF. This is the spinorial law's fixed-point condition and differs from the previous unconditional-complement law.
+Note that fixed points of 0xAA are states where A12 = B12, not where A12 = B12 XOR 0xFFF. This is the spinorial rule's fixed-point condition and differs from the previous unconditional-complement rule.
 
 ### 4.3 Per-Byte Bijectivity and Inverse
 
@@ -243,7 +243,7 @@ Algebraically: for fixed (A, B), A_next = B XOR invert_a has only 2 possibilitie
 
 The full SU(2) information is retained in the 32-bit register atom (24-bit Mac state + 8-bit intron), which maintains the spinorial phase distinction.
 
-The complement map s -> s XOR 0xFFFFFF commutes with all byte actions (this follows algebraically from XOR commutativity and the structure of the transition law). This is a global Z/2 automorphism of the dynamics.
+The complement map s -> s XOR 0xFFFFFF commutes with all byte actions (this follows algebraically from XOR commutativity and the structure of the transition rule). This is a global Z/2 automorphism of the dynamics.
 
 ---
 
@@ -417,11 +417,11 @@ K(x,y): (A, B) -> (A XOR d, B XOR d)
 
 where d = q(x) XOR q(y) and q(b) = mask12(b) XOR (0xFFF if L0_parity(b) else 0).
 
-The commutator defect law is verified exhaustively over all ordered byte pairs (256^2) at the rest state, and the observed defect set equals the entire mask code C64. The commutator always produces a translation within the code, never outside it. The commutator measures the geometric non-commutativity of two operations, and its defect is exactly the XOR of their q-values.
+The commutator defect rule is verified exhaustively over all ordered byte pairs (256^2) at the rest state, and the observed defect set equals the entire mask code C64. The commutator always produces a translation within the code, never outside it. The commutator measures the geometric non-commutativity of two operations, and its defect is exactly the XOR of their q-values.
 
 ---
 
-## Part 8: Exact Algebraic Laws (test_physics_5)
+## Part 8: Exact Algebraic Theorems (test_physics_5)
 
 ### 8.1 Depth-4 Closed Form
 
@@ -478,7 +478,7 @@ This formula is the discrete analog of the continuous CGM result that the BU com
 
 ## Part 9: CGM Constants Bridge (test_physics_5, Class 1)
 
-These constants are treated as intrinsic invariants of the CGM geometry: the kernel physics is constructed so that these relations hold identically, and the tests here verify that the implementation respects the theoretical equalities within numerical precision. Brief glosses: delta_BU is the minimal monodromy defect angle predicted by CGM (the smallest angular displacement produced by a single BU-stage transition). m_a is the aperture scale (the normalization constant relating angular defects to probability measures). Q_G = 4*pi is the quantum gravity horizon (total solid angle of a sphere).
+These constants are treated as intrinsic invariants of the CGM geometry: the kernel dynamics is constructed so that these relations hold identically, and the tests here verify that the implementation respects the theoretical equalities within numerical precision. Brief glosses: delta_BU is the minimal monodromy defect angle predicted by CGM (the smallest angular displacement produced by a single BU-stage transition). m_a is the aperture scale (the normalization constant relating angular defects to probability measures). Q_G = 4*pi is the quantum gravity horizon (total solid angle of a sphere).
 
 ### 9.1 Fundamental Aperture Constraint
 
@@ -532,7 +532,7 @@ The test test_monodromy_hierarchy verifies an ordering of angular scales: omega(
 
 ---
 
-## Part 10: DOF Doubling Law (test_physics_5, TestDOFDoublingLaw)
+## Part 10: DOF Doubling Theorem (test_physics_5, TestDOFDoublingLaw)
 
 ### 10.1 The Restriction Method
 
@@ -565,7 +565,7 @@ The discrete kernel gives reachable state counts 2^(2*DOF). The factor of 2 in t
 |Omega_stage| = 2^(2 * DOF_continuous)
 ```
 
-This is the exact discrete-to-continuous correspondence law. The test confirms it at all three stages with exact integer agreement.
+This is the exact discrete-to-continuous correspondence rule. The test confirms it at all three stages with exact integer agreement.
 
 ---
 
@@ -587,7 +587,7 @@ This identifies a canonical K4 object at depth 4: the K4 vertex set is the fiber
 
 ### 11.2 Fiber Composition Law on Net Displacements
 
-Let W be a depth-4 frame word and let disp(W) denote the net displacement from the rest state in 24-bit space. The displacement composition law is additive under XOR: disp(W1 then W2) = disp(W1) XOR disp(W2). This is the (Z/2)^2 group law acting on displacements, not on states directly.
+Let W be a depth-4 frame word and let disp(W) denote the net displacement from the rest state in 24-bit space. The displacement composition rule is additive under XOR: disp(W1 then W2) = disp(W1) XOR disp(W2). This is the (Z/2)^2 group law acting on displacements, not on states directly.
 
 ### 11.3 Canonical K4 Edge Vector from q-Invariants
 
@@ -603,7 +603,7 @@ All six edges lie in the mask code C64 and satisfy the cocycle (Kirchhoff) ident
 
 ### 11.4 Horizon K4 Partition and Coset Structure
 
-The horizon set for the spinorial transition law is the equality manifold A = B. Within Omega, the horizon has 64 states and partitions into four classes of 16 under pair-parity labeling of the 12-bit component.
+The horizon set for the spinorial transition rule is the equality manifold A = B. Within Omega, the horizon has 64 states and partitions into four classes of 16 under pair-parity labeling of the 12-bit component.
 
 Each 16-element vertex class is a coset of a shared 16-element kernel subgroup in mask coordinates. This establishes a boundary K4 organization with exact uniform cardinalities and explicit algebraic coset structure.
 
@@ -619,7 +619,7 @@ The commutator loop
 
 K(x,y) = T_x T_y T_x^{-1} T_y^{-1}
 
-acts as a symmetric translation by defect d = q(x) XOR q(y). The defect is always in C64. The defect law is verified exhaustively over all ordered byte pairs (256^2) at the rest state, and the observed defect set equals the entire code C64.
+acts as a symmetric translation by defect d = q(x) XOR q(y). The defect is always in C64. The defect rule is verified exhaustively over all ordered byte pairs (256^2) at the rest state, and the observed defect set equals the entire code C64.
 
 ### 11.7 Spinorial Stabilizers and Exact Multiplicity Laws
 
@@ -661,7 +661,7 @@ These checks establish standard bipartite entropy behavior under the code lift.
 
 ## Summary: What the Tests Establish
 
-The physics tests collectively establish the following properties of the Gyroscopic ASI aQPU Kernel kernel:
+The physics tests collectively establish the following properties of the Gyroscopic ASI hQVM Kernel kernel:
 
 **Conformance** (test_physics_1): The implementation correctly realizes all specification requirements including state packing, transcription, intron decomposition, mask expansion, spinorial transition, inverse, shadow count, and depth-4 alternation.
 
@@ -669,11 +669,11 @@ The physics tests collectively establish the following properties of the Gyrosco
 
 **Affine dynamics** (test_physics_3): Every byte implements an affine swap on GF(2)^12. Word actions are either identity or swap linear part plus XOR translation. Depth-4 alternation is affine cancellation.
 
-**Spinorial universe** (test_physics_4): Omega has 4096 states, radius 2, 64 horizon states, and satisfies the holographic ratio 64^2 = 4096. The reference byte has 64 fixed points and 2016 two-cycles on Omega. Every non-reference byte has order 4 on Omega. Commutator defects live in C64.
+**Spinorial universe** (test_physics_4): Omega has 4096 states, radius 2, 64 horizon states, and satisfies the holographic identity 64^2 = 4096. The reference byte has 64 fixed points and 2016 two-cycles on Omega. Every non-reference byte has order 4 on Omega. Commutator defects live in C64.
 
 **Depth-4 fiber bundle and intrinsic K4** (test_physics_6): For fixed depth-4 payload geometry, family-phase gauge freedom collapses to a 4-element fiber indexed by (phi_a, phi_b) in (Z/2)^2. Horizon states partition into four 16-element cosets, and the induced boundary wedges form a uniform 2-fold cover of Omega. Additional exact multiplicity laws are verified (4 horizon stabilizers, 4-to-1 q-map, uniform 16-to-1 length-2 provenance).
 
-**Theory bridge** (test_physics_5): The kernel constants satisfy all CGM continuous invariants including Q_G * m_a^2 = 1/2, the fine-structure constant prediction to 0.04%, the K_QG identity, the stage action ratios, and the aperture quantization chain (5/256, 1/48, 8/256 turn). The DOF doubling law 2^(2*DOF) connects continuous degrees of freedom to discrete state counts. The product structure Omega = U x V implements optical conjugacy with constant density 0.5 at every state.
+**Theory bridge** (test_physics_5): The kernel constants satisfy all CGM continuous invariants including Q_G * m_a^2 = 1/2, the fine-structure constant prediction to 0.04%, the K_QG identity, the stage action ratios, and the aperture quantization chain (5/256, 1/48, 8/256 turn). The DOF doubling theorem 2^(2*DOF) connects continuous degrees of freedom to discrete state counts. The product structure Omega = U x V implements optical conjugacy with constant density 0.5 at every state.
 
 The full test suite confirms that the discrete 24-bit byte-driven kernel is a faithful finite-group realization of the CGM theoretical framework at the kernel level, with exact integer theorems replacing the continuous relations of the original physics. The governance measurement layer (aperture, domain ledgers, Hodge decomposition) is not covered by these physics tests.
 

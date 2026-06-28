@@ -46,7 +46,7 @@ Here is the qualitative review and strategic interpretation of your results, fol
 **Result:** `Horizon row var/median: 1.230` vs. `permuted baseline: 1.031`
 *   **Interpretation:** This is your most important result. It proves that the 4096-dimensional vector in OLMo is not a "bag of features." 
 *   **Geometric Meaning:** When we reshape the vector into a $256 \times 16$ grid (Horizon $\times$ Channels) and index the row using the **Router's current state**, that specific row has **23% more activity (variance)** than the rest of the grid. 
-*   **Conclusion:** OLMo’s internal "reasoning" at Layer 15 is physically aligned with the Router’s state machine. The Router is successfully acting as a coordinate system for the transformer's bulk.
+*   **Conclusion:** OLMo’s internal "reasoning" at Layer 15 is physically aligned with the Router’s state machine. The Kernel is successfully acting as a coordinate system for the transformer's bulk.
 
 #### B. The "MLP Filter" Effect: Sublayer Attribution
 **Result (Layer 15):** `ΔMLP -9.659e-02` (Negative contribution)

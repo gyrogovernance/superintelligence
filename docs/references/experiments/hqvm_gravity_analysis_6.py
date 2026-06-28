@@ -35,8 +35,8 @@ if str(_REPO) not in sys.path:
 if str(_EXPERIMENTS) not in sys.path:
     sys.path.insert(0, str(_EXPERIMENTS))
 
-from aqpu_gravity_analysis_2 import enumerate_omega
-from aqpu_gravity_common import (
+from hqvm_gravity_analysis_2 import enumerate_omega
+from hqvm_gravity_common import (
     configure_stdout_utf8,
     Q_G,
     rho,
@@ -307,7 +307,7 @@ section("A.1  Antimatter involution C")
 print("  C(A12, B12) = (B12, A12); reversed word uses families (3,2,1,0).")
 
 section("A.2  Gravitoelectric invariants (EVEN under C)")
-print("  D=24 displacement, q(F)=0, cycle->REST: aqpu_gravity_analysis_2 S1/S4.")
+print("  D=24 displacement, q(F)=0, cycle->REST: hqvm_gravity_analysis_2 S1/S4.")
 print("  Mass popcount(A12) even under face-swap: verified on Omega in A.5.")
 
 section("A.3  H_spin observable (ODD under C on chi6)")
@@ -400,7 +400,7 @@ print("  mass(face-swap C) = mass:   {}/{}".format(mass_invariant_count, n_omega
 print("  H_spin range: [{}, {}]".format(min(h_spin_values), max(h_spin_values)))
 
 section("A.6  Chiral gravitomagnetic coupling")
-print("  ||pi||^2/Tr^2 = 2/75 (bulk): aqpu_gravity_analysis_3 B.")
+print("  ||pi||^2/Tr^2 = 2/75 (bulk): hqvm_gravity_analysis_3 B.")
 psi_ns = 0.15
 chiral_ns = (4.0 / 75.0) * psi_ns ** 2
 print("  delta_B_g/B_g = (4/75)*psi^2 at psi=0.15 (NS surface): {:.6f}  ({:.4f}%)".format(
@@ -411,7 +411,7 @@ print("  delta_B_g/B_g = (4/75)*psi^2 at psi=0.15 (NS surface): {:.6f}  ({:.4f}%
 # =====================================================================
 print("=" * 9, "B. Gravitational wave extensions", "=" * 9)
 print()
-print("  Vacuum Gauss / HT strain calibration: aqpu_gravity_analysis_5 J, P.")
+print("  Vacuum Gauss / HT strain calibration: hqvm_gravity_analysis_5 J, P.")
 print()
 
 section("B.0  Quadrupole shell spectrum and 8-byte Z2 holonomy")
@@ -784,7 +784,7 @@ print("  Hawking kappa ratio ~1: {:.4f} = {}".format(hk["kappa_ratio"], check_hk
 print("  Hawking L ratio < 1: {:.4f} = {}".format(hk["lum_ratio"], check_lum))
 print("  Exterior I = 1/2 all g1: {}".format(all_I_half))
 print()
-print("  Scalar-tensor action (psi slaved): aqpu_gravity_analysis_5 S.")
+print("  Scalar-tensor action (psi slaved): hqvm_gravity_analysis_5 S.")
 print()
 
 section("E.4  Summary")

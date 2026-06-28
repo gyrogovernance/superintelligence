@@ -1,6 +1,6 @@
 # src/router.py
 """
-Gyroscopic ASI aQPU Kernel - Compact deterministic byte-driven coordination medium.
+Gyroscopic ASI hQVM Kernel - Compact replayable byte-driven coordination medium.
 
 Maintains:
 - state24: the 24-bit GENE_Mac tensor state

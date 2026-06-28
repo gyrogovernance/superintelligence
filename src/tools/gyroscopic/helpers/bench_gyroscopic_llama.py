@@ -643,7 +643,7 @@ def print_report(results: list[RunResult], meta: dict[str, Any], *, verbose: boo
 def _print_plain_summary(results: list[RunResult], meta: dict[str, Any]) -> None:
     print("\n--- What this means ---")
     print("  Stock = normal llama.cpp on your mini-PC.")
-    print("  Gyroscopic = same model with physics-guided attention:")
+    print("  Gyroscopic = same model with dynamics-guided attention:")
     print("    - KV chirality prefilter uses live M2/eta (entanglement entropy), not static LSH.")
     by_case: dict[str, dict[str, RunResult]] = {}
     for r in results:

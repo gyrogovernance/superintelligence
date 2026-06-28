@@ -7,7 +7,7 @@ Key design choices:
 - Edges are indexed in the canonical K4 edge order:
   (0,1),(0,2),(0,3),(1,2),(1,3),(2,3)
   where vertices are (Gov, Info, Infer, Intel) by convention of CGM/GGG.
-- Events do NOT change kernel physics; they are ordered by kernel shared moments.
+- Events do NOT change kernel dynamics; they are ordered by kernel shared moments.
 - The K4 geometry is an application-layer governance measurement construct.
   It does not depend on kernel state bits.
 """

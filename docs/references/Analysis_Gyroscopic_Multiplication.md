@@ -757,7 +757,7 @@ This document develops the arithmetic layer: exact chart decomposition of intege
 
 The companion document `QuBEC_Theory` develops the operator and transport layer: shell, chirality, gauge, spectral dynamics, and exact partition operator classes.
 
-The aQPU kernel and SDK specifications develop the native state and runtime layer: reachable manifold, transition law, execution surfaces, and observable records.
+The hQVM kernel and SDK specifications develop the native state and runtime layer: reachable manifold, transition rule, execution surfaces, and observable records.
 
 Practical execution proceeds in this order:
 
@@ -815,7 +815,7 @@ The 2.07% aperture, in this reading, is the structural gap that separates the fu
 
 ## Appendix: Phenomenological Resonances and Research Leads
 
-The following sections document phenomenological resonances and research leads. They play no role in the deductive results of the CGM or the verified properties of the aQPU kernel.
+The following sections document phenomenological resonances and research leads. They play no role in the deductive results of the CGM or the verified properties of the hQVM kernel.
 
 ### Appendix P1: Two-Circle Intersection Geometry
 
@@ -1088,4 +1088,4 @@ Ungar, A. A. (2008). Analytic Hyperbolic Geometry and Albert Einstein's Special 
 
 ### Gyroscopic ASI Framework
 
-Gyroscopic ASI aQPU Kernel specification and Quantum Computing SDK specification. Repository: github.com/gyrogovernance/superintelligence
+Gyroscopic ASI hQVM Kernel specification and Quantum Computing SDK specification. Repository: github.com/gyrogovernance/superintelligence

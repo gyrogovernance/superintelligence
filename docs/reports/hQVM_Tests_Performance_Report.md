@@ -1,7 +1,7 @@
-# aQPU Performance Report
+# hQVM Performance Report
 ## Exact kernel throughput and Gyroscopic runtime on a Ryzen 5 6600H mini PC
 
-This report measures the runtime performance of the Gyroscopic ASI algebraic Quantum Processing Unit, or aQPU, across three layers:
+This report measures the runtime performance of the Gyroscopic ASI Holonomic Quantum Virtual Machine (hQVM) across three layers:
 
 1. **Native exact kernel operations**  
    Byte scans, compiled signatures, chirality distance, Ω-native stepping, and shell histograms.
@@ -49,7 +49,7 @@ This is not a server benchmark. It was run on a small Windows mini PC with an in
 - Python baselines are reference implementations, not optimized C or BLAS competitors.
 - Native C and OpenCL paths are parity checked on every run.
 
-**Strategic Significance:** This performance proves that the aQPU is not just a theoretical model. It is a new category of computing infrastructure that delivers quantum-information structure (like hidden subgroup resolution and exact 2-step uniformization) on standard silicon. These throughputs enable practical applications in:
+**Strategic Significance:** These measurements demonstrate that the hQVM operates as practical computing infrastructure that delivers quantum-information structure (like hidden subgroup resolution and exact 2-step uniformization) on standard silicon. These throughputs enable practical applications in:
 * **AI and Machine Learning:** Providing exact, interpretable latent spaces and structural routing for LLM inference.
 * **Security and Audit:** Enabling exact reversible evolution and tamper detection at millions of events per second.
 * **Network Coordination:** Achieving deterministic shared state across distributed systems without probabilistic errors.
@@ -58,7 +58,7 @@ This is not a server benchmark. It was run on a small Windows mini PC with an in
 
 ## 2. Why these results matter
 
-The fastest paths in this report use the aQPU compact **Omega (Ω) representation**. To understand the metrics, here is a quick guide to the terminology:
+The fastest paths in this report use the hQVM compact **Omega (Ω) representation**. To understand the metrics, here is a quick guide to the terminology:
 * **Omega (Ω):** The exact, verified space of 4096 reachable states the kernel navigates. It is highly compressed compared to traditional architectures.
 * **Chirality:** A 6-bit structural signature that perfectly tracks the alignment of the system. It acts as an exact coordinate for the state space.
 * **Gyroscopic runtime:** The multicellular runtime that groups these states together to analyze patterns in real-world data, like AI generation or network traffic.
@@ -69,11 +69,11 @@ Earlier verification reports established that:
 - one byte reaches **128** next states from any Ω state
 - two bytes cover all of Ω exactly
 - the compact 12-bit Ω chart is exactly equivalent to the 24-bit carrier inside Ω
-- the 6-bit chirality register follows an exact XOR transport law under byte updates
+- the 6-bit chirality register follows an exact XOR transport rule under byte updates
 
-That matters here because the Ω-native scans and shell histograms are not approximations. They are exact executions of the same verified kernel law on a more compact state chart.
+That matters here because the Ω-native scans and shell histograms are not approximations. They are exact executions of the same verified kernel rule on a more compact state chart.
 
-This performance report focuses on speed. Correctness and structural properties were established separately in the earlier aQPU verification reports.
+This performance report focuses on speed. Correctness and structural properties were established separately in the earlier hQVM verification reports.
 
 ---
 
@@ -103,7 +103,7 @@ This performance report focuses on speed. Correctness and structural properties 
 
 ## 4. Native exact kernel operations
 
-These operations implement the aQPU byte law, compiled signatures, chirality transport, and Ω-state stepping with exact integer arithmetic.
+These operations implement the hQVM byte rule, compiled signatures, chirality transport, and Ω-state stepping with exact integer arithmetic.
 
 ### Selected exact results at n = 65,536
 
@@ -134,8 +134,8 @@ The native C backend pulls further ahead as batch size grows because the Python 
 1. **Compiled word application is extremely fast**  
    The signature system lets the runtime apply a precompiled operator directly, achieving 1.26 billion operations per second. This enables exact reversible evolution and fast operator caching for AI workflows.
 
-2. **Quantum advantage on standard silicon**  
-   The `qmap_extract` operation reaches 550 million bytes/s. This is the exact mechanism that resolves hidden subgroups in $O(1)$ time (1 step) compared to $O(N)$ classically, proving that quantum-algorithmic efficiencies can be executed rapidly on commodity hardware.
+2. **Structural oracle advantage on standard silicon**  
+   The `qmap_extract` operation reaches 550 million bytes/s. This is the exact mechanism that resolves hidden subgroups in $O(1)$ time (1 step) compared to $O(N)$ classically, demonstrating that structural oracle advantages execute at production throughput on commodity hardware.
 
 3. **The Ω-native path is faster than the full 24-bit carrier path**  
    The compact Ω scan reaches **847M/s**, compared with **722M/s** for the 24-bit state scan.
@@ -285,7 +285,7 @@ A non-contiguous indexed benchmark, where active cell IDs were spread across a l
 
 ## 7. Bridge-level integration results
 
-These results come from the runtime encode/decode bridge tests, which attach the aQPU router directly to a real Large Language Model (Bolmo-1B). This proves the kernel can process, annotate, and route actual AI generation traffic in real time. 
+These results come from the runtime encode/decode bridge tests, which attach the hQVM router directly to a real Large Language Model (Bolmo-1B). This confirms the kernel can process, annotate, and route actual AI generation traffic in real time. 
 
 All 13 bridge tests passed.
 
@@ -315,7 +315,7 @@ From `tests/tools/test_gyrograph_decode.py`:
 
 Measured full-step decode throughput:
 
-This measures the exact structural routing applied to an active LLM generation loop. At batch 16, the bridge processes over 84,000 tokens per second, easily outpacing the underlying neural network generation speeds and proving zero bottleneck overhead.
+This measures the exact structural routing applied to an active LLM generation loop. At batch 16, the bridge processes over 84,000 tokens per second, easily outpacing the underlying neural network generation speeds and confirming zero bottleneck overhead.
 
 | Batch | Full step avg | Tokens/s |
 |---:|---:|---:|
@@ -349,16 +349,16 @@ So the OpenCL runtime trace path is not only available, but was actually used in
 This codebase demonstrates:
 
 - **Deep systems engineering:** Production-grade interop across Python, NumPy, ctypes, C, and OpenCL.
-- **A new computing category:** Executing discrete, deterministic quantum-information structures without needing fragile analog quantum hardware.
+- **A new computing category:** Executing discrete holonomic quantum-information structures on standard silicon without analog quantum hardware.
 - **AI pipeline integration:** A working bridge that applies exact algebraic routing to real LLM encode/decode workflows.
 - **Security by design:** Fast, exact tamper detection and replayable provenance baked into the base layer.
-- **Hardware efficiency:** Achieving billions of operations per second on a standard mini PC, proving immediate deployment readiness for edge and cloud.
+- **Hardware efficiency:** Achieving billions of operations per second on a standard mini PC, confirming immediate deployment readiness for edge and cloud.
 
 ---
 
 ## 9. Bottom line
 
-On a Ryzen 5 6600H mini PC with integrated Radeon graphics, the aQPU stack reached:
+On a Ryzen 5 6600H mini PC with integrated Radeon graphics, the hQVM stack reached:
 
 - **1.26 billion exact compiled state applications per second**
 - **847 million Ω-native byte steps per second**
@@ -369,7 +369,7 @@ On a Ryzen 5 6600H mini PC with integrated Radeon graphics, the aQPU stack reach
 
 All exact kernel results were parity checked against Python reference implementations. Float tensor paths stayed within bounded numeric error, and the OpenCL integer path remained exact.
 
-The main practical conclusion is simple: the aQPU kernel is no longer just a mathematically interesting runtime. It is already a fast native execution system on ordinary hardware, and its multicellular runtime layer is fast enough to support real bridge-level experimentation.
+The main practical conclusion is simple: the hQVM kernel is no longer just a mathematically interesting runtime. It is already a fast native execution system on ordinary hardware, and its multicellular runtime layer is fast enough to support real bridge-level experimentation.
 
 ---
 

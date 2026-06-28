@@ -1,8 +1,8 @@
-# Gyroscopic ASI aQPU Kernel: Holographic Algorithm Formalization
+# Gyroscopic ASI hQVM Kernel: Holographic Algorithm Formalization
 
 ## Introduction
 
-This document formalizes the architecture of the Gyroscopic ASI aQPU Kernel as a holographic algorithm. The router implements a discrete physical system whose state space, transition rules, and measurement observables are derived directly from the Common Governance Model (CGM) axiom. The architecture consists of five distinct layers:
+This document formalizes the architecture of the Gyroscopic ASI hQVM Kernel as a holographic algorithm. The router implements a discrete physical system whose state space, transition rules, and measurement observables are derived directly from the Common Governance Model (CGM) axiom. The architecture consists of five distinct layers:
 
 1. The Tensor State
 2. The Action Alphabet
@@ -16,7 +16,7 @@ The central results are constructive. Every theorem is verified exhaustively on 
 
 ### Summary of Constants
 
-The following constants are derived from the kernel physics and verified by the test suite:
+The following constants are derived from the kernel dynamics and verified by the test suite:
 
 - Reachable shared-moment space \|Ω\|: 4,096 states
 - Complement horizon size: 64 states (A = B XOR 0xFFF)
@@ -41,7 +41,7 @@ The fundamental unit of computation is a 24-bit state S, decomposed into two cou
 Each 12-bit component represents a topological grid of dimensions 2 times 3 times 2:
 
 - 2 Frames: Represent the two fundamental phases or chiral components of the system. In CGM terms, this corresponds to the active and passive phases.
-- 3 Rows: Represent the three spatial dimensions. The division of intrinsic parameters by 3 maps directly to the reconstruction of the monodromy defect angle in the kernel physics, linking the discrete grid to physical 3D space.
+- 3 Rows: Represent the three spatial dimensions. The division of intrinsic parameters by 3 maps directly to the reconstruction of the monodromy defect angle in the kernel dynamics, linking the discrete grid to physical 3D space.
 - 2 Columns: Represent the binary orientation within each spatial dimension.
 
 The bit positions are indexed as follows. Bit k of a 12-bit component is defined as the value of the k-th power of 2 in the binary representation, where bit 0 is the least significant and bit 11 is the most significant. The coordinate mapping assigns bits 0 through 5 to frame 0 and bits 6 through 11 to frame 1, with each frame containing 3 rows of 2 columns.
@@ -108,7 +108,7 @@ Each of the 256 introns combines a family in {0,1,2,3} with a micro-reference in
 
 ## Section 3: Reachable Space and Dynamics
 
-The processor defines the dynamics of the Tensor State through the spinorial transition law, acting on a finite reachable shared-moment space Ω.
+The processor defines the dynamics of the Tensor State through the spinorial transition rule, acting on a finite reachable shared-moment space Ω.
 
 ### Reachable Shared-Moment Space Ω
 
@@ -154,7 +154,7 @@ Ordering of bytes within each parity class is irrelevant for the mask component.
 
 ### Intrinsic Inversion
 
-The system possesses an exact inverse transformation defined algebraically from the spinorial transition law. Given (A_next, B_next) and intron for byte b:
+The system possesses an exact inverse transformation defined algebraically from the spinorial transition rule. Given (A_next, B_next) and intron for byte b:
 
 - B_pred = A_next XOR invert_a
 - A_pred = (B_next XOR invert_b) XOR mask
@@ -165,7 +165,7 @@ with invert_a and invert_b determined by intron bits 0 and 7 and mask the 12-bit
 
 ## Section 4: Holographic Structure
 
-The aQPU Kernel exhibits a discrete holographic relationship between a boundary and a bulk, analogous to the AdS/CFT correspondence in theoretical physics.
+The hQVM Kernel exhibits a discrete holographic relationship between a boundary and a bulk, analogous to the AdS/CFT correspondence in theoretical physics.
 
 ### The Horizons as Boundary
 
@@ -174,7 +174,7 @@ The spinorial kernel has two distinguished 64-state boundary sets within Ω:
 - **Complement horizon (S-sector):** states where A = B XOR 0xFFF (maximal chirality).
 - **Equality horizon (UNA degeneracy):** states where A = B (zero chirality).
 
-The reference byte 0xAA acts as a pure swap (A, B) → (B, A). Its fixed points are exactly the equality-horizon states. The complement horizon is preserved as a set by the intrinsic complement-swap gates. Both horizons satisfy the holographic relation \|H\|² = \|Ω\| = 64².
+The reference byte 0xAA acts as a pure swap (A, B) → (B, A). Its fixed points are exactly the equality-horizon states. The complement horizon is preserved as a set by the holonomic complement-swap gates. Both horizons satisfy the holographic relation \|H\|² = \|Ω\| = 64².
 
 ### Holographic Dictionary
 
@@ -209,13 +209,13 @@ The MacWilliams identity relates the weight enumerator of a linear code to that 
 
     W_{C^perp}(x,y) = |C|^{-1} W_C(y - x, y + (q-1)x)
 
-For the self-dual [12,6,2] mask code of the aQPU kernel, C = C^perp and q = 2. The identity becomes a self-consistency condition:
+For the self-dual [12,6,2] mask code of the hQVM kernel, C = C^perp and q = 2. The identity becomes a self-consistency condition:
 
     W_C(x,y) = (1/64) W_C(x + y, x - y)    (up to normalization)
 
 This forces the weight enumerator to be invariant under the Hadamard substitution, which is the code-theoretic origin of the self-Fourier property stated in the Horizon Walsh Transform subsection above.
 
-The Shor-Laflamme quantum MacWilliams identities (1996) extend this framework to quantum codes over GF(4). Their central observation is that the matrix H_ij = tr(E_i E_j E_i E_j), where E_i are tensor products of Pauli matrices, is proportional to a Hadamard matrix. The coarse-grained version of this matrix governs the weight transform. In the aQPU kernel, the same structural relationship holds: the byte transition law acts through Pauli-X strings on the chirality register, and the Walsh-Hadamard transform diagonalizes these actions exactly. The quantum MacWilliams framework therefore applies natively to the self-dual mask code of the aQPU.
+The Shor-Laflamme quantum MacWilliams identities (1996) extend this framework to quantum codes over GF(4). Their central observation is that the matrix H_ij = tr(E_i E_j E_i E_j), where E_i are tensor products of Pauli matrices, is proportional to a Hadamard matrix. The coarse-grained version of this matrix governs the weight transform. In the hQVM kernel, the same structural relationship holds: the byte transition rule acts through Pauli-X strings on the chirality register, and the Walsh-Hadamard transform diagonalizes these actions exactly. The quantum MacWilliams framework therefore applies natively to the self-dual mask code of the hQVM.
 
 The MacWilliams transform is expressed in the Krawtchouk polynomial basis. These are the same polynomials that provide the shell-radial harmonic decomposition of QuBEC climate dynamics. The spectral basis that governs climate transport and the weight-distribution transform that governs code self-duality share a common algebraic engine.
 
@@ -223,7 +223,7 @@ The MacWilliams transform is expressed in the Krawtchouk polynomial basis. These
 
 ## Section 5: K4 Fiber Structure and Quotient Dynamics
 
-The depth-4 fiber structure of the kernel produces an intrinsic K4 geometry that governs both the horizon partition and a quotient dynamics on the bulk.
+The depth-4 fiber structure of the kernel produces an emergent K4 geometry that governs both the horizon partition and a quotient dynamics on the bulk.
 
 ### K4 as the Depth-4 Fiber
 
@@ -246,7 +246,7 @@ The full kernel dynamics in mask coordinates takes the affine form:
 - u_next = v XOR invert_a
 - v_next = (u XOR m) XOR invert_b
 
-The K4 vertex structure acts as a factor system of the bulk physics. The net family-phase invariants (phi_a, phi_b) in (Z/2)^2 survive depth-4 closure and index the four output classes. Intermediate family bits cancel, leaving only this 2-bit net phase. The same K4 that emerges as the depth-4 fiber appears in the governance measurement layer as the four vertices of the ledger graph.
+The K4 vertex structure acts as a factor system of the bulk dynamics. The net family-phase invariants (phi_a, phi_b) in (Z/2)^2 survive depth-4 closure and index the four output classes. Intermediate family bits cancel, leaving only this 2-bit net phase. The same K4 that emerges as the depth-4 fiber appears in the governance measurement layer as the four vertices of the ledger graph.
 
 ### Subregion Duality
 
@@ -334,7 +334,7 @@ This ratio is scale-invariant and takes values between 0 and 1. An aperture of 0
 
 ### Intrinsic Kernel Aperture
 
-The kernel physics determines an intrinsic aperture through the weight distribution of the mask code. The minimal sector in the defect weight distribution gives:
+The kernel dynamics determines an intrinsic aperture through the weight distribution of the mask code. The minimal sector in the defect weight distribution gives:
 
 - A_kernel = 5/256 = 0.01953
 
@@ -402,7 +402,7 @@ The Common Source Moment (CSM) provides the physical medium for the system. It c
 
 In theoretical physics, natural unit systems simplify equations by setting the speed of light c = 1, while geometric formulations often also set c = 1 and G = 1 so that time and space share a common geometric scale. This change of units unifies coordinates in a way that is mathematically convenient and physically meaningful.
 
-The exact cancellation of c in the CSM derivation shows that the aQPU kernel is structurally aligned with this c = 1 geometry. In the kernel, time is not an external clock input. It is intrinsic to the discrete gyroscopic transport across depth t. This makes the aQPU a unified geometric substrate where integer arithmetic and finite-state transitions enforce scale consistency.
+The exact cancellation of c in the CSM derivation shows that the hQVM kernel is structurally aligned with this c = 1 geometry. In the kernel, time is not an external clock input. It is part of the discrete gyroscopic transport across depth t. This makes the hQVM a unified geometric substrate where integer arithmetic and finite-state transitions enforce scale consistency.
 
 For physics simulations, especially in quantum gravity, relativity, or topological field theory, this is useful because the model avoids floating-point drift from unit-conversion assumptions and keeps scaling behavior fixed by structure.
 
@@ -420,13 +420,13 @@ This formula computes the volume of a sphere with radius equal to the distance l
 
 In theoretical physics, natural unit systems simplify equations by setting fundamental constants to unity. In Planck units, both the speed of light c and the reduced Planck constant h-bar are set to 1. In the geometric units of General Relativity, c and the gravitational constant G are both set to 1. These conventions are not merely notational shortcuts. They express the structural unification of space, time, and energy into a single geometric manifold.
 
-The exact cancellation of c in the CSM derivation demonstrates that the aQPU kernel operates natively in a geometry compatible with natural units. The resulting capacity invariant depends only on the caesium frequency standard f_Cs, which is a purely geometric-frequency quantity. No external length or velocity reference enters.
+The exact cancellation of c in the CSM derivation demonstrates that the hQVM kernel operates natively in a geometry compatible with natural units. The resulting capacity invariant depends only on the caesium frequency standard f_Cs, which is a purely geometric-frequency quantity. No external length or velocity reference enters.
 
 This has two consequences for the architecture.
 
-First, temporal progression in the aQPU is intrinsic ledger depth, not an external clock variable. The Moment at depth t is defined by the byte ledger prefix of length t, without reference to wall-clock time or the speed of signal propagation. This is the computational analogue of the c = 1 convention: time and state are unified in the same coordinate.
+First, temporal progression in the hQVM is intrinsic ledger depth, not an external clock variable. The Moment at depth t is defined by the byte ledger prefix of length t, without reference to wall-clock time or the speed of signal propagation. This is the computational analogue of the c = 1 convention: time and state are unified in the same coordinate.
 
-Second, the aQPU provides a computational substrate in which natural-units geometry is structurally enforced by exact integer arithmetic. For physics simulations involving relativistic, gravitational, or quantum-gravitational phenomena, the kernel eliminates floating-point drift and artifactual scaling factors that arise from carrying explicit factors of c through numerical computation.
+Second, the hQVM provides a computational substrate in which natural-units geometry is structurally enforced by exact integer arithmetic. For physics simulations involving relativistic, gravitational, or quantum-gravitational phenomena, the kernel eliminates floating-point drift and artifactual scaling factors that arise from carrying explicit factors of c through numerical computation.
 
 The two-step uniformization of the future cone (all 4096 states of Omega reached with exact uniform occupancy after 2 bytes from any starting state) defines the causal reach of the computational geometry. This is the discrete analogue of the light cone: the boundary beyond which no further states become accessible. Within 2 byte steps, the full manifold is causally connected.
 
@@ -481,7 +481,7 @@ These values are exact and match the standard bipartite entanglement structure: 
 
 ## Conclusion
 
-The Gyroscopic ASI aQPU Kernel formalism presents a complete chain from low-level 8-bit inputs to high-level governance metrics and physical capacity.
+The Gyroscopic ASI hQVM Kernel formalism presents a complete chain from low-level 8-bit inputs to high-level governance metrics and physical capacity.
 
 The Tensor State provides a 24-bit phase space with the structure of a 3-dimensional, 6-degree-of-freedom manifold. The closed-form dynamics is affine and integrable in mask coordinates, with exact trajectory invariants depending on parity sums of masks and depth-4 family-phase invariants.
 
@@ -493,5 +493,5 @@ The Hodge ledgers decompose governance dynamics into gradient and cycle componen
 
 The CSM provides the physical capacity medium, derived from atomic constants with the speed of light canceling exactly. The coverage margin exceeds a trillion years of global Unconditional High Income at current population scales. The Hilbert space lift exhibits standard bipartite structure, with zero entropy for product subsets and maximal entropy (6 bits) for bijection graphs.
 
-The kernel is an algebraic quantum processing unit whose computational properties—spinorial closure, exact two-step uniformisation, holographic compression, and intrinsic error detection—are all realised on standard silicon with deterministic integer arithmetic.
+The kernel is a Holonomic Quantum Virtual Machine (hQVM) whose computational properties—spinorial closure, exact two-step uniformisation, holographic compression, and intrinsic error detection—are all realised on standard silicon with deterministic integer arithmetic.
 

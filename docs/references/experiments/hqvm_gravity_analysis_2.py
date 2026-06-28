@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-aqpu_gravity_analysis_2.py
+hqvm_gravity_analysis_2.py
 
 Canonical kernel gravity theorems.
 
@@ -63,7 +63,7 @@ from src.api import (
     state24_to_omega12,
 )
 
-from aqpu_gravity_common import (
+from hqvm_gravity_common import (
     Q_G as Q_G_NUM,
     Z2_HOLONOMY_PATH_TRAVERSE as D_Z2,
     AF as AF_2D,

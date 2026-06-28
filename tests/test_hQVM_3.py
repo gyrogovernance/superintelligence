@@ -1,7 +1,7 @@
 """
-test_aQPU_3.py — Frontier computational characterization of the aQPU.
+test_hQVM_3.py — Frontier computational characterization of the hQVM.
 
-Run:  pytest tests/test_aQPU_3.py -v -s
+Run:  pytest tests/test_hQVM_3.py -v -s
 
 Computes structural properties of the kernel as a computational medium.
 Where possible, results are derived from exact algebraic laws established
@@ -11,7 +11,7 @@ structural invariants. All tests print results for examination.
 Scope:
 - Permutation structure and exact row-class theorem (rank from ε-quotient)
 - Exact undetected error enumerator from (1+z²)^12
-- Exact perturbation law (payload vs boundary decomposition)
+- Exact perturbation rule (payload vs boundary decomposition)
 - Channel capacity (per-byte and depth-4)
 - State separation universality and distance spectrum
 - Tamper detection with exact miss mechanisms
@@ -21,8 +21,8 @@ Scope:
 - Trajectory compression bounds
 
 Does NOT retest: kernel conformance (test_physics_1-6),
-gate structure / horizons / chirality transport (test_aQPU),
-Hilbert lift / Bell / CHSH / teleportation (test_aQPU_2).
+gate structure / horizons / chirality transport (test_hQVM),
+Hilbert lift / Bell / CHSH / teleportation (test_hQVM_2).
 """
 
 from __future__ import annotations
@@ -46,7 +46,7 @@ from src.constants import (
     unpack_state,
 )
 from src.api import MASK12_BY_BYTE, chirality_word6, mask12_for_byte, q_word6
-from tests.test_aQPU_1 import _bfs_omega
+from tests.test_hQVM_1 import _bfs_omega
 
 
 # ----------------------------------------------------------------

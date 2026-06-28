@@ -1,6 +1,6 @@
 # src/api.py
 """
-Gyroscopic ASI aQPU Kernel API: precomputed tables, integrity checks, and derived functions.
+Gyroscopic ASI hQVM Kernel API: precomputed tables, integrity checks, and derived functions.
 
 Built from theoretical constants in src.constants. No HTTP or REST;
 this module provides mask lookup, dual code and syndromes, trajectory

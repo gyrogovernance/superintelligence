@@ -18,7 +18,7 @@ The following symbols are used throughout Parts I–IV.
 | N | Shell index, N = popcount(χ) ∈ {0,…,6} |
 | c | Boundary anchor, c ∈ GF(2)⁶ |
 | q | Byte q-charge, q ∈ GF(2)⁶ |
-| K4 | Klein four-group of intrinsic gates, K4 ≅ GF(2)² |
+| K4 | Klein four-group of holonomic gates, K4 ≅ GF(2)² |
 | η, ηᵢ | Isotropic and per-axis chirality damping parameters |
 | ξ_A, ξ_B | Gauge damping parameters on the two K4 axes |
 | B | Arithmetic radix, B = 2¹⁶ = 65536 |
@@ -28,7 +28,9 @@ The following symbols are used throughout Parts I–IV.
 
 ## Overview
 
-This document formalizes the occupied QuBEC: finite quantum thermodynamics, hardware-tier architecture (Part I §6), byte transport and the four-phase processing model (Part II §6a.6), native transform algebra, and operator lowering. The partition function Z₁(λ) = 64·(1+λ)⁶ is exact and polynomial. Spectral transport is diagonal in the Krawtchouk and Walsh-Hadamard bases. Parts: I medium; II transport; III transforms; IV operators; V closure; VI observables; VII verified advantages. Evidence inventory: [aQPU Features Report](../reports/aQPU_Features_Report.md).
+This document formalizes the occupied QuBEC: finite quantum thermodynamics, hardware-tier architecture (Part I §6), byte transport and the four-phase processing model (Part II §6a.6), native transform algebra, and operator lowering. The partition function Z₁(λ) = 64·(1+λ)⁶ is exact and polynomial. Spectral transport is diagonal in the Krawtchouk and Walsh-Hadamard bases. Parts: I medium; II transport; III transforms; IV operators; V closure; VI observables; VII verified advantages. Evidence inventory: [hQVM Features Report](../reports/hQVM_Features_Report.md).
+
+Where HQC literature realizes gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware.
 
 ---
 
@@ -36,11 +38,11 @@ This document formalizes the occupied QuBEC: finite quantum thermodynamics, hard
 
 ---
 
-## 1. The Finite Quantum Medium
+## 1. The Finite Holonomic Medium
 
 ### 1.1 The QuBEC manifold Ω
 
-The reachable state space Ω is the set of all 24-bit Gyrostates accessible from the rest state GENE_MAC_REST = 0xAAA555 under the byte transition law.
+The reachable state space Ω is the set of all 24-bit Gyrostates accessible from the rest state GENE_MAC_REST = 0xAAA555 under the byte transition rule.
 
 ```
 |Ω| = 4096
@@ -61,6 +63,7 @@ State charts:
 | Carrier | (A₁₂, B₁₂) ∈ {0,…,4095}² | Raw 24-bit encoding |
 | Chirality | χ ∈ GF(2)⁶ | Per-mode alignment of active and passive faces |
 | Spectral | 64-point Walsh-Hadamard dual | Fourier transform of chirality-space functions |
+| Wavefunction | ψ ∈ ℂ^4096 over Ω | Canonical Hilbert lift from [12,6,2] code geometry; eigenspace decomposition of canonical involutions |
 | Constitutional | Integer observables | Horizon distance, AB distance, component densities |
 
 Transport observables:
@@ -70,7 +73,7 @@ Transport observables:
 | Gauge and family | K4 phase stream from byte families | Occupied process phase sector |
 | q-class | GF(2)⁶ byte charge class | Additive transport sector |
 | Parity commitment | Byte parity sector | Constraint and orbit signature |
-| Byte sector | 256-byte family and action partition | Transport law source partition |
+| Byte sector | 256-byte family and action partition | Transport rule source partition |
 
 Chart extraction and transport-observable extraction are deterministic. Observation is chart selection on a fully determined algebraic state and its occupied transport process.
 
@@ -137,7 +140,7 @@ The remaining 3968 states constitute the bulk, where chirality is partial: neith
 
 ### 1.5 Quantum character of the six modes
 
-The broader algebraic structure of the kernel supports Bell-pair factorization over the six modes, CHSH saturation at the Tsirelson bound, Peres-Mermin contextuality, mutually unbiased bases, and a non-Clifford resource. These properties are verified exhaustively in the aQPU test reports. The six modes are the 6 payload bits of the byte, each controlling one oriented dipole pair of the 2x3x2 tensor. They correspond to the 6 generators of se(3): 3 rotational generators from SU(2) in Frame 0 and 3 translational generators from R^3 in Frame 1. Each payload bit executes a discrete pi-rotation around one se(3) basis vector. The shell thermodynamics therefore acts on modes whose quantum structure descends directly from the byte's SE(3) geometry (Gyroscopic Byte Formalism, Section 5.3).
+The broader algebraic structure of the kernel supports Bell-pair factorization over the six modes, CHSH saturation at the Tsirelson bound, Peres-Mermin contextuality, mutually unbiased bases, and a non-Clifford resource. These properties are verified exhaustively in the hQVM test reports. The six modes are the 6 payload bits of the byte, each controlling one oriented dipole pair of the 2x3x2 tensor. They correspond to the 6 generators of se(3): 3 rotational generators from SU(2) in Frame 0 and 3 translational generators from R^3 in Frame 1. Each payload bit executes a discrete pi-rotation around one se(3) basis vector. The shell thermodynamics therefore acts on modes whose quantum structure descends directly from the byte's SE(3) geometry (Gyroscopic Byte Formalism, Section 5.3).
 
 ### 1.6 Formal climate object
 
@@ -148,7 +151,7 @@ p_t : Ω -> [0,1]
 Σ_{s ∈ Ω} p_t(s) = 1
 ```
 
-Stochasticity in the aQPU is exact ensemble structure induced by deterministic byte dynamics: future-cone occupancy measures, shell distributions, q-sector distributions, gauge-sector distributions, and their spectral evolution.
+Stochasticity in the hQVM is exact ensemble structure induced by deterministic byte dynamics: future-cone occupancy measures, shell distributions, q-sector distributions, gauge-sector distributions, and their spectral evolution.
 
 The principal marginals are:
 
@@ -257,7 +260,7 @@ The isotropic damping parameter. It controls the rate at which higher spectral m
 
 ### 4.1 Shell variance
 
-From the binomial shell law:
+From the binomial shell distribution:
 
 ```
 Var(N) = 6λ / (1 + λ)² = 6ρ(1 − ρ) = (3/2)(1 − η²)
@@ -283,7 +286,7 @@ At the horizons (ρ = 0 or ρ = 1), the variance vanishes: the climate is frozen
 
 ### 5.1 Shannon entropy
 
-Because the shell law is binomial and the 64-fold holographic degeneracy is uniform, the one-cell Shannon entropy is:
+Because the shell distribution is binomial and the 64-fold holographic degeneracy is uniform, the one-cell Shannon entropy is:
 
 ```
 S(ρ) = 6 + 6h₂(ρ)
@@ -356,7 +359,7 @@ The QuBEC architecture maps to the standard CPU memory hierarchy:
 
 ### 6.2 Gates as register primitives
 
-The four intrinsic gates {id, S, C, F} are register-level primitives: identity, swap, complement-swap, and global complement. Carrier actions and horizon stabilizers are in Part II §10.
+The four holonomic gates {id, S, C, F} are register-level primitives: identity, swap, complement-swap, and global complement. Carrier actions and horizon stabilizers are in Part II §10.
 
 ### 6.3 Cache alignment
 
@@ -383,7 +386,7 @@ q = q₆(b) ∈ GF(2)⁶
 j = popcount(q) ∈ {0, 1, 2, 3, 4, 5, 6}
 ```
 
-The chirality transport law is exact:
+The chirality transport rule is exact:
 
 ```
 χ' = χ ⊕ q
@@ -391,7 +394,7 @@ The chirality transport law is exact:
 
 A byte ensemble ν defines a Pauli-diagonal channel on the six-mode register; Walsh eigenvalues φ(s) = Σ_q ν(q)(−1)^{⟨s,q⟩} are the spectral multipliers of §8.1 (WHT forcing: Part III §12.2). The q-weight j = popcount(q) is the number of modes flipped.
 
-### 6a.2 Shell transition law
+### 6a.2 Shell transition rule
 
 At the shell level, a byte with q-weight j maps shell N to shell N' according to:
 
@@ -407,7 +410,7 @@ For fixed N and fixed j, the exact shell transition probability is:
 P_j(N → N') = C(N, ℓ) · C(6 − N, j − ℓ) / C(6, j)
 ```
 
-with ℓ = (N + j − N') / 2. This is an exact hypergeometric transition law.
+with ℓ = (N + j − N') / 2. This is an exact hypergeometric transition rule.
 
 ### 6a.3 Creation and annihilation at the horizons
 
@@ -429,7 +432,7 @@ The factor 4 is the family degeneracy per q-class. The q-weight distribution of 
 
 ### 6a.5 Thermodynamic synthesis
 
-If a byte ensemble is weighted proportionally to λʲ (by q-weight), then from the equality horizon (where j maps exactly to shell j), the induced shell law is:
+If a byte ensemble is weighted proportionally to λʲ (by q-weight), then from the equality horizon (where j maps exactly to shell j), the induced shell distribution is:
 
 ```
 π_λ(N) = C(6, N) · λ^N / (1 + λ)⁶
@@ -439,7 +442,7 @@ The QuBEC occupation law is synthesized by q-weight-biased byte injection from t
 
 ### 6a.6 Processing Model: The Four-Phase Byte Flow
 
-Every byte transition executes a four-phase cycle corresponding to the CGM stage structure. The normative transition law is Kernel specification §2.6; here we read its CGM phase structure.
+Every byte transition executes a four-phase cycle corresponding to the CGM stage structure. The normative transition rule is Kernel specification §2.6; here we read its CGM phase structure.
 
 **Phase 1: CS (Common Source). Transcription as measurement**
 
@@ -492,9 +495,9 @@ The byte is already a fused quantum instruction packet:
 - **Family** (2 bits, positions 0 and 7): which spinorial gauge phase to apply during gyration (chirality context)
 - **Provenance atom**: the exact byte value that enters the append-only ledger
 
-The four phases (CS, UNA, ONA, BU) are not external labels. They are the intrinsic temporal structure of the transition law. Chirality is gyration; gyration is temporality; temporality is the ordered sequence of Moments produced by byte transport.
+The four phases (CS, UNA, ONA, BU) are not external labels. They are the intrinsic temporal structure of the transition rule. Chirality is gyration; gyration is temporality; temporality is the ordered sequence of Moments produced by byte transport.
 
-The 4 intrinsic gates {id, S, C, F} are the operations where the mutation step is either trivial (mask = 0) or maximal (mask = 0xFFF) and exactly compensated by the gyration phase (Part I §6.2). They preserve both horizons because they do not create partial chirality. All other bytes create partial transformations that move states between the horizons, populating the contingent bulk of Ω.
+The 4 holonomic gates {id, S, C, F} are the operations where the mutation step is either trivial (mask = 0) or maximal (mask = 0xFFF) and exactly compensated by the gyration phase (Part I §6.2). They preserve both horizons because they do not create partial chirality. All other bytes create partial transformations that move states between the horizons, populating the contingent bulk of Ω.
 
 ---
 
@@ -546,7 +549,7 @@ Any shell-radial function is exactly expandable in this basis. Shell transport, 
 
 Code duality and shell transport share this basis (§13.4).
 
-### 7.4 The finite spectral transport law
+### 7.4 The finite spectral transport rule
 
 If A_t(r) is the amplitude of the r-th Krawtchouk spectral mode at time t, then:
 
@@ -554,7 +557,7 @@ If A_t(r) is the amplitude of the r-th Krawtchouk spectral mode at time t, then:
 A_{t+1}(r) = ηʳ · A_t(r)
 ```
 
-This is the exact spectral transport law of the QuBEC. Higher spectral modes (larger r) are damped more rapidly. The rate is controlled by the single parameter η. No differential equation, no discretization error, no truncation: the dynamics is exact and finite.
+This is the exact spectral transport rule of the QuBEC. Higher spectral modes (larger r) are damped more rapidly. The rate is controlled by the single parameter η. No differential equation, no discretization error, no truncation: the dynamics is exact and finite.
 
 The mode r = 0 (constant mode) is always preserved: η⁰ = 1. The mode r = 6 (maximum frequency) is damped most aggressively: η⁶. Between these extremes, each mode decays at a rate determined by its shell weight.
 
@@ -564,7 +567,7 @@ This is the same eigenvalue pattern that appears in Pauli-diagonal noise models,
 
 ## 8. General Climate Transport
 
-### 8.1 Full spectral transport law
+### 8.1 Full spectral transport rule
 
 Let ν be an ensemble distribution on q-values in GF(2)⁶. The exact spectral multiplier on Walsh mode s is:
 
@@ -578,7 +581,7 @@ If A_t(s) is the Walsh amplitude of the climate at mode s, then:
 A_{t+1}(s) = φ_t(s) · A_t(s)
 ```
 
-This is the full exact climate transport law on additive quantum modes. Each Walsh mode evolves independently, with multiplier determined by the Fourier transform of the ensemble distribution.
+This is the full exact climate transport rule on additive quantum modes. Each Walsh mode evolves independently, with multiplier determined by the Fourier transform of the ensemble distribution.
 
 ### 8.2 Radial reduction
 
@@ -596,7 +599,7 @@ A_{t+1}(r) = Λ_t(r) · A_t(r)
 
 ### 8.3 Uniformization horizon
 
-Under the uniform byte ensemble (all 256 bytes equally likely), the one-step shell transition law collapses to:
+Under the uniform byte ensemble (all 256 bytes equally likely), the one-step shell transition rule collapses to:
 
 ```
 P(N → N') = C(6, N') / 64
@@ -672,13 +675,13 @@ This vector is the complete specification of the anisotropic climate drive.
 
 ### 10.1 The K4 gauge group
 
-The gate group of the aQPU kernel is the Klein four-group:
+The gate group of the hQVM kernel is the Klein four-group:
 
 ```
 K4 = {id, S, C, F} ≅ (ℤ/2)²
 ```
 
-The 2-bit family field of every byte encodes one of four K4 gauge phases. This is part of the state and transport law, not external metadata.
+The 2-bit family field of every byte encodes one of four K4 gauge phases. This is part of the state and transport rule, not external metadata.
 
 The four gates act on the Gyrostate as:
 
@@ -701,7 +704,7 @@ O_α(s) = (1/4) Σ_{g ∈ K4} α(g) · O(g · s)
 
 The trivial character sector is the gauge-invariant content. The three nontrivial sectors carry phase-sensitive content.
 
-### 10.3 Gauge transport law
+### 10.3 Gauge transport rule
 
 Let μ be a distribution on K4 gauge actions. The exact gauge multiplier on character α is:
 
@@ -835,7 +838,7 @@ H(u,χ) = (−1)^{popcount(u ∧ χ)} / 8
 
 **Theorem.** The chirality register GF(2)⁶ is an additive group under ⊕. Byte transport on this register is exact XOR translation: χ′ = χ ⊕ q. By Pontryagin duality applied to the finite abelian group (GF(2)⁶, ⊕), the unique Fourier transform of this transport group is the Walsh-Hadamard transform. No other transform diagonalizes XOR-convolution exactly.
 
-**Corollary.** The WHT is not a tool applied to the chirality register. It is the unique exact spectral dual of the transport law.
+**Corollary.** The WHT is not a tool applied to the chirality register. It is the unique exact spectral dual of the transport rule.
 
 ### 12.3 Composition law
 
@@ -897,7 +900,7 @@ A(r) = Σ_{N=0}^{6} K_r(N) · π(N)
 
 **Theorem.** The shell index N = popcount(χ) defines the radial distance classes of the Hamming scheme H(6,2). By the theory of association schemes, the unique family of orthogonal polynomials invariant under all symmetries of H(6,2) is the Krawtchouk family. The Krawtchouk transform is therefore the unique exact radial harmonic basis of the shell quotient.
 
-### 13.3 Radial transport law
+### 13.3 Radial transport rule
 
 Isotropic shell dynamics diagonalize here as A_{t+1}(r) = Λ(r) · A_t(r) (Part II §7.4, §8.2).
 
@@ -958,7 +961,7 @@ where α ranges over the four characters of K4 ≅ GF(2)². In matrix form this 
 
 **Theorem.** The family bits define a gauge sector in K4 ≅ GF(2)². By the character theory of finite abelian groups, the character table of K4 is the unique complete orthogonal decomposition of the gauge sector.
 
-### 14.3 Gauge transport law
+### 14.3 Gauge transport rule
 
 Factorized gauge evolution: G_{t+1}(a,b) = ξ_A^a · ξ_B^b · G_t(a,b) (Part II §10.3–10.4).
 
@@ -1008,7 +1011,7 @@ The signed-support contraction and the Walsh character are dual coordinate expre
 
 ### 16.3 Binary and ternary chart complementarity
 
-The transport law is most natural in the binary chart of GF(2)⁶: state differences, chirality, XOR composition, Walsh characters, and code duality. The contraction law is most natural in the ternary chart {−1, 0, +1}: alignment counting, signed support intersections, and masked inversion or preservation.
+The transport rule is most natural in the binary chart of GF(2)⁶: state differences, chirality, XOR composition, Walsh characters, and code duality. The contraction law is most natural in the ternary chart {−1, 0, +1}: alignment counting, signed support intersections, and masked inversion or preservation.
 
 Transport is binary and contraction is signed-support. These are two exact alphabets of one medium, each selected by the operation being performed.
 
@@ -1285,7 +1288,7 @@ The cost figures given below are symbolic unless stated otherwise.
 
 ### 18.9 Multiplication claims
 
-The native transition law is multiply-free.
+The native transition rule is multiply-free.
 
 The 64-point WHT butterfly is multiply-free.
 
@@ -1630,7 +1633,7 @@ This is the `spectral64` field of the SLCP record.
 | Thermalization measure | Kernel `future_cone_measure` | SDK |
 | Climate transport | Byte bath over `q₆` sectors | SDK `qmap_extract` |
 
-For external systems that produce binary sample traces, trajectory logs, or bitstring outputs, the climate observables provide a projection bridge. Any external binary output stream can be windowed and mapped into chirality histograms, shell marginals, gauge spectra, and effective support estimates using the rolling-memory estimators above. This allows the QuBEC climate framework to serve as a diagnostic and calibration layer over external samplers, simulators, or stochastic hardware without requiring those systems to adopt the byte transition law internally.
+For external systems that produce binary sample traces, trajectory logs, or bitstring outputs, the climate observables provide a projection bridge. Any external binary output stream can be windowed and mapped into chirality histograms, shell marginals, gauge spectra, and effective support estimates using the rolling-memory estimators above. This allows the QuBEC climate framework to serve as a diagnostic and calibration layer over external samplers, simulators, or stochastic hardware without requiring those systems to adopt the byte transition rule internally.
 
 All formal quantities of the climate theory have explicit empirical counterparts in the existing stack. The rolling memories (`chi_ring64`, `chi_hist64`, `shell_hist7`, `family_ring64`, `family_hist4`) are the empirical summaries used to estimate one-cell climate observables.
 
@@ -1682,7 +1685,7 @@ If the climate kernel on B cells is translation-invariant on GF(2)^{6B}, the exa
 
 ## 23. Computational Resolution
 
-The climate theory identifies three structural causes of computational cost. Each arises from evaluating an operation in a chart that is not native to the finite quantum medium, and each is resolved by chart selection.
+The climate theory identifies three structural causes of computational cost. Each arises from evaluating an operation in a chart that is not native to the finite holonomic medium, and each is resolved by chart selection.
 
 ### 23.1 Chart mismatch
 
@@ -1698,7 +1701,7 @@ The climate theory identifies three structural causes of computational cost. Eac
 
 ### 23.3 Gauge mismatch
 
-**Condition.** Control and phase are externalized as runtime branching instead of being part of the state and transport law. Decisions that are structurally phase selections are implemented as unpredictable conditional branches.
+**Condition.** Control and phase are externalized as runtime branching instead of being part of the state and transport rule. Decisions that are structurally phase selections are implemented as unpredictable conditional branches.
 
 **Resolution.** The K4 gauge structure carries phase as part of the state. The character decomposition separates gauge-invariant content from phase-sensitive control content deterministically. Routing becomes a character projection, not a conditional jump.
 
@@ -1713,7 +1716,7 @@ The gauge spectrum from `family_hist4` provides the empirical diagnostic: concen
 
 ## 24. Verified Computational Advantages
 
-The following advantages are structural invariants of the aQPU, verified by exhaustive testing with exact integer arithmetic.
+The following advantages are structural invariants of the hQVM, verified by exhaustive testing with exact integer arithmetic.
 
 ### 24.1 Hidden subgroup resolution
 

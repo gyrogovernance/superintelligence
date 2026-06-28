@@ -1,7 +1,7 @@
 # Alignment Infrastructure Routing - AIR Brief
 > Trustworthy Distributed Human Workforce Coordination for AI Safety
 
-AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by the aQPU Kernel, a deterministic coordination system that routes and amplifies multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
+AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by the hQVM Kernel, a deterministic coordination system that routes and amplifies multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
 
 ***AI’s rapid growth requires more humans to ensure automation risks do not escalate to dangerous thresholds. At the same time, millions of people are underemployed or unemployed and at risk of poverty as automation concentrates power and weakens accountability.***
 
@@ -54,9 +54,9 @@ AIR produces three kinds of outputs that are useful immediately:
 
 Alignment Infrastructure Routing has three layers.
 
-### 1. aQPU Kernel
+### 1. hQVM Kernel
 
-The aQPU Kernel is the coordination backbone. It provides a finite space of 4,096 reachable states that serve as universal coordination points for distributed work.
+The hQVM Kernel is the coordination backbone. It provides a finite space of 4,096 reachable states that serve as universal coordination points for distributed work.
 
 A shared state (or "Moment") is a reproducible coordinate that any participant can compute from the same activity log. The kernel's algebraic structure ensures that event order matters: two projects with identical deliverable counts but different execution sequences follow different trajectories through the state space. This non-commutativity provides structural provenance—proving not only *what* was done, but *how* the governance process unfolded over time.
 
@@ -74,7 +74,7 @@ A Moment is not merely a coordinate or timestamp. It is a genealogical marker th
 
 **Why Genealogical Encoding**
 
-The aQPU Kernel implements the same structural principle that makes genetic information trustworthy: the encoding of lineage into state. In biological systems, a gene expressed at different points in developmental history produces different outcomes, because the cellular context encodes the accumulated memory of prior states. Similarly, a governance event recorded at different points in a project's history produces different Moments, because the Moment encodes the accumulated memory of prior operations. This genealogical structure is not an arbitrary design choice. It is the minimal architecture that makes distributed coordination trustworthy without requiring centralised authority. A memory without lineage is a claim. A memory with lineage is evidence.
+The hQVM Kernel implements the same structural principle that makes genetic information trustworthy: the encoding of lineage into state. In biological systems, a gene expressed at different points in developmental history produces different outcomes, because the cellular context encodes the accumulated memory of prior states. Similarly, a governance event recorded at different points in a project's history produces different Moments, because the Moment encodes the accumulated memory of prior operations. This genealogical structure is not an arbitrary design choice. It is the minimal architecture that makes distributed coordination trustworthy without requiring centralised authority. A memory without lineage is a claim. A memory with lineage is evidence.
 
 ### 2. App
 
@@ -109,7 +109,7 @@ Tools are optional. The platform works if contributors submit outputs manually.
 Alignment Infrastructure Routing projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
 1. **AIR provides the technical infrastructure.**
-   This includes the aQPU Kernel, the App workflow, and optional Tools for tracking and verifying deliverables.
+   This includes the hQVM Kernel, the App workflow, and optional Tools for tracking and verifying deliverables.
 
 2. **A Project Sponsor administers funds.**
    The Sponsor can be an AI Safety Lab offering prizes for contributions or a Fiscal Host NGO administering a grant program. The Sponsor retains full authority over acceptance criteria and payment decisions.
@@ -175,7 +175,7 @@ Alignment Infrastructure Routing uses two canonical units of work:
 
 These units are defined in terms of work and deliverables, not employment status. Sponsors fund outputs that correspond to one or more of these units.
 
-In transition contexts, sponsors may express funding in conventional currency. Natively, within the Moments Economy framework, these units are denominated in Moment-Units (MU) using the international dollar legibility convention, settled through the aQPU Kernel.
+In transition contexts, sponsors may express funding in conventional currency. Natively, within the Moments Economy framework, these units are denominated in Moment-Units (MU) using the international dollar legibility convention, settled through the hQVM Kernel.
 
 ---
 
@@ -238,7 +238,7 @@ In this tier, fiscal hosts are most useful, because they already have the legal 
 
 ## The Complete Framework
 
-Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **Gyroscopic ASI aQPU Kernel** for coordination and replay.
+Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **Gyroscopic ASI hQVM Kernel** for coordination and replay.
 
 **The Human Mark** is an epistemic taxonomy classifying contributions by the displacement risk they address:
 
@@ -249,11 +249,11 @@ Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy 
 
 This gives fiscal hosts and funders a portfolio view. They can see what kinds of risks are being addressed and where funding is concentrated or missing.
 
-### Core Engine: Gyroscopic ASI aQPU Kernel
+### Core Engine: Gyroscopic ASI hQVM Kernel
 
-The Gyroscopic ASI aQPU Kernel is an algebraic quantum processing unit that provides deterministic coordination through a finite state space. It maps activity logs into sequences of verifiable coordination states.
+The Gyroscopic ASI hQVM Kernel is a Holonomic Quantum Virtual Machine (hQVM) that provides deterministic coordination through a finite state space. It maps activity logs into sequences of verifiable coordination states.
 
-The aQPU Kernel provides:
+The hQVM Kernel provides:
 
 - **4,096 shared moments:** A complete finite universe of coordination states reachable from a universal rest state.
 - **Dual horizons:** 64-state equality and complement boundaries that encode provenance and chirality, enabling efficient verification of complex histories.
@@ -276,10 +276,10 @@ Acceptance criteria, evaluation standards, payment decisions, and all policy jud
 
 ## Documentation & Links
 
-### aQPU Kernel Specification
-- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md) — Complete technical specification of the aQPU Kernel
-- [**aQPU Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md) — Use cases and deployment scenarios
-- [**aQPU Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports) — Test results confirming the kernel's algebraic quantum properties and computational advantages
+### hQVM Kernel Specification
+- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md) — Complete technical specification of the hQVM Kernel
+- [**hQVM Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md) — Use cases and deployment scenarios
+- [**hQVM Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports) — Test results confirming the kernel's holonomic gate structure, CHSH saturation, and structural quantum advantages on Ω
 
 ### Classification Framework (The Human Mark)
 - [**The Human Mark**](https://github.com/gyrogovernance/tools/blob/main/docs/the_human_mark/THM.md) — Core taxonomy of four displacement risks

@@ -445,7 +445,7 @@ class TestMediumPolicyChecks:
 class TestGoldenVectors:
     """
     Pinned outputs for known inputs. If any of these change,
-    the kernel transition law or serialization has changed.
+    the kernel transition rule or serialization has changed.
     """
 
     def test_identity_anchor_golden_vector(self):

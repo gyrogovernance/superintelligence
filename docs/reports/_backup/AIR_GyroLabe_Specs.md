@@ -33,7 +33,7 @@ The primary goal is to constrain the high-entropy "hallucination" space of gener
 
 GyroLabe couples a generative language model to a finite, discrete geometric reference frame.
 
-The reference frame is the **Gyroscopic ASI aQPU Kernel**, a deterministic finite-state router with:
+The reference frame is the **Gyroscopic ASI hQVM Kernel**, a deterministic finite-state router with:
 
 - **Reachable shared-moment space Ω:** 4,096 states from rest
 - **Actions:** 256 (one for each byte 0..255)
@@ -461,7 +461,7 @@ GyroLabe implements active inference with the kernel as the generative model and
 
 #### 9.1 Batch support
 
-The aQPU Kernel Kernel supports batch inference (B >= 1). All per-sequence state is stored in arrays of shape (B,):
+The hQVM Kernel Kernel supports batch inference (B >= 1). All per-sequence state is stored in arrays of shape (B,):
 
 - **Kernel state:** `state_index` and `last_byte` are numpy arrays of shape (batch_size,). Each sequence in the batch evolves an independent trajectory.
 - **Atlas lookups:** Next-state transitions use numpy advanced indexing: `epistemology[state_indices, bytes]`. This is efficient on both CPU and GPU.

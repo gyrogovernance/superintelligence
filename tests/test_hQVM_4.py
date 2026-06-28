@@ -1,15 +1,15 @@
-# tests/test_aQPU_4.py
+# tests/test_hQVM_4.py
 """
-aQPU tests 4: Quantum Advantage and Universal Computation via Native Topology.
+hQVM tests 4: Quantum Advantage and Universal Computation via Native Topology.
 
 Key insight: GENE_Mac is a 6-qubit register, not 12.
 B is not independent — it is A viewed through the gate structure.
-The 4 intrinsic gates {id, S, C, F} are the native quantum operations.
+The 4 holonomic gates {id, S, C, F} are the native quantum operations.
 Bytes combine 6-qubit mutations with gate-phase gyration.
 
 This file investigates:
 1. The 6-qubit +/-1 tensor as the native quantum register
-2. The 4 intrinsic gates as quantum operations on this register
+2. The 4 holonomic gates as quantum operations on this register
 3. The operator family (length-1 + length-2): what entangling structure exists?
 4. Whether the byte algebra provides universal quantum computation
 5. delta_BU as the non-Clifford resource and the aperture-universality connection
@@ -23,7 +23,7 @@ structural invariants that are algebraically certain.
 Scope: Full-blown universal QC and “hard” computational advantage
 
 Run:
-    pytest tests/test_aQPU_4.py -v -s
+    pytest tests/test_hQVM_4.py -v -s
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ from src.api import (
     word6_to_pairdiag12,
     word_signature,
 )
-from tests.test_aQPU_1 import _bfs_omega
+from tests.test_hQVM_1 import _bfs_omega
 
 
 def _byte_from_micro_family(micro: int, family: int) -> int:
@@ -286,7 +286,7 @@ class TestIntrinsicGatesOnSpins:
                     changed += 1
 
             print(f"    {gate_name}: chirality preserved={preserved}, changed={changed}")
-            # All gates preserve chirality (proven in test_aQPU_1)
+            # All gates preserve chirality (proven in test_hQVM_1)
             assert changed == 0
 
     def test_single_byte_spin_action(self) -> None:
@@ -790,7 +790,7 @@ class TestByteAlgebraComputationalPower:
         compare q6(x) and q6(y).
 
         Classical approaches to testing commutativity of group elements
-        generally require applying both orderings. The aQPU's q-map
+        generally require applying both orderings. The hQVM's q-map
         provides a structural shortcut.
         """
         print(f"\n  COMMUTATIVITY AS COMPUTATIONAL RESOURCE:")
@@ -829,21 +829,21 @@ class TestByteAlgebraComputationalPower:
 
 class TestStructuralAdvantage:
     """
-    What concrete advantages does the aQPU topology provide?
+    What concrete advantages does the hQVM topology provide?
     Analyze from the verified structural properties.
     """
 
     def test_two_step_uniformization_advantage(self) -> None:
         """
         Classical random walk on 4096-state graph: mixing time O(log n) ~ 12 steps.
-        aQPU: exact uniformization in 2 steps.
+        hQVM: exact uniformization in 2 steps.
         This is a concrete, verified structural advantage.
         """
         print(f"\n{'='*70}")
         print("6. STRUCTURAL ADVANTAGE ANALYSIS")
         print(f"{'='*70}")
 
-        # Verify 2-step uniformization (already proven in test_aQPU_3,
+        # Verify 2-step uniformization (already proven in test_hQVM_3,
         # but compute the key metric)
         outputs = Counter()
         for b1 in range(256):
@@ -858,7 +858,7 @@ class TestStructuralAdvantage:
         classical_mixing = math.ceil(math.log2(OMEGA_SIZE))
 
         print(f"\n  TWO-STEP UNIFORMIZATION:")
-        print(f"    aQPU mixing time: 2 steps (exact uniform)")
+        print(f"    hQVM mixing time: 2 steps (exact uniform)")
         print(f"    Classical random walk mixing: O(log {OMEGA_SIZE}) ~ {classical_mixing} steps")
         print(f"    Speedup factor: ~{classical_mixing // 2}x")
         print(f"    Verified uniform: {is_uniform}")
@@ -912,12 +912,12 @@ class TestStructuralAdvantage:
         print(f"    Compare to classical CRC-32:")
         print(f"      Random collision: 1/2^32 = {100/2**32:.10f}%")
         print(f"      But: CRC has no algebraic miss characterization")
-        print(f"      aQPU: every miss has an exact algebraic explanation")
+        print(f"      hQVM: every miss has an exact algebraic explanation")
         print(f"      (shadow partner, q-class, gate stabilizer)")
 
     def test_information_theoretic_advantage(self) -> None:
         """
-        The aQPU provides exact integer conditional entropies and
+        The hQVM provides exact integer conditional entropies and
         perfect uniform distributions. This is a structural property
         that classical systems can only approximate.
         """
@@ -954,26 +954,25 @@ class TestStructuralAdvantage:
 
 class TestNativeQuantumAdvantage:
     """
-    Proves computational advantage natively.
-    Instead of complex matrices, we show how the aQPU's algebra provides
-    the exact period-finding and hidden-subgroup resolution required for
-    algorithms like Shor's, executing in O(1) algebraic steps.
+    Oracle/query-model advantages on the native chirality register (GF(2)^6).
+
+    Hidden subgroup resolution via q-map and Walsh-Hadamard transform.
     """
 
     def test_native_hidden_subgroup_resolution(self) -> None:
         """
         Quantum advantage relies on resolving a Hidden Subgroup in O(1).
-        The aQPU's q-map does exactly this for the byte algebra.
+        The hQVM's q-map does exactly this for the byte algebra.
         """
         kernel_bytes = list(Q_KERNEL_BYTES)
         fiber_sizes = Counter(len(bs) for bs in BYTES_BY_Q6)
 
         print(f"\n{'='*70}")
-        print("A. NATIVE QUANTUM ADVANTAGE (HSP & PERIOD FINDING)")
+        print("A. ORACLE / QUERY QUANTUM ADVANTAGE (HSP)")
         print(f"{'='*70}")
         print(f"\n  HIDDEN SUBGROUP RESOLUTION:")
         print(f"    Total search space: 256 byte operations")
-        print(f"    aQPU natively projects to {len(BYTES_BY_Q6)} topological classes")
+        print(f"    hQVM natively projects to {len(BYTES_BY_Q6)} topological classes")
         print(f"    Subgroup size: {len(kernel_bytes)}")
         print(f"    Fiber sizes: {dict(fiber_sizes)}")
 
@@ -983,13 +982,12 @@ class TestNativeQuantumAdvantage:
         print(f"    Periodicity is exactly 4 across the entire space.")
         print(f"    Hardware speedup: The ALU topological mapping achieves this in 1 operation")
 
-    def test_factorization_period_finding_isomorphism(self) -> None:
+    def test_depth_4_holonomic_closure(self) -> None:
         """
-        Shor's algorithm relies on finding r such that x^r = 1.
-        The aQPU natively enforces a period-4 structure (r=4) for all bytes
-        and a period-2 structure for the underlying affine permutations.
+        Every byte has topological period 4 on Ω: T_b^4 = id.
+        This is universal depth-4 holonomic closure, not mod-N period finding.
         """
-        print(f"\n  NATIVE PERIOD-FINDING (SHOR'S ISOMORPHISM):")
+        print(f"\n  DEPTH-4 HOLONOMIC CLOSURE:")
 
         all_order_4 = True
         for b in range(256):
@@ -1003,7 +1001,6 @@ class TestNativeQuantumAdvantage:
                 break
 
         print(f"    Universal depth-4 closure T_b^4 = id: {all_order_4}")
-        print(f"    This provides the period-finding structure used by factorization algorithms.")
         assert all_order_4, "Topological periodicity failed"
 
 
@@ -1022,9 +1019,9 @@ class TestNativeUniversalComputation:
 
     def test_topological_entanglement_via_intrinsic_gates(self) -> None:
         """
-        Proves the 4 intrinsic gates ARE the entangling gates.
+        Proves the 4 holonomic gates ARE the entangling gates.
         In standard QC, CNOT entangles 2 qubits.
-        In aQPU, S and C entangle the 6-DoF Active manifold with the 6-DoF Passive manifold.
+        In hQVM, S and C entangle the 6-DoF Active manifold with the 6-DoF Passive manifold.
         """
         print(f"\n{'='*70}")
         print("B. NATIVE UNIVERSAL COMPUTATION")

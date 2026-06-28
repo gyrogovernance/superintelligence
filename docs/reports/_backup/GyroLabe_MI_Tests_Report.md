@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 
-This report presents empirical findings from coupling the Gyroscopic ASI aQPU Kernel Kernel to a 7B parameter language model (OLMo-3-7B-Instruct) via the GyroLabe coordination system. The primary finding is **topological alignment**: the coupled system preserves the intrinsic metric structure of the kernel's 12-bit mask code while exhibiting measurable resonance between the model's internal activations and the kernel's discrete geometry.
+This report presents empirical findings from coupling the Gyroscopic ASI hQVM Kernel Kernel to a 7B parameter language model (OLMo-3-7B-Instruct) via the GyroLabe coordination system. The primary finding is **topological alignment**: the coupled system preserves the intrinsic metric structure of the kernel's 12-bit mask code while exhibiting measurable resonance between the model's internal activations and the kernel's discrete geometry.
 
 Key results:
 

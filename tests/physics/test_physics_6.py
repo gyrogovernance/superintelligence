@@ -14,7 +14,7 @@ Additionally covers legacy gaps:
   - Provenance degeneracy (history non-uniqueness)
   - Erasure taxonomy on the [12,6,2] code
   - Hilbert-lift entanglement (product vs graph states)
-  - Spinorial intrinsic gate and holonomy (horizon-preserving bytes, q 4-to-1, defect C64)
+  - Spinorial holonomic gate and holonomy (horizon-preserving bytes, q 4-to-1, defect C64)
 
 No new source files. Uses only src.constants and src.api.
 """
@@ -307,7 +307,7 @@ class TestK4EdgesFromCommutationInvariant:
 
     def test_frame_edges_satisfy_cocycle_condition(self):
         """
-        The K4 edge vector must satisfy the cocycle (Kirchhoff) law:
+        The K4 edge vector must satisfy the cocycle (Kirchhoff) rule:
         e01 XOR e12 = e02 (and cyclic permutations).
         This is just XOR associativity but confirms the edges form
         a consistent gradient on K4.
@@ -657,7 +657,7 @@ class TestSpinorialIntrinsicGateAndHolonomyCounts:
     Replace the old constant-fitting attempts with intrinsic spinorial invariants:
 
     1) Horizon-preserving bytes: exact gate set that maps horizon to horizon.
-       This is kernel physics and depends on family-controlled complements.
+       This is kernel dynamics and depends on family-controlled complements.
 
     2) q-map: bytes -> C64 is exactly 4-to-1 (256 bytes onto 64 codewords).
        This is the correct intrinsic 4-family structure in the new architecture.
