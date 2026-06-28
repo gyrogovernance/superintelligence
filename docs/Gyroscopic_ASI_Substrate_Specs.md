@@ -30,7 +30,7 @@ This specification operates within the scientific and architectural commitments 
 2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Direct** and **Indirect** sources of authority and agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not originate, decide, or authorize.
 
 3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
-4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition law, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
+4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition rule, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
 
 These frameworks are fully specified in the GyroGovernance repositories ([tools](https://github.com/gyrogovernance/tools), [science](https://github.com/gyrogovernance/science)), but this document is functionally self-contained and focused on physical implementation.
 
@@ -65,7 +65,7 @@ These substrate specifications draw formal constraints from the:
 - **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, monodromy defect δ_BU, canonical aperture A*)
 - **The Human Mark (THM):** defining ontological source-type distinctions for AI governance risk classification
 - **Gyroscopic Global Governance (GGG):** defining the operational significance of aperture, alignment, and post-AGI equilibrium
-- **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition law, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
+- **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition rule, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
 
 Formal citations to these works are provided in the References section (Section 23).
 
@@ -98,9 +98,9 @@ This specification depends on the following external definitions:
 - The derivation of invariant values from operational coherence requirements
 - The prohibition on absolute opposition (θ = π), which follows from the ONA constraint
 
-**Gyroscopic ASI hQVM Kernel Specification:** The normative digital reference implementation defining the state model, transition law, mask code, and all kernel invariants. See `docs/Gyroscopic_ASI_Specs.md`.
+**Gyroscopic ASI hQVM Kernel Specification:** The normative digital reference implementation defining the state model, transition rule, mask code, and all kernel invariants. See `docs/Gyroscopic_ASI_Specs.md`.
 
-**hQVM Substrate Controller:** The hardware control interface that translates between canonical byte operations and physical optical parameters. The controller implements the public hQVM transition law and manages state readout, quantization, and conformance verification.
+**hQVM Substrate Controller:** The hardware control interface that translates between canonical byte operations and physical optical parameters. The controller implements the public hQVM transition rule and manages state readout, quantization, and conformance verification.
 
 ---
 

@@ -547,7 +547,7 @@ A conforming QuBEC implementation must:
 - preserve the holographic identity |H|² = |Ω| = 4096
 - preserve the complementarity invariant: horizon_distance + ab_distance = 12
 - preserve constant component density 0.5 across all Ω states
-- preserve the chirality transport law χ(T(b)(s)) = χ(s) ⊕ q6(b)
+- preserve the chirality transport rule χ(T(b)(s)) = χ(s) ⊕ q6(b)
 - preserve per-byte bijectivity and invertibility on the full 24-bit carrier
 
 ---

@@ -164,7 +164,7 @@ Algebraic quantum structure on the 4096-state manifold Omega, established primar
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
-| 19 | **Exactly 4 horizon-preserving bytes** forming intrinsic gates {id, S, C, F} | hQVM Report 1 SS3.1 | Exhaustive over 256 bytes |
+| 19 | **Exactly 4 horizon-preserving bytes** forming holonomic gates {id, S, C, F} | hQVM Report 1 SS3.1 | Exhaustive over 256 bytes |
 | 20 | **S-gate** (bytes 0xAA, 0x54): pure swap (A,B)->(B,A) | hQVM Report 1 SS3.1 | 2000 random states |
 | 21 | **C-gate** (bytes 0xD5, 0x2B): complement-swap (A,B)->(B xor F, A xor F) | hQVM Report 1 SS3.1 | 2000 random states |
 | 22 | **F-gate**: global inversion (A,B)->(A xor F, B xor F), requires depth 2 | hQVM Report 1 SS3.2 | 1000 random states, both orderings |
@@ -300,7 +300,7 @@ Algebraic quantum structure on the 4096-state manifold Omega, established primar
 | 110 | **Magic state Wigner negativity**: \|delta> has W(0,1) = -0.043771 | hQVM Report 1 SS10.4 | Discrete Wigner function computation |
 | 111 | **Aperture gap Delta = 1-delta(BU)/m_a ~ 0.0207**: \|delta(BU)-m_a\| = Delta x m_a exactly | hQVM Report 1 SS10.5 | Exact equality verified |
 | 112 | **Three universality ingredients**: Clifford backbone, non-Clifford delta(BU), entangling gate S | hQVM Report 1 SS12.1 | Moments Report + hQVM tests |
-| 113 | **Topological entanglement via intrinsic gates**: localized A perturbation transported exactly to B by gate S | hQVM Report 1 SS9.3 | Explicit mask 0x003 perturbation test |
+| 113 | **Topological entanglement via holonomic gates**: localized A perturbation transported to B by gate S | hQVM Report 1 SS9.3 | Explicit mask 0x003 perturbation test |
 | 114 | **Non-Clifford certification by 4 independent tests**: distance from Clifford, no periodicity, dense equidistribution, Wigner negativity | SDK Spec SS9.2 | Each independently verified |
 
 ### 11. Error Detection, Tamper Provenance, and Non-Cloning

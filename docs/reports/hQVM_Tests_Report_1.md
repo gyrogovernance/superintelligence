@@ -13,7 +13,7 @@ The Gyroscopic kernel achieves proven computational advantages in both time and 
 
 This report documents the hQVM properties as verified by five test files totalling 185 tests. It builds on two previously established verification layers:
 
-- **Physics Tests Report** (6 test files, all passing): establishes kernel conformance, the self-dual [12,6,2] mask code, affine dynamics, the spinorial universe (Ω topology, holographic identity, commutator defect rule), the CGM constants bridge, and the depth-4 fiber bundle with intrinsic K4 geometry.
+- **Physics Tests Report** (6 test files, all passing): establishes kernel conformance, the self-dual [12,6,2] mask code, affine dynamics, the spinorial universe (Ω topology, holographic identity, commutator defect rule), the CGM constants bridge, and the depth-4 fiber bundle with holonomic K4 geometry.
 - **Moments Tests Report** (4 test files, 88 tests, all passing): establishes the 6-spin isomorphism, exact Clifford unitaries over the code, the 8192-element operator family with central spinorial involution, the depth-4 frame operator quotient, stabiliser structure, and the economic/genealogy certification medium.
 
 The hQVM suite does not retest properties already verified in those reports. Where this report references a property established elsewhere, the source is identified.
@@ -110,7 +110,7 @@ The full GENE_Mac state contains two 12-bit components, A (active phase) and B (
 - At rest: spin_A = (+1, +1, +1, +1, +1, +1), spin_B = (−1, −1, −1, −1, −1, −1). A and B are exact complements.
 - In Ω: 64 states have A = B (equality horizon), 64 states have A = B ⊕ 0xFFF (complement horizon), and 3968 states have partial chirality (bulk).
 
-The relationship between A and B is mediated by the four intrinsic gates. The gate structure determines how B relates to A at any given state, rather than B carrying independent operational content. The full state (A, B) encodes six qubits of axis-orientation content plus the gate-phase relationship between the two components.
+The relationship between A and B is mediated by the four holonomic gates. The gate structure determines how B relates to A at any given state, rather than B carrying independent operational content. The full state (A, B) encodes six qubits of axis-orientation content plus the gate-phase relationship between the two components.
 
 This corresponds to the byte structure: 6 payload bits carry the operational content (64 transformations), while 2 boundary bits select the family phase (4 complement configurations). The structural correspondence is:
 
@@ -231,7 +231,7 @@ The four gates form K4 = (ℤ/2)². `test_hQVM_1.py::TestK4GateGroup` verifies:
 - No single byte implements F on all states (verified against 4 probe states covering rest, zero, and bulk regions).
 - No single byte is the identity on all states (same 4 probe states).
 
-The K4 group emerges at three independent levels of the architecture: as the depth-4 fiber (for fixed payload, 4⁴ family combinations collapse to 4 distinct states indexed by (φ_A, φ_B) ∈ (ℤ/2)²; established in the Physics Tests Report, Part 11), as the intrinsic gate group (this section), and as the governance measurement topology (specification §4.6). This triple coincidence is a structural consequence of depth-4 closure.
+The K4 group emerges at three independent levels of the architecture: as the depth-4 fiber (for fixed payload, 4⁴ family combinations collapse to 4 distinct states indexed by (φ_A, φ_B) ∈ (ℤ/2)²; established in the Physics Tests Report, Part 11), as the holonomic gate group (this section), and as the governance measurement topology (specification §4.6). This triple coincidence is a structural consequence of depth-4 closure.
 
 ### 3.4 Gate Action on the Horizons
 
@@ -759,7 +759,7 @@ The standard universality theorem for quantum computation requires three ingredi
 
 **Non-Clifford resource.** δ_BU provides it: distance 0.195342 from the nearest Clifford angle (Part 10.2), no periodicity up to order 100,000 (Part 10.3), dense U(1) equidistribution (Part 10.3), and Wigner-negative magic state (Part 10.4).
 
-**Entangling operations.** The four intrinsic gates provide the inter-component coupling. This is distinct from the Hilbert-space bipartite (Bell-pair) entanglement already established in Part 8: here the verified structure is native topological inter-component coupling at the gate level. Within that gate structure, **gate S is explicitly demonstrated** by perturbation transport (Part 9.3): a localised perturbation in A is transported exactly to B by S. **Gate C** is the complement-swap partner in the same K4 structure (same horizon-preserving set, spin action (sA, sB) → (−sB, −sA)); it is not separately demonstrated by perturbation transport in the test body, but shares the same gate algebra and provides the other non-trivial inter-component operation. The gates are confirmed in spin coordinates (Part 3.2) and as the sole inter-component coupling mechanism (Part 9.3).
+**Entangling operations.** The four holonomic gates provide the inter-component coupling. This is distinct from the Hilbert-space bipartite (Bell-pair) entanglement already established in Part 8: here the verified structure is native topological inter-component coupling at the gate level. Within that gate structure, **gate S is explicitly demonstrated** by perturbation transport (Part 9.3): a localised perturbation in A is transported exactly to B by S. **Gate C** is the complement-swap partner in the same K4 structure (same horizon-preserving set, spin action (sA, sB) → (−sB, −sA)); it is not separately demonstrated by perturbation transport in the test body, but shares the same gate algebra and provides the other non-trivial inter-component operation. The gates are confirmed in spin coordinates (Part 3.2) and as the sole inter-component coupling mechanism (Part 9.3).
 
 ### 12.2 Dense Operator Generation
 

@@ -106,7 +106,7 @@ Structural properties can be used as optimization targets. Models can be trained
 
 The router does not store the world; it stores the auditable sequence of the world’s coordination. This creates a high degree of structural economy where the fixed infrastructure never grows, and only the logs of history scale with time.
 
-- **Fixed Infrastructure:** The kernel physics and constants are a one-time cost. They never grow regardless of the volume of events or the number of participants.
+- **Fixed Infrastructure:** The kernel dynamics and constants are a one-time cost. They never grow regardless of the volume of events or the number of participants.
 - **Log Growth:** The system accumulates history at 1 byte per step (the byte log) and roughly 200 bytes per governance record (the event log). 
 - **Storage Strategy:** At global scale, high-volume systems use rollup and commitment strategies. The coordination layer remains lightweight—storing only bytes and apertures—while the raw detail remains in domain-specific systems.
 
