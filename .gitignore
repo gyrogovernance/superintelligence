@@ -135,6 +135,9 @@ external/*
 external/llama.cpp/build/
 src/tools/gyroscopic/_build/
 
+# Symlinks for Cursor indexing (targets remain gitignored above, but Cursor follows symlinks)
+external_indexed
+notes_indexed
 
 node_modules/
 

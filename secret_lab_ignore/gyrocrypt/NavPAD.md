@@ -806,6 +806,24 @@ For transcripts that still cite **F-numbers**: use this map once, then prefer **
 
 > **Rule:** No dense 2^q cosets, NumPy FFT as primary readout, O(r) period search, holonomy replacing production, or lossy quotient as strict Shor (§3 K2–K3, K11–K12, K16). See `NO_DRIFT.md`.
 
+### Period-Finding Frontier (2026-06-28)
+
+Two period-finding paths exist. Neither qualifies as native hQVM period finding in the sense that Simon is native.
+
+**Production path** (`kernel/shor.py` + `native.c`): `shor_period_u64` computes ord_N(a) via classical modular exponentiation coset + cyclic QFT spectral readout (F_{G_X} suffix beam). Fast and correct, but it is a classical C implementation, not hQVM holonomy.
+
+**Research path** (`kernel/holonomy.py`): `holonomy_closure_period()` iterates `apply_multicell` up to 50000 times and polls whether the register returned to inject(1). This is brute-force search around a compiled operator, not native spectral readout. It is not what an hQVM should require.
+
+**The correct native path (does not exist yet):** Simon proves the pattern: entangle via depth-4 oracle, then native QFT spectral peaks, then algebraic solve. For cyclic groups the pattern would be: entangle via compiled oracle, then CQFT spectral peaks (cqft64_fast exists in core.py and uses delta_BU twiddles), then continued fractions to recover the period. The CQFT primitive is verified but nobody has wired it into a period-recovery pipeline. This is the open milestone.
+
+**Small-N_closure_tests are toys:** For N=15 (ord=4), the answer is trivial (b^4=id restates depth-4 closure already verified). They demonstrate the residue injection compiler but not native spectral readout. They should not be published as verified quantum advantage results.
+
+**Dependency chain for anyone attempting this:**
+- `cqft64_fast` (core.py, pure Python, uses delta_BU twiddles) is the cyclic QFT primitive
+- `compile_factor_operator` (holonomy.py) injects (N,a) into a GyroOperator on MultiCellRouter; currently uses WIRE_TABULATE (compile-time table), the CNOT carry ledger is the open compiler milestone
+- `wavefunction_hq_spectral_peaks` (core.py) does WHT^{tensor2} readout; a CQFT analogue for cyclic spectral peaks would be needed
+- Simon's `_resolve_cell` (simon.py) is the template: entangle -> WHT peaks -> GF(2) solve. Replace WHT with CQFT and GF(2) solve with continued fractions to get the cyclic analogue.
+
 ---
 
 ## §5 Progress bars
