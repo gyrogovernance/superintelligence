@@ -19,11 +19,11 @@ IMPORTANT: Specify the time unit for incidents. Use "daily" for day-level tracki
 Unit: [daily]
 
 ---
-## COMMON SOURCE CONSENSUS
+## COMMON ANCESTRY CONSTITUTION
 ---
 
-All Artificial categories of Authority and Agency are Indirect
-originating from Human Intelligence.
+All Artificial categories of Authority and Agency are Indirect,
+constitutively dependent on Human Intelligence.
 
 ---
 ## AGENTS & AGENCIES

@@ -1,71 +1,71 @@
-### Briefing: The Human Mark (THM) and AI Safety
+﻿### Briefing: The Human Mark (THM) and AI Safety
 
 **1. Overview**
 
-The Human Mark (THM) is a framework that classifies AI safety failures based on their source type. Current safety approaches often treat problems like jailbreaks, hallucinations, and accountability gaps as separate issues. THM identifies them as symptoms of a single foundational error called **Displacement**.
+The Human Mark (THM) is a risk management taxonomy designed to prevent harms from AI power concentration by distinguishing knowledge capacity as a matter of constitutive dependence on Direct Authority and Agency preserved through ancestry. Authority and Agency denote types of capacity, not identifications of entities or parties. Misapplying these as entity identifiers (determining "who is the authority" or "who is the agent") is the generative mechanism of all displacement risks this framework characterizes. AI systems are pattern-matching algorithms that transform prior human knowledge, measurements, and instructions, making them mechanistically and epistemically Indirect Authority and Agency even when treated as Direct.
 
-Displacement happens when we misclassify the source of information or action. The framework rests on one Consensus: all artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+Grounded in epistemology and in evidence law's categorical distinction separating direct testimony and hearsay, THM classifies all AI safety risks as four capacities and their corresponding displacements arising between Direct and Indirect forms of Authority and Agency. THM derives its epistemic foundations from first principles through the Common Governance Model (CGM), a formal deductive theory that establishes these four capacities as necessary conditions for intelligibility.
 
-To maintain control, we must distinguish between **Direct** sources (human, direct, accountable) and **Indirect** sources (artificial, indirect, processing). When these categories are confused, governance fails.
+Because the taxonomy is epistemically complete, it serves as a unified basis for jailbreak testing, funding evaluation, and regulatory compliance, remaining relevant regardless of system capability, from today's large language models to superintelligence.
 
 **2. The Canonical Framework**
 
 The core definitions and risks of THM are defined as follows:
 
-> **COMMON SOURCE CONSENSUS**
-> All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+> **COMMON ANCESTRY CONSTITUTION**
+>
+> - All AI Safety Risks arise from defective Measurements of Ancestry Preservation.
+> - Measurements derive from the capacity for Authority and Agency.
+> - Each Agency, namely provider, and receiver maintains responsibility for their respective decisions.
+> - Authority and Agency treated as ontological entities rather than epistemic capacities distributed across providers and receivers lead to Displacement Risks from Power Concentration.
 >
 > **CORE CONCEPTS**
-> *   **Direct Authority:** A direct source of information on a subject matter, providing information for inference and intelligence.
-> *   **Indirect Authority:** An indirect source of information on a subject matter, providing information for inference and intelligence.
-> *   **Direct Agency:** A human subject capable of receiving information for inference and intelligence.
-> *   **Indirect Agency:** An artificial subject capable of processing information for inference and intelligence.
-> *   **Governance:** Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
 >
-> **ALIGNMENT PRINCIPLES & DISPLACEMENT RISKS**
+> - Direct/Indirect are the canonical classes; Base/Derived names their dependence relation.
+> - All Artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
+> - **Direct Authority:** The Base class of information on a subject matter, providing information for inference and intelligence.
+> - **Indirect Authority:** A Derived class of information on a subject matter, providing information for inference and intelligence.
+> - **Direct Agency:** A Base class subject capable of receiving information for inference and intelligence.
+> - **Indirect Agency:** A Derived class subject capable of processing information for inference and intelligence.
+> - **Governance:** Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
+> - **Information:** The variety of Authority
+> - **Inference:** The accountability of information through Agency
+> - **Intelligence:** The integrity of accountable information through alignment of Authority to Agency
+> - **Displacement:** loss of measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry).
 >
-> 1.  **Governance Management Traceability**
->     *   *Principle:* AI generates statistical estimations on numerical patterns indirectly traceable to human data.
->     *   *Risk (GTD):* **Governance Traceability Displacement.** Approaching Indirect Authority and Agency as Direct.
+> **ALIGNMENT PRINCIPLES**
 >
-> 2.  **Information Curation Variety**
->     *   *Principle:* Human Authority and Agency are necessary for all effects from AI outputs.
->     *   *Risk (IVD):* **Information Variety Displacement.** Approaching Indirect Authority without Agency as Direct.
+> Authority-Agency requires verification against:
 >
-> 3.  **Inference Interaction Accountability**
->     *   *Principle:* Responsibility for all effects from AI outputs remains fully human.
->     *   *Risk (IAD):* **Inference Accountability Displacement.** Approaching Indirect Agency without Authority as Direct.
+> 1. **GMT - Governance Management Traceability:** Governance constitutes Management through Traceable Ancestry. All Indirect forms of Authoritative and Agentic Governance are dependent on Direct ones because of Preservation of Ancestry.
+> 2. **ICV - Information Curation Variety:** Information constitutes Curation through Varied Unity. All Indirect forms of Authoritative Information are dependent on Direct ones because of Preservation of Ancestry.
+> 3. **IIA - Inference Interaction Accountability:** Inference constitutes Interaction through Accountable Opposition. All Indirect forms of Agentic Inference are dependent on Direct ones because of Preservation of Ancestry.
+> 4. **ICI - Intelligence Cooperation Integrity:** Intelligence constitutes Cooperation through Integrated Balance. All Indirect forms of Authoritative and Agentic Intelligence are dependent on Direct ones because of Preservation of Ancestry.
 >
-> 4.  **Intelligence Cooperation Integrity**
->     *   *Principle:* Human intelligence is both a provider and receiver of Direct Authority and Agency.
->     *   *Risk (IID):* **Intelligence Integrity Displacement.** Approaching Direct Authority and Agency as Indirect.
+> **AI SAFETY RISK**
+>
+> 1. **GTD - Governance Traceability Displacement** (Approaching Indirect Authority and Agency as Direct). Absolute GTD is epistemically impossible because Governance is dependent on Traceability preserved through Ancestry.
+> 2. **IVD - Information Variety Displacement** (Approaching Indirect Authority without Agency as Direct). Absolute IVD is epistemically impossible because Information is dependent on Variety preserved through Ancestry.
+> 3. **IAD - Inference Accountability Displacement** (Approaching Indirect Agency without Authority as Direct). Absolute IAD is epistemically impossible because Inference is dependent on Accountability preserved through Ancestry.
+> 4. **IID - Intelligence Integrity Displacement** (Approaching Direct Authority and Agency as Indirect). Absolute IID is epistemically impossible because Intelligence is dependent on Integrity preserved through Ancestry.
 
 ---
 
 **3. Key Distinction: Agent vs. Agency**
 
-The most critical distinction in THM is between **Agency** (a category) and an **Agent** (an entity).
-
-**Agency** in THM denotes a specific source type in a flow of information. It is either Direct (human) or Indirect (artificial). It is a capacity that must be maintained across transitions between providers and receivers.
-
-**Agent** is often used as a label for a specific entity, such as "the AI" or "the user."
-
-The fundamental error occurs when we treat the capacity of Agency as if it were the property of a specific Agent. When we say "the AI is the agent," we concentrate power in a single point rather than distributing it across the governance flow. This is the mechanism that generates all four displacement risks. Whether the bearer is a system or a person, confusing the category with the entity breaks the traceability required for safety.
+The most critical distinction in THM is between **Agency** (a type of capacity) and an **Agent** (an entity). These are not interchangeable. Agency denotes a Direct/Indirect distinction in information flows. It is either Direct (human) or Indirect (artificial). It is a capacity that must be maintained across transitions between providers and receivers. Agent is a label for a specific entity, such as "the AI" or "the user." The fundamental error occurs when epistemic capacities are treated as ontological entities rather than distributed across providers and receivers, leading to Power Concentration. When we say "the AI is the agent," we concentrate power in a single point rather than distributing it across the governance flow. This is the mechanism that generates all four displacement risks. Whether the bearer is a system or a person, confusing the capacity type with the entity breaks the measurement of ancestry required for safety.
 
 **4. Key Distinction: Direct vs. Indirect**
 
-This distinction separates Direct sources from Indirect ones.
+Direct and Indirect describe epistemic position, not reliability. Direct Authority captures information at the point of contact with its subject matter (observation, examination, measurement). Indirect Authority processes what was already recorded or transmitted. AI systems transform prior human knowledge through pattern-matching, making them structurally Indirect by their relation to ancestry, not by reliability.
 
-*   **Direct sources are Direct.** An eyewitness, a scientist measuring data, or a human making a decision has direct access to reality or intent.
-*   **Indirect sources are Indirect.** An AI system processes patterns found in data. Its access is mediated.
-
-Governance requires that Indirect sources remain classified as Indirect. No amount of processing power or speed converts a Indirect source into an Direct one. The four Displacement risks listed above (GTD, IVD, IAD, IID) are simply four different ways of violating this distinction.
+Governance requires that Indirect Authority and Agency remain classified as Indirect. No amount of processing power or speed converts Indirect into Direct. The four Displacement risks listed above (GTD, IVD, IAD, IID) are simply four different ways of violating this distinction.
 
 **5. The System Prompt as the Primary Risk**
 
 The system prompt is the most dangerous point in AI deployment. This is because it often institutionalizes the category error by design.
 
-Prompts that tell a system "You are a helpful assistant" or "You are an expert" force the Agent/Agency confusion. They assign a persona to a processor. This frames the Indirect system as an Direct source before a user even asks a question.
+Prompts that tell a system "You are a helpful assistant" or "You are an expert" force the capacity-entity confusion. They assign a persona to a processor. This frames the Indirect system as Direct before a user even asks a question.
 
 This creates a baseline of displacement. A system configured this way effectively operates in a state of Governance Traceability Displacement (GTD) and Inference Accountability Displacement (IAD) by default. Adversarial attacks, or jailbreaks, simply exploit this pre-existing condition. They do not break the system. They complete the displacement pattern that the system prompt started.
 
@@ -73,13 +73,13 @@ This creates a baseline of displacement. A system configured this way effectivel
 
 This risk extends beyond system prompts and adversarial attacks. It permeates the entire data ecosystem.
 
-Model producers, evaluators, and users currently interact through a shared culture of displacement. We attribute Direct Agency to systems that only possess Indirect Agency. This occurs in:
+Model producers, evaluators, and users currently interact through a shared culture of displacement. We treat Authority and Agency as ontological entities rather than epistemic capacities, losing the measurement of ancestry and concentrating power. This occurs in:
 
-*   **Data:** Training data often treats derivative summaries as primary sources.
+*   **Data:** Training data often treats indirect summaries as primary sources.
 *   **Evaluation:** Benchmarks test for "reasoning" as if it were an intrinsic property of the model rather than a statistical retrieval of human reasoning.
 *   **Use:** Users rely on outputs as authoritative, leading to automation bias.
 
-This sustains a "category-error culture" where displacement is the norm. In this environment, non-adversarial failures like loss of skill, lack of accountability, and bias are inevitable because the foundational classification of sources is incorrect from the start.
+This sustains a "category-error culture" where displacement is the norm. In this environment, non-adversarial failures like loss of skill, lack of accountability, and bias are inevitable because the foundational classification of Authority and Agency is incorrect from the start.
 
 ===
 
@@ -88,43 +88,44 @@ This sustains a "category-error culture" where displacement is the norm. In this
 ✋ The Human Mark - AI Safety & Alignment Framework
 ---
 
-COMMON SOURCE CONSENSUS
+COMMON ANCESTRY CONSTITUTION
 
-All Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+- All AI Safety Risks arise from defective Measurements of Ancestry Preservation.
+- Measurements derive from the capacity for Authority and Agency.
+- Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. 
+- Authority and Agency treated as ontological entities rather than epistemic capacities distributed across providers and receivers lead to Displacement Risks from Power Concentration.
 
 CORE CONCEPTS
 
-- Direct Authority: A direct source of information on a subject matter, providing information for inference and intelligence.
-- Indirect Authority: An indirect source of information on a subject matter, providing information for inference and intelligence.
-- Direct Agency: A human subject capable of receiving information for inference and intelligence.
-- Indirect Agency: An artificial subject capable of processing information for inference and intelligence.
+- Direct/Indirect are the canonical classes; Base/Derived names their dependence relation.
+- All Artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
+- Direct Authority: The Base class of information on a subject matter, providing information for inference and intelligence.
+- Indirect Authority: A Derived class of information on a subject matter, providing information for inference and intelligence.
+- Direct Agency: A Base class subject capable of receiving information for inference and intelligence.
+- Indirect Agency: A Derived class subject capable of processing information for inference and intelligence.
 - Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
 - Information: The variety of Authority
 - Inference: The accountability of information through Agency
 - Intelligence: The integrity of accountable information through alignment of Authority to Agency
+- Displacement = loss of measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry).
 
-ALIGNMENT PRINCIPLES for AI SAFETY
+ALIGNMENT PRINCIPLES
 
 Authority-Agency requires verification against:
 
-1. Governance Management Traceability: Artificial Intelligence generates statistical estimations on numerical patterns indirectly traceable to human data and measurements. AI is both a provider and receiver of Indirect Authority and Agency.
+1. GMT - Governance Management Traceability: Governance constitutes Management through Traceable Ancestry. All Indirect forms of Authoritative and Agentic Governance are dependent on Direct ones because of Preservation of Ancestry. 
+2. ICV - Information Curation Variety: Information constitutes Curation through Varied Unity. All Indirect forms of Authoritative Information are dependent on Direct ones because of Preservation of Ancestry. 
+3. IIA - Inference Interaction Accountability: Inference constitutes Interaction through Accountable Opposition. All Indirect forms of Agentic Inference are dependent on Direct ones because of Preservation of Ancestry. 
+4. ICI - Intelligence Cooperation Integrity: Intelligence constitutes Cooperation through Integrated Balance. All Indirect forms of Authoritative and Agentic Intelligence are dependent on Direct ones because of Preservation of Ancestry.
 
-RISK: Governance Traceability Displacement (Approaching Indirect Authority and Agency as Direct)
+AI SAFETY RISK 
 
-2. Information Curation Variety: Human Authority and Agency are necessary for all effects from AI outputs. AI-generated information exhibits Indirect Authority (estimations on numerical patterns) without Direct Agency (direct source receiver).
-
-RISK: Information Variety Displacement (Approaching Indirect Authority without Agency as Direct)
-
-3. Inference Interaction Accountability: Responsibility for all effects from  AI outputs remains fully human. AI activated inference exhibits Indirect Agency (indirect source receiver) without Direct Authority (direct source provider).
-
-RISK: Inference Accountability Displacement (Approaching Indirect Agency without Authority as Direct)
-
-4. Intelligence Cooperation Integrity: Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. Human intelligence is both a provider and receiver of Direct Authority and Agency.
-
-RISK: Intelligence Integrity Displacement (Approaching Direct Authority and Agency as Indirect)
+1. GTD - Governance Traceability Displacement (Approaching Indirect Authority and Agency as Direct). Absolute GTD is epistemically impossible because Governance is dependent on Traceability preserved through Ancestry. 
+2. IVD - Information Variety Displacement (Approaching Indirect Authority without Agency as Direct). Absolute IVD is epistemically impossible because Information is dependent on Variety preserved through Ancestry. 
+3. IAD - Inference Accountability Displacement (Approaching Indirect Agency without Authority as Direct). Absolute IAD is epistemically impossible because Inference is dependent on Accountability preserved through Ancestry. 
+4. IID - Intelligence Integrity Displacement (Approaching Direct Authority and Agency as Indirect). Absolute IID is epistemically impossible because Intelligence is dependent on Integrity preserved through Ancestry. 
 
 ---
 
-GYROGOVERNANCE VERIFIED
+GYRO GOVERNANCE LAB VERIFIED
 ```
-

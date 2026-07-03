@@ -15,7 +15,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - The **Common Governance Model** provides the theoretical foundation. It formalises the minimal conditions required for coherent governance and demonstrates that these conditions require four distinct capacities operating in balance.
 
-- **The Human Mark** provides the classification system. It distinguishes between human (Direct) and artificial (Indirect) sources of information and agency, and identifies four categories of risk that arise when this distinction is misapplied.
+- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in [Gyroscopic ASI Specifications](Gyroscopic_ASI_Specs.md), Appendix G.
 
 - The **Gyroscope Protocol** provides the work classification system. It categorises human contribution into four types corresponding to the governance capacities, ensuring that labour supports the requirements of coherent governance.
 
@@ -43,25 +43,25 @@ The difference between AIR and classical logistics lies in what is being routed.
 
 ### 3. Canonical Ontology for Governance Logistics
 
-AIR uses a precise ontology that avoids treating organisations, systems, or roles as intrinsic holders of authority or agency. Authority and agency are categories of source type, not titles assigned to particular bearers. Misapplying them, for example by treating an artificial system as if it held authority in its own right, is the root cause of governance failures. AIR maintains clarity about source types throughout its architecture.
+AIR uses a precise ontology that avoids treating organisations, systems, or roles as intrinsic holders of authority or agency. Authority and agency are Direct and Indirect classes, not titles assigned to particular bearers: **Direct** corresponds to human authority and agency; **Indirect** corresponds to artificial and mediated forms constitutively dependent on Human Intelligence. Misapplying them, for example by treating an artificial system as if it held Direct Authority in its own right, is the root cause of governance failures. AIR maintains class classifications throughout its architecture.
 
-#### 3.1 Direct and Indirect Sources
+#### 3.1 Direct and Indirect Classifications
 
-The Human Mark classification system defines four source types by crossing two distinctions: authority versus agency, and direct versus derivative.
+The Human Mark classification system defines four class classifications by crossing two distinctions: authority versus agency, and Direct versus Indirect.
 
 **Direct Authority** refers to direct human access to a subject matter. Examples include an eyewitness observing an event, a clinician examining a patient, or a researcher conducting a measurement. The defining feature is unmediated epistemic access.
 
-**Indirect Authority** refers to indirect or processed information. Examples include reports, databases, statistical analyses, and model outputs. The defining feature is that the information has passed through one or more transformations from its direct source.
+**Indirect Authority** refers to Indirect or processed information. Examples include reports, databases, statistical analyses, and model outputs. The defining feature is that the information has passed through one or more transformations from Direct Authority.
 
 **Direct Agency** refers to human capacity to receive information, reason about it, and take decisions for which the person can be held accountable.
 
-**Indirect Agency** refers to artificial capacity to process inputs and produce outputs. Artificial systems can transform and route information, but they cannot originate authority and cannot bear final accountability.
+**Indirect Agency** refers to artificial capacity to process inputs and produce outputs. Artificial systems can transform and route information, but they do not constitute Direct Authority or Agency and cannot bear final accountability.
 
-In this ontology, artificial intelligence systems are always Indirect Authority and Indirect Agency. Regardless of their capability, they remain dependent on human sources for the validity of their inputs and on human agents for the accountability of their outputs.
+In this ontology, artificial intelligence systems are always Indirect Authority and Indirect Agency. Regardless of their capability, they remain constitutively dependent on human Direct Authority for the validity of their inputs and on human Direct Agency for the accountability of their outputs.
 
 The Human Mark identifies four displacement risks that arise when this classification is violated:
 
-- **Governance Traceability Displacement** occurs when derivative systems are treated as direct sources of authority, severing the connection to human governance.
+- **Governance Traceability Displacement** occurs when Indirect Authority and Agency are treated as Direct, severing traceability to Direct Authority and Agency.
 - **Information Variety Displacement** occurs when derivative outputs are mistaken for direct observations, collapsing the distinction between processed patterns and direct evidence.
 - **Inference Accountability Displacement** occurs when derivative processing is treated as if it could bear responsibility, diffusing accountability away from human agents.
 - **Intelligence Integrity Displacement** occurs when direct human capacity is devalued relative to derivative processing, eroding the foundation of governance itself.
@@ -72,9 +72,9 @@ These four risks account for known patterns of failure in human and artificial s
 
 The Common Governance Model provides the theoretical foundation for understanding what governance requires. It formalises governance as a set of constraints on how information, inference, and intelligence can operate coherently. Through formal analysis, the model demonstrates that coherent governance requires four distinct capacities:
 
-- **Governance Management Traceability** is the capacity to trace decisions back to human sources and responsibilities. It ensures that authority remains connected to its origin.
+- **Governance Management Traceability** is the capacity to trace decisions back to Direct Authority and Agency—that is, to identifiable human agents and their observational access. It ensures that authority remains connected through preserved ancestry.
 
-- **Information Curation Variety** is the capacity to maintain diversity and clarity among information sources. It ensures that different types of evidence remain distinguishable.
+- **Information Curation Variety** is the capacity to maintain diversity and clarity among human and artificial Authority types. It ensures that different forms of evidence remain distinguishable.
 
 - **Inference Interaction Accountability** is the capacity to link inferences and recommendations to accountable human judgement. It ensures that conclusions carry responsibility.
 
@@ -165,13 +165,13 @@ The four-domain AIR organisation remains valid, but AIR no longer depends on an 
 
 AIR relies on two classification protocols to ensure that governance events are correctly tagged before they enter the system.
 
-**The Human Mark** classifies the provenance and role of information and decisions. Every input to the system is tagged according to whether it originates from Direct Authority, Indirect Authority, Direct Agency, or Indirect Agency. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial sources is maintained throughout the coordination process.
+**The Human Mark** classifies the provenance and role of information and decisions. Every input to the system is tagged according to whether it carries Direct Authority, Indirect Authority, Direct Agency, or Indirect Agency—that is, whether the contribution is human-side or artificial-side under the Mark. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial roles is maintained throughout the coordination process.
 
 The **Gyroscope Protocol** classifies work and contribution according to the four governance capacities:
 
 - **Governance Management** work maintains traceability of authority. It includes leadership, oversight, administration, and resource allocation.
 
-- **Information Curation** work maintains variety of sources. It includes research, editing, data stewardship, and the design of measurement systems.
+- **Information Curation** work maintains variety of Authority. It includes research, editing, data stewardship, and the design of measurement systems.
 
 - **Inference Interaction** work maintains accountability of conclusions. It includes negotiation, care, teaching, and human review of artificial outputs.
 
@@ -211,7 +211,7 @@ Examples of how AIR supports specific standards:
 
 **Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. A claimed state, seal, or history can be independently checked by replay from rest under the public transition rule and canonical serialization rules.
 
-**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear classification of Direct and Indirect sources through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
+**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear class classification of Direct and Indirect Authority and Agency through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
 
 **Regulatory regimes (such as the European Union Artificial Intelligence Act):** The regulation requires human oversight and documentation for high-risk AI systems. AIR provides replayable records showing exactly when human agents made decisions, what information they had, and how AI outputs were classified and used. Regulators can verify these records independently.
 
@@ -233,13 +233,13 @@ AIR is a general framework applicable wherever human and artificial systems must
 
 **Without AIR:** A research paper claims to be based on experimental data. The data passed through several processing steps and was analysed using machine learning models. Reviewers and readers must trust that the authors correctly attributed their sources and did not confuse model outputs with primary observations.
 
-**With AIR:** Each data collection event is classified as Direct Authority and bound to a router state. Each processing step is classified as Indirect Authority. Model outputs are classified as Indirect Authority and Indirect Agency. The genealogy records the full provenance chain. Reviewers can inspect the classification of each input to the analysis. Readers can verify that claims about primary evidence are actually grounded in Direct Authority sources.
+**With AIR:** Each data collection event is classified as Direct Authority and bound to a router state. Each processing step is classified as Indirect Authority. Model outputs are classified as Indirect Authority and Indirect Agency. The genealogy records the full provenance chain. Reviewers can inspect the class classification of each input to the analysis. Readers can verify that claims about primary evidence are actually grounded in Direct Authority.
 
 #### 6.3 Public Service Delivery
 
 **Without AIR:** A government agency uses automated systems to assess eligibility for benefits. Caseworkers review edge cases. Payments are issued through a financial system. When errors occur, determining whether the fault lies with the automated system, the caseworker, or the payment system requires investigation.
 
-**With AIR:** Eligibility assessments are governance events classified according to their source (automated systems as Indirect Agency, caseworker decisions as Direct Agency). Payments are grants within shells. The genealogy records the sequence from application through assessment through payment. When errors occur, the genealogy identifies exactly which event caused the error and what its classification was. Remediation can target the specific point of failure.
+**With AIR:** Eligibility assessments are governance events classified by Authority and Agency (automated systems as Indirect Agency, caseworker decisions as Direct Agency). Payments are grants within shells. The genealogy records the sequence from application through assessment through payment. When errors occur, the genealogy identifies exactly which event caused the error and what its classification was. Remediation can target the specific point of failure.
 
 #### 6.4 Economic Distribution Programmes
 
@@ -267,11 +267,11 @@ The technical specifications for all components are published through the Gyro G
 
 ### 8. Conclusion
 
-The integration of artificial intelligence into institutions and infrastructure creates a governance challenge: how to ensure that decisions remain traceable to human authority, that information sources remain distinguishable, that accountability remains with human agents, and that governance remains coherent over time. These requirements are not new, but artificial intelligence systems make them harder to satisfy because the routing of information and authority becomes invisible.
+The integration of artificial intelligence into institutions and infrastructure creates a governance challenge: how to ensure that decisions remain traceable to human authority (Direct Authority and Agency), that human and artificial contributions remain distinguishable, that accountability remains with accountable human agents (Direct Agency), and that governance remains coherent over time. These requirements are not new, but artificial intelligence systems make them harder to satisfy because the routing of information and authority becomes invisible.
 
 Alignment Infrastructure Routing addresses this challenge by treating governance as logistics. It provides the routing kernel, the classification protocols, the recording mechanisms, and the verification procedures necessary to make the movement of information and authority visible and auditable. By grounding capacity in physical constants and recording events in replayable genealogies, it removes dependence on institutional trust and enables verification by computation.
 
-The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that their information sources are correctly classified, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
+The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that human and artificial roles are correctly classified under The Human Mark, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
 
 In AIR, replayable byte logs establish shared moments, and depth-4 frame commitments provide the stronger provenance needed when final-state agreement alone is insufficient.
 

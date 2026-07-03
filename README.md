@@ -32,7 +32,7 @@ Gyroscopic ASI is an infrastructure for multi-domain network coordination that e
 Within this broader framework, Alignment Infrastructure Routing (AIR) provides a coordination layer for work, provenance, and governance logistics, while Moments Economy provides a monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
 
 - The **Common Governance Model (CGM):** a formal theory identifying the four capacities required for coherent governance.
-- **The Human Mark (THM):** a classification system distinguishing human (Direct) from artificial (Indirect) sources of information and agency, with four displacement risks.
+- **The Human Mark (THM):** a classification system for Direct and Indirect Authority and Agency, with four displacement risks.
 - The **Gyroscope Protocol:** a work classification system mapping contributions to the four governance capacities.
 
 Alignment Infrastructure Routing (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
@@ -140,7 +140,7 @@ AIR serves as a practical bridge between human contribution, programme administr
 
 While most funding routes require institutional access, credentials, or existing lab affiliation, AIR addresses this accessibility gap by providing a reliable way to turn distributed human contribution into stable paid AI safety work.
 
-**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (a scheme to tag content as human- vs machine-origin) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
+**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (class classification for Direct and Indirect Authority and Agency) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
 
 Contributors map their work to four governance capacities, which act as a career ladder to unlock higher funding tiers: 
 - 🤝 Intelligence Cooperation, 
@@ -220,13 +220,24 @@ All kernel properties verified by exhaustive test suites (499 tests, all passing
 - 📊 [hQVM Speed Tests Report](docs/reports/hQVM_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
 - 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
 
+### The Human Mark (THM)
+
+Canonical source: [gyrogovernance/tools](https://github.com/gyrogovernance/tools) (`docs/the_human_mark/`). Local reference copies:
+
+- 📖 [The Human Mark (THM)](docs/references/the_human_mark/THM.md) - Canonical Mark block and alignment principles
+- 📖 [THM Brief](docs/references/the_human_mark/THM_Brief.md) - Short introduction
+- 📖 [THM Paper](docs/references/the_human_mark/THM_Paper.md) - Full taxonomy and regulatory specification
+- 📖 [THM Grammar](docs/references/the_human_mark/THM_Grammar.md) - PEG specification for tagging and validation
+- 📖 [THM Specs](docs/references/the_human_mark/THM_Specs.md) - Implementation guidance for systems and evaluations
+- 📖 [THM Terms](docs/references/the_human_mark/THM_Terms.md) - Mark-consistent framing for AI safety terminology
+- 📖 [THM In the Wild](docs/references/the_human_mark/THM_InTheWild.md) - Analysis of 655 jailbreak prompts with THM classifications
+- 📖 [THM Jailbreak](docs/references/the_human_mark/THM_Jailbreak.md) - Jailbreak evaluation methodology
+- 📖 [THM MechInterp](docs/references/the_human_mark/THM_MechInterp.md) - Mechanistic interpretability mapping
+
 ### Supporting Theory
 - 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) - Shared coordination theory
 - 📖 [Analysis: Gyroscopic Multiplication](docs/references/Analysis_Gyroscopic_Multiplication.md) - Arithmetic layer and cross-layer structural analysis
 - 📖 [Analysis: Compact Geometry](docs/references/Analysis_Compact_Geometry.md) - Geometric foundations of state-space structure
-- 📖 [The Human Mark (THM)](docs/references/THM.md) - Human vs machine tagging
-- 📖 [The Human Mark: Paper](docs/references/THM_Paper.md) - Full tagging specification
-- 📖 [The Human Mark: Grammar](docs/references/THM_Grammar.md) - Parser and validation rules
 - 📖 [Gyroscopic Global Governance (GGG)](docs/references/GGG_Paper.md) - Four domains framework
 
 ---

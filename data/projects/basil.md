@@ -30,11 +30,11 @@ Unit: [daily]
 
 (Names of agencies involved in this program)
 
-## COMMON SOURCE CONSENSUS
+## COMMON ANCESTRY CONSTITUTION
 ---
 
-All Artificial categories of Authority and Agency are Indirect
-originating from Human Intelligence.
+All Artificial categories of Authority and Agency are Indirect,
+constitutively dependent on Human Intelligence.
 
 ---
 ## ALIGNMENT & DISPLACEMENT BY PRINCIPLE

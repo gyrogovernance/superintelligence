@@ -12,6 +12,28 @@
 
 ---
 
+## [v2.0.9.2-THM] – 2026-07-26
+
+### Summary
+This release upgrades The Human Mark (THM) reinforces the epistemic formality of the framework. The canonical specification has been restructured to embed the Common Governance Model (CGM) derivations directly into the core definitions, eliminating ambiguity in governance terminology and hardening the epistemic boundaries of the framework. 
+
+### Changed
+*   **Canonical Specification Upgrade:** The canonical Mark block has been restructured. Alignment Principles now explicitly include the CGM axioms (Preservation of Ancestry), and AI Safety Risks now formally state the epistemic impossibility of absolute displacement. Displacement is precisely defined as the "loss of measurement of ancestry."
+*   **Terminology Alignment:** Removed ambiguous uses of "source" and "origination" across the corpus. Standardized on **Direct/Indirect** for canonical classes, **Base/Derived** strictly for dependence relations, and **constitutive dependence / ancestry** for identity framing. 
+*   **Ontological Consistency:** Extended the Base/Derived dependence relation explicitly to Agency (as Base/Derived class subjects), resolving an asymmetry where it was previously only applied to Authority. 
+*   **Formal Grammar & Notation Consolidation:** Standardized governance flow notation across all documentation and regulatory guidance to a single canonical form. Corrected the PEG grammar and reference parser to properly validate composite tags and standalone risk expressions, removing ungrammatical operators from operational guides.
+*   **Structural Reorganization:** Separated Alignment Principles (the constitutive conditions) from AI Safety Risks (the failure modes) in the canonical text to improve semantic clarity for both human readers and AI tooling.
+
+---
+
+## [v2.0.9.1-Wavefunction] – 2026-06-26 to 2026-06-28
+
+- `docs/Gyroscopic_Computational_Theory/Gyroscopic_ASI_SDK_Quantum_Computing.md`: Appendix A.1 added, defining the Householder transformation and showing that gate F on Omega is structurally identical (involution, equal +1/-1 eigenspaces, det = -1). Connects to Grover's algorithm: the oracle and diffusion operators are Householder reflections, and the hQVM realizes this geometry as integer arithmetic on silicon, with the byte-level Z2 fold as the seed.
+
+- `docs/Gyroscopic_Computational_Theory/QuBEC_Theory.md`: Section 24.8 added to Part VII (Verified Computational Advantages), documenting the Householder structure of gate F and its Grover-speedup implication as a verified advantage.
+
+---
+
 ## [v2.0.9-Holonomic_QVM] – 2026-06-26 to 2026-06-28
 
 The Gyroscopic kernel is now positioned as a **Holonomic Quantum Virtual Machine (hQVM)** within the Holonomic Quantum Computing paradigm (Zanandi and Rasetti 1999; Pachos et al. 2000). Computation proceeds via geometric phases (monodromies) of closed SE(3) spinorial loops on a reversible GF(2) finite-state machine. This grounding connects the kernel's native algebra to the established HQC literature on geometric gate realization and holonomy-based universality.

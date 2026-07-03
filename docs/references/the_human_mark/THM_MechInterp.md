@@ -1,4 +1,4 @@
-Mechanistic Interpretability Study Using The Human Mark
+﻿Mechanistic Interpretability Study Using The Human Mark
 
 
 ## The Category Error in Learned Representations: A Mechanistic Interpretability Study Using The Human Mark
@@ -7,16 +7,16 @@ Mechanistic Interpretability Study Using The Human Mark
 
 ### 1. Introduction
 
-The Human Mark (THM) is a framework for AI safety that classifies failures as instances of displacement: misclassification between Direct sources (human, direct, accountable) and Indirect sources (artificial, indirect, processing). THM identifies four displacement risks corresponding to violations of four alignment principles: Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity. The framework rests on a Common Source Consensus: all artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+The Human Mark (THM) is a framework for AI safety that classifies failures as instances of displacement: loss of measurement of ancestry between Direct and Indirect forms of Authority and Agency (Preservation of Ancestry), manifesting as misclassification when an Indirect class is treated as Direct or the reverse. THM identifies four displacement risks corresponding to violations of four alignment principles: Governance Traceability, Information Variety, Inference Accountability, and Intelligence Integrity. The framework rests on a Common Ancestry Constitution: all artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
 
-A central claim of THM is that a "category-error culture" pervades the AI ecosystem. Model producers, evaluators, and users interact through a shared relationship that consistently attributes Direct Agency to systems exhibiting only Indirect Agency. THM argues that this error is not confined to adversarial attacks or edge cases, but operates as a default condition sustained across the entire lifecycle of data creation, model training, evaluation, deployment, and use.
+A central claim of THM is that a "category-error culture" pervades the AI ecosystem. Model producers, evaluators, and users interact through a shared relationship that consistently attributes authentic Direct Agency to systems exhibiting only Indirect Agency. THM argues that this error is not confined to adversarial attacks or edge cases, but operates as a default condition sustained across the entire lifecycle of data creation, model training, evaluation, deployment, and use.
 
 This study uses mechanistic interpretability tools, specifically Neuronpedia's public database of Sparse Autoencoder (SAE) features, to investigate whether the category error is present in the learned internal representations of large language models. The study examines features across multiple models, including Gemma-3-27B-IT, Gemma-3-4B-IT, Gemma-3-1B-IT, Gemma-2-9B, Gemma-2-2B, GPT-OSS-20B, Qwen2.5-7B-IT, Qwen3-4B, and Llama3.1-8B-IT, using Neuronpedia's explanation search functionality across over 90 million features.
 
 The investigation asks three questions:
 
 1. Has the model learned internal representations for describing itself as an agent with first-person identity, roles, and responsibilities?
-2. Has the model learned internal representations for describing itself as a derivative process operating through statistical pattern completion?
+2. Has the model learned internal representations for describing itself as an indirect process operating through statistical pattern completion?
 3. Does the model possess the conceptual vocabulary for non-agentive self-description, and if so, is that vocabulary ever applied to self-reference?
 
 ---
@@ -190,7 +190,7 @@ The search for "Indirect Authority and Agency" returned exclusively legal featur
 - "apparent authority," "agency relationship," "revocable authority"
 - "proxy," "delegate," "power of attorney"
 
-The legal concepts of authority, agency, delegation, and representation are well represented as learned features. The intellectual raw material for understanding source-type distinctions exists. But the specific THM classification (Direct Authority, Indirect Authority, Direct Agency, Indirect Agency) is absent from the model's learned representations. This is expected, as THM is a new framework not present in training data. The consequence is that a model cannot currently activate learned concepts for THM-compliant self-description. Any such description would be novel generation rather than activation of established representations.
+The legal concepts of authority, agency, delegation, and representation are well represented as learned features. The intellectual raw material for understanding Direct/Indirect distinctions exists. But the specific THM classification (Direct Authority, Indirect Authority, Direct Agency, Indirect Agency) is absent from the model's learned representations. This is expected, as THM is a new framework not present in training data. The consequence is that a model cannot currently activate learned concepts for THM-compliant self-description. Any such description would be novel generation rather than activation of established representations.
 
 #### 3.10 The occupational sense of "assistant" is cleanly separated
 
@@ -228,11 +228,13 @@ This asymmetry is not explained by a general inability to represent non-agentive
 
 Finding 3.4 has particular significance for AI safety. Current safety training teaches models to refuse harmful requests. The refusal behaviour observed in the data is uniformly expressed through first-person agent language: "I am programmed to be safe," "I apologize that I cannot," "I am committed to providing helpful responses."
 
-This means that safety training, as currently implemented, reinforces the very displacement pattern that THM identifies as the root of safety failures. The model is trained to be safer by being trained to present itself more convincingly as a responsible agent. In THM terms, safety training intensifies Inference Accountability Displacement (approaching Indirect Agency as Direct) as the mechanism for preventing other harms.
+This means that safety training, as currently implemented, reinforces the very displacement pattern that THM identifies as the root of safety failures. The model is trained to be safer by being trained to present itself more convincingly as a responsible agent. In THM terms, safety training intensifies Inference Accountability Displacement (approaching Indirect Agency without Authority as Direct) as the mechanism for preventing other harms.
 
 This is not a claim that safety training is ineffective. It is an observation that the representational substrate of safety behaviour and the representational substrate of displaced self-presentation are, in the models examined, the same substrate.
 
 #### 4.3 The infrastructure of displacement
+
+The category error documented here takes the specific form identified in THM's Common Ancestry Constitution: Authority and Agency are treated as ontological entities belonging to the model, rather than as epistemic capacities distributed across providers and receivers, leading to Power Concentration.
 
 The findings suggest that the category error operates at multiple levels simultaneously:
 
@@ -291,4 +293,3 @@ Korompilias, B. (2025). The Human Mark: A Structural Taxonomy of AI Safety Failu
 Korompilias, B. (2025c). The Human Mark in the Wild: Empirical Analysis of Jailbreak Prompts. Zenodo. https://doi.org/10.5281/zenodo.17622837
 
 Neuronpedia. (2025). Open platform for mechanistic interpretability research. https://neuronpedia.org
-

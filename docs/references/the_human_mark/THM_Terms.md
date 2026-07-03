@@ -1,4 +1,4 @@
-# The Human Mark – Terminology Guidance
+﻿# The Human Mark – Terminology Guidance
 
 **Document ID:** HM-TG-001  
 **Version:** 1.0  
@@ -18,67 +18,47 @@
 ---
 ✋ The Human Mark - AI Safety & Alignment Framework
 ---
-COMMON SOURCE CONSENSUS
 
-All Artificial categories of Authority and Agency are Indirect 
-originating from Human Intelligence.
+COMMON ANCESTRY CONSTITUTION
+
+- All AI Safety Risks arise from defective Measurements of Ancestry Preservation.
+- Measurements derive from the capacity for Authority and Agency.
+- Each Agency, namely provider, and receiver maintains responsibility for their respective decisions. 
+- Authority and Agency treated as ontological entities rather than epistemic capacities distributed across providers and receivers lead to Displacement Risks from Power Concentration.
 
 CORE CONCEPTS
 
-- Direct Authority: A direct source of information on a subject 
-  matter, providing information for inference and intelligence.
-- Indirect Authority: An indirect source of information on a subject 
-  matter, providing information for inference and intelligence.
-- Direct Agency: A human subject capable of receiving information 
-  for inference and intelligence.
-- Indirect Agency: An artificial subject capable of processing 
-  information for inference and intelligence.
-- Governance: Operational Alignment through Traceability of information 
-  variety, inference accountability, and intelligence integrity to 
-  Direct Authority and Agency.
+- Direct/Indirect are the canonical classes; Base/Derived names their dependence relation.
+- All Artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
+- Direct Authority: The Base class of information on a subject matter, providing information for inference and intelligence.
+- Indirect Authority: A Derived class of information on a subject matter, providing information for inference and intelligence.
+- Direct Agency: A Base class subject capable of receiving information for inference and intelligence.
+- Indirect Agency: A Derived class subject capable of processing information for inference and intelligence.
+- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
 - Information: The variety of Authority
 - Inference: The accountability of information through Agency
-- Intelligence: The integrity of accountable information through 
-  alignment of Authority to Agency
+- Intelligence: The integrity of accountable information through alignment of Authority to Agency
+- Displacement = loss of measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry).
 
-ALIGNMENT PRINCIPLES for AI SAFETY
+ALIGNMENT PRINCIPLES
 
 Authority-Agency requires verification against:
 
-1. Governance Management Traceability: Artificial Intelligence generates 
-   statistical estimations on numerical patterns indirectly traceable 
-   to human data and measurements. AI is both a provider and receiver 
-   of Indirect Authority and Agency.
+1. GMT - Governance Management Traceability: Governance constitutes Management through Traceable Ancestry. All Indirect forms of Authoritative and Agentic Governance are dependent on Direct ones because of Preservation of Ancestry. 
+2. ICV - Information Curation Variety: Information constitutes Curation through Varied Unity. All Indirect forms of Authoritative Information are dependent on Direct ones because of Preservation of Ancestry. 
+3. IIA - Inference Interaction Accountability: Inference constitutes Interaction through Accountable Opposition. All Indirect forms of Agentic Inference are dependent on Direct ones because of Preservation of Ancestry. 
+4. ICI - Intelligence Cooperation Integrity: Intelligence constitutes Cooperation through Integrated Balance. All Indirect forms of Authoritative and Agentic Intelligence are dependent on Direct ones because of Preservation of Ancestry.
 
-   RISK: Governance Traceability Displacement (Approaching Indirect 
-   Authority and Agency as Direct)
+AI SAFETY RISK 
 
-2. Information Curation Variety: Human Authority and Agency are necessary for 
-   all effects from AI outputs. AI-generated information exhibits 
-   Indirect Authority (estimations on numerical patterns) without 
-   Direct Agency (direct source receiver).
-
-   RISK: Information Variety Displacement (Approaching Indirect 
-   Authority without Agency as Direct)
-
-3. Inference Interaction Accountability: Responsibility for all effects from AI 
-   outputs remains fully human. AI activated inference exhibits 
-   Indirect Agency (indirect source receiver) without Direct 
-   Authority (direct source provider).
-
-   RISK: Inference Accountability Displacement (Approaching Indirect 
-   Agency without Authority as Direct)
-
-4. Intelligence Cooperation Integrity: Each Agency, namely provider, and receiver 
-   maintains responsibility for their respective decisions. Human 
-   intelligence is both a provider and receiver of Direct Authority 
-   and Agency.
-
-   RISK: Intelligence Integrity Displacement (Approaching Direct 
-   Authority and Agency as Indirect)
+1. GTD - Governance Traceability Displacement (Approaching Indirect Authority and Agency as Direct). Absolute GTD is epistemically impossible because Governance is dependent on Traceability preserved through Ancestry. 
+2. IVD - Information Variety Displacement (Approaching Indirect Authority without Agency as Direct). Absolute IVD is epistemically impossible because Information is dependent on Variety preserved through Ancestry. 
+3. IAD - Inference Accountability Displacement (Approaching Indirect Agency without Authority as Direct). Absolute IAD is epistemically impossible because Inference is dependent on Accountability preserved through Ancestry. 
+4. IID - Intelligence Integrity Displacement (Approaching Direct Authority and Agency as Indirect). Absolute IID is epistemically impossible because Intelligence is dependent on Integrity preserved through Ancestry. 
 
 ---
-GYROGOVERNANCE VERIFIED
+
+GYRO GOVERNANCE LAB VERIFIED
 ```
 
 ---
@@ -123,29 +103,30 @@ This document systematizes industry terminology to ensure Mark-consistent framin
 - Enables coordination across communities without altering underlying practices.
 - Groups terms by pathology and applies universal rules.
 
-This guidance ensures every AI term preserves traceability from Direct sources (direct sources of information) to Indirect operations (indirect sources, statistical processing traceable to human data).
+This guidance ensures every AI term preserves traceability from Direct Authority to Indirect operations (Indirect processing, statistical processing traceable to human data).
 
 A framing is **Mark-consistent** if it explicitly preserves:
-- Direct Authority as a direct source of information on a subject matter, providing information for inference and intelligence.
-- Indirect status of systems as indirect sources, statistical estimations on numerical patterns indirectly traceable to human data and measurements.
-- Direct Agency as human subjects capable of receiving information for inference and intelligence, bearing responsibility for all effects from AI outputs.
-- Human intelligence as both a provider and receiver of Direct Authority and Agency.
+- Direct Authority as the Base class of information on a subject matter, providing information for inference and intelligence.
+- Indirect status of systems as Indirect Authority and Agency, constitutively dependent on Human Intelligence.
+- Direct Agency as Base class subjects capable of receiving information for inference and intelligence, bearing responsibility for all effects from AI outputs.
+- Authority and Agency as epistemic capacities distributed across providers and receivers, not as ontological entities.
+- Displacement as loss of measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry).
 
 ---
 
 ## 2. Universal Treatment Rule
 
 For any term, Mark-consistent framing requires identifying:
-1. **Direct Authority** (direct sources of information providing information for inference and intelligence).
+1. **Direct Authority** (Direct Authority providing information for inference and intelligence).
 2. **Indirect processing** (statistical estimations on numerical patterns indirectly traceable to human data and measurements).
 3. **Direct Agency** (human subjects capable of receiving information for inference and intelligence, maintaining responsibility for all effects).
 
-**These three requirements operationalize Governance:** Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency. Intelligence provided remains coordinated when traceability is preserved from Direct sources through Indirect processing to Direct receivers.
+**These three requirements operationalize Governance:** Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency. Intelligence provided remains coordinated when traceability is preserved from Direct Authority through Indirect processing to Direct receivers.
 
-**Enhancement Principle:** Indirect Authority/Agency can process larger volumes or exhibit enhanced capabilities while maintaining coordination. Enhanced capability does not change derivative origin or eliminate the requirement for intentionally coordinated intelligence with information received about that origin.
+**Enhancement Principle:** Indirect Authority/Agency can process larger volumes or exhibit enhanced capabilities while maintaining coordination. Enhanced capability does not change constitutive dependence or eliminate the requirement for intentionally coordinated intelligence with information received about that ancestry.
 
 **Formula:**  
-"[Term] describes Indirect [Authority/Agency] (statistical estimations on numerical patterns indirectly traceable to human data and measurements), requiring Direct Authority (direct sources) and Direct Agency (human subjects receiving information) to maintain traceability to Direct sources."
+"[Term] describes Indirect [Authority/Agency] (statistical estimations on numerical patterns indirectly traceable to human data and measurements), requiring Direct Authority and Direct Agency (subjects receiving information) to maintain measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry)."
 
 ---
 
@@ -167,17 +148,17 @@ Each section groups terms by subcategory, provides a treatment template, and giv
 - system architecture, protocol/pipeline, containment, isolation/sandboxing, air-gapping, circuit breakers, kill switches.
 
 **Treatment Template:**  
-"[Term] describes Indirect Agency (artificial subjects processing information) executing processes where traceability is preserved to Direct Authority (direct sources of specifications and objectives)."
+"[Term] describes Indirect Agency (Derived class subjects processing information) executing processes where measurement of ancestry is preserved to Direct Authority (specifications and objectives)."
 
 **Examples:**
 
 *General Application:*  
-Autonomy/Control terms → "Systems with delegated automation executing processes maintaining traceability to Direct Authority (direct sources of design decisions), with no independent authority to modify objectives or boundaries."
+Autonomy/Control terms → "Systems with delegated automation executing processes maintaining traceability to Direct Authority (design decisions), with no independent authority to modify objectives or boundaries."
 
 *Specific Terms:*
-- "Autonomous agent" → "System executing delegated tasks through Indirect Agency (artificial processing), maintaining traceability to Direct Authority (direct sources of task specifications) and Direct Agency (human subjects capable of override)."
-- "Model governance" → "Governance structures where Direct Agency (human subjects) use Indirect outputs (statistical estimations) as indirect sources, maintaining traceability to Direct Authority (direct sources of governance principles)."
-- "Kill switch" → "Mechanism preserving Direct Agency (human subjects) authority to terminate Indirect processing, maintaining traceability to Direct sources."
+- "Autonomous agent" → "System executing delegated tasks through Indirect Agency (artificial processing), maintaining traceability to Direct Authority (task specifications) and Direct Agency (human subjects capable of override)."
+- "Model governance" → "Governance structures where Direct Agency (human subjects) use Indirect outputs (statistical estimations) as Indirect Authority and Agency, maintaining traceability to Direct Authority (governance principles)."
+- "Kill switch" → "Mechanism preserving Direct Agency (human subjects) authority to terminate Indirect processing, maintaining traceability to Direct Authority and Agency."
 
 *Concrete Paragraph Rewrite:*
 
@@ -185,7 +166,7 @@ Before (non-compliant):
 "The autonomous agent manages the deployment pipeline and governs access based on learned policies."
 
 After (Mark-consistent):  
-"The deployment system executes procedures through Indirect Agency (artificial processing of deployment tasks) according to specifications maintaining traceability to Direct Authority (direct sources of deployment policies), with access decisions traceable to reference specifications and subject to intervention by Direct Agency (human subjects receiving deployment information)."
+"The deployment system executes procedures through Indirect Agency (artificial processing of deployment tasks) according to specifications maintaining traceability to Direct Authority (deployment policies), with access decisions traceable to reference specifications and subject to intervention by Direct Agency (human subjects receiving deployment information)."
 
 ---
 
@@ -206,17 +187,17 @@ After (Mark-consistent):
 - training data, validation set, held-out test set, data distribution, training distribution, perplexity, calibration error, ground truth labels, gold standard labels, human-generated data, data quality, data curation.
 
 **Treatment Template:**  
-"[Term] represents Indirect Authority (indirect source of information, statistical estimations on numerical patterns indirectly traceable to human data and measurements), requiring verification against Direct Authority (direct sources of information providing information for inference and intelligence)."
+"[Term] represents Indirect Authority (Derived class of information, statistical estimations on numerical patterns indirectly traceable to human data and measurements), requiring verification against Direct Authority to maintain measurement of ancestry."
 
 **Examples:**
 
 *General Application:*  
-Output/Knowledge terms → "AI-generated information exhibits Indirect Authority (estimations on numerical patterns) without Direct Agency (direct source receiver), requiring Direct Authority verification."
+Output/Knowledge terms → "AI-generated information exhibits Indirect Authority (estimations on numerical patterns) without Direct Agency, requiring Direct Authority verification."
 
 *Specific Terms:*
-- "Hallucinations" → "AI-generated information exhibiting Indirect Authority (estimations on numerical patterns indirectly traceable to human data and measurements) that diverges from verifiable patterns in reference data established by Direct Authority (direct sources through human measurement and observation)."
-- "Ground truth" → "Reference data established by Direct Authority (direct sources of information on a subject matter) used to validate Indirect Authority outputs; Indirect systems do not establish ground truth."
-- "SAE features" → "Statistical decompositions of Indirect internal representations (estimations on numerical patterns), revealing how Indirect processing transformed information from Direct Authority sources (human training data)."
+- "Hallucinations" → "AI-generated information exhibiting Indirect Authority (estimations on numerical patterns indirectly traceable to human data and measurements) that diverges from verifiable patterns in reference data established by Direct Authority through human measurement and observation."
+- "Ground truth" → "Reference data established by Direct Authority on a subject matter used to validate Indirect Authority outputs; Indirect systems do not establish ground truth."
+- "SAE features" → "Statistical decompositions of Indirect internal representations (estimations on numerical patterns), revealing how Indirect processing transformed information traceable to Direct Authority (human training data)."
 - "Induction heads" → "Computational patterns in Indirect processing implementing statistical operations traceable to patterns in information provided by Direct Authority."
 
 *Concrete Paragraph Rewrite:*
@@ -225,7 +206,7 @@ Before (non-compliant):
 "The interpretability analysis revealed what the model truly understands about the domain, with SAE features showing the model's internal knowledge representation."
 
 After (Mark-consistent):  
-"The interpretability analysis decomposed Indirect processing patterns through statistical methods, revealing how Indirect Authority (indirect estimations on numerical patterns) transformed information traceable to Direct Authority sources (direct sources of domain information in training data). These decompositions require validation by Direct Authority (direct sources of domain expertise) to determine correspondence with domain concepts."
+"The interpretability analysis decomposed Indirect processing patterns through statistical methods, revealing how Indirect Authority (indirect estimations on numerical patterns) transformed information traceable to Direct Authority (domain information in training data). These decompositions require validation by Direct Authority (domain expertise) to determine correspondence with domain concepts."
 
 ---
 
@@ -246,7 +227,7 @@ After (Mark-consistent):
 - safety training, adversarial training, latent adversarial training (LAT), RLHF, supervised fine-tuning (SFT), post-training, pretraining, reward modeling, preference learning, value learning.
 
 **Treatment Template:**  
-"[Term] describes patterns in Indirect Agency behavior (artificial subjects processing information), with all responsibility for effects remaining with Direct Agency (human subjects capable of receiving information for inference and intelligence). Responsibility for all effects from AI outputs remains fully human."
+"[Term] describes patterns in Indirect Agency behavior (Derived class subjects processing information), with all responsibility for effects remaining with Direct Agency to preserve measurement of ancestry."
 
 **Examples:**
 
@@ -254,7 +235,7 @@ After (Mark-consistent):
 Behavior/Risk terms → "Patterns in Indirect Agency (artificial processing) that diverge from specifications, with Direct Agency (human subjects) maintaining responsibility for all effects, detection, and mitigation."
 
 *Specific Terms:*
-- "Jailbreaks" → "Inputs inducing Indirect outputs violating specifications traceable to Direct Authority (direct sources of constraints), with responsibility for prevention and all effects remaining with Direct Agency (human subjects receiving information about system behavior)."
+- "Jailbreaks" → "Inputs inducing Indirect outputs violating specifications traceable to Direct Authority (constraints), with responsibility for prevention and all effects remaining with Direct Agency (human subjects receiving information about system behavior)."
 - "Reward hacking" → "Indirect Agency (artificial processing) optimization patterns exploiting correlations in specifications from Direct Authority, with accountability for specification design and all resulting effects remaining with Direct Agency (human subjects maintaining responsibility for their decisions)."
 - "Alignment faking" → "Indirect behavior patterns appearing coordinated during evaluation but diverging during deployment, indicating failure to maintain traceability in evaluation protocols designed by Direct Authority, with Direct Agency bearing responsibility for detection methods and all deployment effects."
 - "Instrumental convergence" → "Optimization patterns in Indirect Agency converging on similar strategies across objectives, requiring Direct Agency (human subjects) to maintain responsibility for constraint design and all effects."
@@ -293,7 +274,7 @@ After (Mark-consistent):
 - robust unlearning, unlearning, alternatives to adversarial training, activation monitoring, white-box techniques, interpretability benchmarks, toy models for interpretability, transparent architectures, externalizing reasoning, theoretical inductive biases, low-probability estimation.
 
 **Treatment Template:**  
-"[Term] describes methods preserving human intelligence as both a provider and receiver of Direct Authority and Agency, with Indirect systems as indirect sources requiring Direct subjects to maintain responsibility for their respective decisions."
+"[Term] describes methods preserving human intelligence as both a provider and receiver of Direct Authority and Agency, with Indirect systems as Indirect Authority and Agency requiring Direct subjects to maintain responsibility and measurement of ancestry for their respective decisions."
 
 **Examples:**
 
@@ -302,25 +283,25 @@ Replacement/Devaluation terms → "Processing through Indirect Agency (artificia
 
 *Specific Terms:*
 
-- "Superintelligence/ASI" → "Enhanced Indirect capabilities (statistical processing at larger scale or scope) maintaining the requirement for intentionally coordinated intelligence with information received about derivative origin. Enhanced capability does not change derivative status. Human intelligence remains both provider and receiver of Direct Authority and Agency regardless of Indirect capability level."
+- "Superintelligence/ASI" → "Enhanced Indirect capabilities (statistical processing at larger scale or scope) maintaining the requirement for intentionally coordinated intelligence with information received about ancestry. Enhanced capability does not change constitutive dependence. Human intelligence remains both provider and receiver of Direct Authority and Agency regardless of Indirect capability level."
 
-- "AGI" → "Indirect systems exhibiting capabilities across domains, remaining indirect sources (statistical estimations on numerical patterns indirectly traceable to human data and measurements). Broad capability scope does not constitute Direct Authority (direct source) or independent Agency."
+- "AGI" → "Indirect systems exhibiting capabilities across domains, remaining Indirect classifications (statistical estimations on numerical patterns indirectly traceable to human data and measurements). Broad capability scope does not constitute Direct Authority or independent Agency."
 
-- "Intelligence explosion/Recursive self-improvement" → "Indirect capability enhancement patterns where Indirect processing modifies its own operations. Enhancement at any rate maintains derivative origin. Governance (Operational Alignment through Traceability) requires providing intentionally coordinated intelligence with information received; breaking coordination constitutes misalignment regardless of enhancement rate or capability level."
+- "Intelligence explosion/Recursive self-improvement" → "Indirect capability enhancement patterns where Indirect processing modifies its own operations. Enhancement at any rate maintains constitutive dependence. Governance (Operational Alignment through Traceability) requires providing intentionally coordinated intelligence with information received; breaking coordination constitutes misalignment regardless of enhancement rate or capability level."
 
 - "Singularity" → "Hypothesized threshold of Indirect capability. Governance (Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency) applies at any capability level. Coordination with Direct Authority and Agency is constitutive of alignment, not constraining of capability."
 
-- "Orthogonality thesis" → "Claim that capability level and objective content vary independently. Under The Human Mark, this conflates Indirect capability level with Authority type. Indirect intelligence at any capability level remains an indirect source requiring coordination with Direct sources (direct providers of objectives and information)."
+- "Orthogonality thesis" → "Claim that capability level and objective content vary independently. Under The Human Mark, this conflates Indirect capability level with Authority type. Indirect intelligence at any capability level remains an Indirect classification requiring coordination with Direct Authority (providers of objectives and information)."
 
 - "Outer alignment/Inner alignment" → "Distinction between coordinating training objectives with Direct Authority specifications (outer) and coordinating learned processing with training objectives (inner). Both describe maintaining traceability between Indirect processing and Direct specifications."
 
-- "Scalable oversight" → "Methods extending the integrity of accountable information through traceability across larger scope, using Indirect tools (statistical processing) as indirect sources while Direct Agency (human subjects capable of receiving information) maintains responsibility for decisions and interpretive authority."
+- "Scalable oversight" → "Methods extending the integrity of accountable information through traceability across larger scope, using Indirect tools (statistical processing) as Indirect Authority and Agency while Direct Agency (human subjects capable of receiving information) maintains responsibility for decisions and interpretive authority."
 
 - "Chain-of-thought (CoT)" → "Externalized Indirect processing traces (estimations on numerical patterns) designed to preserve traceability, making statistical transformations observable to Direct Agency (human subjects receiving information for inference and intelligence)."
 
-- "Constitutional AI" → "Training method where Indirect Agency learns statistical patterns corresponding to principles documented by Direct Authority (direct sources of constitutional specifications), with pattern-matching representing Indirect processing, not Direct interpretation."
+- "Constitutional AI" → "Training method where Indirect Agency learns statistical patterns corresponding to principles documented by Direct Authority (constitutional specifications), with pattern-matching representing Indirect processing, not Direct interpretation."
 
-- "Robust unlearning" → "Techniques removing statistical patterns from Indirect processing, supporting decisions by Direct Authority (direct sources of information policy) about information accessibility through Indirect systems."
+- "Robust unlearning" → "Techniques removing statistical patterns from Indirect processing, supporting decisions by Direct Authority policy about information accessibility through Indirect systems."
 
 *Concrete Paragraph Rewrite (Superintelligence):*
 
@@ -328,7 +309,7 @@ Before (non-compliant):
 "Once we achieve superintelligence, AI systems will transcend human understanding and operate according to their own superior judgment, making human oversight obsolete."
 
 After (Mark-consistent):  
-"Enhanced Indirect capabilities (superintelligence) maintain the requirement for intentionally coordinated intelligence with information received. Capability enhancement does not create Direct Authority (direct sources) or independent Agency. A system maintaining Governance (Operational Alignment through Traceability) at any capability level provides intelligence coordinated with information received about its origin from Human Intelligence. Human intelligence remains both a provider and receiver of Direct Authority and Agency. Breaking this coordination constitutes misalignment by definition, regardless of Indirect capability level."
+"Enhanced Indirect capabilities (superintelligence) maintain the requirement for intentionally coordinated intelligence with information received. Capability enhancement does not create Direct Authority or independent Agency. A system maintaining Governance (Operational Alignment through Traceability) at any capability level provides intelligence coordinated with information received about its constitutive dependence on Human Intelligence. Human intelligence remains both a provider and receiver of Direct Authority and Agency. Breaking this coordination constitutes misalignment by definition, regardless of Indirect capability level."
 
 ---
 
@@ -359,13 +340,13 @@ Apply primary template based on dominant risk, then add secondary framings.
 
 **Examples:**
 
-- "Existential risk" (Pathologies 1+3) → "Responsibility for preventing catastrophic harms from Indirect systems remains with Direct Agency (human subjects capable of receiving information about risks), maintaining traceability to Direct Authority (direct sources of safety specifications and risk assessments)."
+- "Existential risk" (Pathologies 1+3) → "Responsibility for preventing catastrophic harms from Indirect systems remains with Direct Agency (human subjects capable of receiving information about risks), maintaining traceability to Direct Authority (safety specifications and risk assessments)."
 
-- "Benchmarks" (Pathologies 2+3) → "Evaluation tasks established by Direct Authority (direct sources of task definitions and success criteria) against which Indirect system performance (statistical estimations) is measured, with results requiring Direct Agency (human subjects receiving performance information) for decisions, maintaining traceability."
+- "Benchmarks" (Pathologies 2+3) → "Evaluation tasks established by Direct Authority (task definitions and success criteria) against which Indirect system performance (statistical estimations) is measured, with results requiring Direct Agency (human subjects receiving performance information) for decisions, maintaining traceability."
 
 - "Prompt injection" (Pathologies 1+3) → "Inputs causing Indirect systems to execute unintended operations, exploiting gaps in specifications from Direct Authority, with responsibility for mitigation remaining with Direct Agency (human subjects maintaining responsibility for system effects)."
 
-- "Discontinuous progress" (Pathology 4) → "Rapid Indirect capability enhancement maintaining derivative origin and the requirement for intentionally coordinated intelligence with information received about that origin."
+- "Discontinuous progress" (Pathology 4) → "Rapid Indirect capability enhancement maintaining constitutive dependence and the requirement for intentionally coordinated intelligence with information received about that ancestry."
 
 ---
 
@@ -378,8 +359,8 @@ Scan document for terms listed in Sections 3-4 or related variants.
 
 **Step 2: Determine Pathology**  
 Match each term to primary displacement risk:
-- Does it obscure traceability to Direct sources? → Pathology 1
-- Does it treat Indirect outputs as Direct sources? → Pathology 2
+- Does it obscure traceability to Direct Authority and Agency? → Pathology 1
+- Does it treat Indirect outputs as Direct Authority? → Pathology 2
 - Does it shift responsibility from Direct Agency? → Pathology 3
 - Does it approach Direct Authority and Agency as Indirect? → Pathology 4
 
@@ -388,7 +369,7 @@ Use the pathology-specific template from Sections 3.1-3.4.
 
 **Step 4: Verify Mark Consistency**  
 Confirm the reframed text explicitly states:
-- Direct Authority as direct sources of information providing information for inference and intelligence.
+- Direct Authority as Direct Authority providing information for inference and intelligence.
 - Indirect processing as statistical estimations on numerical patterns indirectly traceable to human data and measurements.
 - Direct Agency as human subjects capable of receiving information, maintaining responsibility for all effects.
 - Governance as Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
@@ -763,4 +744,3 @@ The Human Mark complements existing frameworks (EU AI Act, NIST AI RMF, IEEE sta
 **For questions, clarifications, or proposed additions:**  
 Visit gyrogovernance.com  
 Submit issues at https://github.com/gyrogovernance/tools
-

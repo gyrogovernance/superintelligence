@@ -27,7 +27,7 @@ This specification operates within the scientific and architectural commitments 
 
 1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations (Governance, Information, Inference, and Intelligence) on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
 
-2. **The Human Mark (THM):** an alignment framework classifying all AI failures as category errors between **Direct** and **Indirect** sources of authority and agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not originate, decide, or authorize.
+2. **The Human Mark (THM):** an alignment framework classifying category errors between human (Direct) and artificial (Indirect) Authority and Agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not constitute Direct Authority or Agency, decide, or authorize. See [Gyroscopic ASI Specifications](Gyroscopic_ASI_Specs.md), Appendix G, for the canonical Mark block.
 
 3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
 4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition rule, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
@@ -63,7 +63,7 @@ The substrate inherits no assumptions about upstream or downstream architecture 
 These substrate specifications draw formal constraints from the:
 
 - **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, monodromy defect δ_BU, canonical aperture A*)
-- **The Human Mark (THM):** defining ontological source-type distinctions for AI governance risk classification
+- **The Human Mark (THM):** defining Direct (human) and Indirect (artificial) class distinctions for AI governance risk classification. Canonical Mark: [Gyroscopic ASI Specifications](Gyroscopic_ASI_Specs.md), Appendix G.
 - **Gyroscopic Global Governance (GGG):** defining the operational significance of aperture, alignment, and post-AGI equilibrium
 - **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition rule, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
 

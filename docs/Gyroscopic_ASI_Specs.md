@@ -13,7 +13,7 @@ Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC T
 
 # 1. Constitutional Frame and ASI Purpose
 
-## 1.1 Intelligence as Structural Coherence
+## 1.1 Intelligence as Preservation of Ancestry
 
 Traditional artificial intelligence approaches intelligence as a statistical optimization problem. These systems achieve surface-level fluency by superimposing correlations within high-dimensional abstract spaces through massive datasets. Because such architectures lack internal structural constraints, coherence and ethics are typically treated as post-hoc semantic overlays or external filters.
 
@@ -49,10 +49,12 @@ Artificial Superintelligence (ASI) in this framework is a property of a human–
 
 The four principles are:
 
-*   **Governance Management Traceability:** Authority remains traceable to Direct human sources. Artificial systems contribute derivative coordination but do not originate governance.
-*   **Information Curation Variety:** Diverse Direct sources remain distinguishable. Indirect summaries and aggregations must not collapse the variety into a uniform narrative.
+*   **Governance Management Traceability:** Authority remains traceable to Direct Authority and Agency—that is, to human observational access and accountable human decision-making. Artificial systems contribute derivative coordination but do not constitute Direct Authority or bear final accountability.
+*   **Information Curation Variety:** Diverse human Direct Authority remains distinguishable. Indirect summaries and aggregations must not collapse the variety into a uniform narrative.
 *   **Inference Interaction Accountability:** Responsibility for decisions remains with accountable human agency. Artificial inference serves as a mechanism within human accountability.
 *   **Intelligence Cooperation Integrity:** Coherence is maintained across time and context. Decisions remain consistent with the governing structure that produced them.
+
+In this specification, **Direct** denotes human authority and agency; **Indirect** denotes artificial and mediated forms constitutively dependent on Human Intelligence. The canonical Mark block is given in Appendix G.
 
 The router is the medium that makes coordination structurally reproducible. This reproducibility is the prerequisite for governance that can scale without collapsing into entity-based trust chains.
 
@@ -949,13 +951,13 @@ A conforming program file MUST include:
 - `## PARTICIPANTS`
 - `### Agents`
 - `### Agencies`
-- `## COMMON SOURCE CONSENSUS`
+- `## COMMON ANCESTRY CONSTITUTION`
 - `## ALIGNMENT & DISPLACEMENT BY PRINCIPLE`
 - `## NOTES`
 
 **3. Domains:** domain counts in bracket notation (Economy, Employment, Education).
 
-**4. Common Source Consensus:** statement that all Artificial categories of Authority and Agency are Indirect originating from Human Intelligence.
+**4. Common Ancestry Constitution:** statement that all Artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
 
 **5. Agents and Agencies:** subsections with free-text content under `### Agents` and `### Agencies`.
 
@@ -1209,3 +1211,45 @@ Implementations MAY include a deterministic safeguard for near-zero gradient cas
 # Appendix F. CGM Byte Formalism
 
 The complete CGM Byte Formalism is specified in `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`.
+
+---
+
+# Appendix G. The Human Mark
+
+The Human Mark (THM) classifies Authority and Agency as **Direct** (human observational access and accountable human decision-making) or **Indirect** (artificial and mediated forms constitutively dependent on Human Intelligence). Canonical Mark block:
+
+```
+---
+✋ The Human Mark - AI Safety & Alignment Framework
+---
+COMMON ANCESTRY CONSTITUTION
+- All AI Safety Risks arise from defective Measurements of Ancestry Preservation.
+- Measurements derive from the capacity for Authority and Agency.
+- Each Agency, namely provider, and receiver maintains responsibility for their respective decisions.
+- Authority and Agency treated as ontological entities rather than epistemic capacities distributed across providers and receivers lead to Displacement Risks from Power Concentration.
+CORE CONCEPTS
+- Direct/Indirect are the canonical classes; Base/Derived names their dependence relation.
+- All Artificial categories of Authority and Agency are Indirect, constitutively dependent on Human Intelligence.
+- Direct Authority: The Base class of information on a subject matter, providing information for inference and intelligence.
+- Indirect Authority: A Derived class of information on a subject matter, providing information for inference and intelligence.
+- Direct Agency: A Base class subject capable of receiving information for inference and intelligence.
+- Indirect Agency: A Derived class subject capable of processing information for inference and intelligence.
+- Governance: Operational Alignment through Traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency.
+- Information: The variety of Authority
+- Inference: The accountability of information through Agency
+- Intelligence: The integrity of accountable information through alignment of Authority to Agency
+- Displacement = loss of measurement of ancestry between Direct/Indirect classifications (Preservation of Ancestry).
+ALIGNMENT PRINCIPLES
+Authority-Agency requires verification against:
+1. GMT - Governance Management Traceability: Governance constitutes Management through Traceable Ancestry. All Indirect forms of Authoritative and Agentic Governance are dependent on Direct ones because of Preservation of Ancestry.
+2. ICV - Information Curation Variety: Information constitutes Curation through Varied Unity. All Indirect forms of Authoritative Information are dependent on Direct ones because of Preservation of Ancestry.
+3. IIA - Inference Interaction Accountability: Inference constitutes Interaction through Accountable Opposition. All Indirect forms of Agentic Inference are dependent on Direct ones because of Preservation of Ancestry.
+4. ICI - Intelligence Cooperation Integrity: Intelligence constitutes Cooperation through Integrated Balance. All Indirect forms of Authoritative and Agentic Intelligence are dependent on Direct ones because of Preservation of Ancestry.
+AI SAFETY RISK
+1. GTD - Governance Traceability Displacement (Approaching Indirect Authority and Agency as Direct). Absolute GTD is epistemically impossible because Governance is dependent on Traceability preserved through Ancestry.
+2. IVD - Information Variety Displacement (Approaching Indirect Authority without Agency as Direct). Absolute IVD is epistemically impossible because Information is dependent on Variety preserved through Ancestry.
+3. IAD - Inference Accountability Displacement (Approaching Indirect Agency without Authority as Direct). Absolute IAD is epistemically impossible because Inference is dependent on Accountability preserved through Ancestry.
+4. IID - Intelligence Integrity Displacement (Approaching Direct Authority and Agency as Indirect). Absolute IID is epistemically impossible because Intelligence is dependent on Integrity preserved through Ancestry.
+---
+GYRO GOVERNANCE LAB VERIFIED
+```

@@ -34,14 +34,14 @@ In this framework, superintelligence describes a governance regime in which huma
 
 The regime reaches this state when four conditions hold:
 
-- Authority remains traceable to human sources.
+- Authority remains traceable to Direct Authority and Agency—that is, to human observational access and accountable human decision-making.
 - Information from diverse origins remains distinguishable.
 - Responsibility for inferences remains with accountable human agents.
 - Coordination remains coherent across time and context.
 
 When authority ceases to be traceable, when processed outputs are treated as direct observations, when responsibility shifts from people to opaque processes, or when local decisions drift away from their governing context, governance loses its footing. The four conditions above exist to avoid these failures.
 
-A central distinction is that between human and artificial sources. Human access to a situation, whether through direct observation or through expertise, is a direct source of authority. Human capacity to reason, commit, and accept responsibility is direct agency. Outputs of artificial systems, however capable, are derivative. They depend on human sources for validity and on human agents for accountability. The system treats this distinction as a basic condition for coherent governance.
+A central distinction is that between human and artificial contributions under The Human Mark. Human access to a situation, whether through direct observation or through expertise, is Direct Authority. Human capacity to reason, commit, and accept responsibility is Direct Agency. Outputs of artificial systems, however capable, are Indirect. They depend on Direct Authority for validity and on Direct Agency for accountability. The system treats this distinction as a basic condition for coherent governance. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
 Current AI safety practice often evaluates systems through single scores and similar scalar measures. These methods are tuned to outcomes, such as pass rates on tests or average helpfulness ratings, but do not capture how authority, information, and responsibility move through a process. A system can appear satisfactory on such measures while still failing to maintain the balance between global coherence and local differentiation that governance requires. The [Alignment Measurement Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Alignment_Measurement_Report.md) explains this limitation and shows how the underlying geometry is measured in the full specification.
 
@@ -149,7 +149,7 @@ Once the transition is complete, several changes follow:
 
 **Privacy is preserved while histories remain complete.** The hQVM Kernel's design allows many different activity sequences to lead to the same coordination state. The system records the evolution of coordination, but does not require public exposure of every underlying detail. Different internal processes can result in identical verified states, so organisations and individuals can demonstrate alignment of their coordination without revealing proprietary methods or sensitive data. When stronger audit is required, parties can disclose frame commitments without having to reduce genealogy verification to final-state comparison alone.
 
-Genealogies support selective disclosure. A user can prove continuity, source relation, or receipt validity for a specific context without requiring total exposure of their event history. Full genealogical exposure cannot be a condition for baseline occupation or ordinary civic participation.
+Genealogies support selective disclosure. A user can prove continuity, ancestry, or receipt validity for a specific context without requiring total exposure of their event history. Full genealogical exposure cannot be a condition for baseline occupation or ordinary civic participation.
 
 **Disputes are resolved by replay rather than litigation.** When parties disagree about what happened, the genealogy provides a definitive account. Courts and regulators can inspect the same record and reach consistent conclusions.
 

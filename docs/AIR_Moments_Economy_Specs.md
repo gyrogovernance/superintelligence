@@ -53,7 +53,7 @@ The architecture draws on five related internal frameworks and specifications.
 
 **Gyroscopic Global Governance (GGG):** A governance framework developed in the surrounding research programme, applying four governance capacities across economy, employment, education, and ecology.
 
-**The Human Mark (THM):** An epistemic taxonomy used here to distinguish Direct human sources from Indirect artificial and mediated sources.
+**The Human Mark (THM):** An epistemic taxonomy classifying human (Direct) and artificial (Indirect) Authority and Agency. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
 **Gyroscopic infrastructure:** The broader coordination substrate used in this architecture, comprising hQVM, Gyroscopic runtime, and QuBEC.
 
@@ -311,11 +311,11 @@ Verification follows a three-stage social pattern. It begins locally, where each
 
 ## 10. Epistemic foundations
 
-The Moments Economy relies on the distinction between human and artificial sources as set out in The Human Mark, an epistemic framework used throughout this wider body of work.
+The Moments Economy relies on the human–artificial distinction formalised in The Human Mark: Direct Authority and Agency on the human side; Indirect forms on the artificial and mediated side. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
-### 10.1 Common Source Consensus
+### 10.1 Common Ancestry Constitution
 
-The architecture operates on the principle that all artificial authority and agency are indirect and originate from human intelligence. Accordingly, every governance action above Tier 1 MUST trace to a Direct human source (§10.2).
+The architecture operates on the principle that all artificial authority and agency are Indirect and constitutively dependent on Human Intelligence. Accordingly, every governance action above Tier 1 MUST trace to a Direct human bearer of Authority or Agency (§10.2).
 
 ### 10.2 Classifications
 
@@ -324,11 +324,11 @@ The architecture operates on the principle that all artificial authority and age
 * **Indirect Authority:** mediated, processed, recorded, or model-generated information
 * **Indirect Agency:** artificial processing capacity
 
-Artificial systems may contribute to coordination, interpretation, and record production, but they do not originate authority and they do not bear final accountability.
+Artificial systems may contribute to coordination, interpretation, and record production, but they do not constitute Direct Authority or Agency and they do not bear final accountability.
 
 ### 10.3 Displacement risks
 
-Misclassification between Direct and Indirect sources creates four named displacement risks in this framework.
+Misclassification between Direct and Indirect classifications creates four named displacement risks in this framework.
 
 * **GTD:** Governance Traceability Displacement - Approaching Indirect Authority and Agency as Direct
 * **IVD:** Information Variety Displacement - Approaching Indirect Authority without Agency as Direct
