@@ -1,7 +1,6 @@
-# Gyroscopic ASI hQVM Kernel: Holonomic Quantum Computing SDK Specification
+# hQVM SDK: Quantum Computing
 
-This document specifies the Holonomic Quantum Computing SDK for the Gyroscopic ASI Holonomic Quantum Virtual Machine (hQVM). The SDK exposes the native computational medium of the kernel: a gyroscopic holonomic system whose operations are algebraically condensed, whose temporal structure is defined by the dynamics, and whose ensemble stochasticity is carried by the byte sequence.
-The hQVM is a finite-state holonomic computation unit over 4,096 algebraic states where public byte-ledger replay uniquely determines every state transition.
+## Holonomic Quantum Computing SDK Specification
 
 Verified properties: [hQVM Features Report](reports/hQVM_Features_Report.md).
 
@@ -527,7 +526,7 @@ A conforming SDK implementation must:
 - produce Results with complete provenance
 - support at least one target with full state inspection
 - maintain the canonical trajectory as append-only
-- pass the verified structural property tests documented in [QuBEC Theory](theory/QuBEC_Theory.md) Part VII §24
+- pass the verified structural property tests documented in [QuBEC Theory](hQVM_QuBEC_Theory.md) Part VII §24
 - produce identical canonical observables across all targets for the same compiled circuit and initial state
 
 ## 10.2 Target Conformance

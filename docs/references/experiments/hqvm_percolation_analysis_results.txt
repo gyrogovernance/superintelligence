@@ -1,0 +1,2402 @@
+hQVM CGM percolation study
+started: 2026-07-04T02:37:42+03:00
+python: C:\Python314\python.exe
+parts: 1, 2, 3, 4
+
+######## hqvm_percolation_analysis_1.py ########
+
+hQVM Byte-Alphabet Percolation: CGM-grounded baseline (analysis_1)
+=====
+
+I. MANIFOLD CONSTRUCTION AND BYTE CLASSIFICATION
+-----
+  |Omega| = 4096
+  |Byte alphabet| = 256
+
+  Family distribution: {0: 64, 1: 64, 2: 64, 3: 64}
+  K4 gate distribution: {'C': 64, 'F': 64, 'S': 64, 'id': 64}
+  Q6 weight distribution: {0: 4, 1: 24, 2: 60, 3: 80, 4: 60, 5: 24, 6: 4}
+  Fold disagreement distribution: {0: 16, 1: 64, 2: 96, 3: 64, 4: 16}
+  Phase-net vectors: 16 distinct
+  Curvature 2-form values: {0.0: 64, 0.0625: 128, 0.25: 64}
+  Distinct connection chain signatures: 81
+  Precomputing transition table (4096 states x 256 bytes)...
+  Transition table ready.
+
+=====
+I.5 K4 ALGEBRAIC CROSS-CHECK (exact, all 64 micro_refs x 4096 states)
+=====
+
+  T2 (W2: shell -> 6-shell, all m, all states):    VERIFIED
+  T3 (W2': shell -> 6-shell, all m, all states):   VERIFIED
+  T4 (F preserves shell, all m, all states):       VERIFIED
+  W2 involution (W2 o W2 = id, all m, all states): VERIFIED
+  K4 commutation (W2.W2' = W2'.W2 = F, sampled):   VERIFIED
+
+=====
+II. EXACT DETERMINISTIC REACHABILITY
+=====
+
+--- A. Family Restrictions ---
+
+Alphabet                    |B|  Reach       Shells  Span  Giant  Full  Span@D
+-----
+  Family 00                    64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Family 01                    64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Family 10                    64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Family 11                    64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  all pairs/triples (10 combos)         4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True  (same)
+  All families                256   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+
+--- B. K4 Gate Restrictions ---
+
+Alphabet                    |B|  Reach       Shells  Span  Giant  Full  Span@D
+-----
+  Gate id only                 64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Gate S only                  64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Gate C only                  64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Gate F only                  64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  all gate pairs (6 combos)         4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True  (same)
+  id+F (preserve)             128   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  S+C (swap)                  128   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+
+--- C. Q6 Weight Layer Restrictions ---
+
+Alphabet                    |B|  Reach       Shells  Span  Giant  Full  Span@D
+-----
+  Q6 weight=0 only          4      2         (6,) False  False False       -
+  Q6 weight=1 only         24   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       6
+  Q6 weight=2 only         60   1024 (0, 2, 4, 6)  True  False False       3
+  Q6 weight=3 only         80   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Q6 weight=4 only         60   1024 (0, 2, 4, 6)  True  False False       3
+  Q6 weight=5 only         24   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       6
+  Q6 weight=6 only          4      4       (0, 6)  True  False False       1
+
+  Q6 weight <= 0            4      2         (6,) False  False False       -
+  Q6 weight <= 1           28   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       6
+  Q6 weight <= 2           88   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       3
+  Q6 weight <= 3          168   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Q6 weight <= 4          228   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Q6 weight <= 5          252   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Q6 weight <= 6          256   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+
+--- D. Fold Disagreement Restrictions ---
+
+Alphabet                    |B|  Reach       Shells  Span  Giant  Full  Span@D
+-----
+  Fold disagree=0 only      16     64 (0, 2, 4, 6)  True  False False       1
+  Fold disagree=1 only      64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Fold disagree=2 only      96   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Fold disagree=3 only      64   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       2
+  Fold disagree=4 only      16    256 (0, 2, 3, 4, 6)  True  False False       2
+
+  Fold disagree <= 0        16     64 (0, 2, 4, 6)  True  False False       1
+  Fold disagree <= 1        80   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Fold disagree <= 2       176   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Fold disagree <= 3       240   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+  Fold disagree <= 4       256   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True       1
+
+--- E. Curvature 2-Form Magnitude Restrictions ---
+
+|F|^2 at fold        |B|  Reach       Shells  Span  Giant  Full
+-----
+  0.000000            64    256 (0, 1, 2, 3, 4, 5, 6)  True  False False
+  0.062500           128   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True
+  0.250000            64   1024 (0, 1, 2, 3, 4, 5, 6)  True  False False
+
+  Cumulative (ascending |F|^2):
+    |F|^2 <= 0.000000         64    256 (0, 1, 2, 3, 4, 5, 6)  True  False False
+    |F|^2 <= 0.062500        192   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True
+    |F|^2 <= 0.250000        256   4096 (0, 1, 2, 3, 4, 5, 6)  True   True  True
+
+--- F. Phase-Net Vector Restrictions ---
+  Phase-net = (CS_xor, UNA_xor, ONA_xor, BU_xor) across fold
+
+Phase-net              |B|  Reach       Shells  Span  Giant
+-----
+  (0, 0, 0, 0)            16     64 (0, 2, 4, 6)  True  False
+  (0, 0, 0, 1)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (0, 0, 1, 0)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (0, 0, 1, 1)            16    256 (0, 2, 4, 6)  True  False
+  (0, 1, 0, 0)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (0, 1, 0, 1)            16    256 (0, 2, 4, 6)  True  False
+  (0, 1, 1, 0)            16    256 (0, 2, 4, 6)  True  False
+  (0, 1, 1, 1)            16    256 (0, 2, 3, 4, 6)  True  False
+  (1, 0, 0, 0)            16     64 (0, 2, 4, 6)  True  False
+  (1, 0, 0, 1)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (1, 0, 1, 0)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (1, 0, 1, 1)            16    256 (0, 2, 4, 6)  True  False
+  (1, 1, 0, 0)            16    256 (0, 1, 2, 3, 4, 5, 6)  True  False
+  (1, 1, 0, 1)            16    256 (0, 2, 4, 6)  True  False
+  (1, 1, 1, 0)            16    256 (0, 2, 4, 6)  True  False
+  (1, 1, 1, 1)            16    256 (0, 2, 3, 4, 6)  True  False
+
+  Cumulative by active phases (net=1 in that phase):
+    >= 0 active phases:   256 bytes  Reach=  4096  Span=True  Giant=True
+    >= 1 active phases:   240 bytes  Reach=  4096  Span=True  Giant=True
+    >= 2 active phases:   176 bytes  Reach=  4096  Span=True  Giant=True
+    >= 3 active phases:    80 bytes  Reach=  4096  Span=True  Giant=True
+    >= 4 active phases:    16 bytes  Reach=   256  Span=True  Giant=False
+
+--- G. Connection 1-Form Boundary Restrictions ---
+  Testing which phase boundaries are essential for spanning.
+  CS|UNA  :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach= 4096 Span= True
+  UNA|ONA :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach= 4096 Span= True
+  ONA|BU  :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach=  256 Span= True
+  BU|BU   :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach=  256 Span= True
+  BU|ONA  :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach=  256 Span= True
+  ONA|UNA :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach=  256 Span= True
+  UNA|CS  :  |A|>0 ->  192B  Reach= 4096 Span= True  |  |A|=0 ->   64B  Reach= 4096 Span= True
+
+--- H. Horizon-to-horizon coverage (byte edges, baseline) ---
+  From ALL 64 complement-horizon states: |eq hit| and full_omega
+  under byte transitions (expected trivial for most restrictions).
+
+  Restriction                        |B|  Reach  |Eq hit|  Eq cover  full_O
+  -----
+  All bytes                          256   4096        64          True        True
+  Family 00 only                      64   4096        64          True        True
+  Family 01 only                      64   4096        64          True        True
+  Family 10 only                      64   4096        64          True        True
+  Family 11 only                      64   4096        64          True        True
+  Gate id+F (shell-preserving)       128   4096        64          True        True
+  Gate S+C (pole-swap)               128   4096        64          True        True
+
+=====
+III. PROBABILISTIC PERCOLATION SWEEPS
+=====
+
+  P(full)=unconditional; P(f|nz)=conditional on nonempty alphabet.
+
+--- A. Family Fraction Sweep ---
+  p = probability of including each of the 4 families (gauge only)
+  progress: family 1/38 (p=0.000)
+  progress: family 11/38 (p=0.100)
+  progress: family 21/38 (p=0.200)
+  progress: family 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0433    1.0000    0.043    4096.0  
+  0.020   0.1100    1.0000    0.110    4096.0  
+  0.030   0.1267    1.0000    0.127    4096.0  
+  0.040   0.1467    1.0000    0.147    4096.0  
+  0.050   0.1700    1.0000    0.170    4096.0  
+  0.060   0.2267    1.0000    0.227    4096.0  
+  0.070   0.2633    1.0000    0.263    4096.0  
+  0.080   0.2633    1.0000    0.263    4096.0  
+  0.090   0.3333    1.0000    0.333    4096.0  
+  0.100   0.3333    1.0000    0.333    4096.0  
+  0.110   0.3033    1.0000    0.303    4096.0  
+  0.120   0.3733    1.0000    0.373    4096.0  
+  0.130   0.4100    1.0000    0.410    4096.0  
+  0.140   0.4667    1.0000    0.467    4096.0  
+  0.150   0.5000    1.0000    0.500    4096.0  
+  0.160   0.4967    1.0000    0.497    4096.0  
+  0.170   0.5267    1.0000    0.527    4096.0  
+  0.180   0.5400    1.0000    0.540    4096.0  
+  0.190   0.6200    1.0000    0.620    4096.0  
+  0.200   0.5667    1.0000    0.567    4096.0  
+  0.210   0.5833    1.0000    0.583    4096.0  
+  0.220   0.6500    1.0000    0.650    4096.0  
+  0.230   0.6600    1.0000    0.660    4096.0  
+  0.240   0.6533    1.0000    0.653    4096.0  
+  0.250   0.6433    1.0000    0.643    4096.0  
+  ...
+  0.300   0.7567    1.0000    0.757    4096.0  
+  0.400   0.8667    1.0000    0.867    4096.0  
+  0.500   0.9533    1.0000    0.953    4096.0  
+  0.600   0.9567    1.0000    0.957    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   0.9967    1.0000    0.997    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1500
+  (4 of 38 p-values omitted; see p_c above)
+
+--- B. Full Byte Fraction Sweep ---
+  p = probability of including each of the 256 bytes
+  progress: byte 1/38 (p=0.000)
+  progress: byte 11/38 (p=0.100)
+  progress: byte 21/38 (p=0.200)
+  progress: byte 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.950    275.0   
+  0.020   0.1733    0.1751    0.990    1267.2  
+  0.030   0.5467    0.5485    0.997    2796.7  
+  0.040   0.8033    0.8033    1.000    3519.3  
+  0.050   0.9133    0.9133    1.000    3844.3  
+  0.060   0.9733    0.9733    1.000    4016.6  
+  0.070   1.0000    1.0000    1.000    4096.0  
+  0.080   1.0000    1.0000    1.000    4096.0  
+  0.090   1.0000    1.0000    1.000    4096.0  
+  0.100   1.0000    1.0000    1.000    4096.0  
+  0.110   1.0000    1.0000    1.000    4096.0  
+  0.120   1.0000    1.0000    1.000    4096.0  
+  0.130   1.0000    1.0000    1.000    4096.0  
+  0.140   1.0000    1.0000    1.000    4096.0  
+  0.150   1.0000    1.0000    1.000    4096.0  
+  0.160   1.0000    1.0000    1.000    4096.0  
+  0.170   1.0000    1.0000    1.000    4096.0  
+  0.180   1.0000    1.0000    1.000    4096.0  
+  0.190   1.0000    1.0000    1.000    4096.0  
+  0.200   1.0000    1.0000    1.000    4096.0  
+  0.210   1.0000    1.0000    1.000    4096.0  
+  0.220   1.0000    1.0000    1.000    4096.0  
+  0.230   1.0000    1.0000    1.000    4096.0  
+  0.240   1.0000    1.0000    1.000    4096.0  
+  0.250   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.0287
+  (4 of 38 p-values omitted; see p_c above)
+
+--- C. Q6 Class Fraction Sweep ---
+  p = probability of including each of the 64 q6-transport classes
+  progress: q6 1/38 (p=0.000)
+  progress: q6 11/38 (p=0.100)
+  progress: q6 21/38 (p=0.200)
+  progress: q6 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.437    18.9    
+  0.020   0.0000    0.0000    0.757    60.4    
+  0.030   0.0033    0.0037    0.897    128.7   
+  0.040   0.0200    0.0216    0.927    286.0   
+  0.050   0.0633    0.0655    0.967    589.9   
+  0.060   0.1000    0.1014    0.987    877.6   
+  0.070   0.1700    0.1729    0.983    1134.9  
+  0.080   0.2967    0.2967    1.000    1734.4  
+  0.090   0.2900    0.2910    0.997    1759.0  
+  0.100   0.4633    0.4633    1.000    2484.9  
+  0.110   0.4600    0.4600    1.000    2422.1  
+  0.120   0.6300    0.6300    1.000    2973.7  
+  0.130   0.6933    0.6933    1.000    3195.0  
+  0.140   0.7633    0.7633    1.000    3417.2  
+  0.150   0.8267    0.8267    1.000    3619.0  
+  0.160   0.8700    0.8700    1.000    3733.8  
+  0.170   0.9133    0.9164    0.997    3869.5  
+  0.180   0.9367    0.9367    1.000    3929.6  
+  0.190   0.9333    0.9333    1.000    3933.0  
+  0.200   0.9633    0.9633    1.000    3987.6  
+  0.210   0.9567    0.9567    1.000    3979.9  
+  0.220   0.9733    0.9733    1.000    4019.2  
+  0.230   0.9900    0.9900    1.000    4068.7  
+  0.240   0.9933    0.9933    1.000    4077.2  
+  0.250   0.9967    0.9967    1.000    4084.1  
+  0.260   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   0.9967    0.9967    1.000    4089.2  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1124
+  (3 of 38 p-values omitted; see p_c above)
+
+--- D. Micro-Ref (6-bit Payload) Fraction Sweep ---
+  p = probability of including each of the 64 micro_refs
+  (each micro_ref carries all 4 families/gauge phases together)
+  progress: micro_ref 1/38 (p=0.000)
+  progress: micro_ref 11/38 (p=0.100)
+  progress: micro_ref 21/38 (p=0.200)
+  progress: micro_ref 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.480    49.0    
+  0.020   0.0033    0.0047    0.717    115.3   
+  0.030   0.0200    0.0233    0.860    246.8   
+  0.040   0.0567    0.0632    0.897    496.5   
+  0.050   0.1167    0.1186    0.983    806.7   
+  0.060   0.1900    0.1939    0.980    1142.8  
+  0.070   0.2967    0.2977    0.997    1589.9  
+  0.080   0.3967    0.3980    0.997    2018.8  
+  0.090   0.5067    0.5067    1.000    2402.2  
+  0.100   0.5533    0.5533    1.000    2584.6  
+  0.110   0.6633    0.6633    1.000    2946.4  
+  0.120   0.7500    0.7500    1.000    3269.0  
+  0.130   0.8067    0.8067    1.000    3461.1  
+  0.140   0.8367    0.8367    1.000    3556.3  
+  0.150   0.8733    0.8733    1.000    3688.3  
+  0.160   0.9233    0.9233    1.000    3852.2  
+  0.170   0.9367    0.9367    1.000    3893.1  
+  0.180   0.9467    0.9467    1.000    3927.0  
+  0.190   0.9667    0.9667    1.000    3988.5  
+  0.200   0.9700    0.9700    1.000    4001.3  
+  0.210   0.9900    0.9900    1.000    4065.3  
+  0.220   1.0000    1.0000    1.000    4096.0  
+  0.230   1.0000    1.0000    1.000    4096.0  
+  0.240   0.9967    0.9967    1.000    4085.8  
+  0.250   0.9967    0.9967    1.000    4085.8  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.0894
+  (4 of 38 p-values omitted; see p_c above)
+
+=====
+IV. SHELL-RESOLVED PERCOLATION THRESHOLDS
+=====
+
+  p          Shell0   Shell1   Shell2   Shell3   Shell4   Shell5   Shell6
+  -----
+  progress: shell sweep 1/14 (p=0.000)
+  0.000       0.000    0.000    0.000    0.000    0.000    0.000    0.000
+  0.005       0.045    0.155    0.350    0.385    0.330    0.155    0.735
+  0.010       0.135    0.355    0.605    0.700    0.620    0.445    0.930
+  progress: shell sweep 4/14 (p=0.020)
+  0.020       0.455    0.755    0.910    0.915    0.915    0.785    0.995
+  0.030       0.775    0.950    0.995    0.995    0.995    0.955    1.000
+  0.050       0.970    1.000    1.000    1.000    1.000    0.995    1.000
+  progress: shell sweep 7/14 (p=0.080)
+  0.080       0.995    1.000    1.000    1.000    1.000    1.000    1.000
+  0.100       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  0.150       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  progress: shell sweep 10/14 (p=0.200)
+  0.200       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  0.300       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  0.500       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  progress: shell sweep 13/14 (p=0.700)
+  0.700       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+  1.000       1.000    1.000    1.000    1.000    1.000    1.000    1.000
+
+=====
+V. DEPTH-RESOLVED PERCOLATION
+=====
+
+  Restriction                 |B|   D=1   D=2   D=3   D=4   D=5   D=6   D=7   D=8   D=9  D=10  D=11  D=12
+  -----
+  All bytes                   256     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Families 00+01              128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Families 10+11              128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Families 00+10              128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Families 01+11              128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Gate id+F                   128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Gate S+C                    128     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Q6 weight >= 3              168     S     s     s     s     s     s     s     s     s     s     s     s  |  Span@D=1
+  Fold disagree >= 2          176     .     S     s     s     s     s     s     s     s     s     s     s  |  Span@D=2
+
+=====
+VI. K4 GAUGE CLOSURE AND PERCOLATION
+=====
+
+  Theorem T1: {id, W2, W2', F} is K4 for every micro-ref m.
+  Theorem T2/T3: W2 and W2' swap constitutional poles (shell s -> 6-s).
+  Theorem T4: F preserves shell (Z2 carrier flip within pole).
+
+  Key question: Does spanning REQUIRE at least one pole-swap gate?
+
+  Shell-preserving only (id+F): 128 bytes
+    Reachable: 4096  Shells: (0, 1, 2, 3, 4, 5, 6)
+    Spans: True  Giant: True
+
+  Pole-swap only (S+C): 128 bytes
+    Reachable: 4096  Shells: (0, 1, 2, 3, 4, 5, 6)
+    Spans: True  Giant: True
+
+  Minimum gate combinations for spanning:
+    ('id',): SPANS (|B|=64, Reach=4096, Span@D=1)
+    ('S',): SPANS (|B|=64, Reach=4096, Span@D=1)
+    ('C',): SPANS (|B|=64, Reach=4096, Span@D=1)
+    ('F',): SPANS (|B|=64, Reach=4096, Span@D=1)
+    ('id', 'S'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('id', 'C'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('id', 'F'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('S', 'C'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('S', 'F'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('C', 'F'): SPANS (|B|=128, Reach=4096, Span@D=1)
+    ('id', 'S', 'C'): SPANS (|B|=192, Reach=4096, Span@D=1)
+    ('id', 'S', 'F'): SPANS (|B|=192, Reach=4096, Span@D=1)
+    ('id', 'C', 'F'): SPANS (|B|=192, Reach=4096, Span@D=1)
+    ('S', 'C', 'F'): SPANS (|B|=192, Reach=4096, Span@D=1)
+    ('id', 'S', 'C', 'F'): SPANS (|B|=256, Reach=4096, Span@D=1)
+
+  W2 structure by family pair:
+  W2 = [fam00, fam01], W2' = [fam10, fam11] (canonical ordering)
+    Families 00+01: Reach=4096  Span=True  Giant=True  Span@D=1
+    Families 00+10: Reach=4096  Span=True  Giant=True  Span@D=1
+    Families 00+11: Reach=4096  Span=True  Giant=True  Span@D=1
+    Families 01+10: Reach=4096  Span=True  Giant=True  Span@D=1
+    Families 01+11: Reach=4096  Span=True  Giant=True  Span@D=1
+    Families 10+11: Reach=4096  Span=True  Giant=True  Span@D=1
+
+=====
+VII. CURVATURE CHAIN ANALYSIS
+=====
+
+  Distinct connection chain signatures: 81
+
+  Boundary necessity test (exclude bytes with |A|>0 at each boundary):
+    Exclude CS|UNA  :   64B remaining  Reach= 4096  Span=True
+    Exclude UNA|ONA :   64B remaining  Reach= 4096  Span=True
+    Exclude ONA|BU  :   64B remaining  Reach=  256  Span=True
+    Exclude BU|BU   :   64B remaining  Reach=  256  Span=True
+    Exclude BU|ONA  :   64B remaining  Reach=  256  Span=True
+    Exclude ONA|UNA :   64B remaining  Reach=  256  Span=True
+    Exclude UNA|CS  :   64B remaining  Reach= 4096  Span=True
+
+  Bytes with curvature ONLY at the BU|BU fold:
+    Count: 0  Reach=1  Span=False
+
+  Bytes with zero curvature at the BU|BU fold:
+    Count: 64  Reach=256  Span=True
+
+  Curvature 2-form magnitude vs spanning capability:
+    |F|^2 >= 0.000000:  256B  Reach= 4096  Span=True
+    |F|^2 >= 0.062500:  192B  Reach= 4096  Span=True
+    |F|^2 >= 0.250000:   64B  Reach= 1024  Span=True
+
+=====
+VIII. APERTURE THRESHOLD HYPOTHESIS TESTING
+=====
+
+  CGM constants (candidate threshold scales):
+    Delta (aperture gap)                = 0.0206995539
+    1/48 (geometric quantization)       = 0.0208333333
+    5/256 (dyadic approximant)          = 0.0195312500
+    6/256 (6-generator dyadic)          = 0.0234375000
+    1 - rho                             = 0.0206995539
+    m_a                                 = 0.1994711402
+    rho * Delta                         = 0.0202710824
+    Delta^2                             = 0.0004284715
+
+  Non-empty-selection null (k = number of independent groups):
+  p_null solves 1-(1-p)^k = 0.5  =>  p_null = 1 - 0.5^(1/k)
+    family       (k=  4): p_null = 0.159104
+    byte         (k=256): p_null = 0.002704
+    q6_class     (k= 64): p_null = 0.010772
+    micro_ref    (k= 64): p_null = 0.010772
+
+  --- Thresholds for event: hit_equality (weak, P(span)) ---
+
+    family sweep:  p_c ~ 0.150000  (expected included groups at p_c: 0.60 of 4)
+        p_c / Delta (aperture gap)           = 7.246533
+        p_c / 1/48 (geometric quantization)  = 7.200000
+        p_c / 5/256 (dyadic approximant)     = 7.680000
+        p_c / 6/256 (6-generator dyadic)     = 6.400000
+        p_c / 1 - rho                        = 7.246533
+        p_c / m_a                            = 0.751988
+        p_c / rho * Delta                    = 7.399704
+        p_c / Delta^2                        = 350.081601
+
+    byte sweep:  p_c ~ 0.021505  (expected included groups at p_c: 5.51 of 256)
+        p_c / Delta (aperture gap)           = 1.038929
+        p_c / 1/48 (geometric quantization)  = 1.032258
+        p_c / 5/256 (dyadic approximant)     = 1.101075
+        p_c / 6/256 (6-generator dyadic)     = 0.917563
+        p_c / 1 - rho                        = 1.038929
+        p_c / m_a                            = 0.107812
+        p_c / rho * Delta                    = 1.060889
+        p_c / Delta^2                        = 50.190911
+
+    q6_class sweep:  p_c ~ 0.090698  (expected included groups at p_c: 5.80 of 64)
+        p_c / Delta (aperture gap)           = 4.381625
+        p_c / 1/48 (geometric quantization)  = 4.353488
+        p_c / 5/256 (dyadic approximant)     = 4.643721
+        p_c / 6/256 (6-generator dyadic)     = 3.869767
+        p_c / 1 - rho                        = 4.381625
+        p_c / m_a                            = 0.454691
+        p_c / rho * Delta                    = 4.474239
+        p_c / Delta^2                        = 211.677247
+
+    micro_ref sweep:  p_c ~ 0.010845  (expected included groups at p_c: 0.69 of 64)
+        p_c / Delta (aperture gap)           = 0.523928
+        p_c / 1/48 (geometric quantization)  = 0.520563
+        p_c / 5/256 (dyadic approximant)     = 0.555268
+        p_c / 6/256 (6-generator dyadic)     = 0.462723
+        p_c / 1 - rho                        = 0.523928
+        p_c / m_a                            = 0.054369
+        p_c / rho * Delta                    = 0.535002
+        p_c / Delta^2                        = 25.311064
+
+  --- Thresholds for event: full_omega (strong, P(full)) ---
+
+    family sweep:  p_c ~ 0.150000  (expected included groups at p_c: 0.60 of 4)
+        p_c / Delta (aperture gap)           = 7.246533
+        p_c / 1/48 (geometric quantization)  = 7.200000
+        p_c / 5/256 (dyadic approximant)     = 7.680000
+        p_c / 6/256 (6-generator dyadic)     = 6.400000
+        p_c / 1 - rho                        = 7.246533
+        p_c / m_a                            = 0.751988
+        p_c / rho * Delta                    = 7.399704
+        p_c / Delta^2                        = 350.081601
+
+    byte sweep:  p_c ~ 0.028750  (expected included groups at p_c: 7.36 of 256)
+        p_c / Delta (aperture gap)           = 1.388919
+        p_c / 1/48 (geometric quantization)  = 1.380000
+        p_c / 5/256 (dyadic approximant)     = 1.472000
+        p_c / 6/256 (6-generator dyadic)     = 1.226667
+        p_c / 1 - rho                        = 1.388919
+        p_c / m_a                            = 0.144131
+        p_c / rho * Delta                    = 1.418277
+        p_c / Delta^2                        = 67.098974
+
+    q6_class sweep:  p_c ~ 0.112353  (expected included groups at p_c: 7.19 of 64)
+        p_c / Delta (aperture gap)           = 5.427795
+        p_c / 1/48 (geometric quantization)  = 5.392941
+        p_c / 5/256 (dyadic approximant)     = 5.752471
+        p_c / 6/256 (6-generator dyadic)     = 4.793725
+        p_c / 1 - rho                        = 5.427795
+        p_c / m_a                            = 0.563254
+        p_c / rho * Delta                    = 5.542523
+        p_c / Delta^2                        = 262.217984
+
+    micro_ref sweep:  p_c ~ 0.089394  (expected included groups at p_c: 5.72 of 64)
+        p_c / Delta (aperture gap)           = 4.318641
+        p_c / 1/48 (geometric quantization)  = 4.290909
+        p_c / 5/256 (dyadic approximant)     = 4.576970
+        p_c / 6/256 (6-generator dyadic)     = 3.814141
+        p_c / 1 - rho                        = 4.318641
+        p_c / m_a                            = 0.448155
+        p_c / rho * Delta                    = 4.409924
+        p_c / Delta^2                        = 208.634490
+
+=====
+IX. HOLOGRAPHIC IDENTITY UNDER PARTIAL ALPHABET
+=====
+
+  Full Omega: |Omega| = 4096
+  |H_comp| = 64, |H_eq| = 64
+  |H|^2 = 4096 (should equal 4096)
+
+  p        <|Omega_r|>  <|H_comp_r|>   <|H_comp_r|^2>   Ratio     
+  -----
+  0.050    3937.3       64.0           4096.0           1.0403    
+  0.100    4096.0       64.0           4096.0           1.0000    
+  0.200    4096.0       64.0           4096.0           1.0000    
+  0.300    4096.0       64.0           4096.0           1.0000    
+  0.500    4096.0       64.0           4096.0           1.0000    
+  0.700    4096.0       64.0           4096.0           1.0000    
+  1.000    4096.0       64.0           4096.0           1.0000    
+
+=====
+X. NULL MODEL COMPARISON
+=====
+
+--- Null Model 1: Shuffled Family Labels ---
+  Same 256 permutations, randomly reassigned to 4 'families' of 64.
+
+  Real CGM families:
+    p=0.20: P(span) = 0.5800
+    p=0.30: P(span) = 0.7600
+    p=0.50: P(span) = 0.9000
+    p=0.70: P(span) = 1.0000
+    p=1.00: P(span) = 1.0000
+
+  Shuffled family labels (avg over 5 shuffles):
+    p=0.20: P(span) = 0.6100  (real vs shuffled diff reveals CGM structure)
+    p=0.30: P(span) = 0.7700  (real vs shuffled diff reveals CGM structure)
+    p=0.50: P(span) = 0.9300  (real vs shuffled diff reveals CGM structure)
+    p=0.70: P(span) = 0.9900  (real vs shuffled diff reveals CGM structure)
+    p=1.00: P(span) = 1.0000  (real vs shuffled diff reveals CGM structure)
+
+--- Null Model 2: Random Byte Subset (No Family Structure) ---
+  Randomly select k bytes from 256, measure spanning.
+  Compare to selecting k bytes respecting family structure.
+
+      k Random P(span)     Family-struct P(span) 
+  -----
+      4 0.1900             0.2300                
+      8 0.8500             0.8000                
+     16 1.0000             1.0000                
+     32 1.0000             1.0000                
+     64 1.0000             1.0000                
+    128 1.0000             1.0000                
+
+--- Null Model 3: Shuffled Byte -> Transition Mapping ---
+  Byte KEEPS its true family/q6 label but its dynamics is swapped
+  for a random other byte's dynamics. This is the correct null:
+  it breaks classification<->dynamics correspondence exactly.
+
+  Real dynamics vs shuffled dynamics (avg over 5 shuffles),
+  Family Fraction Sweep, event = full_omega (the discriminating one):
+
+  p        Real P(full)   Shuffled P(full)   Real P(span)   Shuffled P(span)  
+  -----
+  0.20     0.6000         0.6100             0.6000         0.6100            
+  0.30     0.7300         0.8700             0.7300         0.8700            
+  0.50     0.9400         0.9300             0.9400         0.9300            
+  0.70     1.0000         0.9900             1.0000         0.9900            
+  1.00     1.0000         1.0000             1.0000         1.0000            
+
+=====
+XI. HORIZON-STABILIZER BYTE PERCOLATION
+=====
+  Holonomic gate bytes preserve complement horizon pointwise
+  (Features 19, 121; Formalism Sec 7.0).
+
+  |comp_horizon|=64  |eq_horizon|=64
+
+  Bytes preserving ALL comp_horizon states (1-step): 4
+    0x2B
+    0x54
+    0xAA
+    0xD5
+  Declared HORIZON_GATE_BYTES: 0xAA, 0x54, 0xD5, 0x2B
+  Bytes preserving ALL eq_horizon states (1-step): 4
+    0x2B
+    0x54
+    0xAA
+    0xD5
+
+  BFS from comp_horizon, alphabet=4 gate bytes only:
+    Reach=64  confined=True  full_omega=False
+
+  MC horizon confinement (conditional on nonempty alphabet):
+  p      P(conf|comp)  P(conf|eq)    P(full)   
+  -----
+  0.000  0.0000        0.0000        0.0000    
+  0.020  0.0000        0.0000        0.1544    
+  0.050  0.0000        0.0000        0.9333    
+  0.100  0.0000        0.0000        1.0000    
+  0.150  0.0000        0.0000        1.0000    
+  0.200  0.0000        0.0000        1.0000    
+  0.300  0.0000        0.0000        1.0000    
+  0.500  0.0000        0.0000        1.0000    
+  1.000  0.0000        0.0000        1.0000    
+
+=====
+XII. LI/FG/BG PAYLOAD-AXIS SWEEPS
+=====
+  Groups = micro_ref buckets active on each se(3) axis
+  (Formalism Sec 2.1: LI pairs 0,5; FG pairs 1,4; BG pairs 2,3).
+
+
+--- LI axis: 48 micro_ref groups, 192 bytes ---
+  progress: axis-LI 1/38 (p=0.000)
+  progress: axis-LI 11/38 (p=0.100)
+  progress: axis-LI 21/38 (p=0.200)
+  progress: axis-LI 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.460    34.1    
+  0.020   0.0000    0.0000    0.640    80.4    
+  0.030   0.0000    0.0000    0.753    120.5   
+  0.040   0.0200    0.0226    0.887    251.7   
+  0.050   0.0400    0.0438    0.913    406.0   
+  0.060   0.0600    0.0629    0.953    542.3   
+  0.070   0.1333    0.1370    0.973    956.6   
+  0.080   0.1667    0.1712    0.973    1070.3  
+  0.090   0.2933    0.2953    0.993    1541.9  
+  0.100   0.3333    0.3401    0.980    1790.7  
+  0.110   0.3667    0.3716    0.987    1882.1  
+  0.120   0.5533    0.5533    1.000    2585.9  
+  0.130   0.5200    0.5200    1.000    2465.6  
+  0.140   0.6400    0.6443    0.993    2899.9  
+  0.150   0.6867    0.6867    1.000    3040.0  
+  0.160   0.7333    0.7333    1.000    3212.8  
+  0.170   0.7867    0.7867    1.000    3384.3  
+  0.180   0.8667    0.8667    1.000    3653.1  
+  0.190   0.8400    0.8400    1.000    3568.6  
+  0.200   0.9267    0.9267    1.000    3864.3  
+  0.210   0.9400    0.9400    1.000    3906.6  
+  0.220   0.9400    0.9400    1.000    3906.6  
+  0.230   0.9667    0.9667    1.000    3993.6  
+  0.240   0.9533    0.9533    1.000    3947.5  
+  0.250   0.9933    0.9933    1.000    4075.5  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1171
+  (4 of 38 p-values omitted; see p_c above)
+
+--- FG axis: 48 micro_ref groups, 192 bytes ---
+  progress: axis-FG 1/38 (p=0.000)
+  progress: axis-FG 11/38 (p=0.100)
+  progress: axis-FG 21/38 (p=0.200)
+  progress: axis-FG 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0067    0.0164    0.407    94.7    
+  0.020   0.0000    0.0000    0.607    58.2    
+  0.030   0.0133    0.0171    0.780    161.1   
+  0.040   0.0267    0.0336    0.793    351.5   
+  0.050   0.0400    0.0444    0.900    387.9   
+  0.060   0.1000    0.1042    0.960    717.2   
+  0.070   0.1667    0.1712    0.973    1026.6  
+  0.080   0.2000    0.2000    1.000    1134.3  
+  0.090   0.2733    0.2752    0.993    1478.9  
+  0.100   0.3533    0.3533    1.000    1833.9  
+  0.110   0.4733    0.4733    1.000    2252.8  
+  0.120   0.5267    0.5302    0.993    2466.9  
+  0.130   0.6200    0.6200    1.000    2793.9  
+  0.140   0.6067    0.6107    0.993    2774.2  
+  0.150   0.7467    0.7467    1.000    3228.8  
+  0.160   0.7067    0.7067    1.000    3145.0  
+  0.170   0.8333    0.8333    1.000    3539.2  
+  0.180   0.8467    0.8467    1.000    3587.8  
+  0.190   0.9133    0.9133    1.000    3808.0  
+  0.200   0.8800    0.8800    1.000    3712.0  
+  0.210   0.9267    0.9267    1.000    3865.6  
+  0.220   0.9267    0.9267    1.000    3870.7  
+  0.230   0.9533    0.9533    1.000    3947.5  
+  0.240   0.9533    0.9533    1.000    3946.2  
+  0.250   0.9667    0.9667    1.000    3988.5  
+  ...
+  0.290   1.0000    1.0000    1.000    4096.0  
+  0.300   0.9933    0.9933    1.000    4075.5  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1150
+  (3 of 38 p-values omitted; see p_c above)
+
+--- BG axis: 48 micro_ref groups, 192 bytes ---
+  progress: axis-BG 1/38 (p=0.000)
+  progress: axis-BG 11/38 (p=0.100)
+  progress: axis-BG 21/38 (p=0.200)
+  progress: axis-BG 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.380    23.6    
+  0.020   0.0067    0.0095    0.700    125.3   
+  0.030   0.0067    0.0082    0.813    123.8   
+  0.040   0.0200    0.0226    0.887    253.5   
+  0.050   0.0733    0.0821    0.893    542.6   
+  0.060   0.1000    0.1071    0.933    758.6   
+  0.070   0.1733    0.1769    0.980    1033.5  
+  0.080   0.2267    0.2297    0.987    1309.4  
+  0.090   0.3467    0.3514    0.987    1744.3  
+  0.100   0.3533    0.3533    1.000    1842.9  
+  0.110   0.4533    0.4533    1.000    2198.4  
+  0.120   0.5133    0.5133    1.000    2436.8  
+  0.130   0.5333    0.5333    1.000    2504.2  
+  0.140   0.6400    0.6400    1.000    2869.4  
+  0.150   0.6867    0.6867    1.000    3060.5  
+  0.160   0.7800    0.7800    1.000    3375.4  
+  0.170   0.8400    0.8400    1.000    3587.8  
+  0.180   0.8400    0.8400    1.000    3555.8  
+  0.190   0.8600    0.8600    1.000    3650.6  
+  0.200   0.8867    0.8867    1.000    3732.5  
+  0.210   0.9267    0.9267    1.000    3865.6  
+  0.220   0.9400    0.9400    1.000    3911.7  
+  0.230   0.9533    0.9533    1.000    3952.6  
+  0.240   0.9600    0.9600    1.000    3968.0  
+  0.250   0.9867    0.9867    1.000    4055.0  
+  ...
+  0.270   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1178
+  (3 of 38 p-values omitted; see p_c above)
+
+=====
+XIII. SHADOW-PAIR (q-FIBER) PERCOLATION
+=====
+  64 q6 classes x 4 bytes; b and b^0xFE share the same Omega map
+  (Feature 55). Modes: full_fiber | one_repr | shadow_one.
+
+
+--- q-fiber mode: full_fiber ---
+  progress: q-fiber/full_fiber 1/38 (p=0.000)
+  progress: q-fiber/full_fiber 11/38 (p=0.100)
+  progress: q-fiber/full_fiber 21/38 (p=0.200)
+  progress: q-fiber/full_fiber 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.507    14.6    
+  0.020   0.0000    0.0000    0.753    87.6    
+  0.030   0.0133    0.0147    0.907    200.2   
+  0.040   0.0267    0.0280    0.953    357.3   
+  0.050   0.0333    0.0345    0.967    482.9   
+  0.060   0.1133    0.1141    0.993    828.8   
+  0.070   0.2067    0.2081    0.993    1358.0  
+  0.080   0.2800    0.2819    0.993    1602.3  
+  0.090   0.2933    0.2933    1.000    1733.8  
+  0.100   0.4067    0.4067    1.000    2228.5  
+  0.110   0.5267    0.5267    1.000    2619.0  
+  0.120   0.6467    0.6467    1.000    3079.7  
+  0.130   0.6933    0.6933    1.000    3217.3  
+  0.140   0.8067    0.8067    1.000    3541.5  
+  0.150   0.8200    0.8200    1.000    3583.1  
+  0.160   0.8467    0.8467    1.000    3703.5  
+  0.170   0.8867    0.8867    1.000    3789.9  
+  0.180   0.9533    0.9533    1.000    3950.1  
+  0.190   0.9400    0.9400    1.000    3940.7  
+  0.200   0.9800    0.9800    1.000    4043.1  
+  0.210   0.9667    0.9667    1.000    4007.3  
+  0.220   0.9867    0.9867    1.000    4061.9  
+  0.230   0.9933    0.9933    1.000    4082.3  
+  0.240   1.0000    1.0000    1.000    4096.0  
+  0.250   0.9933    0.9933    1.000    4075.5  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1078
+  (4 of 38 p-values omitted; see p_c above)
+
+--- q-fiber mode: one_repr ---
+  progress: q-fiber/one_repr 1/38 (p=0.000)
+  progress: q-fiber/one_repr 11/38 (p=0.100)
+  progress: q-fiber/one_repr 21/38 (p=0.200)
+  progress: q-fiber/one_repr 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.407    10.7    
+  0.020   0.0000    0.0000    0.727    44.5    
+  0.030   0.0067    0.0076    0.880    106.9   
+  0.040   0.0200    0.0211    0.947    332.5   
+  0.050   0.0267    0.0276    0.967    415.1   
+  0.060   0.0667    0.0680    0.980    787.4   
+  0.070   0.1533    0.1554    0.987    1068.6  
+  0.080   0.2000    0.2013    0.993    1291.9  
+  0.090   0.2400    0.2400    1.000    1569.1  
+  0.100   0.3733    0.3733    1.000    2189.0  
+  0.110   0.4933    0.4966    0.993    2639.4  
+  0.120   0.5667    0.5667    1.000    2784.9  
+  0.130   0.6867    0.6867    1.000    3162.5  
+  0.140   0.7600    0.7600    1.000    3383.1  
+  0.150   0.8000    0.8000    1.000    3508.8  
+  0.160   0.8533    0.8533    1.000    3677.8  
+  0.170   0.8533    0.8533    1.000    3711.1  
+  0.180   0.9400    0.9400    1.000    3931.9  
+  0.190   0.9067    0.9067    1.000    3803.9  
+  0.200   0.9467    0.9467    1.000    3952.4  
+  0.210   0.9667    0.9667    1.000    4013.9  
+  0.220   0.9933    0.9933    1.000    4075.5  
+  0.230   0.9733    0.9733    1.000    4007.7  
+  0.240   0.9933    0.9933    1.000    4075.5  
+  0.250   0.9867    0.9867    1.000    4075.3  
+  0.260   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1109
+  (3 of 38 p-values omitted; see p_c above)
+
+--- q-fiber mode: shadow_one ---
+  progress: q-fiber/shadow_one 1/38 (p=0.000)
+  progress: q-fiber/shadow_one 11/38 (p=0.100)
+  progress: q-fiber/shadow_one 21/38 (p=0.200)
+  progress: q-fiber/shadow_one 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.473    27.9    
+  0.020   0.0000    0.0000    0.713    49.1    
+  0.030   0.0133    0.0168    0.793    186.2   
+  0.040   0.0400    0.0441    0.907    381.9   
+  0.050   0.0467    0.0486    0.960    547.2   
+  0.060   0.0600    0.0612    0.980    730.2   
+  0.070   0.1800    0.1849    0.973    1190.2  
+  0.080   0.2600    0.2653    0.980    1576.7  
+  0.090   0.4067    0.4067    1.000    2180.1  
+  0.100   0.4467    0.4467    1.000    2365.9  
+  0.110   0.5533    0.5570    0.993    2696.2  
+  0.120   0.5733    0.5733    1.000    2769.3  
+  0.130   0.6933    0.6933    1.000    3232.4  
+  0.140   0.7667    0.7667    1.000    3415.0  
+  0.150   0.8267    0.8267    1.000    3583.6  
+  0.160   0.8467    0.8467    1.000    3645.7  
+  0.170   0.9000    0.9000    1.000    3812.7  
+  0.180   0.8667    0.8667    1.000    3737.6  
+  0.190   0.9400    0.9400    1.000    3927.0  
+  0.200   0.9667    0.9667    1.000    3997.9  
+  0.210   0.9933    0.9933    1.000    4082.3  
+  0.220   0.9933    0.9933    1.000    4075.5  
+  0.230   0.9867    0.9867    1.000    4061.9  
+  0.240   0.9867    0.9867    1.000    4061.9  
+  0.250   0.9867    0.9867    1.000    4061.9  
+  0.260   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.1050
+  (3 of 38 p-values omitted; see p_c above)
+
+=====
+XIV. SUMMARY AND THRESHOLD INVENTORY
+=====
+
+  MINIMUM SPANNING ALPHABETS (smallest byte subsets that span):
+  Testing all single bytes and all byte pairs...
+    Single bytes that span: 4
+      0x2A: fam=10 gate=S q6_w=6 fd=1 |F|^2=0.0000 phase_net=(1, 0, 0, 0)
+      0x55: fam=11 gate=F q6_w=6 fd=0 |F|^2=0.0000 phase_net=(0, 0, 0, 0)
+      0xAB: fam=01 gate=C q6_w=6 fd=1 |F|^2=0.0000 phase_net=(1, 0, 0, 0)
+      0xD4: fam=00 gate=id q6_w=6 fd=0 |F|^2=0.0000 phase_net=(0, 0, 0, 0)
+    Byte pairs that span (sampled 5000): 205
+
+    Properties of spanning pairs (first 20):
+      0x68+0x16: fams=10+10 gates=S+S same_fam=True same_gate=True
+      0x9A+0x1A: fams=00+10 gates=id+S same_fam=False same_gate=False
+      0xAB+0x68: fams=01+10 gates=C+S same_fam=False same_gate=False
+      0x31+0x55: fams=11+11 gates=F+F same_fam=True same_gate=True
+      0x55+0x4C: fams=11+10 gates=F+S same_fam=False same_gate=False
+      0x5D+0x2A: fams=11+10 gates=F+S same_fam=False same_gate=False
+      0x7F+0xFF: fams=11+01 gates=F+C same_fam=False same_gate=False
+      0x2A+0x71: fams=10+11 gates=S+F same_fam=False same_gate=False
+      0xD4+0x34: fams=00+10 gates=id+S same_fam=False same_gate=False
+      0x3C+0xD4: fams=10+00 gates=S+id same_fam=False same_gate=False
+      0x4F+0x31: fams=11+11 gates=F+F same_fam=True same_gate=True
+      0xBC+0x43: fams=00+11 gates=id+F same_fam=False same_gate=False
+      0xD4+0xF5: fams=00+01 gates=id+C same_fam=False same_gate=False
+      0x2A+0x51: fams=10+11 gates=S+F same_fam=False same_gate=False
+      0xAB+0x5B: fams=01+11 gates=C+F same_fam=False same_gate=False
+      0x62+0x1C: fams=10+10 gates=S+S same_fam=True same_gate=True
+      0xDA+0xDB: fams=00+01 gates=id+C same_fam=False same_gate=False
+      0xD4+0xE4: fams=00+00 gates=id+id same_fam=True same_gate=True
+      0x3E+0xBE: fams=10+00 gates=S+id same_fam=False same_gate=False
+      0xE0+0x9E: fams=00+00 gates=id+id same_fam=True same_gate=True
+
+  THRESHOLD RATIOS vs CGM CONSTANTS (full_omega event):
+
+    family: p_c(full_omega) ~ 0.150000
+      p_c / Delta    = 7.246533
+      p_c / 1/48     = 7.200000
+      p_c / 5/256    = 7.680000
+      p_c / 6/256    = 6.400000
+      p_c / rho      = 0.153171
+      p_c / m_a      = 0.751988
+
+    byte: p_c(full_omega) ~ 0.028750
+      p_c / Delta    = 1.388919
+      p_c / 1/48     = 1.380000
+      p_c / 5/256    = 1.472000
+      p_c / 6/256    = 1.226667
+      p_c / rho      = 0.029358
+      p_c / m_a      = 0.144131
+
+    q6_class: p_c(full_omega) ~ 0.112353
+      p_c / Delta    = 5.427795
+      p_c / 1/48     = 5.392941
+      p_c / 5/256    = 5.752471
+      p_c / 6/256    = 4.793725
+      p_c / rho      = 0.114728
+      p_c / m_a      = 0.563254
+
+    micro_ref: p_c(full_omega) ~ 0.089394
+      p_c / Delta    = 4.318641
+      p_c / 1/48     = 4.290909
+      p_c / 5/256    = 4.576970
+      p_c / 6/256    = 3.814141
+      p_c / rho      = 0.091283
+      p_c / m_a      = 0.448155
+
+    axis_LI: p_c(full_omega) ~ 0.117143
+      p_c / Delta    = 5.659197
+      p_c / 1/48     = 5.622857
+      p_c / 5/256    = 5.997714
+      p_c / 6/256    = 4.998095
+      p_c / rho      = 0.119619
+      p_c / m_a      = 0.587267
+
+    axis_FG: p_c(full_omega) ~ 0.115000
+      p_c / Delta    = 5.555675
+      p_c / 1/48     = 5.520000
+      p_c / 5/256    = 5.888000
+      p_c / 6/256    = 4.906667
+      p_c / rho      = 0.117431
+      p_c / m_a      = 0.576525
+
+    axis_BG: p_c(full_omega) ~ 0.117778
+      p_c / Delta    = 5.689870
+      p_c / 1/48     = 5.653333
+      p_c / 5/256    = 6.030222
+      p_c / 6/256    = 5.025185
+      p_c / rho      = 0.120267
+      p_c / m_a      = 0.590450
+
+    qfiber_full_fiber: p_c(full_omega) ~ 0.107778
+      p_c / Delta    = 5.206768
+      p_c / 1/48     = 5.173333
+      p_c / 5/256    = 5.518222
+      p_c / 6/256    = 4.598519
+      p_c / rho      = 0.110056
+      p_c / m_a      = 0.540318
+
+    qfiber_one_repr: p_c(full_omega) ~ 0.110909
+      p_c / Delta    = 5.358043
+      p_c / 1/48     = 5.323636
+      p_c / 5/256    = 5.678545
+      p_c / 6/256    = 4.732121
+      p_c / rho      = 0.113253
+      p_c / m_a      = 0.556016
+
+    qfiber_shadow_one: p_c(full_omega) ~ 0.105000
+      p_c / Delta    = 5.072573
+      p_c / 1/48     = 5.040000
+      p_c / 5/256    = 5.376000
+      p_c / 6/256    = 4.480000
+      p_c / rho      = 0.107219
+      p_c / m_a      = 0.526392
+
+  STRUCTURAL REACHABILITY (byte-level):
+    Shell-preserving only (id+F): Span=True
+    Pole-swap only (S+C):        Span=True
+    Family 00 alone: Span=True  Reach=4096
+    Family 01 alone: Span=True  Reach=4096
+    Family 10 alone: Span=True  Reach=4096
+    Family 11 alone: Span=True  Reach=4096
+    Family pairs that span:
+      00+01: Span@D=1
+      00+10: Span@D=1
+      00+11: Span@D=1
+      01+10: Span@D=1
+      01+11: Span@D=1
+      10+11: Span@D=1
+
+=====
+END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
+=====
+
+exit=0  duration=661.84s
+
+######## hqvm_percolation_analysis_2.py ########
+
+hQVM Canonical-Word Percolation -- the CGM-native percolation theory
+=====
+Grounded in Analysis_hQVM_Wavefunction.md Theorems T1-T10 and
+Gyroscopic_ASI_Specs_Formalism.md Sec 2.2/4 (6-bit payload dial).
+
+1. MANIFOLD AND WORD OPERATOR CONSTRUCTION
+-----
+  Building byte transition table (4096 x 256)...
+  Composing canonical word permutations W2, W2', F (64 x 4096)...
+  |comp_horizon|=64  |eq_horizon|=64  (expect 64/64, holographic 64^2=4096)
+
+=====
+2. K4 WORD-ALGEBRA CROSS-CHECK (all 64 micro_refs x 4096 states)
+=====
+  T2  W2  : shell s -> 6-s         : VERIFIED
+  T3  W2' : shell s -> 6-s         : VERIFIED
+  T4  F   : shell s -> s           : VERIFIED
+  T6  W2^2 = W2'^2 = F^2 = id      : VERIFIED
+  T9  W2 : comp-horizon <-> eq-horizon bijection : VERIFIED
+  (T10 q-transport is byte-level; re-checked via q_word6 below.)
+
+=====
+3. SINGLE-POLE REACHABILITY (word graph)
+=====
+
+  With ALL 64 micro_refs available (full payload, gauge-complete):
+    W2-only  reachable from rest :   128 / 4096
+    F-only   reachable from rest :     2 / 4096
+    W2+W2'   reachable from rest :   128 / 4096
+    W2+W2'+F reachable from rest :   128 / 4096
+
+  W2-only one-hop from rest  : |{W2(m)(rest)}| = 64
+  W2-only two-hop closure    : 128  (BFS reach 128)
+  F-only one-hop from rest   : |{F(m)(rest)}| = 1  (BFS reach 2)
+
+=====
+4. CANONICAL-WORD PERCOLATION SWEEP (W2+W2', micro_ref dial)
+=====
+  Include each of the 64 micro_refs w.p. p; each selected m brings
+  BOTH W2(m) (Egress) and W2'(m) (Ingress) -- gauge-complete per m.
+  Events: E1 hit_eq_word, E2 full_pairing (T9), E3 full_omega.
+  Conditional on |M|>0.
+
+  progress: word sweep 1/35 (p=0.000)
+  progress: word sweep 11/35 (p=0.100)
+  progress: word sweep 21/35 (p=0.200)
+  progress: word sweep 31/35 (p=0.300)
+  p      E[#m]  P(pair)  P(full)  CI95      <Reach>  
+  -----
+  ...
+  0.000  0.00   0.0000   0.0000   0.0000    0.0      
+  0.010  0.64   0.0000   0.0000   0.0000    5.7      
+  0.020  1.28   0.0000   0.0000   0.0000    7.9      
+  0.030  1.92   0.0112   0.0000   0.0000    14.6     
+  0.040  2.56   0.0217   0.0000   0.0000    21.5     
+  0.050  3.20   0.0518   0.0000   0.0000    27.2     
+  0.060  3.84   0.1015   0.0000   0.0000    36.3     
+  0.070  4.48   0.1515   0.0000   0.0000    48.7     
+  0.080  5.12   0.3384   0.0000   0.0000    66.6     
+  0.090  5.76   0.3250   0.0000   0.0000    70.3     
+  0.100  6.40   0.4800   0.0000   0.0000    84.3     
+  0.110  7.04   0.5550   0.0000   0.0000    91.2     
+  0.120  7.68   0.6250   0.0000   0.0000    96.2     
+  0.130  8.32   0.6800   0.0000   0.0000    102.2    
+  0.140  8.96   0.7850   0.0000   0.0000    112.6    
+  0.150  9.60   0.8600   0.0000   0.0000    117.9    
+  0.160  10.24  0.8900   0.0000   0.0000    120.0    
+  0.170  10.88  0.8650   0.0000   0.0000    118.2    
+  0.180  11.52  0.9350   0.0000   0.0000    123.7    
+  0.190  12.16  0.9350   0.0000   0.0000    123.8    
+  0.200  12.80  0.9800   0.0000   0.0000    126.7    
+  0.210  13.44  0.9800   0.0000   0.0000    126.7    
+  0.220  14.08  0.9650   0.0000   0.0000    125.6    
+  0.230  14.72  0.9950   0.0000   0.0000    127.7    
+  0.240  15.36  1.0000   0.0000   0.0000    128.0    
+  0.250  16.00  0.9950   0.0000   0.0000    127.7    
+  0.260  16.64  0.9900   0.0000   0.0000    127.4    
+  0.270  17.28  0.9950   0.0000   0.0000    127.7    
+  0.280  17.92  1.0000   0.0000   0.0000    128.0    
+  0.290  18.56  1.0000   0.0000   0.0000    128.0    
+  0.300  19.20  1.0000   0.0000   0.0000    128.0    
+  0.400  25.60  1.0000   0.0000   0.0000    128.0    
+  0.500  32.00  1.0000   0.0000   0.0000    128.0    
+  0.700  44.80  1.0000   0.0000   0.0000    128.0    
+  1.000  64.00  1.0000   0.0000   0.0000    128.0    
+
+  Thresholds (conditional on |M|>0):
+    E1 hit_eq_word    : p_c = 0.0050  E[#m] = 0.32 of 64
+    E2 full_pairing   : p_c = 0.1027  E[#m] = 6.57 of 64
+    E3 full_omega     : no crossing in range
+
+  Minimum payload for word-transitivity (random subset search):
+    no subset of <=16 micro_refs achieves full_omega in search
+
+=====
+5. TRANSPORT-CURVATURE SPECTRUM COMPLETION
+=====
+  Transport defect between bytes bi, bj : d = popcount(q6(bi) XOR q6(bj))
+  in {0..6}. The full curvature spectrum (all 7 weights) is the kernel/
+  Regge completeness condition. Percolation event E4 = all k=0..6 present
+  among pairwise defects of the allowed byte set.
+
+  p      E[#bytes] P(spectrum complete)  <#weights>
+  -----
+  0.000  0.0       0.0000                0.00      
+  0.010  2.6       0.0000                1.96      
+  0.020  5.1       0.0365                4.04      
+  0.030  7.7       0.0704                5.04      
+  0.040  10.2      0.2950                5.85      
+  0.050  12.8      0.4200                6.24      
+  0.060  15.4      0.6000                6.51      
+  0.070  17.9      0.7500                6.73      
+  0.080  20.5      0.8300                6.82      
+  0.090  23.0      0.9100                6.91      
+  0.100  25.6      0.9550                6.95      
+  0.110  28.2      0.9850                6.99      
+  0.120  30.7      0.9950                7.00      
+  0.130  33.3      1.0000                7.00      
+  0.140  35.8      0.9950                7.00      
+  0.150  38.4      1.0000                7.00      
+  0.160  41.0      1.0000                7.00      
+  0.170  43.5      1.0000                7.00      
+  0.180  46.1      1.0000                7.00      
+  0.190  48.6      1.0000                7.00      
+  0.200  51.2      1.0000                7.00      
+  0.300  76.8      1.0000                7.00      
+  0.500  128.0     1.0000                7.00      
+  1.000  256.0     1.0000                7.00      
+
+  E4 curvature-complete p_c ~ 0.0544  ->  E[#bytes] at p_c = 13.9
+
+=====
+6. NULL MODEL -- SHUFFLED BYTE->TRANSITION MAPPING (curve-level)
+=====
+  Byte KEEPS its true micro_ref label but its dynamics is swapped for a
+  random other byte's dynamics. Breaks classification<->dynamics exactly.
+  Word percolation (W2+W2') real vs shuffled, with binomial 95% CI.
+
+  p      Real P(full)  Shuffled P(full)  gap     Real CI95     
+  -----
+  0.050  0.0000        0.0598            -0.0598 0.0000        
+  0.100  0.0000        0.4583            -0.4583 0.0000        
+  0.150  0.0000        0.8833            -0.8833 0.0000        
+  0.200  0.0000        0.9917            -0.9917 0.0000        
+  0.300  0.0000        1.0000            -1.0000 0.0000        
+  0.500  0.0000        1.0000            -1.0000 0.0000        
+  1.000  0.0000        1.0000            -1.0000 0.0000        
+
+=====
+7. SECTOR/SHELL CONFINEMENT (all 64 micro_refs, W2+W2')
+=====
+  Constitutional sectors: comp_horizon(64), bulk(3968), eq_horizon(64).
+  Shell = popcount(chi) in {0..6}.
+
+  Reach from rest: 128 / 4096   full_omega=False   bulk_hit=0
+  comp_horizon reached: 64 / 64
+  eq_horizon reached:   64 / 64
+
+  Shell   Count   Of shell  
+  -----
+  0       64      64        
+  1       0       384       
+  2       0       960       
+  3       0       1280      
+  4       0       960       
+  5       0       384       
+  6       64      64        
+
+  From ALL comp_horizon sources:
+    reach=128  full_pairing(eq)=True  full_omega=False
+
+=====
+8. EDGE-MODE PERCOLATION (micro_ref dial, conditional on |M|>0)
+=====
+  Modes: w2w2p (Egress+Ingress), f (F only), all (W2+W2'+F).
+
+  p       w2w2p P(full)  f P(full)      all P(full)   
+  -----
+  0.000   0.0000         0.0000         0.0000        
+  0.050   0.0000         0.0000         0.0000        
+  0.100   0.0000         0.0000         0.0000        
+  0.150   0.0000         0.0000         0.0000        
+  0.200   0.0000         0.0000         0.0000        
+  0.300   0.0000         0.0000         0.0000        
+  0.500   0.0000         0.0000         0.0000        
+  1.000   0.0000         0.0000         0.0000        
+
+=====
+9. PROBE-WORD REACHABILITY (Analysis_hQVM_Wavefunction Sec 13)
+=====
+  Single-step word graph: one edge type per row, all 64 micro_refs.
+
+  Probe                   Reach  full_Oon shell 0
+  -----
+  canonical F                 2   False         0
+  canonical 4-fam W2        128   False        64
+  canonical F^2 (depth-8)      1   False         0
+  same-fam 00                 1   False         0
+  same-fam 11                 1   False         0
+  reverse fam order           2   False         0
+
+=====
+12. CONSTITUTIONAL BYTE SHELL TRACE (Wavefunction Sec 5)
+=====
+  Byte-by-byte shells from rest for canonical 4-family turn
+  (micro_ref=1, families 00->01->10->11).
+
+  depth-4 (1 turn):
+    shells  = [6, 5, 0, 5, 6]
+    sectors = ['comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon']
+    bytes   = A8 A9 28 29
+  depth-8 (2 turns):
+    shells  = [6, 5, 0, 5, 6, 5, 0, 5, 6]
+    sectors = ['comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon']
+    bytes   = A8 A9 28 29 A8 A9 28 29
+
+=====
+10. HELIX Z2 CYCLE (F involution, depth-8 from rest)
+=====
+  rest --F(m)--> swapped --F(m)--> rest  (T6, all m).
+
+  F(m)^2(rest)=rest for 64 / 64 micro_refs
+  Shell distribution after one F(m) from rest: {6: 64}
+
+=====
+11. FLAT vs CURVED PAYLOAD (fiber bundle Sec 16.1)
+=====
+  micro_ref m is flat iff all 4 family bytes have fwd==rev (P=I).
+  Word percolation with flat-only vs curved-only micro_ref pools.
+
+  Flat micro_refs: 0   Curved micro_refs: 64
+
+  p      flat P(pair)  curved P(pair)  flat Reach  curved Reach
+  -----
+  0.100  0.0000        1.0000          0.0         128.0       
+  0.200  0.0000        1.0000          0.0         128.0       
+  0.300  0.0000        1.0000          0.0         128.0       
+  0.500  0.0000        1.0000          0.0         128.0       
+  1.000  0.0000        1.0000          0.0         128.0       
+
+=====
+END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
+=====
+
+exit=0  duration=16.13s
+
+######## hqvm_percolation_analysis_3.py ########
+
+hQVM Percolation Structural Completeness (analysis_3)
+=====
+  Precomputing transition table (4096 states x 256 bytes)...
+  Transition table ready.
+  |Omega|=4096  permutation classes=128
+
+=====
+1. COMMUTATION STRUCTURE (Features 68-76)
+=====
+  Bytes x,y commute on Omega iff q6(x) = q6(y).
+
+  Commuting ordered pairs (exhaustive): 1024 / 65536
+  Rate = 0.015625  (expect 1024/65536 = 0.015625)
+  Distinct q6 classes: 64  (each has 4 bytes)
+
+  Deterministic reachability: single-q alphabet (max 4 bytes):
+    q6=00: |B|=4  Reach=2  Full=False  Span=False
+    q6=31: |B|=4  Reach=8  Full=False  Span=False
+    q6=63: |B|=4  Reach=4  Full=False  Span=True
+
+  MC sweep: single random q-class vs independent bytes (n=200):
+  p      single-q P(full)  byte P(full)  E[#q|nz]  
+  -----
+  0.100  0.0000            1.0000        21.93     
+  0.200  0.0000            1.0000        37.38     
+  0.300  0.0000            1.0000        48.34     
+  0.500  0.0000            1.0000        60.28     
+  1.000  0.0000            1.0000        64.00     
+
+  Q-diversity threshold (independent bytes, n=300):
+  p       P(full)   E[#q]     E[|A|]    E[reach]  
+  -----
+  0.010   0.0036    2.65      2.7       152.4     
+  0.015   0.0471    3.61      3.7       565.5     
+  0.020   0.1733    4.83      5.0       1240.5    
+  0.022   0.2584    5.55      5.7       1727.0    
+  0.025   0.3567    6.29      6.5       2117.6    
+  0.030   0.6020    7.69      8.0       2935.6    
+  0.035   0.7233    8.88      9.4       3357.0    
+  0.040   0.8000    9.63      10.3      3510.6    
+  0.050   0.9333    11.68     12.6      3904.8    
+  0.080   1.0000    18.15     20.6      4096.0    
+  0.100   1.0000    22.11     25.7      4096.0    
+
+=====
+2. FUTURE-CONE ENTROPY H1(p), H2(p) (Features 77-79)
+=====
+  H1: entropy of 1-step next-state distribution from rest
+       (byte chosen uniformly from allowed alphabet).
+  H2: entropy of 2-step distribution (ordered byte pairs).
+  Full alphabet reference: H1=7, H2=12.
+
+  p      E[H1]     E[H2]     E[|R1|]   E[|R2|]   
+  -----
+  0.000  0.000     0.000     0.0       0.0       
+  0.020  2.198     4.376     5.1       30.3      
+  0.050  3.578     7.113     12.6      165.0     
+  0.100  4.588     9.056     24.9      599.1     
+  0.150  5.106     9.995     35.6      1137.9    
+  0.200  5.464     10.583    45.9      1745.5    
+  0.300  5.959     11.257    65.2      2863.0    
+  0.500  6.493     11.748    95.6      3930.2    
+  0.700  6.790     11.914    116.8     4090.7    
+  1.000  7.000     12.000    128.0     4096.0    
+
+  State-independence (full alphabet, fixed starts):
+  start shell H1      H2      |R1|    |R2|    
+  -----
+  6           7.000   12.000  128     4096    
+  0           7.000   12.000  128     4096    
+  1           7.000   12.000  128     4096    
+  2           7.000   12.000  128     4096    
+  3           7.000   12.000  128     4096    
+  4           7.000   12.000  128     4096    
+  5           7.000   12.000  128     4096    
+
+  State-independence under restriction (p=0.05, n=100, mean over starts):
+    shell 6: E[H1]=3.652  E[H2]=7.253
+    shell 0: E[H1]=3.627  E[H2]=7.211
+    shell 1: E[H1]=3.565  E[H2]=7.087
+    shell 2: E[H1]=3.591  E[H2]=7.136
+
+=====
+3. OMEGA = U x V COSET COVERAGE (Feature 2)
+=====
+  u6,v6 are C64 coset coordinates; |U|=|V|=64.
+
+  p      |U_hit|  |V_hit|  |UxV|    Reach   P(full) 
+  -----
+  0.050  63.2     63.2     4029.8   3940.0  0.9350  
+  0.100  64.0     64.0     4096.0   4096.0  1.0000  
+  0.200  64.0     64.0     4096.0   4096.0  1.0000  
+  0.300  64.0     64.0     4096.0   4096.0  1.0000  
+  0.500  64.0     64.0     4096.0   4096.0  1.0000  
+  1.000  64.0     64.0     4096.0   4096.0  1.0000  
+
+=====
+4. SHELL ENRICHMENT AND MEAN S(chi) (Wavefunction Sec 16.6)
+=====
+  Enrichment(k) = (fraction of R in shell k) / (C(6,k)/64).
+  S(chi) = popcount(chi) = shell index. Omega mean S = 3.0.
+
+  p       E[|R|]    E[S]     E[k]=0  E[k]=1  E[k]=2  E[k]=3  E[k]=4  E[k]=5  E[k]=6 
+  -----
+  0.010   204.6     3.638    0.719   0.719   0.794   0.865   0.728   0.652   14.921 
+  0.015   836.4     3.366    1.195   0.874   0.802   0.912   0.901   0.888   8.448  
+  0.020   1534.5    3.164    0.904   1.007   0.946   0.919   0.948   0.912   4.773  
+  0.022   1770.3    3.150    0.805   0.962   0.969   0.957   0.912   0.968   4.265  
+  0.025   2189.7    3.127    0.970   0.908   0.985   0.949   0.958   0.995   3.480  
+  0.030   2881.6    3.050    1.075   0.972   0.995   0.959   1.003   0.978   2.081  
+  0.035   3216.8    3.038    1.005   1.025   0.974   0.983   0.973   1.032   1.785  
+  0.040   3494.8    3.020    1.055   0.997   0.985   0.994   0.992   0.997   1.445  
+  0.050   3877.1    3.007    1.005   1.000   0.996   0.996   0.996   1.013   1.115  
+  0.100   4096.0    3.000    1.000   1.000   1.000   1.000   1.000   1.000   1.000  
+  0.200   4096.0    3.000    1.000   1.000   1.000   1.000   1.000   1.000   1.000  
+  0.300   4096.0    3.000    1.000   1.000   1.000   1.000   1.000   1.000   1.000  
+  0.500   4096.0    3.000    1.000   1.000   1.000   1.000   1.000   1.000   1.000  
+  1.000   4096.0    3.000    1.000   1.000   1.000   1.000   1.000   1.000   1.000  
+
+=====
+5. TWO-STEP UNIFORMIZATION MULTIPLICITY (Feature 80)
+=====
+  From rest: count images of all ordered 2-byte words.
+  Full alphabet: each state hit 16 times (65536 words).
+
+  Full alphabet: min=16 max=16 unique multiplicities=1  (expect all 16)
+
+  p      E[min]   E[max]   E[std]   E[CV]    E[cover]  
+  -----
+  0.050  1.00     2.2      0.19     0.162    0.0393    
+  0.100  1.00     3.7      0.38     0.321    0.1392    
+  0.150  1.00     5.1      0.61     0.455    0.2790    
+  0.200  1.00     6.2      0.77     0.512    0.4236    
+  0.300  1.00     8.3      1.19     0.579    0.6995    
+  0.500  1.00     12.7     2.10     0.502    0.9633    
+  0.700  1.39     15.4     2.61     0.337    0.9989    
+  1.000  16.00    16.0     0.00     0.000    1.0000    
+
+=====
+6. FOLD DISAGREEMENT AND PHASE-NET COMPLETE TABLES
+=====
+
+  --- Fold disagreement (all levels + cumulative) ---
+  Level         |B|  Reach  Full
+  -----
+  fd=0 only       16     64 False
+  fd=1 only       64   4096  True
+  fd=2 only       96   4096  True
+  fd=3 only       64   4096  True
+  fd=4 only       16    256 False
+  fd<=0          16     64 False
+  fd<=1          80   4096  True
+  fd<=2         176   4096  True
+  fd<=3         240   4096  True
+  fd<=4         256   4096  True
+
+  --- Phase-net vectors (all 16) ---
+  Phase-net               |B|  Reach  Giant
+  -----
+  (0, 0, 0, 0)             16     64  False
+  (0, 0, 0, 1)             16    256  False
+  (0, 0, 1, 0)             16    256  False
+  (0, 0, 1, 1)             16    256  False
+  (0, 1, 0, 0)             16    256  False
+  (0, 1, 0, 1)             16    256  False
+  (0, 1, 1, 0)             16    256  False
+  (0, 1, 1, 1)             16    256  False
+  (1, 0, 0, 0)             16     64  False
+  (1, 0, 0, 1)             16    256  False
+  (1, 0, 1, 0)             16    256  False
+  (1, 0, 1, 1)             16    256  False
+  (1, 1, 0, 0)             16    256  False
+  (1, 1, 0, 1)             16    256  False
+  (1, 1, 1, 0)             16    256  False
+  (1, 1, 1, 1)             16    256  False
+
+=====
+7. MINIMAL CONNECTION-BOUNDARY SUBSETS (2^7 exhaustive)
+=====
+  Mask bit i: boundary i may have nonzero |A| in allowed bytes.
+  mask=0: only bytes with all chain magnitudes zero.
+
+  Masks achieving full Omega: 5 / 128
+  Minimum active boundaries: 5
+  Minimal masks (popcount, mask, |B|, boundary names):
+    pop=5 mask=061 |B|= 64  ['CS|UNA', 'ONA|BU', 'BU|BU', 'BU|ONA', 'ONA|UNA']
+
+  Reach vs number of active boundaries (best mask per popcount):
+  pop   best |B|  Reach   Full  
+  -----
+  0     1         2       No    
+  1     4         16      No    
+  2     4         32      No    
+  3     16        256     No    
+  4     16        512     No    
+  5     64        4096    Yes   
+  6     64        4096    Yes   
+  7     256       4096    Yes   
+
+=====
+8. 128 OMEGA-PERMUTATION-CLASS PERCOLATION (Feature 45)
+=====
+  128 classes (2 bytes per class via b^0xFE shadow).
+
+
+  --- Mode: one_repr (128 groups) ---
+  progress: perm-one_repr 1/38 (p=0.000)
+  progress: perm-one_repr 11/38 (p=0.100)
+  progress: perm-one_repr 21/38 (p=0.200)
+  progress: perm-one_repr 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.740    42.8    
+  0.020   0.0200    0.0223    0.895    349.9   
+  0.030   0.0600    0.0612    0.980    663.7   
+  0.040   0.2250    0.2284    0.985    1562.1  
+  0.050   0.3100    0.3116    0.995    1978.3  
+  0.060   0.5050    0.5075    0.995    2704.3  
+  0.070   0.7500    0.7500    1.000    3399.0  
+  0.080   0.8300    0.8300    1.000    3600.6  
+  0.090   0.9150    0.9150    1.000    3849.0  
+  0.100   0.9200    0.9200    1.000    3905.0  
+  0.110   0.9550    0.9550    1.000    3978.1  
+  0.120   0.9550    0.9550    1.000    3978.2  
+  0.130   0.9800    0.9800    1.000    4060.0  
+  0.140   0.9950    0.9950    1.000    4080.6  
+  0.150   0.9950    0.9950    1.000    4085.8  
+  0.160   1.0000    1.0000    1.000    4096.0  
+  0.170   1.0000    1.0000    1.000    4096.0  
+  0.180   1.0000    1.0000    1.000    4096.0  
+  0.190   1.0000    1.0000    1.000    4096.0  
+  0.200   1.0000    1.0000    1.000    4096.0  
+  0.210   1.0000    1.0000    1.000    4096.0  
+  0.220   1.0000    1.0000    1.000    4096.0  
+  0.230   1.0000    1.0000    1.000    4096.0  
+  0.240   1.0000    1.0000    1.000    4096.0  
+  0.250   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.0597
+  (4 of 38 p-values omitted; see p_c above)
+
+  --- Mode: both_shadow (128 groups) ---
+  progress: perm-both_shadow 1/38 (p=0.000)
+  progress: perm-both_shadow 11/38 (p=0.100)
+  progress: perm-both_shadow 21/38 (p=0.200)
+  progress: perm-both_shadow 31/38 (p=0.300)
+
+  p       P(full)   P(f|nz)   P(nz)    <R|nz>  
+  -----
+  ...
+  0.000   0.0000    0.0000    0.000    0.0     
+  0.010   0.0000    0.0000    0.740    18.0    
+  0.020   0.0000    0.0000    0.930    201.4   
+  0.030   0.1000    0.1031    0.970    813.0   
+  0.040   0.1850    0.1850    1.000    1381.9  
+  0.050   0.3500    0.3500    1.000    1991.3  
+  0.060   0.5650    0.5650    1.000    2675.5  
+  0.070   0.6800    0.6800    1.000    3191.4  
+  0.080   0.8250    0.8250    1.000    3568.8  
+  0.090   0.8700    0.8700    1.000    3729.8  
+  0.100   0.9600    0.9600    1.000    3996.0  
+  0.110   0.9800    0.9800    1.000    4034.6  
+  0.120   0.9950    0.9950    1.000    4080.6  
+  0.130   1.0000    1.0000    1.000    4096.0  
+  0.140   1.0000    1.0000    1.000    4096.0  
+  0.150   1.0000    1.0000    1.000    4096.0  
+  0.160   1.0000    1.0000    1.000    4096.0  
+  0.170   1.0000    1.0000    1.000    4096.0  
+  0.180   1.0000    1.0000    1.000    4096.0  
+  0.190   1.0000    1.0000    1.000    4096.0  
+  0.200   1.0000    1.0000    1.000    4096.0  
+  0.210   1.0000    1.0000    1.000    4096.0  
+  0.220   1.0000    1.0000    1.000    4096.0  
+  0.230   1.0000    1.0000    1.000    4096.0  
+  0.240   1.0000    1.0000    1.000    4096.0  
+  0.250   1.0000    1.0000    1.000    4096.0  
+  ...
+  0.300   1.0000    1.0000    1.000    4096.0  
+  0.400   1.0000    1.0000    1.000    4096.0  
+  0.500   1.0000    1.0000    1.000    4096.0  
+  0.600   1.0000    1.0000    1.000    4096.0  
+  0.700   1.0000    1.0000    1.000    4096.0  
+  0.800   1.0000    1.0000    1.000    4096.0  
+  0.900   1.0000    1.0000    1.000    4096.0  
+  1.000   1.0000    1.0000    1.000    4096.0  
+  p_c(P(full)) ~ 0.0570
+  (4 of 38 p-values omitted; see p_c above)
+
+=====
+SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
+=====
+
+=====
+9. GEOMETRIC POROSITY THRESHOLDS (boundary-channel openness)
+=====
+  pi_j(A) = fraction of bytes in A with nonzero connection at boundary j.
+  pi_BU is BU|BU (fold boundary). pi_fold averages ONA|BU, BU|BU, BU|ONA.
+  CGM constants: Delta=0.020700  5/256=0.019531  1/48=0.020833
+
+  pi_BU   P(span)   P(full)   E[|A|]    E[pi_fold]  
+  -----
+  0.000   0.9920    0.0000    26.0      0.2483      
+  0.010   0.9880    0.0000    25.5      0.2477      
+  0.011   0.9640    0.0000    24.3      0.2516      
+  0.012   0.9920    0.0000    26.8      0.2534      
+  0.013   0.9840    0.0000    25.2      0.2580      
+  0.014   0.9920    0.0000    26.2      0.2548      
+  0.015   0.9960    0.0000    25.6      0.2532      
+  0.016   0.9840    0.0000    24.9      0.2568      
+  0.017   0.9880    0.0000    26.0      0.2542      
+  0.018   0.9880    0.0000    24.5      0.2584      
+  0.019   0.9840    0.0000    25.6      0.2595      
+  0.020   0.9840    0.0000    25.9      0.2625      
+  0.021   0.9920    0.0000    26.4      0.2659      
+  0.022   0.9760    0.0000    25.2      0.2596      
+  0.023   0.9800    0.0000    27.0      0.2615      
+  0.024   0.9800    0.0000    25.8      0.2668      
+  0.025   0.9800    0.0000    25.7      0.2642      
+  0.026   0.9880    0.0000    25.4      0.2640      
+  0.027   0.9840    0.0000    25.9      0.2621      
+  0.028   0.9760    0.0000    26.4      0.2661      
+  0.029   0.9760    0.0000    26.3      0.2685      
+  0.030   0.9800    0.0000    25.3      0.2655      
+  0.031   0.9960    0.0000    26.7      0.2639      
+  0.032   0.9800    0.0320    25.3      0.2677      
+  0.033   0.9880    0.0480    25.8      0.2680      
+  0.034   0.9680    0.0440    25.3      0.2648      
+  0.035   0.9840    0.0680    25.8      0.2682      
+  0.036   0.9880    0.1080    26.9      0.2728      
+  0.037   0.9720    0.1040    24.9      0.2757      
+  0.038   0.9880    0.1240    26.4      0.2728      
+  0.039   0.9880    0.1400    26.5      0.2754      
+  0.040   0.9760    0.1760    25.6      0.2697      
+  0.050   0.9840    0.2840    25.6      0.2803      
+  0.060   0.9880    0.3800    26.3      0.2885      
+  0.070   0.9800    0.4680    26.9      0.2977      
+  0.080   0.9920    0.5120    26.3      0.3001      
+  0.090   0.9920    0.6280    26.2      0.3091      
+  0.100   0.9880    0.6040    24.9      0.3175      
+  0.110   0.9520    0.6680    26.3      0.3266      
+  0.120   0.9640    0.7040    26.4      0.3273      
+  0.130   0.9720    0.7800    27.3      0.3363      
+  0.140   0.9400    0.7360    25.6      0.3508      
+  0.150   0.9800    0.8000    25.7      0.3511      
+  0.160   0.9560    0.8000    25.0      0.3606      
+  0.170   0.9520    0.8040    26.4      0.3628      
+  0.180   0.9640    0.8120    25.0      0.3693      
+  0.190   0.9680    0.8720    26.1      0.3776      
+  0.200   0.9720    0.8560    26.1      0.3867      
+  0.300   0.9560    0.9000    26.1      0.4521      
+  0.400   0.9680    0.9360    27.1      0.5180      
+  0.500   0.9560    0.9400    26.6      0.5811      
+  0.600   0.9720    0.9560    26.7      0.6483      
+  0.700   0.9520    0.9160    26.0      0.7163      
+  0.800   0.9600    0.9200    26.8      0.7857      
+  0.900   0.9600    0.9320    26.1      0.8458      
+  1.000   0.9560    0.9120    25.8      0.9179      
+
+  All-boundary porosities at full alphabet (reference):
+    pi(CS|UNA) = 0.7500
+    pi(UNA|ONA) = 0.7500
+    pi(ONA|BU) = 0.7500
+    pi(BU|BU) = 0.7500
+    pi(BU|ONA) = 0.7500
+    pi(ONA|UNA) = 0.7500
+    pi(UNA|CS) = 0.7500
+
+=====
+9b. SIZE-CONTROLLED FOLD-TRIPLE POROSITY
+=====
+  Fix |A|=k; vary pi_fold via pool[0] vs pool[3] bytes.
+  pool[c] = bytes active on exactly c of {ONA|BU, BU|BU, BU|ONA}.
+  Phase A: all 256 bytes.  Phase B: 64-byte minimal 5-boundary mask.
+  CGM: Delta=0.020700  5/256=0.019531  1/48=0.020833
+
+  Pool sizes (all bytes): c=0:16  c=1:48  c=2:48  c=3:144
+  Minimal-mask pool |B|=64  mask=61
+
+  === Phase A (all bytes) ===
+  --- |A| = 5 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.9733    0.0000    0.0000      
+  0.010    0.9867    0.0000    0.0000      
+  0.020    0.9667    0.0000    0.0000      
+  0.021    0.9700    0.0000    0.0000      
+  0.030    0.9767    0.0000    0.0000      
+  0.050    0.9800    0.0000    0.0000      
+  0.100    0.9800    0.0000    0.0000      
+  0.200    0.9333    0.0000    0.2000      
+
+  --- |A| = 6 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.9933    0.0000    0.0000      
+  0.010    1.0000    0.0000    0.0000      
+  0.020    0.9900    0.0000    0.0000      
+  0.021    0.9933    0.0000    0.0000      
+  0.030    0.9800    0.0000    0.0000      
+  0.050    0.9933    0.0000    0.0000      
+  0.100    0.9733    0.0000    0.1667      
+  0.200    0.9667    0.0000    0.1667      
+
+  --- |A| = 7 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.9900    0.0000    0.0000      
+  0.010    1.0000    0.0000    0.0000      
+  0.020    1.0000    0.0000    0.0000      
+  0.021    1.0000    0.0000    0.0000      
+  0.030    0.9967    0.0000    0.0000      
+  0.050    1.0000    0.0000    0.0000      
+  0.100    0.9900    0.0000    0.1429      
+  0.200    0.9933    0.0000    0.1429      
+
+  --- |A| = 8 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    1.0000    0.0000    0.0000      
+  0.010    0.9967    0.0000    0.0000      
+  0.020    1.0000    0.0000    0.0000      
+  0.021    1.0000    0.0000    0.0000      
+  0.030    1.0000    0.0000    0.0000      
+  0.050    1.0000    0.0000    0.0000      
+  0.100    1.0000    0.0000    0.1250      
+  0.200    0.9967    0.0000    0.2500      
+
+  --- |A| = 9 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    1.0000    0.0000    0.0000      
+  0.010    1.0000    0.0000    0.0000      
+  0.020    1.0000    0.0000    0.0000      
+  0.021    1.0000    0.0000    0.0000      
+  0.030    1.0000    0.0000    0.0000      
+  0.050    1.0000    0.0000    0.0000      
+  0.100    1.0000    0.0000    0.1111      
+  0.200    0.9967    0.0000    0.2222      
+
+  --- |A| = 10 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    1.0000    0.0000    0.0000      
+  0.010    1.0000    0.0000    0.0000      
+  0.020    1.0000    0.0000    0.0000      
+  0.021    1.0000    0.0000    0.0000      
+  0.030    1.0000    0.0000    0.0000      
+  0.050    1.0000    0.0000    0.0000      
+  0.100    1.0000    0.0000    0.1000      
+  0.200    1.0000    0.0000    0.2000      
+
+  === Phase B (minimal-mask pool) ===
+  --- |A| = 5 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    1.0000    0.0000    0.2000      
+  P(span)=0.5 at pi_fold ~ 0.1000  (Delta=0.0207, ratio=4.83)
+
+  --- |A| = 6 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    0.0000    0.0000    0.0000      
+
+  --- |A| = 7 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    0.0000    0.0000    0.0000      
+
+  --- |A| = 8 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    0.0000    0.0000    0.0000      
+
+  --- |A| = 9 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    0.0000    0.0000    0.0000      
+
+  --- |A| = 10 ---
+  pi_fold  P(span)   P(full)   E[pi_fold]  
+  -----
+  0.000    0.0000    0.0000    0.0000      
+  0.010    0.0000    0.0000    0.0000      
+  0.020    0.0000    0.0000    0.0000      
+  0.021    0.0000    0.0000    0.0000      
+  0.030    0.0000    0.0000    0.0000      
+  0.050    0.0000    0.0000    0.0000      
+  0.100    0.0000    0.0000    0.0000      
+  0.200    0.0000    0.0000    0.0000      
+
+  Interpretation per Wavefunction analysis:
+    Delta (~0.0207) is the residual aperture AFTER depth-4 holonomic closure,
+    not the classical critical porosity for horizon spanning (E_span).
+    Byte-level fold disagreement is structurally 50%; closure compresses it to ~2.07%.
+    The relevant 'aperture event' is holonomy-word availability or H2 onset, not E_span.
+
+=====
+10. PLAQUETTE LOOP DEFECT D(A) (Gravity Sec 5.0, 5.6)
+=====
+  d(x,y) = popcount(q6(x) XOR q6(y));  D(A) = sum d / (2|Omega|).
+  E[d] = mean defect per ordered pair (converges to 3.0 at full alphabet).
+  Full alphabet: D = 24 (exhaustive).
+
+  Exhaustive 256-byte alphabet: D=24.000000  E[d]=3.000000
+
+  p      E[D(A)]     E[mean d]   E[|A|]    
+  -----
+  0.050  0.0576      2.7480      12.6      
+  0.100  0.2375      2.8839      25.5      
+  0.200  0.9472      2.9495      50.9      
+  0.300  2.1626      2.9695      76.9      
+  0.500  6.0074      2.9884      128.0     
+  0.700  11.6987     2.9947      178.7     
+  1.000  24.0000     3.0000      256.0     
+
+  D(A) vs |A| (random subsets, n=150 each size):
+  |A|    E[D(A)]     E[mean d]   
+  -----
+  4      0.0044      2.2575      
+  8      0.0207      2.6490      
+  16     0.0883      2.8248      
+  32     0.3639      2.9111      
+  64     1.4819      2.9639      
+  128    5.9767      2.9884      
+  256    24.0000     3.0000      
+
+=====
+11. SPANNING TRANSMISSION AND tau_G PROXY (Beer-Lambert bridge)
+=====
+  T(A) = P(constitutional span from rest under alphabet A).
+  STF bulk = shells 1-5; horizons 0,6 are endpoints.
+  tau_G (kernel closed form) = 76.237941
+
+  p       P(span)   -ln T     E[bulk hit] E[pi_BU]  
+  -----
+  0.005   0.0396    3.2277    0.407       0.7376    
+  0.010   0.1312    2.0310    0.604       0.7321    
+  0.015   0.3061    1.1838    0.763       0.7589    
+  0.020   0.4013    0.9130    0.884       0.7432    
+  0.025   0.6054    0.5019    0.928       0.7744    
+  0.030   0.6967    0.3614    0.963       0.7570    
+  0.040   0.9100    0.0943    0.991       0.7539    
+  0.050   0.9467    0.0548    1.000       0.7619    
+  0.060   0.9967    0.0033    1.000       0.7542    
+  0.080   0.9967    0.0033    1.000       0.7551    
+  0.100   1.0000    -0.0000   1.000       0.7555    
+  0.150   1.0000    -0.0000   1.000       0.7519    
+  0.200   1.0000    -0.0000   1.000       0.7466    
+
+  Reference: rho^5 = 0.900699  (5 STF shell closure factors)
+  tau_G / |Omega| = 0.018613
+  Delta * rho^5 * f_ordered = 0.018613
+  At p=0.020, T~0.44, -ln T~0.81; bulk fraction~0.45.
+
+=====
+11b. tau_G PERCOLATION IDENTITY (holonomy + channel)
+=====
+  Holonomy: tau_cycle/Delta from hqvm_gravity_analysis_3 weighting.
+  Channel: tau_step on rest-reachable edges (restriction degradation).
+
+  Holonomy full alphabet: tau_cycle/Delta = 7591/7392
+  Kernel reference:       tau_cycle/Delta = 7591/7392
+  Match: True
+  Micro-ref weight covered: 1.000000
+  Q-weight closed form:   tau_cycle/Delta = 7591/7392
+
+  Channel full alphabet: tau_step=0.0046594211  4*tau_step=0.0186376843
+  Kernel tau_cycle     = 0.0212568065
+  4*tau_step/tau_cycle = 0.876787
+  Note: holonomy tau matches kernel exactly (per Wavefunction: depth-4 holonomy path).
+        Channel tau samples all rest-reachable edges (different measure; ratio is conversion factor).
+
+  p       hol/Delta     q/Delta       micro_cov   E[micro_cov]  4*tau_step    
+  -----
+  0.010   0.000000      0.513128      0.0000      0.0000        0.0138060943  
+  0.015   0.000000      0.683883      0.0000      0.0000        0.0162790453  
+  0.020   0.000000      0.748215      0.0000      0.0000        0.0171425200  
+  0.025   0.000000      0.864689      0.0000      0.0000        0.0180989432  
+  0.030   0.000000      0.888640      0.0000      0.0001        0.0183348671  
+  0.050   0.000000      0.986871      0.0000      0.0004        0.0186225235  
+  0.100   0.004687      1.023588      0.0001      0.0064        0.0186376843  
+  0.200   0.077813      1.026848      0.0014      0.0974        0.0186376843  
+  0.500   0.984169      1.026921      0.0643      0.9839        0.0186376843  
+  1.000   1.026921      1.026921      1.0000      1.0000        0.0186376843  
+
+  Analytic micro_cov derivation (independent inclusion, L=4 for canonical F word):
+    E[micro_cov] = 1 - (1 - p^L)^64
+  This is the percolation law for holonomy-word availability (the relevant event for aperture/tau_cycle).
+
+=====
+12. SHELL-RESOLVED LOCAL CONNECTIVITY vs TOPOLOGICAL DEPTH
+=====
+  psi_topo(k) = 6 - k  (depth from complement horizon at shell k).
+  C(k) = fraction of edges from shell-k states in R that reach k-1.
+
+  --- p = 0.02 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      22830     
+  1      5      0.0170      140390    
+  2      4      0.0948      348656    
+  3      3      0.2306      465586    
+  4      2      0.3053      346544    
+  5      1      0.2352      138830    
+  6      0      0.1024      29604     
+  --- p = 0.03 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      53554     
+  1      5      0.0165      326914    
+  2      4      0.0958      812344    
+  3      3      0.2376      1087432   
+  4      2      0.3186      823842    
+  5      1      0.2465      326974    
+  6      0      0.1060      61756     
+  --- p = 0.05 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      123712    
+  1      5      0.0150      741992    
+  2      4      0.0931      1856208   
+  3      3      0.2341      2474704   
+  4      2      0.3119      1854480   
+  5      1      0.2330      741992    
+  6      0      0.0901      124288    
+  --- p = 0.10 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      243136    
+  1      5      0.0161      1458816   
+  2      4      0.0945      3647040   
+  3      3      0.2360      4862720   
+  4      2      0.3146      3647040   
+  5      1      0.2362      1458816   
+  6      0      0.0969      243136    
+  --- p = 0.20 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      491712    
+  1      5      0.0156      2950272   
+  2      4      0.0927      7375680   
+  3      3      0.2339      9834240   
+  4      2      0.3119      7375680   
+  5      1      0.2318      2950272   
+  6      0      0.0936      491712    
+  --- p = 0.30 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      742272    
+  1      5      0.0157      4453632   
+  2      4      0.0947      11134080  
+  3      3      0.2350      14845440  
+  4      2      0.3134      11134080  
+  5      1      0.2367      4453632   
+  6      0      0.0945      742272    
+  --- p = 0.50 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      1226560   
+  1      5      0.0155      7359360   
+  2      4      0.0933      18398400  
+  3      3      0.2339      24531200  
+  4      2      0.3118      18398400  
+  5      1      0.2333      7359360   
+  6      0      0.0929      1226560   
+  --- p = 1.00 ---
+  shell  psi    C(k->k-1)   edge ct   
+  0      6      0.0000      2457600   
+  1      5      0.0156      14745600  
+  2      4      0.0938      36864000  
+  3      3      0.2344      49152000  
+  4      2      0.3125      36864000  
+  5      1      0.2344      14745600  
+  6      0      0.0938      2457600   
+
+=====
+13. U x V RECTANGULARITY (factorization skew)
+=====
+  rect = |R| / (|U_R| * |V_R|); 1.0 iff R is a full coset rectangle.
+
+  p      E[rect]   E[|R|]    E[|U|]  E[|V|]  
+  -----
+  0.020  0.6505    1436.3    38.1    38.1    
+  0.025  0.7182    2004.9    44.4    44.4    
+  0.030  0.8234    2651.7    51.8    51.8    
+  0.050  0.9699    3869.8    62.4    62.4    
+  0.100  1.0000    4096.0    64.0    64.0    
+  0.150  1.0000    4096.0    64.0    64.0    
+  0.200  1.0000    4096.0    64.0    64.0    
+  0.300  1.0000    4096.0    64.0    64.0    
+  0.500  1.0000    4096.0    64.0    64.0    
+  1.000  1.0000    4096.0    64.0    64.0    
+
+=====
+15. SHELL TRANSITION OPERATORS M_A(q) (Compact Geometry)
+=====
+  Empirical M_A from uniform byte steps in allowed alphabet A.
+  Tr(M_q), C(q)=Tr(M_q^2); M_shell = sum k*C(6,k) = 192 (binomial).
+
+  q   Tr(M)       Tr(M^2)     C(q) emp    C(q) exact    |bytes| 
+  -----
+  0   7.000000    7.000000    7.000000    7             4        OK
+  1   0.000000    3.111111    3.111111    28/9          24       OK
+  2   2.333333    2.271111    2.333333    7/3           60       OK
+  3   0.000000    2.080000    2.080000    52/25         80       OK
+  4   1.400000    2.271111    1.400000    7/5           60       OK
+  5   0.000000    3.111111    3.111111    28/9          24       OK
+  6   1.000000    7.000000    1.000000    1             4        OK
+  M_shell (binom sum k*C(6,k)) = 192  (population moment, per Compact Geometry)
+  Per-q C(q) matches carrier_trace exactly (Tr(M) for even q, Tr(M^2) for odd q).
+
+  Restricted C(3) and Tr(M_3) vs p (n=150):
+  p       Tr(M_3)     C(3)        E[|A|]    
+  -----
+  0.050   0.000000    2.080000    12.9      
+  0.100   0.000000    2.080000    25.7      
+  0.200   0.000000    2.080000    52.2      
+  0.500   0.000000    2.080000    128.1     
+  1.000   0.000000    2.080000    256.0     
+
+=====
+14. WORD-REGIME REACHABILITY: HORIZON vs BULK ANCHORS
+=====
+  W2/W2' map shell s -> 6-s globally (T2/T3).
+  From rest (shell 6) words reach horizons only; from bulk,
+  antipodal bulk shells are accessible.
+
+  rest (shell 6): Reach=128  shells=[0, 6]
+  bulk (shell 2): Reach=128  shells=[2, 4]
+  equality horizon (shell 0): Reach=128  shells=[0, 6]
+
+=====
+16. SELF-ENERGY CLOSURE FROM PERCOLATION-DERIVED G(psi)
+=====
+  Inputs: D=24 -> G_kernel=pi/6; tau_G from holonomy transport.
+  Exterior ODE gives I = int exp(g1*psi)/s^2 ds = psi(s_h)-psi(inf).
+  Horizon condition fixes psi(s_h)=1/2.
+
+  tau_cycle/Delta = 7591/7392  (1.026920995671)
+  tau_cycle       = 0.021256806515
+  tau_G           = 76.237916638581
+  N_cycles        = 3586.517880
+  g1              = -0.645567722244
+  s_h             = 1.694550962999
+  I_exact         = 0.500000000000
+  I_numeric       = 0.499937270873  err=2.32e-09
+  E_rest/Mc^2     = 0.250000000000
+  E_self/Mc^2     = -0.250000000000
+  M_obs/M_bare    = 0.800000000000
+  I=1/2: PASS
+  numeric I: PASS
+  E_self=-1/4: PASS
+  M_obs/M_bare=4/5: PASS
+
+=====
+END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
+=====
+
+exit=0  duration=500.61s
+
+######## hqvm_percolation_analysis_4.py ########
+
+hQVM Percolation Fiber-Complete Product Cluster (analysis_4)
+|Omega| = 4096  |H| = 64  sqrt(|Omega|) = 64
+  Precomputing transition table (4096 states x 256 bytes)...
+  Transition table ready.
+
+=====
+1. HOLOGRAPHIC ROOT IDENTITY
+=====
+  |H| = horizon cardinality, |Omega| = manifold cardinality.
+  Identity: |H|^2 = |Omega| (self-dual code product).
+
+  |comp horizon| = 64
+  |eq horizon|   = 64
+  |Omega|        = 4096
+  |H|^2/|Omega|  = 1.000000
+  [PASS] horizon_cardinality_64
+         |H| = 64 per pole
+  [PASS] holographic_square_identity
+         64^2 = 4096
+  [PASS] root_is_sqrt_of_manifold
+         sqrt(|Omega|) = 64 = |H|
+
+=====
+2. FIBER-COMPLETE PRODUCT CLUSTER THEOREM
+=====
+  Theorem: fiber-complete A => Reach = R_U x R_V, |R_U|=|R_V|=2^r(A),
+           |Reach(A)| = (2^r(A))^2.
+  Corollary: full Omega requires r=6 and odd-parity transport.
+  Fiber-complete: every q6 present includes all four family bytes.
+
+  case                    r fc |Reach|    pred   |U|   |V|  rect  ok
+  -----
+  Q6 weight=0             0  Y       2       2     2     2 0.500  True
+  Q6 weight=1             6  Y    4096    4096    64    64 1.000  True
+  Q6 weight=2             5  Y    1024    1024    32    32 1.000  True
+  Q6 weight=3             6  Y    4096    4096    64    64 1.000  True
+  Q6 weight=4             5  Y    1024    1024    32    32 1.000  True
+  Q6 weight=5             6  Y    4096    4096    64    64 1.000  True
+  Q6 weight=6             1  Y       4       4     2     2 1.000  True
+  fold_disagree=0         3  n      64      64     8     8 1.000  True
+  fold_disagree=1         6  n    4096    4096    64    64 1.000  True
+  fold_disagree=2         6  n    4096    4096    64    64 1.000  True
+  fold_disagree=3         6  n    4096    4096    64    64 1.000  True
+  fold_disagree=4         4  n     256     256    16    16 1.000  True
+  even Q6 weight          5  Y    1024    1024    32    32 1.000  True
+  odd Q6 weight           6  Y    4096    4096    64    64 1.000  True
+  all 256                 6  Y    4096    4096    64    64 1.000  True
+  [PASS] fiber_complete_product_cluster_size
+         15/15 structured cases, |Reach|=(2^r)^2
+  [PASS] fiber_complete_reachable_set_is_RU_x_RV
+         15/15 structured cases, rect matches product
+  [PASS] fiber_complete_marginal_factors_equal
+         15/15 structured cases, |U_R|=|V_R|=2^r
+  fiber-complete cases in table: 10/15
+
+  Scope boundary: fiber-incomplete restriction
+  (one byte per q6 class; product structure may degrade)
+
+    family 00: r=6  fc=False  |Reach|=4096  ok=True
+    family 01: r=6  fc=False  |Reach|=4096  ok=True
+    family 10: r=6  fc=False  |Reach|=4096  ok=True
+    family 11: r=6  fc=False  |Reach|=4096  ok=True
+  [PASS] family_slices_product_cluster
+         4/4 family slices satisfy |Reach|=(2^r)^2
+
+  Fiber-incomplete: six bytes, one per independent q6
+    n=200  max|Reach|=4064  min rect=0.992
+    (rank=6 but fiber-incomplete; full Omega=4096 not required)
+
+  Corollary: even-q6 fiber-complete subspace (128 generators)
+    |A|=128  rank=5  |Reach|=1024
+  [PASS] corollary_even_subspace_max_32_squared
+         rank=5 even subspace, |Reach|=1024=32^2
+
+  Report: rank vs |A| under random restriction (not gated)
+    even-q6 |A| in [20,64]: P(1024)=1.000  P(full)=0.000
+    |A|=24 even vs fiber-incomplete odd: P(even<odd)=1.000
+
+=====
+3. PARITY OBSTRUCTION
+=====
+  Even-q6 alphabets confine to even shells; full Omega requires odd shell.
+
+  even-q6 alphabet size: 128
+  |Reach| = 1024
+  shells hit: [0, 2, 4, 6]
+  odd shells present: False
+  [PASS] even_q6_no_odd_shells
+         shells = [0, 2, 4, 6]
+  [PASS] even_q6_not_full_omega
+         |Reach| = 1024 < 4096
+  [PASS] odd_q6_full_root_rank
+         rank=6, |Reach|=4096
+
+=====
+4. WORD CONFINEMENT (ROOT-ONLY ACTION)
+=====
+  Canonical W2 words from rest: orbit <= 128, shells {0, 6} only.
+
+  max |Reach| singleton W2(m): 2
+  |Reach| all W2:             128
+  shells all W2:              [0, 6]
+  [PASS] w2_singleton_orbit_le_128
+         max = 2
+  [PASS] w2_all_shells_horizon_only
+         shells = [0, 6]
+  [PASS] w2_all_orbit_equals_128
+         |Reach| = 128
+  [PASS] word_regime_horizon_confinement
+         128-state horizon orbit from rest
+
+  |Reach| W2+W2'+F from rest: 128
+  shells: [0, 6]
+  |Reach| W2+W2'+F from all comp horizon: 128
+  shells comp starts: [0, 6]
+  [PASS] k4_words_rest_le_128
+         |Reach| = 128
+  [PASS] k4_words_comp_horizon_shells_only
+         shells = [0, 6]
+
+=====
+5. ROOT-DIMENSION CRITICALITY HIERARCHY
+=====
+  Generator restriction dial p; weak (50%) and strong (90%) onsets.
+
+  p       span     full     spectrum h1_wk    word_evt 
+  -----
+  0.010   0.0934   0.0165   0.0110   0.0000   0.0000   
+  0.015   0.2551   0.0765   0.0459   0.0000   0.0000   
+  0.020   0.3807   0.1574   0.1269   0.0000   0.0000   
+  0.022   0.4975   0.2312   0.1457   0.0000   0.0000   
+  0.025   0.6100   0.3250   0.1950   0.0000   0.0000   
+  0.030   0.7400   0.5100   0.3150   0.0000   0.0000   
+  0.035   0.7950   0.7000   0.3950   0.0150   0.0000   
+  0.040   0.8950   0.7950   0.5050   0.0350   0.0000   
+  0.050   0.9750   0.9400   0.6400   0.1400   0.0000   
+  0.060   0.9900   0.9850   0.8350   0.4000   0.0000   
+  0.080   1.0000   1.0000   0.9300   0.8300   0.0050   
+  0.100   1.0000   1.0000   0.9950   0.9600   0.0000   
+  0.150   1.0000   1.0000   1.0000   1.0000   0.0450   
+  0.200   1.0000   1.0000   1.0000   1.0000   0.1500   
+  0.300   1.0000   1.0000   1.0000   1.0000   0.3900   
+  0.500   1.0000   1.0000   1.0000   1.0000   0.9700   
+  0.700   1.0000   1.0000   1.0000   1.0000   1.0000   
+  1.000   1.0000   1.0000   1.0000   1.0000   1.0000   
+
+  weak onset p_c (50%):
+    span         0.0221
+    full         0.0297
+    spectrum     0.0398
+    h1_wk        0.0647
+    word_evt     0.3379
+
+  strong onset p_c (50% of strong criterion):
+    h1_st        0.5020
+    unif_wk      0.2364
+    unif_st      0.8500
+    word_frac    0.8500
+  [PASS] weak_threshold_ordering
+         span < full < spectrum < h1_wk < word_evt
+
+  report: p_c(full) ~ 0.0297  (ref 0.029)
+  report: p_c(unif_st) ~ 0.8500  (ref 0.70)
+
+=====
+5b. HOLONOMY WORD SCALING
+=====
+  word_evt: any_microref_complete; mean frac vs p^4.
+  E[word_evt] = 1 - (1 - p^4)^64.
+
+  p       E[evt]    pred_evt    E[frac]   pred_frac   |err|   
+  -----
+  0.010   0.0000    0.0000      0.0000    0.0000      0.0000  
+  0.020   0.0000    0.0000      0.0000    0.0000      0.0000  
+  0.030   0.0000    0.0001      0.0000    0.0000      0.0001  
+  0.050   0.0033    0.0004      0.0001    0.0000      0.0029  
+  0.100   0.0033    0.0064      0.0001    0.0001      0.0030  
+  0.200   0.0967    0.0974      0.0016    0.0016      0.0007  
+  0.300   0.4533    0.4058      0.0093    0.0081      0.0476  
+  0.500   0.9867    0.9839      0.0666    0.0625      0.0041  
+  0.700   1.0000    1.0000      0.2380    0.2401      0.0021  
+  1.000   1.0000    1.0000      1.0000    1.0000      0.0000  
+  [PASS] word_availability_matches_analytic
+         max |E[evt] - (1-(1-p^4)^64)| <= 0.08, observed 0.0476
+  [PASS] mean_completion_matches_p4
+         max |E[frac] - p^4| <= 0.08, observed 0.0041
+
+=====
+6. FLUX NORMALIZATION BRIDGE
+=====
+  D from percolation loop census; Q_G=4*pi solid angle; G_kernel=Q_G/D.
+
+  D(full) = 24.000000
+  mean defect = 3.000000
+  Q_G = 4*pi = 12.5663706144
+  G_kernel = Q_G / D = 0.5235987756
+  (Q_G)^2 = 16*pi^2 = 157.9136704174
+  16*pi^2 / |K4| = 4*pi^2 = 39.4784176044
+  m_a = 0.1994711402
+  Q_G * m_a^2 = 0.5000000000
+  [PASS] plaquette_D_equals_24
+         D(full) = 24.000000
+  [PASS] mean_defect_equals_3
+         mean defect = 3.000000
+  [PASS] G_kernel_from_flux_over_D
+         G_kernel = 4*pi/24 = 0.5235987756
+  [PASS] Q_G_square_equals_16pi2
+         (Q_G)^2 = 16*pi^2
+  [PASS] sixteen_pi_sq_resolved_by_k4
+         16*pi^2 / |K4| = 4*pi^2
+  [PASS] discrete_root_squared_is_omega
+         64^2 = 4096
+  [PASS] aperture_spinorial_identity
+         Q_G * m_a^2 = 1/2
+
+  |H| / Q_G = 5.092958
+
+=====
+SUMMARY
+=====
+  gates: 27 pass, 0 fail, 27 total
+
+exit=0  duration=97.28s
+
+finished: 2026-07-04T02:58:58+03:00
+total_duration=1275.85s
+worst_exit=0

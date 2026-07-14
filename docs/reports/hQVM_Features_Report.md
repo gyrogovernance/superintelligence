@@ -1,4 +1,6 @@
-# Verified Quantum and Physics Features of the Gyroscopic hQVM Kernel
+# hQVM Features Report
+
+## Verified Quantum and Physics Features of the Gyroscopic hQVM Kernel
 
 Inventory of every verified quantum feature and physics result for the Gyroscopic ASI hQVM Kernel. Each entry names the evidence source, the verification method, and (where applicable) the executable experiment script.
 
@@ -13,7 +15,7 @@ Inventory of every verified quantum feature and physics result for the Gyroscopi
 | [Analysis_hQVM_Wavefunction.md](../references/Analysis_hQVM_Wavefunction.md) | Wavefunction theorems T1-T10 on Omega |
 | [Analysis_Gravity.md](../references/Analysis_Gravity.md) | Kernel gravity invariants and continuous field-theory bridge |
 | [Analysis_Compact_Geometry.md](../references/Analysis_Compact_Geometry.md) | Electroweak mass-coordinate law and compact ruler |
-| [Gyroscopic_ASI_SDK_Quantum_Computing.md](../Gyroscopic_ASI_SDK_Quantum_Computing.md) | Normative SDK specification cross-references |
+| [hQVM_SDK_Quantum_Computing.md](../specs/hQVM_SDK_Quantum_Computing.md) | Normative SDK specification cross-references |
 | [gyrogovernance/science](https://github.com/gyrogovernance/science) | Executable verification of the three analysis manuscripts (`experiments/hqvm_*.py`) |
 
 ---

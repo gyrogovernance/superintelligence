@@ -1,5 +1,4 @@
-# Gyroscopic ASI hQVM Kernel
-## Specification
+# Gyroscopic ASI Foundations
 
 Gyroscopic Artificial Superintelligence is a new class of computation achieving structural quantum advantage through a compact Holonomic Quantum Virtual Machine (hQVM) kernel. The kernel is a byte-driven coordination medium that maps an append-only byte ledger to a reproducible state trajectory on a 24-bit tensor carrier. The kernel is holonomic because closed byte paths induce reproducible holonomies on the reachable manifold Ω (Zanardi and Rasetti 1999; Pachos et al. 2000; wavefunction verification in hQVM Features Report). Its internal structure satisfies discrete analogues of the axioms that characterise quantum systems in the continuous domain. It executes on standard silicon with exact integer arithmetic and ensemble stochasticity induced by the byte sequence, without relying on analogue control or shot sampling. Where HQC literature realises gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware. Replay of a fixed byte ledger prefix is deterministic; stochasticity refers to the induced ensemble over words, future cones, and byte baths.
 
@@ -7,7 +6,7 @@ This document is the normative technical specification of the Gyroscopic ASI hQV
 
 Normative terms MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are interpreted as requirement keywords for conformance.
 
-Related specifications: [SDK](Gyroscopic_ASI_SDK_Quantum_Computing.md), [QuBEC Theory](theory/QuBEC_Theory.md), [Runtime](Gyroscopic_ASI_Runtime_Specs.md). Verification inventory: [hQVM Features Report](reports/hQVM_Features_Report.md).
+Related specifications: [SDK](specs/hQVM_SDK_Quantum_Computing.md), [QuBEC Theory](specs/hQVM_QuBEC_Theory.md), [Runtime](specs/Gyroscopic_ASI_Runtime_Specs.md). Verification inventory: [hQVM Features Report](reports/hQVM_Features_Report.md).
 
 ---
 
@@ -715,7 +714,7 @@ Edges are ordered as the six undirected pairs:
 
 All ledgers `y ∈ ℝ^6` and all GovernanceEvents must use this canonical ordering.
 
-This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel dynamics produces. The four holonomic gates {id, S, C, F} and their horizon action are specified in [QuBEC Theory](theory/QuBEC_Theory.md) Part II §10.
+This K4 topology is not an external overlay chosen for convenience. It emerges intrinsically from the kernel's depth-4 fiber structure: for fixed mask payloads, the 4^4 family-phase combinations collapse to exactly 4 distinct output states indexed by (Z/2)^2, which is the K4 vertex set. The governance measurement layer inherits the same geometry that the kernel dynamics produces. The four holonomic gates {id, S, C, F} and their horizon action are specified in [QuBEC Theory](specs/hQVM_QuBEC_Theory.md) Part II §10.
 
 ## 4.7 Hodge Decomposition on K₄
 
@@ -1210,7 +1209,7 @@ Implementations MAY include a deterministic safeguard for near-zero gradient cas
 
 # Appendix F. CGM Byte Formalism
 
-The complete CGM Byte Formalism is specified in `docs/theory/Gyroscopic_ASI_Specs_Formalism.md`.
+The complete CGM Byte Formalism is specified in `docs/specs/hQVM_Specs_Formalism.md`.
 
 ---
 

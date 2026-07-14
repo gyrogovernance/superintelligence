@@ -1,5 +1,8 @@
-# Gyroscopic Byte Formalism
-## The 6-Bit Runtime and Depth-4 Closure
+# hQVM Specifications Formalism
+
+## Gyroscopic Byte Formalism
+
+### The 6-Bit Runtime and Depth-4 Closure
 
 This document specifies the byte-level formalism of the Gyroscopic ASI hQVM Kernel: the palindromic structure of the 8-bit input byte, its decomposition into 2 boundary bits (family phase) and 6 payload bits (operational content), and the depth-4 closure that makes the byte the natural unit of the holonomic computation architecture.
 

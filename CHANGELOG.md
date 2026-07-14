@@ -12,6 +12,38 @@
 
 ---
 
+## [v2.0.9.4-hQVM_Research] – 2026-07-02 to 2026-07-15
+
+### Summary
+
+Integrated new reference analyses from the [science](https://github.com/gyrogovernance/science) research program into `docs/references/`. 
+
+### hQVM Kernel
+
+**Analysis: hQVM Percolation** (`docs/references/Analysis_hQVM_Percolation.md`)
+
+- Proves the Square-Root Cluster Theorem on the 4096-state kernel: under fiber-complete generator restriction, reachable cluster size is the square of transport rank, |Reach(A)| = (2^r(A))², with slope 2 fixed by the U × V product geometry before any random restriction is applied.
+- Reports an exact percolation census over the byte alphabet (plaquette normalization, holonomy coverage, shell connectivity) and specifies supervised benchmark tasks (Appendix A) that tie GF(2) transport rank to mechanistic interpretability ground truth.
+
+**Analysis: hQVM Cohomology** (`docs/references/Analysis_hQVM_Cohomology.md`)
+
+- Classifies transport obstructions on the hQVM transition category through a finite covering system, going beyond graph reachability to state what prevents a generator restriction from preserving ancestry globally.
+- Compares Boolean and Hilbert-lift sections on horizon ensembles, yielding the Grothendieck constant K_G^R(2) = √2; the residual aperture Δ = 1 − ρ is the obstruction this covering detects, and the CHSH measurement on the bipartite carrier makes the correspondence directly falsifiable.
+
+### Physics
+
+**Analysis: Gravity** (`docs/references/Analysis_Gravity.md`)
+
+- Derives gravitational coupling, three-dimensional structure, and causal order from CGM's Preservation of Ancestry, treating rest frame, dimensionality, and G as consequences of completing the four-phase cycle rather than as external inputs.
+- Connects the kernel aperture geometry and BU monodromy hierarchy to a nonlinear continuum formulation with predeclared null-model audits against the verified hQVM constants bridge.
+
+**Analysis: hQVM Wavefunction** (`docs/references/Analysis_hQVM_Wavefunction.md`)
+
+- Formalizes the wavefunction chart of the hQVM kernel: the canonical Hilbert lift ψ ∈ ℂ^4096 induced by the [12,6,2] self-dual code, with 4-byte words acting as unitary operators on the full reachable manifold.
+- Documents eigenspace structure {2048(+1), 2048(−1)}, holonomic phase accumulation, and interference coefficients verified by exhaustive enumeration on Ω, completing the three-chart hierarchy (carrier, chirality, wavefunction).
+
+---
+
 ## [v2.0.9.2-THM] – 2026-07-26
 
 ### Summary
@@ -2683,7 +2715,7 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 * Documented complete operational runtime including Coordinator, tools, and audit logs
 * Consolidated build procedures and reference helpers into appendices
 * Fixed section numbering and cross-references throughout
-* See [Gyroscopic ASI hQVM Kernel - Kernel Specification](/docs/Gyroscopic_ASI_Specs.md) for complete normative specification
+* See [Gyroscopic ASI Foundations](/docs/Gyroscopic_ASI_Foundations.md) for complete normative specification
 
 **General Corrections & Improvements**
 * Improved integration between specification and implementation

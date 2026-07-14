@@ -1,6 +1,6 @@
-# Gyroscopic ASI Specifications
+# Gyroscopic ASI SDK Network
 
-*An agent architecture for aligned intelligence built on the Gyroscopic ASI hQVM Kernel*
+*Multi-agent holographic networks for aligned intelligence built on the Gyroscopic ASI hQVM Kernel*
 
 ---
 
@@ -467,6 +467,6 @@ The architecture is complete and ready for implementation.
 ---
 
 **Repository**: github.com/gyrogovernance/superintelligence  
-**hQVM Kernel Specification**: docs/Gyroscopic_ASI_Specs.md  
+**hQVM Kernel Specification**: docs/Gyroscopic_ASI_Foundations.md  
 **Contact**: basilkorompilias@gmail.com
 

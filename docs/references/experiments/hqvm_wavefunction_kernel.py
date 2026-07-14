@@ -16,6 +16,7 @@ Sections:
     E. Quantum measurement identification — POVM, Born, Kraus
     F. Holographic hierarchy — |Space| = |Subspace|^2 at all scales
     G. Aperture collapse — 50% byte -> 2.07% word = wavefunction collapse
+    H. K4 / W2 verification — depth-4 half-word signatures and T2 pole swap
 """
 from __future__ import annotations
 
@@ -28,24 +29,29 @@ from typing import Final
 
 import numpy as np
 
-_REPO_ROOT = Path(__file__).resolve().parents[1]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.tools.gyroscopic.hQVM.constants import (
+from src.constants import (
     GENE_MAC_REST,
     LAYER_MASK_12,
+    byte_family,
+    byte_micro_ref,
     byte_to_intron,
     intron_family,
     is_on_equality_horizon,
     is_on_horizon,
     step_state_by_byte,
 )
-from src.tools.gyroscopic.hQVM.api import (
+from src.api import (
+    OmegaState12,
     chirality_word6,
     omega12_to_state24,
+    omega_word_signature,
     q_word6,
     state24_to_omega12,
+    step_omega12_by_byte,
 )
 
 # ════════════════════════════════════════════════════════════════════════
@@ -518,7 +524,176 @@ def _enumerate_omega() -> list[int]:
 
 
 # ════════════════════════════════════════════════════════════════════════
-# I. Diagnostics
+# I. K4 / W2 verification
+# ════════════════════════════════════════════════════════════════════════
+
+W2_BYTES: Final[tuple[int, int]] = (0xAA, 0xAB)
+W2P_BYTES: Final[tuple[int, int]] = (0x2A, 0x2B)
+CHI_FLIP_6: Final[int] = 0x3F
+
+
+def _code_shell(u6: int, v6: int) -> int:
+    return (int(u6) ^ int(v6)).bit_count()
+
+
+def _trace_omega12_word(
+    word: tuple[int, ...],
+    u6: int,
+    v6: int,
+) -> OmegaState12:
+    cur = OmegaState12(u6=u6, v6=v6)
+    for b in word:
+        cur = step_omega12_by_byte(cur, b)
+    return cur
+
+
+def _omega12_step_theory(fam: int, m: int, u: int, v: int) -> tuple[int, int]:
+    """Single-byte Omega12 step from QuBEC gyration rule (parity-1)."""
+    eps_a = CHI_FLIP_6 if fam in (1, 3) else 0
+    eps_b = CHI_FLIP_6 if fam in (2, 3) else 0
+    return (v ^ eps_a, u ^ m ^ eps_b)
+
+
+def _trace_omega12_theory(word: tuple[int, ...], u6: int, v6: int) -> tuple[int, int]:
+    u, v = u6, v6
+    for b in word:
+        u, v = _omega12_step_theory(byte_family(b), byte_micro_ref(b), u, v)
+    return u, v
+
+
+def _w2_affine(m: int, u: int, v: int) -> tuple[int, int]:
+    return (u ^ m ^ CHI_FLIP_6, v ^ m)
+
+
+def _w2p_affine(m: int, u: int, v: int) -> tuple[int, int]:
+    return (u ^ m, v ^ m ^ CHI_FLIP_6)
+
+
+def _w2_affine_swapped(m: int, u: int, v: int) -> tuple[int, int]:
+    """Single-byte fam-01 pattern (not the composed W2 word)."""
+    return (v ^ m ^ CHI_FLIP_6, u ^ m)
+
+
+@dataclass(frozen=True)
+class K4VerificationResult:
+    """Pass flags for K4 half-word checks on Omega."""
+    w2_sig_ok: bool
+    w2p_sig_ok: bool
+    w2_rest_ok: bool
+    w2p_rest_ok: bool
+    w2_involution_ok: bool
+    t2_chi_ok: bool
+    t2_shell_ok: bool
+    theory_w2_ok: bool
+    theory_w2p_ok: bool
+    affine_w2_ok: bool
+    swapped_is_fam01_ok: bool
+    omega_chart_ok: bool
+
+    @property
+    def all_pass(self) -> bool:
+        return all(getattr(self, f.name) for f in self.__dataclass_fields__.values())
+
+
+def verify_k4_w2() -> K4VerificationResult:
+    """Exhaustive K4 half-word checks against src.api step_omega12."""
+    sig_w2 = omega_word_signature(W2_BYTES)
+    sig_w2p = omega_word_signature(W2P_BYTES)
+    w2_sig_ok = (sig_w2.parity, sig_w2.tau_u6, sig_w2.tau_v6) == (0, 63, 0)
+    w2p_sig_ok = (sig_w2p.parity, sig_w2p.tau_u6, sig_w2p.tau_v6) == (0, 0, 63)
+
+    rest = state24_to_omega12(GENE_MAC_REST)
+    w2_out = _trace_omega12_word(W2_BYTES, rest.u6, rest.v6)
+    w2p_out = _trace_omega12_word(W2P_BYTES, rest.u6, rest.v6)
+    w2_rest_ok = (w2_out.u6, w2_out.v6) == (63, 63)
+    w2p_rest_ok = (w2p_out.u6, w2p_out.v6) == (0, 0)
+
+    w2_back = _trace_omega12_word(W2_BYTES, w2_out.u6, w2_out.v6)
+    w2_involution_ok = w2_back.u6 == rest.u6 and w2_back.v6 == rest.v6
+
+    chi_mismatch = 0
+    shell_mismatch = 0
+    for u6 in range(64):
+        for v6 in range(64):
+            om = OmegaState12(u6=u6, v6=v6)
+            out = _trace_omega12_word(W2_BYTES, u6, v6)
+            chi = om.chirality6
+            chi_p = out.chirality6
+            if chi_p != (chi ^ CHI_FLIP_6):
+                chi_mismatch += 1
+            if _code_shell(out.u6, out.v6) != (6 - _code_shell(u6, v6)):
+                shell_mismatch += 1
+    t2_chi_ok = chi_mismatch == 0
+    t2_shell_ok = shell_mismatch == 0
+
+    th_w2 = _trace_omega12_theory(W2_BYTES, rest.u6, rest.v6)
+    th_w2p = _trace_omega12_theory(W2P_BYTES, rest.u6, rest.v6)
+    kr_w2 = (w2_out.u6, w2_out.v6)
+    kr_w2p = (w2p_out.u6, w2p_out.v6)
+    theory_w2_ok = th_w2 == kr_w2
+    theory_w2p_ok = th_w2p == kr_w2p
+    affine_w2_ok = _w2_affine(0, rest.u6, rest.v6) == kr_w2
+    swapped_is_fam01_ok = _w2_affine_swapped(0, rest.u6, rest.v6) == _omega12_step_theory(
+        1, 0, rest.u6, rest.v6
+    )
+
+    s24 = GENE_MAC_REST
+    for b in W2_BYTES:
+        s24 = step_state_by_byte(s24, b)
+    omega_chart_ok = omega12_to_state24(w2_out) == s24
+
+    return K4VerificationResult(
+        w2_sig_ok=w2_sig_ok,
+        w2p_sig_ok=w2p_sig_ok,
+        w2_rest_ok=w2_rest_ok,
+        w2p_rest_ok=w2p_rest_ok,
+        w2_involution_ok=w2_involution_ok,
+        t2_chi_ok=t2_chi_ok,
+        t2_shell_ok=t2_shell_ok,
+        theory_w2_ok=theory_w2_ok,
+        theory_w2p_ok=theory_w2p_ok,
+        affine_w2_ok=affine_w2_ok,
+        swapped_is_fam01_ok=swapped_is_fam01_ok,
+        omega_chart_ok=omega_chart_ok,
+    )
+
+
+def print_k4_w2_verification(result: K4VerificationResult) -> None:
+    """Print K4 / W2 verification measurements and PASS/FAIL checks."""
+    rest = state24_to_omega12(GENE_MAC_REST)
+    w2_out = _trace_omega12_word(W2_BYTES, rest.u6, rest.v6)
+
+    print("H. K4 / W2 VERIFICATION")
+    print("-" * 5)
+    sig_w2 = omega_word_signature(W2_BYTES)
+    sig_w2p = omega_word_signature(W2P_BYTES)
+    print(f"  W2 signature (parity, tau_u6, tau_v6): ({sig_w2.parity}, {sig_w2.tau_u6}, {sig_w2.tau_v6})")
+    print(f"  PASS W2 sig == (0, 63, 0): {result.w2_sig_ok}")
+    print(f"  W2' signature (parity, tau_u6, tau_v6): ({sig_w2p.parity}, {sig_w2p.tau_u6}, {sig_w2p.tau_v6})")
+    print(f"  PASS W2' sig == (0, 0, 63): {result.w2p_sig_ok}")
+
+    print(f"\n  rest (u6,v6): ({rest.u6}, {rest.v6})  chi={rest.chirality6:#04x}  code_shell={_code_shell(rest.u6, rest.v6)}")
+    print(f"  W2(rest) -> ({w2_out.u6}, {w2_out.v6})  chi={w2_out.chirality6:#04x}  state24={omega12_to_state24(w2_out):#08x}")
+    print(f"  PASS W2 rest -> (63, 63) equality horizon: {result.w2_rest_ok}")
+    print(f"  PASS W2^2 == id on rest: {result.w2_involution_ok}")
+    print(f"  PASS omega12 chart == step_state_by_byte: {result.omega_chart_ok}")
+
+    print(f"\n  T2 over 4096 states: chi' != chi^63 mismatches = {0 if result.t2_chi_ok else 'FAIL'}")
+    print(f"  PASS T2 chi flip: {result.t2_chi_ok}")
+    print(f"  PASS T2 code_shell s -> 6-s: {result.t2_shell_ok}")
+
+    th_w2 = _trace_omega12_theory(W2_BYTES, rest.u6, rest.v6)
+    print(f"\n  theory step W2(rest): {th_w2}")
+    print(f"  kernel step W2(rest): ({w2_out.u6}, {w2_out.v6})")
+    print(f"  affine W2 (u^m^63, v^m): {_w2_affine(0, rest.u6, rest.v6)}")
+    print(f"  swapped (v^m^63, u^m): {_w2_affine_swapped(0, rest.u6, rest.v6)}  [single-byte fam-01 only]")
+    print(f"  PASS theory == kernel: {result.theory_w2_ok}")
+    print(f"  PASS affine formula == kernel: {result.affine_w2_ok}")
+    print(f"  PASS swapped formula == single-byte fam-01: {result.swapped_is_fam01_ok}")
+
+
+# ════════════════════════════════════════════════════════════════════════
+# J. Diagnostics
 # ════════════════════════════════════════════════════════════════════════
 
 def run_diagnostics() -> None:
@@ -627,15 +802,32 @@ def run_diagnostics() -> None:
     print(f"\n  Compression ratio: {compression:.1f}x  (50% -> {APERTURE_GAP:.4f})")
     print("  Spinorial averaging of byte-level fold disagreement to A*")
 
+    k4 = verify_k4_w2()
+    print()
+    print_k4_w2_verification(k4)
+
     k.entangled_spectrum = list(spectrum)
 
 
 # ════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
+    import argparse
     import codecs
+
+    parser = argparse.ArgumentParser(description="hQVM wavefunction kernel diagnostics")
+    parser.add_argument(
+        "--k4-only",
+        action="store_true",
+        help="Run section H (K4 / W2 verification) only",
+    )
+    args = parser.parse_args()
+
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
-    run_diagnostics()
+    if args.k4_only:
+        print_k4_w2_verification(verify_k4_w2())
+    else:
+        run_diagnostics()
 
 
 if __name__ == "__main__":

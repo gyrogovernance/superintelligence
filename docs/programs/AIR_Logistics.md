@@ -15,7 +15,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - The **Common Governance Model** provides the theoretical foundation. It formalises the minimal conditions required for coherent governance and demonstrates that these conditions require four distinct capacities operating in balance.
 
-- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in [Gyroscopic ASI Specifications](Gyroscopic_ASI_Specs.md), Appendix G.
+- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in [Gyroscopic ASI Foundations](../Gyroscopic_ASI_Foundations.md), Appendix G.
 
 - The **Gyroscope Protocol** provides the work classification system. It categorises human contribution into four types corresponding to the governance capacities, ensuring that labour supports the requirements of coherent governance.
 

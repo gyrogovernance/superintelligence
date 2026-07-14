@@ -277,7 +277,7 @@ Acceptance criteria, evaluation standards, payment decisions, and all policy jud
 ## Documentation & Links
 
 ### hQVM Kernel Specification
-- [**Gyroscopic ASI Specifications**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Specs.md): Complete technical specification of the hQVM Kernel
+- [**Gyroscopic ASI Foundations**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_Foundations.md): Complete technical specification of the hQVM Kernel
 - [**hQVM Kernel Implications & Potential**](https://github.com/gyrogovernance/tools/blob/main/docs/Gyroscopic_ASI_Implications.md): Use cases and deployment scenarios
 - [**hQVM Verification Reports**](https://github.com/gyrogovernance/superintelligence/tree/main/docs/reports): Test results confirming the kernel's holonomic gate structure, CHSH saturation, and structural quantum advantages on Ω
 

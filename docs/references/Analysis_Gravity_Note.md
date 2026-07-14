@@ -1,4 +1,7 @@
-# Gravitational Theory in the Common Governance Model: Causal Preservation of Ancestry through Identity and Individuality
+# Analysis: Gravity Note
+
+## Gravitational Theory in the Common Governance Model: Causal Preservation of Ancestry through Identity and Individuality
+
 [Work in Progress]
 
 
@@ -419,15 +422,15 @@ The 24-bit state (A, B) decomposes into two 12-bit gyrophases over a 2 x 3 x 2 b
 The depth-4 canonical half-word W₂ acts on the Omega12 coordinates as:
 
 ```text
-(u, v) → (v ⊕ m ⊕ 63, u ⊕ m)
+(u, v) → (u ⊕ m ⊕ 63, v ⊕ m)
 ```
 
-where (u, v) are the Omega12 coordinates of the active and passive faces and m is the 6-bit micro-reference mask.
+where (u, v) are the Omega12 coordinates of the active and passive faces and m is the 6-bit micro-reference mask. (Composed two-byte depth-4 half-word: the (u, v) order is preserved; the single-byte fam-01 action is the swap `(v ⊕ m ⊕ 63, u ⊕ m)`, not W₂.)
 
 Taking the XOR of the output components yields the new chirality:
 
 ```text
-χ' = u' ⊕ v' = (v ⊕ m ⊕ 63) ⊕ (u ⊕ m) = (u ⊕ v) ⊕ 63 = χ ⊕ 63
+χ' = u' ⊕ v' = (u ⊕ m ⊕ 63) ⊕ (v ⊕ m) = (u ⊕ v) ⊕ 63 = χ ⊕ 63
 ```
 
 where χ = u ⊕ v is the chirality register before the transition.
@@ -614,7 +617,7 @@ The rest-frame energy equals +M_obs c²/4, balancing the self-energy locally. Se
 
 [11] Korompilias, B. (2025). Formal proof of three-dimensional necessity and six degrees of freedom in the Common Governance Model. Companion analysis (docs/Findings/Analysis_3D_6DOF_Proof.md).
 
-[12] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/Gyroscopic_Computational_Theory/Gyroscopic_ASI_Specs.md).
+[12] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/specs/hQVM_Specs_Formalism.md).
 
 [13] Korompilias, B. (2025). The fine-structure constant from geometric first principles. Companion analysis (docs/Findings/Analysis_Fine_Structure.md).
 

@@ -1,4 +1,6 @@
-# Gravitational Theory in the Common Governance Model: Causal Preservation of Ancestry through Identity and Individuality
+# Analysis: Gravity
+
+## Gravitational Theory in the Common Governance Model: Causal Preservation of Ancestry through Identity and Individuality
 
 ## 1. Introduction
 
@@ -1164,7 +1166,7 @@ Section 7.4 uses α₀ in the product α₀ ζ = ρ⁴/(π √3) for gravitation
 [14] Korompilias, B. (2025). Common Governance Model: Mathematical Physics Framework. Zenodo. DOI: 10.5281/zenodo.17521384.
 [15] Korompilias, B. (2025). Formal proof of three-dimensional necessity and six degrees of freedom in the Common Governance Model. Companion analysis (docs/Findings/Analysis_3D_6DOF_Proof.md).
 [16] Korompilias, B. (2025). Compact geometry: Spectral algebra of the electroweak mass spectrum. Companion analysis (docs/Findings/Analysis_Compact_Geometry.md).
-[17] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/Gyroscopic_Computational_Theory/Gyroscopic_ASI_Specs.md).
+[17] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/specs/hQVM_Specs_Formalism.md).
 [18] Mashhoon, B. (2003). Gravitoelectromagnetism: A Brief Review. In The Measurement of Gravitomagnetism: A Challenging Enterprise, 31-42. New York: Nova Science.
 [19] Mashhoon, B. (2008). Gravitoelectromagnetism. In Reference Frames, 29-39. Berlin: Springer.
 [20] Arnowitt, R., Deser, S. and Misner, C. W. (1962). The dynamics of general relativity. In Gravitation: An Introduction to Current Research, 227-265. New York: Wiley.

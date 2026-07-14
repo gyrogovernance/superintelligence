@@ -1,4 +1,5 @@
-# QuBEC Climate Control Report
+# hQVM Climate Tests Report
+
 ## Stress-Testing the hQVM Architecture on Bolmo-1B
 
 ## Executive Summary

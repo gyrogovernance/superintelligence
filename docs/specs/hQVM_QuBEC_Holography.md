@@ -1,6 +1,6 @@
-# Gyroscopic ASI hQVM Kernel: Holographic Algorithm Formalization
+# hQVM QuBEC Holography
 
-## Introduction
+## Holographic Algorithm Formalization
 
 This document formalizes the architecture of the Gyroscopic ASI hQVM Kernel as a holographic algorithm. The router implements a discrete physical system whose state space, transition rules, and measurement observables are derived directly from the Common Governance Model (CGM) axiom. The architecture consists of five distinct layers:
 

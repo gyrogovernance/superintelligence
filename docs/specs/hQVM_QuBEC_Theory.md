@@ -1762,5 +1762,5 @@ In gate-model quantum computing, Grover's algorithm rests on two Householder ref
 
 ## Repository Context
 
-Read with [Gyroscopic_ASI_Specs.md](../Gyroscopic_ASI_Specs.md), [Gyroscopic_ASI_SDK_Quantum_Computing.md](../Gyroscopic_ASI_SDK_Quantum_Computing.md), and [Gyroscopic_ASI_Runtime_Specs.md](../Gyroscopic_ASI_Runtime_Specs.md).
-Optional: [Gyroscopic_ASI_Specs_Formalism.md](Gyroscopic_ASI_Specs_Formalism.md), [Gyroscopic_ASI_Holography.md](Gyroscopic_ASI_Holography.md), [Analysis_Gyroscopic_Multiplication.md](../references/Analysis_Gyroscopic_Multiplication.md).
+Read with [Gyroscopic_ASI_Foundations.md](../Gyroscopic_ASI_Foundations.md), [hQVM_SDK_Quantum_Computing.md](hQVM_SDK_Quantum_Computing.md), and [Gyroscopic_ASI_Runtime_Specs.md](Gyroscopic_ASI_Runtime_Specs.md).
+Optional: [hQVM_Specs_Formalism.md](hQVM_Specs_Formalism.md), [hQVM_QuBEC_Holography.md](hQVM_QuBEC_Holography.md), [Analysis_Gyroscopic_Multiplication.md](../references/Analysis_Gyroscopic_Multiplication.md).
