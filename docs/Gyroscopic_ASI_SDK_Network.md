@@ -467,6 +467,6 @@ The architecture is complete and ready for implementation.
 ---
 
 **Repository**: github.com/gyrogovernance/superintelligence  
-**hQVM Kernel Specification**: docs/Gyroscopic_ASI_Foundations.md  
+**hQVM Kernel Specification**: `docs/Gyroscopic_ASI_Foundations.md`  
 **Contact**: basilkorompilias@gmail.com
 

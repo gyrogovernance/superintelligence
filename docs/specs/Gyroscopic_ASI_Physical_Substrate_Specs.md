@@ -29,7 +29,7 @@ This specification operates within the scientific and architectural commitments 
 
 1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations (Governance, Information, Inference, and Intelligence) on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
 
-2. **The Human Mark (THM):** an alignment framework classifying category errors between human (Direct) and artificial (Indirect) Authority and Agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not constitute Direct Authority or Agency, decide, or authorize. See [Gyroscopic ASI Foundations](../Gyroscopic_ASI_Foundations.md), Appendix G, for the canonical Mark block.
+2. **The Human Mark (THM):** an alignment framework classifying category errors between human (Direct) and artificial (Indirect) Authority and Agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not constitute Direct Authority or Agency, decide, or authorize. See [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md), Appendix G, for the canonical Mark block.
 
 3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
 4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition rule, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
@@ -65,7 +65,7 @@ The substrate inherits no assumptions about upstream or downstream architecture 
 These substrate specifications draw formal constraints from the:
 
 - **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, monodromy defect δ_BU, canonical aperture A*)
-- **The Human Mark (THM):** defining Direct (human) and Indirect (artificial) class distinctions for AI governance risk classification. Canonical Mark: [Gyroscopic ASI Foundations](../Gyroscopic_ASI_Foundations.md), Appendix G.
+- **The Human Mark (THM):** defining Direct (human) and Indirect (artificial) class distinctions for AI governance risk classification. Canonical Mark: [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md), Appendix G.
 - **Gyroscopic Global Governance (GGG):** defining the operational significance of aperture, alignment, and post-AGI equilibrium
 - **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition rule, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
 
@@ -100,7 +100,7 @@ This specification depends on the following external definitions:
 - The derivation of invariant values from operational coherence requirements
 - The prohibition on absolute opposition (θ = π), which follows from the ONA constraint
 
-**Gyroscopic ASI hQVM Kernel Specification:** The normative digital reference implementation defining the state model, transition rule, mask code, and all kernel invariants. See `docs/Gyroscopic_ASI_Foundations.md`.
+**Gyroscopic ASI hQVM Kernel Specification:** The normative digital reference implementation defining the state model, transition rule, mask code, and all kernel invariants. See [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md).
 
 **hQVM Substrate Controller:** The hardware control interface that translates between canonical byte operations and physical optical parameters. The controller implements the public hQVM transition rule and manages state readout, quantization, and conformance verification.
 

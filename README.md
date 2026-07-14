@@ -172,29 +172,29 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 🧭 [Strategic Significance Brief](docs/Gyroscopic_ASI_SDK_Strategic_Significance_Brief.md) - Why this kernel matters for ASI and governance
 - 🔮 [hQVM Kernel Implications and Potential](docs/Gyroscopic_ASI_Implications.md) - Advantages and use cases
 - ✅ [hQVM Features Report](docs/reports/hQVM_Features_Report.md) - Master inventory of verified quantum and physics features (Tiers A/B/C)
-- 🚛 [AIR Brief](docs/AIR_Brief.md) - Safety work and programs
-- 🧪 [QuBEC Climate Control Brief](docs/theory/QuBEC_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
-- 💰 [Moments Economy Whitepaper](docs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
+- 🚛 [AIR Brief](docs/programs/AIR_Brief.md) - Safety work and programs
+- 🧪 [Computational Climate Control Brief](docs/programs/Computational_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
+- 💰 [Moments Economy Whitepaper](docs/programs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Core Specifications
 
-Read in layer order: **Kernel** → **SDK** → **QuBEC Theory** → **Runtime**.
+Read in layer order: **Foundations** → **SDK** → **QuBEC Theory** → **Runtime**.
 
 | | Document | Role | Primary audience |
 |---|----------|------|------------------|
-| 📖 | [Kernel Specifications](docs/Gyroscopic_ASI_Specs.md) | Normative byte law, state space, replay, and governance measurement | Kernel implementers |
-| 🧠 | [Quantum Computing SDK](docs/Gyroscopic_ASI_SDK_Quantum_Computing.md) | Computational contract: operations, semantics, conformance | SDK users and integrators |
-| 🧪 | [QuBEC Theory](docs/theory/QuBEC_Theory.md) | Mathematical foundation: thermodynamics, hardware-tier architecture, transport, transforms, operator lowering, quantum structure | Researchers and reviewers |
-| ⚙️ | [Gyroscopic Runtime Specification](docs/Gyroscopic_ASI_Runtime_Specs.md) | Multicellular QCA execution, bridges, and operational lowering | Runtime implementers |
-| 📐 | [Specifications Formalism](docs/theory/Gyroscopic_ASI_Specs_Formalism.md) | Proofs, byte formalism, and formal lemmas | Formal verification |
-| 🌐 | [Holographic Algorithm Formalization](docs/theory/Gyroscopic_ASI_Holography.md) | State-space encoding and holographic dictionaries | Encoding and compression |
+| 📖 | [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md) | Kernel architecture, byte law, state space, replay, and governance measurement | Kernel implementers |
+| 🧠 | [Quantum Computing SDK](docs/specs/hQVM_SDK_Quantum_Computing.md) | Computational contract: operations, semantics, conformance | SDK users and integrators |
+| 🧪 | [QuBEC Theory](docs/specs/hQVM_QuBEC_Theory.md) | Mathematical foundation: thermodynamics, hardware-tier architecture, transport, transforms, operator lowering, quantum structure | Researchers and reviewers |
+| ⚙️ | [Gyroscopic Runtime Specification](docs/specs/Gyroscopic_ASI_Runtime_Specs.md) | Multicellular QCA execution, bridges, and operational lowering | Runtime implementers |
+| 📐 | [Specifications Formalism](docs/specs/hQVM_Specs_Formalism.md) | Proofs, byte formalism, and formal lemmas | Formal verification |
+| 🌐 | [Holographic Algorithm Formalization](docs/specs/hQVM_QuBEC_Holography.md) | State-space encoding and holographic dictionaries | Encoding and compression |
 
 
 ### Extensions
-- 🚛 [AIR Logistics Framework](docs/AIR_Logistics.md) - Governance flows and verification
-- 💰 [Moments Economy Architecture](docs/AIR_Moments_Economy_Specs.md) - Monetary settlement from coordination
-- 📜 [Moments Genealogies Specification](docs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
-- 💳 [Pulse Wallet Specification](docs/AIR_Moments_Wallet.md) - Capacity wallet for grammar-compliant recognition and repair
+- 🚛 [AIR Logistics Framework](docs/programs/AIR_Logistics.md) - Governance flows and verification
+- 💰 [Moments Economy Architecture](docs/programs/AIR_Moments_Economy_Specs.md) - Monetary settlement from coordination
+- 📜 [Moments Genealogies Specification](docs/programs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
+- 💳 [Pulse Wallet Specification](docs/programs/AIR_Moments_Wallet.md) - Capacity wallet for grammar-compliant recognition and repair
 
 
 ### Additional SDK surfaces
@@ -205,7 +205,7 @@ Core quantum SDK contract is in the table above. Extension specs:
 - 🌐 [The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) - Internet coordination layer
 
 ### Experimental
-- 🧬 [Substrate: Physical Memory Specification](docs/Gyroscopic_ASI_Substrate_Specs.md) - Memory and carrier layout
+- 🧬 [Substrate: Physical Memory Specification](docs/specs/Gyroscopic_ASI_Physical_Substrate_Specs.md) - Memory and carrier layout
 
 ### Test Reports
 
@@ -216,9 +216,9 @@ All kernel properties verified by exhaustive test suites (499 tests, all passing
 - 📊 [Moments Tests Report](docs/reports/Moments_Tests_Report.md) - Ledger replay tests
 - 📊 [hQVM Verification Report](docs/reports/hQVM_Tests_Report_1.md) - Algebraic properties verified (185 tests)
 - 📊 [hQVM Verification Report II](docs/reports/hQVM_Tests_Report_2.md) - Extended kernel and SDK tests (122 tests)
-- 📊 [QuBEC Climate Tests Report](docs/reports/QuBEC_Climate_Tests_Report.md) - Climate helper and transport diagnostics validation
+- 📊 [hQVM Climate Tests Report](docs/reports/hQVM_Climate_Tests_Report.md) - Climate helper and transport diagnostics validation
 - 📊 [hQVM Speed Tests Report](docs/reports/hQVM_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
-- 📊 [Alignment Measurement Report](docs/reports/Alignment_Measurement_Report.md) - Governance balance metrics
+- 📊 [Measurement Tests Report](docs/reports/Measurement_Tests_Report.md) - Governance balance metrics and epistemic vs empirical evaluation
 
 ### The Human Mark (THM)
 
@@ -235,10 +235,26 @@ Canonical source: [gyrogovernance/tools](https://github.com/gyrogovernance/tools
 - 📖 [THM MechInterp](docs/references/the_human_mark/THM_MechInterp.md) - Mechanistic interpretability mapping
 
 ### Supporting Theory
+
+**CGM foundations**
 - 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) - Shared coordination theory
+- 📖 [CGM Logic](docs/references/CGM_Logic.md) - Construction chain from common source to operational structure
+- 📖 [CGM Research Program](docs/references/CGM_Program.md) - Comprehensive research guide and derivation map
+
+**CGM analyses**
+- 📖 [Analysis: CGM Constants](docs/references/Analysis_CGM_Constants.md) - Mathematical structure of fundamental constants and the aperture parameter
+- 📖 [Analysis: CGM Units](docs/references/Analysis_CGM_Units.md) - Geometric foundation of physical units and energy scales
+- 📖 [Analysis: Monodromy](docs/references/Analysis_Monodromy.md) - Geometric memory across closed loops and fine-structure connections
+- 📖 [Analysis: Gravity](docs/references/Analysis_Gravity.md) - Gravitational theory from causal preservation of ancestry
+- 📖 [Analysis: Gravity Note](docs/references/Analysis_Gravity_Note.md) - Work-in-progress companion to the gravity analysis
+
+**hQVM analyses**
 - 📖 [Analysis: Gyroscopic Multiplication](docs/references/Analysis_Gyroscopic_Multiplication.md) - Arithmetic layer and cross-layer structural analysis
-- 📖 [Analysis: Compact Geometry](docs/references/Analysis_Compact_Geometry.md) - Geometric foundations of state-space structure
-- 📖 [Gyroscopic Global Governance (GGG)](docs/references/GGG_Paper.md) - Four domains framework
+- 📖 [Analysis: hQVM Cohomology](docs/references/Analysis_hQVM_Cohomology.md) - Étale cohomology, Grothendieck structure, and transport obstructions
+- 📖 [Analysis: hQVM Percolation](docs/references/Analysis_hQVM_Percolation.md) - Generator-restricted percolation and universality of ancestry preservation
+- 📖 [Analysis: hQVM Percolation Note](docs/references/Analysis_hQVM_Percolation_Note.md) - Companion note to the percolation analysis
+- 📖 [Analysis: hQVM Wavefunction](docs/references/Analysis_hQVM_Wavefunction.md) - Wavefunction chart analysis of the hQVM kernel
+- 📖 [Analysis: hQVM Wavefunction Corrections](docs/references/Analysis_hQVM_Wavefunction_Corrections.md) - Coordinate and signature reference for the wavefunction kernel
 
 ---
 

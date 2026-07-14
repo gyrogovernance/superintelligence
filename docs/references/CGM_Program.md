@@ -291,7 +291,7 @@ GyroSI is a computational implementation of CGM's principles, representing intel
 
 ## 8. Computational Verification and Reproducibility
 
-Every major claim in this program is backed by runnable Python in `experiments/` and a matching analysis note in `docs/Findings/`. The hQVM kernel test suite documents **243 verified features** across three verification tiers: 165 kernel pytests (Tier A), 72 science-repo executables (Tier B), and 6 formal manuscript proofs (Tier C). This includes CHSH-Tsirelson saturation, quantum teleportation, Peres-Mermin contextuality, and the complete K4/wavefunction/holography closure chain. See [hQVM Features Report](../reports/hQVM_Features_Report.md).
+Every major claim in this program is backed by runnable Python in `experiments/` and a matching analysis note in `docs/Findings/`. The hQVM kernel test suite documents **243 verified features** across three verification tiers: 165 kernel pytests (Tier A), 72 science-repo executables (Tier B), and 6 formal manuscript proofs (Tier C). This includes CHSH-Tsirelson saturation, quantum teleportation, Peres-Mermin contextuality, and the complete K4/wavefunction/holography closure chain. See [hQVM Features Report](docs/reports/hQVM_Features_Report.md).
 
 The repository currently contains:
 

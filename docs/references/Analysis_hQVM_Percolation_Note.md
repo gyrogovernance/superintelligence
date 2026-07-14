@@ -8,7 +8,7 @@
 
 ---
 
-The findings manuscript [`Analysis_hQVM_Percolation.md`](Analysis_hQVM_Percolation.md) reports generator-restricted percolation on the Common Governance Model (CGM) kernel, including exact transport-rank scaling, register-protocol thresholds, coverage hierarchies, and census saturation under partial byte access. This note develops the surrounding material at greater length than the census document carries, covering audience and cross-references, the observable-to-mechanism structure of the kernel, and the connection between its product geometry and the Hilbert-space lift.
+The findings manuscript [Analysis hQVM Percolation](docs/Findings/Analysis_hQVM_Percolation.md) reports generator-restricted percolation on the Common Governance Model (CGM) kernel, including exact transport-rank scaling, register-protocol thresholds, coverage hierarchies, and census saturation under partial byte access. This note develops the surrounding material at greater length than the census document carries, covering audience and cross-references, the observable-to-mechanism structure of the kernel, and the connection between its product geometry and the Hilbert-space lift.
 
 ## 1. Scope and intended reader
 
@@ -26,7 +26,7 @@ The labels physics-informed, physics-guided, and physics-constrained in current 
 |-------------------|------------|------|
 | Mechanistic interpretability, AI safety | Findings §1.8, Appendix A | Findings §3 (rank theorem), §5 (threshold hierarchy) |
 | Percolation, probability | Findings §1.1-1.2, §4.3.5 | Findings §5-6 (census), Appendix B (protocol) |
-| Mathematical physics, CGM | Findings §2-3, `hQVM_Features_Report.md` | `Analysis_hQVM_Wavefunction.md`, `Analysis_Gravity.md` |
+| Mathematical physics, CGM | Findings §2-3, [hQVM Features Report](docs/reports/hQVM_Features_Report.md) | [Analysis: hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md), [Analysis: Gravity](docs/Findings/Analysis_Gravity.md) |
 | Implementation, reproduction | Appendix B, `experiments/hqvm_percolation_analysis*.py` | `gyroscopic/hQVM/`, superintelligence repository tests |
 
 ## 2. Document and repository map
@@ -35,22 +35,22 @@ The labels physics-informed, physics-guided, and physics-constrained in current 
 
 | Document | Role | Verification |
 |----------|------|--------------|
-| [`Analysis_hQVM_Percolation.md`](Analysis_hQVM_Percolation.md) | Generator-restricted percolation census; square-root scaling; Appendix A benchmark specification | `hqvm_percolation_analysis_results.txt`, `hqvm_percolation_analysis_5_results.txt` |
-| [`Analysis_hQVM_Percolation_Note.md`](Analysis_hQVM_Percolation_Note.md) | This companion note | Cross-references only |
-| [`Analysis_hQVM_Wavefunction.md`](Analysis_hQVM_Wavefunction.md) | Spinorial operators; theorems T1-T10; shadow pairs; word confinement | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` |
-| [`Analysis_Gravity.md`](Analysis_Gravity.md) | Kernel gravity invariants; mask code C64; continuous field bridge | `hqvm_gravity_analysis_*.py`, `hqvm_gravity_runner.py` |
-| [`Analysis_Gravity_Note.md`](Analysis_Gravity_Note.md) | Shorter gravitational theory note | Manuscript arguments |
-| [`Analysis_Gravity_Quadratic_Note.md`](Analysis_Gravity_Quadratic_Note.md) | Quadratic-gravity inflation prerequisites from combinatorial axioms | Cross-reference to gravity analysis |
+| [Analysis hQVM Percolation](docs/Findings/Analysis_hQVM_Percolation.md) | Generator-restricted percolation census; square-root scaling; Appendix A benchmark specification | `hqvm_percolation_analysis_results.txt`, `hqvm_percolation_analysis_5_results.txt` |
+| [Analysis hQVM Percolation Note](docs/Findings/Analysis_hQVM_Percolation_Note.md) | This companion note | Cross-references only |
+| [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) | Spinorial operators; theorems T1-T10; shadow pairs; word confinement | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` |
+| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) | Kernel gravity invariants; mask code C64; continuous field bridge | `hqvm_gravity_analysis_*.py`, `hqvm_gravity_runner.py` |
+| [Analysis Gravity Note](docs/Findings/Analysis_Gravity_Note.md) | Shorter gravitational theory note | Manuscript arguments |
+| [Analysis Gravity Quadratic Note](docs/Findings/Analysis_Gravity_Quadratic_Note.md) | Quadratic-gravity inflation prerequisites from combinatorial axioms | Cross-reference to gravity analysis |
 
-### 2.2 Theory, specifications, and verification inventory (science repository)
+### 2.2 Theory, specifications, and verification inventory (superintelligence repository)
 
 | Document | Role |
 |----------|------|
-| [`hQVM_Features_Report.md`](../reports/hQVM_Features_Report.md) | Inventory of verified quantum and physics features; CHSH-Tsirelson certificates; script map |
-| [`QuBEC_Theory.md`](../specs/hQVM_QuBEC_Theory.md) | QuBEC formalism and thermodynamic structure |
-| [`Gyroscopic_ASI_Foundations.md`](../Gyroscopic_ASI_Foundations.md) | Normative hQVM and SDK specification |
-| [`CGM_Paper.md`](../CGM_Paper.md) | Consolidated CGM manuscript |
-| [`CommonGovernanceModel.md`](../CommonGovernanceModel.md) | Programme overview and bibliography |
+| [hQVM Features Report](docs/reports/hQVM_Features_Report.md) | Inventory of verified quantum and physics features; CHSH-Tsirelson certificates; script map |
+| [QuBEC Theory](docs/specs/hQVM_QuBEC_Theory.md) | QuBEC formalism and thermodynamic structure |
+| [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md) | Normative hQVM and SDK specification |
+| [CGM Paper](docs/CGM_Paper.md) | Consolidated CGM manuscript |
+| [Common Governance Model](docs/CommonGovernanceModel.md) | Programme overview and bibliography |
 
 ### 2.3 Executable kernel (superintelligence repository)
 
@@ -84,7 +84,7 @@ The product structure also fixes where the square root sits. In standard bond pe
 
 ## 4. Composition depth and regime change
 
-The same 256 byte operators act at two levels of the multiplicative structure. Single-byte L-type steps operate on the full product U x V and connect across all seven shells when transport diversity is sufficient. Canonical four-byte R-type words act within the root H and confine reachability from horizon anchors to the constitutional poles (Findings §4.1; `Analysis_hQVM_Wavefunction.md`, Theorems T1-T10). The generator set is identical in both regimes. The reachability profile differs by composition depth alone.
+The same 256 byte operators act at two levels of the multiplicative structure. Single-byte L-type steps operate on the full product U x V and connect across all seven shells when transport diversity is sufficient. Canonical four-byte R-type words act within the root H and confine reachability from horizon anchors to the constitutional poles (Findings §4.1; [Analysis: hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md), Theorems T1-T10). The generator set is identical in both regimes. The reachability profile differs by composition depth alone.
 
 Word-level confinement is a verified property of Omega, not a statistical tendency. From a horizon anchor the depth-four word closure keeps trajectories on shells 0 and 6, and the shuffle control in Appendix A.2 destroys this confinement while preserving label statistics. The kernel therefore offers a controlled setting where changing composition depth changes which observables are reachable without changing the underlying operators.
 
@@ -98,7 +98,7 @@ The shell reflection rule s maps to 6 - s is global and identical everywhere. Th
 
 ## 7. The Hilbert lift and continuous representations
 
-The kernel's self-dual mask code C64 lifts to a 12-qubit graph state over GF(2) that factorizes exactly into six independent two-qubit Bell pairs, with CHSH correlators at the Tsirelson bound 2*sqrt(2) (`hQVM_Features_Report.md`, Formal Quantum Certification). Byte stepping remains deterministic exact-integer carrier dynamics on GF(2)^24; the Bell certificates are evaluated on the canonical Hilbert lift of the intrinsic stabilizer code, where the symplectic carrier data define states in a complex amplitude space in the standard stabilizer manner.
+The kernel's self-dual mask code C64 lifts to a 12-qubit graph state over GF(2) that factorizes exactly into six independent two-qubit Bell pairs, with CHSH correlators at the Tsirelson bound 2*sqrt(2) ([hQVM Features Report](docs/reports/hQVM_Features_Report.md), Formal Quantum Certification). Byte stepping remains deterministic exact-integer carrier dynamics on GF(2)^24; the Bell certificates are evaluated on the canonical Hilbert lift of the intrinsic stabilizer code, where the symplectic carrier data define states in a complex amplitude space in the standard stabilizer manner.
 
 This lift is the setting in which the product geometry of Section 3 and the tensor structure of quantum superposition coincide. The reachable set Omega = U x V and the graph-state factorization into Bell pairs are two expressions of the same conjugate product built from the mask code. The square-root relation between cluster size and transport rank is the percolation-side reading of the same structure that yields pairwise entanglement on the lift-side reading. For a reader coming from interpretability, this gives one finite system where the algebraic sense of superposition, meaning many-to-one maps from generators to observables, and the physical sense of superposition, meaning amplitude structure on a tensor product, are the same object viewed through two representations.
 
@@ -132,4 +132,4 @@ Dataset generation for all four tasks requires only the transition table and bre
 
 Korompilias, B. (2025). Common Governance Model: Mathematical Physics Framework. Zenodo. https://doi.org/10.5281/zenodo.17521384
 
-Repository: [github.com/gyrogovernance/science](https://github.com/gyrogovernance/science). Companion findings manuscript: [`Analysis_hQVM_Percolation.md`](Analysis_hQVM_Percolation.md).
+Repository: [github.com/gyrogovernance/science](https://github.com/gyrogovernance/science). Companion findings manuscript: [Analysis hQVM Percolation](docs/Findings/Analysis_hQVM_Percolation.md).

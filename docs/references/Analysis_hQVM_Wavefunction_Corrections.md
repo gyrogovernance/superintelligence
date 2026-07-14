@@ -7,7 +7,7 @@ K4 operator signatures for the hQVM wavefunction kernel. It is a reference for
 experiments that read the `(u6, v6)` coordinates and the `(τ_u6, τ_v6)` signatures
 directly. All statements are verified against the kernel (`src/constants.py`,
 `src/api.py`) by finite computation on the full 4096-state manifold Ω, and
-reconciled with the theory (`docs/specs/hQVM_QuBEC_Theory.md`, `docs/specs/hQVM_Specs_Formalism.md`).
+reconciled with the theory ([QuBEC Theory](docs/specs/hQVM_QuBEC_Theory.md), [hQVM Specs Formalism](docs/specs/hQVM_Specs_Formalism.md)).
 No free parameters.
 
 ---
@@ -176,12 +176,12 @@ original. (The first column uses `code_shell` 6; the second column is `code_shel
 
 ## 7. Verification
 
-Integrated in `docs/references/experiments/hqvm_wavefunction_kernel.py` section **H**
+Integrated in ``experiments/hqvm_wavefunction_kernel.py`` section **H**
 (`verify_k4_w2`, `print_k4_w2_verification`):
 
 ```
-python docs/references/experiments/hqvm_wavefunction_kernel.py          # A–H
-python docs/references/experiments/hqvm_wavefunction_kernel.py --k4-only  # H only
+python `experiments/hqvm_wavefunction_kernel.py`          # A–H
+python `experiments/hqvm_wavefunction_kernel.py` --k4-only  # H only
 ```
 
 Checks: W₂/W₂′ signatures, rest trajectories, T2 over all 4096 Ω states,
@@ -192,6 +192,6 @@ vs swapped `(v^m^63,u^m)` (fam-01 only). Exact integer arithmetic; no sampling.
 
 *Reference note for experiments using the hQVM wavefunction kernel. The kernel
 (`src/constants.py`, `src/api.py`) is the source of truth; the theory
-(`docs/specs/hQVM_QuBEC_Theory.md` §1.3, §10.1; `docs/specs/hQVM_Specs_Formalism.md` §5) supplies
+([QuBEC Theory](docs/specs/hQVM_QuBEC_Theory.md) §1.3, §10.1; [hQVM Specs Formalism](docs/specs/hQVM_Specs_Formalism.md) §5) supplies
 the conventions. This note records the corrected canonical coordinates and
 signatures for reproducibility across repositories.*

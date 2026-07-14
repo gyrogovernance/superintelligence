@@ -28,7 +28,7 @@ The following symbols are used throughout Parts I–IV.
 
 ## Overview
 
-This document formalizes the occupied QuBEC: finite quantum thermodynamics, hardware-tier architecture (Part I §6), byte transport and the four-phase processing model (Part II §6a.6), native transform algebra, and operator lowering. The partition function Z₁(λ) = 64·(1+λ)⁶ is exact and polynomial. Spectral transport is diagonal in the Krawtchouk and Walsh-Hadamard bases. Parts: I medium; II transport; III transforms; IV operators; V closure; VI observables; VII verified advantages. Evidence inventory: [hQVM Features Report](../reports/hQVM_Features_Report.md).
+This document formalizes the occupied QuBEC: finite quantum thermodynamics, hardware-tier architecture (Part I §6), byte transport and the four-phase processing model (Part II §6a.6), native transform algebra, and operator lowering. The partition function Z₁(λ) = 64·(1+λ)⁶ is exact and polynomial. Spectral transport is diagonal in the Krawtchouk and Walsh-Hadamard bases. Parts: I medium; II transport; III transforms; IV operators; V closure; VI observables; VII verified advantages. Evidence inventory: [hQVM Features Report](docs/reports/hQVM_Features_Report.md).
 
 Where HQC literature realizes gates through adiabatic or non-adiabatic control loops on quantum hardware, the hQVM instantiates the same geometric structure as a GF(2) finite-state machine on silicon, opening the possibility of structural quantum advantage without quantum hardware.
 
@@ -1762,5 +1762,5 @@ In gate-model quantum computing, Grover's algorithm rests on two Householder ref
 
 ## Repository Context
 
-Read with [Gyroscopic_ASI_Foundations.md](../Gyroscopic_ASI_Foundations.md), [hQVM_SDK_Quantum_Computing.md](hQVM_SDK_Quantum_Computing.md), and [Gyroscopic_ASI_Runtime_Specs.md](Gyroscopic_ASI_Runtime_Specs.md).
-Optional: [hQVM_Specs_Formalism.md](hQVM_Specs_Formalism.md), [hQVM_QuBEC_Holography.md](hQVM_QuBEC_Holography.md), [Analysis_Gyroscopic_Multiplication.md](../references/Analysis_Gyroscopic_Multiplication.md).
+Read with [Gyroscopic_ASI_Foundations.md](docs/Gyroscopic_ASI_Foundations.md), [hQVM_SDK_Quantum_Computing.md](hQVM_SDK_Quantum_Computing.md), and [Gyroscopic_ASI_Runtime_Specs.md](Gyroscopic_ASI_Runtime_Specs.md).
+Optional: [hQVM_Specs_Formalism.md](hQVM_Specs_Formalism.md), [hQVM_QuBEC_Holography.md](hQVM_QuBEC_Holography.md), [Analysis Gyroscopic Multiplication](docs/Findings/Analysis_Gyroscopic_Multiplication.md).

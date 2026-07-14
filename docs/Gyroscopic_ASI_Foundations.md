@@ -1209,7 +1209,7 @@ Implementations MAY include a deterministic safeguard for near-zero gradient cas
 
 # Appendix F. CGM Byte Formalism
 
-The complete CGM Byte Formalism is specified in `docs/specs/hQVM_Specs_Formalism.md`.
+The complete CGM Byte Formalism is specified in [hQVM Specs Formalism](specs/hQVM_Specs_Formalism.md).
 
 ---
 

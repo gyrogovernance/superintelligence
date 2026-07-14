@@ -12,9 +12,9 @@ Inventory of every verified quantum feature and physics result for the Gyroscopi
 | [hQVM_Tests_Report_1.md](hQVM_Tests_Report_1.md) | Native register, horizons, gates, Hilbert lift, tamper detection, computational advantages |
 | [hQVM_Tests_Report_2.md](hQVM_Tests_Report_2.md) | SDK layer: future-cone theorems, Omega-chart, shell/Krawtchouk, q-fiber, GF(64), native GEMV/WHT |
 | [Moments_Tests_Report.md](Moments_Tests_Report.md) | Clifford unitaries, 8192-operator family, stabilisers, frame certification |
-| [Analysis_hQVM_Wavefunction.md](../references/Analysis_hQVM_Wavefunction.md) | Wavefunction theorems T1-T10 on Omega |
-| [Analysis_Gravity.md](../references/Analysis_Gravity.md) | Kernel gravity invariants and continuous field-theory bridge |
-| [Analysis_Compact_Geometry.md](../references/Analysis_Compact_Geometry.md) | Electroweak mass-coordinate law and compact ruler |
+| [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) | Wavefunction theorems T1-T10 on Omega |
+| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) | Kernel gravity invariants and continuous field-theory bridge |
+| [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md) | Electroweak mass-coordinate law and compact ruler |
 | [hQVM_SDK_Quantum_Computing.md](../specs/hQVM_SDK_Quantum_Computing.md) | Normative SDK specification cross-references |
 | [gyrogovernance/science](https://github.com/gyrogovernance/science) | Executable verification of the three analysis manuscripts (`experiments/hqvm_*.py`) |
 
@@ -49,10 +49,10 @@ The three analysis manuscripts are backed by executable scripts in the science r
 
 | Analysis manuscript | Primary scripts | What they verify |
 |--------------------|-----------------|------------------|
-| [Analysis_hQVM_Wavefunction.md](../references/Analysis_hQVM_Wavefunction.md) | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` | Holonomy diagnostics, BU-Egress/Ingress duality, spectral probes; **theorems T1-T10** exhaustive on all 4096 Omega states |
-| [Analysis_Gravity.md](../references/Analysis_Gravity.md) | `hqvm_gravity_common.py` (library), `hqvm_gravity_analysis_1.py` through `_10.py`, `hqvm_gravity_runner.py` | Kernel invariants (D=24, Gauss law, plaquette census, Regge/tau_G), coupling chain (c4, tau_cycle, G prediction), nonlinear G(psi), antimatter parity, PPN, GW, TOV, optical cosmology |
-| [Analysis_Gravity.md](../references/Analysis_Gravity.md) (corrections) | `hqvm_corrections_analysis_1.py` | Transport-corrected fine-structure constant (0.043 ppb vs CODATA) |
-| [Analysis_Compact_Geometry.md](../references/Analysis_Compact_Geometry.md) | `hqvm_compact_geom_core.py`, `hqvm_compact_geom_kernel.py`, `hqvm_compact_geom_report.py` | Exhaustive Omega enumeration, shell transition algebra, electroweak mass law, null-model audit, lepton/quark diagnostics |
+| [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` | Holonomy diagnostics, BU-Egress/Ingress duality, spectral probes; **theorems T1-T10** exhaustive on all 4096 Omega states |
+| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) | `hqvm_gravity_common.py` (library), `hqvm_gravity_analysis_1.py` through `_10.py`, `hqvm_gravity_runner.py` | Kernel invariants (D=24, Gauss law, plaquette census, Regge/tau_G), coupling chain (c4, tau_cycle, G prediction), nonlinear G(psi), antimatter parity, PPN, GW, TOV, optical cosmology |
+| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) (corrections) | `hqvm_corrections_analysis_1.py` | Transport-corrected fine-structure constant (0.043 ppb vs CODATA) |
+| [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md) | `hqvm_compact_geom_core.py`, `hqvm_compact_geom_kernel.py`, `hqvm_compact_geom_report.py` | Exhaustive Omega enumeration, shell transition algebra, electroweak mass law, null-model audit, lepton/quark diagnostics |
 
 #### Script ownership (from script headers)
 
@@ -404,7 +404,7 @@ Discrete physics of the byte-driven transition rule, established by Physics test
 
 ## Part III: Wavefunction and Holonomy (Tier B)
 
-Verified by [Analysis_hQVM_Wavefunction.md](../references/Analysis_hQVM_Wavefunction.md) and executable in science repo `hqvm_wavefunction_1.py` / `hqvm_wavefunction_2.py`. Overlaps conceptually with K4 gate tests (Part I SS3) but proves micro_ref-universal operator algebra.
+Verified by [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) and executable in science repo `hqvm_wavefunction_1.py` / `hqvm_wavefunction_2.py`. Overlaps conceptually with K4 gate tests (Part I SS3) but proves micro_ref-universal operator algebra.
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -431,7 +431,7 @@ Verified by [Analysis_hQVM_Wavefunction.md](../references/Analysis_hQVM_Wavefunc
 
 ## Part IV: Gravitational Kernel Invariants (Tier B)
 
-Discrete combinatorial invariants linking the kernel to [Analysis_Gravity.md](../references/Analysis_Gravity.md). Executable in science repo `hqvm_gravity_analysis_*.py` (orchestrated by `hqvm_gravity_runner.py`).
+Discrete combinatorial invariants linking the kernel to [Analysis Gravity](docs/Findings/Analysis_Gravity.md). Executable in science repo `hqvm_gravity_analysis_*.py` (orchestrated by `hqvm_gravity_runner.py`).
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -452,7 +452,7 @@ Discrete combinatorial invariants linking the kernel to [Analysis_Gravity.md](..
 
 ## Part V: Electroweak Mass-Coordinate Law (Tier B)
 
-From [Analysis_Compact_Geometry.md](../references/Analysis_Compact_Geometry.md). Kernel algebra proved in `hqvm_compact_geom_kernel.py`; mass law and audits reported by `hqvm_compact_geom_report.py` (computes via `hqvm_compact_geom_core.py`).
+From [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md). Kernel algebra proved in `hqvm_compact_geom_kernel.py`; mass law and audits reported by `hqvm_compact_geom_report.py` (computes via `hqvm_compact_geom_core.py`).
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -477,7 +477,7 @@ From [Analysis_Compact_Geometry.md](../references/Analysis_Compact_Geometry.md).
 
 ## Part VI: Continuous Gravity Phenomenology (Tier B)
 
-Continuous field-theory predictions anchored on kernel invariants. Documented in [Analysis_Gravity.md](../references/Analysis_Gravity.md) and numerically closed in science repo scripts `hqvm_gravity_analysis_4.py` through `_10.py` and `hqvm_corrections_analysis_1.py`.
+Continuous field-theory predictions anchored on kernel invariants. Documented in [Analysis Gravity](docs/Findings/Analysis_Gravity.md) and numerically closed in science repo scripts `hqvm_gravity_analysis_4.py` through `_10.py` and `hqvm_corrections_analysis_1.py`.
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -520,7 +520,7 @@ Continuous field-theory predictions anchored on kernel invariants. Documented in
 
 ## Part VII: CGM Modal Structure (Tier C)
 
-Formal modal-logic and manuscript-only results from [Analysis_Gravity.md](../references/Analysis_Gravity.md) and companion proof [15]. No dedicated experiment script in the science repo.
+Formal modal-logic and manuscript-only results from [Analysis Gravity](docs/Findings/Analysis_Gravity.md) and companion proof [15]. No dedicated experiment script in the science repo.
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
