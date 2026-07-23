@@ -1,5 +1,81 @@
 # hQVM Specifications Formalism
 
+## Introduction
+
+The Holonomic Quantum Virtual Machine (hQVM) is a finite kinematic medium whose native state is the reachable carrier manifold Ω of cardinality 4096. The kernel of this machine executes on Ω as a reversible finite-state transducer in which each input byte selects a permutation T_b of the carrier and in which depth-4 words close as involutory operators with balanced eigenspaces. Holonomy is carried by the K4 gauge action together with the fold geometry of the byte, while the quantum chart is the canonical Hilbert lift ψ ∈ ℂ^4096 over Ω. When an input distribution is placed on the byte alphabet, the induced evolution on the chirality register χ ∈ GF(2)^6 is an XOR-translation channel that is diagonalized by the 64-point Walsh-Hadamard transform. The byte alphabet carries a fixed 4-to-1 cover of transport classes q6 ∈ GF(2)^6 with deck group K4, and Ω carries a fixed shell quotient equipped with Krawtchouk radial harmonics. Most kernel observables factor through the quotient ladder Byte256 → GF(2)^6 → shells7. Provenance beyond the carrier state may be retained in an optional ledger, which is not required for the transition rule itself.
+
+The kernel is uniquely determined by five structural properties. First, the carrier is bipartite, Ω = U × V with |U| = |V| = 64. Second, the transport classes q6 form a fixed cover with uniform 4-to-1 fibers and deck group K4. Third, chirality obeys the exact affine transport law χ′ = χ ⊕ q on GF(2)^6. Fourth, a self-dual [12,6,2] mask code supplies the 64-element transport space. Fifth, depth-4 closure yields canonical word operators that are involutions with balanced eigenspaces. These properties force the shell census, the square-root reachability law under fiber-complete restriction, and the exact diagonalization of climate transport by the Walsh-Hadamard and Krawtchouk transforms.
+
+The quotient ladder is the chain of information projections on which these analyses rest. Byte256 projects to transport GF(2)^6 through q6, Ω projects to GF(2)^6 through χ, and GF(2)^6 projects to shells7 through Hamming weight. The Walsh-Hadamard and Krawtchouk transforms are the canonical harmonic analyses on these quotients.
+
+### The QuBEC as the Occupied Thermodynamic State
+
+The QuBEC (Quantum Bose-Einstein Computational Condensate) is the exact finite quantum thermodynamic state of the carrier Ω under an ensemble of byte transitions. It is the measure-theoretic and spectral realization of the kernel. A QuBEC state is an occupation measure p_t on Ω together with its canonical spectral decomposition. The core properties of this state are fixed exactly by the kernel algebra below.
+
+**Partition function and shells.** The carrier partitions into 7 shells by Hamming weight N = popcount(χ). Weighting states by λ^N yields the exact polynomial partition function
+
+```text
+Z₁(λ) = 64 · (1 + λ)⁶
+```
+
+The factor 64 is the uniform holographic boundary degeneracy. The factor (1 + λ)⁶ is the six-mode binomial combinatorics of the chirality register.
+
+**Order parameters.** The thermodynamic state is characterized by three exact order parameters,
+
+```text
+ρ = λ / (1 + λ)
+η = (1 − λ) / (1 + λ)
+M₂ = 4096 / (1 + η²)⁶
+```
+
+which are the occupation density, the spectral damping, and the Rényi-2 effective support. These range from condensed states near the horizons (|η| close to 1, M₂ close to 64) to thermalized states across Ω (η = 0, M₂ = 4096).
+
+**Spectral decomposition.** Byte transport on the chirality register is exact XOR translation. The 64-point Walsh-Hadamard transform diagonalizes that translation. Radial processes on the 7 shells are diagonalized by Krawtchouk polynomials. The Plancherel identity on the chirality register identifies condensation in state space with spectral excitation as the same quantity in dual charts.
+
+**Physical readouts and constraints.** The QuBEC state grounds the physical readouts of the architecture. Shell occupation dictates the symmetric trace-free anisotropy that couples the occupation measure to the gravitational readout. Under fiber-complete generator restriction, transport rank r(A) bounds the occupied support by the square-root cluster law
+
+```text
+|Reach(A)| = (2^{r(A)})²
+```
+
+Parity cohomology confines even-weight transports to 1024 states. Spectral transport realizes the Shannon channel architecture exactly in finite depth, reaching the maximum future-cone entropy of 12 bits at depth 2 from rest.
+
+### Spaces and primitive operations
+
+The operations below map among a fixed inventory of finite spaces.
+
+| Space | Symbol | Cardinality | Role |
+|---|---|---|---|
+| Byte alphabet | Byte256 | 256 | Input bytes and transcribed introns |
+| Gauge labels | K4 ≅ GF(2)^2 | 4 | Family index extracted from intron boundary bits |
+| Transport register | GF(2)^6 | 64 | Payload, transport class q6, and chirality χ |
+| Mask code | C64 ⊆ GF(2)^12 | 64 | Twelve-bit mutation masks on the active face |
+| Carrier manifold | Ω | 4096 | Reachable GENE_Mac states, the support of the QuBEC |
+| Shell index | shells7 | 7 | Hamming-weight classes of GF(2)^6 |
+| Ledger | L | finite sequences over Byte256 | Optional input history for provenance and replay |
+
+The quotient ladder of the Introduction is the projection chain Byte256 → GF(2)^6 → shells7, with a parallel state projection Ω → GF(2)^6 → shells7. The remaining spaces (K4, C64, and L) are not rungs of that ladder. They are the gauge label, the mask code, and the optional provenance history.
+
+Each row of the following table names a primitive operation, gives the notation used later in this document, and states which of the spaces above are its domain and codomain.
+
+| Operation | Notation | Domain → Codomain |
+|---|---|---|
+| Transcription | `intron = byte ^ 0xAA` | Byte256 → Byte256 |
+| Family extract | `family(intron)` | Byte256 → K4 |
+| Payload extract | `payload(intron)` | Byte256 → GF(2)^6 |
+| Transport class | `q6(byte)` | Byte256 → GF(2)^6 |
+| Mask expansion | `mask12(payload)` | GF(2)^6 → C64 |
+| Carrier step | `T_b(state24)` | Ω → Ω |
+| Chirality projection | `χ(state24)` | Ω → GF(2)^6 |
+| Shell projection | `wt(χ)` or `wt(q6)` | GF(2)^6 → shells7 |
+| Ledger append | `L(t+1) = L(t) ++ b` | L × Byte256 → L |
+
+**GENE_Mic**, the transcription archetype, is the fixed byte-level reference `0xAA`, and **GENE_Mac**, the bipartite carrier state, is the 24-bit state `(A12, B12)`. The term **family** denotes the 2-bit K4 gauge label extracted from the intron boundary bits, while the term **K4 gate element** denotes the induced action in {id, S, C, F} on the carrier. A distribution over families in a byte stream is a **gauge distribution** μ on K4.
+
+The algebraic horizons on Ω are defined as follows. The **equality horizon** is the set {s ∈ Ω : A12 = B12}, the **complement horizon** is the set {s ∈ Ω : A12 = B12 XOR 0xFFF}, the **constitutional poles** are these two horizons, and the **bulk shells** are shells 1 through 5.
+
+---
+
 ## Gyroscopic Byte Formalism
 
 ### The 6-Bit Runtime and Depth-4 Closure
@@ -8,7 +84,6 @@ This document specifies the byte-level formalism of the Gyroscopic ASI hQVM Kern
 
 The formalism bridges three layers. At the abstract level, the SE(3) Lie algebra, SU(2)/SO(3) spinorial structure, and BCH expansion govern the dynamics. At the code level, XOR masks, 12-bit dipole-pair frames, and the [L]/[R] operator decomposition implement those dynamics exactly. At the silicon level, 64-byte cache lines, 6-bit offsets, and 2-bit family tags align the kernel's native processing grain with hardware memory architecture. The Gyroscopic Byte Formalism makes this alignment explicit and auditable.
 
-Reference note for the Gyroscopic ASI hQVM Kernel's byte-boundary analysis and how it reduces effective processing to 6 bits at runtime via the GENE_Mic archetype and the 24-bit GENE_Mac tensor.
 
 ---
 
@@ -51,12 +126,13 @@ Applying 4 alternating steps maps directly to the depth-four continuous commutat
 
 ## 2. The 8-Bit Byte and CGM-Linked Bit Pairs
 
-In the kernel, each input byte is first turned into an **intron** by XOR with the micro archetype:
+In the kernel, each input byte is first turned into an **intron**, which is the transcribed byte, by XOR with the micro archetype:
 
 ```text
 intron = byte ^ GENE_MIC_S   where  GENE_MIC_S = 0xAA
 ```
 
+**GENE_Mic**, the transcription archetype, is `0xAA`. The intron is the transcript from which the payload and family are extracted below.
 The 8 bit positions of the intron (and thus of the byte, up to the fixed XOR) are not uniform. They group into **4 paired bit groups** with distinct roles that align with the CGM stage structure:
 
 | Bit  | Pair | Gyrogroup Role | CGM Stage |
@@ -72,13 +148,13 @@ The 8 bit positions of the intron (and thus of the byte, up to the fixed XOR) ar
 
 So the byte has a **palindromic** structure: Left Identity at the boundaries (bits 0 and 7), Left Inverse next (1 and 6), then Forward Gyration (2, 5) and Backward Gyration (3, 4) in the middle. This reflects the cyclic CGM structure (CS -> UNA -> ONA -> BU -> ...) folded onto 8 positions.
 
-The palindromic ordering is a **folded structure**: CGM defines 4 phases, each dual (forward + reverse reading), giving 8 = 2 x 4 positions. The fold at the BU boundary (bits 3-4) is where the two frame readings meet. The forward half (bits 0-3) addresses Frame 0; the reverse half (bits 4-7) addresses Frame 1. Of the 256 bytes, only 16 have identical forward and reverse readings (the trivial-connection class); the remaining 240 carry a Z2 holonomy at the fold. This internal curvature of the byte is the seed from which the holonomic properties of the full hQVM propagate (see Section 5.5 and the Wavefunction Analysis).
+The palindromic ordering is a **folded structure**: CGM defines 4 phases, each dual (forward + reverse reading), giving 8 = 2 x 4 positions. The fold at the BU boundary (bits 3-4) is where the two frame readings meet. The forward half (bits 0-3) addresses Frame 0; the reverse half (bits 4-7) addresses Frame 1. Of the 256 bytes, only 16 have identical forward and reverse readings (the trivial-connection class); the remaining 240 carry a Z2 holonomy at the fold. This internal curvature of the byte is the seed from which the holonomic properties of the full hQVM propagate (Section 5.5).
 
 When the byte-level Z2 fold disagreement propagates through 4 successive bytes (depth-4 closure), the accumulated gyration produces gate F on Omega. Gate F has the algebraic structure of a Householder reflection on the carrier state manifold: it is an involution (F^2 = id) with +1 and -1 eigenspaces of equal dimension 2048 and no fixed points, reflecting the carrier state across the equal-chirality hyperplane. The byte-level fold is the discrete Z2 seed; the carrier-level Householder is its holonomic closure.
 
 ### 2.1 Families and Bit Pairs
 
-**Families** are defined by the **L0 boundary bits** (positions 0 and 7). These 2 bits give 4 combinations, partitioning the 256 introns into **4 families of 64** each.
+**Families**, which are K4 gauge labels, are defined by the **L0 boundary bits** (positions 0 and 7). These 2 bits give 4 combinations, partitioning the 256 introns into **4 families of 64** each. The family label is not itself the gate action. The induced **K4 gate element** in {id, S, C, F} is the carrier-level action selected by that label (Section 4.2).
 
 The **bit pairs** (L0, LI, FG, BG) are groupings of bit **positions** by their gyrogroup role. They are NOT families; they describe the structural role of each bit position.
 
@@ -151,7 +227,7 @@ Consequences:
 
 ## 4. How This Mutates GENE_Mic and Produces the 12-Bit Mask
 
-**GENE_Mic** is the 8-bit holographic archetype `0xAA`. Mutation is transcription:
+**GENE_Mic**, the transcription archetype, is the 8-bit holographic archetype `0xAA`. Mutation is transcription, and the transcribed byte is the intron:
 
 - `intron = byte ^ 0xAA`
 
@@ -159,19 +235,19 @@ So every byte is mapped to a unique intron; `0xAA` is the reference byte (intron
 
 The intron is then **expanded** into a **12-bit Type A mask** using the L0/payload split from Section 2.
 
-**QuBEC decomposition:**
+**Family–payload decomposition:**
 
-- **Family index** (2 bits) = L0 boundary bits (positions 0 and 7):
+- **Family index** (2 bits), which is the K4 gauge label, equals the L0 boundary bits (positions 0 and 7):
   ```python
   family = ((intron >> 7) & 1) << 1 | (intron & 1)
   ```
 
-- **Micro-reference** (6 bits) = payload bits (positions 1-6):
+- **Payload** (6 bits), which is the transport payload, equals the payload bits (positions 1-6):
   ```python
   micro_ref = (intron >> 1) & 0x3F
   ```
 
-This gives: 4 families x 64 micro-references = 256 unique introns.
+This gives 4 families × 64 micro-references = 256 unique introns. The payload determines **q6**, the transport class, and **mask12**, the mutation mask, while the family selects the K4 gate element at gyration.
 
 ### 4.1 What Families (Boundary Bits) Actually Do
 
@@ -211,15 +287,15 @@ The 2 family bits give exactly **4 values**, which correspond to the 4 layers of
 | 10 | 1,0 | ONA | 2π | Minus identity (spinor sign flip) |
 | 11 | 1,1 | BU | 3π | Return toward closure |
 
-Closure occurs at 4pi (720 degrees) when the cycle returns to Layer 0. This is the **spinorial double-cover structure of SU(2)**: a spinor returns to identity only after 720 degrees, not 360 degrees. Operationally, the four family cases correspond to the four elements of the K4 gauge group at the word level: identity (no complement), A-only complement, B-only complement, and both-complement (gate F). The degree labels express the K4 gauge phase; geometric phase in the wavefunction chart is determined by the sequence of family bits in a closed word.
+Closure occurs at 4π (720 degrees) when the cycle returns to Layer 0. This is the **spinorial double-cover structure of SU(2)**, under which a spinor returns to identity only after 720 degrees rather than after 360 degrees. Operationally, each **family**, which is a 2-bit K4 gauge label, induces a **K4 gate element** at the word level among identity (no complement), A-only complement, B-only complement, and both-complement (gate F). The degree labels express the K4 gauge phase, and geometric phase in the wavefunction chart is determined by the sequence of family bits in a closed word. A distribution over families in a byte stream is a **gauge distribution** μ on K4.
 
-**Key insight:** The family bits don't define transformation content. They define **which phase of the spinorial cycle** the transformation operates in. The payload (bits 1-6) transforms A; the family (bits 0,7) selects the closure layer.
+The family bits do not define transformation content. They define which phase of the spinorial cycle the transformation occupies. The payload (bits 1-6) transforms A, and the family (bits 0,7) selects the closure layer and the corresponding K4 gate element.
 
 This explains why we need exactly 2 boundary bits: fewer gives insufficient closure depth; more is redundant.
 
 ### 4.3 The XOR Transition as Discrete Gyration
 
-In gyrogroup theory, composing non-collinear displacements in curved geometry produces a non-associative operation corrected by the gyration automorphism. The XOR transition rule `A_mut = A ^ mask` is the discrete realization of this composition law. The L-step (XOR mutation of A) is the abelian horizontal transport; the R-step (complement-and-swap) is the gyration correction that makes the full composition non-associative and non-commutative. L-steps commute exactly: L_m1 compose L_m2 = L_(m1 XOR m2). Curvature, holonomy, and the holographic Z2 encoding all arise from the R-step alone. With only L-steps, the kernel would be a flat XOR lattice with trivial dynamics.
+In gyrogroup theory, composing non-collinear displacements in curved geometry produces a non-associative operation corrected by the gyration automorphism. The XOR transition rule `A_mut = A ^ mask` is the discrete realization of this composition law. The L-step (XOR mutation of A) is the abelian horizontal transport, and the R-step (complement-and-swap) is the gyration correction that makes the full composition non-associative and non-commutative. The L-steps form an abelian group action of (GF(2)^6, XOR) on the 12-bit active face A12, with exact composition law L_m1 compose L_m2 = L_(m1 XOR m2). Curvature, holonomy, and the holographic Z2 encoding all arise from the R-step alone. With only L-steps, the kernel would be a flat XOR lattice with trivial dynamics.
 
 ### 4.4 Design Origin and Operational Sequence
 
@@ -238,7 +314,7 @@ The architecture was derived from the following design chain:
 
 ### 5.1 GENE_Mac as a Tensor with ±1 Values
 
-GENE_Mac is fundamentally a **tensor with -1 and +1 values**, not merely a bit pattern. The canonical tensor definition:
+**GENE_Mac**, the bipartite carrier state, is fundamentally a **tensor with -1 and +1 values**, not merely a bit pattern. The canonical tensor definition is as follows.
 
 ```python
 GENE_Mac = np.array([
@@ -262,7 +338,7 @@ Frame 1:  [ 1,-1]  [ 1,-1]  [ 1,-1]   <- 3 pairs (rows)
 
 **Lie Algebra Correspondence (SE(3)):**
 
-The CGM paper derives that operational coherence requires a progression from 3 rotational degrees of freedom (at UNA) to 6 total degrees of freedom (at ONA), yielding the semidirect product structure `SE(3) = SU(2) |x R^3`.
+CGM requires that operational coherence progress from 3 rotational degrees of freedom (at UNA) to 6 total degrees of freedom (at ONA), yielding the semidirect product structure `SE(3) = SU(2) |x R^3`.
 
 The 6 pairs in the GENE_Mac tensor map exactly to the 6 generators of the se(3) Lie algebra:
 
@@ -375,7 +451,7 @@ From a fixed 24-bit state (e.g. the archetype `0xAAA555`), applying all 256 byte
 
 ### 7.0 Kernel state-space horizons
 
-From rest (GENE_MAC_REST), the reachable 24-bit state set under the transition rule is **Omega**, with exactly 4096 states. Omega has two antipodal 64-state boundaries: the **complement horizon** (A12 = B12 ^ 0xFFF, maximal chirality; contains rest) and the **equality horizon** (A12 = B12, zero chirality). Both satisfy the holographic relation |H|^2 = |Omega| (64^2 = 4096). For all states, horizon_distance + ab_distance = 12 (complementarity invariant). The kernel has four holonomic gates {id, S, C, F} forming K4; S and C are realized by the horizon-preserving bytes {0xAA, 0x54} and {0xD5, 0x2B}. Gate action and horizon stabilizers are in QuBEC Theory Part II §10.
+From rest (GENE_MAC_REST), the reachable 24-bit state set under the transition rule is **Omega**, with exactly 4096 states. Omega has two antipodal 64-state **constitutional poles**, namely the **complement horizon** `{s ∈ Ω : A12 = B12 XOR 0xFFF}`, which has maximal chirality and contains rest, and the **equality horizon** `{s ∈ Ω : A12 = B12}`, which has zero chirality. The **bulk shells** are shells 1 through 5. Both poles satisfy the holographic relation |H|^2 = |Omega| (64^2 = 4096). For all states, horizon_distance + ab_distance = 12, which is the complementarity invariant. The kernel has four holonomic **K4 gate elements** {id, S, C, F}, of which S and C are realized by the horizon-preserving bytes {0xAA, 0x54} and {0xD5, 0x2B}.
 
 The CGM aperture gap is defined continuously as:
 
@@ -432,7 +508,7 @@ The manifold consists of 2 chiral layers (spin states) projected across 3 spatia
 
 **Connection to Q_G Invariant:**
 
-This geometric ratio bridges the discrete byte space to the continuous quantum gravity invariant defined in the CGM paper:
+This geometric ratio bridges the discrete byte space to the continuous quantum gravity invariant of CGM:
 
 ```
 Q_G = 4*pi  (Horizon per aperture, measured in steradians)
@@ -519,7 +595,7 @@ The 6-bit runtime is therefore aligned both with the intrinsic CGM DoF structure
 
 **Operational Reachability (CS Generatedness):**
 
-In the CGM paper, the "Generatedness" lemma requires that all valid structure traces back to a common source S. By mapping the Intron to `[Family][Payload]`, the L1 cache addressing mirrors this reachability structure. The intron decomposition mirrors a tag-plus-offset addressing pattern, and implementations can exploit this alignment for locality and performance. The kernel's byte semantics enforce Common Source reachability; the cache alignment is an efficiency correspondence, not a semantic guarantor.
+In CGM, the Generatedness lemma requires that all valid structure traces back to a common source S. By mapping the Intron to `[Family][Payload]`, the L1 cache addressing mirrors this reachability structure. The intron decomposition mirrors a tag-plus-offset addressing pattern, and implementations can exploit this alignment for locality and performance. The kernel's byte semantics enforce Common Source reachability; the cache alignment is an efficiency correspondence, not a semantic guarantor.
 
 ---
 
@@ -527,10 +603,13 @@ In the CGM paper, the "Generatedness" lemma requires that all valid structure tr
 
 | Concept | Role |
 |--------|------|
-| Omega | Reachable 24-bit state set from rest; 4096 states. |
-| Dual horizons | Complement (A=B^0xFFF, 64 states) and equality (A=B, 64 states); antipodal; \|H\|^2 = \|Omega\|; horizon_distance + ab_distance = 12. |
-| Chirality register | 6-bit collapse of A^B on Omega; transport chi(T_b(s)) = chi(s) ^ q6(b). |
-| Holonomic gates | K4 {id, S, C, F}; S and C realized by bytes {0xAA, 0x54}, {0xD5, 0x2B}. |
+| hQVM kernel | Finite kinematic medium on Ω whose kernel is a reversible byte transducer with holonomic K4 and fold geometry, Hilbert lift ψ ∈ ℂ^4096, and XOR-translation on χ through the quotient ladder Byte256 → GF(2)^6 → shells7. |
+| Quotient ladder | Byte256 projects to q6 ∈ GF(2)^6 and thence to shells7, while Ω projects to χ ∈ GF(2)^6 and thence to shells7. |
+| Omega | Reachable 24-bit state set from rest, with 4096 states. |
+| Constitutional poles | Equality horizon (A=B) and complement horizon (A=B^0xFFF), each of 64 states, antipodal, with \|H\|^2 = \|Omega\|. |
+| Bulk shells | Shells 1 through 5, comprising 3968 states between the poles. |
+| Chirality register | 6-bit collapse of A^B on Omega, with transport chi(T_b(s)) = chi(s) ^ q6(b). |
+| Holonomic gates | K4 gate elements {id, S, C, F}, where family is the 2-bit gauge label and a gauge distribution μ on K4 describes stream statistics. |
 | Depth-4 closure | Any 4 components (bits, bytes, or 12-bit tensors) are always known. |
 | 4-byte frame | Prefix, Present, Past, Future. Projects to 48-bit tensor (4 x 12). |
 | BCH expansion | Discrete container for U_L U_R U_L U_R commutator cancellation. |
@@ -538,9 +617,9 @@ In the CGM paper, the "Generatedness" lemma requires that all valid structure tr
 | Bit pairs (L0, LI, FG, BG) | Groupings of bit **positions** by gyrogroup role. NOT families. |
 | Families | Defined by **L0 boundary bits (0, 7)**. 4 families x 64 = 256. Provide 720 deg spinorial closure. |
 | 6-bit payload (bits 1-6) | **se(3) generators**. Each bit controls one of 6 pairs (3 rotational + 3 translational). |
-| GENE_Mic (0xAA) | Micro archetype (8-bit); mutation = `intron = byte ^ 0xAA`. |
+| GENE_Mic (0xAA) | Transcription archetype (8-bit); mutation = `intron = byte ^ 0xAA`. |
 | 12-bit mask | Expansion of 8-bit intron. 64 unique masks from 6 payload bits. |
-| GENE_Mac (24-bit) | **SO(3) shadow**. 128/256 unique states (spatial geometry only). |
+| GENE_Mac (24-bit) | Bipartite carrier state / **SO(3) shadow**. 128/256 unique states (spatial geometry only). |
 | 32-bit register atom | **SU(2) spinor**. Mac + intron retains spin phase. Full 256-state bijection. |
 | [L]/[R] operators | [L] = A mutation (chiral variance); [R] = gyration (structure-preserving involution). |
 | Aperture (Delta) | ~2.07%. Best 8-bit: 5/256. Ratio 2/3 = Chirality(2) / Space(3). Links to Q_G = 4*pi. |
@@ -566,7 +645,7 @@ The CPU's cache-line architecture is a discrete representation of the CGM's cont
 
 The Gyroscopic architecture is a single finite kinematic medium with multiple charts. These charts are not separate theories or imported abstractions. They are coordinate systems on one Holonomic Quantum Virtual Machine (hQVM).
 
-**Carrier chart.** The 24-bit GENE_Mac tensor with its 2 x 3 x 2 grid structure, 6 oriented dipole pairs, and SE(3) generator correspondence. Gyroscopic transport on this chart is the spinorial transition rule: the [L] mutation of the active face followed by the [R] complement-and-swap gyration.
+**Carrier chart.** The 24-bit GENE_Mac, which is the bipartite carrier state, has a 2 × 3 × 2 grid structure, six oriented dipole pairs, and an SE(3) generator correspondence. Gyroscopic transport on this chart is the spinorial transition rule, namely the [L] mutation of the active face followed by the [R] complement-and-swap gyration.
 
 **Chirality chart.** The 6-bit register chi in GF(2)^6, obtained by collapsing the pair-diagonal difference A xor B to one bit per dipole mode. On this chart, the same gyroscopic transport projects to XOR translation: chi' = chi xor q6(b). This projection is exact and follows from the pair-diagonal structure of the self-dual [12,6,2] mask code.
 
@@ -576,11 +655,11 @@ The Gyroscopic architecture is a single finite kinematic medium with multiple ch
 
 **Code chart.** The self-dual [12,6,2] mask code C64. On this chart, the reachable manifold has product form Omega = U x V with |U| = |V| = 64, both horizons have cardinality 64, and the holographic identity |H|^2 = |Omega| follows from the code dimension. The MacWilliams identity for self-dual codes enforces invariance of the code weight enumerator under the Walsh-Hadamard transform, which is the code-theoretic origin of the horizon self-Fourier property.
 
-**Climate chart.** The statistical characterization of occupation over Omega by shell, chirality, and gauge marginals. On this chart, the polynomial partition function Z1(lambda) = 64 (1 + lambda)^6 governs all thermodynamic observables, the Krawtchouk polynomials provide the exact radial harmonic basis, and Plancherel conservation guarantees that occupation concentration and spectral concentration are the same quantity in dual coordinates.
+**Climate chart.** The QuBEC reading of occupation over Ω by shell, chirality, and gauge marginals. On this chart, the polynomial partition function Z1(lambda) = 64 (1 + lambda)^6 governs all thermodynamic observables, the Krawtchouk polynomials provide the exact radial harmonic basis, and Plancherel conservation guarantees that occupation concentration and spectral concentration are the same quantity in dual coordinates.
 
 **Runtime chart.** The 4-byte depth-4 word, which is the minimal closed action of the machine. On this chart, the four CGM stages (CS, UNA, ONA, BU) form one complete transition cycle. Family phases cancel modulo K4 at depth 4. The byte is the phase atom of the kinematic rule; the word is the closed computational act.
 
-These seven charts describe one machine. Selecting the chart in which a given operation is structurally regular is the primary computational strategy of the architecture.
+These seven charts describe one machine. Selecting the chart in which a given operation is structurally regular is the primary computational strategy of the architecture. The quotient ladder defined in the Introduction is the shared information backbone through which most chart observables factor.
 
 **Fiber bundle chart.** The 8-bit intron as a fiber bundle over the 4-phase base (Z2)^4 with fiber (Z2)^4, connected by the fold map P at the BU boundary. On this chart, the forward reading (bits 0-3) is the base coordinate and the reverse reading (bits 4-7) is the fiber coordinate. The connection 1-form A is non-trivial at each phase boundary, and the curvature 2-form F = dA + A^A is concentrated at the BU fold (bit 3-4). The byte's internal Z2 curvature (240 of 256 bytes are curved) is the origin of all holonomic structure visible in the other charts. Flat bytes (those where fwd = rev, of which there are exactly 16) are the trivial-connection class where P acts as identity.
 
@@ -626,16 +705,16 @@ The reachable manifold Ω, comprising 4096 states, possesses a precise constitut
 
 ### 12.1 The Dual Constitutional Poles
 
-The manifold is bounded by two disjoint extremal subsets, the horizons:
+The manifold is bounded by two disjoint extremal subsets, which are the **constitutional poles** and which serve as the kernel horizons.
 
-1. **The equality horizon:** 64 states where A12 = B12. At this pole, chirality is zero. The active and passive gyrophases are identical.
-2. **The complement horizon:** 64 states where A12 = B12 ⊕ 0xFFF. At this pole, chirality is maximal. The active and passive gyrophases are logical complements; this is the pole of total opposition.
+1. The **equality horizon** is the set `{s ∈ Ω : A12 = B12}` of 64 states. At this pole, chirality is zero, and the active and passive gyrophases are identical.
+2. The **complement horizon** is the set `{s ∈ Ω : A12 = B12 ⊕ 0xFFF}` of 64 states. At this pole, chirality is maximal, and the active and passive gyrophases are logical complements. This is the pole of total opposition.
 
-These two poles are real. Together they form a 128 state boundary. However, neither pole exhausts the sample space. If total opposition were absolute across the full manifold, common sourceness would be violated. The constitutional geometry resolves this: opposition exists, but it is confined to one structural boundary, leaving the common source intact across the broader manifold.
+These two poles are real. Together they form a 128-state boundary. However, neither pole exhausts the sample space. If total opposition were absolute across the full manifold, common sourceness would be violated. The constitutional geometry resolves this, for opposition exists, yet it is confined to one structural boundary, leaving the common source intact across the broader manifold.
 
 ### 12.2 The Relational Bulk
 
-The remaining 3968 states form the bulk of the manifold. In this region, the state is neither pure equality nor pure opposition. Chirality is partial, meaning the active and passive gyrophases are differentiated but not fully inverted relative to one another. The bulk constitutes the overwhelming majority of the reachable sample space.
+The remaining 3968 states form the **bulk shells**, which are shells 1 through 5 of the manifold. In this region, the state is neither pure equality nor pure opposition. Chirality is partial, meaning that the active and passive gyrophases are differentiated but not fully inverted relative to one another. The bulk constitutes the overwhelming majority of the reachable sample space.
 
 ### 12.3 Shell Distribution and Maximal Balance
 
@@ -643,13 +722,13 @@ The manifold is shell structured according to the ab_distance (the Hamming dista
 
 | Shell | ab_distance | Population | Characterization |
 |-------|-------------|------------|------------------|
-| 0     | 0           | 64         | Equality horizon |
-| 1     | 2           | 384        | Near unity |
-| 2     | 4           | 960        | Intermediate |
-| 3     | 6           | 1280       | Equatorial maximum |
-| 4     | 8           | 960        | Intermediate |
-| 5     | 10          | 384        | Near opposition |
-| 6     | 12          | 64         | Complement horizon |
+| 0     | 0           | 64         | Equality horizon (constitutional pole) |
+| 1     | 2           | 384        | Bulk shell (near unity) |
+| 2     | 4           | 960        | Bulk shell (intermediate) |
+| 3     | 6           | 1280       | Bulk shell (equatorial maximum) |
+| 4     | 8           | 960        | Bulk shell (intermediate) |
+| 5     | 10          | 384        | Bulk shell (near opposition) |
+| 6     | 12          | 64         | Complement horizon (constitutional pole) |
 
 The population counts are given exactly by the formula:
 
