@@ -33,7 +33,7 @@ Adoption for the first purpose automatically builds the infrastructure for the s
 
 ### Scope and relationship to AIR
 
-The Gyroscopic infrastructure serves here as the settlement and verification substrate for the Moments Economy. The same infrastructure also serves as the coordination backbone for Alignment Infrastructure Routing, a related coordination framework for grants, work receipts, and project histories. These uses are related but distinct. Institutions may adopt AIR for coordination without adopting the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
+The Gyroscopic infrastructure serves here as the settlement and verification substrate for the Moments Economy. The same infrastructure also serves as the coordination backbone for Alignment Infrastructure Routes, a related coordination framework for grants, work receipts, and project histories. These uses are related but distinct. Institutions may adopt AIR for coordination without adopting the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
 
 ### Document structure
 

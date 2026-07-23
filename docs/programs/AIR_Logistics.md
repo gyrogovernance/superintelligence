@@ -1,11 +1,11 @@
-# Alignment Infrastructure Routing (AIR)
+# Alignment Infrastructure Routes (AIR)
 ## Global AI Governance Logistics Framework
 
 ---
 
 ### 1. Purpose and Scope
 
-Alignment Infrastructure Routing (AIR) is a practical framework for coordinating human and artificial systems in a way that can be verified, audited, and governed. It treats governance as a logistics discipline: how information, authority, and decisions move through society, and how those movements can be made visible and accountable.
+Alignment Infrastructure Routes (AIR) is a practical framework for coordinating human and artificial systems in a way that can be verified, audited, and governed. It treats governance as a logistics discipline: how information, authority, and decisions move through society, and how those movements can be made visible and accountable.
 
 The word logistics derives from the Greek *logistikē*, meaning the art of reasoning and calculating. This etymology reveals that logistics is not merely about physical transport but about the logic of coordination itself. Logic forms the foundation of computation, networks, and artificial intelligence. At the level of information and decisions, the internet and artificial intelligence systems are logistical networks. They route inputs to outputs through transformation rules. The challenge of governing these systems is the challenge of making their routing visible and verifiable.
 
@@ -269,7 +269,7 @@ The technical specifications for all components are published through the Gyro G
 
 The integration of artificial intelligence into institutions and infrastructure creates a governance challenge: how to ensure that decisions remain traceable to human authority (Direct Authority and Agency), that human and artificial contributions remain distinguishable, that accountability remains with accountable human agents (Direct Agency), and that governance remains coherent over time. These requirements are not new, but artificial intelligence systems make them harder to satisfy because the routing of information and authority becomes invisible.
 
-Alignment Infrastructure Routing addresses this challenge by treating governance as logistics. It provides the routing kernel, the classification protocols, the recording mechanisms, and the verification procedures necessary to make the movement of information and authority visible and auditable. By grounding capacity in physical constants and recording events in replayable genealogies, it removes dependence on institutional trust and enables verification by computation.
+Alignment Infrastructure Routes addresses this challenge by treating governance as logistics. It provides the routing kernel, the classification protocols, the recording mechanisms, and the verification procedures necessary to make the movement of information and authority visible and auditable. By grounding capacity in physical constants and recording events in replayable genealogies, it removes dependence on institutional trust and enables verification by computation.
 
 The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that human and artificial roles are correctly classified under The Human Mark, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
 

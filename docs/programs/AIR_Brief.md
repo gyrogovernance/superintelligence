@@ -1,4 +1,4 @@
-# Alignment Infrastructure Routing - AIR Brief
+# Alignment Infrastructure Routes - AIR Brief
 > Trustworthy Distributed Human Workforce Coordination for AI Safety
 
 AIR is infrastructure that helps AI safety labs scale their interventions and capabilities by coordinating human workforce capacity across projects. It is powered by the hQVM Kernel, a deterministic coordination system that routes and amplifies multi-agent capacity, and it provides targeted tools for classification, accounting, and funding allocation.
@@ -52,7 +52,7 @@ AIR produces three kinds of outputs that are useful immediately:
 
 ## How it works
 
-Alignment Infrastructure Routing has three layers.
+Alignment Infrastructure Routes has three layers.
 
 ### 1. hQVM Kernel
 
@@ -106,7 +106,7 @@ Tools are optional. The platform works if contributors submit outputs manually.
 
 ## Operating Model
 
-Alignment Infrastructure Routing projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
+Alignment Infrastructure Routes projects are executed through a defined operating arrangement that separates technical coordination from financial authority.
 
 1. **AIR provides the technical infrastructure.**
    This includes the hQVM Kernel, the App workflow, and optional Tools for tracking and verifying deliverables.
@@ -155,17 +155,17 @@ To manage risk and budget, Project Sponsors set specific caps on participation.
 
 A standard configuration limits an individual contributor to a specific number of Daily Prizes and Sprint Stipends per project. This ensures funds are distributed to a wider pool of contributors and prevents indefinite casual work without a move toward formal employment.
 
-The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Infrastructure Routing provides the verified work trail and classification data to inform these decisions, but does not automate the transfer of funds.
+The Sponsor retains full discretion over acceptance criteria and payment release. Alignment Infrastructure Routes provides the verified work trail and classification data to inform these decisions, but does not automate the transfer of funds.
 
 ---
 
 ## Example Program Configuration and Funding Tiers
 
-The Alignment Infrastructure Routing model can be used by AI safety labs directly or by NGOs and fiscal hosts. The same basic units apply in both cases. Amounts below are illustrative; actual rates and caps are set by the sponsor.
+The Alignment Infrastructure Routes model can be used by AI safety labs directly or by NGOs and fiscal hosts. The same basic units apply in both cases. Amounts below are illustrative; actual rates and caps are set by the sponsor.
 
 ### Canonical work units
 
-Alignment Infrastructure Routing uses two canonical units of work:
+Alignment Infrastructure Routes uses two canonical units of work:
 
 - **Daily Unit (1 Day)**  
   One day of focused work on a well-defined task. This is used for "Daily Prizes".
@@ -181,7 +181,7 @@ In transition contexts, sponsors may express funding in conventional currency. N
 
 ### Tier 1: Individual rapid grants (per-person cap, e.g. £1,000)
 
-Some programs, such as rapid grants, place a cap per individual (£1,000 per person). In this setting, Alignment Infrastructure Routing can be used to structure a small, safe engagement window.
+Some programs, such as rapid grants, place a cap per individual (£1,000 per person). In this setting, Alignment Infrastructure Routes can be used to structure a small, safe engagement window.
 
 **Example configuration (illustrative numbers):**
 
@@ -194,7 +194,7 @@ A sponsor with a £1,000 cap per person can, for example:
   - additional prizes in a later round, or
   - overhead, tools, or coordination costs
 
-The key point is that the cap applies per person, and Alignment Infrastructure Routing provides a clear way to express "how much work was funded" inside that limit, without treating it as salary.
+The key point is that the cap applies per person, and Alignment Infrastructure Routes provides a clear way to express "how much work was funded" inside that limit, without treating it as salary.
 
 ---
 
@@ -227,7 +227,7 @@ Larger grants (for example, £70,000) can be used to fund medium-term projects, 
 - Structure:
   - Early phase: several Sprint Units and Daily Units to qualify contributors and refine workflows
   - Main phase: contributors move into more stable contracts or stipends handled by the fiscal host's normal HR or contracting processes
-- Alignment Infrastructure Routing continues to be used for:
+- Alignment Infrastructure Routes continues to be used for:
   - defining and tracking Daily and Sprint Units
   - classifying deliverables with Gyroscope and The Human Mark
   - providing an attested work trail for reporting back to the sponsor
@@ -238,7 +238,7 @@ In this tier, fiscal hosts are most useful, because they already have the legal 
 
 ## The Complete Framework
 
-Alignment Infrastructure Routing uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **Gyroscopic ASI hQVM Kernel** for coordination and replay.
+Alignment Infrastructure Routes uses **The Human Mark** as its shared taxonomy for AI safety failure modes, the **Gyroscope Protocol** for workflow classification, and the **Gyroscopic ASI hQVM Kernel** for coordination and replay.
 
 **The Human Mark** is an epistemic taxonomy classifying contributions by the displacement risk they address:
 
@@ -262,7 +262,7 @@ The hQVM Kernel provides:
 
 ### Theoretical Foundation: Gyroscopic Global Governance
 
-Alignment Infrastructure Routing is the operational expression of Gyroscopic Global Governance (GGG), a framework for post-AGI coordination. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
+Alignment Infrastructure Routes is the operational expression of Gyroscopic Global Governance (GGG), a framework for post-AGI coordination. GGG demonstrates that properly aligned human-AI systems can resolve systemic coordination failures that lead to poverty, unemployment, and ecological degradation.
 
 ---
 

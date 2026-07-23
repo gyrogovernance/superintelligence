@@ -324,7 +324,7 @@ GYRO GOVERNANCE LAB VERIFIED
 
 **Grant:** Recognised MU capacity assigned for baseline occupation, role-based occupation, project participation, or other governed purposes.
 
-**AIR (Alignment Infrastructure Routing):** The coordination layer through which human and machine-mediated work is routed, attributed, governed, and made economically legible.
+**AIR (Alignment Infrastructure Routes):** The coordination layer through which human and machine-mediated work is routed, attributed, governed, and made economically legible.
 
 **Fair-Use Governance:** The governance of physical constraints through scoped rules, local priorities, ecological limits, and production coordination, rather than exclusionary price escalation.
 

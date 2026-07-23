@@ -12,6 +12,20 @@
 
 ---
 
+## [v2.0.9.6-AIR] – 2026-07-24
+
+Renamed AIR from Alignment Infrastructure - Routing to Routes
+
+---
+
+## [v2.0.9.5-hQVM] – 2026-07-23
+
+Updated:
+docs\specs\hQVM_QuBEC_Theory.md
+docs\specs\hQVM_Specs_Formalism.md
+
+---
+
 ## [v2.0.9.4-hQVM_Research] – 2026-07-02 to 2026-07-15
 
 ### Summary
@@ -2099,9 +2113,9 @@ For a small model (1B) it is alright. It needs a system prompt to remember the H
 
 ## [v1.2.8-GyroGem] – 2026-02-06 
 
-### Created GyroGem: THM Grammatical Guard for Alignment Infrastructure Routing
+### Created GyroGem: THM Grammatical Guard for Alignment Infrastructure Routes
 
-- Selected **T5Gemma 2 270M-270M** (encoder-decoder, pretrained) as the base model for GyroGem, a THM grammatical guard operating at the application layer of Alignment Infrastructure Routing.
+- Selected **T5Gemma 2 270M-270M** (encoder-decoder, pretrained) as the base model for GyroGem, a THM grammatical guard operating at the application layer of Alignment Infrastructure Routes.
 - Rationale: encoder-decoder architecture matches the classification-to-structured-output task profile. ~370M total memory footprint runs on CPU within the target hardware (AMD Ryzen 5 6600H, 32GB DDR5). Pretrained base provides a clean starting point without pre-existing displacement patterns from instruction tuning.
 
 ### Specification Written (AIR-GG-001 v1.0)
@@ -2430,7 +2444,7 @@ Revived and Updated Gyroscopic.
 ## [v1.2.2-Logistics] – 2026-01-26
 
 ### Added:
-- `docs\AIR_Logistics.md` - Alignment Infrastructure Routing (AIR) Logistics Framework that provides protocols, ontologies, and routing mechanisms for tracking and verifying coordination across human and artificial agents, treating governance as a logistics discipline with visible and accountable movement of information, authority, and decisions.
+- `docs\AIR_Logistics.md` - Alignment Infrastructure Routes (AIR) Logistics Framework that provides protocols, ontologies, and routing mechanisms for tracking and verifying coordination across human and artificial agents, treating governance as a logistics discipline with visible and accountable movement of information, authority, and decisions.
 
 ---
 
@@ -2566,7 +2580,7 @@ Revisiting equations for the Moments Economy.
 
 ## [v1.0-AIR] – 2026-01-01
 
-# v1.0 Release: Production-Ready Alignment Infrastructure Routing
+# v1.0 Release: Production-Ready Alignment Infrastructure Routes
 
 This release marks the first stable version of the Gyroscopic ASI hQVM Kernel, delivering a complete, tested, and documented system for deterministic coordination in human-AI governance settings.
 
@@ -2600,7 +2614,7 @@ All 135 tests pass, providing exhaustive verification of the kernel's structural
 - **Substrate: Physical Memory Specification** (`docs/Gyroscopic_ASI_Substrate_Specs.md`): Future development architecture for physical memory implementation
 
 ### Operational Documentation
-- **Alignment Infrastructure Routing (AIR) Brief** (`docs/AIR_Brief.md`): Complete overview of AIR's workforce coordination model, operating units, and program structure
+- **Alignment Infrastructure Routes (AIR) Brief** (`docs/AIR_Brief.md`): Complete overview of AIR's workforce coordination model, operating units, and program structure
 
 ### Test Reports
 - **Physics Tests Report** (`docs/reports/Physics_Tests_Report.md`): Verified structural properties and CGM-linked constants reconstruction
@@ -2617,7 +2631,7 @@ The router operates as a **Indirect coordination system**: it transforms and rou
 
 ---
 
-**Summary:** v1.0-AIR delivers a production-ready, exhaustively tested, and fully documented system for deterministic coordination in human-AI governance. The release establishes the epistemic necessity of geometric measurement for AI alignment and provides the complete infrastructure required for Alignment Infrastructure Routing.
+**Summary:** v1.0-AIR delivers a production-ready, exhaustively tested, and fully documented system for deterministic coordination in human-AI governance. The release establishes the epistemic necessity of geometric measurement for AI alignment and provides the complete infrastructure required for Alignment Infrastructure Routes.
 
 ---
 
@@ -2670,10 +2684,10 @@ This update fundamentally restructures AIR from a "multi-command CLI" into a **d
 ## [v0.9.9.5-AIR-CLI] – 2025-12-29
 
 ### Documentation
-- **Alignment Infrastructure Routing (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the Gyroscopic ASI Kernel.
+- **Alignment Infrastructure Routes (AIR) Brief:** Added comprehensive brief document (`docs/Alignment_Convergence_Brief.md`) describing human workforce coordination infrastructure for AI safety. The brief outlines how AIR helps AI safety labs scale interventions by coordinating human workforce capacity across projects, provides operating models for Daily Units (1 day) and Sprint Units (4 days), and explains the progression from open participation to stable employment through the Gyroscopic ASI Kernel.
 
 ### Development Planning
-- **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routing. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, tool integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
+- **AIR CLI Development Guide:** Created agent guide (`src/agent.md`) specifying the complete CLI implementation plan for Alignment Infrastructure Routes. The guide defines the CLI architecture with commands for atlas management, project initialization, run tracking (daily/sprint units), event binding, tool integration (THM and Gyroscope), and bundle generation/verification. The CLI will use markdown frontmatter for human-editable configs, append-only binary logs for kernel state, and JSONL for governance events, enabling replayable audit trails for sponsor verification.
 
 ---
 

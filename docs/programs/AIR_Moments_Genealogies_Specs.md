@@ -6,7 +6,7 @@
 
 ### Purpose
 
-This document explains how the Alignment Infrastructure Routing system enters existing markets and how its widespread adoption enables an economic transition. It is intended for anyone who needs to understand why the infrastructure exists, how it spreads, and what happens when enough of the world uses it.
+This document explains how the Alignment Infrastructure Routes system enters existing markets and how its widespread adoption enables an economic transition. It is intended for anyone who needs to understand why the infrastructure exists, how it spreads, and what happens when enough of the world uses it.
 
 For technical specifications, see the linked documents throughout this text and listed at the end.
 
