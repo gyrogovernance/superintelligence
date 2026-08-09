@@ -128,12 +128,31 @@ codebase-mcp/
 
 # external/: only llama.cpp submodule (commit pointer) is tracked in superintelligence.
 # fwht, backups, patches, vendored trees, etc. stay local -- visible on disk, never pushed.
-external/*
-!external/llama.cpp
+#external/*
+external/llama.cpp
+
+external/WHT_examples/
 
 # Build artifacts inside the submodule checkout and local native DLL
 external/llama.cpp/build/
 src/tools/gyroscopic/_build/
+
+# Orphan / wrong-cwd scratch dumps (never use repo-root _build)
+/_build/
+
+# Never commit in-place MSVC/gcc junk dropped in the package root
+# (official builds must use src/tools/gyroscopic/_build/ — see helpers/build_*.ps1 and build.py).
+src/tools/gyroscopic/*.obj
+src/tools/gyroscopic/*.exe
+src/tools/gyroscopic/*.lib
+src/tools/gyroscopic/*.exp
+src/tools/gyroscopic/*.dll
+src/tools/gyroscopic/*.pdb
+src/tools/gyroscopic/*.ilk
+src/tools/gyroscopic/*.o
+src/tools/gyroscopic/*.a
+src/tools/gyroscopic/*.so
+src/tools/gyroscopic/*.dylib
 
 # Symlinks for Cursor indexing (targets remain gitignored above, but Cursor follows symlinks)
 external_indexed
@@ -173,10 +192,16 @@ data/models/Bolmo-1B/.hf_modules/
 data/gyroadaptor_out/
 data/atlas/olmo_3_7b_manifolds/
 
+# Percolation study (carrier dumps + scratch, large binaries)
+data/percolation_study/
+
 research_mechanistic_interpretability/reports/Notes/
 secret_lab_ignore/GyroGem/notes/
 
 data/cache/
+
+# Local eval corpora / gate scratch (not source)
+data/eval/
 
 data/layers/
 data/resonators/

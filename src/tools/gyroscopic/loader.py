@@ -6,6 +6,7 @@ import re
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
+from typing import TypedDict
 
 from .config import (
     GyroscopicLLMConfig,
@@ -47,11 +48,14 @@ def _require_gguf_path(cfg: GyroscopicLLMConfig) -> Path:
 
 
 def _gyro_env(base: dict[str, str] | None = None, *, strict: bool = False) -> dict[str, str]:
-    """Prepare env for gyroscopic llama-cli runs (GGML_GYROSCOPIC=1)."""
+    """Prepare env for gyroscopic llama-cli runs.
+
+    Ledger path and Arc 2/3 holonomic flags are left to the caller
+    (see ``production_gyroscopic_env(..., holonomic_kv=True)``).
+    """
     env = dict(os.environ) if base is None else dict(base)
-    env["GGML_GYROSCOPIC"] = "1"
     if strict:
-        env["GGML_GYROSCOPIC_STRICT"] = "1"
+        env["GYRO_LEDGER_STRICT"] = "1"
     return env
 
 
@@ -176,6 +180,15 @@ def parse_llama_perplexity_output(stdout: str, stderr: str) -> float | None:
                     pass
     return None
 
+
+class LlamaPerplexityResult(TypedDict):
+    rc: int
+    ppl: float | None
+    stdout: str
+    stderr: str
+    argv: list[str]
+
+
 def run_llama_perplexity(
     cfg: GyroscopicLLMConfig,
     *,
@@ -183,7 +196,7 @@ def run_llama_perplexity(
     extra_args: Sequence[str] | None = None,
     env: dict[str, str] | None = None,
     timeout_sec: float | None = 1800.0,
-) -> dict[str, object]:
+) -> LlamaPerplexityResult:
     argv = build_llama_perplexity_command(cfg, corpus_path=corpus_path, extra_args=extra_args)
     cp = _run_command(argv, env=env, timeout_sec=timeout_sec)
     ppl = parse_llama_perplexity_output(cp.stdout or "", cp.stderr or "")

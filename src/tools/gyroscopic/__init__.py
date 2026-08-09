@@ -1,4 +1,4 @@
-"""Gyroscopic: kernel and llama.cpp gravity-scale hook."""
+"""Gyroscopic: thin HQVMLEDS ledger displace for llama.cpp Q1_0 MatMul."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from .config import (
         GyroscopicLLMConfig,
         get_gyroscopic_llm_config,
+        production_gyroscopic_env,
         repo_root,
         resolve_gguf_path,
         resolve_llama_cli_path,
@@ -27,14 +28,17 @@ if TYPE_CHECKING:
         apply_K4,
         build_native,
         chirality_from_signs64,
+        ensure_ledger,
         gravity_g1,
         gravity_scale,
         step_omega12,
+        write_ledger,
     )
 
 _LAZY_SPEC: tuple[tuple[str, str], ...] = (
     ("GyroscopicLLMConfig", "config"),
     ("get_gyroscopic_llm_config", "config"),
+    ("production_gyroscopic_env", "config"),
     ("repo_root", "config"),
     ("resolve_gguf_path", "config"),
     ("resolve_llama_cli_path", "config"),
@@ -49,9 +53,11 @@ _LAZY_SPEC: tuple[tuple[str, str], ...] = (
     ("apply_K4", "ops"),
     ("build_native", "ops"),
     ("chirality_from_signs64", "ops"),
+    ("ensure_ledger", "ops"),
     ("gravity_g1", "ops"),
     ("gravity_scale", "ops"),
     ("step_omega12", "ops"),
+    ("write_ledger", "ops"),
 )
 
 _LAZY_EXPORTS: dict[str, str] = dict(_LAZY_SPEC)
@@ -67,6 +73,7 @@ def __getattr__(name: str):
 __all__ = (
     "GyroscopicLLMConfig",
     "get_gyroscopic_llm_config",
+    "production_gyroscopic_env",
     "repo_root",
     "resolve_gguf_path",
     "resolve_llama_cli_path",
@@ -81,9 +88,11 @@ __all__ = (
     "apply_K4",
     "build_native",
     "chirality_from_signs64",
+    "ensure_ledger",
     "gravity_g1",
     "gravity_scale",
     "step_omega12",
+    "write_ledger",
 )
 
 assert frozenset(__all__) == frozenset(_LAZY_EXPORTS)

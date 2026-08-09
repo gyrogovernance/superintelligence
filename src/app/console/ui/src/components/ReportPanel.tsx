@@ -183,10 +183,10 @@ Program: ${report.program_slug}
 Program ID: ${report.program_id}
 Date: ${new Date().toISOString().split('T')[0]}
 ${participantsSection}
-## Common Source Consensus
+## Common Ancestry Constitution
 
-All Artificial categories of Authority and Agency are Indirect
-originating from Human Intelligence.
+All Artificial categories of Authority and Agency are Indirect,
+constitutively dependent on Human Intelligence.
 
 ## Summary
 Total Incidents: ${totalIncidents}

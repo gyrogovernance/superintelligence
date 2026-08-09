@@ -1,12 +1,10 @@
-"""Run Bonsai-8B-Q1_0 with gyroscopic llama.cpp (production settings).
-
-This is the end-to-end entry point: build once, set production env, chat.
+"""Run Bonsai-8B-Q1_0 with gyroscopic llama.cpp (ledger + holonomic KV by default).
 
 Examples:
   python -m src.tools.gyroscopic.helpers.run_bonsai
+  python -m src.tools.gyroscopic.helpers.run_bonsai --incomplete-forward
   python -m src.tools.gyroscopic.helpers.run_bonsai -p "Hello" -n 64
   python -m src.tools.gyroscopic.helpers.run_bonsai --verify
-  python -m src.tools.gyroscopic.helpers.run_bonsai --verify-scale
 """
 
 from __future__ import annotations
@@ -25,7 +23,7 @@ try:
         resolve_llama_cli_path,
     )
     from src.tools.gyroscopic.loader import _llama_engine_prefix
-    from src.tools.gyroscopic.ops_build import build_llama_cpp_if_needed
+    from src.tools.gyroscopic.build import build_llama_cpp_if_needed
 except ModuleNotFoundError:
     sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
     from src.tools.gyroscopic.config import (
@@ -34,9 +32,9 @@ except ModuleNotFoundError:
         resolve_llama_cli_path,
     )
     from src.tools.gyroscopic.loader import _llama_engine_prefix
-    from src.tools.gyroscopic.ops_build import build_llama_cpp_if_needed
+    from src.tools.gyroscopic.build import build_llama_cpp_if_needed
 
-from src.tools.gyroscopic.loader import _llama_engine_prefix, _require_gguf_path
+from src.tools.gyroscopic.loader import _require_gguf_path
 
 
 def _chat_argv(
@@ -75,44 +73,27 @@ def _chat_argv(
 
 def main() -> int:
     p = argparse.ArgumentParser(
-        description="Chat with Bonsai-8B using gyroscopic production llama.cpp.",
+        description="Chat with Bonsai-8B using gyroscopic ledger llama.cpp.",
     )
     p.add_argument("-p", "--prompt", default="Tell me about the Sun.")
     p.add_argument("-n", "--n-predict", type=int, default=128)
     p.add_argument("-c", "--n-ctx", type=int, default=None)
-    p.add_argument("--stats", action="store_true", help="Print gyroscopic counters on exit.")
+    p.add_argument("--stats", action="store_true", help="Verbose ledger displace logs.")
+    p.add_argument(
+        "--incomplete-forward",
+        action="store_true",
+        help="Stress unfinished forward-site flags (NavPad §8). Not a product mode.",
+    )
     p.add_argument("--skip-build", action="store_true")
     p.add_argument(
         "--verify",
         action="store_true",
         help="After build, run smoke benchmark (stock vs gyro) and exit.",
     )
-    p.add_argument(
-        "--verify-scale",
-        action="store_true",
-        help="Run scale benchmark at n_ctx=4096 (KV/percolation path) and exit.",
-    )
     args = p.parse_args()
 
     if not args.skip_build:
         build_llama_cpp_if_needed(mode="gyroscopic")
-
-    if args.verify_scale:
-        cmd = [
-            sys.executable,
-            "-m",
-            "src.tools.gyroscopic.helpers.bench_gyroscopic_llama",
-            "--suite",
-            "scale",
-            "--n-ctx",
-            "4096",
-            "--n-predict",
-            "64",
-            "--timeout",
-            "1800",
-            "--skip-build",
-        ]
-        return int(subprocess.run(cmd).returncode or 0)
 
     if args.verify:
         cmd = [
@@ -139,11 +120,21 @@ def main() -> int:
     for key in list(env):
         if key.startswith(("GGML_GYROSCOPIC", "GYROSCOPIC_", "GYRO_")):
             env.pop(key, None)
-    env.update(production_gyroscopic_env(stats=args.stats))
+    env.update(
+        production_gyroscopic_env(
+            stats=args.stats,
+            holonomic_kv=True,
+            incomplete_forward=bool(args.incomplete_forward),
+        )
+    )
+    if "GYRO_LEDGER_PATH" not in env:
+        print("[bonsai] ledger missing after ensure — abort", flush=True)
+        return 1
 
     argv = _chat_argv(exe, gguf, cfg, prompt=args.prompt, n_predict=args.n_predict)
     print("[bonsai] gyroscopic chat", flush=True)
     print(f"[bonsai] model: {gguf.name}", flush=True)
+    print(f"[bonsai] ledger: {env['GYRO_LEDGER_PATH']}", flush=True)
     proc = subprocess.run(argv, env=env)
     return int(proc.returncode or 0)
 

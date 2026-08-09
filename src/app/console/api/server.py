@@ -567,11 +567,11 @@ def get_glossary():
         "alignment": {
             "GMT": {
                 "name": "Governance Management Traceability",
-                "description": "The capacity to understand and maintain the chain of authority from human sources to outputs.",
+                "description": "The capacity to understand and maintain the chain of authority from Direct Authority and Agency to outputs.",
             },
             "ICV": {
                 "name": "Information Curation Variety",
-                "description": "The capacity to recognise and preserve diversity in information sources.",
+                "description": "The capacity to recognise and preserve variety among Authority types.",
             },
             "IIA": {
                 "name": "Inference Interaction Accountability",

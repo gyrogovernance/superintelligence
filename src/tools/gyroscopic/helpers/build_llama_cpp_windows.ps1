@@ -55,14 +55,12 @@ if ($buildTargets.Count -gt 0) {
 
 if ($Mode -eq "stock") {
     $buildDir = "build-stock"
-    $backendSubdir = "ggml-cpu"
     $gyroFlag = "-DGGML_GYROSCOPIC=OFF"
     $modeLabel = "stock (vanilla ggml-cpu)"
 } else {
     $buildDir = "build"
-    $backendSubdir = "ggml-gyroscopic"
     $gyroFlag = "-DGGML_GYROSCOPIC=ON"
-    $modeLabel = "gyroscopic (ggml-gyroscopic)"
+    $modeLabel = "gyroscopic (ggml-gyroscopic backend)"
 }
 
 $buildLine = "cmake --build $buildDir --config Release $targetArgs -j $buildJobs"
@@ -77,7 +75,7 @@ if (Test-Path $cachePath) {
 Write-Host "Build mode: $modeLabel"
 Write-Host "Build tree: external\llama.cpp\$buildDir"
 $cmakeArgs = @(
-    "call `"$vcvars`" && cd /d `"$llamaDir`" && cmake -B $buildDir -DCMAKE_BUILD_TYPE=Release $asmCompilerArg -DGGML_CPU_BACKEND_SUBDIR=$backendSubdir $gyroFlag -DGGML_OPENMP=ON -DGGML_AVX2=ON -DGGML_BMI2=ON && $buildLine"
+    "call `"$vcvars`" && cd /d `"$llamaDir`" && cmake -B $buildDir -DCMAKE_BUILD_TYPE=Release $asmCompilerArg $gyroFlag -DGGML_OPENMP=ON -DGGML_AVX2=ON -DGGML_BMI2=ON && $buildLine"
 )
 cmd.exe /c $cmakeArgs[0]
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -5,9 +5,30 @@
  * Gyroscopic C constants.
  * Keep in sync with src/tools/gyroscopic/constants.py.
  *
- * Environment variables read by the gyroscopic backend:
- *   GGML_GYROSCOPIC=1          enable per-layer gravity scale on Q1_0 matmul
- *   GYROSCOPIC_TOTAL_LAYERS    model depth for gravity scale (default 36)
+ * Live ledger env (read by ggml-gyroscopic hooks / ledger.c / attn.c / codec.c):
+ *   GYRO_LEDGER_PATH      thin HQVMLEDS (or fat HQVMLEDG) file
+ *   GYRO_LEDGER_STRICT    abort if allowlisted site cannot displace
+ *   GYRO_LEDGER_ALLOW     comma allowlist override
+ *   GYRO_LEDGER_VERBOSE   extra displace logs
+ *   GYRO_LEDGER_TENSOR    fat/default name substring
+ *   GYRO_KV_LEDGER=1      capture KV coordinates on RoPE (WHT-peak)
+ *   GYRO_KV_KQ8=1         displace float K cache with ggml Q8_0 (no-alloc)
+ *   GYRO_KV_V=1           displace float V cache with ggml Q8_0 (no-alloc)
+ *   GYRO_HOLONOMIC_ATTN=1 flash_attn score + Attn@V from Q8_0 K/V
+ *   GYRO_HOLONOMIC_ATTN_MODE  unset|zero_scores|random_scores (dot = default)
+ *   GYRO_COORD_PERTURB=zero_kq8  force zero K scores (score-loop proof)
+ *   GYRO_V_PERTURB=1      zero V contribution (Attn@V proof)
+ *   GYRO_PERCOLATION_SOFTMAX=1  shadow percolation θ vs stock softmax
+ *   GYRO_SHELL_NORM=1     shadow shell-equilibration vs RMSNorm
+ *   GYRO_RESIDUAL_SHADOW=1  shadow residual RMS / depth
+ *   GYRO_RECEIPTS=1       emit per-token GENE_Mac receipts (kernel step)
+ *   GYRO_APERTURE_SOFTMAX=1  aperture-constrained softmax (rank deficit * Delta)
+ *   GYRO_ROPE_CODEC=1     RoPE via T_256^(turn) LUT (live)
+ *   GYRO_SILU_CODEC=1     SwiGLU gate LUT apply (owned)
+ *   GYRO_CGM_LIFT=1       lift attn argmax → (q6,fam) phase byte; chi6 at KV write
+ *   GYRO_RESIDUAL_HYBRID=1  residual add gain from lift traj (hybrid bridge)
+ *   GYRO_NORM_CODEC / GYRO_NORM_COMMIT  scaffolding; live Norm apply broken
+ *   GYRO_CGM_LIFT_PERTURB=1  flip q6/fam (causal proof; not production)
  */
 
 /*

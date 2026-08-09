@@ -1,10 +1,9 @@
 #pragma once
 
 /*
- * Gyroscopic kernel C API.
+ * Gyroscopic kernel C API (offline / native DLL / tests).
  *
- * Inference (ggml hook) reads per-layer gravity_scale via quants.c TLS only.
- * Other exports are used by tests and offline diagnostics.
+ * Not linked into ggml-cpu inference. Live MatMul displace uses ledger.h.
  */
 
 #include <stdint.h>
@@ -254,11 +253,32 @@ GYROSCOPIC_EXPORT void gyroscopic_tile_decompose_ratios(
     gyroscopic_tile_ratios_t * out
 );
 
+/** Native 64-point Walsh-Hadamard transform on a float vector (in place). */
+GYROSCOPIC_EXPORT void gyroscopic_wht64_float(float data[64]);
+
 /** y[i] = sum_j f[i^j] * x[j] (chi-circulant matvec). */
 GYROSCOPIC_EXPORT void gyroscopic_chi_circulant_matvec(
     const float * f,
     const float * x,
     float *       y
+);
+
+/** Owned holonomic affinity step (spine). chi_q/chi_k = one chi6 per token;
+ *  aff_out[q] = A[chi_q[q]] where A = iWHT(Khat . WHT(H)), H the key
+*  chi histogram, Khat the spectral kernel (WHT of a chi-circulant column).
+*  Cost O(nq+nk+64 log64), not O(nq*nk*d). Returns 0 / -1. */
+GYROSCOPIC_EXPORT int gyroscopic_affinity_step(
+    const uint8_t * chi_q, int64_t nq,
+    const uint8_t * chi_k, int64_t nk,
+    const float   * khat,
+    float         * aff_out
+);
+
+/** Per-pair chi-coupling entry (owned QK-equivalent). score[i] =
+ *  kdir[chi_q[i] ^ chi_k[i]]; 64-LUT, no d-MACs. Returns 0 / -1. */
+GYROSCOPIC_EXPORT int gyroscopic_chi_coupling(
+    const uint8_t * chi_q, const uint8_t * chi_k, int64_t n,
+    const float   * kdir, float * score
 );
 
 /** Exact hybrid matvec: y = P_chi(W)·x + (W - P_chi(W))·x for 64x64 W. */
@@ -274,6 +294,66 @@ GYROSCOPIC_EXPORT float gyroscopic_tile_hybrid_dot_row(
     int           row,
     const float * x
 );
+
+/* ---------------------------------------------------------------------------
+ * Kernel-in-attention (Runtime Spec §6, pen-test L1/L4, analysis §7.2 fork A).
+ *
+ * The kernel executes a native score term inside flash-attn using Bonsai's Q/K
+ * activations. No residual gate, no head replacement, no training.
+ *
+ * chi6_from_plane64: peak-index chirality (0..63) of one 64-dim head plane.
+ *   Input is the first 64 of a 128-dim head channel (head dim = 2x64).
+ * gyro_sim: exact GF(2)^6 chirality distance, bounded 0..6.
+ * ------------------------------------------------------------------------- */
+
+/* Peak-index chi6 (0..63) of a 64-wide float plane (Q/K head half-plane). */
+GYROSCOPIC_EXPORT uint8_t gyroscopic_chi6_from_plane64(const float * plane64);
+
+/* Exact chirality similarity: 6 - popcount(a xor b), bounded 0..6. */
+GYROSCOPIC_EXPORT int gyroscopic_gyro_sim(uint8_t chi_a, uint8_t chi_b);
+
+/* ---------------------------------------------------------------------------
+ * Carrier projection from the TRUE 4096-dim residual (Omega = U x V, |U|=64).
+ *
+ * Bonsai hidden dim = 4096 = Omega. A 64-dim SLICE of Q/K is NOT the U factor
+ * (it is i.i.d. Rademacher -> thermal M2). The constitutional carrier is
+ * computed by grouping the 4096 residual into 64 blocks of 64 and applying the
+ * kernel's chirality code to each block: chi_out[b] = peak-index WHT64 of the
+ * sign pattern of block b. This yields the 64-element U factor, natively
+ * projected from the full Omega space (not a linear slice).
+ *
+ * x4096 must point at a contiguous 4096-wide residual row. chi_out[64] receives
+ * one chi6 per block. Returns 0 on success, -1 on null input.
+ * ------------------------------------------------------------------------- */
+GYROSCOPIC_EXPORT int gyroscopic_project_to_carrier_64(
+    const float * x4096, uint8_t chi_out[64]);
+
+
+/* ---------------------------------------------------------------------------
+ * Trajectory + receipt (carrier bookkeeping). Canonical Omega-12 step via
+ * gyroscopic_step_omega12. Single-owner instance lives in attn.c (lift path).
+ * ------------------------------------------------------------------------- */
+#define HQVM_ARCHETYPE_STATE24 GENE_MAC_REST
+
+typedef struct gyro_trajectory_state {
+    uint32_t state24;   /* (A12 << 12) | B12 */
+    uint64_t depth;     /* ledger depth (time) = tokens committed */
+    uint32_t n_trans;   /* transitions applied this token (36 layers) */
+    uint32_t phase_idx; /* emission counter; fam = phase_idx & 3 */
+} gyro_trajectory_state_t;
+
+typedef struct hqvm_receipt {
+    uint16_t anchor12;
+    uint8_t  k4_family;
+    uint32_t state24;
+    uint64_t depth;
+    uint32_t fnv1a;
+} hqvm_receipt_t;
+
+GYROSCOPIC_EXPORT void hqvm_traj_reset(gyro_trajectory_state_t *t);
+GYROSCOPIC_EXPORT void hqvm_traj_step(gyro_trajectory_state_t *t, uint8_t intron_byte);
+GYROSCOPIC_EXPORT uint32_t hqvm_receipt_seal(const hqvm_receipt_t *r);
+GYROSCOPIC_EXPORT void hqvm_receipt_print(const hqvm_receipt_t *r);
 
 #ifdef __cplusplus
 }

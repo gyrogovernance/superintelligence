@@ -1008,10 +1008,10 @@ def sync_program(program_md_path: Path) -> dict[str, Any]:
             ])
 
     report_md_lines.extend([
-        "## Common Source Consensus",
+        "## Common Ancestry Constitution",
         "",
-        "All Artificial categories of Authority and Agency are Indirect",
-        "originating from Human Intelligence.",
+        "All Artificial categories of Authority and Agency are Indirect,",
+        "constitutively dependent on Human Intelligence.",
         "",
     ])
 

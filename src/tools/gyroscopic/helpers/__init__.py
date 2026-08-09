@@ -1,6 +1,10 @@
-"""Gyroscopic helpers: bench runner and offline diagnostics.
+"""Gyroscopic helpers: build, bench, run, gates.
 
-- ``bench_gyroscopic_llama`` -- stock vs gyroscopic generation benchmark
-- ``diagnostics`` -- GGUF route scan, tile projection, offline kernel ctypes
-- ``build_*.ps1`` -- native / llama.cpp build scripts
+- ``build_*.ps1`` / package ``build.py`` — native kernel / llama.cpp builds
+- ``bench_gyroscopic_llama`` — stock vs gyroscopic generation bench
+- ``run_bonsai`` — chat entry (ledger+KV; ``--incomplete-forward`` for unfinished-site stress only)
+- ``gates`` — canonical acceptance gates (NavPad §7): ledger / kv / codecs / causal / forward-probe
+
+Production ledger: package-root ``ledger.py`` (auto-ensured by ``production_gyroscopic_env``).
+C sources: ``kernel``, ``ledger``, ``attn``, ``codec``.
 """

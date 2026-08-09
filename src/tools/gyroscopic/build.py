@@ -120,13 +120,15 @@ def _llama_gyroscopic_build_inputs(repo_root: Path) -> list[Path]:
     out: list[Path] = []
     if gyroscopic.is_dir():
         out.extend(p for p in gyroscopic.glob("*.h") if p.is_file())
-        kernel_c = gyroscopic / "kernel.c"
-        if kernel_c.is_file():
-            out.append(kernel_c)
+        for name in ("kernel.c", "ledger.c", "attn.c", "codec.c"):
+            p = gyroscopic / name
+            if p.is_file():
+                out.append(p)
 
     ggml = repo_root / "external" / "llama.cpp" / "ggml" / "src" / "ggml-gyroscopic"
     for rel in (
         "ggml-cpu.c",
+        "ops.cpp",
         "vec.cpp",
         "quants.c",
         "quants.h",

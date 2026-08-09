@@ -29,13 +29,13 @@
 
 Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) and Artificial General Intelligence (AGI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
 
-Within this broader framework, Alignment Infrastructure Routing (AIR) provides a coordination layer for work, provenance, and governance logistics, while Moments Economy provides a monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
+Within this broader framework, Alignment Infrastructure Routes (AIR) provides a coordination layer for work, provenance, and governance logistics, while Moments Economy provides a monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. It builds upon:
 
 - The **Common Governance Model (CGM):** a formal theory identifying the four capacities required for coherent governance.
 - **The Human Mark (THM):** a classification system for Direct and Indirect Authority and Agency, with four displacement risks.
 - The **Gyroscope Protocol:** a work classification system mapping contributions to the four governance capacities.
 
-Alignment Infrastructure Routing (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
+Alignment Infrastructure Routes (AIR) acts as the operational backbone, coordinating AI safety work and funding flows across projects. Together these components provide the coordination infrastructure for AI governance at scale while keeping authority and accountability with humans.
 
 Gyroscopic ASI is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.
 
@@ -132,9 +132,9 @@ All results below are verified by exhaustive computation over the entire reachab
 
 ---
 
-## 🍃 Alignment Infrastructure Routing (AIR)
+## 🍃 Alignment Infrastructure Routes (AIR)
 
-Alignment Infrastructure Routing (AIR) sits within the broader framework of Gyroscopic Collective Superintelligence, routing work, funding, provenance, and governance across AI safety and public-interest programmes.
+Alignment Infrastructure Routes (AIR) sits within the broader framework of Gyroscopic Collective Superintelligence, routing work, funding, provenance, and governance across AI safety and public-interest programmes.
 
 AIR serves as a practical bridge between human contribution, programme administration, and verifiable machine-assisted workflows.
 
@@ -273,7 +273,7 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/api.py` : Precomputed tables, chirality register, word signatures, Walsh helpers, and public algebra API
 - `src/kernel.py` : Reference kernel execution and replay surfaces
 - `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
-- `src/tools/gyroscopic/` : Gyroscopic kernel backend and runtime surfaces; llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
+- `src/tools/gyroscopic/` : Gyroscopic kernel backend (`kernel` / `ledger` / `attn` / `codec`); SoT `runtime_NavPAD.md`; llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
 - `docs/` : Specifications, reports, and supporting theory
 - `tests/` : Exhaustive verification suites for kernel physics, hQVM properties, SDK surfaces, and governance measurement
@@ -396,4 +396,4 @@ MIT Licence - see [LICENSE](LICENSE) for details.
   <p>All foundational ideas, design decisions, and conceptual frameworks originate from the Author.</p>
   <p>Responsibility for the validity, coherence, and ethical direction of this project remains fully human.</p>
   <p><strong>Acknowledgements:</strong><br>
-  This project benefited from AI language model services accessed through LMArena, Cursor IDE, OpenAI (ChatGPT), Anthropic (Opus), and Google (Gemini).</p>
+  This project benefited from AI language model services accessed through LMArena, Cursor IDE, Moonshot AI (Kimi), Z.ai (GLM) OpenAI (ChatGPT), Anthropic (Opus), and Google (Gemini).</p>

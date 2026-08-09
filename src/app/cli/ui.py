@@ -35,7 +35,7 @@ def cyan(text: str) -> str:
 
 
 def header(title: str) -> str:
-    return f"\n{bold('AIR')} - Alignment Infrastructure Routing\n{bold(title)}\n"
+    return f"\n{bold('AIR')} - Alignment Infrastructure Routes\n{bold(title)}\n"
 
 
 def kv(key: str, value: str, indent: int = 0) -> str:

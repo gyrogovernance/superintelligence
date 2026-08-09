@@ -98,15 +98,29 @@ L0_BIT_0: int = _k.L0_BIT_0
 L0_BIT_7: int = _k.L0_BIT_7
 BYTE_COUNT: int = _k.BYTE_COUNT
 
-# Process environment variables read by the gyroscopic backend or bench harness.
+# Process environment variables for the live ledger path / harness.
 GYRO_ENV_VAR_NAMES: tuple[str, ...] = (
-    "GGML_GYROSCOPIC",
-    "GGML_GYROSCOPIC_STRICT",
-    "GYROSCOPIC_TOTAL_LAYERS",
-    "GYROSCOPIC_KV_CHI",
-    "GYROSCOPIC_KV_CHI_INDEX",
-    "GYROSCOPIC_GRAVITY_ATTN",
-    "GYROSCOPIC_KV_CHI_STATS",
+    "GYRO_LEDGER_PATH",
+    "GYRO_LEDGER_STRICT",
+    "GYRO_LEDGER_ALLOW",
+    "GYRO_LEDGER_VERBOSE",
+    "GYRO_LEDGER_TENSOR",
+    "GYRO_KV_LEDGER",
+    "GYRO_KV_KQ8",
+    "GYRO_KV_V",
+    "GYRO_V_PERTURB",
+    "GYRO_HOLONOMIC_ATTN",
+    "GYRO_HOLONOMIC_ATTN_MODE",
+    "GYRO_COORD_PERTURB",
+    "GYRO_APERTURE_SOFTMAX",
+    "GYRO_ROPE_CODEC",
+    "GYRO_SILU_CODEC",
+    "GYRO_CGM_LIFT",
+    "GYRO_CGM_LIFT_PERTURB",
+    "GYRO_RESIDUAL_HYBRID",
+    "GYRO_NORM_CODEC",
+    "GYRO_NORM_COMMIT",
+    "GYRO_RECEIPTS",
 )
 
 _C_HEADER_MAP: dict[str, int | float] = {

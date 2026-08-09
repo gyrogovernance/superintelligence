@@ -1,7 +1,8 @@
-"""ctypes bindings for the Gyroscopic kernel.
+"""ctypes bindings for the Gyroscopic kernel (offline / tests).
 
-Builds ``kernel.c`` for tests. The llama.cpp hot path uses ``gravity_scale`` via
-TLS; this module also exposes step rule, K4, and chirality helpers.
+Builds ``kernel.c`` into a standalone native DLL for Python tests and helpers.
+The llama.cpp inference hot path also links ``kernel.c`` (plus ``ledger.c``,
+``attn.c``, ``codec.c``) into ggml-cpu — see ggml-gyroscopic CMakeLists.
 """
 
 from __future__ import annotations
@@ -12,11 +13,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .constants import (
+    GAUGE_COUNT,
+    HORIZON_SIZE,
+    OMEGA_SIZE,
+)
+
 _PKG_DIR = Path(__file__).resolve().parent
 _BUILD_DIR = _PKG_DIR / "_build"
-
-OMEGA_SIZE = 4096
-HORIZON_SIZE = 64
 
 K4_ID = 0
 K4_W2 = 1
@@ -28,6 +32,11 @@ PATH_BULK_CS = 1
 PATH_BULK_UNA = 2
 PATH_BULK_ONA = 3
 PATH_BULK_BU = 4
+
+# GAUGE_COUNT mirrors K4 size; keep local aliases for callers.
+assert GAUGE_COUNT == 4
+assert HORIZON_SIZE == 64
+assert OMEGA_SIZE == 4096
 
 
 def _lib_name() -> str:
@@ -150,9 +159,12 @@ def _bind(lib: ctypes.CDLL) -> None:
     lib.gyroscopic_kv_f32_block_chirality.restype = u8
     lib.gyroscopic_kv_f32_block_chirality.argtypes = [ctypes.POINTER(ctypes.c_float), u32p]
 
-    hist64 = ctypes.c_uint32 * 64
+    hist64 = ctypes.c_uint32 * HORIZON_SIZE
     lib.gyroscopic_chi_hist_d_eff.restype = ctypes.c_int
     lib.gyroscopic_chi_hist_d_eff.argtypes = [hist64, u8, fptr, fptr]
+
+    lib.gyroscopic_chi_hist_m2_eta.restype = None
+    lib.gyroscopic_chi_hist_m2_eta.argtypes = [hist64, fptr, fptr]
 
     lib.gyroscopic_route_resonance.restype = ctypes.c_float
     lib.gyroscopic_route_resonance.argtypes = [
@@ -178,7 +190,7 @@ def _bind(lib: ctypes.CDLL) -> None:
     lib.gyroscopic_comb_qft_peak.restype = ctypes.c_uint32
     lib.gyroscopic_comb_qft_peak.argtypes = [u64, ctypes.c_int, ctypes.POINTER(ctypes.c_float)]
 
-    tile = 64
+    tile = HORIZON_SIZE
     f32a = ctypes.c_float * (tile * tile)
     f32v = ctypes.c_float * tile
 
@@ -250,6 +262,31 @@ def kv_f32_block_chirality(x: list[float], state24: int | None = None) -> tuple[
     return chi, int(s.value)
 
 
+def kv_f32_to_word4(x: list[float]) -> list[int]:
+    """Map a 64-float block to its 4-byte holonomic word (bridge serializer)."""
+    if len(x) != 64:
+        raise ValueError("block must be length 64")
+    buf = (ctypes.c_float * 64)(*x)
+    out = (ctypes.c_uint8 * 4)()
+    _lib().gyroscopic_kv_f32_to_word4(buf, out)
+    return [int(out[i]) for i in range(4)]
+
+
+def serialize_4096_to_hqvm_bytes(v: list[float]) -> list[int]:
+    """Holonomic encoder: 4096-dim vector -> 256-byte stream (64 blocks x 4 bytes).
+
+    Each 64-wide block maps to a depth-4 kernel word via kv_f32_to_word4; the
+    resulting byte stream is exactly what step_omega12 walks to build the
+    4096-cell Omega (u6*64+v6) occupation. Companion consumer: probe _omega_cell_after_bytes.
+    """
+    if len(v) != OMEGA_SIZE:
+        raise ValueError(f"vector must be length {OMEGA_SIZE}")
+    out: list[int] = []
+    for b in range(0, OMEGA_SIZE, HORIZON_SIZE):
+        out.extend(kv_f32_to_word4(v[b:b + HORIZON_SIZE]))
+    return out
+
+
 def chi_hist_d_eff(hist: list[int], chi_q: int) -> tuple[int, float, float]:
     """Percolation-aware Hamming aperture from 64-bin occupation histogram."""
     if len(hist) != 64:
@@ -259,6 +296,17 @@ def chi_hist_d_eff(hist: list[int], chi_q: int) -> tuple[int, float, float]:
     eta = ctypes.c_float()
     d = int(_lib().gyroscopic_chi_hist_d_eff(hbuf, chi_q & 0x3F, ctypes.byref(m2), ctypes.byref(eta)))
     return d, float(m2.value), float(eta.value)
+
+
+def chi_hist_m2_eta(hist: list[int]) -> tuple[float, float]:
+    """Rényi-2 effective support M̂₂ = W²/Σh² and spectral damping η from a 64-bin occupation histogram (QuBEC §21.3)."""
+    if len(hist) != 64:
+        raise ValueError("hist must be length 64")
+    hbuf = (ctypes.c_uint32 * 64)(*hist)
+    m2 = ctypes.c_float()
+    eta = ctypes.c_float()
+    _lib().gyroscopic_chi_hist_m2_eta(hbuf, ctypes.byref(m2), ctypes.byref(eta))
+    return float(m2.value), float(eta.value)
 
 
 def route_resonance(
@@ -356,3 +404,17 @@ def tile_decompose_ratios(W: list[float]) -> dict[str, float]:
         "r_defect": float(out.r_defect),
         "norm": float(out.norm),
     }
+
+
+def ensure_ledger(*args, **kwargs):
+    """Ensure the thin HQVMLEDS production ledger exists. See ``ledger``."""
+    from .ledger import ensure_ledger as _ensure
+
+    return _ensure(*args, **kwargs)
+
+
+def write_ledger(*args, **kwargs):
+    """Write the thin HQVMLEDS production ledger. See ``ledger``."""
+    from .ledger import write_ledger as _write
+
+    return _write(*args, **kwargs)

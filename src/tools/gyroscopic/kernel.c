@@ -3,10 +3,14 @@
  */
 
 #include "kernel.h"
+#include <stdio.h>
 
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* internal alias: existing callers use the short name */
+#define wht64_float gyroscopic_wht64_float
 
 /* ------------------------------------------------------------------ */
 /* CGM constants used only here. Derived in gyroscopic_gravity_g1().  */
@@ -117,26 +121,17 @@ GYROSCOPIC_EXPORT uint32_t gyroscopic_step_omega12(uint32_t state24, uint8_t byt
 /* ================================================================== */
 /* 2. Wavefunction K4 operators (permutation only).                   */
 /*                                                                    */
-/* Psi is a length-4096 array over Omega = HORIZON x q-class.         */
-/* Indices: i = h * 64 + q, with h, q in [0, 63].                     */
-/*   W2  : swap (h, q) -> (q, h)         [horizon/q-class swap]       */
-/*   W2' : (h,q)->(~q,~h) = swap then complement both (6-bit)        */
-/*   F   : global complement (h,q)->(~h,~q) = W2 o W2'                */
+/* Psi is a length-4096 array over Omega = U x V.                      */
+/* Indices: i = u6 * 64 + v6, with u6, v6 in [0, 63].                 */
+/* The depth-4 half-words are order-preserving translations on         */
+/* (u6, v6): parity 0 (the per-byte U/V swap cancels over two bytes),  */
+/* so the coordinates are complemented, not exchanged. For m = 0       */
+/* (Analysis_hQVM_Wavefunction_Corrections sec 3-4):                   */
+/*   W2  : (u, v) -> (u ^ 63, v)        signature (0, 63, 0)  chi^63  */
+/*   W2' : (u, v) -> (u, v ^ 63)        signature (0, 0, 63)  chi^63  */
+/*   F   : (u, v) -> (u ^ 63, v ^ 63)   = W2 o W2'            chi     */
 /* Each is an involution; F = W2 o W2' holds by construction.         */
 /* ================================================================== */
-
-static void apply_swap(float psi[GYROSCOPIC_WAVEFUNCTION_SIZE]) {
-    int h, q;
-    for (h = 0; h < (int) HORIZON_SIZE; ++h) {
-        for (q = h + 1; q < (int) HORIZON_SIZE; ++q) {
-            const size_t i = (size_t) h * HORIZON_SIZE + (size_t) q;
-            const size_t j = (size_t) q * HORIZON_SIZE + (size_t) h;
-            const float t = psi[i];
-            psi[i] = psi[j];
-            psi[j] = t;
-        }
-    }
-}
 
 /* Map (h, q) -> (perm(h), perm(q)); perm is an involution on 0..63.
  * Uses ~16 KB stack buffer; research path only, not matmul inner loop. */
@@ -169,26 +164,24 @@ GYROSCOPIC_EXPORT void gyroscopic_apply_K4(
         return;
     }
 
+    for (i = 0; i < (int) HORIZON_SIZE; ++i) {
+        comp[i]  = (uint8_t) ((~(unsigned) i) & CHIRALITY_MASK_6);
+        ident[i] = (uint8_t) i;
+    }
+
     switch (gate) {
         case GYROSCOPIC_K4_ID:
             return;
         case GYROSCOPIC_K4_W2:
-            apply_swap(psi);
+            /* (u, v) -> (u ^ 63, v): complement U, preserve V (chi ^ 63). */
+            apply_pairwise(psi, comp, ident);
             return;
         case GYROSCOPIC_K4_W2P:
-            for (i = 0; i < (int) HORIZON_SIZE; ++i) {
-                comp[i]  = (uint8_t) ((~(unsigned) i) & CHIRALITY_MASK_6);
-                ident[i] = (uint8_t) i;
-            }
-            /* complement-swap: (h, q) -> (~q, ~h) = swap then complement both */
-            apply_swap(psi);
-            apply_pairwise(psi, comp, comp);
-            (void) ident;
+            /* (u, v) -> (u, v ^ 63): preserve U, complement V (chi ^ 63). */
+            apply_pairwise(psi, ident, comp);
             return;
         case GYROSCOPIC_K4_F:
-            for (i = 0; i < (int) HORIZON_SIZE; ++i) {
-                comp[i] = (uint8_t) ((~(unsigned) i) & CHIRALITY_MASK_6);
-            }
+            /* (u, v) -> (u ^ 63, v ^ 63) = W2 o W2' (chi preserved). */
             apply_pairwise(psi, comp, comp);
             return;
         default:
@@ -250,7 +243,9 @@ static void wht64_int32(int32_t data[64]) {
 }
 
 /* In-place 64-point Walsh-Hadamard on floats (same butterfly as wht64_int32). */
-static void wht64_float(float data[64]) {
+GYROSCOPIC_EXPORT void gyroscopic_wht64_float(float data[64]);
+
+GYROSCOPIC_EXPORT void gyroscopic_wht64_float(float data[64]) {
     int stride, i, j;
     for (stride = 32; stride >= 1; stride >>= 1) {
         for (i = 0; i < 64; i += 2 * stride) {
@@ -330,6 +325,48 @@ GYROSCOPIC_EXPORT uint8_t gyroscopic_activation_chirality_q8(
     signs = gyroscopic_signs64_from_q8(q0, 32);
     signs |= (gyroscopic_signs64_from_q8(q1, 32) << 32);
     return gyroscopic_chirality_from_signs64(signs);
+}
+
+/* ---------------------------------------------------------------------------
+ * Kernel-in-attention (Runtime Spec §6, analysis §7.2 fork A).
+ * chi6 is the peak-index chirality of a 64-wide sign pattern (WHT64 argmax).
+ * The kernel operates on Bonsai Q/K planes; no training, no residual gate.
+ * ------------------------------------------------------------------------- */
+
+GYROSCOPIC_EXPORT uint8_t gyroscopic_chi6_from_plane64(const float * plane64) {
+    if (plane64 == NULL) {
+        return 0;
+    }
+    return gyroscopic_chirality_from_signs64(gyroscopic_signs64_from_f32(plane64));
+}
+
+GYROSCOPIC_EXPORT int gyroscopic_gyro_sim(uint8_t chi_a, uint8_t chi_b) {
+    uint64_t x = (uint64_t) chi_a ^ (uint64_t) chi_b;
+    int       n = 0;
+
+    while (x) {
+        x &= x - 1u;
+        ++n;
+    }
+    return (int) (CHIRALITY_QUBITS_6 - n);
+}
+
+/* Carrier projection from the true 4096-dim residual (Omega = U x V, |U|=64).
+ * Group x4096 into 64 blocks of 64; chi_out[b] = peak-index WHT64 of the sign
+ * pattern of block b. Reuses the kernel's native chirality code (no new
+ * projection invented). A 64-slice of Q/K is NOT the U factor; this is. */
+GYROSCOPIC_EXPORT int gyroscopic_project_to_carrier_64(
+    const float * x4096, uint8_t chi_out[64]) {
+    int b;
+    if (x4096 == NULL || chi_out == NULL) {
+        return -1;
+    }
+    for (b = 0; b < 64; ++b) {
+        const float * block = x4096 + (size_t) b * 64;
+        chi_out[b] = gyroscopic_chirality_from_signs64(
+            gyroscopic_signs64_from_f32(block));
+    }
+    return 0;
 }
 
 GYROSCOPIC_EXPORT int gyroscopic_chirality_distance(uint8_t chi_a, uint8_t chi_b) {
@@ -1141,6 +1178,110 @@ GYROSCOPIC_EXPORT void gyroscopic_chi_circulant_matvec(
     wht64_float(y);
 }
 
+/* ---------------------------------------------------------------------------
+ * Owned holonomic affinity step (the spine, Runtime Spec §19-§21 + SDK §11.10).
+ *
+ * This IS the attention-like job, computed as exact GF(2)^6 circulant
+ * algebra instead of float QK^T + softmax. Tokens carry their carrier
+ * egress chi (the chart), not a foreign residual to be scored.
+ *
+ *   H[64]  = gather key mass at chi_k positions (density over the 64-bin
+ *            chirality register; O(nk))
+ *   Hw     = WHT(H)                      (O(64 log 64))
+ *   Aw[r]  = Hw[r] * Khat[r]             (pointwise spectral kernel, O(64))
+ *   A      = iWHT(Aw)                    (O(64 log 64))
+ *   aff[q] = A[ chi_q[q] ]                 (emit, O(nq))
+ *
+ * Total O(nq + nk + 64 log 64), independent of d. Brute
+ * XOR-distance attention is O(nq * nk * d). The kernel owns the
+ * structured affinity step; the continuous head consumes A as a chart.
+ *
+ * Khat is the spectral kernel (WHT of the native chi-circulant column
+ * f, i.e. gyroscopic_project_chi_coeffs(W, Khat)). Self-affinity
+ * = pass the same chi array for q and k.
+ *
+ * chi_q/chi_k: one chi6 per token. aff_out: nq scores.
+ * Returns 0 on success, -1 on null input.
+ * ------------------------------------------------------------------------- */
+GYROSCOPIC_EXPORT int gyroscopic_affinity_step(
+        const uint8_t * chi_q, int64_t nq,
+        const uint8_t * chi_k, int64_t nk,
+        const float   * khat,
+        float         * aff_out) {
+    int64_t i;
+    int     r;
+    float   H[GYRO_TILE];
+    float   Hw[GYRO_TILE];
+    float   Aw[GYRO_TILE];
+
+    if (chi_q == NULL || chi_k == NULL || khat == NULL || aff_out == NULL) {
+        return -1;
+    }
+    if (nq <= 0 || nk <= 0) {
+        return -1;
+    }
+
+    /* 1. gather key mass into the 64-bin chi histogram */
+    for (r = 0; r < GYRO_TILE; ++r) {
+        H[r] = 0.0f;
+    }
+    for (i = 0; i < nk; ++i) {
+        const int b = (int) chi_k[i] & 0x3F;
+        H[b] += 1.0f;
+    }
+
+    /* 2. WHT(H) */
+    memcpy(Hw, H, (size_t) GYRO_TILE * sizeof(float));
+    wht64_float(Hw);
+
+    /* 3. pointwise spectral kernel */
+    for (r = 0; r < GYRO_TILE; ++r) {
+        Aw[r] = Hw[r] * khat[r];
+    }
+
+    /* 4. iWHT -> A in chi basis */
+    wht64_float(Aw);
+    {
+        const float inv = 1.0f / (float) GYRO_TILE;
+        for (r = 0; r < GYRO_TILE; ++r) {
+            Aw[r] *= inv;
+        }
+    }
+
+    /* 5. emit: score[q] = A[ chi_q[q] ] */
+    for (i = 0; i < nq; ++i) {
+        const int b = (int) chi_q[i] & 0x3F;
+        aff_out[i] = Aw[b];
+    }
+    return 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * Per-pair chi-coupling entry (the genuine attention score, Runtime Spec
+ * sec 19-21). score[i] = K_direct[ chi_q[i] ^ chi_k[i] ], where K_direct is
+ * the circulant column. Constant-time via a 64-entry LUT; no d-MACs, no
+ * float GEMM. chi_q/chi_k: one chi6 per token (length n). score: length n.
+ * This is the kernel-owned QK-equivalent: a class function of the XOR, which
+ * is why the whole channel diagonalizes under WHT (see
+ * gyroscopic_affinity_step). Returns 0 / -1.
+ * ------------------------------------------------------------------------- */
+GYROSCOPIC_EXPORT int gyroscopic_chi_coupling(
+        const uint8_t * chi_q, const uint8_t * chi_k, int64_t n,
+        const float   * kdir, float * score) {
+    int64_t i;
+    if (chi_q == NULL || chi_k == NULL || kdir == NULL || score == NULL) {
+        return -1;
+    }
+    if (n <= 0) {
+        return -1;
+    }
+    for (i = 0; i < n; ++i) {
+        const int xor = ((int) chi_q[i] ^ (int) chi_k[i]) & 0x3F;
+        score[i] = kdir[xor];
+    }
+    return 0;
+}
+
 GYROSCOPIC_EXPORT void gyroscopic_tile_hybrid_matvec(
     const float * W,
     const float * x,
@@ -1186,3 +1327,44 @@ GYROSCOPIC_EXPORT float gyroscopic_tile_hybrid_dot_row(
     }
     return y;
 }
+
+/* Trajectory + receipt types / steppers (single-owner instance lives in attn). */
+GYROSCOPIC_EXPORT void hqvm_traj_reset(gyro_trajectory_state_t *t) {
+    if (!t) return;
+    t->state24 = (uint32_t)GENE_MAC_REST;
+    t->depth = 0;
+    t->n_trans = 0;
+    t->phase_idx = 0;
+}
+
+GYROSCOPIC_EXPORT void hqvm_traj_step(gyro_trajectory_state_t *t, uint8_t intron_byte) {
+    if (!t) return;
+    t->state24 = gyroscopic_step_omega12(t->state24, intron_byte);
+    t->n_trans++;
+}
+
+GYROSCOPIC_EXPORT uint32_t hqvm_receipt_seal(const hqvm_receipt_t *r) {
+    uint32_t h = 2166136261u;
+    const unsigned char *p;
+    size_t n, i;
+    if (!r) return 0;
+    p = (const unsigned char *)&r->anchor12; n = sizeof(r->anchor12);
+    for (i = 0; i < n; ++i) { h ^= p[i]; h *= 16777619u; }
+    h ^= r->k4_family; h *= 16777619u;
+    p = (const unsigned char *)&r->state24; n = sizeof(r->state24);
+    for (i = 0; i < n; ++i) { h ^= p[i]; h *= 16777619u; }
+    p = (const unsigned char *)&r->depth; n = sizeof(r->depth);
+    for (i = 0; i < n; ++i) { h ^= p[i]; h *= 16777619u; }
+    return h;
+}
+
+GYROSCOPIC_EXPORT void hqvm_receipt_print(const hqvm_receipt_t *r) {
+    if (!r) return;
+    fprintf(stderr,
+            "[hqvm-receipt] anchor=%03x k4=%u state24=%06x depth=%llu fnv=%08x\n",
+            (unsigned)(r->anchor12 & 0xFFF), (unsigned)(r->k4_family & 0x3),
+            (unsigned)(r->state24 & 0xFFFFFFu), (unsigned long long)r->depth,
+            (unsigned)r->fnv1a);
+    fflush(stderr);
+}
+

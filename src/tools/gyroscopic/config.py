@@ -243,16 +243,39 @@ def resolve_llama_perplexity_path(cfg: GyroscopicLLMConfig) -> Path:
 def production_gyroscopic_env(
     *,
     stats: bool = False,
+    ledger_path: str | None = None,
+    holonomic_kv: bool = False,
+    incomplete_forward: bool = False,
 ) -> dict[str, str]:
-    """Environment for production gyroscopic inference on Bonsai-8B-Q1_0."""
+    """Environment for gyroscopic Bonsai-8B-Q1_0.
+
+    Always sets GYRO_LEDGER_* and ensures the thin HQVMLEDS ledger file exists
+    (see ``ledger.ensure_ledger``). holonomic_kv enables Q8 K/V + holonomic attn.
+
+    incomplete_forward enables unfinished forward-site flags for stress/debug only
+    (NavPad §8). Not a product mode; does not close §0.
+    """
+    from .ledger import ensure_ledger
+
     env: dict[str, str] = {
-        "GGML_GYROSCOPIC": "1",
-        "GYROSCOPIC_KV_CHI": "1",
-        "GYROSCOPIC_KV_CHI_INDEX": "1",
-        "GYROSCOPIC_KV_PREFILTER_DECODE_ONLY": "1",
-        "GYROSCOPIC_GRAVITY_ATTN": "1",
-        "GYROSCOPIC_TOTAL_LAYERS": "36",
+        "GYRO_LEDGER_STRICT": "1",
+        "GYRO_LEDGER_ALLOW": (
+            "attn_q.weight,attn_k.weight,attn_v.weight,attn_output.weight,"
+            "ffn_gate.weight,ffn_up.weight,ffn_down.weight"
+        ),
     }
+    path = ensure_ledger(ledger_path) if ledger_path else ensure_ledger()
+    env["GYRO_LEDGER_PATH"] = str(path)
     if stats:
-        env["GYROSCOPIC_KV_CHI_STATS"] = "1"
+        env["GYRO_LEDGER_VERBOSE"] = "1"
+    if holonomic_kv or incomplete_forward:
+        env["GYRO_KV_KQ8"] = "1"
+        env["GYRO_KV_V"] = "1"
+        env["GYRO_HOLONOMIC_ATTN"] = "1"
+    if incomplete_forward:
+        env["GYRO_APERTURE_SOFTMAX"] = "1"
+        env["GYRO_ROPE_CODEC"] = "1"
+        env["GYRO_SILU_CODEC"] = "1"
+        env["GYRO_CGM_LIFT"] = "1"
+        env["GYRO_RESIDUAL_HYBRID"] = "1"
     return env
