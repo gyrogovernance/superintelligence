@@ -68,7 +68,7 @@ Owned sites apply when their flag is on (`GYRO_SILU_CODEC=1` applies the SwiGLU 
 
 **Env.** `GYRO_LEDGER_PATH`, `GYRO_LEDGER_STRICT`, optional `GYRO_LEDGER_ALLOW`.
 
-**Unfinished under §0:** `token_embd.weight` and `output.weight` are Q1_0 but **outside** the allowlist — still stock MatMul. That was a deferred engineering cut, **not** a user-declared end design. Native inference requires a decision: compile them under the same law, or state an explicit logits residual boundary with theory.
+**Boundary (not Arc-1 law failure):** `token_embd.weight` is embedding `GET_ROWS` (not a Dense MatMul); `output.weight` is logits `MUL_MAT`. Both are Q1_0 and **outside** the allowlist — stock path. Deferred engineering cut, **not** a user-declared end design. Native inference requires a decision: compile under Arc 1 law where applicable, or state an explicit embd/logits residual boundary with theory.
 
 ---
 
@@ -80,7 +80,7 @@ Owned sites apply when their flag is on (`GYRO_SILU_CODEC=1` applies the SwiGLU 
 
 **Env.** `GYRO_HOLONOMIC_ATTN=1`, `GYRO_KV_KQ8=1`, `GYRO_KV_V=1`.
 
-**Unfinished under §0:** Q8_0 is a finite magnitude chart, not coordinate-native Value. Optional later: magnitude-preserving Value codec beyond Q8 if theory demands finer datatype fields. Softmax/RoPE/Norm/FFN/residual were never Arc 2–3 scope.
+**Closed on:** Q8_0 as the owned magnitude chart for K/V. Softmax/RoPE/Norm/FFN/residual were never Arc 2–3 scope (forward pass, §5). Do not reopen Arc 3 with a speculative “Value-beyond-Q8” unfinished item unless theory explicitly revisits V.
 
 ---
 
@@ -121,9 +121,7 @@ These reopen **§0 / forward-pass sites only**. Arcs 1–3 stay closed unless a 
 
 **C. Boundaries and identity**
 
-11. **`token_embd` / `output.weight`:** compile under Arc 1 law or explicit theory-backed logits residual — not silent stock.
-12. Any remaining Dense/bias/add sites in the Bonsai graph that still run stock ggml: inventory and classify (compile / Δ-residual / reject).
-13. Optional Value-beyond-Q8 only with a deterministic magnitude-preserving decoder.
+11. **`token_embd` / `output.weight`:** decide embd (`GET_ROWS`) and logits (`MUL_MAT`) under Arc 1 law or explicit theory-backed residual — not silent stock.
 
 **D. Rejected (do not revive as unfinished)**
 
@@ -131,6 +129,7 @@ These reopen **§0 / forward-pass sites only**. Arcs 1–3 stay closed unless a 
 - Percolation / shell-λ as softmax weights
 - Aperture ε-mixture on RoPE / Norm / SiLU
 - Dropping Norm residual wholesale
+- Invented audit fronts (generic Dense/bias inventory; Value-beyond-Q8 as §0 debt while Arc 3 stays closed)
 - **Shipping or documenting a permanent “hybrid mode” as §0 success**
 
 ### 5.3 Incomplete causal bridge (stress evidence only — not final law)
@@ -149,6 +148,8 @@ These reopen **§0 / forward-pass sites only**. Arcs 1–3 stay closed unless a 
 | Percolation / shell-λ as softmax weights | Wrong category |
 | Aperture ε on RoPE / Norm / SiLU | Wrong site |
 | Drop Norm residual wholesale | Collapses depth |
+| Dense/bias/add “inventory and classify” as open front | Not a Bonsai site gap; biases absent; ADD is §5.2 A.2/B.6; embd/logits are §5.2 C.11 |
+| Value-beyond-Q8 as §0 unfinished | Arc 3 closed on Q8_0; speculative reopen only |
 | Treating incomplete forward stacks as §0 done | Revisionism |
 | Consenting to a permanent “hybrid mode” as architecture or deliverable | Scope creep; not requested |
 | Preserving OBSERVE/EMIT/COMMIT as architecture | Scaffolding, not theory |
