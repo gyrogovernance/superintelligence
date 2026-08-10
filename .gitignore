@@ -129,7 +129,7 @@ codebase-mcp/
 # external/: only llama.cpp submodule (commit pointer) is tracked in superintelligence.
 # fwht, backups, patches, vendored trees, etc. stay local -- visible on disk, never pushed.
 #external/*
-external/llama.cpp
+# external/llama.cpp
 
 external/WHT_examples/
 

@@ -252,8 +252,9 @@ def production_gyroscopic_env(
     Always sets GYRO_LEDGER_* and ensures the thin HQVMLEDS ledger file exists
     (see ``ledger.ensure_ledger``). holonomic_kv enables Q8 K/V + holonomic attn.
 
-    incomplete_forward enables unfinished forward-site flags for stress/debug only
-    (NavPad §8). Not a product mode; does not close §0.
+    With holonomic_kv: native driver + owned site laws (Attn shell+QK, FFN shell gate,
+    Norm commit, RoPE codec, residual Δ-law, CGM lift).
+    incomplete_forward: unfinished stress flags only (not production law).
     """
     from .ledger import ensure_ledger
 
@@ -261,7 +262,8 @@ def production_gyroscopic_env(
         "GYRO_LEDGER_STRICT": "1",
         "GYRO_LEDGER_ALLOW": (
             "attn_q.weight,attn_k.weight,attn_v.weight,attn_output.weight,"
-            "ffn_gate.weight,ffn_up.weight,ffn_down.weight"
+            "ffn_gate.weight,ffn_up.weight,ffn_down.weight,"
+            "token_embd.weight,output.weight"
         ),
     }
     path = ensure_ledger(ledger_path) if ledger_path else ensure_ledger()
@@ -272,10 +274,22 @@ def production_gyroscopic_env(
         env["GYRO_KV_KQ8"] = "1"
         env["GYRO_KV_V"] = "1"
         env["GYRO_HOLONOMIC_ATTN"] = "1"
+    if holonomic_kv and not incomplete_forward:
+        env["GYRO_NATIVE_FORWARD"] = "1"
+        env["GYRO_ATTN_SHELL_QK"] = "1"
+        env["GYRO_FFN_SHELL_GATE"] = "1"
+        env["GYRO_NORM_COMMIT"] = "1"
+        env["GYRO_ROPE_CODEC"] = "1"
+        env["GYRO_CGM_LIFT"] = "1"
+        env["GYRO_RESIDUAL_LAW"] = "1"
+        # Bonsai-8B-Q1_0 is Qwen3 (GGUF qwen3.rope.freq_base=1e6, yarn×4 → freq_scale=0.25).
+        env["GYRO_ROPE_FREQ_BASE"] = "1000000"
+        env["GYRO_ROPE_FREQ_SCALE"] = "0.25"
     if incomplete_forward:
         env["GYRO_APERTURE_SOFTMAX"] = "1"
         env["GYRO_ROPE_CODEC"] = "1"
         env["GYRO_SILU_CODEC"] = "1"
         env["GYRO_CGM_LIFT"] = "1"
-        env["GYRO_RESIDUAL_HYBRID"] = "1"
+        env["GYRO_RESIDUAL_LAW"] = "1"
+        env["GYRO_RESIDUAL_HYBRID"] = "1"  # deprecated alias
     return env

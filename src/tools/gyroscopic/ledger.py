@@ -34,6 +34,9 @@ DEFAULT_ALLOW = (
     "ffn_gate.weight",
     "ffn_up.weight",
     "ffn_down.weight",
+    # Arc 1 compile: embd GET_ROWS + logits MUL_MAT (NavPad §3 / Arc 4)
+    "token_embd.weight",
+    "output.weight",
 )
 ATTN_ALLOW = (
     "attn_q.weight",

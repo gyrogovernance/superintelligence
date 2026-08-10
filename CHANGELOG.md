@@ -12,7 +12,7 @@
 
 ---
 
-## [v2.1.0-Gyroscopic] – 2026-04-19 to 2026-08-09
+## [v2.1.0-Gyroscopic] – 2026-04-19 to 2026-08-10
 
 Here is the narrative for your changelog. It tells the story of the last four months without the internal shorthand, focusing on what actually happened and why August changed everything.
 
@@ -48,19 +48,29 @@ This insight forced us to look back at the language model problem. We had been t
 
 Once we reframed the problem, the solution came quickly. We built a reverse compiler for Bonsai 8B. It takes the frozen weights and compiles them into our native form: a controller that maps input to a geometric shell, a tape of bytes that drive the kernel, and a gyration step that moves the state.
 
-The results are concrete. We can now process a full tensor slice from Bonsai's attention layers using only byte operations and a small controller. The output matches the original model's activations with a cosine similarity of 0.948, well above the threshold we set for success. We have closed the loop in C, verified against Python, and the ledger format is now provably correct. This is not a hybrid mode where we run some operations in the kernel and some in standard floating point. It is a true displacement of the matrix multiplication with a temporal ledger.
+The results are concrete. We can now process a full tensor slice from Bonsai's attention layers using only byte operations and a small controller. The output matches the original model's activations with a cosine similarity of 0.948, well above the threshold we set for success. We have closed the loop in C, verified against Python, and the ledger format is now provably correct. The matrix multiplication is genuinely displaced by a temporal ledger.
 
-We call this Arc 1, and it is closed. Arcs 2 and 3, covering the key and value memory of the attention mechanism, are also closed. We own those parts of the stack now. The model uses our memory format, not the standard floating point cache.
+The key and value memory of the attention mechanism followed. The model uses our memory format, not the standard floating point cache.
 
-### What Remains (Arc 4)
+### Owning the Forward Pass
 
-We are not finished. The forward pass still has open sites. The normalization layers, the rotary position embeddings, and the final output projection are not yet fully compiled into the trajectory form. We know what needs to happen. The continuous parts must either be compiled into the ledger depth or preserved as explicit residual channels where the geometry demands it. We have working prototypes for these, but they are not yet the primary path. There is no "hybrid mode" that we consider acceptable as a final state. The goal remains a fully causal carrier where the trajectory drives every step.
+In August the whole block stack came under our control. The model generates valid text while every one of Bonsai's 36 transformer blocks runs on our native driver, under the full geometric laws, with no standard transformer execution underneath.
+
+Getting there taught us something we had underestimated. The pretrained model's causal topology is itself part of the law we are compiling. Qwen3 rotates consecutive coordinate pairs rather than split halves, so a correct angle applied to the wrong planes is a different rotation. Prompt processing has to run layer by layer, because a layer's memory must exist for every prompt token before the next layer reads it. The model's position tensor defines where we are in a sequence. Our integer activation quantization has to match the host exactly, because those bits feed the parity decisions that choose which geometric shell the state moves to. Even a small row selection step inside the last block turned out to be load bearing.
+
+Our own charts needed two corrections. Normalization carries two distinct reference points, the state's scale and the learned weights' scale, and they must not be collapsed into one. And our fixed point normalization had to be restructured to stay closed over the model's real dynamic range at width 4096.
+
+All of this was resolved without switching off a single geometric law. The manifold gain, the aperture modulated residual, the shell based attention weighting, and the family gated feed forward path were all active when the model answered correctly.
 
 ### Current Status
 
-The science repository has demonstrated that the kernel predicts physical reality across scales from quantum gravity to biological metabolism. The superintelligence repository has demonstrated that we can compile a real language model into this kernel and reproduce its behavior without relying on standard matrix multiplication. 
+The science repository has demonstrated that the kernel predicts physical reality across scales from quantum gravity to biological metabolism. The superintelligence repository now runs a real language model through the kernel's own trajectory rather than through standard transformer execution.
 
-We have moved from "can this work?" to "how do we close the final gap?" The answer is now a matter of engineering discipline, not fundamental uncertainty. We know the form of the solution. It is the trajectory, the ledger, and the datatype. We are almost there.
+We own the 36 block forward pass. Genealogy runs as one continuous history across prompt and generation, spanning tokens times layers exactly. Attention memory, rotary phase, normalization, the feed forward gate, and the residual stream all follow native law.
+
+Two things remain. The ends of the graph, meaning embedding entry, final normalization, and the output projection, still run on the host. And the working buffers are still held in floating point even though the decision laws are native, so the arithmetic has yet to be closed down to integers and dyadics.
+
+The hard question is answered. The trajectory carries a real model.
 
 Gyroscopic ASI Runtime code: src\tools\gyroscopic
 

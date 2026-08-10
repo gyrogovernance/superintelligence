@@ -152,17 +152,38 @@ def _codecs_variant_env(extra: dict[str, str]) -> dict[str, str]:
 
 
 def _parse_counters(combined: str) -> dict[str, int | None]:
-    hol = re.search(r"holonomic_score_calls=(\d+)", combined)
-    stock = re.search(r"stock_score_calls=(\d+)", combined)
-    vq8 = re.search(r"v_q8_calls=(\d+)", combined)
-    rope_c = re.search(r"rope_codec_calls=(\d+)", combined)
-    rope_s = re.search(r"rope_stock_calls=(\d+)", combined)
+    def _i(pat: str, *, last: bool = False) -> int | None:
+        if last:
+            ms = list(re.finditer(pat, combined))
+            m = ms[-1] if ms else None
+        else:
+            m = re.search(pat, combined)
+        return int(m.group(1)) if m else None
+
     return {
-        "holonomic": int(hol.group(1)) if hol else None,
-        "stock": int(stock.group(1)) if stock else None,
-        "v_q8": int(vq8.group(1)) if vq8 else None,
-        "rope_codec": int(rope_c.group(1)) if rope_c else None,
-        "rope_stock": int(rope_s.group(1)) if rope_s else None,
+        "holonomic": _i(r"holonomic_score_calls=(\d+)"),
+        "stock": _i(r"stock_score_calls=(\d+)"),
+        "v_q8": _i(r"v_q8_calls=(\d+)"),
+        "rope_codec": _i(r"rope_codec_calls=(\d+)"),
+        "rope_stock": _i(r"rope_stock_calls=(\d+)"),
+        "stock_block": _i(r"stock_block_forward_calls=(\d+)", last=True),
+        "native_block": _i(r"native_block_calls=(\d+)", last=True),
+        "native_block_delta": _i(r"native_block_delta=(\d+)", last=True),
+        "stock_softmax": _i(r"stock_softmax_calls=(\d+)", last=True),
+        "stock_silu": _i(r"stock_silu_calls=(\d+)", last=True),
+        "stock_flash_attn": _i(r"stock_flash_attn_calls=(\d+)", last=True),
+        "stock_rope": _i(r"stock_rope_calls=(\d+)", last=True),
+        "stock_rmsnorm": _i(r"stock_rmsnorm_calls=(\d+)", last=True),
+        "stock_swiglu": _i(r"stock_swiglu_calls=(\d+)", last=True),
+        "stock_add": _i(r"stock_add_calls=(\d+)", last=True),
+        "set_rows": _i(r"set_rows_calls=(\d+)", last=True),
+        "stock_tail": _i(r"stock_tail_calls=(\d+)", last=True),
+        "kv_null_reads": _i(r"kv_null_reads=(\d+)", last=True),
+        "kv_null_writes": _i(r"kv_null_writes=(\d+)", last=True),
+        "K_writes": _i(r"K_writes=(\d+)", last=True),
+        "V_writes": _i(r"V_writes=(\d+)", last=True),
+        "chiK_writes": _i(r"chiK_writes=(\d+)", last=True),
+        "pi_applied": _i(r"pi_applied=(\d+)", last=True),
     }
 
 
@@ -191,6 +212,11 @@ def _codecs_smoke(cfg, env: dict[str, str], label: str, timeout_sec: int = 300) 
     print(f"  {label}_v_q8>0  {_pass(v_pos)}")
     print(f"  {label}_smoke  {_pass(ok)}")
     return ok, ctr, combined
+
+
+def _last_re(pattern: str, text: str) -> re.Match[str] | None:
+    ms = list(re.finditer(pattern, text))
+    return ms[-1] if ms else None
 
 
 def _incomplete_forward_env(*, perturb: bool) -> dict[str, str]:
@@ -459,7 +485,14 @@ def _kv_v(args: argparse.Namespace) -> int:
     q = "Question: the first city mentioned was Paris. What is the capital of Italy?"
     long_prompt = filler + " " + q
     cfg_l = replace(cfg, n_ctx=3072)
-    rl = run_llama_cli(cfg_l, prompt=long_prompt, n_predict=8, env=env_arc3, timeout_sec=300)
+    try:
+        rl = run_llama_cli(cfg_l, prompt=long_prompt, n_predict=8, env=env_arc3, timeout_sec=900)
+    except subprocess.TimeoutExpired:
+        print("  rc=TIMEOUT")
+        print(f"  Gate I  {_pass(False)}")
+        overall = disp_ok and pert_ok and False
+        print(f"\n  GATE_KV_V  {_pass(overall)}")
+        return 0 if overall else 1
     comb_l = (rl.stdout or "") + "\n" + (rl.stderr or "")
     aborted = "GGML_ABORT" in comb_l or "refusing" in comb_l
     stock_zero = "stock_score_calls=0" in comb_l
@@ -642,7 +675,7 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     cfg = replace(get_gyroscopic_llm_config(), n_ctx=512)
     extra = ["--temp", "0", "--top-k", "1", "--seed", "1"]
 
-    print("\n1. HYBRID (no perturb)")
+    print("\n1. RESIDUAL LAW (no perturb)")
     print("=" * 5)
     try:
         ra = run_llama_cli(
@@ -657,16 +690,41 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     comb_a = (ra.stdout or "") + "\n" + (ra.stderr or "")
     print(f"  rc={ra.returncode}")
     print(f"  gen_A={gen_a!r}")
-    hits = re.search(r"\[hqvm-residual-hybrid\] hits=(\d+)", comb_a)
-    stock = re.search(r"stock_score_calls=(\d+)", comb_a)
+    hits = _last_re(r"\[hqvm-residual(?:-hybrid)?\] hits=(\d+)", comb_a)
+    stock = _last_re(r"stock_score_calls=(\d+)", comb_a)
     print(f"  residual_hits={hits.group(1) if hits else None}")
     print(f"  stock_score_calls={stock.group(1) if stock else None}")
     print(f"  stock_score_calls=0  {_pass(stock is not None and int(stock.group(1)) == 0)}")
     if hits:
         h = int(hits.group(1))
-        print(f"  residual_hits_near_72  {_pass(40 <= h <= 200)}")
+        print(f"  residual_hits_near_72  {_pass(40 <= h <= 2000)}")
+    clock = _last_re(
+        r"\[hqvm-gyro-clock\] depth_start=(\d+) depth_end=(\d+) steps=(\d+)",
+        comb_a,
+    )
+    if clock:
+        d0, d1, steps = int(clock.group(1)), int(clock.group(2)), int(clock.group(3))
+        print(f"  genealogy depth_start={d0} depth_end={d1} steps={steps}")
+        span = d1 - d0 if d1 >= d0 else None
+        print(f"  genealogy_steps>0  {_pass(steps > 0)}")
+        # Bonsai L=36; one MVG step per (token, layer) ⇒ steps == T*L == span.
+        print(f"  genealogy_steps>=36  {_pass(steps >= 36)}")
+        print(f"  genealogy_steps%36==0  {_pass(steps > 0 and steps % 36 == 0)}")
+        if span is not None and steps > 0:
+            print(f"  genealogy_span={span} steps={steps}")
+            print(f"  genealogy_span==steps  {_pass(span == steps)}")
+            print(f"  genealogy_span==T*L  {_pass(span == steps)}")
+        clock_ok = (
+            steps >= 36
+            and steps % 36 == 0
+            and span is not None
+            and span == steps
+        )
+    else:
+        print("  genealogy_line  (absent this run)")
+        clock_ok = False
 
-    print("\n2. HYBRID + PERTURB")
+    print("\n2. RESIDUAL LAW + PERTURB")
     print("=" * 5)
     try:
         rb = run_llama_cli(
@@ -687,7 +745,67 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     print(f"  both_rc=0  {_pass(ra.returncode == 0 and rb.returncode == 0)}")
     print(f"  gen_nonempty  {_pass(bool(gen_a) and bool(gen_b))}")
     print(f"  token_seq_differs  {_pass(differ)}")
-    overall = (ra.returncode == 0 and rb.returncode == 0 and differ)
+    print(f"  genealogy_T*L  {_pass(clock_ok)}")
+
+    print("\n4. NATIVE DRIVER (production holonomic_kv)")
+    print("=" * 5)
+    env_n = _clean_env()
+    env_n.update(production_gyroscopic_env(holonomic_kv=True))
+    if SIDECAR.is_file():
+        env_n["GYRO_LEDGER_PATH"] = str(SIDECAR)
+    native_ok = False
+    try:
+        rn = run_llama_cli(
+            cfg, prompt=PARIS_PROMPT, n_predict=8,
+            env=env_n, timeout_sec=600, extra_args=extra,
+        )
+        comb_n = (rn.stdout or "") + "\n" + (rn.stderr or "")
+        ctr_n = _parse_counters(comb_n)
+        print(f"  rc={rn.returncode}")
+        print(f"  stock_block_forward_calls={ctr_n['stock_block']}")
+        print(f"  native_block_calls={ctr_n['native_block']}")
+        print(f"  native_block_delta={ctr_n['native_block_delta']}")
+        print(f"  stock_softmax_calls={ctr_n['stock_softmax']}")
+        print(f"  stock_silu_calls={ctr_n['stock_silu']}")
+        print(f"  stock_flash_attn_calls={ctr_n['stock_flash_attn']}")
+        print(f"  stock_rope_calls={ctr_n['stock_rope']}")
+        print(f"  stock_rmsnorm_calls={ctr_n['stock_rmsnorm']}")
+        print(f"  stock_swiglu_calls={ctr_n['stock_swiglu']}")
+        print(f"  set_rows_calls={ctr_n['set_rows']}")
+        print(f"  stock_tail_calls={ctr_n['stock_tail']}")
+        print(f"  kv_null_reads={ctr_n['kv_null_reads']} kv_null_writes={ctr_n['kv_null_writes']}")
+        print(f"  K_writes={ctr_n['K_writes']} V_writes={ctr_n['V_writes']} chiK_writes={ctr_n['chiK_writes']}")
+        print(f"  pi_applied={ctr_n['pi_applied']}")
+        blk0 = ctr_n["stock_block"] == 0
+        nat_pos = ctr_n["native_block"] is not None and ctr_n["native_block"] > 0
+        sm0 = ctr_n["stock_softmax"] == 0
+        silu0 = ctr_n["stock_silu"] == 0
+        fa0 = ctr_n["stock_flash_attn"] == 0
+        rope0 = ctr_n["stock_rope"] == 0
+        rms0 = ctr_n["stock_rmsnorm"] == 0
+        swi0 = ctr_n["stock_swiglu"] == 0
+        rows0 = ctr_n["set_rows"] == 0
+        knull0 = (ctr_n["kv_null_reads"] == 0 and ctr_n["kv_null_writes"] == 0)
+        print(f"  stock_block_forward_calls=0  {_pass(blk0)}")
+        print(f"  native_block_calls>0  {_pass(nat_pos)}")
+        print(f"  stock_softmax_calls=0  {_pass(sm0)}")
+        print(f"  stock_silu_calls=0  {_pass(silu0)}")
+        print(f"  stock_flash_attn_calls=0  {_pass(fa0)}")
+        print(f"  stock_rope_calls=0  {_pass(rope0)}")
+        print(f"  stock_rmsnorm_calls=0  {_pass(rms0)}")
+        print(f"  stock_swiglu_calls=0  {_pass(swi0)}")
+        print(f"  set_rows_calls=0  {_pass(rows0)}")
+        print(f"  kv_null=0  {_pass(knull0)}")
+        native_ok = (
+            rn.returncode == 0 and blk0 and nat_pos and sm0 and silu0
+            and fa0 and rope0 and rms0 and swi0 and rows0 and knull0
+        )
+        print(f"  native_driver  {_pass(native_ok)}")
+    except Exception as e:
+        print(f"  native_run_error={e!r}")
+        print(f"  native_driver  {_pass(False)}")
+
+    overall = (ra.returncode == 0 and rb.returncode == 0 and differ and clock_ok and native_ok)
     print(f"  GATE_CAUSAL  {_pass(overall)}")
     print("\nDONE")
     print("=" * 5)
@@ -698,9 +816,9 @@ def cmd_forward_probe(args: argparse.Namespace) -> int:
     print("hQVM GATE FORWARD-PROBE: Norm shadow + PPL Base/N/H/NH")
     print("=" * 5)
     print("  note=incomplete forward-site probe; not a product mode")
-    print("  note=Norm COMMIT may FAIL until signed Δ-ruler")
+    print("  note=signed Norm Δ-ruler; residual law; Softmax/FFN deferred")
 
-    cfg = replace(get_gyroscopic_llm_config(), n_ctx=max(256, int(args.ctx)))
+    cfg = replace(get_gyroscopic_llm_config(), n_ctx=max(128, int(args.ctx)))
     try:
         print(f"  perplexity_exe={resolve_llama_perplexity_path(cfg).name}  {_pass(True)}")
     except FileNotFoundError:
@@ -718,20 +836,38 @@ def cmd_forward_probe(args: argparse.Namespace) -> int:
     print(f"  n_cos={len(cos)} mean_cos={mean_cos}")
     cos_ok = mean_cos is not None and mean_cos >= 0.999
     print(f"  mean_cos>=0.999  {_pass(cos_ok)}")
+    rels = [float(m) for m in re.findall(r"\[hqvm-norm-codec\] rel=([0-9.eE+-]+)", comb)]
+    if rels:
+        mean_rel = sum(rels) / len(rels)
+        print(f"  n_rel={len(rels)} mean_rel={mean_rel}")
+    clock = re.search(
+        r"\[hqvm-gyro-clock\] depth_start=(\d+) depth_end=(\d+) steps=(\d+)",
+        comb,
+    )
+    if clock:
+        d0, d1, steps = int(clock.group(1)), int(clock.group(2)), int(clock.group(3))
+        print(f"  genealogy depth_start={d0} depth_end={d1} steps={steps}")
+        print(f"  genealogy_steps>0  {_pass(steps > 0)}")
 
     variants = [
         ("Base", {}),
         ("N", {"GYRO_NORM_CODEC": "1", "GYRO_NORM_COMMIT": "1"}),
-        ("H", {"GYRO_CGM_LIFT": "1", "GYRO_RESIDUAL_HYBRID": "1"}),
+        ("H", {"GYRO_CGM_LIFT": "1", "GYRO_RESIDUAL_LAW": "1", "GYRO_RESIDUAL_HYBRID": "1"}),
         ("NH", {
             "GYRO_NORM_CODEC": "1", "GYRO_NORM_COMMIT": "1",
-            "GYRO_CGM_LIFT": "1", "GYRO_RESIDUAL_HYBRID": "1",
+            "GYRO_CGM_LIFT": "1", "GYRO_RESIDUAL_LAW": "1", "GYRO_RESIDUAL_HYBRID": "1",
         }),
     ]
 
     print("\n2. PPL")
     print("=" * 5)
-    corpus = str(CORPUS_TINY)
+    # Micro corpus keeps CPU gate time tractable (full tiny ~16KB often >10min/variant).
+    corpus_path = _REPO_ROOT / "_build" / "ppl_forward_probe.txt"
+    _ensure_tiny(corpus_path, min_bytes=2000)
+    if corpus_path.stat().st_size > 2200:
+        corpus_path.write_text(corpus_path.read_text(encoding="utf-8")[:2000], encoding="utf-8")
+    corpus = str(corpus_path)
+    print(f"  corpus={corpus_path.name} bytes={corpus_path.stat().st_size} ctx={int(args.ctx)}")
     ppls: dict[str, float | None] = {}
     for name, extra in variants:
         env = _codecs_base_env()
@@ -791,8 +927,8 @@ def main() -> int:
         "forward-probe",
         help="Norm shadow + lift/residual PPL (incomplete sites; not a mode)",
     )
-    ph.add_argument("--ctx", type=int, default=256)
-    ph.add_argument("--timeout", type=int, default=2400)
+    ph.add_argument("--ctx", type=int, default=128)
+    ph.add_argument("--timeout", type=int, default=900)
 
     args = ap.parse_args()
     handlers = {

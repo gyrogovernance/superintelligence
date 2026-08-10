@@ -26,10 +26,17 @@
  *   GYRO_ROPE_CODEC=1     RoPE via T_256^(turn) LUT (live)
  *   GYRO_SILU_CODEC=1     SwiGLU gate LUT apply (owned)
  *   GYRO_CGM_LIFT=1       lift attn argmax → (q6,fam) phase byte; chi6 at KV write
- *   GYRO_RESIDUAL_HYBRID=1  residual add gain from lift traj (hybrid bridge)
- *   GYRO_NORM_CODEC / GYRO_NORM_COMMIT  scaffolding; live Norm apply broken
+ *   GYRO_RESIDUAL_LAW=1   residual-stream law: add gain = 1+Delta*m from lift traj
+ *   GYRO_RESIDUAL_HYBRID=1  deprecated alias of GYRO_RESIDUAL_LAW
+ *   GYRO_NORM_CODEC / GYRO_NORM_COMMIT  signed Delta-ruler Norm (COMMIT applies)
+ *   GYRO_NORM_G0          Norm gain reference (default 1.0; export geomean TODO)
  *   GYRO_CGM_LIFT_PERTURB=1  flip q6/fam (causal proof; not production)
  */
+
+/* Bonsai-8B layer count — GyroClock depth = token_pos * HQVM_N_LAYER + layer_idx */
+#ifndef HQVM_N_LAYER
+#define HQVM_N_LAYER 36
+#endif
 
 /*
  * ABI / header contract (mirrored in Python _C_HEADER_MAP; used by kernel.c + ggml):

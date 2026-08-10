@@ -148,6 +148,21 @@ void hqvm_holonomic_counters_print(void) {
 #endif
     fprintf(stderr, "[hqvm-holonomic] holonomic_score_calls=%llu stock_score_calls=%llu v_q8_calls=%llu\n",
             (unsigned long long)h, (unsigned long long)s, (unsigned long long)vq8);
+    /* Native driver / site ownership counters (resolved at link from layer/codec). */
+    {
+        extern uint64_t hqvm_stock_block_forward_calls(void);
+        extern uint64_t hqvm_native_block_calls(void);
+        extern uint64_t hqvm_stock_softmax_calls(void);
+        extern uint64_t hqvm_stock_silu_calls(void);
+        fprintf(stderr,
+            "[hqvm-native] stock_block_forward_calls=%llu native_block_calls=%llu "
+            "stock_softmax_calls=%llu stock_silu_calls=%llu pi_applied=%d\n",
+            (unsigned long long)hqvm_stock_block_forward_calls(),
+            (unsigned long long)hqvm_native_block_calls(),
+            (unsigned long long)hqvm_stock_softmax_calls(),
+            (unsigned long long)hqvm_stock_silu_calls(),
+            hqvm_pi_applied());
+    }
     fflush(stderr);
 }
 
@@ -439,20 +454,20 @@ void hqvm_quantize_row_q8(
     int64_t n,
     void *out_q8)
 {
+    /* Match ggml quantize_row_q8_0: scale d = amax/127 is always >= 0. */
     hqvm_q8_blk *blk = (hqvm_q8_blk *)out_q8;
     int64_t b;
     int i;
     if (!row || !out_q8 || n <= 0) return;
     for (b = 0; b < n / HQVM_Q8_BLOCK; ++b) {
         float amax = 0.0f;
-        int64_t imax = 0;
         float d, id;
         for (i = 0; i < HQVM_Q8_BLOCK; ++i) {
             const float ax = fabsf(row[b * HQVM_Q8_BLOCK + i]);
-            if (ax > amax) { amax = ax; imax = i; }
+            if (ax > amax) amax = ax;
         }
-        d = row[b * HQVM_Q8_BLOCK + imax] / 127.0f;
-        id = d ? 1.0f / d : 0.0f;
+        d = amax / 127.0f;
+        id = d > 0.0f ? 1.0f / d : 0.0f;
         blk[b].d = hqvm_f32_to_f16(d);
         for (i = 0; i < HQVM_Q8_BLOCK; ++i) {
             int qv = (int)lrintf(row[b * HQVM_Q8_BLOCK + i] * id);
@@ -700,6 +715,195 @@ void hqvm_softmax_inplace(float *scores, int64_t Nk, float M) {
     }
     invS = Ssum > 0.0f ? 1.0f / Ssum : 0.0f;
     for (i = 0; i < Nk; ++i) scores[i] *= invS;
+}
+
+static uint64_t s_stock_softmax_calls = 0;
+
+void hqvm_stock_softmax_inc(void) {
+    s_stock_softmax_calls++;
+}
+
+uint64_t hqvm_stock_softmax_calls(void) {
+    return s_stock_softmax_calls;
+}
+
+int hqvm_attn_shell_qk_enabled(void) {
+    static int s = -1;
+    if (s < 0) {
+        const char *e = getenv("GYRO_ATTN_SHELL_QK");
+        s = (e && e[0] && e[0] != '0') ? 1 : 0;
+    }
+    return s;
+}
+
+static float hqvm_attn_lambda_from_Nc(uint8_t Nc) {
+    static const float lam[7] = {
+        0.0f, 0.2f, 0.5f, 1.0f, 2.0f, 5.0f, HQVM_LAMBDA_MAX_ATTN
+    };
+    if (Nc > 6) Nc = 6;
+    return lam[Nc];
+}
+
+void hqvm_attn_weight_shell_qk(
+    float *scores, const float *q_head128, const void *k_chi_base,
+    int kv_head, int64_t Nk, uint8_t Nc, int top_k)
+{
+    int64_t j;
+    uint8_t chi_q;
+    uint64_t qsigns = 0;
+    float lam, lam_pow[7];
+    float *w = NULL;
+    int *shell_of = NULL;
+    int count[7];
+    float denom = 0.0f;
+    int i, N;
+    if (!scores || !q_head128 || Nk <= 0) return;
+    if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
+    for (i = 0; i < 64; ++i) if (q_head128[i] >= 0.0f) qsigns |= (1ull << i);
+    chi_q = gyroscopic_chirality_from_signs64(qsigns);
+    lam = hqvm_attn_lambda_from_Nc(Nc);
+    lam_pow[0] = 1.0f;
+    for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lam;
+
+    w = (float *)malloc((size_t)Nk * sizeof(float));
+    shell_of = (int *)malloc((size_t)Nk * sizeof(int));
+    if (!w || !shell_of) { free(w); free(shell_of); return; }
+    for (N = 0; N < 7; ++N) count[N] = 0;
+
+    for (j = 0; j < Nk; ++j) {
+        uint8_t chi_k;
+        int Nj;
+        w[j] = 0.0f;
+        shell_of[j] = -1;
+        if (scores[j] <= -1e20f) continue;
+        if (k_chi_base && hqvm_k_chi6_has(k_chi_base)) {
+            chi_k = hqvm_k_chi6_get(k_chi_base, j, kv_head);
+        } else {
+            chi_k = 0;
+        }
+#if defined(_MSC_VER)
+        Nj = (int)__popcnt((unsigned)((chi_q ^ chi_k) & 63));
+#else
+        Nj = __builtin_popcount((unsigned)((chi_q ^ chi_k) & 63));
+#endif
+        if (Nj > 6) Nj = 6;
+        shell_of[j] = Nj;
+        count[Nj]++;
+    }
+
+    /* Within each shell: keep top-k by QK score; weight = lambda^N */
+    for (N = 0; N < 7; ++N) {
+        int need = top_k;
+        int taken = 0;
+        if (count[N] <= 0) continue;
+        if (need > count[N]) need = count[N];
+        while (taken < need) {
+            int64_t best = -1;
+            float best_s = -INFINITY;
+            for (j = 0; j < Nk; ++j) {
+                if (shell_of[j] != N) continue;
+                if (w[j] > 0.0f) continue; /* already taken */
+                if (scores[j] > best_s) { best_s = scores[j]; best = j; }
+            }
+            if (best < 0) break;
+            w[best] = lam_pow[N];
+            denom += lam_pow[N];
+            taken++;
+        }
+    }
+
+    if (denom <= 0.0f) {
+        /* Fallback: uniform over unmasked */
+        int nu = 0;
+        for (j = 0; j < Nk; ++j) if (scores[j] > -1e20f) nu++;
+        for (j = 0; j < Nk; ++j)
+            scores[j] = (scores[j] > -1e20f && nu > 0) ? (1.0f / (float)nu) : 0.0f;
+    } else {
+        for (j = 0; j < Nk; ++j) scores[j] = w[j] / denom;
+    }
+    free(w);
+    free(shell_of);
+}
+
+void hqvm_attn_weight_shell_qk_flat(
+    float *scores, const float *q_head128, const uint8_t *k_chi6,
+    int64_t n_kv_heads, int kv_head, int64_t Nk, uint8_t Nc, int top_k)
+{
+    int64_t j;
+    uint8_t chi_q;
+    uint64_t qsigns = 0;
+    float lam, lam_pow[7];
+    float *w = NULL;
+    int *shell_of = NULL;
+    int count[7];
+    float denom = 0.0f;
+    int i, N;
+    if (!scores || !q_head128 || Nk <= 0) return;
+    if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
+    if (kv_head < 0) kv_head = 0;
+    if (n_kv_heads <= 0) n_kv_heads = HQVM_KV_N_KV_HEAD;
+    for (i = 0; i < 64; ++i) if (q_head128[i] >= 0.0f) qsigns |= (1ull << i);
+    chi_q = gyroscopic_chirality_from_signs64(qsigns);
+    lam = hqvm_attn_lambda_from_Nc(Nc);
+    lam_pow[0] = 1.0f;
+    for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lam;
+
+    w = (float *)malloc((size_t)Nk * sizeof(float));
+    shell_of = (int *)malloc((size_t)Nk * sizeof(int));
+    if (!w || !shell_of) { free(w); free(shell_of); return; }
+    for (N = 0; N < 7; ++N) count[N] = 0;
+
+    for (j = 0; j < Nk; ++j) {
+        uint8_t chi_k;
+        int Nj;
+        w[j] = 0.0f;
+        shell_of[j] = -1;
+        if (scores[j] <= -1e20f) continue;
+        if (k_chi6 && kv_head >= 0 && kv_head < (int)n_kv_heads) {
+            chi_k = k_chi6[j * n_kv_heads + kv_head];
+        } else {
+            chi_k = 0;
+        }
+#if defined(_MSC_VER)
+        Nj = (int)__popcnt((unsigned)((chi_q ^ chi_k) & 63));
+#else
+        Nj = __builtin_popcount((unsigned)((chi_q ^ chi_k) & 63));
+#endif
+        if (Nj > 6) Nj = 6;
+        shell_of[j] = Nj;
+        count[Nj]++;
+    }
+
+    for (N = 0; N < 7; ++N) {
+        int need = top_k;
+        int taken = 0;
+        if (count[N] <= 0) continue;
+        if (need > count[N]) need = count[N];
+        while (taken < need) {
+            int64_t best = -1;
+            float best_s = -INFINITY;
+            for (j = 0; j < Nk; ++j) {
+                if (shell_of[j] != N) continue;
+                if (w[j] > 0.0f) continue;
+                if (scores[j] > best_s) { best_s = scores[j]; best = j; }
+            }
+            if (best < 0) break;
+            w[best] = lam_pow[N];
+            denom += lam_pow[N];
+            taken++;
+        }
+    }
+
+    if (denom <= 0.0f) {
+        int nu = 0;
+        for (j = 0; j < Nk; ++j) if (scores[j] > -1e20f) nu++;
+        for (j = 0; j < Nk; ++j)
+            scores[j] = (scores[j] > -1e20f && nu > 0) ? (1.0f / (float)nu) : 0.0f;
+    } else {
+        for (j = 0; j < Nk; ++j) scores[j] = w[j] / denom;
+    }
+    free(w);
+    free(shell_of);
 }
 
 /* Shell-occupation softmax (QuBEC §2.2, §23.1). Replaces exp(score) with the
@@ -1136,6 +1340,24 @@ static int s_chi_n = 0;
 static gyro_trajectory_state_t s_traj;
 static int s_traj_init = 0;
 
+/* GyroClock — genealogy = law + CS anchor + depth (no per-step byte storage). */
+static int s_seq_active = 0;
+static int s_layer = 0;
+static uint64_t s_depth_min = 0;
+static uint64_t s_depth_max = 0;
+static uint64_t s_step_count = 0;
+static uint64_t s_depth_start = 0; /* first depth recorded this sequence */
+static uint64_t s_depth_end = 0;   /* max+1 after last step (span end) */
+static uint32_t s_rope_clock_token_pos = 0;
+static uint32_t s_seq_len = 0;     /* tokens observed; next decode index */
+static int s_decode_mode = 0;      /* last lift was decode (Nq==1) */
+static uint8_t s_last_byte = 0;
+static uint64_t s_residual_hits = 0;
+static uint8_t s_pi_u6 = 0;
+static uint8_t s_pi_v6 = 0;
+static int s_pi_pending = 0;
+static int s_pi_applied = 0;
+
 static uint8_t fam_of_intron(uint8_t intron) {
     return (uint8_t)((intron & 1u) | ((intron >> 6) & 2u));
 }
@@ -1217,16 +1439,18 @@ int hqvm_cgm_lift_perturb_enabled(void) {
     return s;
 }
 
-static int s_layer = 0;
-static uint8_t s_last_byte = 0;
-static uint64_t s_residual_hits = 0;
-
 int hqvm_cgm_lift_layer(void) {
-    return s_layer % 36;
+    return s_layer % HQVM_N_LAYER;
 }
 
 int hqvm_cgm_lift_bump_layer(void) {
-    s_layer = (s_layer + 1) % 36;
+    const int prev = s_layer % HQVM_N_LAYER;
+    s_layer = (s_layer + 1) % HQVM_N_LAYER;
+    /* After layer L-1 of a decode token, advance sequence cursor (not Nk-1). */
+    if (s_decode_mode && prev == (HQVM_N_LAYER - 1)) {
+        s_seq_len++;
+        s_decode_mode = 0;
+    }
     return s_layer;
 }
 
@@ -1242,21 +1466,182 @@ uint8_t hqvm_cgm_lift_last_byte(void) {
     return s_last_byte;
 }
 
-int hqvm_residual_hybrid_enabled(void) {
+void hqvm_pi_stash_from_embd_row(const float *e, int64_t n) {
+    uint8_t u = 0, v = 0;
+    int i;
+    if (!e || n < 12) return;
+    for (i = 0; i < 6; ++i) {
+        if (e[i] < 0.0f) u |= (uint8_t)(1u << i);
+        if (e[6 + i] < 0.0f) v |= (uint8_t)(1u << i);
+    }
+    s_pi_u6 = u;
+    s_pi_v6 = v;
+    s_pi_pending = 1;
+}
+
+int hqvm_pi_applied(void) {
+    return s_pi_applied;
+}
+
+void hqvm_cgm_lift_get_uv6(uint8_t *u6, uint8_t *v6) {
+    if (u6) *u6 = (uint8_t)(s_pi_u6 & 63);
+    if (v6) *v6 = (uint8_t)(s_pi_v6 & 63);
+}
+
+uint8_t hqvm_cgm_lift_carrier_shell(void) {
+    uint8_t chi;
+    if (s_traj_init) {
+        chi = gyroscopic_chirality_word6(s_traj.state24);
+    } else {
+        chi = (uint8_t)((s_pi_u6 ^ s_pi_v6) & 63);
+    }
+#if defined(_MSC_VER)
+    return (uint8_t)__popcnt((unsigned)(chi & 63));
+#else
+    return (uint8_t)__builtin_popcount((unsigned)(chi & 63));
+#endif
+}
+
+uint8_t hqvm_cgm_lift_fam(void) {
+    if (!s_traj_init) return 0;
+    return (uint8_t)(s_traj.phase_idx & 3u);
+}
+
+void hqvm_cgm_lift_reset_sequence(void) {
+    if (!s_init) hqvm_cgm_lift_init();
+    hqvm_traj_reset(&s_traj);
+    s_pi_applied = 0;
+    if (s_pi_pending) {
+        /* Pack (u6,v6) into A12/B12 low+high nibbles as CS anchor. */
+        const uint16_t A = (uint16_t)(((s_pi_u6 & 63) | ((uint16_t)(s_pi_u6 & 63) << 6)) & 0xFFF);
+        const uint16_t B = (uint16_t)(((s_pi_v6 & 63) | ((uint16_t)(s_pi_v6 & 63) << 6)) & 0xFFF);
+        s_traj.state24 = ((uint32_t)A << 12) | (uint32_t)B;
+        s_pi_applied = 1;
+        s_pi_pending = 0;
+        fprintf(stderr,
+            "[hqvm-gyro-clock] reset_sequence L=%d Pi_applied u6=%u v6=%u state24=%06x\n",
+            HQVM_N_LAYER, (unsigned)s_pi_u6, (unsigned)s_pi_v6,
+            (unsigned)(s_traj.state24 & 0xFFFFFFu));
+    } else {
+        fprintf(stderr, "[hqvm-gyro-clock] reset_sequence L=%d anchor=GENE_MAC_REST\n",
+                HQVM_N_LAYER);
+    }
+    s_traj_init = 1;
+    s_layer = 0;
+    s_depth_min = UINT64_MAX;
+    s_depth_max = 0;
+    s_step_count = 0;
+    s_depth_start = 0;
+    s_depth_end = 0;
+    s_rope_clock_token_pos = 0;
+    s_seq_len = 0;
+    s_decode_mode = 0;
+    s_last_byte = 0;
+    s_seq_active = 1;
+    fflush(stderr);
+}
+
+void hqvm_genealogy_observe_prefill(uint32_t token_pos) {
+    s_decode_mode = 0;
+    if (token_pos + 1u > s_seq_len) {
+        s_seq_len = token_pos + 1u;
+    }
+}
+
+uint32_t hqvm_genealogy_decode_token_pos(void) {
+    s_decode_mode = 1;
+    return s_seq_len;
+}
+
+uint32_t hqvm_genealogy_seq_len(void) {
+    return s_seq_len;
+}
+
+int hqvm_cgm_lift_seq_active(void) {
+    return s_seq_active;
+}
+
+uint64_t hqvm_genealogy_depth(uint32_t token_pos, uint32_t layer_idx) {
+    return (uint64_t)token_pos * (uint64_t)HQVM_N_LAYER + (uint64_t)(layer_idx % HQVM_N_LAYER);
+}
+
+uint32_t hqvm_genealogy_token_pos(uint64_t depth) {
+    return (uint32_t)(depth / (uint64_t)HQVM_N_LAYER);
+}
+
+uint32_t hqvm_genealogy_layer(uint64_t depth) {
+    return (uint32_t)(depth % (uint64_t)HQVM_N_LAYER);
+}
+
+uint64_t hqvm_genealogy_depth_start(void) {
+    return s_depth_start;
+}
+
+uint64_t hqvm_genealogy_depth_end(void) {
+    return s_depth_end;
+}
+
+uint64_t hqvm_genealogy_step_count(void) {
+    return s_step_count;
+}
+
+uint64_t hqvm_genealogy_span(void) {
+    if (s_step_count == 0 || s_depth_min == UINT64_MAX) return 0;
+    return s_depth_max - s_depth_min + 1ull;
+}
+
+int hqvm_genealogy_n_layer(void) {
+    return HQVM_N_LAYER;
+}
+
+void hqvm_genealogy_counters_print(void) {
+    fprintf(stderr,
+        "[hqvm-gyro-clock] depth_start=%llu depth_end=%llu steps=%llu span=%llu "
+        "L=%d layer=%d seq_len=%u\n",
+        (unsigned long long)s_depth_start,
+        (unsigned long long)s_depth_end,
+        (unsigned long long)s_step_count,
+        (unsigned long long)hqvm_genealogy_span(),
+        HQVM_N_LAYER,
+        s_layer % HQVM_N_LAYER,
+        (unsigned)s_seq_len);
+    fflush(stderr);
+}
+
+void hqvm_rope_clock_token_pos_set(uint32_t token_pos) {
+    s_rope_clock_token_pos = token_pos;
+}
+
+uint32_t hqvm_rope_clock_token_pos_get(void) {
+    return s_rope_clock_token_pos;
+}
+
+int hqvm_residual_law_enabled(void) {
     static int s = -1;
     if (s < 0) {
-        const char *e = getenv("GYRO_RESIDUAL_HYBRID");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
+        const char *law = getenv("GYRO_RESIDUAL_LAW");
+        const char *hyb = getenv("GYRO_RESIDUAL_HYBRID");
+        s = 0;
+        if (law && law[0] && law[0] != '0') s = 1;
+        else if (hyb && hyb[0] && hyb[0] != '0') s = 1;
     }
     return s;
+}
+
+int hqvm_residual_hybrid_enabled(void) {
+    return hqvm_residual_law_enabled();
 }
 
 float hqvm_residual_gain(void) {
     uint8_t chi6;
     int shell;
     float m;
-    if (!s_traj_init || !hqvm_cgm_lift_enabled()) return 1.0f;
-    chi6 = gyroscopic_chirality_word6(s_traj.state24);
+    if (!hqvm_residual_law_enabled()) return 1.0f;
+    if (s_traj_init) {
+        chi6 = gyroscopic_chirality_word6(s_traj.state24);
+    } else {
+        chi6 = (uint8_t)((s_pi_u6 ^ s_pi_v6) & 63);
+    }
 #if defined(_MSC_VER)
     shell = (int)__popcnt((unsigned)chi6);
 #else
@@ -1266,24 +1651,36 @@ float hqvm_residual_gain(void) {
     return 1.0f + (float)APERTURE_GAP * m;
 }
 
-void hqvm_residual_hybrid_hit(void) {
+void hqvm_residual_law_hit(void) {
     s_residual_hits++;
     if (s_residual_hits == 1ull || (s_residual_hits % 72ull) == 0ull) {
-        hqvm_residual_hybrid_counters_print();
+        hqvm_residual_law_counters_print();
     }
+}
+
+void hqvm_residual_hybrid_hit(void) {
+    hqvm_residual_law_hit();
+}
+
+uint64_t hqvm_residual_law_hits(void) {
+    return s_residual_hits;
 }
 
 uint64_t hqvm_residual_hybrid_hits(void) {
     return s_residual_hits;
 }
 
-void hqvm_residual_hybrid_counters_print(void) {
+void hqvm_residual_law_counters_print(void) {
     fprintf(stderr,
-        "[hqvm-residual-hybrid] hits=%llu gain=%.6f state24=%06x\n",
+        "[hqvm-residual] hits=%llu gain=%.6f state24=%06x\n",
         (unsigned long long)s_residual_hits,
         (double)hqvm_residual_gain(),
         s_traj_init ? (unsigned)(s_traj.state24 & 0xFFFFFFu) : 0u);
     fflush(stderr);
+}
+
+void hqvm_residual_hybrid_counters_print(void) {
+    hqvm_residual_law_counters_print();
 }
 
 void hqvm_cgm_lift_counters_get(
@@ -1305,6 +1702,7 @@ void hqvm_cgm_lift_counters_print(void) {
         s_traj_init ? (unsigned)(s_traj.state24 & 0xFFFFFFu) : 0u,
         s_table_ok);
     fflush(stderr);
+    hqvm_genealogy_counters_print();
 }
 
 static hqvm_chi_stream_t *chi_stream(const void *base, int create) {
@@ -1353,26 +1751,20 @@ void hqvm_k_chi6_store(
 
 uint8_t hqvm_k_chi6_get(const void *k_base, int64_t idx, int head) {
     hqvm_chi_stream_t *S = chi_stream(k_base, 0);
-    int i;
     if (idx < 0 || idx >= HQVM_CHI_CAP) return 0;
     if (head < 0 || head >= HQVM_KV_N_KV_HEAD) return 0;
-    if (S) return S->chi[idx][head];
-    for (i = 0; i < s_chi_n; ++i) {
-        if (s_chi[i].max_idx >= idx) return s_chi[i].chi[idx][head];
-    }
-    return 0;
+    if (!S) return 0;
+    return S->chi[idx][head];
 }
 
 int hqvm_k_chi6_has(const void *k_base) {
-    int i;
-    if (chi_stream(k_base, 0) != NULL) return 1;
-    for (i = 0; i < s_chi_n; ++i) if (s_chi[i].max_idx >= 0) return 1;
-    return 0;
+    return chi_stream(k_base, 0) != NULL;
 }
 
 void hqvm_lift_attention_phase(
     const float *scores, const void *k_base, int64_t Nk, int head,
-    uint8_t chi_q, int depth, float Delta, float eps_max, gyro_lift_attn_t *out)
+    uint8_t chi_q, uint32_t token_pos, uint32_t layer_idx,
+    float Delta, float eps_max, gyro_lift_attn_t *out)
 {
     int64_t i, i_star = -1;
     float best = -INFINITY;
@@ -1380,8 +1772,10 @@ void hqvm_lift_attention_phase(
     int r = 0;
     float eps = 0.0f;
     uint8_t q6, fam, byte;
+    uint64_t depth;
     static int s_print = 0;
     static int s_inv_note = 0;
+    static int s_chi_strict_note = 0;
 
     if (!out) return;
     memset(out, 0, sizeof(*out));
@@ -1389,7 +1783,19 @@ void hqvm_lift_attention_phase(
     out->argmax = -1;
     if (!scores || !k_base || Nk <= 0) return;
     if (!s_init) hqvm_cgm_lift_init();
+    if (!s_seq_active) hqvm_cgm_lift_reset_sequence();
     if (!s_traj_init) { hqvm_traj_reset(&s_traj); s_traj_init = 1; }
+
+    depth = hqvm_genealogy_depth(token_pos, layer_idx);
+    if (depth > (uint64_t)UINT32_MAX) {
+        static int s_depth_warn = 0;
+        if (s_depth_warn < 3) {
+            fprintf(stderr,
+                "[hqvm-gyro-clock] depth=%llu exceeds UINT32_MAX; phase_idx clamped\n",
+                (unsigned long long)depth);
+            s_depth_warn++;
+        }
+    }
 
     for (i = 0; i < Nk; ++i) {
         if (scores[i] > best) { best = scores[i]; i_star = i; }
@@ -1397,15 +1803,32 @@ void hqvm_lift_attention_phase(
     if (i_star < 0 || best <= -1e20f) return;
 
     out->argmax = (int)i_star;
+    if (!hqvm_k_chi6_has(k_base)) {
+        const char *strict = getenv("GYRO_LEDGER_STRICT");
+        if (strict && strict[0] && strict[0] != '0') {
+            fprintf(stderr,
+                "[hqvm-cgm-lift] STRICT abort: chi stream missing for lift "
+                "token_pos=%u layer=%u\n",
+                (unsigned)token_pos, (unsigned)layer_idx);
+            fflush(stderr);
+            abort();
+        }
+        if (s_chi_strict_note < 3) {
+            fprintf(stderr,
+                "[hqvm-cgm-lift] chi missing (return 0) token_pos=%u layer=%u\n",
+                (unsigned)token_pos, (unsigned)layer_idx);
+            s_chi_strict_note++;
+        }
+    }
     q6 = (uint8_t)((chi_q ^ hqvm_k_chi6_get(k_base, i_star, head)) & 63);
-    /* Canonical depth-phase: fam from emission counter, not layer index. */
-    fam = (uint8_t)(s_traj.phase_idx & 3u);
-    out->phase_idx = s_traj.phase_idx;
+    /* GyroClock family: fam = depth & 3 (not call-count). */
+    fam = (uint8_t)(depth & 3u);
+    out->phase_idx = (uint32_t)(depth > (uint64_t)UINT32_MAX ? UINT32_MAX : depth);
 
     if (hqvm_cgm_lift_perturb_enabled()) {
-        /* Flip q6 bit0 and fam — magnitude path unchanged; traj must diverge. */
-        q6 = (uint8_t)((q6 ^ 1u) & 63);
-        fam = (uint8_t)((fam ^ 1u) & 3);
+        /* Strong coupling probe: flip several q6 bits + fam — magnitude path untouched. */
+        q6 = (uint8_t)((q6 ^ 0x2Au) & 63);
+        fam = (uint8_t)((fam ^ 3u) & 3);
     }
 
     byte = hqvm_byte_of_q6_fam(q6, fam);
@@ -1440,15 +1863,24 @@ void hqvm_lift_attention_phase(
     out->eps = eps;
 
     hqvm_traj_step(&s_traj, out->byte);
-    s_traj.phase_idx++;
+    /* Record formula depth on traj for genealogy; do not use phase_idx++ as fam source. */
+    s_traj.phase_idx = out->phase_idx;
     s_lift_calls++;
     out->state24 = s_traj.state24;
 
-    if (s_print < 12) {
+    if (s_step_count == 0 || depth < s_depth_min) s_depth_min = depth;
+    if (s_step_count == 0 || depth > s_depth_max) s_depth_max = depth;
+    if (s_step_count == 0) s_depth_start = depth;
+    s_step_count++;
+    s_depth_end = s_depth_max + 1ull;
+    hqvm_rope_clock_token_pos_set(token_pos);
+
+    if (s_print < 12 || (s_step_count % 36ull) == 0ull) {
         fprintf(stderr,
-            "[hqvm-cgm-lift] layer=%d head=%d argmax=%d q6=%u fam=%u byte=%02x "
-            "phase=%u r=%d eps=%.4f state=%06x\n",
-            depth, head, out->argmax, (unsigned)out->q6, (unsigned)out->fam,
+            "[hqvm-cgm-lift] depth=%llu token_pos=%u layer=%u head=%d argmax=%d "
+            "q6=%u fam=%u byte=%02x phase=%u r=%d eps=%.4f state=%06x\n",
+            (unsigned long long)depth, (unsigned)token_pos, (unsigned)layer_idx,
+            head, out->argmax, (unsigned)out->q6, (unsigned)out->fam,
             (unsigned)out->byte, (unsigned)out->phase_idx, r, eps,
             (unsigned)(s_traj.state24 & 0xFFFFFFu));
         s_print++;

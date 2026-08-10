@@ -1,203 +1,249 @@
 # Gyroscopic Runtime NavPad
 
-**Single source of truth** for §0 status and unfinished work. Not a run log.
+**Plan, verified status, and ownership boundary** for gyroscopic ASI inference on Bonsai-8B-Q1_0.
 
-Evidence only: `log_NavPad.md`. Theory reading: `Analysis_Arcs_1_4_Theory.md`.
-
----
-
-## 0. Goal (unchanged) and honest status
-
-**§0 completion (intent):** the forward pass *is* a deterministic hQVM trajectory on Ω (|Ω| = 4096): Input → Controller → Tape → gyration → Shell, datatype **[Anchor, Restriction, Depth, Phase]**. Continuous magnitude only where aperture Δ > 0 forces a residual channel. Carrier is causal. Inference is gyroscopic-native — not a stock transformer with optional flags.
-
-| Site | Scope | Status vs §0 |
-|---|---|---|
-| **Arc 1** | Temporal weight MatMul | **CLOSED** (real displace) |
-| **Arcs 2–3** | Attention KV memory | **CLOSED** (real displace) |
-| **Forward pass** | Softmax / RoPE / Norm / FFN / residual / lift / receipts | **NOT CLOSED** |
-
-**There is no consented “hybrid mode.”** Nobody approved a permanent stock+gyro mix as a product, architecture, or §0 deliverable. Incomplete forward-site work (lift writing traj, residual Δ-modulation, codec LUTs beside stock ops) is **unfinished §0 / engineering debt**. Treating that stack as a milestone to ship, a named mode, or “good enough” is **scope creep and revisionism**. The only completion criterion remains §0 native inference.
-
-**What exists today (incomplete forward stack, not a deliverable):** allowlisted Q1_0 MatMuls + Q8 KV + holonomic QK/Attn@V + flagged aperture/RoPE/SwiGLU + CGM-lift traj + residual add modulated by traj (`1+Δ·m`). That proves some coupling; it does **not** close §0.
-
-Target: Bonsai-8B-Q1_0. Hooks: `external/llama.cpp/ggml/src/ggml-gyroscopic/`. Logic: `src/tools/gyroscopic/`.
-
-Env: `production_gyroscopic_env(holonomic_kv=True)` = closed MatMul+KV (ensures ledger). Chat: `run_bonsai`. Ledger: `ledger.py` (`ensure_ledger` / `write_ledger`). Flag stacks that combine unfinished forward sites are stress/debug only (§8) — not product modes.
-
-Gate / CLI / env names are **architectural sites** only (`ledger` / `kv` / `codecs` / `causal` / `forward-probe`, `incomplete_forward=`). Do not invent milestone nicknames as identifiers.
+Dated evidence lives in `log_NavPad.md`. The laws and their theoretical justification live in `Analysis_Gyroscopic_Runtime.md`. The wider theory set begins with `docs/Gyroscopic_ASI_Foundations.md`, `docs/specs/hQVM_Specs_Formalism.md`, `docs/specs/hQVM_QuBEC_Theory.md`, and `docs/specs/Gyroscopic_ASI_Runtime_Specs.md`.
 
 ---
 
-## 0.1 Process note — scaffolding labels are not architecture
+## 1. Goal
 
-Labels such as **OBSERVE / EMIT / DISPLACE / COMMIT**, and flag pairs like `GYRO_NORM_CODEC` vs `GYRO_NORM_COMMIT`, were **progressive engineering attempts** to shadow-then-flip ops. They are **not** part of the CGM/hQVM architecture and must not be preserved as doctrine.
+Implement full gyroscopic ASI inference in which the forward pass is a deterministic hQVM trajectory on Ω, with |Ω| = 4096:
 
-**“Hybrid” is the same class of mistake:** an eng nickname for “stock graph still runs; some sites hooked.” It is not a datatype, not a carrier law, and not a consented deliverable. Do not grow product surface around it.
+Input → Controller → Tape → gyration → Shell
 
-Owned sites apply when their flag is on (`GYRO_SILU_CODEC=1` applies the SwiGLU LUT; no separate COMMIT). What the theory requires: each site either (a) is compiled into the datatype / trajectory law, or (b) retains an explicit Δ-forced continuous residual with a stated residual law — not a permanent observe/hybrid forever mode.
+The runtime datatype is **[Anchor, Restriction, Depth, Phase]**. One request has one **Genealogy**, consisting of the law, the request-scoped Common Source anchor, and depth.
 
----
+The intended native algebra is integer exact or dyadic exact. Euclidean floating-point arrays may remain as temporary interoperability charts during development, but they are not the final architecture. Transcendental decision laws must resolve to finite charts, popcount, polynomial-in-λ weighting, or algebraic selection. The aperture invariant is represented by the Formalism tick `Q_256(Δ) = 5/256`.
 
-## 1. Contract
+**Full completion criterion:** every load-bearing site, including embedding lookup, all 36 transformer blocks, final normalization, and output projection, is governed by the datatype and Genealogy without stock semantic ownership. A separate completion criterion is a genuinely float-free hot path.
 
-1. Kernel math: `kernel.c` / `kernel.h`. Reverse-compiler d=6: `ledger.c` (`step_uv6`). Do not conflate.
-2. No Python in the hot path. Python = export and gates only.
-3. No assist-BLAS / bias decoration. The kernel owns the substituted site.
-4. Verify with **canonical gates** (§7), not diagnostic branches on production paths.
-5. Production ledger (`HQVMLEDS`) does not duplicate GGUF weights. Signs/scales from ggml RAM.
-6. `GYRO_LEDGER_STRICT=1`: allowlisted site that cannot displace aborts.
-7. Do not declare §0 closed on the basis of incomplete mixed-path stacks.
+Target model: Bonsai-8B-Q1_0. Thin hooks: `external/llama.cpp/ggml/src/ggml-gyroscopic/`. Native logic: `src/tools/gyroscopic/`.
 
 ---
 
-## 2. Datatype and split
+## 2. Runtime contract
 
-**[Anchor, Restriction, Depth, Phase]** — Anchor `(u6,v6)`, `chi6 = u6 ⊕ v6`; Restriction = shared byte table; Depth = ledger time; Phase = selected byte (plus family bits when forming a full intron).
-
-**Manifold vs controller:** manifold commits *which* shell; controller commits *how much*.
-
-**Δ ≈ 0.0207:** residual individuality is not disposable. Where continuous content is load-bearing, it survives as an explicit residual channel — not as “we left stock ops forever.” (A Δ-forced residual channel is theory; a permanent transformer+hooks “hybrid mode” is not.)
-
-**Byte = q6 + family:** `intron = byte ⊕ GENE_MIC_S`. Family from `phase_idx mod 4` when emitting.
-
----
-
-## 3. Weight MatMul (Arc 1) — CLOSED
-
-**Law.** `Y = exact_Q1_0_q8_dot_product × manifold_gain`. Families today: `attn_q/k/v/output`, `ffn_gate/up/down` (2520 sites).
-
-**Env.** `GYRO_LEDGER_PATH`, `GYRO_LEDGER_STRICT`, optional `GYRO_LEDGER_ALLOW`.
-
-**Boundary (not Arc-1 law failure):** `token_embd.weight` is embedding `GET_ROWS` (not a Dense MatMul); `output.weight` is logits `MUL_MAT`. Both are Q1_0 and **outside** the allowlist — stock path. Deferred engineering cut, **not** a user-declared end design. Native inference requires a decision: compile under Arc 1 law where applicable, or state an explicit embd/logits residual boundary with theory.
+1. Kernel math belongs in `kernel.c` and `kernel.h`. Reverse compilation at d=6 belongs in `ledger.c` through `step_uv6`. These are distinct layers.
+2. Python is limited to export, orchestration, and gates. It is not part of the inference hot path.
+3. `HQVMLEDS` compiles weight law and does not duplicate GGUF weight payloads. Signs and scales are read from ggml RAM.
+4. `GYRO_LEDGER_STRICT=1` makes failure to displace an allowlisted site fatal.
+5. Genealogy is request-scoped and continuous across prefill and decode. Receipts are optional coordinates on that history.
+6. Prefill is layer-major. Layer ℓ must produce K and V for every prompt token before layer ℓ+1 consumes the resulting residual stream.
+7. Graph positions are authoritative for sequence lifecycle. Native decode must not infer absolute position from call count.
+8. Native Q8_0 activation quantization must match ggml exactly because scale rounding and integer tie behavior affect parity and therefore manifold routing.
+9. Passing tests is evidence of a law, not a substitute for the law.
 
 ---
 
-## 4. Attention KV (Arcs 2–3) — CLOSED
+## 3. Datatype and clocks
 
-**Key.** `GYRO_KV_KQ8=1` → Q8_0 K; F16 K never allocated; holonomic in-place scores.
+**Anchor:** `(u6,v6)`, with `chi6 = u6 ⊕ v6`.
 
-**Value.** `GYRO_KV_V=1` → Q8_0 V; `hqvm_attn_v_reduce`.
+**Restriction:** the shared byte table.
 
-**Env.** `GYRO_HOLONOMIC_ATTN=1`, `GYRO_KV_KQ8=1`, `GYRO_KV_V=1`.
+**Depth:** `depth = t·L + ℓ`, with `L = 36` for Bonsai.
 
-**Closed on:** Q8_0 as the owned magnitude chart for K/V. Softmax/RoPE/Norm/FFN/residual were never Arc 2–3 scope (forward pass, §5). Do not reopen Arc 3 with a speculative “Value-beyond-Q8” unfinished item unless theory explicitly revisits V.
+**Phase:** the selected byte plus family bits when a full intron is formed.
 
----
+**Family:** `fam = depth & 3`.
 
-## 5. Temporal forward pass — OPEN vs §0
+**Byte composition:** `intron = byte ⊕ GENE_MIC_S`.
 
-### 5.1 What exists (incomplete inventory — not accepted deliverables)
+**Manifold and controller:** the manifold commits which shell is selected. The controller commits how much amplitude is transported through exact Q1_0 by q8 products and dyadic laws.
 
-| Site | Today | vs §0 |
-|---|---|---|
-| Softmax | Aperture mix live when flagged; PPL PASS | Partial — still stock exp + ε; not traj-native attention bookkeeping |
-| RoPE | 256-tick LUT live when flagged; PPL PASS | Partial — not bound to causal phase / receipt depth |
-| SwiGLU | LUT live when flagged; PPL PASS | Partial — chart of SiLU, not FFN-as-trajectory |
-| RMSNorm | Stock scale; Δ-ruler encode exists but **broken** for live apply (unsigned clamp → `////////`) | Open — must compile gain under signed Δ-ruler + residual law |
-| Residual add | Stock F32 + **Δ-modulation** from lift traj | Partial — causal touch, **not** ledger-depth residual stream |
-| CGM-lift | One byte/layer; traj advances; residual reads it | Partial — write/read exist; model still not traj-native |
-| Receipts | Can seal from lift traj | Partial — not one Moment genealogy across prefill/decode as native time |
-| χ | Write-time `k_chi6` for lift; aperture can use store | Partial — unify everywhere; no Q8 re-derive as primary |
-
-### 5.2 Unfinished work (theoretically required for native inference)
-
-These reopen **§0 / forward-pass sites only**. Arcs 1–3 stay closed unless a site forces revisiting them.
-
-**A. Carrier and time**
-
-1. Make the trajectory the **primary** control of depth/phase for every compiled site — not a Δ-sidecar on stock adds.
-2. Define residual-stream law: continuous Δ-channel beside carrier **or** compile accumulation into ledger depth; today’s `1+Δ·m` on F32 add is unfinished bridge code, not an accepted residual architecture.
-3. One Moment / receipt genealogy across prefill and decode (replayable native time).
-4. Lift schedule: one byte/layer is a choice; native may need richer emission (heads/tokens) with thread-safe traj.
-
-**B. Continuous chart → coordinates + residual**
-
-5. **RMSNorm:** fix signed Δ-ruler encode/decode (negative `log2(g/g0)` must not clamp to q=0); apply live; measure **rel magnitude error**, not cosine; keep only Δ-forced residual of the gain — no permanent shadow mode as architecture.
-6. **Residual / skip connections:** finish beyond modulation — either a stated Δ-forced continuous residual law or compile into carrier depth.
-7. **RoPE:** bind finite turn chart to trajectory phase / depth (not only LUT of stock angles).
-8. **Softmax:** keep exp as magnitude decoder; aperture as distribution constraint; bind rank/χ to write-time ledger χ under causal carrier (not re-derived ad hoc).
-9. **FFN / SwiGLU:** causal compile or residual+coordinate on carrier — LUT alone is not native FFN.
-10. Drop remaining scaffolding dual-paths once a site is owned (Norm still has codec/commit debt). Retire “hybrid” naming from eng surfaces when forward sites are actually owned.
-
-**C. Boundaries and identity**
-
-11. **`token_embd` / `output.weight`:** decide embd (`GET_ROWS`) and logits (`MUL_MAT`) under Arc 1 law or explicit theory-backed residual — not silent stock.
-
-**D. Rejected (do not revive as unfinished)**
-
-- χ-only / Khat as live QK energy
-- Percolation / shell-λ as softmax weights
-- Aperture ε-mixture on RoPE / Norm / SiLU
-- Dropping Norm residual wholesale
-- Invented audit fronts (generic Dense/bias inventory; Value-beyond-Q8 as §0 debt while Arc 3 stays closed)
-- **Shipping or documenting a permanent “hybrid mode” as §0 success**
-
-### 5.3 Incomplete causal bridge (stress evidence only — not final law)
-
-- Lift writes traj once per layer (holonomic FA guard).
-- Residual path reads `state24` → `gain = 1 + Δ·(shell−3)/3` on same-shape F32 4096 adds.
-- Perturb (`GYRO_CGM_LIFT_PERTURB`) changes decode — proves coupling, **not** native replacement and **not** consent for a hybrid product.
-
----
-
-## 6. Rejected paths
-
-| Path | Why |
+| Object | Role |
 |---|---|
-| χ-only / Khat as live QK | Discards magnitude |
-| Percolation / shell-λ as softmax weights | Wrong category |
-| Aperture ε on RoPE / Norm / SiLU | Wrong site |
-| Drop Norm residual wholesale | Collapses depth |
-| Dense/bias/add “inventory and classify” as open front | Not a Bonsai site gap; biases absent; ADD is §5.2 A.2/B.6; embd/logits are §5.2 C.11 |
-| Value-beyond-Q8 as §0 unfinished | Arc 3 closed on Q8_0; speculative reopen only |
-| Treating incomplete forward stacks as §0 done | Revisionism |
-| Consenting to a permanent “hybrid mode” as architecture or deliverable | Scope creep; not requested |
-| Preserving OBSERVE/EMIT/COMMIT as architecture | Scaffolding, not theory |
+| `HQVMLEDS` sidecar | Compiled weight law for MatMul |
+| Genealogy | Request anchor, depth, phase, and transport history |
+| Native KV plus `k_chi6` | Causal memory and its matching shell coordinate |
+| Receipts or QR | Optional observation, outside the hot path |
 
 ---
 
-## 7. Canonical gates (one module)
+## 4. Verified ownership state, 2026-08-10
 
+### 4.1 What is now owned
+
+The full Bonsai transformer block stack is natively driven under the default production laws.
+
+| Site | Native law or behavior | Verified status |
+|---|---|---|
+| Block scheduling | `hqvm_forward_prefill`, `hqvm_forward_decode_step`, `hqvm_block_forward` | OWNED |
+| Weight MatMul | exact Q1_0 by q8 controller product times manifold gain | OWNED in all 36 blocks |
+| Q, K, V and output projections | native ledger MatMul | OWNED |
+| Q and K per-head RMSNorm | Δ-ruler with Bonsai epsilon `1e-6` | OWNED |
+| RoPE | Qwen3 normal consecutive-pair layout on the turn-tick chart | OWNED |
+| K and V memory | native per-layer Q8_0 cache plus `k_chi6` | OWNED |
+| Attention weighting | full λ^N law at `GYRO_ATTN_LEVEL=2` | OWNED |
+| FFN and SwiGLU | family by occupation gate at `GYRO_FFN_LEVEL=2` | OWNED |
+| Residual stream | `x ← x + y·(1 + Δ·m)` | OWNED |
+| Genealogy | `depth=t·36+ℓ`, one continuous prefill/decode history | OWNED |
+| CS lift | request anchor derived from embeddings and applied at injection | OWNED at current boundary |
+| Stock transformer-block execution | bypassed, including final-layer row selection | ZERO observed calls |
+
+The canonical native run produced valid text, including `The capital of France is Paris.`. The causal gate passed with a nonempty answer, a changed decode under lift perturbation, and a genealogy span equal to `T·L`.
+
+Observed production-path counters included:
+
+- `stock_block_forward_calls=0`
+- `stock_flash_attn_calls=0`
+- `stock_softmax_calls=0`
+- `stock_rope_calls=0`
+- `stock_rmsnorm_calls=0` inside bypassed blocks
+- `stock_swiglu_calls=0`
+- `stock_silu_calls=0`
+- `stock_add_calls=0`
+- `set_rows_calls=0`
+- `kv_null_reads=0`, `kv_null_writes=0`
+- `native_block_delta=36` for each decode token
+- `K_writes=V_writes=chiK_writes=T·36·8` during prefill
+- `pi_applied=1`
+
+### 4.2 What is not yet owned
+
+We can confidently claim **native ownership of the 36-block forward trajectory**. We cannot yet claim ownership of the entire model graph, and we cannot claim a float-free hot path.
+
+| Boundary | Current state | Required closure |
+|---|---|---|
+| Embedding lookup | ggml supplies the initial F32 embedding row; native CS and Pi begin there | Own lookup and native chart entry |
+| Final RMSNorm | stock tail executes after native residual injection | Move final norm into native driver |
+| `output.weight` projection | stock tail produces logits | Move logits projection and ledger law into native driver |
+| Sampling | llama.cpp sampler remains the consumer of logits | Declare whether sampling is chassis or architecture scope |
+| Float-free execution | native blocks still use F32 residual, Q/K/V scratch, attention accumulation, decoded scales, and some chart construction | Replace temporary Euclidean charts with integer or dyadic storage and arithmetic |
+| Perplexity acceptance | valid generation and causal gates pass; production native PPL has not been accepted | Run cached-base PPL only after the tail boundary is settled |
+
+`stock_tail_calls=7` in the eight-token smoke run is therefore expected evidence of the remaining final norm and logits boundary, not evidence that stock transformer blocks executed.
+
+**Ownership verdict:** block-forward ownership is closed. Whole-graph ownership, float-free ownership, and PPL closure remain open. The project has reached valid native text generation, but it has not yet reached every completion criterion stated in Section 1.
+
+---
+
+## 5. Engineering knowledge that closed native generation
+
+### 5.1 Qwen3 graph topology is part of the executable contract
+
+Bonsai is a Qwen3-family model. The native driver must respect these facts:
+
+- Q and K receive per-head RMSNorm before RoPE.
+- RoPE uses the normal consecutive-pair convention `(2i, 2i+1)`, not the NeoX half-split convention.
+- The graph contains `inp_out_ids` row selection inside the final transformer block.
+- Final tensors are named `result_norm` and `result_output`.
+- Native residual injection must target the input of final RMSNorm, not its output.
+- The unnamed I32 input consumed by RoPE carries authoritative absolute positions.
+
+The final-layer `GET_ROWS` operation was load-bearing. Allowing it to execute after native injection replaced the native residual with stale graph data. It is now classified as stock block work whenever its source belongs to a transformer block.
+
+### 5.2 Prefill causality is layer-major
+
+A token-major prefill computes later layers before all same-layer prompt K and V entries exist. Correct causal memory requires:
+
+```text
+for layer ℓ:
+    for prompt token t:
+        execute block(t, ℓ)
 ```
+
+Only after all prompt tokens complete layer ℓ may the residual stream advance to layer ℓ+1.
+
+### 5.3 Sequence lifecycle follows model positions
+
+The graph position tensor determines request reset, prefill, and decode position. Native KV is reset when a new sequence starts or graph positions rewind. This prevents prior requests and guessed positions from contaminating Genealogy and causal memory.
+
+### 5.4 Q8_0 compatibility is semantic
+
+The native q8 quantizer now matches `quantize_row_q8_0_ref` by using `roundf` and by storing the block scale after FP16 rounding. This is not only numerical compatibility. The quantized activation enters mismatch parity and chirality decisions, so a one-bit discrepancy can choose a different shell.
+
+### 5.5 Norm has two distinct reference moments
+
+The inverse RMS gain is dimensionless and is encoded around reference 1. The learned normalization weights are encoded around their tensor-local geometric mean. Using one reference for both conflates two moments and distorts the ruler.
+
+The fixed RMS moment also has a finite-word-size law. Direct Q16 squaring at hidden width 4096 overflows signed 64-bit accumulation once late-layer residual magnitudes become validly large. The corrected method normalizes by `amax`, accumulates bounded Q15 squares, and restores scale afterward. This preserves the fixed moment without overflow.
+
+### 5.6 The decisive closure chain
+
+Valid native generation required all of the following to hold together:
+
+1. Qwen3 consecutive-pair RoPE.
+2. Bit-compatible Q8_0 activation quantization.
+3. Layer-major prefill.
+4. Position-driven sequence lifecycle.
+5. Correct `result_norm` input injection.
+6. Final-block `GET_ROWS` bypass.
+7. Separate RMS and learned-weight references.
+8. Overflow-safe fixed RMS accumulation.
+
+No manifold law was disabled to obtain the passing result.
+
+---
+
+## 6. Remaining work
+
+### 6.1 Close whole-graph ownership
+
+Move final RMSNorm and `output.weight` projection into the native driver. Decide explicitly whether embedding lookup and sampling are part of architectural ownership or declared chassis boundaries. Update counters so a completed whole-graph run has no unexplained stock tail work.
+
+### 6.2 Close the native algebra
+
+Inventory every F32 field and operation in `layer.c`, `attn.c`, `codec.c`, and `ledger.c`. Replace them site by site with declared integer or dyadic charts. Priority order:
+
+1. Residual and normalized activation storage.
+2. Q, K, V and FFN scratch buffers.
+3. Attention score and value accumulation.
+4. Q1_0 scale decode and controller gain representation.
+5. RoPE tick application without F32 row buffers.
+6. Native final norm and logits.
+
+A zero stock-op counter does not prove float-free execution. Float-free acceptance requires datatype and operation audits plus dedicated counters or compile-time enforcement.
+
+### 6.3 Quality closure
+
+After whole-graph ownership is fixed, run the cheapest production-native perplexity sample against a cached stock baseline. Broaden the corpus only if the small gate is sound. Keep stress tests last.
+
+### 6.4 Diagnostic hygiene
+
+Keep law-level counters and request summaries. Remove temporary numerical probes from default output once they no longer provide acceptance evidence.
+
+---
+
+## 7. Canonical gates
+
+```powershell
 python -m src.tools.gyroscopic.helpers.gates ledger
-python -m src.tools.gyroscopic.helpers.gates kv [--ppl]
-python -m src.tools.gyroscopic.helpers.gates codecs [--smoke-only]
+python -m src.tools.gyroscopic.helpers.gates kv --ppl
+python -m src.tools.gyroscopic.helpers.gates codecs --smoke-only
 python -m src.tools.gyroscopic.helpers.gates causal
 python -m src.tools.gyroscopic.helpers.gates forward-probe
 ```
 
 | Subcommand | Role |
 |---|---|
-| `ledger` | MatMul displace (Paris + PPL) |
-| `kv` | Q8 K then V + holonomic Attn@V |
-| `codecs` | Aperture/RoPE/SwiGLU vs Base (site probes) |
-| `causal` | Lift perturb changes decode — coupling proof only |
-| `forward-probe` | Norm shadow + residual/lift PPL (Norm COMMIT may FAIL until §5.2.5) |
+| `ledger` | MatMul displacement and quality |
+| `kv` | Q8 K/V and holonomic attention memory |
+| `codecs` | Aperture, RoPE, and FFN site probes |
+| `causal` | Native driver, Genealogy span, and lift perturbation |
+| `forward-probe` | Norm and residual measurements |
 
-Prefer smoke → causal → one cached Base PPL → variants. Do not re-Base every flag flip.
+Preferred order: smoke, causal, one cached Base PPL, then variants.
 
 ---
 
-## 8. Incomplete forward flag stack (stress/debug only — not a product mode)
+## 8. Default production law stack
 
-Code: `production_gyroscopic_env(incomplete_forward=True)` / `run_bonsai --incomplete-forward`. Use only to reproduce unfinished-site measurements. Not architecture.
+`production_gyroscopic_env(holonomic_kv=True)` enables the native driver and owned site laws. Native internal defaults are:
 
-```
-GYRO_LEDGER_PATH=.../hqvm_sidecar.bin
-GYRO_LEDGER_STRICT=1
-GYRO_HOLONOMIC_ATTN=1
-GYRO_KV_KQ8=1
-GYRO_KV_V=1
-GYRO_APERTURE_SOFTMAX=1
-GYRO_ROPE_CODEC=1
-GYRO_SILU_CODEC=1
-GYRO_CGM_LIFT=1
-GYRO_RESIDUAL_HYBRID=1
+```text
+GYRO_ATTN_LEVEL=2
+GYRO_FFN_LEVEL=2
+GYRO_NATIVE_KV=q8
+GYRO_NATIVE_ROPE=tick
+GYRO_NATIVE_NORM=Delta-ruler
+GYRO_NATIVE_RESIDUAL=Delta-law
 ```
 
-Do not set `GYRO_NORM_COMMIT`. Next theory-facing work: §5.2 (Norm signed ruler first among continuous ops; then residual law; then embd/logits; then retire scaffolding and “hybrid” aliases).
+Debug overrides such as `GYRO_NATIVE_KV=f32`, `GYRO_NATIVE_ROPE=float`, `GYRO_NATIVE_NORM=plain`, identity residual, stock softmax, or reduced attention and FFN ladders are diagnostic controls. They are not production architecture.
 
-Rebuild: `cmake --build external/llama.cpp/build --config Release --target ggml-cpu --clean-first` then `llama-cli` / `llama-perplexity`.
+`production_gyroscopic_env(incomplete_forward=True)` is measurement-only and must not be described as the product path.
 
 ---
 
@@ -205,15 +251,15 @@ Rebuild: `cmake --build external/llama.cpp/build --config Release --target ggml-
 
 | Role | Path |
 |---|---|
-| Status (this doc) | `runtime_NavPAD.md` |
-| Evidence | `log_NavPad.md` |
-| Theory notes | `Analysis_Arcs_1_4_Theory.md` |
-| C linked into ggml-cpu | `kernel.c`, `ledger.c`, `attn.c`, `codec.c` (+ headers) |
-| Public include umbrella | `api.h` → `constants` / `kernel` / `ledger` / `attn` / `codec` |
-| Thin hooks | `external/llama.cpp/ggml/src/ggml-gyroscopic/` |
-| Env | `config.production_gyroscopic_env` (auto-`ensure_ledger`) |
-| Build | `build.py`; `helpers/build_*.ps1` |
-| Ledger (Python) | `ledger.py` — thin HQVMLEDS; companion to `ledger.c` |
-| Gates / chat / bench | `helpers/gates.py`, `helpers/run_bonsai.py`, `helpers/bench_gyroscopic_llama.py` |
+| Status and plan | `runtime_NavPAD.md` |
+| Dated evidence | `log_NavPad.md` |
+| Theoretical exposition | `Analysis_Gyroscopic_Runtime.md` |
+| Native block driver | `layer.c`, `layer.h` |
+| Kernel and transport | `kernel.c`, `kernel.h` |
+| Ledger MatMul | `ledger.c`, `ledger.h`, `ledger.py` |
+| Attention and finite charts | `attn.c`, `attn.h`, `codec.c`, `codec.h` |
+| Thin graph hooks | `external/llama.cpp/ggml/src/ggml-gyroscopic/` |
+| Production environment | `config.production_gyroscopic_env` |
+| Gates and runner | `helpers/gates.py`, `helpers/run_bonsai.py` |
 
-One trajectory instance lives in `attn.c` (lift); traj/receipt types and steppers live in `kernel`. Continuous charts live in `codec`. Do not reintroduce split underscored modules.
+One trajectory instance lives in `attn.c`. Trajectory and receipt types live in the kernel. Finite and dyadic charts live in the codec.

@@ -108,6 +108,19 @@ HQVM_EXPORT uint32_t hqvm_kv_ledger_coord_count(const hqvm_kv_ledger *L);
 
 /* ---- Softmax / Attn@V / shadows ---- */
 HQVM_EXPORT void hqvm_softmax_inplace(float *scores, int64_t Nk, float M);
+HQVM_EXPORT void hqvm_stock_softmax_inc(void);
+HQVM_EXPORT uint64_t hqvm_stock_softmax_calls(void);
+/* Phase 5: shell-bucket poly-lambda + within-shell QK top-k (no exp). */
+#define HQVM_ATTN_SHELL_TOPK 16
+#define HQVM_LAMBDA_MAX_ATTN 8.0f
+HQVM_EXPORT int hqvm_attn_shell_qk_enabled(void);
+HQVM_EXPORT void hqvm_attn_weight_shell_qk(
+    float *scores, const float *q_head128, const void *k_chi_base,
+    int kv_head, int64_t Nk, uint8_t Nc, int top_k);
+/* Same law; chi from flat native KV table [pos * n_kv_heads + kv_head]. */
+HQVM_EXPORT void hqvm_attn_weight_shell_qk_flat(
+    float *scores, const float *q_head128, const uint8_t *k_chi6,
+    int64_t n_kv_heads, int kv_head, int64_t Nk, uint8_t Nc, int top_k);
 HQVM_EXPORT void hqvm_percolation_shadow(const float *raw_scores, int64_t Nk, float M);
 HQVM_EXPORT void hqvm_attn_v_reduce(
     float *out, int64_t DV, const float *weights, int64_t Nk,
@@ -168,10 +181,44 @@ HQVM_EXPORT int hqvm_cgm_lift_bump_layer(void);
 HQVM_EXPORT int hqvm_cgm_lift_traj_ready(void);
 HQVM_EXPORT uint32_t hqvm_cgm_lift_state24(void);
 HQVM_EXPORT uint8_t hqvm_cgm_lift_last_byte(void);
+/* Request-scoped sequence reset: traj + Genealogy (CS from Pi or GENE_MAC_REST). */
+HQVM_EXPORT void hqvm_cgm_lift_reset_sequence(void);
+HQVM_EXPORT int hqvm_cgm_lift_seq_active(void);
+/* Embd Pi: signs of first 12 dims -> (u6,v6); stash then apply on reset. */
+HQVM_EXPORT void hqvm_pi_stash_from_embd_row(const float *e, int64_t n);
+HQVM_EXPORT int hqvm_pi_applied(void);
+/* Carrier (u6,v6) after Pi / reset (GENE_MAC_REST bits if no Pi). */
+HQVM_EXPORT void hqvm_cgm_lift_get_uv6(uint8_t *u6, uint8_t *v6);
+HQVM_EXPORT uint8_t hqvm_cgm_lift_carrier_shell(void);
+HQVM_EXPORT uint8_t hqvm_cgm_lift_fam(void);
+
+/* GyroClock: depth = token_pos * HQVM_N_LAYER + layer_idx (Bonsai L=36). */
+HQVM_EXPORT uint64_t hqvm_genealogy_depth(uint32_t token_pos, uint32_t layer_idx);
+HQVM_EXPORT uint32_t hqvm_genealogy_token_pos(uint64_t depth);
+HQVM_EXPORT uint32_t hqvm_genealogy_layer(uint64_t depth);
+HQVM_EXPORT uint64_t hqvm_genealogy_depth_start(void);
+HQVM_EXPORT uint64_t hqvm_genealogy_depth_end(void);
+HQVM_EXPORT uint64_t hqvm_genealogy_step_count(void);
+HQVM_EXPORT uint64_t hqvm_genealogy_span(void);
+HQVM_EXPORT int hqvm_genealogy_n_layer(void);
+HQVM_EXPORT void hqvm_genealogy_counters_print(void);
+/* Prefill: record iq1; decode: return seq cursor (never padded Nk-1). */
+HQVM_EXPORT void hqvm_genealogy_observe_prefill(uint32_t token_pos);
+HQVM_EXPORT uint32_t hqvm_genealogy_decode_token_pos(void);
+HQVM_EXPORT uint32_t hqvm_genealogy_seq_len(void);
+/* RoPE audit: last lift token_pos (layer-0 bind check). */
+HQVM_EXPORT void hqvm_rope_clock_token_pos_set(uint32_t token_pos);
+HQVM_EXPORT uint32_t hqvm_rope_clock_token_pos_get(void);
+
+/* Residual-stream law (1+Delta*m). HYBRID names kept as ABI aliases. */
+HQVM_EXPORT int hqvm_residual_law_enabled(void);
 HQVM_EXPORT int hqvm_residual_hybrid_enabled(void);
 HQVM_EXPORT float hqvm_residual_gain(void);
+HQVM_EXPORT void hqvm_residual_law_hit(void);
 HQVM_EXPORT void hqvm_residual_hybrid_hit(void);
+HQVM_EXPORT uint64_t hqvm_residual_law_hits(void);
 HQVM_EXPORT uint64_t hqvm_residual_hybrid_hits(void);
+HQVM_EXPORT void hqvm_residual_law_counters_print(void);
 HQVM_EXPORT void hqvm_residual_hybrid_counters_print(void);
 HQVM_EXPORT void hqvm_cgm_lift_counters_get(
     uint64_t *lift_calls, uint64_t *chi6_writes, uint64_t *invariant_fails);
@@ -180,9 +227,11 @@ HQVM_EXPORT void hqvm_k_chi6_store(
     const void *k_base, int64_t idx, const float *row_f32, int64_t n_heads, int64_t head_dim);
 HQVM_EXPORT uint8_t hqvm_k_chi6_get(const void *k_base, int64_t idx, int head);
 HQVM_EXPORT int hqvm_k_chi6_has(const void *k_base);
+/* Lift once per (token_pos, layer): depth = t*L+ell; fam = depth & 3. */
 HQVM_EXPORT void hqvm_lift_attention_phase(
     const float *scores, const void *k_base, int64_t Nk, int head,
-    uint8_t chi_q, int depth, float Delta, float eps_max, gyro_lift_attn_t *out);
+    uint8_t chi_q, uint32_t token_pos, uint32_t layer_idx,
+    float Delta, float eps_max, gyro_lift_attn_t *out);
 
 #ifdef __cplusplus
 }

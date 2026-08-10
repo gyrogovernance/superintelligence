@@ -5,6 +5,7 @@
 
 #include "ledger.h"
 #include "constants.h"
+#include "attn.h"
 
 #include <math.h>
 
@@ -472,9 +473,9 @@ void hqvm_quantize_x_q8(const float *x, int64_t n, int8_t *qx, float *xd) {
         {
             const float d = amax / 127.0f;
             const float id = (d > 0.0f) ? (1.0f / d) : 0.0f;
-            xd[i / 32] = d;
+            xd[i / 32] = hqvm_fp16_to_f32(hqvm_f32_to_f16(d));
             for (j = 0; j < 32; ++j) {
-                int v = (int)lrintf(x[i + j] * id);
+                int v = (int)roundf(x[i + j] * id);
                 if (v > 127) v = 127;
                 if (v < -127) v = -127;
                 qx[i + j] = (int8_t)v;

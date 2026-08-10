@@ -16,14 +16,17 @@
  *
  * Env — unfinished forward sites (stress/debug; not a product mode):
  *   GYRO_APERTURE_SOFTMAX, GYRO_ROPE_CODEC, GYRO_SILU_CODEC,
- *   GYRO_CGM_LIFT, GYRO_RESIDUAL_HYBRID
+ *   GYRO_CGM_LIFT, GYRO_RESIDUAL_LAW (GYRO_RESIDUAL_HYBRID deprecated alias)
  *
  * Env — scaffolding / proofs:
- *   GYRO_NORM_CODEC, GYRO_NORM_COMMIT (Norm live apply broken),
+ *   GYRO_NORM_CODEC, GYRO_NORM_COMMIT (signed Delta-ruler), GYRO_NORM_G0,
  *   GYRO_CGM_LIFT_PERTURB, GYRO_V_PERTURB, GYRO_COORD_PERTURB,
  *   GYRO_HOLONOMIC_ATTN_MODE, GYRO_KV_LEDGER, GYRO_RECEIPTS
  *
  * Prefer production_gyroscopic_env(...) over hand-rolled flag sets.
+ *
+ * Native driver (Bonsai blocks): GYRO_NATIVE_FORWARD — prefill/decode loops
+ * call hqvm_block_forward; stock ggml block graph must not run.
  */
 
 #include "constants.h"
@@ -31,3 +34,4 @@
 #include "ledger.h"
 #include "attn.h"
 #include "codec.h"
+#include "layer.h"
