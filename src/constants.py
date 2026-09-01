@@ -129,10 +129,24 @@ Q1: int = 0x0F0
 # Aperture quantization (CGM Byte Formalism §7)
 # ================================================================
 
-DELTA_BU: float = 0.195342176580
 M_A: float = 1.0 / (2.0 * math.sqrt(2.0 * math.pi))
+
+
+def _poincare_half_rapidity(beta: float) -> float:
+    """k(β) = β / (1 + √(1 − β²)) = tanh(atanh(β)/2)."""
+    return beta / (1.0 + math.sqrt(max(0.0, 1.0 - beta * beta)))
+
+
+def bu_holonomy_angle() -> float:
+    """BU dual-pole loop angle δ_BU = 4 · arctan(k(π/4) · k(m_a))."""
+    return 4.0 * math.atan(
+        _poincare_half_rapidity(math.pi / 4.0) * _poincare_half_rapidity(M_A)
+    )
+
+
+DELTA_BU: float = bu_holonomy_angle()
 RHO: float = DELTA_BU / M_A
-APERTURE_GAP: float = 1.0 - RHO  # ~0.020699553913
+APERTURE_GAP: float = 1.0 - RHO  # ≈ 0.020699545503
 APERTURE_GAP_Q256: int = 5  # best 8-bit dyadic approximation: 5/256
 
 

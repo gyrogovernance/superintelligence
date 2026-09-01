@@ -15,7 +15,7 @@ This analysis establishes the following results:
 *   The angular invariant **Q_G = 4π** is the quantum of gravity, the horizon normalization required for coherent observation. It is fixed in the GNS representation as the ratio of two operational parameters [14] before any geometric structure is assumed. Three-dimensional space appears as a downstream realization of the closure conditions (Sections 2 and 3).
 *   The Virial condition **2T + V = 0** holds as a structural consequence of ancestry preservation in CGM, distinct from the standard reading as an averaged orbital relation. Coherent closure forces net displacement to zero every cycle, verified by the kernel invariant D = 24 across all 64 mass configurations. Gravity anchors the rest frame as a dynamical condition, so the rest energy relation E = mc² follows as an entailment of closure (Section 4).
 *   The hQVM kernel realises the modal axioms as a finite integer algebra and supplies the discrete Gauss law **G_kernel = Q_G/D = π/6**. Q_G is the flux quantum through any closed surface (Section 5).
-*   The position-dependent coupling **G(ψ) = G₀ exp(g₁ψ)** with g₁ = −0.6456 closes from three independent premises: optical conjugacy E_UV E_IR = E_CS v/(4π²), the Δ ruler, and symmetric trace-free attenuation across the five bulk shells. With the electroweak scale v as the single energy anchor, the weak-field G matches the CODATA reference value to **0.074 ppm** (Section 6).
+*   The position-dependent coupling **G(ψ) = G₀ exp(g₁ψ)** with g₁ = −0.6456 closes from three independent premises: optical conjugacy E_UV E_IR = E_CS v/(4π²), the Δ ruler, and symmetric trace-free attenuation across the five bulk shells. With the electroweak scale v as the single energy anchor, the weak-field G lies about **+2.99 ppm** from the CODATA reference value (Section 6).
 *   The point-mass exterior closes analytically in **ψ(s) = −(1/g₁) ln(1 − g₁/s)** with effective metric f = 1 − 2ψ. The horizon sits at ψ = 1/2, s_h ≈ 1.695 r_g (15.3% inward of Schwarzschild), and the photon sphere at s_ph ≈ 2.586 r_g gives a shadow area 80% of the GR Schwarzschild prediction (Sections 6 and 7).
 *   The **self-energy theorem E_self = −Mc²/4** is exact and finite, replacing the divergent Newtonian integral. The position-dependent coupling acts as a geometric regulator, and the dressing identity **M_obs = (4/5) M_bare** binds 20% of bare mass into the gravitational field (Section 6.5).
 *   Electromagnetic and gravitational couplings share the aperture geometry, giving the kernel-level identity **α₀ ζ = ρ⁴/(π √3)** as a constant-product falsification threshold independent of m_a. Under the antimatter involution, gravitoelectric invariants are even, so antimatter has positive gravitational mass identical to matter, while gravitomagnetic invariants are odd, giving a sign-flipped spin coupling at order ψ² (Sections 6.6 and 7.4).
@@ -145,7 +145,7 @@ Ingress Balance (BU-Ingress) requires the closed state to retain the information
 S → (□B → ([R]S ↔ S ∧ ¬([L]S ↔ S) ∧ ¬□E ∧ ¬□¬E))
 ```
 
-The depth-four state preserves the full operational history, including the original chirality, rotational variety, and translational expansion. Memory is encoded as the monodromy phase defect of the vibrational oscillation at BU. Ingress represents the centripetal binding that reconstructs the original context without erasing structural distinctions.
+The depth-four state preserves the full operational history, including the original chirality, rotational variety, and translational expansion. Memory is encoded as the holonomy phase defect of the vibrational oscillation at BU. Ingress represents the centripetal binding that reconstructs the original context without erasing structural distinctions.
 
 The following results are theorems of the modal system, proven in [15]. The BCH expansion of the depth-four commutator condition forces the generated Lie algebra to close on three generators as sl(2), through Hall word exclusion of bracket length ≥ 3. The simplicity requirement from BU-Ingress excludes direct-sum algebras such as so(4), and the GNS construction selects the compact real form su(2). The bi-gyrogroup consistency required by ONA forces the semidirect product SE(3) = SU(2) ⋉ R³ with exactly three translational parameters. The dimensional proof in [15] establishes n = 3 as the unique dimension satisfying all five conditions simultaneously, with constructive exclusions of n = 2 and n ≥ 4. The hQVM kernel of Section 5 is a concrete finite realization of these theorems, not an independent postulate. In the GNS representation of [14], the modal operators [L] and [R] are realized as one-parameter unitary groups U_L(t) = exp(itX) and U_R(t) = exp(itY) on L²(S²), providing the Lie algebra elements X and Y on which the BCH expansion operates.
 
@@ -165,7 +165,7 @@ Q_G × m_a² = 1/2
 
 (2π)_L and (2π)_R denote the angular coverage contributed by the left and right transition directions. Each contributes 2π because a full cycle in either direction covers one complete angular revolution.
 
-The continuous 4π sphere therefore resolves into a half-integer quantum pass, reflecting the underlying SU(2) double-cover structure established by the rotational degrees of freedom. The closure ratio ρ = δ_BU/m_a and the aperture gap Δ = 1 − ρ measure how the BU dual-pole monodromy δ_BU sits relative to the aperture m_a (Appendix G). Numerically, m_a ≈ 0.199471, ρ ≈ 0.9793, and Δ ≈ 0.0207.
+The continuous 4π sphere therefore resolves into a half-integer quantum pass, reflecting the underlying SU(2) double-cover structure established by the rotational degrees of freedom. With δ_BU = 4 · arctan(k(π/4) · k(m_a)), the closure ratio ρ = δ_BU/m_a and the aperture gap Δ = 1 − ρ measure how the BU dual-pole loop angle sits relative to the aperture m_a (Appendix G). Numerically, m_a ≈ 0.199471140201, ρ ≈ 0.979300454497, and Δ ≈ 0.020699545503.
 
 The 4π invariant appears in the field equation for a point source:
 
@@ -227,7 +227,7 @@ To convert defect magnitude to an angle scale, define the plaquette deficit angl
 alpha(d) = (popcount(d) / 6) x delta_BU
 ```
 
-delta_BU is the BU dual-pole monodromy fixed in Appendix G. This fixes the curvature unit.
+delta_BU is the BU dual-pole loop angle fixed in Appendix G. This fixes the curvature unit.
 
 A Regge action is a weighted sum of deficit angles. In this manuscript the weight is the symmetric trace-free (STF) sector of the shell-conditioned stress σ^{ij} = p δ^{ij} + π^{ij} introduced in Section 4 and formalized in Appendix D. The horizons have π = 0 and therefore carry zero STF weight. Only shells 1 through 5 contribute to the gravitational attenuation τ_G.
 
@@ -336,7 +336,7 @@ The deficit angle for a plaquette with defect d is:
 alpha(d) = (popcount(d) / 6) x delta_BU
 ```
 
-This is the discrete analogue of the deficit angle in Regge calculus, where curvature at a hinge is measured by the angular deficit. The factor delta_BU sets the curvature scale from the BU monodromy.
+This is the discrete analogue of the deficit angle in Regge calculus, where curvature at a hinge is measured by the angular deficit. The factor delta_BU sets the curvature scale from the BU dual-pole loop angle.
 
 The Regge action sums deficit angles weighted by hinge area. In the kernel, the hinge weight is the anisotropy (symmetric trace-free content) of the shell at which the holonomy step occurs. Sections 4 and 5.4 establish that gravity couples exclusively to the five bulk shells carrying STF degrees. Shells 0 and 6 carry zero anisotropy: Tr(sigma) = 0 and ||pi||^2 = 0 on both horizons. The plaquette census confirms that horizons carry nonzero geometric defect (alpha sum approximately 200) but zero anisotropy weight. Geometric defect exists on the horizons, but the STF weight is zero there, so horizons do not contribute to the Regge transport that defines τ_G. This is the discrete trace versus trace-free split used throughout this manuscript. The curvature proxy alpha(d) can be nonzero on the horizons, but the gravitational attenuation depends on the trace-free sector π, which vanishes on shells 0 and 6 and is nonzero only in shells 1 through 5.
 
@@ -354,24 +354,23 @@ Evaluating S_cycle on the 64 micro-reference holonomy cycles (binomial-weighted 
 The total Refractive Depth is:
 
 ```text
-tau_G = N_cycles x tau_cycle = 76.237916638581
+tau_G = N_cycles x tau_cycle = 76.237913573567
 ```
 
-This matches the closed-form expression tau_G = |Omega| Delta rho^5 (1 - 4 rho Delta^2 + c_4 Delta^4) to relative precision 3.7 x 10^{-16}. The closed form is the Regge sum, evaluated analytically.
+This matches the closed-form expression tau_G = |Omega| Delta rho^5 (1 - 4 rho Delta^2) to relative precision 3.7 x 10^{-16}. The closed form is the Regge sum, evaluated analytically.
 
-The Z2 holonomy structure imposes a selection rule on the BCH correction orders. The projected correction series f_k4 in tau_G = |Omega| Delta rho^5 f_k4 has nonzero coefficients only at even orders:
+The Z2 holonomy structure imposes a selection rule on the BCH correction orders. The projected STF series f_k4 in tau_G = |Omega| Delta rho^5 f_k4 has nonzero coefficients only at even orders through Delta^2:
 
 ```text
 order 0:  f_k4 =  1        (identity)
 order 1:  f_k4 =  0        (absent)
 order 2:  f_k4 = -4 rho    ([X,Y] commutator)
 order 3:  f_k4 =  0        (absent)
-order 4:  f_k4 =  c_4      ([[X,Y],[X,Y]] double commutator)
-order 5:  f_k4 =  0        (absent)
-order 6:  f_k4 =  0        (absent)
 ```
 
-The K4 algebra {id, W2, W2', F} is (Z/2)^2. Its Z2 symmetry annihilates all odd-order corrections. Only the even commutator structures [X,Y] and [[X,Y],[X,Y]] survive projection into the gravitational sector. The formal depth-four BCH identity Delta = 2Z1 - 2Z2 = 2[X,Y], verified by symbolic computation (Dynkin truncation at O(t^3)), confirms that the leading correction is the standard commutator term.
+The order-4 coefficient c_4 = -7/4 is a kernel theorem of the isotropic stress channel (Appendix C.4). It defines the separate scalar tau_trace = |Omega| Delta rho^5 c_4 Delta^4 and does not enter the STF attenuation that normalizes G.
+
+The K4 algebra {id, W2, W2', F} is (Z/2)^2. Its Z2 symmetry annihilates all odd-order corrections. The commutator structure [X,Y] survives projection into the gravitational attenuation sector. The formal depth-four BCH identity Delta = 2Z1 - 2Z2 = 2[X,Y], verified by symbolic computation (Dynkin truncation at O(t^3)), confirms that the leading correction is the standard commutator term.
 
 The non-commutativity [X,Y] is global: every state in Omega distinguishes T_x T_y from T_y T_x (4096/4096 states differ). Yet at depth four, the S-sector closes: q(F) = 0 and tau(LRLR) = tau(RLRL). Full non-commutativity and full closure coexist. Gravity is the coupling between them: the global non-commutativity provides the curvature content, and the depth-four closure provides the balance that converts curvature into a coherent field.
 
@@ -390,13 +389,13 @@ The quantum of gravity and the aperture geometry of Section 3 fix the coupling s
 The derivation proceeds in six steps, each entailed by the previous:
 
 1.  Compute G_kernel = Q_G/D = π/6 from the horizon invariant Q_G (Section 3) and the shell displacement D = 24 (Section 5.2), both established as kernel theorems.
-2.  Integrate the symmetric trace-free attenuation across the five bulk shells to obtain the Refractive Depth τ_G = |Ω|Δρ⁵(1 − 4ρΔ² + c₄Δ⁴), with c₄ = −7/4 fixed by two independent kernel routes (Appendix C).
+2.  Integrate the symmetric trace-free attenuation across the five bulk shells to obtain the Refractive Depth τ_G = |Ω|Δρ⁵(1 − 4ρΔ²).
 3.  Evaluate the weak-field coupling G₀ = G_kernel exp(−τ_G)/v².
 4.  Derive the position-dependent coupling G(ψ) = G₀ exp(g₁ψ) from the Refractive Depth gradient and E_ref(ψ).
 5.  Construct the effective metric f = 1 − 2ψ from the exact point-mass solution.
 6.  Verify the Einstein tensor, the modified Gauss law, and the equivalence principles.
 
-The dimensionless coupling Gv²/G_kernel = exp(−τ_G) is determined entirely by kernel invariants. Converting to the dimensional G requires the electroweak scale v as an energy anchor, and that anchor is the single measured input to the prediction. Q_G = 4π is fixed by the GNS normalization as the ratio λ/m_a of two representation-independent parameters [14]. With Q_G fixed, the bridge identity Q_G m_a² = 1/2 determines m_a uniquely. The remaining kernel invariants (|Ω|, D, ρ, Δ, c₄) are theorems about the computational system. The parameter count is therefore: zero free parameters from the axioms, zero from the kernel, one measured input (v) to set the dimensional scale.
+The dimensionless coupling Gv²/G_kernel = exp(−τ_G) is determined entirely by kernel invariants. Converting to the dimensional G requires the electroweak scale v as an energy anchor, and that anchor is the single measured input to the prediction. Q_G = 4π is fixed by the GNS normalization as the ratio λ/m_a of two representation-independent parameters [14]. With Q_G fixed, the bridge identity Q_G m_a² = 1/2 determines m_a uniquely. The remaining kernel invariants (|Ω|, D, ρ, Δ) are theorems about the computational system. The parameter count is therefore: zero free parameters from the axioms, zero from the kernel, one measured input (v) to set the dimensional scale.
 
 ### 6.1 Continuum Limit of the Kernel Gauss Law
 
@@ -466,18 +465,18 @@ Gravity couples exclusively to the five bulk shells identified in Section 5.1, s
 Section 5.6 proves that τ_G is a Regge action: the sum of plaquette deficit angles weighted by anisotropy, integrated over bulk holonomy cycles, reproduces the closed-form expression to machine precision. The Regge identity establishes the Refractive Depth as a curvature sum on the compact manifold.
 
 ```text
-τ_G⁰ = |Ω| Δ ρ⁵ (1 − 4ρ Δ²)
+τ_G = |Ω| Δ ρ⁵ (1 − 4ρ Δ²)
 ```
 
-Here |Ω| = 4096, Δ = 1 − ρ, and ρ is the closure ratio from Section 3. The factor (1 − 4ρΔ²) is the lowest-order symmetric correction from the four-stage depth structure. An additive correction reduces the residual further.
+Here |Ω| = 4096, Δ = 1 − ρ, and ρ is the closure ratio from Section 3. The factor (1 − 4ρΔ²) is the lowest-order symmetric correction from the four-stage depth structure. The isotropic stress channel supplies a separate kernel scalar
 
 ```text
-δτ = |Ω| Δ ρ⁵ c₄ Δ⁴,    c₄ = −7/4
+τ_trace = |Ω| Δ ρ⁵ c₄ Δ⁴,    c₄ = −7/4
 ```
 
-The full model is τ_G = τ_G⁰ + δτ. The constant c₄ = −7/4 is fixed by two independent routes (Appendix C.4). The correction orders in Δ match the standard Baker-Campbell-Hausdorff (BCH) commutator hierarchy for composed transports. After projection into the Z2 holonomy sector, only the even commutator orders contribute to τ_G. The Z2 involution of the holonomy cycle eliminates all odd-order corrections in Δ, enforcing exact symmetry at leading order. The c₄ Δ⁴ correction represents a soft breaking of this Z2 symmetry by the isotropic pressure component of the stress tensor, providing the monopole contribution to the mass-energy stress budget that the five STF components miss.
+with c₄ fixed by two independent routes (Appendix C.4). τ_trace lives in the monopole / isotropic-pressure sector and does not enter the STF attenuation exponent that normalizes G. The correction orders in Δ match the Baker-Campbell-Hausdorff (BCH) commutator hierarchy for composed transports. After projection into the Z2 holonomy sector, only the even commutator orders through Δ² contribute to τ_G. The Z2 involution of the holonomy cycle eliminates all odd-order corrections in Δ. The order-4 coefficient c₄ records the soft breaking of this Z2 symmetry by the isotropic pressure component of the stress tensor, providing the monopole contribution to the mass-energy stress budget that the five STF components miss, without sourcing gravitational attenuation.
 
-Numerical evaluation gives τ_G⁰ alone a 25 ppm offset in G relative to the reference measurement. Adding δτ with c₄ = −7/4 leaves a residual of 7.36 × 10⁻⁸ in τ, equivalent to a 0.074 ppm difference between prediction and reference value. The experimental uncertainty on G in CODATA 2018 is approximately 22 ppm, orders of magnitude larger than the residual. The sub-ppm agreement therefore tests the internal consistency of the dimensionless formula rather than providing a metrological verification at that precision. A decisive test requires substantially improved G measurements or an independent observable that constrains the same τ_G structure. Because the prediction equals G_kernel exp(−τ_G)/v², a fractional change in τ maps directly to the same fractional change in G with opposite sign. The prediction is stable at the precision to which Δ and ρ are fixed, and the sub-ppm residual is free of fine-tuned cancellation among poorly determined inputs.
+Numerical evaluation gives τ_G ≈ 76.237913574 and a weak-field residual of about +2.99 ppm in G relative to the reference measurement (τ residual versus τ_required ≈ −2.99 × 10⁻⁶). The experimental uncertainty on G in CODATA 2018 is approximately 22 ppm, so the residual sits well inside the metrological uncertainty. A decisive test requires substantially improved G measurements or an independent observable that constrains the same τ_G structure. Because the prediction equals G_kernel exp(−τ_G)/v², a fractional change in τ maps directly to the same fractional change in G with opposite sign. The prediction is fixed once Δ and ρ are fixed by the closed-form loop angle.
 
 ### 6.4 The Effective Metric and Einstein Equations
 
@@ -737,10 +736,10 @@ The position-dependent coupling G(ψ) modifies gravity in the high-potential reg
 Electromagnetic and gravitational couplings share the aperture geometry, producing a testable relationship between them. With ζ = 8/(m_a √3) = 16√(2π/3) ≈ 23.155 and α₀ = δ_BU⁴/m_a, the product
 
 ```text
-α₀ ζ = ρ⁴ / (π √3) = 0.169025920321
+α₀ ζ = ρ⁴ / (π √3) = 0.169025926127
 ```
 
-cancels m_a entirely. Independent measurements of α and G can therefore falsify CGM if their product violates ρ⁴/(π√3). The laboratory fine-structure constant α_CODATA differs from α₀ by +319 ppm. The transport-corrected value (Appendix H) matches α_CODATA to sub-ppb accuracy. Gravity and the kernel invariant use α₀ and do not incorporate that correction chain, so the product test applies to α₀ specifically. Given α_CODATA, the product α ζ = ρ⁴/(π√3) predicts ζ ≈ 23.163. Any independent constraint on G or ζ that disagrees with this propagation, after explicit identification of which α definition is used, falsifies the stated layer of the framework.
+cancels m_a entirely. Independent measurements of α and G can therefore falsify CGM if their product violates ρ⁴/(π√3). The laboratory fine-structure constant α_CODATA differs from α₀ by about +319.43 ppm. The transport-corrected value (Appendix H) is about 33.7 ppb from CODATA 2018. Gravity and the kernel invariant use α₀ and do not incorporate that correction chain, so the product test applies to α₀ specifically. Given α_CODATA, the product α ζ = ρ⁴/(π√3) predicts ζ ≈ 23.163. Any independent constraint on G or ζ that disagrees with this propagation, after explicit identification of which α definition is used, falsifies the stated layer of the framework.
 
 The shell opacity structure modulates the fine-structure constant across cosmological depth. Binomial shell weights, carrier-trace weighting, and coupling sensitivity dα/α per dΔ/Δ = 4/ρ project onto the Δ ruler, giving a modulation anchored on α₀ = δ_BU⁴/m_a with period Δ ≈ 0.0207 in ln(1+z) and fractional amplitude approximately 4.8 × 10⁻⁴ (`hqvm_gravity_analysis_5.py`, section O). Seven sub-cycles per main period arise from the shell structure, with sub-cycle period Δ/7 ≈ 0.0030. A survey spanning at least one full period in ln(1+z) and detecting no modulation at 3σ confidence with the stated period and amplitude would falsify the shell-opacity link to electromagnetic coupling.
 
@@ -788,10 +787,10 @@ Three results anchor the derivation:
 *   The Refractive Depth model
 
     ```text
-    τ_G = |Ω| Δ ρ⁵ [(1 − 4ρΔ²) + c₄Δ⁴]  with c₄ = −7/4
+    τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ²)
     ```
 
-    yields G_pred within 0.074 ppm of the reference measurement, and the exponent 5 is confirmed by three independent arguments (STF dimension, bulk shell count, and carrier-trace polynomial).
+    yields G_pred about +2.99 ppm from the reference measurement, and the exponent 5 is confirmed by three independent arguments (STF dimension, bulk shell count, and carrier-trace polynomial).
 
 Section 4 establishes the Virial condition 2T + V = 0 as a structural consequence of ancestry preservation rather than an averaged orbital relation. Coherent closure forces net displacement to zero every cycle, the kernel invariant D = 24 is the discrete witness of this fact, and gravity is the dynamical anchor that keeps the rest frame from dispersing. The rest energy relation E = mc² is then an entailment of closure rather than a coordinate convention.
 
@@ -927,11 +926,11 @@ The transport measure τ_cycle/Δ = 7591/7392 and the anisotropy measure 5/99 (f
 ### C.3 Series Expansion
 Expanding the closed form τ_G = |Ω| Δ (1−Δ)⁵ (1−4(1−Δ)Δ²) as a polynomial in Δ produces a finite series through degree nine with coefficients c_n/|Ω| = [0, 1, −5, 6, 14, −55, 79, −60, 24, −4]. The series converges to the closed form exactly at machine precision.
 
-### C.4 The c₄ Correction
-The additive correction δτ = |Ω| Δ ρ⁵ c₄ Δ⁴ with c₄ = −7/4 is fixed by two independent routes. Route A gives c₄ = −(1 + Tr(σ_iso)) = −7/4 from the isotropic stress trace. Route B gives c₄ = q_W from the closure charge on gyroscopic edge increments, yielding the same value. The two routes are mathematically independent: Route A derives c₄ from the second-moment structure of the payload bit distribution, while Route B derives it from the edge-increment structure of the K4 gate composition. They share the kernel as a common framework but use different theorems about different objects. Including δτ reduces the τ residual from 2.46 × 10⁻⁵ to 7.36 × 10⁻⁸.
+### C.4 The c₄ Trace Scalar
+The isotropic-channel scalar τ_trace = |Ω| Δ ρ⁵ c₄ Δ⁴ with c₄ = −7/4 is fixed by two independent routes. Route A gives c₄ = −(1 + Tr(σ_iso)) = −7/4 from the isotropic stress trace. Route B gives c₄ = q_W from the closure charge on gyroscopic edge increments, yielding the same value. The two routes are mathematically independent: Route A derives c₄ from the second-moment structure of the payload bit distribution, while Route B derives it from the edge-increment structure of the K4 gate composition. They share the kernel as a common framework but use different theorems about different objects. τ_trace belongs to the isotropic pressure / monopole sector. The STF coupling depth is τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ²), with residual versus τ_required about −2.99 × 10⁻⁶.
 
 ### C.5 Cycle Count
-The number of Z2 holonomy cycles (8 bytes each) is N_cycles = |Ω| ρ⁵ (f_K4 + c₄ Δ⁴) / (τ_cycle/Δ), where f_K4 = 1 − 4ρΔ². This evaluates to N_cycles ≈ 3586.5. The product N_cycles × τ_cycle = τ_G confirms exact agreement with the closed form.
+The number of Z2 holonomy cycles (8 bytes each) is N_cycles = |Ω| ρ⁵ f_K4 / (τ_cycle/Δ), where f_K4 = 1 − 4ρΔ². This evaluates to N_cycles ≈ 3586.52. The product N_cycles × τ_cycle = τ_G confirms exact agreement with the closed form.
 
 ### C.6 Per-Family Uniformity
 The per-family depth-4 Refractive Depth is identical across all four family phases, with τ_word = 0.009408891 and zero variance. This uniformity supports the equal-weight assignment in the f_K4 correction factor.
@@ -1088,19 +1087,19 @@ It is the maximum amplitude consistent with a π-radian observable horizon. Left
 
 The gyrotriangle defect δ = π − (π/2 + π/4 + π/4) = 0 fixes the angular structure uniquely.
 
-### G.2 BU Dual-Pole Monodromy and Closure
+### G.2 BU Dual-Pole Loop and Closure
 
-The BU dual-pole monodromy δ_BU is the phase accumulated on the path ONA → BU+ → BU− → ONA:
+The BU Dual-Pole Loop δ_BU is the phase accumulated on the path ONA → BU+ → BU− → ONA:
 
 ```text
-δ_BU = 2 × ω(ONA ↔ BU)  ≈  0.195342176580 rad
+δ_BU = 4 · arctan(k(π/4) · k(m_a))  ≈  0.195342178258 rad
 ```
 
 The closure ratio and aperture gap are
 
 ```text
-ρ = δ_BU / m_a  ≈  0.979300
-Δ = 1 − ρ = 1 − δ_BU / m_a  ≈  0.020700
+ρ = δ_BU / m_a  ≈  0.979300454497
+Δ = 1 − ρ = 1 − δ_BU / m_a  ≈  0.020699545503
 ```
 
 Observation requires Δ > 0: full closure would leave no aperture. Δ is the expansion parameter for STF attenuation (Section 6) and for fine-structure corrections (Appendix H).
@@ -1114,10 +1113,10 @@ This appendix defines α₀ and the transport-corrected α used in Section 7.4 c
 Electromagnetic coupling at the observable BU (IR) focus begins with
 
 ```text
-α₀ = δ_BU⁴ / m_a  ≈  0.007299683322
+α₀ = δ_BU⁴ / m_a  ≈  0.007299683573
 ```
 
-Quartic scaling reflects dual commutators and dual poles. Division by m_a ties the result to the observational aperture. This differs from CODATA α by 319 ppm.
+with δ_BU = 4 · arctan(k(π/4) · k(m_a)). Quartic scaling reflects dual commutators and dual poles. Division by m_a ties the result to the observational aperture. Relative to CODATA 2018 this differs by about 319.43 ppm.
 
 ### H.2 Transport-Corrected Alpha
 
@@ -1126,11 +1125,11 @@ Three geometric corrections in powers of Δ yield the full prediction:
 ```text
 α = (δ_BU⁴ / m_a)
     × [1 − (3/4) R Δ²]
-    × [1 − (5/6)((φ_SU2/(3 δ_BU)) − 1)(1 − Δ² h_ratio) Δ² / (4π √3)]
+    × [1 − (5/6)((φ_SU2/(3 δ_BU)) − 1) Δ² / (4π √3)]
     × [1 + (1/ρ) diff Δ⁴]
 ```
 
-R = 0.993434896272 is the Thomas-Wigner curvature ratio, φ_SU2 = 2 arccos((1 + 2√2)/4) is the exact SU(2) holonomy, h_ratio = 4.417034 is the measured 4-leg/8-leg holonomy ratio, and diff = φ_SU2 − 3 δ_BU. The result α = 0.007297352563 matches CODATA to 0.043 ppb.
+R = 0.993434896272 is the Thomas-Wigner curvature ratio, φ_SU2 = 2 arccos((1 + 2√2)/4) is the exact SU(2) commutator holonomy, and diff = φ_SU2 − 3 δ_BU. Evaluating with the closed-form δ_BU gives α ≈ 0.007297352815, about 33.7 ppb from CODATA 2018.
 
 Section 7.4 uses α₀ in the product α₀ ζ = ρ⁴/(π √3) for gravitational coupling falsification. The transport correction chain applies to electromagnetic precision tests, not to the kernel G prediction.
 
@@ -1166,7 +1165,7 @@ Section 7.4 uses α₀ in the product α₀ ζ = ρ⁴/(π √3) for gravitation
 [14] Korompilias, B. (2025). Common Governance Model: Mathematical Physics Framework. Zenodo. DOI: 10.5281/zenodo.17521384.
 [15] Korompilias, B. (2025). Formal proof of three-dimensional necessity and six degrees of freedom in the Common Governance Model. Companion analysis (docs/Findings/Analysis_3D_6DOF_Proof.md).
 [16] Korompilias, B. (2025). Compact geometry: Spectral algebra of the electroweak mass spectrum. Companion analysis (docs/Findings/Analysis_Compact_Geometry.md).
-[17] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/specs/hQVM_Specs_Formalism.md).
+[17] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md).
 [18] Mashhoon, B. (2003). Gravitoelectromagnetism: A Brief Review. In The Measurement of Gravitomagnetism: A Challenging Enterprise, 31-42. New York: Nova Science.
 [19] Mashhoon, B. (2008). Gravitoelectromagnetism. In Reference Frames, 29-39. Berlin: Springer.
 [20] Arnowitt, R., Deser, S. and Misner, C. W. (1962). The dynamics of general relativity. In Gravitation: An Introduction to Current Research, 227-265. New York: Wiley.

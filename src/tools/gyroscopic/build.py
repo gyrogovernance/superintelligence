@@ -44,12 +44,23 @@ def _needs_rebuild(artifacts: list[Path], deps: list[Path]) -> bool:
     return False
 
 
-def _llama_build_dir(mode: LlamaBuildMode) -> str:
-    return "build-stock" if mode == "stock" else "build"
+def gyroscopic_build_root(repo_root_path: Path | None = None) -> Path:
+    """Official artifact root: ``src/tools/gyroscopic/_build`` (never repo-root ``_build``)."""
+    root = repo_root_path if repo_root_path is not None else repo_root()
+    return root / "src" / "tools" / "gyroscopic" / "_build"
 
 
-def _llama_cli_candidates(repo_root: Path, mode: LlamaBuildMode) -> list[Path]:
-    base = repo_root / "external" / "llama.cpp" / _llama_build_dir(mode) / "bin"
+def _llama_build_dirname(mode: LlamaBuildMode) -> str:
+    return "llama-cpp-stock" if mode == "stock" else "llama-cpp"
+
+
+def llama_cmake_build_dir(repo_root_path: Path | None = None, *, mode: LlamaBuildMode = "gyroscopic") -> Path:
+    """CMake ``-B`` directory under ``src/tools/gyroscopic/_build``."""
+    return gyroscopic_build_root(repo_root_path) / _llama_build_dirname(mode)
+
+
+def _llama_cli_candidates(repo_root_path: Path, mode: LlamaBuildMode) -> list[Path]:
+    base = llama_cmake_build_dir(repo_root_path, mode=mode) / "bin"
     if sys.platform == "win32":
         return [
             base / "Release" / "llama-cli.exe",
@@ -59,9 +70,9 @@ def _llama_cli_candidates(repo_root: Path, mode: LlamaBuildMode) -> list[Path]:
     return [base / "llama-cli"]
 
 
-def _llama_build_artifacts(repo_root: Path, mode: LlamaBuildMode) -> list[Path]:
+def _llama_build_artifacts(repo_root_path: Path, mode: LlamaBuildMode) -> list[Path]:
     """Key build products used to detect staleness (not just llama-cli.exe)."""
-    base = repo_root / "external" / "llama.cpp" / _llama_build_dir(mode)
+    base = llama_cmake_build_dir(repo_root_path, mode=mode)
     rels = (
         "bin/Release/llama-cli.exe",
         "bin/Release/ggml-cpu.dll",
@@ -75,7 +86,7 @@ def _llama_build_artifacts(repo_root: Path, mode: LlamaBuildMode) -> list[Path]:
         p = _subpath(base, rel)
         if p.is_file():
             out.append(p)
-    cli = resolve_llama_cli_out(repo_root, mode=mode)
+    cli = resolve_llama_cli_out(repo_root_path, mode=mode)
     if cli is not None and cli not in out:
         out.append(cli)
     return out
@@ -93,15 +104,15 @@ def resolve_integrated_gyro_dll() -> Path:
     """Return the ggml CPU backend DLL that exports the Gyroscopic symbols."""
     root = repo_root()
     names = ("ggml-cpu.dll", "libggml-cpu.so", "libggml-cpu.dylib", "ggml-base.dll", "llama.dll")
-    for sub in ("build/bin/Release", "build/bin/Debug", "build/bin"):
-        base = _subpath(root / "external" / "llama.cpp", sub)
+    base = llama_cmake_build_dir(root, mode="gyroscopic")
+    for sub in ("bin/Release", "bin/Debug", "bin"):
         for name in names:
-            dll = base / name
+            dll = _subpath(base, f"{sub}/{name}")
             if dll.is_file():
                 return dll
     raise FileNotFoundError(
         "Integrated gyroscopic DLL not found (expected ggml-cpu). "
-        "Build external/llama.cpp with the gyroscopic backend first."
+        "Build into src/tools/gyroscopic/_build/llama-cpp first."
     )
 
 
@@ -120,7 +131,7 @@ def _llama_gyroscopic_build_inputs(repo_root: Path) -> list[Path]:
     out: list[Path] = []
     if gyroscopic.is_dir():
         out.extend(p for p in gyroscopic.glob("*.h") if p.is_file())
-        for name in ("kernel.c", "ledger.c", "attn.c", "codec.c"):
+        for name in ("kernel.c", "ledger.c", "attn.c", "codec.c", "layer.c", "runtime.c"):
             p = gyroscopic / name
             if p.is_file():
                 out.append(p)
@@ -159,7 +170,6 @@ def _llama_gyroscopic_build_inputs(repo_root: Path) -> list[Path]:
         out.append(llama_cli)
 
     for ps1 in (
-        repo_root / "scripts" / "build_llama_cpp_windows.ps1",
         repo_root / "src" / "tools" / "gyroscopic" / "helpers" / "build_llama_cpp_windows.ps1",
     ):
         if ps1.is_file():
@@ -182,7 +192,6 @@ def _llama_stock_build_inputs(repo_root: Path) -> list[Path]:
     if llama_cli.is_file():
         out.append(llama_cli)
     for ps1 in (
-        repo_root / "scripts" / "build_llama_cpp_windows.ps1",
         repo_root / "src" / "tools" / "gyroscopic" / "helpers" / "build_llama_cpp_windows.ps1",
     ):
         if ps1.is_file():
@@ -196,14 +205,17 @@ def _llama_build_inputs(repo_root: Path, mode: LlamaBuildMode) -> list[Path]:
     return _llama_gyroscopic_build_inputs(repo_root)
 
 
-def _resolve_llama_build_script_windows(repo_root: Path) -> Path | None:
-    for ps1 in (
-        repo_root / "scripts" / "build_llama_cpp_windows.ps1",
-        repo_root / "src" / "tools" / "gyroscopic" / "helpers" / "build_llama_cpp_windows.ps1",
-    ):
-        if ps1.is_file():
-            return ps1
-    return None
+def _resolve_llama_build_script_windows(repo_root_path: Path) -> Path | None:
+    # Official script lives under gyroscopic/helpers (writes into gyroscopic/_build).
+    ps1 = (
+        repo_root_path
+        / "src"
+        / "tools"
+        / "gyroscopic"
+        / "helpers"
+        / "build_llama_cpp_windows.ps1"
+    )
+    return ps1 if ps1.is_file() else None
 
 
 def _build_verbose() -> bool:
@@ -211,8 +223,10 @@ def _build_verbose() -> bool:
 
 
 def _should_print_build_line(line: str, *, verbose: bool) -> bool:
-    if verbose or not line:
-        return bool(line)
+    if not line:
+        return False
+    if verbose:
+        return True
     low = line.lower()
     if any(k in low for k in ("error", "failed", "fatal", "lnk1104", "cannot open file")):
         return True
@@ -284,10 +298,10 @@ def _run_llama_build_windows(repo_root: Path, mode: LlamaBuildMode) -> None:
     raise RuntimeError(msg)
 
 
-def _run_llama_build_unix(repo_root: Path, mode: LlamaBuildMode) -> None:
+def _run_llama_build_unix(repo_root_path: Path, mode: LlamaBuildMode) -> None:
     import shutil
 
-    llama = repo_root / "external" / "llama.cpp"
+    llama = repo_root_path / "external" / "llama.cpp"
     cm = llama / "CMakeLists.txt"
     if not cm.is_file():
         raise FileNotFoundError(f"Gyroscopic: missing {cm}")
@@ -295,27 +309,26 @@ def _run_llama_build_unix(repo_root: Path, mode: LlamaBuildMode) -> None:
     if not cmake:
         raise RuntimeError("Gyroscopic: cmake not found in PATH.")
 
-    build_dir = _llama_build_dir(mode)
+    build_dir = llama_cmake_build_dir(repo_root_path, mode=mode)
+    build_dir.mkdir(parents=True, exist_ok=True)
     if mode == "stock":
-        backend_subdir = "ggml-cpu"
         gyro_flag = "OFF"
     else:
-        backend_subdir = "ggml-gyroscopic"
         gyro_flag = "ON"
 
     nj = max(1, (os.cpu_count() or 4))
     cfg_cmd = [
         cmake,
+        "-S",
+        str(llama.resolve()),
         "-B",
-        build_dir,
+        str(build_dir.resolve()),
         "-DCMAKE_BUILD_TYPE=Release",
-        f"-DGGML_CPU_BACKEND_SUBDIR={backend_subdir}",
         f"-DGGML_GYROSCOPIC={gyro_flag}",
         "-DGGML_OPENMP=ON",
     ]
     cp1 = subprocess.run(
         cfg_cmd,
-        cwd=str(llama.resolve()),
         capture_output=True,
         text=True,
         errors="replace",
@@ -327,8 +340,7 @@ def _run_llama_build_unix(repo_root: Path, mode: LlamaBuildMode) -> None:
         )
 
     cp2 = subprocess.run(
-        [cmake, "--build", build_dir, "-j", str(nj)],
-        cwd=str(llama.resolve()),
+        [cmake, "--build", str(build_dir.resolve()), "-j", str(nj)],
         capture_output=True,
         text=True,
         errors="replace",

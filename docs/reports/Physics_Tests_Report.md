@@ -472,13 +472,13 @@ d is always in C64 (the mask code)
 
 The defect lies in C64 because q(b) = mask12(b) XOR correction, and both mask12(b) and the correction (0 or 0xFFF) are in the span of C64 as a linear code (0xFFF is the all-ones vector, which for the pair-diagonal code is the mask for micro_ref = 63, i.e., all 6 pairs set).
 
-This formula is the discrete analog of the continuous CGM result that the BU commutator defect is delta_BU = 0.1953 radians, and that this defect lives in the abelian U(1) residual.
+This formula is the discrete analog of the continuous CGM result that the BU dual-pole loop angle is δ_BU ≈ 0.195342178258 radians, and that this angle lives in the abelian U(1) residual.
 
 ---
 
 ## Part 9: CGM Constants Bridge (test_physics_5, Class 1)
 
-These constants are treated as intrinsic invariants of the CGM geometry: the kernel dynamics is constructed so that these relations hold identically, and the tests here verify that the implementation respects the theoretical equalities within numerical precision. Brief glosses: delta_BU is the minimal monodromy defect angle predicted by CGM (the smallest angular displacement produced by a single BU-stage transition). m_a is the aperture scale (the normalization constant relating angular defects to probability measures). Q_G = 4*pi is the quantum gravity horizon (total solid angle of a sphere).
+These constants are treated as intrinsic invariants of the CGM geometry: the kernel dynamics is constructed so that these relations hold identically, and the tests here verify that the implementation respects the theoretical equalities within numerical precision. Brief glosses: δ_BU is the BU dual-pole loop angle `4 · arctan(k(π/4) · k(m_a))`. m_a is the aperture scale (the normalization constant relating angular defects to probability measures). Q_G = 4*pi is the quantum gravity horizon (total solid angle of a sphere).
 
 ### 9.1 Fundamental Aperture Constraint
 
@@ -492,14 +492,14 @@ This is the normalization relation that connects the quantum gravity horizon (Q_
 
 ### 9.2 Fine-Structure Constant Prediction
 
-The intrinsic dimensionless coupling alpha is predicted as alpha = delta_BU^4 / m_a:
+The base electromagnetic kernel is α₀ = δ_BU⁴ / m_a:
 ```
-alpha_CGM = delta_BU^4 / m_a = (0.195342)^4 / 0.199471 = 0.007297352563
-alpha_exp = 0.0072973525693
-|alpha_CGM - alpha_exp| / alpha_exp < 4 * 10^{-4}
+alpha_0 = delta_BU^4 / m_a ≈ 0.007299683573
+alpha_exp (CODATA 2018) = 0.0072973525693
+|alpha_0 - alpha_exp| / alpha_exp ≈ 319.43 ppm
 ```
 
-Agreement to within 0.04% (400 ppm). The test uses a tolerance of 4e-4, which is satisfied. The CGM paper quotes 9-digit agreement, though the test uses the less precise stored value of delta_BU.
+Transport corrections in powers of Δ yield α ≈ 0.007297352816 (≈ 33.8 ppb vs CODATA 2018). The kernel bridge test uses a tolerance of 4e-4 on the α₀ comparison, which is satisfied. Source of truth for the closed-form δ_BU: `src/constants.py` (`bu_holonomy_angle`).
 
 ### 9.3 K_QG Identity
 
@@ -524,7 +524,7 @@ These ratios are verified to 12 decimal places, confirming that the stage thresh
 
 ### 9.5 Aperture Quantization Chain
 
-The continuous aperture gap maps to exact discrete approximants at the 8-bit and depth-4 scales (TestApertureQuantizationChain). The tests verify: 256 * APERTURE_GAP rounds to 5 (byte-scale horizon 5/256); 48 * APERTURE_GAP rounds to 1 (depth-4 aperture horizon 1/48); delta_BU/(2*pi) quantizes to 8/256 = 1/32 turn. This chain connects the continuous CGM constants to discrete byte-scale and depth-4-scale quantization.
+The continuous aperture gap maps to exact discrete approximants at the 8-bit and depth-4 scales (TestApertureQuantizationChain). The tests verify: 256 * APERTURE_GAP rounds to 5 (byte-scale horizon 5/256); 48 * APERTURE_GAP is near unity (depth-4 companion 1/48; 48·Δ ≈ 0.993578); delta_BU/(2*pi) quantizes to 8/256 = 1/32 turn. This chain connects the continuous CGM constants to discrete byte-scale and depth-4-scale quantization.
 
 ### 9.6 Monodromy Hierarchy
 

@@ -73,32 +73,87 @@ HQVM_EXPORT void hqvm_rope_codec_audit_report(void);
 HQVM_EXPORT void hqvm_rope_stock_inc(void);
 HQVM_EXPORT void hqvm_rope_codec_counters_get(uint64_t *codec_calls, uint64_t *stock_calls);
 
-/* ---- FFN shell gate (no SiLU) ---- */
+/* ---- FFN joint law (H7) ----
+ * Documented production L2 (Theory_Drop Runtime §4.1.2):
+ *   silu(gate)·up·(1+Δ·m)·(1+0.25Δ·m_req)
+ * Shell-only `up*simplex(λ^N)` is forbidden (discards controller magnitude).
+ * Product path remains exact stock SwiGLU until this opt-in face is enabled
+ * (`GYRO_FFN_NATIVE=1`, alias `GYRO_FFN_SHELL_GATE`) and Paris holds.
+ * Analysis §7.7 eventual shell-native nonlinearity is not a softstep hack.
+ */
 HQVM_EXPORT int hqvm_ffn_shell_gate_enabled(void);
+/* Alias: GYRO_FFN_NATIVE (same as hqvm_ffn_shell_gate_enabled). */
+HQVM_EXPORT int hqvm_ffn_native_enabled(void);
 HQVM_EXPORT void hqvm_ffn_shell_gate_init(void);
-HQVM_EXPORT void hqvm_ffn_shell_gate_apply(
+HQVM_EXPORT void hqvm_ffn_shell_gate_apply_native(
     float *dst, const float *gate, const float *up, int64_t n,
     uint8_t fam, uint8_t Nc);
 HQVM_EXPORT void hqvm_stock_silu_inc(void);
 HQVM_EXPORT uint64_t hqvm_stock_silu_calls(void);
 
-/* ---- SiLU codec ---- */
-#define HQVM_SILU_BINS 256
+/* ---- Integer-owned finite binary32 chart (native magnitude lane) ----
+ * hqvm_dyad32_t is the controller magnitude object. to_f32/from_f32 are chart
+ * adapters for stock interoperability — never proof that a site is native.
+ */
+typedef struct hqvm_dyad32 {
+    uint32_t bits;
+} hqvm_dyad32_t;
 
-HQVM_EXPORT void hqvm_silu_codec_init(void);
-HQVM_EXPORT void hqvm_silu_codec_init_range(float clip);
-HQVM_EXPORT int hqvm_silu_codec_enabled(void);
-HQVM_EXPORT void hqvm_silu_apply(float *x, int64_t n, float clip);
-HQVM_EXPORT void hqvm_swiglu_apply(
-    float *dst, const float *gate, const float *up, int64_t n, float clip);
-HQVM_EXPORT void hqvm_silu_codec_shadow(const float *x, int64_t n, float clip);
-HQVM_EXPORT void hqvm_swiglu_codec_shadow(
-    const float *gate, const float *up, int64_t n, float clip);
+/* Product faces (ex-hosting): Delta-ruler norm, YaRN RoPE ticks, FFN SwiGLU|L2. */
+#ifndef HQVM_HEAD_DIM
+#define HQVM_HEAD_DIM 128
+#endif
+HQVM_EXPORT int hqvm_norm_ruler_dyad(
+    const hqvm_dyad32_t * x_in,
+    hqvm_dyad32_t *       x_out,
+    int64_t               n,
+    const float *         g,
+    float                 g0);
+HQVM_EXPORT int hqvm_rope_qk_dyad(
+    hqvm_dyad32_t * Q,
+    hqvm_dyad32_t * K,
+    int32_t         n_heads,
+    int32_t         gqa_ratio,
+    int32_t         token_pos);
+HQVM_EXPORT int hqvm_ffn_gate_dyad(
+    const hqvm_dyad32_t * gate,
+    const hqvm_dyad32_t * up,
+    hqvm_dyad32_t *       dst,
+    int64_t               n,
+    uint8_t               fam,
+    uint8_t               Nc);
 
-/* ---- Aperture Norm / SiLU variants ---- */
-HQVM_EXPORT int hqvm_aperture_silu_enabled(void);
-HQVM_EXPORT void hqvm_aperture_rms_scale(float *row, int64_t n, float Delta);
-HQVM_EXPORT void hqvm_aperture_silu(float *row, int64_t n, float Delta);
+HQVM_EXPORT int hqvm_dyad32_is_finite(hqvm_dyad32_t x);
+HQVM_EXPORT int hqvm_dyad32_sign(hqvm_dyad32_t x);
+HQVM_EXPORT hqvm_dyad32_t hqvm_dyad32_abs(hqvm_dyad32_t x);
+HQVM_EXPORT int hqvm_dyad32_is_zero(hqvm_dyad32_t x);
+HQVM_EXPORT int hqvm_dyad32_from_i32(int32_t x, hqvm_dyad32_t *out);
+HQVM_EXPORT int hqvm_dyad32_add(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out);
+HQVM_EXPORT int hqvm_dyad32_mul(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out);
+HQVM_EXPORT int hqvm_dyad32_div(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out);
+HQVM_EXPORT int hqvm_dyad32_mul_rational(
+    hqvm_dyad32_t x, int32_t num, int32_t den, hqvm_dyad32_t *out);
+/* Chassis adapters copy the binary32 object representation; they do no arithmetic. */
+HQVM_EXPORT hqvm_dyad32_t hqvm_dyad32_from_f32(float x);
+HQVM_EXPORT float hqvm_dyad32_to_f32(hqvm_dyad32_t x);
+/* Exact integer magnitude * 2^exp2 packed as a dyad object (round-to-nearest-even). */
+HQVM_EXPORT int hqvm_dyad32_pack_i128(uint32_t sign, uint64_t sig, int exp2, hqvm_dyad32_t *out);
+
+/* Committed-chart access. */
+HQVM_EXPORT float hqvm_norm_rsqrt_mantissa(double mant);
+HQVM_EXPORT float hqvm_norm_commit_gain(float inv_gain);
+HQVM_EXPORT float hqvm_norm_weight_commuted(float w, float ref, float Delta);
+
+/* ---- Dyadic aperture / scale charts (F32 algebra closure) ---- */
+/* Residual mixer: gain = 1 + APERTURE_GAP * (Nc-3)/3 as num/den (den = 3<<16). */
+HQVM_EXPORT void hqvm_residual_gain_q16(uint8_t Nc, int32_t *num, int32_t *den);
+HQVM_EXPORT float hqvm_residual_gain_from_Nc(uint8_t Nc);
+/* Manifold MatMul gain: 1 + APERTURE_GAP * 0.5 * (s0+s1), s in {±1}; den = 1<<16. */
+HQVM_EXPORT void hqvm_manifold_gain_q16(
+    uint8_t chi_bit0, uint8_t p0, uint8_t chi_bit1, uint8_t p1,
+    int32_t *num, int32_t *den);
+HQVM_EXPORT float hqvm_manifold_gain_from_bits(
+    uint8_t chi_bit0, uint8_t p0, uint8_t chi_bit1, uint8_t p1);
 
 #ifdef __cplusplus
 }

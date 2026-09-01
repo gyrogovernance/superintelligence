@@ -317,7 +317,7 @@ The tests implicitly verify the discrete realization of the CGM constraints:
 - **ONA (Non-absolute opposition):** Dual horizons with |H| = 64, neither absolute
 - **BU (Balanced closure):** XYXY = id for all 65,536 pairs, b⁴ = id for all 256 bytes
 
-The aperture gap Δ ≈ 0.0207 appears in the shell structure as the imbalance between the complement horizon (shell 6, 64 states) and the equality horizon (shell 0, 64 states). The ratio 2/3 = chirality/space appears as the relationship between the 2-frame structure and the 3-axis structure of each 12-bit component.
+The aperture gap Δ ≈ 0.020699545503 appears in the shell structure as the imbalance between the complement horizon (shell 6, 64 states) and the equality horizon (shell 0, 64 states). The ratio 2/3 = chirality/space appears as the relationship between the 2-frame structure and the 3-axis structure of each 12-bit component.
 
 ---
 
@@ -325,7 +325,7 @@ The aperture gap Δ ≈ 0.0207 appears in the shell structure as the imbalance b
 
 For completeness, areas where the test suite could be extended:
 
-- **Non-Clifford certification:** The δ_BU monodromy defect and Wigner negativity tests are covered in hQVM_Tests_Report_1.md, Part 10.
+- **Non-Clifford certification:** The δ_BU loop angle and Wigner negativity tests are covered in hQVM_Tests_Report_1.md, Part 10.
 - **Exact tamper detection rates:** The 1/255 substitution miss rate and ~3/255 swap miss rate are stated but not tested here
 - **Benchmark timing:** The classical-vs-hQVM step counts for the claimed advantages are proven structurally but not timed
 - **Spectral chart duality:** The Walsh-Hadamard transform on actual chirality state vectors (as opposed to random test vectors) is not tested for its dual-basis interpretation

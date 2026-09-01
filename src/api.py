@@ -404,7 +404,7 @@ def word_signature(items: Iterable[ByteItem]) -> WordSignature:
                 n += 1
         else:
             s = step_state_by_byte(s, int(item) & UINT8_MASK)
-        n += 1
+            n += 1
     tau_a12, tau_b12 = unpack_state(s)
     return WordSignature(
         parity=n & 1,

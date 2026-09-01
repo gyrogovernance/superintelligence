@@ -57,27 +57,29 @@ def _defaults_dict() -> dict[str, Any]:
 
 
 def _default_llama_cli_candidates(*, backend: str = "gyroscopic") -> list[Path]:
-    """Typical CMake output locations for ``llama-cli`` (build from ``external/llama.cpp``)."""
+    """CMake output under ``src/tools/gyroscopic/_build`` (never repo-root ``_build``)."""
     root = repo_root()
-    build_dir = "build-stock" if backend == "stock" else "build"
+    build_name = "llama-cpp-stock" if backend == "stock" else "llama-cpp"
+    base = root / "src" / "tools" / "gyroscopic" / "_build" / build_name / "bin"
     if sys.platform == "win32":
         return [
-            root / "external" / "llama.cpp" / build_dir / "bin" / "Release" / "llama-cli.exe",
-            root / "external" / "llama.cpp" / build_dir / "bin" / "Debug" / "llama-cli.exe",
-            root / "external" / "llama.cpp" / build_dir / "bin" / "llama-cli.exe",
+            base / "Release" / "llama-cli.exe",
+            base / "Debug" / "llama-cli.exe",
+            base / "llama-cli.exe",
         ]
-    return [root / "external" / "llama.cpp" / build_dir / "bin" / "llama-cli"]
+    return [base / "llama-cli"]
 
 
 def _default_llama_perplexity_candidates() -> list[Path]:
     root = repo_root()
+    base = root / "src" / "tools" / "gyroscopic" / "_build" / "llama-cpp" / "bin"
     if sys.platform == "win32":
         return [
-            root / "external" / "llama.cpp" / "build" / "bin" / "Release" / "llama-perplexity.exe",
-            root / "external" / "llama.cpp" / "build" / "bin" / "Debug" / "llama-perplexity.exe",
-            root / "external" / "llama.cpp" / "build" / "bin" / "llama-perplexity.exe",
+            base / "Release" / "llama-perplexity.exe",
+            base / "Debug" / "llama-perplexity.exe",
+            base / "llama-perplexity.exe",
         ]
-    return [root / "external" / "llama.cpp" / "build" / "bin" / "llama-perplexity"]
+    return [base / "llama-perplexity"]
 
 
 @dataclass(frozen=True)
@@ -189,7 +191,7 @@ def resolve_gguf_path(cfg: GyroscopicLLMConfig) -> Path:
 def resolve_llama_cli_path(cfg: GyroscopicLLMConfig, *, backend: str = "gyroscopic") -> Path:
     """Resolve the ``llama-cli`` executable (native C backend).
 
-    ``backend`` is ``"stock"`` (vanilla ``build-stock``) or ``"gyroscopic"`` (``build``).
+    ``backend`` is ``"stock"`` (``_build/llama-cpp-stock``) or ``"gyroscopic"`` (``_build/llama-cpp``).
     """
     root = repo_root()
     if cfg.llama_cli_path and backend == "gyroscopic":
@@ -206,11 +208,13 @@ def resolve_llama_cli_path(cfg: GyroscopicLLMConfig, *, backend: str = "gyroscop
         if c.is_file():
             return c
     build_hint = (
-        "build-stock (stock)" if backend == "stock" else "build (gyroscopic)"
+        "src/tools/gyroscopic/_build/llama-cpp-stock"
+        if backend == "stock"
+        else "src/tools/gyroscopic/_build/llama-cpp"
     )
     raise FileNotFoundError(
         "gyroscopic_llm: llama-cli not found for "
-        f"{backend} backend. Build external/llama.cpp/{build_hint} "
+        f"{backend} backend. Build into {build_hint} "
         "or set GYROSCOPIC_LLAMA_CLI. Tried:\n  " + "\n  ".join(tried)
     )
 
@@ -276,20 +280,26 @@ def production_gyroscopic_env(
         env["GYRO_HOLONOMIC_ATTN"] = "1"
     if holonomic_kv and not incomplete_forward:
         env["GYRO_NATIVE_FORWARD"] = "1"
+        env["GYRO_NATIVE_EMISSION"] = "1"
         env["GYRO_ATTN_SHELL_QK"] = "1"
-        env["GYRO_FFN_SHELL_GATE"] = "1"
+        # H5/H6/H7: dyad×Q8 scores, dyad×Q8 V-reduce, FFN L2 joint law (Paris held).
+        env["GYRO_NATIVE_ATTN_SCORES"] = "1"
+        # Documented FFN L2 joint law (Theory_Drop §4.1.2); Paris held with opt-in.
+        env["GYRO_FFN_NATIVE"] = "1"
+        # Analysis §7.3 dyad×Q8 V-reduce; Paris held.
+        env["GYRO_NATIVE_VREDUCE"] = "1"
         env["GYRO_NORM_COMMIT"] = "1"
         env["GYRO_ROPE_CODEC"] = "1"
         env["GYRO_CGM_LIFT"] = "1"
         env["GYRO_RESIDUAL_LAW"] = "1"
+        env["GYRO_PI_FROM_EMBD"] = "1"
         # Bonsai-8B-Q1_0 is Qwen3 (GGUF qwen3.rope.freq_base=1e6, yarn×4 → freq_scale=0.25).
         env["GYRO_ROPE_FREQ_BASE"] = "1000000"
         env["GYRO_ROPE_FREQ_SCALE"] = "0.25"
     if incomplete_forward:
-        env["GYRO_APERTURE_SOFTMAX"] = "1"
+        # Causal-gate stress path (no native forward); not product holonomic.
         env["GYRO_ROPE_CODEC"] = "1"
-        env["GYRO_SILU_CODEC"] = "1"
         env["GYRO_CGM_LIFT"] = "1"
         env["GYRO_RESIDUAL_LAW"] = "1"
-        env["GYRO_RESIDUAL_HYBRID"] = "1"  # deprecated alias
+        # Do not set GYRO_RESIDUAL_HYBRID (deprecated alias of GYRO_RESIDUAL_LAW).
     return env

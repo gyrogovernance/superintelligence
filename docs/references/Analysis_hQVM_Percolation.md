@@ -6,7 +6,7 @@
 
 **Reproducibility:** `experiments/hqvm_percolation_analysis_results.txt` and `experiments/hqvm_percolation_analysis_5_results.txt`. Scripts and protocol: Appendix B. Cross-references to `docs/Findings/Analysis_Gravity.md` denote the full findings manuscript (Sections 1 through 8 and Appendices A through H), not the shorter Gravity Note unless explicitly cited.
 
-**Subject classes (arXiv-style):** math-ph; cs.LG; cs.IT; math.PR; math.CO; cs.AI
+**Subject classes:** math-ph; cs.LG; cs.IT; math.PR; math.CO; cs.AI
 
 **Keywords:** Common Governance Model, generator-restricted percolation, GF(2) transport rank, finite transformation semigroups, exact enumeration benchmark, matroid rank, coding theory, mechanistic interpretability, representation learning ground truth, mathematical physics
 
@@ -110,7 +110,7 @@ The factor H is the constitutional horizon, the 64-element boundary set that mus
 
 ### 1.5 The hQVM Kernel
 
-The executable kernel studied here is the Holonomic Quantum Virtual Machine (hQVM). Its reachable state set Omega contains 4096 carrier states. Connectivity is fixed by the CGM transition rule. Kernel invariants of the state space are verified on all 4096 states in [hQVM Features Report](docs/reports/hQVM_Features_Report.md).
+The executable kernel studied here is the Holonomic Quantum Virtual Machine (hQVM). Its reachable state set Omega contains 4096 carrier states. Connectivity is fixed by the CGM transition rule. Kernel invariants of the state space are verified on all 4096 states in [hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md).
 
 The hQVM is the minimal finite realization of the CGM conditions: a two-face 24-bit carrier updated by byte operators on a 256-symbol alphabet. Section 2 gives the state-space layout, byte classification, and canonical word operators.
 
@@ -169,9 +169,9 @@ Beyond its role in the CGM programme, this system supports supervised benchmark 
 
 Research on learned representations relies on synthetic datasets whose generative structure is known in full, so a probing method can be scored against enumerated ground truth. Statistical percolation at criticality carries a familiar difficulty: the target structure is subtle, models can fit spurious correlates, and verifying which correlate a probe has detected is itself hard. This kernel avoids that ambiguity for its own labels because every reachable set, shell profile, and coverage flag is computed by enumeration on 4096 states.
 
-The testbed has four structural properties relevant to such evaluations. First, labels are exact by census, not by sampling. Second, the hidden mechanistic variable is GF(2) transport rank, with a closed-form map to cluster size under fiber-complete restriction, derived from the axiomatic kernel verified across tiered feature gates ([hQVM Features Report](docs/reports/hQVM_Features_Report.md)). Third, the latent computation follows a fixed chain: allowed bytes determine transport values, their span defines rank r(A), and |Reach(A)| = (2^r(A))^2. A model trained on membership vectors to predict cluster size could satisfy the labels by counting active generators or by reconstructing the span; Appendix A.1 separates those routes with size-controlled strata. Fourth, a built-in dynamics shuffle preserves marginal label statistics while replacing the label-to-dynamics map (Appendix A.2), giving a matched-pair control for mechanism-versus-correlate studies. Training models, running probes, and reporting interpretability outcomes remain outside the scope of this percolation study.
+The testbed has four structural properties relevant to such evaluations. First, labels are exact by census, not by sampling. Second, the hidden mechanistic variable is GF(2) transport rank, with a closed-form map to cluster size under fiber-complete restriction, derived from the axiomatic kernel verified across tiered feature gates ([hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md)). Third, the latent computation follows a fixed chain: allowed bytes determine transport values, their span defines rank r(A), and |Reach(A)| = (2^r(A))^2. A model trained on membership vectors to predict cluster size could satisfy the labels by counting active generators or by reconstructing the span; Appendix A.1 separates those routes with size-controlled strata. Fourth, a built-in dynamics shuffle preserves marginal label statistics while replacing the label-to-dynamics map (Appendix A.2), giving a matched-pair control for mechanism-versus-correlate studies. Training models, running probes, and reporting interpretability outcomes remain outside the scope of this percolation study.
 
-Under fiber-incomplete restriction, identical cluster cardinalities can arise from different transport spans (Section 3.5), so cluster size alone does not determine the generating set. The fiber structure of Section 2.6 makes the point at the generator level: four bytes share one transport value and are indistinguishable from the chirality register alone, so transport measurement alone does not identify which generator acted. This many-to-one map from generators to observables corresponds to the structure interpretability research calls superposition, where one measured quantity is consistent with more than one underlying feature. The same code family also carries a verified Hilbert-space lift with graph-state factorization into Bell pairs and CHSH values at the Tsirelson bound ([hQVM Features Report](docs/reports/hQVM_Features_Report.md), Formal Quantum Certification). Whether methods applied to models trained on Appendix A tasks recover transport rank or only squared cluster observables remains an open evaluation question.
+Under fiber-incomplete restriction, identical cluster cardinalities can arise from different transport spans (Section 3.5), so cluster size alone does not determine the generating set. The fiber structure of Section 2.6 makes the point at the generator level: four bytes share one transport value and are indistinguishable from the chirality register alone, so transport measurement alone does not identify which generator acted. This many-to-one map from generators to observables corresponds to the structure interpretability research calls superposition, where one measured quantity is consistent with more than one underlying feature. The same code family also carries a verified Hilbert-space lift with graph-state factorization into Bell pairs and CHSH values at the Tsirelson bound ([hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md), Formal Quantum Certification). Whether methods applied to models trained on Appendix A tasks recover transport rank or only squared cluster observables remains an open evaluation question.
 
 Transport rank is collective: no single byte carries it, and the parity obstruction in Section 3.4 gives large alphabets with matched local byte statistics but different global reachability. Byte operators and canonical words share the same 256 generators yet produce different reachability regimes at different composition depth (Section 4.1). Shell reflection s maps to 6 - s is global, while word-level confinement depends on the start anchor; Appendix A.4 states two hypotheses about how a trained model might represent that anchor dependence. These patterns are candidates for structural comparison with context-dependent behavior in learned systems; the appendix tasks specify how to test them.
 
@@ -240,7 +240,7 @@ The transition is a discrete gyrogroup composition in which the L-step applies t
 
 ### 2.4 CGM Stage Labels in the Byte
 
-The Common Governance Model names four stages in the constitutional update cycle: **CS** (Common Source), **UNA** (Unity Non-Absolute), **ONA** (Opposition Non-Absolute), and **BU** (Balance Universal). In the hQVM kernel these names label positions in the 8-bit intron after transcription and in the two-step byte transition. The mapping from stage to bit positions follows [hQVM Specs Formalism](docs/specs/hQVM_Specs_Formalism.md), Sections 1 and 2.
+The Common Governance Model names four stages in the constitutional update cycle: **CS** (Common Source), **UNA** (Unity Non-Absolute), **ONA** (Opposition Non-Absolute), and **BU** (Balance Universal). In the hQVM kernel these names label positions in the 8-bit intron after transcription and in the two-step byte transition. The mapping from stage to bit positions follows [hQVM Specs Formalism](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md), Sections 1 and 2.
 
 | CGM stage | Gyrogroup bit pair | Intron positions | Role in one byte step |
 |-----------|-------------------|------------------|------------------------|
@@ -253,7 +253,7 @@ Each byte implements one [L][R] modal step. The L-step applies the mask (UNA con
 
 ### 2.5 Byte Classification Axes
 
-The CGM fiber-bundle structure of the byte provides multiple classification axes ([hQVM Specs Formalism](docs/specs/hQVM_Specs_Formalism.md), Sections 2 through 4).
+The CGM fiber-bundle structure of the byte provides multiple classification axes ([hQVM Specs Formalism](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md), Sections 2 through 4).
 
 **Family** (2 boundary bits, positions 0 and 7 of the intron). Four families of 64 bytes each, corresponding to the four elements of the K4 gauge group, namely id for family 00, S for family 01, C for family 10, and F for family 11.
 
@@ -283,7 +283,7 @@ A **micro-reference** is the six-bit payload index in the byte (intron bits 1 th
 
 Canonical word operators compose bytes into closed invariants. From `docs/Findings/Analysis_hQVM_Wavefunction.md`, Theorems T1 through T10:
 
-**Modal depth convention.** One byte implements one [L][R] pair (modal depth 2). W2 and W2' are two-byte half-words (modal depth 4). F = W2 then W2' is a four-byte full word (modal depth 8).
+**Word length convention.** One byte implements one [L][R] pair (modal depth 2). W2 and W2' are two-byte half-words (modal depth 4). F = W2 then W2' is the four-byte operator product of those half-words.
 
 **W2(m).** Two-byte half-word [byte(fam 00, m), byte(fam 01, m)] at modal depth 4. Involution mapping shell s to 6 - s (Theorem T2).
 
@@ -471,7 +471,7 @@ From horizon anchors, word dynamics visits only the two constitutional horizons.
 
 ### 4.2 Exact Deterministic Reachability (Byte Regime)
 
-Exact deterministic reachability from the rest state for structured generator restrictions follows from breadth-first search to depth 12. Depth 12 exceeds the longest canonical word path (modal depth 8 for F) and accommodates restricted semigroups that need more than two steps without saturating early. Supplementary deterministic checks are indexed in Appendix B.
+Exact deterministic reachability from the rest state for structured generator restrictions follows from breadth-first search to depth 12. Depth 12 exceeds the longest canonical word path (the four-byte word F) and accommodates restricted semigroups that need more than two steps without saturating early. Supplementary deterministic checks are indexed in Appendix B.
 
 #### 4.2.1 Family Restrictions
 
@@ -719,7 +719,7 @@ Among 5000 random byte pairs, 205 pairs achieve constitutional spanning. Same-fa
 
 ### 4.6 Payload-Axis Sweeps
 
-The hQVM 24-bit carrier unpacks to a 2 x 3 x 2 tensor with six oriented dipole pairs ([hQVM Specs Formalism](docs/specs/hQVM_Specs_Formalism.md), Section 2.1). Three pairs in Frame 0 correspond to rotational generators of se(3). Three pairs in Frame 1 correspond to translational generators. CGM derives six operational degrees of freedom at the ONA stage as the se(3) Lie algebra SE(3) = SU(2) semidirect R^3. Each payload bit flips one dipole pair, executing a discrete pi-rotation around the corresponding generator.
+The hQVM 24-bit carrier unpacks to a 2 x 3 x 2 tensor with six oriented dipole pairs ([hQVM Specs Formalism](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md), Section 2.1). Three pairs in Frame 0 correspond to rotational generators of se(3). Three pairs in Frame 1 correspond to translational generators. CGM derives six operational degrees of freedom at the ONA stage as the se(3) Lie algebra SE(3) = SU(2) semidirect R^3. Each payload bit flips one dipole pair, executing a discrete pi-rotation around the corresponding generator.
 
 The three payload-axis labels are **LI** (Left Inverse, intron bit pairs 1 and 6), **FG** (Forward Gyration, pairs 2 and 5), and **BG** (Backward Gyration, pairs 3 and 4). Each axis sweep includes the 48 micro-reference groups whose payload touches that axis (192 bytes total per axis).
 
@@ -749,7 +749,7 @@ The three modes yield thresholds within approximately 0.006 of each other. Spino
 
 ### 4.8 Horizon-Stabilizer Percolation
 
-The four holonomic gate bytes HORIZON_GATE_BYTES = {0xAA, 0x54, 0xD5, 0x2B} are the unique bytes that preserve every complement-horizon state and every equality-horizon state in one step (Feature 121 in [hQVM Features Report](docs/reports/hQVM_Features_Report.md)). This census identifies the set of one-step horizon stabilizers on all 64 states of each horizon.
+The four holonomic gate bytes HORIZON_GATE_BYTES = {0xAA, 0x54, 0xD5, 0x2B} are the unique bytes that preserve every complement-horizon state and every equality-horizon state in one step (Feature 121 in [hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md)). This census identifies the set of one-step horizon stabilizers on all 64 states of each horizon.
 
 Breadth-first search from all 64 complement-horizon states using only these four bytes reaches 64 states with E_horizon_confined = True.
 
@@ -817,7 +817,7 @@ Structured probe words from `docs/Findings/Analysis_hQVM_Wavefunction.md` Sectio
 |-------|------:|------------|------------|
 | canonical F | 2 | No | 0 |
 | canonical 4-fam W2 | 128 | No | 64 |
-| canonical F^2 (depth-8) | 1 | No | 0 |
+| canonical F^2 (Z₂ return) | 1 | No | 0 |
 | same-fam 00 | 1 | No | 0 |
 | same-fam 11 | 1 | No | 0 |
 | reverse fam order | 2 | No | 0 |
@@ -879,7 +879,7 @@ Three observables measure how completely the transport root is populated beyond 
 
 Table 15. Curvature spectrum completion versus byte fraction. p_c approximately 0.0544 (about 13.9 expected bytes, part 2 Section 5).
 
-**Channel isotropy.** From rest, H1(p) is the Shannon entropy of the one-step next-state distribution when a byte is chosen uniformly from the allowed generator set. The full generator set gives H1 = 7 (Features 77 through 79 in [hQVM Features Report](docs/reports/hQVM_Features_Report.md)).
+**Channel isotropy.** From rest, H1(p) is the Shannon entropy of the one-step next-state distribution when a byte is chosen uniformly from the allowed generator set. The full generator set gives H1 = 7 (Features 77 through 79 in [hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md)).
 
 | p | E[H1] | E[\|R1\|] |
 |---|-------|-----------|
@@ -951,16 +951,16 @@ The aperture Delta generalizes across the hQVM(d) family. The mean byte-level fo
 Delta(d) = 1/(8d)
 ```
 
-so that 8d times Delta(d) equals 1 exactly at every d. At d = 6 this gives Delta(6) = 1/48 = 0.020833, close to but distinct from the continuum CGM aperture Delta = 0.020700 used in the comparison below; the two differ by about 6 * 10^-4, a resolution-scale distinction already discussed in the wavefunction analysis (Analysis_hQVM_Wavefunction.md, Sections 16.5 through 16.7) and not reopened here.
+so that 8d times Delta(d) equals 1 exactly at every d. At d = 6 this gives Delta(6) = 1/48 = 0.020833, close to but distinct from the continuum CGM aperture Delta ≈ 0.020699545503 used in the comparison below; the two differ by about 6 * 10^-4, a resolution-scale distinction already discussed in the wavefunction analysis (Analysis_hQVM_Wavefunction.md, Sections 16.5 through 16.7) and not reopened here.
 
-CGM dimensionless constants were compared to empirically determined thresholds. The aperture gap Delta = 0.0207 is the residual informational aperture after depth-4 spinorial closure of byte-level fold disagreements (`docs/Findings/Analysis_hQVM_Wavefunction.md`, Sections 16.5 through 16.7). It equals 1 - rho to leading order, with rho the closure ratio, and matches the holonomic ratio delta_BU / m_a from `docs/Findings/Analysis_Monodromy.md`.
+CGM dimensionless constants were compared to empirically determined thresholds. The aperture gap Delta = 1 - rho ≈ 0.020699545503 is the residual informational aperture after depth-4 spinorial closure of byte-level fold disagreements (`docs/Findings/Analysis_hQVM_Wavefunction.md`, Sections 16.5 through 16.7). Here rho = delta_BU / m_a with delta_BU = 4*arctan(k(pi/4)*k(m_a)) from `docs/Findings/Analysis_Holonomy.md`.
 
 | Constant | Value |
 |----------|-------|
-| Delta (aperture gap) | 0.02070 |
-| 1/48 (geometric quantization) | 0.02083 |
-| 5/256 (dyadic approximant) | 0.01953 |
-| m_a (observational aperture) | 0.19947 |
+| Delta (aperture gap) | 0.020699545503 |
+| 1/48 (geometric quantization) | 0.020833 |
+| 5/256 (dyadic approximant) | 0.019531 |
+| m_a (observational aperture) | 0.199471140200 |
 
 Table 19. CGM constants for threshold comparison.
 
@@ -989,17 +989,17 @@ The weak byte-fraction threshold p_c approximately 0.022 for E_span tracks aggre
 
 ## 6. Structural Completeness Under Restriction
 
-The structural layer completes the CGM-native percolation observables under generator restriction, covering commutation structure, the U x V coset factorization, shell composition of reachable sets, permutation-class percolation, geometric porosity, plaquette defects, shell transition spectra, and the counting identity under partial restriction. Monte Carlo sample count n = 150 through 200 per sweep unless noted. Rows at p = 1.0 are the full-generator-set limit and match kernel invariants reported in [hQVM Features Report](docs/reports/hQVM_Features_Report.md).
+The structural layer completes the CGM-native percolation observables under generator restriction, covering commutation structure, the U x V coset factorization, shell composition of reachable sets, permutation-class percolation, geometric porosity, plaquette defects, shell transition spectra, and the counting identity under partial restriction. Monte Carlo sample count n = 150 through 200 per sweep unless noted. Rows at p = 1.0 are the full-generator-set limit and match kernel invariants reported in [hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md).
 
 ### 6.1 Commutation and Q-Diversity
 
-Bytes x and y commute on Omega if and only if q6(x) = q6(y) (Features 68 through 76 in [hQVM Features Report](docs/reports/hQVM_Features_Report.md)). Exhaustive enumeration yields 1024 commuting ordered pairs out of 65536 (rate 1/64).
+Bytes x and y commute on Omega if and only if q6(x) = q6(y) (Features 68 through 76 in [hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md)). Exhaustive enumeration yields 1024 commuting ordered pairs out of 65536 (rate 1/64).
 
 Each Q6 transport class contains exactly four bytes, one per family. Deterministic reachability from rest with a single q-class alphabet never exceeds 8 states, and exhaustive census over all 64 transport classes confirms that maximum. Monte Carlo at p at least 0.1 gives P(full) = 0 for single-q-class subsets and P(full) = 1 for independent byte inclusion. Q-diversity across transport classes fills the transport root, matching the rank condition r(A) = 6.
 
 ### 6.2 U x V Coset Factorization and Rectangularity
 
-Omega has product structure Omega = U x V with |U| = |V| = 64 C64 cosets ([hQVM Features Report](docs/reports/hQVM_Features_Report.md)). Under random byte subsets from rest, both marginals saturate by p = 0.10, where E[|U_hit|] = E[|V_hit|] = 64 and P(full) = 1. At p = 0.05, E[|U_hit|] approximately 63 and P(full) approximately 0.94. Full-Omega reachability implies simultaneous saturation of both coset factors. Partial marginals at low p track the bulk percolation transition.
+Omega has product structure Omega = U x V with |U| = |V| = 64 C64 cosets ([hQVM Features Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md)). Under random byte subsets from rest, both marginals saturate by p = 0.10, where E[|U_hit|] = E[|V_hit|] = 64 and P(full) = 1. At p = 0.05, E[|U_hit|] approximately 63 and P(full) approximately 0.94. Full-Omega reachability implies simultaneous saturation of both coset factors. Partial marginals at low p track the bulk percolation transition.
 
 Beyond marginal coverage, define rectangularity
 
@@ -1055,7 +1055,7 @@ Exhaustive search over all 2^7 boundary masks confirms that full Omega requires 
 
 At full generator set, every boundary has porosity pi_j = 0.75 and blockage fraction 1 - pi_j = 0.25 under the connection 1-form definition above.
 
-Delta = 0.0207 indexes aggregate restriction of the BU-fold triple {ONA|BU, BU|BU, BU|ONA} under simultaneous closure. The weak spanning event E_span at byte fraction p_c approximately 0.022 is the percolation onset of the same BU-fold geometry.
+Delta ≈ 0.020699545503 indexes aggregate restriction of the BU-fold triple {ONA|BU, BU|BU, BU|ONA} under simultaneous closure. The weak spanning event E_span at byte fraction p_c approximately 0.022 is the percolation onset of the same BU-fold geometry.
 
 ### 6.6 Plaquette Loop Defect
 

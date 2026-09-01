@@ -90,6 +90,14 @@ def build_llama_cli_command(
         "-p", prompt,
         "--no-display-prompt",
         "--single-turn",
+        # Product acceptance is greedy exactness (H-EMIT: temp=0, top_k=1).
+        "--temp", "0",
+        "--top-k", "1",
+        "--seed", "1",
+        # Bonsai is Qwen3-family; keep reasoning mode explicit so greedy
+        # exactness compares against the same template regime as run_bonsai.
+        "--reasoning",
+        "off",
     ]
     if cfg.verbose:
         args.append("-v")

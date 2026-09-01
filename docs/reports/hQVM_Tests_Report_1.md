@@ -591,17 +591,23 @@ The entangling power of the byte algebra operates between the A and B manifolds 
 
 ## Part 10: The Non-Clifford Resource δ_BU
 
-### 10.1 The CGM Monodromy Defect
+### 10.1 The CGM Dual-Pole Loop Angle
 
-The Common Governance Model derives a representation-independent constant from the depth-4 closure condition: the BU monodromy defect δ_BU = 0.195342176580 radians. This is the residual geometric phase of the dual-pole loop in the BU stage of the CGM framework.
-
-The ratio δ_BU / m_a = 0.9793, where m_a = 1/(2√(2π)) is the CGM aperture scale, yields the canonical aperture:
+The Common Governance Model derives a representation-independent constant from the depth-4 closure condition: the BU dual-pole loop angle
 
 ```
-Δ = 1 − δ_BU/m_a = 0.020699553913   (≈ 2.07%)
+δ_BU = 4 · arctan(k(π/4) · k(m_a)) ≈ 0.195342178258
 ```
 
-The same constant, raised to the fourth power and normalised by m_a, yields the fine-structure constant α = δ_BU⁴/m_a = 0.007297352563 (matching experiment to nine significant digits; confirmed in the Physics Tests Report, Part 9.2).
+with Poincaré half-rapidity radius k(β) = β / (1 + √(1 − β²)). This is the residual geometric phase of the dual-pole loop in the BU stage of the CGM framework.
+
+The ratio ρ = δ_BU / m_a ≈ 0.979300454497, where m_a = 1/(2√(2π)) is the CGM aperture scale, yields the canonical aperture:
+
+```
+Δ = 1 − δ_BU/m_a ≈ 0.020699545503   (≈ 2.07%)
+```
+
+The base electromagnetic kernel is α₀ = δ_BU⁴/m_a ≈ 0.007299683573. Transport corrections in powers of Δ yield α ≈ 0.007297352816 (≈ 33.8 ppb vs CODATA 2018; confirmed in the Physics Tests Report, Part 9.2).
 
 ### 10.2 Distance from Clifford Angles
 
@@ -625,11 +631,11 @@ Clifford operations (Hadamard, phase, CNOT) form a finite group and are efficien
 
 `test_hQVM_4.py::TestNonCliffordAndUniversality::test_high_order_non_periodicity` verifies:
 
-The rotation R(δ_BU) does not return to identity for any k ≤ 100,000. The closest return is at k = 22,805, distance 4.59 × 10^(−5) rad (non-negligible: the ratio to 2π/100000 is 0.73). This confirms the absence of low-order periodicity.
+The rotation R(δ_BU) does not return to identity for any k ≤ 100,000. The closest return is at k = 22,805, distance 7.62 × 10^(−6) rad. This confirms the absence of low-order periodicity.
 
 `test_hQVM_4.py::TestNonCliffordAndUniversality::test_dense_phase_equidistribution` verifies:
 
-The phase sequence {k × δ_BU mod 2π : k = 1, …, 50000} equidistributes over [0, 2π). Binned into 100 equal intervals: range [498, 502] against an expected 500, chi-squared = 0.212 against a critical value of 142.4. This confirms that R(δ_BU) generates a dense subgroup of U(1), which is a necessary condition for the Solovay-Kitaev approximation theorem.
+The phase sequence {k × δ_BU mod 2π : k = 1, …, 50000} equidistributes over [0, 2π). Binned into 100 equal intervals against an expected 500, chi-squared = 0.232 against a critical value of 142.4. This confirms that R(δ_BU) generates a dense subgroup of U(1), which is a necessary condition for the Solovay-Kitaev approximation theorem.
 
 ### 10.4 Magic State and Negative Wigner Function
 
@@ -652,11 +658,11 @@ W(0,1) is negative. Negative Wigner function values certify a state as a non-sta
 `test_hQVM_4.py::TestNonCliffordAndUniversality::test_aperture_as_universality_window` confirms:
 
 ```
-|δ_BU − m_a| = 0.004128963621
-Δ × m_a     = 0.004128963621   (exact equality)
+|δ_BU − m_a| ≈ 0.004128961943
+Δ × m_a      ≈ 0.004128961943   (exact equality)
 ```
 
-The aperture gap Δ measures the normalised distance between δ_BU and m_a. If Δ were zero, the monodromy defect and aperture scale would coincide. The non-zero aperture guarantees that δ_BU generates a dense U(1) subgroup distinct from any structure associated with the aperture scale alone.
+The aperture gap Δ measures the normalised distance between δ_BU and m_a. If Δ were zero, the loop angle and aperture scale would coincide. The non-zero aperture guarantees that δ_BU generates a dense U(1) subgroup distinct from any structure associated with the aperture scale alone.
 
 The byte-scale quantisation of the aperture is 5/256 ≈ 0.01953, and the depth-4 quantisation is 1/48 ≈ 0.02083 (confirmed in the Physics Tests Report, Part 9.5).
 

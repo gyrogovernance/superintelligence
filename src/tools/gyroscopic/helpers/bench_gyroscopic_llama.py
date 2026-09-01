@@ -1,4 +1,4 @@
-"""Gyroscopic LLM benchmark — stock vs gyroscopic backend at KV-relevant scale.
+"""Gyroscopic LLM benchmark  stock vs gyroscopic backend at KV-relevant scale.
 
 Measures generation throughput (ms/token), prompt/decode timing, and confirms
 the gyroscopic backend (ggml-gyroscopic copy + kernel.c linked) builds and
@@ -9,8 +9,8 @@ Current integration is a separate, contract-correct design (analysis_NavPAD
 7.2 / Runtime Spec 17) and is NOT exercised here. This bench only
 proves the two backends are at parity for the forward pass.
 
-  stock      = build-stock (vanilla ggml-cpu)
-  gyroscopic = build (ggml-gyroscopic + kernel.c, no blend hook)
+  stock      = _build/llama-cpp-stock (vanilla ggml-cpu)
+  gyroscopic = _build/llama-cpp (ggml-gyroscopic + kernel.c, no blend hook)
 
 Usage:
   python -m src.tools.gyroscopic.helpers.bench_gyroscopic_llama
@@ -159,8 +159,9 @@ def _gyro_env() -> dict[str, str]:
 
 
 def _assert_gyro_exe(exe: Path) -> None:
-    if "build-stock" in str(exe.resolve()).replace("\\", "/").lower():
-        raise RuntimeError(f"gyroscopic bench must not use build-stock llama-cli, got: {exe}")
+    path = str(exe.resolve()).replace("\\", "/").lower()
+    if "llama-cpp-stock" in path or path.endswith("/build-stock/") or "/build-stock/" in path:
+        raise RuntimeError(f"gyroscopic bench must not use stock llama-cli, got: {exe}")
 
 
 # ---------------------------------------------------------------------------
@@ -487,8 +488,8 @@ def print_report(results, meta, *, verbose):
 
 def _print_plain_summary(results, meta):
     print("\n--- What this means ---")
-    print("  Stock = vanilla ggml-cpu (build-stock).")
-    print("  Gyroscopic = ggml-gyroscopic backend (kernel.c linked, no blend hook).")
+    print("  Stock = vanilla ggml-cpu (_build/llama-cpp-stock).")
+    print("  Gyroscopic = ggml-gyroscopic backend (_build/llama-cpp; kernel.c linked, no blend hook).")
     print("  Parity check: both run the same forward pass; generation + speed must match.")
     stock = next((r for r in results if r.mode == "stock" and r.ok), None)
     gyro = next((r for r in results if r.mode == "gyroscopic" and r.ok), None)

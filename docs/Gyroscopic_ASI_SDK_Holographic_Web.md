@@ -193,7 +193,7 @@ These algebraic properties give the kernel concrete computational advantages ove
 
 The kernel exports a native 6-bit chirality register that satisfies an exact linear transport rule: for every byte b and state s in Ω, the chirality of the successor satisfies χ(T_b(s)) = χ(s) ⊕ q₆(b), where q₆(b) is a byte-dependent 6-bit word. This register is the substrate for single-step Deutsch-Jozsa and Bernstein-Vazirani analogues and provides a constant-time commutativity test: two bytes commute if and only if their q₆-words are equal.
 
-Finally, the CGM monodromy defect δ_BU ≈ 0.1953 rad acts as a non-Clifford resource on top of a Clifford backbone formed by the self-dual [12,6,2] mask code. Combined with the entangling horizon gates S and C from the holonomic K4 gate group, the kernel possesses all three ingredients for algebraic universality on standard silicon while preserving determinism and replayability.
+Finally, the CGM dual-pole loop angle δ_BU ≈ 0.195342178258 rad acts as a non-Clifford resource on top of a Clifford backbone formed by the self-dual [12,6,2] mask code. Combined with the entangling horizon gates S and C from the holonomic K4 gate group, the kernel possesses all three ingredients for algebraic universality on standard silicon while preserving determinism and replayability.
 
 ---
 
@@ -221,7 +221,7 @@ Any bulk state compresses losslessly to an equality-horizon anchor plus a byte f
 
 ### 6.6 Intrinsic Alignment
 
-The intrinsic kernel aperture A_kernel of 5/256 approximates the CGM target aperture within 5.6 percent. The monodromy defect, aperture scale, and fine-structure constant reconstruct from kernel quantities with agreement ranging from 0.02 percent to 5.6 percent. The kernel embodies the alignment geometry at the discrete level.
+The intrinsic kernel aperture A_kernel of 5/256 approximates the CGM target aperture within 5.6 percent. The dual-pole loop angle, aperture scale, and fine-structure chain reconstruct from kernel quantities with agreement ranging from 0.02 percent to 5.6 percent. The kernel embodies the alignment geometry at the discrete level.
 
 ### 6.7 Exact Mixing
 

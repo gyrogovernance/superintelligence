@@ -1,5 +1,7 @@
 # Build external/llama.cpp (CPU, MSVC Release) on Windows.
-# Requires: CMake, Ninja (optional), Visual Studio 2022 Build Tools (C++ workload).
+# Output tree is ALWAYS under src/tools/gyroscopic/_build (never repo-root _build,
+# never external/llama.cpp/build).
+# Requires: CMake, Visual Studio 2022 Build Tools (C++ workload + MASM).
 # Run from repo root:
 #   powershell -File src/tools/gyroscopic/helpers/build_llama_cpp_windows.ps1
 #   powershell -File src/tools/gyroscopic/helpers/build_llama_cpp_windows.ps1 -Mode stock
@@ -12,6 +14,7 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 $llamaDir = Join-Path $repoRoot "external\llama.cpp"
+$gyroBuildRoot = Join-Path $repoRoot "src\tools\gyroscopic\_build"
 $vswhere = Join-Path ${env:ProgramFiles(x86)} "Microsoft Visual Studio\Installer\vswhere.exe"
 if (-not (Test-Path $vswhere)) {
     throw "vswhere not found. Install Visual Studio 2022 Build Tools with Desktop development with C++."
@@ -54,29 +57,34 @@ if ($buildTargets.Count -gt 0) {
 }
 
 if ($Mode -eq "stock") {
-    $buildDir = "build-stock"
+    $buildName = "llama-cpp-stock"
     $gyroFlag = "-DGGML_GYROSCOPIC=OFF"
     $modeLabel = "stock (vanilla ggml-cpu)"
 } else {
-    $buildDir = "build"
+    $buildName = "llama-cpp"
     $gyroFlag = "-DGGML_GYROSCOPIC=ON"
     $modeLabel = "gyroscopic (ggml-gyroscopic backend)"
 }
 
-$buildLine = "cmake --build $buildDir --config Release $targetArgs -j $buildJobs"
-$cachePath = Join-Path $llamaDir "$buildDir\CMakeCache.txt"
+New-Item -ItemType Directory -Force -Path $gyroBuildRoot | Out-Null
+$buildDir = Join-Path $gyroBuildRoot $buildName
+New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
+
+$buildLine = "cmake --build `"$buildDir`" --config Release $targetArgs -j $buildJobs"
+$cachePath = Join-Path $buildDir "CMakeCache.txt"
 if (Test-Path $cachePath) {
     $generatorLine = Select-String -Path $cachePath -Pattern "^CMAKE_GENERATOR:INTERNAL=" | Select-Object -First 1
     if ($generatorLine -and $generatorLine.Line -like "*Visual Studio*") {
-        $buildLine = "cmake --build $buildDir --config Release $targetArgs -- /m:$buildJobs /nr:false"
+        $buildLine = "cmake --build `"$buildDir`" --config Release $targetArgs -- /m:$buildJobs /nr:false"
     }
 }
 
+$relTree = "src\tools\gyroscopic\_build\$buildName"
 Write-Host "Build mode: $modeLabel"
-Write-Host "Build tree: external\llama.cpp\$buildDir"
+Write-Host "Build tree: $relTree"
 $cmakeArgs = @(
-    "call `"$vcvars`" && cd /d `"$llamaDir`" && cmake -B $buildDir -DCMAKE_BUILD_TYPE=Release $asmCompilerArg $gyroFlag -DGGML_OPENMP=ON -DGGML_AVX2=ON -DGGML_BMI2=ON && $buildLine"
+    "call `"$vcvars`" && cmake -S `"$llamaDir`" -B `"$buildDir`" -DCMAKE_BUILD_TYPE=Release $asmCompilerArg $gyroFlag -DGGML_OPENMP=ON -DGGML_AVX2=ON -DGGML_BMI2=ON && $buildLine"
 )
 cmd.exe /c $cmakeArgs[0]
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host "Done. Example: external\llama.cpp\$buildDir\bin\Release\llama-cli.exe --version"
+Write-Host "Done. Example: $relTree\bin\Release\llama-cli.exe --version"

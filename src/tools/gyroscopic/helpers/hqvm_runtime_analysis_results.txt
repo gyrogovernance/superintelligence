@@ -1,0 +1,85 @@
+=====
+hQVM RUNTIME ANALYSIS (C medium costs)
+=====
+
+1. Port smoke (C trust)
+=====
+  [PASS] C grammar verify returns ok
+         measured: ok
+         threshold: ok
+  [PASS] Port smoke: sig13 apply matches byte replay
+         measured: 64/64
+         threshold: all
+  [PASS] Port smoke: brute route2 returns 16
+         measured: 16
+         threshold: 16
+
+2. ACTION vs LEDGER wall-clock
+=====
+  [INFO] ACTION faster on all sampled cells; median=23.29x (compile amortized excluded)
+  [PASS] ACTION batch apply vs LEDGER byte replay (median)
+         measured: 23.29x
+         threshold: >=1.0
+
+3. Route2 synthesize vs brute
+=====
+  [PASS] Port smoke: synthesize set equals brute
+         measured: 288/288
+         threshold: all
+  [INFO] route2 synthesize 8.003us vs brute 160.43us (20.0x)
+  [PASS] Route2 synthesize latency vs brute
+         measured: syn=8.003us brute=160.43us
+         threshold: <10% of brute or <20us
+
+4. Spectral climate WHT vs dense
+=====
+  [PASS] Port smoke: spectral n-step matches dense circulant
+         measured: max_abs=8.38e-09
+         threshold: <1e-3
+  [INFO] n=10:21.0x; n=100:24.2x; n=1000:120.2x
+  [PASS] Spectral climate wall-clock vs dense (all n)
+         measured: n=10:21.0x; n=100:24.2x; n=1000:120.2x
+         threshold: >=1.0x each
+
+5. Shell7 radial apply
+=====
+  [PASS] Port smoke: shell7 gains act on shell masses
+         measured: ok
+         threshold: ok
+  [INFO] 29.351us/apply (1000x loop)
+  [PASS] Shell7 apply latency
+         measured: 29.351us
+         threshold: <1000us
+
+6. G-equivariant 2080-sector layer
+=====
+  [PASS] Sector index bijects XOR-diff pairs onto 0..2079
+         measured: 2080 classes
+         threshold: 2080 in [0,2079]
+  [PASS] Equivariance: K(g·psi)==g·K(psi) over sampled G elements
+         measured: max_rel=0.00e+00
+         threshold: <1e-4
+  [PASS] Structured apply equals its dense orbital expansion
+         measured: max_abs=0.00e+00 (scale 248.98)
+         threshold: rel<1e-4
+  [INFO] G-equivariant operator: 2080 spectral params vs 16777216 dense entries (8065x compression)
+  [INFO] equiv2080 apply 44.28ms vs dense4096 3581.13ms (80.9x); 2080 params vs 16,777,216
+  [PASS] Structured equivariant matvec vs dense 4096x4096 wall-clock
+         measured: 80.9x
+         threshold: >=1.0x
+
+7. ACTION cache (8192)
+=====
+  [PASS] Port smoke: sig13 cache identity length 8192
+         measured: 8192
+         threshold: 8192
+  [INFO] cache vs recompile: 1.35x at B=4096 (amortized), 19.13x at B=8 (unamortized); 64 sigs x 32B words, C loops
+  [PASS] ACTION cache vs recompile (compile tax unamortized)
+         measured: 19.13x at B=8
+         threshold: >=1.0x
+
+[hqvm_runtime_analysis_1.py finished in 45.9s]
+
+=====
+SUMMARY: 16 passed, 0 failed out of 16 checks  (total 45.9s)
+=====

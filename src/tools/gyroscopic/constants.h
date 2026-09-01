@@ -5,32 +5,16 @@
  * Gyroscopic C constants.
  * Keep in sync with src/tools/gyroscopic/constants.py.
  *
- * Live ledger env (read by ggml-gyroscopic hooks / ledger.c / attn.c / codec.c):
- *   GYRO_LEDGER_PATH      thin HQVMLEDS (or fat HQVMLEDG) file
- *   GYRO_LEDGER_STRICT    abort if allowlisted site cannot displace
- *   GYRO_LEDGER_ALLOW     comma allowlist override
- *   GYRO_LEDGER_VERBOSE   extra displace logs
- *   GYRO_LEDGER_TENSOR    fat/default name substring
- *   GYRO_KV_LEDGER=1      capture KV coordinates on RoPE (WHT-peak)
- *   GYRO_KV_KQ8=1         displace float K cache with ggml Q8_0 (no-alloc)
- *   GYRO_KV_V=1           displace float V cache with ggml Q8_0 (no-alloc)
- *   GYRO_HOLONOMIC_ATTN=1 flash_attn score + Attn@V from Q8_0 K/V
- *   GYRO_HOLONOMIC_ATTN_MODE  unset|zero_scores|random_scores (dot = default)
- *   GYRO_COORD_PERTURB=zero_kq8  force zero K scores (score-loop proof)
- *   GYRO_V_PERTURB=1      zero V contribution (Attn@V proof)
- *   GYRO_PERCOLATION_SOFTMAX=1  shadow percolation θ vs stock softmax
- *   GYRO_SHELL_NORM=1     shadow shell-equilibration vs RMSNorm
- *   GYRO_RESIDUAL_SHADOW=1  shadow residual RMS / depth
- *   GYRO_RECEIPTS=1       emit per-token GENE_Mac receipts (kernel step)
- *   GYRO_APERTURE_SOFTMAX=1  aperture-constrained softmax (rank deficit * Delta)
- *   GYRO_ROPE_CODEC=1     RoPE via T_256^(turn) LUT (live)
- *   GYRO_SILU_CODEC=1     SwiGLU gate LUT apply (owned)
- *   GYRO_CGM_LIFT=1       lift attn argmax → (q6,fam) phase byte; chi6 at KV write
- *   GYRO_RESIDUAL_LAW=1   residual-stream law: add gain = 1+Delta*m from lift traj
- *   GYRO_RESIDUAL_HYBRID=1  deprecated alias of GYRO_RESIDUAL_LAW
- *   GYRO_NORM_CODEC / GYRO_NORM_COMMIT  signed Delta-ruler Norm (COMMIT applies)
- *   GYRO_NORM_G0          Norm gain reference (default 1.0; export geomean TODO)
- *   GYRO_CGM_LIFT_PERTURB=1  flip q6/fam (causal proof; not production)
+ * Live env (read by ggml-gyroscopic / ledger / attn / codec / layer / runtime):
+ *   GYRO_LEDGER_PATH, GYRO_LEDGER_STRICT, GYRO_LEDGER_ALLOW, GYRO_LEDGER_VERBOSE, GYRO_LEDGER_TENSOR
+ *   GYRO_KV_KQ8, GYRO_KV_V, GYRO_HOLONOMIC_ATTN
+ *   GYRO_NATIVE_FORWARD, GYRO_NATIVE_EMISSION, GYRO_NATIVE_GENEALOGY, GYRO_GENEALOGY_PATH
+ *   GYRO_NATIVE_GROUP, GYRO_NATIVE_POLAR_PREFILTER, GYRO_NATIVE_RESET, GYRO_NATIVE_* site toggles
+ *   GYRO_ATTN_SHELL_QK, GYRO_FFN_NATIVE, GYRO_NORM_*, GYRO_ROPE_*
+ *   GYRO_CGM_LIFT, GYRO_PI_FROM_EMBD
+ *   Adversarial gate probes: GYRO_*_PERTURB
+ * Deprecated (still read, do not set in production): GYRO_RESIDUAL_HYBRID, GYRO_RESIDUAL_LAW
+ * Full name list: constants.py GYRO_ENV_VAR_NAMES / GYRO_ENV_DEPRECATED.
  */
 
 /* Bonsai-8B layer count — GyroClock depth = token_pos * HQVM_N_LAYER + layer_idx */
@@ -223,6 +207,11 @@
 
 #ifndef APERTURE_GAP_Q256
 #define APERTURE_GAP_Q256 5u
+#endif
+
+/* Fixed Q16 chart of APERTURE_GAP = 1 - DELTA_BU/M_A (compile-time round). */
+#ifndef HQVM_APERTURE_GAP_Q16
+#define HQVM_APERTURE_GAP_Q16 ((int32_t)(((1.0 - ((double)DELTA_BU / (double)M_A)) * 65536.0) + 0.5))
 #endif
 
 #endif /* GYROSCOPIC_CONSTANTS_H */

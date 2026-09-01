@@ -781,6 +781,14 @@ At the byte level, only {0xD5, 0x2B} fix every complement horizon state pointwis
 
 Under the K4 gate group, Ω partitions into 1056 orbits: 32 of size 2 on the complement horizon (paired by S), 32 of size 2 on the equality horizon (paired by C), and 992 of size 4 in the bulk. Bulk states have trivial K4 stabilizer; horizon states have stabilizer of order 2.
 
+### 10.7 Climate stabilizers in the signature group
+
+The signature group G of order 8192 (Group Theory Analysis §5.2) acts on climates on Ω. By the signature chirality-shift law (SDK §5.1.3), a signature (ε, τ_u, τ_v) maps the chirality marginal to its translate by δ = τ_u ⊕ τ_v. The shell-weighted family P_λ(χ) ∝ λ^{wt(χ)} of §2 is therefore invariant under exactly the signatures with δ = 0. These form the diagonal subgroup
+
+    H = {(0, t, t), (1, t, t) : t ∈ GF(2)^6}
+
+of order 128. For λ ≠ 1 the stabilizer of P_λ equals H: a signature with δ ≠ 0 translates χ and changes λ^{wt(χ)} for some χ. Every holonomic gate lies in H, since S = (1, 0, 0), C = (1, 63, 63), and F = (0, 63, 63) all have δ = 0, so the gate group acts within the symmetry of any shell-weighted climate. The canonical word W2(m) has τ = (63 ⊕ m, m), so δ = 63 for every m, and W2 lies outside H for every m. W2 exchanges the two condensation regimes: it maps P_λ to P_{1/λ}, so ρ → 1 − ρ, η → −η, m → −m, and M2 is preserved since M2 depends on η^2. The pair (H, W2) is the exact finite symmetry structure of the λ-ensemble: H is the stabilizer that any climate-respecting model may assume, and W2 is the canonical generator that moves one climate to its dual. The computation is verified by brute force over all 8192 signatures (Features Report §3.1, SG-5).
+
 ---
 
 ## 11. The Full Climate Equation
@@ -1306,7 +1314,7 @@ The cost figures given below are symbolic unless stated otherwise.
 | K4Char4 | 12 add/sub | 0 |
 | WHT + pointwise + inverse WHT | 832 total | 64 |
 
-### 18.9 Multiplication claims
+### 18.9 Multiplication in the native medium
 
 The native transition rule is multiply-free.
 
@@ -1318,11 +1326,11 @@ The Krawtchouk transform uses scalar multiply-add operations.
 
 The spectral application of a diagonalised operator uses pointwise scalar multipliers.
 
-A learned 64 × 64 weight block is multiply-free only when its data and symmetry structure reduce the required contraction to XOR, signed masks, additions, subtractions, and popcount operations.
+These statements apply to kernel dynamics and native spectral operators.
 
-The specification must not claim that general matrix multiplication is replaced by XOR. The formal claim is that native transport is XOR, native spinorial state projection is multiply-free, and learned weight application is exposed to native structure tests and exact dot-product evaluation where structure does not reduce further.
+### 18.10 n-step evolution: native vs dense (circulant climate, 64 modes)
 
-### 18.10 n-step evolution: native vs dense
+Scope: symbolic cost for **circulant chirality climate** evolution, exponentiating a 64×64 circulant via dense matrix power vs spectral WHT diagonalization. This is not a claim about arbitrary learned dense weight matrices, weight pruning, or universal matmul speedup.
 
 **Dense method via matrix exponentiation:**
 
@@ -1477,7 +1485,7 @@ Illustrative transformer bridge examples (KV polar encoding, native attention) a
 | Symbol | Meaning |
 |---|---|
 | m_a | Observational aperture, m_a = 1/(2√(2π)) |
-| δ_BU | BU dual-pole monodromy |
+| δ_BU | BU dual-pole loop angle |
 | ρ_cl | Closure ratio, ρ_cl = δ_BU/m_a |
 | Δ | Aperture gap, Δ = 1 − ρ_cl |
 | Q_G | Quantum gravity invariant, Q_G = 4π |
@@ -1488,9 +1496,9 @@ The CGM constants governing closure geometry are:
 
 ```
 m_a    = 1 / (2√(2π))    observational aperture
-δ_BU                      BU dual-pole monodromy
+δ_BU                      BU dual-pole loop angle
 ρ_cl   = δ_BU / m_a       closure ratio
-Δ      = 1 − ρ_cl         aperture gap  (≈ 0.0207)
+Δ      = 1 − ρ_cl         aperture gap  (≈ 0.020699545503)
 Q_G    = 4π               quantum gravity invariant
 ```
 
@@ -1531,7 +1539,7 @@ The geometric quantization relation is:
 48 · Δ ≈ 1
 ```
 
-Numerically: 48 · 0.0207 = 0.9936, with 0.64% deviation from unity.
+Numerically: 48 · 0.020699545503 ≈ 0.993578, with about 0.64% deviation from unity.
 
 The best 8-bit dyadic approximation of Δ is:
 
@@ -1547,13 +1555,13 @@ The ratio of the two natural quantization scales is:
 (1/48) / (1/32) = 2/3
 ```
 
-where 1/32 corresponds to the turn-normalized monodromy δ_BU/(2π) ≈ 1/32. The factor 2/3 is the ratio of chirality (2 faces, A and B, the spinorial double-cover) to space (3 spatial axes). The aperture exists because mapping a 2-phase chiral spinor onto a 3-axis discrete grid leaves a geometric gap.
+where 1/32 corresponds to the turn-normalized loop angle δ_BU/(2π) ≈ 1/32. The factor 2/3 is the ratio of chirality (2 faces, A and B, the spinorial double-cover) to space (3 spatial axes). The aperture exists because mapping a 2-phase chiral spinor onto a 3-axis discrete grid leaves a geometric gap.
 
 ### 20.5 Unified defect concept
 
 The transform algebra and the closure geometry share a common structural concept: an exact finite remainder from an ideal closure condition.
 
-**Closure defect.** The aperture gap Δ is the remainder when the BU monodromy falls short of the aperture scale. It is the structural reason the medium has both radial and directional coordinates.
+**Closure defect.** The aperture gap Δ is the remainder when the BU dual-pole loop angle falls short of the aperture scale. It is the structural reason the medium has both radial and directional coordinates.
 
 **Anisotropy defect.** When the byte ensemble drives the six chirality axes unequally, the climate departs from the isotropic shell distribution. The anisotropy vector (η₁,…,η₆) measures this defect from the isotropic ideal.
 
@@ -1563,7 +1571,7 @@ All three are structurally the same kind of object: a finite remainder from an e
 
 ### 20.6 Toroidal gate homology
 
-The gate group K4 = (ℤ/2)² is the first homology group of the torus with ℤ/2 coefficients: H₁(T², ℤ/2) = (ℤ/2)². Meridional cycle ↔ S (non-commutativity); longitudinal cycle ↔ C (non-associativity); diagonal cycle ↔ F = S ∘ C (balance); trivial cycle ↔ id. Residual holonomy after both fundamental cycles is δ_BU (§20.1).
+The gate group K4 = (ℤ/2)² is the first homology group of the torus with ℤ/2 coefficients: H₁(T², ℤ/2) = (ℤ/2)². Meridional cycle ↔ S (non-commutativity); longitudinal cycle ↔ C (non-associativity); diagonal cycle ↔ F = S ∘ C (balance); trivial cycle ↔ id. Residual path memory after both fundamental cycles is δ_BU (§20.1).
 
 ---
 

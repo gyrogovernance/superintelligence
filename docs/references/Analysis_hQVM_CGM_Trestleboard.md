@@ -4,7 +4,7 @@
 
 **Reproducibility:** `experiments/hqvm_cgm_trestleboard_results.txt`. Scripts: `hqvm_cgm_trestleboard_1.py` through `hqvm_cgm_trestleboard_5.py`, `hqvm_cgm_trestleboard_common.py`, `hqvm_cgm_trestleboard_run.py`. External data catalogs: `data/catalogs/ensdf/` and `data/catalogs/fusion/` (SOURCE files in each directory). Local PDF copies of primary isomer references: `docs/references/` (`SOURCE_Th229m.txt`, `SOURCE_U235m.txt`).
 
-**Subject classes (arXiv-style):** nucl-th; nucl-ex; physics.plasm-ph; math-ph
+**Subject classes:** nucl-th; nucl-ex; physics.plasm-ph; math-ph
 
 **Keywords:** Common Governance Model, hQVM trestleboard, nuclear isomer, Th-229m, Delta-ruler, fusion S-factor, percolation hierarchy, alpha decay, beta decay, Coulomb barrier, nuclear magic numbers
 
@@ -14,9 +14,9 @@
 
 This document demonstrates that a discrete geometric framework predicts specific nuclear and fusion observables with high precision and zero free nuclear parameters. The framework derives a single logarithmic energy coordinate from the electroweak scale. This coordinate places electroweak masses, nuclear binding energies, and isomeric excitations on the same ruler. The primary empirical results are:
 
-*   The Th-229m isomeric excitation energy is predicted to be 8.3563 eV. The measured value is 8.3557 eV (relative error 7.19e-05).
-*   The deuteron binding energy is predicted to be 2.2242 MeV. The measured value is 2.2240 MeV (relative error 8.89e-05).
-*   The ruler unit that governs these nuclear scales is derived from the W and Z boson mass ratio. Two independent derivations yield this unit with an absolute agreement of 8.34e-10.
+*   The Th-229m isomeric excitation energy is predicted to be 8.3563 eV. The measured value is 8.3557 eV (relative error 6.95e-05).
+*   The deuteron binding energy is predicted to be 2.2242 MeV. The measured value is 2.2240 MeV (relative error 8.77e-05).
+*   Nuclear grammar uses the loop-angle aperture gap Δ as the shared ruler unit. The W/Z mass ratio recovers the kernel self-consistency aperture Δ_* to absolute agreement 7.899e-10 (`Analysis_Compact_Geometry.md`).
 *   An algebraic mapping of nuclear quantum numbers preserves chirality shell and parity across 314/314 alpha parents and 801/801 beta parents in the IAEA LiveChart catalog.
 *   The seven canonical nuclear magic numbers 2, 8, 20, 28, 50, 82, and 126 emerge as large-gap closures in a Nilsson spectrum whose spin-orbit and deformation couplings are fixed by the same geometric constants chain that sets the electroweak ruler.
 *   The Coulomb barriers for seven fusion fuels map to a single structural rung on this ruler. Known resonances for five of these fuels align with structural percolation thresholds.
@@ -43,32 +43,32 @@ The Square, Compass, and Level share one energy coordinate. That coordinate is f
 
 ### 2.1 The Aperture Gap and the Delta-Ruler
 
-Nuclear binding energies near a few MeV, isomeric excitations near a few eV, and electroweak masses near the hundred-GeV scale all receive a coordinate on that shared logarithmic ruler. A shared coordinate of this kind is usable only if its spacing unit is fixed once, independently of which energy band is under study. This section constructs that unit from two geometric inputs of the CGM kernel. Two named quantities must be kept distinct: the aperture m_a is a fixed reference scale, and the aperture gap Δ is the fractional opening relative to that scale. Only Δ becomes the ruler tick.
+Nuclear binding energies near a few MeV, isomeric excitations near a few eV, and electroweak masses near the hundred-GeV scale all receive a coordinate on that shared logarithmic ruler. A shared coordinate of this kind is usable only if its spacing unit is fixed once, independently of which energy band is under study. This section constructs that unit from two geometric inputs of the CGM kernel. Two named quantities must be kept distinct: the aperture m_a is a fixed reference scale, and the aperture gap Δ is the fractional opening relative to that scale. Only Δ becomes the ruler tick. Electroweak mass polynomials use a second aperture Δ_* fixed by D³ self-consistency (`Analysis_Compact_Geometry.md`); that distinction is stated in Section 2.2.
 
 The first input is the aperture
 
 ```
-m_a = 1 / (2 √(2π)) ≈ 0.199471
+m_a = 1 / (2 √(2π)) ≈ 0.199471140201
 ```
 
-m_a is a dimensionless closed-form constant. Geometrically, it is the largest residual oscillation about the closed configuration that remains inside a total phase of π, half of a full 2π cycle (`Analysis_CGM_Constants.md`). In this document that constant is the reference scale against which the monodromy is compared.
+m_a is a dimensionless closed-form constant. Geometrically, it is the largest residual oscillation about the closed configuration that remains inside a total phase of π, half of a full 2π cycle (`Analysis_CGM_Constants.md`). In this document that constant is the reference scale against which the BU dual-pole loop angle is compared.
 
-The second input is the dual-pole monodromy
+The second input is the BU dual-pole loop angle
 
 ```
-δ_BU ≈ 0.195342 rad
+δ_BU = 4 · arctan(k(π/4) · k(m_a)) ≈ 0.195342178258
 ```
 
-δ_BU is a geometric phase angle, in radians, accumulated by traversing a closed loop on the kernel. It is recovered from the SU(2) half-loop trace (`Analysis_Monodromy.md`). Numerically δ_BU lies slightly below m_a.
+with Poincaré half-rapidity radius k(β) = β / (1 + √(1 − β²)). Numerically δ_BU lies slightly below m_a.
 
 The closure ratio and the complementary opening are
 
 ```
-ρ = δ_BU / m_a ≈ 0.979300
-Δ = 1 − ρ = 1 − δ_BU / m_a ≈ 0.020699
+ρ = δ_BU / m_a ≈ 0.979300454497
+Δ = 1 − ρ = 1 − δ_BU / m_a ≈ 0.020699545503
 ```
 
-ρ is the closure ratio, the fraction of the aperture filled by the monodromy (about 97.93 percent). Δ is the aperture gap, the complementary open fraction (about 2.07 percent). Δ is dimensionless. It is the spacing unit of the energy ruler used for the rest of this document.
+ρ is the closure ratio, the fraction of the aperture filled by the loop angle (about 97.93 percent). Δ is the aperture gap, the complementary open fraction (about 2.07 percent). Δ is dimensionless. It is the spacing unit of the energy ruler used for the rest of this document.
 
 The ruler coordinate for an energy E is defined by the pair of maps
 
@@ -86,19 +86,19 @@ ticks per ρ-layer         = log2(1/ρ) / Δ = 1.458
 ticks per octave          = 1 / Δ         = 48.31
 ```
 
-These are the tick widths of one aperture-grade step, one holonomy dress layer, and one factor-of-two energy change, respectively. The equatorial code factor 2^(C3 Δ²) = 1.00595755, with enumerator weight C3 = 20, appears later when a grammar class sits on the nuclear equator.
+These are the tick widths of one aperture-grade step, one ρ-dress layer, and one factor-of-two energy change, respectively. The equatorial code factor 2^(C3 Δ²) = 1.00595755, with enumerator weight C3 = 20, appears later when a grammar class sits on the nuclear equator.
 
-The same ruler carries electroweak masses at small n, nuclear optical structure at large n, and atomic levels at the largest n. Section 2.2 recovers the same Δ independently from the W/Z mass ratio, so the nuclear placements that follow do not rest on an unchecked geometric input.
+The same ruler carries electroweak masses at small n, nuclear optical structure at large n, and atomic levels at the largest n. Section 2.2 recovers the kernel aperture Δ_* independently from the W/Z mass ratio, so the spectral lock does not rest on an unchecked geometric input. Nuclear grammar continues to use the loop-angle ruler Δ.
 
-### 2.2 Independent Recovery of Δ from the W/Z Mass Ratio
+### 2.2 Independent Recovery of Δ_* from the W/Z Mass Ratio
 
-The tick distance between the W and Z masses on the ruler is `n_W − n_Z = log2(m_Z / m_W) ≈ 0.182`, with `m_Z` and `m_W` the measured boson masses and `n_W`, `n_Z` their tick coordinates. Before any nuclear claim is made, the aperture gap `Δ`, already fixed by the constants chain, is recovered independently by Newton inversion of the electroweak mass-coordinate expansion of `Analysis_Compact_Geometry.md`. Each channel mass is a carrier-trace polynomial
+The tick distance between the W and Z masses on the loop-angle ruler is `n_W − n_Z = log2(m_Z / m_W) ≈ 0.182`, with `m_Z` and `m_W` the measured boson masses and `n_W`, `n_Z` their tick coordinates. Before any nuclear claim is made, the kernel self-consistency aperture `Δ_*` of `Analysis_Compact_Geometry.md` is recovered independently by Newton inversion of the electroweak mass-coordinate expansion. Each channel mass is a carrier-trace polynomial evaluated at `Δ_*`
 
 ```
-L_i = a_i Δ + b_i + c_i Δ² + p_i Δ³/√5 + q_i Δ⁴ + r5_i Δ⁵
+L_i = a_i Δ_* + b_i + c_i Δ_*^2 + p_i Δ_*^3/√5 + q_i Δ_*^4 + r5_i Δ_*^5
 ```
 
-The index `i` runs over the four channels Top, Higgs, Z, and W. The coefficients `a_i, b_i, c_i, p_i, q_i, r5_i` are kernel constants drawn from the horizon size `|H| = 64`, the enumerator weights `C1 = 6`, `C2 = 15`, `C3 = 20`, the reduced shell moment `M_shell = 192`, the K4 stage flags, and the trace-free edge increments. At fifth order the four channels recover their PDG masses with tick error below `6.15e-9`. The value of `Δ` that recovers the measured `m_W / m_Z` agrees with `Δ_ref` to absolute error `8.34e-10`. That `Δ_ref` is the ruler unit throughout this document.
+The index `i` runs over the four channels Top, Higgs, Z, and W. The coefficients `a_i, b_i, c_i, p_i, q_i, r5_i` are kernel constants drawn from the horizon size `|H| = 64`, the enumerator weights `C1 = 6`, `C2 = 15`, `C3 = 20`, the reduced shell moment `M_shell = 192`, the K4 stage flags, and the trace-free edge increments. At fifth order the four channels recover their PDG masses with maximum tick error `2.593 × 10⁻⁷` when evaluated at `Δ_*`. Newton inversion of the measured `m_W / m_Z` recovers `Δ_*` to absolute error `7.899 × 10⁻¹⁰`. The loop-angle gap `Δ` remains the ruler unit for nuclear and fusion placements throughout this document.
 
 With the PDG ratio `m_Z / m_W = 1.134470`,
 
@@ -113,15 +113,15 @@ log2(m_Z / m_W) = Δ · S_WZ(Δ)
 S_WZ(Δ) = (C2 − C1) − (C3/2)·Δ + 2·Δ²/√5 − Δ³
 ```
 
-in which `S_WZ` is a dimensionless polynomial in `Δ` whose coefficients are the same kernel constants. Newton inversion of that identity from the measured mass ratio yields a second determination of the same aperture:
+in which `S_WZ` is a dimensionless polynomial in `Δ` whose coefficients are the same kernel constants. Newton inversion of that identity from the measured mass ratio yields
 
 ```
 Δ_WZ = 0.020699554747
-Δ_ref = 0.020699553913
-|Δ_WZ − Δ_ref| = 8.340e-10
+Δ_*  = 0.020699553957
+|Δ_WZ − Δ_*| = 7.899e-10
 ```
 
-with relative error `4.029e-08`. The two determinations, one from the full four-channel `L_i` expansion and one from the W/Z ratio identity alone, agree to the fourth-order D4 target of the compact-geometry analysis (absolute error `8.34e-10`). All nuclear and fusion placements in this document use that `Δ`.
+with relative error `3.816e-08`. The W/Z ratio identity and the four-channel `L_i` expansion therefore lock to the same kernel aperture `Δ_*`. Grammar energies `E(k, ℓ)` and tick coordinates `n(E)` continue to use the loop-angle gap `Δ`.
 
 ### 2.3 Closure Grammar
 
@@ -148,11 +148,11 @@ FORCED    (3,0)   810.78     2.1838 MeV     Strong bare (v·Δ³)
 FORCED    (6,2)  1680.15     8.3563 eV      Nuclear spinorial (v·ρ²·Δ⁶/√5·2^(C3Δ²))
 optional  (6,0)  1621.56    19.368 eV       Boundary bare (v·Δ⁶)
 optional  (6,4)  1683.48     7.9665 eV      Boundary EM (v·ρ⁴·Δ⁶/√5)
-optional  (6,5)  1684.93     7.8016 eV      Boundary gravity (v·ρ⁵·Δ⁶/√5)
+optional  (6,5)  1684.94     7.8016 eV      Boundary gravity (v·ρ⁵·Δ⁶/√5)
 optional  (4,0)  1081.04    45.203 keV      keV bare (v·Δ⁴)
 optional  (4,2)  1140.04    19.387 keV      keV spinorial (v·ρ²·Δ⁴/√5)
 optional  (3,2)   869.78   936.60 keV       Strong spinorial (v·ρ²·Δ³/√5)
-optional  (3,5)   874.15   879.63 keV       Strong gravity (v·ρ⁵·Δ³/√5)
+optional  (3,5)   874.16   879.63 keV       Strong gravity (v·ρ⁵·Δ³/√5)
 ```
 
 ### 2.4 The Level
@@ -160,11 +160,11 @@ optional  (3,5)   874.15   879.63 keV       Strong gravity (v·ρ⁵·Δ³/√5)
 The Level places an absolute energy on the ruler. From an energy `E` it returns `n(E)`, the named grammar class whose predicted energy `E(k,ℓ)` minimizes the absolute tick residual `|n(E) − n(E(k,ℓ))|`, and that residual. Against the forced classes,
 
 ```
-Th-229m     n = 1680.15   class (6,2)   tick = +0.00501   |rel| = 7.189e-05
-Deuteron BE n =  809.51   class (3,0)   tick = -1.27239   |rel| bare = 1.809e-02
+Th-229m     n = 1680.15   class (6,2)   tick = +0.00484   |rel| = 6.947e-05
+Deuteron BE n =  809.51   class (3,0)   tick = -1.27248   |rel| bare = 1.809e-02
 ```
 
-The deuteron full formula `v·Δ³ + v·Δ⁴·(2/√5)` closes at `|rel| = 8.891e-05` against the measured 2.2240 MeV. The 1.272-tick Level residual is a code-atom resolution limit of the underlying kernel lattice.
+The deuteron full formula `v·Δ³ + v·Δ⁴·(2/√5)` closes at `|rel| = 8.768e-05` against the measured 2.2240 MeV. The 1.272-tick Level residual is a code-atom resolution limit of the underlying kernel lattice.
 
 ### 2.5 The Square and Sector Placement
 
@@ -299,6 +299,8 @@ The shell census verifies the factorization. With shell index `s` defined as the
 pops = [64, 384, 960, 1280, 960, 384, 64]
 ```
 
+The coefficients `C(6,s)` are row 6 of Pascal's triangle; the kernel uses them only as the binomial census of `GF(2)^6`, not as the lower-triangular Pascal matrix on shell transitions.
+
 These sum to 4096 with mean shell `⟨S⟩ = 3.000`. Holographic balance `|H|^2 = |Ω|` holds exactly. Rank-by-rank reachability under fiber-complete restriction is
 
 ```
@@ -389,7 +391,7 @@ E_min = v · ρ² · Δ⁶ / √5 · 2^(C3 Δ²)
 
 This is the energy of the forced nuclear class: electroweak anchor `v`, spinorial dress `ρ²`, sixth aperture grade `Δ⁶`, STF equipartition `1/√5`, and equatorial tick `2^(C3 Δ²)` with enumerator weight `C3 = C(6, 3) = 20`. What the ENSDF half-life-tagged eV-band census can falsify is the absence of any such isomer below the tolerance window around `E_min`. The stronger reading, that this residual is the absolute minimum nuclear excitation of the ground-state sector, is a physics interpretation of the Δ⁶ W-boundary that extends beyond the census check.
 
-The derivation uses only upstream quantities. The electroweak sector closes at `Δ⁵` in the compact-geometry five-order expansion, which is the BU-balanced ground relative to the representation boundary. The sixth grade is the W-channel representation boundary, the unique full-flag K4 endpoint. The first excitation beyond ground is that residual. Any lower structure would have been required to close at `Δ⁵` (`docs/CGM_Logic.md`). The inputs are fixed. `Δ` is the value recovered in Section 2.2, and `(k, ℓ) = (6, 2)` is the forced nuclear class.
+The derivation uses only upstream quantities. The electroweak sector closes at `Δ⁵` in the compact-geometry five-order expansion, which is the BU-balanced ground relative to the representation boundary. The sixth grade is the W-channel representation boundary, the unique full-flag K4 endpoint. The first excitation beyond ground is that residual. Any lower structure would have been required to close at `Δ⁵` (`docs/CGM_Logic.md`). The inputs are fixed. `Δ` is the loop-angle aperture gap of Section 2.1, and `(k, ℓ) = (6, 2)` is the forced nuclear class.
 
 Numerically,
 
@@ -401,13 +403,13 @@ E_min = 8.3563 eV
 
 The lowest established optically addressable nuclear excited state is the Th-229m isomer at 8.3557335(8) eV in CaF2 (Zhang et al.). This is more than 10^5 times lower than typical nuclear excitations in the keV-MeV range, and it is the unique known nuclear excitation in the laser and VUV window.
 
-The forced prediction and the measurement agree to a relative error of 7.19e-05, with a ruler residual of 0.005 ticks against the forced class `(6, 2)` (tick tolerance 0.1). The Level assigns Th-229m to `(6, 2)`. The prediction contains zero free parameters and has grammar rank 1. The forced-class energy window at tolerance `tol` ticks is
+The forced prediction and the measurement agree to a relative error of 6.95e-05, with a ruler residual of 0.005 ticks against the forced class `(6, 2)` (tick tolerance 0.1). The Level assigns Th-229m to `(6, 2)`. The prediction contains zero free parameters and has grammar rank 1. The forced-class energy window at tolerance `tol` ticks is
 
 ```
 E_lo = E_min / 2^(tol · Δ) ,   E_hi = E_min · 2^(tol · Δ)
 ```
 
-so `tol` is the allowed tick half-width about `E_min` and `[E_lo, E_hi]` is the corresponding energy band. At `tol = 0.1` that band is `[8.3444, 8.3683]` eV. The ENSDF eV-band isomer census in `data/catalogs/ensdf/ensdf_ev_band_levels.csv`, filtered to half-life-tagged entries via the IAEA LiveChart levels API (ENSDF underlying evaluations in `data/catalogs/ensdf/SOURCE.txt`, 214 actinide level files), contains no isomer below that window. The prediction is therefore the empirical minimum among known excitations. Census status on the filtered band is
+so `tol` is the allowed tick half-width about `E_min` and `[E_lo, E_hi]` is the corresponding energy band. At `tol = 0.1` that band is `[8.3443, 8.3683]` eV. The ENSDF eV-band isomer census in `data/catalogs/ensdf/ensdf_ev_band_levels.csv`, filtered to half-life-tagged entries via the IAEA LiveChart levels API (ENSDF underlying evaluations in `data/catalogs/ensdf/SOURCE.txt`, 214 actinide level files), contains no isomer below that window. The prediction is therefore the empirical minimum among known excitations. Census status on the filtered band is
 
 ```
 status         label                   E_eV     near(k,ℓ)  tick
@@ -457,14 +459,14 @@ Z         W2'        (1, 1, 0)
 W         F          (1, 1, 1)
 ```
 
-The W channel is the full-flag endpoint and carries the largest positive sixth-grade residual. Each mass is a spectral expansion in the aperture,
+The W channel is the full-flag endpoint and carries the largest positive sixth-grade residual. Each mass is a spectral expansion in the kernel aperture `Δ_*`,
 
 ```
-L_i(Δ) = a_i·Δ + b_i + c_i·Δ² + p_i·(Δ/√5)·Δ² + q_i·Δ⁴ + r5_i·Δ⁵
-m_i = v / 2^{L_i(Δ)}
+L_i(Δ_*) = a_i·Δ_* + b_i + c_i·Δ_*^2 + p_i·(Δ_*/√5)·Δ_*^2 + q_i·Δ_*^4 + r5_i·Δ_*^5
+m_i = v / 2^{L_i(Δ_*)}
 ```
 
-Channel index `i` labels Top, Higgs, Z, or W. The polynomial `L_i` gives the tick coordinate and `m_i` is the absolute mass. The coefficients are fixed by kernel algebra. Recovered masses are
+Channel index `i` labels Top, Higgs, Z, or W. The polynomial `L_i` gives the mass coordinate and `m_i` is the absolute mass. The coefficients are fixed by kernel algebra. Recovered masses are
 
 ```
 Top    172.7600 GeV
@@ -473,7 +475,7 @@ Z       91.1876 GeV
 W       80.3790 GeV
 ```
 
-The W/Z ratio from the spectral expansion is `0.88146853`, matching the PDG value, with absolute error on the recovered `Δ` equal to `2.203e-11`. Carrier traces `C(q)` enter the channel corrections and the nuclear matrix-element proxies.
+The W/Z ratio from the spectral expansion is `0.88146853`, matching the PDG value, with absolute error on the spectral mass ratio equal to `2.074e-10`. Carrier traces `C(q)` enter the channel corrections and the nuclear matrix-element proxies.
 
 `E_min` is the nuclear residual of this structure. The sixth grade is the W-channel representation boundary, so the nuclear scale inherits the kernel spectral anchor rather than introducing a new parameter. The 32-bit spinorial lift closes through K4 algebra, Gate F (a shell-preserving involution on the carrier, `F² = id`), and exact rank-lock (PMF match `0.999667`).
 
@@ -497,7 +499,7 @@ E_tensor = 0.0404 MeV
 E_total  = 2.2242 MeV
 ```
 
-The measured deuteron binding is 2.2240 MeV (Particle Data Group few-nucleon summary, Navas et al., Phys. Rev. D 110, 030001, 2024), so the full formula closes to a relative error of 8.89e-05, well within the 5e-04 threshold. The bare term alone has relative error 1.81e-02, which the tensor correction removes.
+The measured deuteron binding is 2.2240 MeV (Particle Data Group few-nucleon summary, Navas et al., Phys. Rev. D 110, 030001, 2024), so the full formula closes to a relative error of 8.77e-05, well within the 5e-04 threshold. The bare term alone has relative error 1.81e-02, which the tensor correction removes.
 
 ### 5.2 The Tensor Fraction and the Discrete Pion
 
@@ -692,7 +694,7 @@ where `j` and `l` are the total and orbital angular momentum quantum numbers of 
 
 where `l` is again the orbital angular momentum quantum number.
 
-The parameter `κ` sets the overall scale of the spin-orbit and deformation terms in oscillator units. The parameter `μ` sets the relative weight of the deformation term. The CS axiom fixes the sign of the spin-orbit term so that the aligned branch `j = l + 1/2` lies lower under left chirality. The deformation weight is identified with the reciprocal of the symmetric trace-free bulk dimension, which equals five, giving `μ = 1/5`. That dimension is the five independent spatial modes of the `l = 2` quadrupole on the SE(3) shadow. The spin-orbit scale is identified with the BU dual-pole monodromy expressed as a fraction of a full turn. Writing `τ = δ_BU/(2π)`, the coupling is taken as the 256-tick turn quantization of `τ`, where `Q_256` denotes rounding to the nearest 1/256-turn tick, which gives `κ = Q_256(τ) = 1/32`. Both assignments use only quantities already fixed by the CGM constants chain of Section 2. The same STF bulk dimension enters the electroweak mass expansion through the `1/√5` equipartition factor of Section 2.1, and the same monodromy ratio `δ_BU/m_a` that defines the aperture gap Δ also supplies τ. The couplings that govern shell closure at `(Z, N) = (82, 126)` therefore belong to the same geometric ratio system as the W/Z mass split, not to a separate nuclear parameter set.
+The parameter `κ` sets the overall scale of the spin-orbit and deformation terms in oscillator units. The parameter `μ` sets the relative weight of the deformation term. The CS axiom fixes the sign of the spin-orbit term so that the aligned branch `j = l + 1/2` lies lower under left chirality. The deformation weight is identified with the reciprocal of the symmetric trace-free bulk dimension, which equals five, giving `μ = 1/5`. That dimension is the five independent spatial modes of the `l = 2` quadrupole on the SE(3) shadow. The spin-orbit scale is identified with the BU Dual-Pole Loop expressed as a fraction of a full turn. Writing `τ = δ_BU/(2π)`, the coupling is taken as the 256-tick turn quantization of `τ`, where `Q_256` denotes rounding to the nearest 1/256-turn tick, which gives `κ = Q_256(τ) = 1/32`. Both assignments use only quantities already fixed by the CGM constants chain of Section 2. The same STF bulk dimension enters the electroweak mass expansion through the `1/√5` equipartition factor of Section 2.1, and the same holonomy ratio `δ_BU/m_a` that defines the aperture gap Δ also supplies τ. The couplings that govern shell closure at `(Z, N) = (82, 126)` therefore belong to the same geometric ratio system as the W/Z mass split, not to a separate nuclear parameter set.
 
 Two spectra are evaluated at this anchor. In the diagonal spectrum each orbital receives the energy above without cross-shell mixing. In the mixed spectrum the quadrupole operator introduces Δn = 2 couplings between orbitals of the same `l`, `j`, and `m` whose major quantum numbers differ by two, where `m` is the magnetic substate label, the projection of `j` onto a fixed axis. The mixed spectrum is solved on the `m`-substate basis so that level counting is explicit after diagonalization. A closure is recorded when an adjacent gap exceeds 1.8 times the local median spacing, and gap prominence ranks the largest closures relative to their neighbors.
 
@@ -1073,7 +1075,7 @@ The eV-band census also includes U-235m near 76 eV (Ponce et al., Phys. Rev. C 9
 
 Reference astrophysical S-factors for holdout tests reside in `data/catalogs/fusion/` with provenance in `data/catalogs/fusion/SOURCE.txt`. D-T, D-D, D-3He, and T-T use the Bosch–Hale Padé fits (Nucl. Fusion 32, 611, 1992). p-11B uses the Tentori–Belloni piecewise fit (Nucl. Fusion 63, 086001, 2023). 3He-3He uses the Solar Fusion II quadratic (Adelberger et al., Rev. Mod. Phys. 83, 195, 2011). p-6Li uses the Trojan Horse Method quadratic fit recorded in that catalog.
 
-The electroweak anchor `v` and the W and Z masses used in the mass-ratio recovery of the ruler unit follow the PDG 2024 review (Navas et al., Phys. Rev. D 110, 030001, 2024). The deuteron binding energy used for the strong-scale check is 2.2240 MeV (PDG few-nucleon summary).
+The electroweak anchor `v` and the W and Z masses used in the mass-ratio recovery of the kernel aperture `Δ_*` follow the PDG 2024 review (Navas et al., Phys. Rev. D 110, 030001, 2024). The deuteron binding energy used for the strong-scale check is 2.2240 MeV (PDG few-nucleon summary).
 
 The terrestrial fusion viability boundary is the Rider cutoff `Z1 Z2 ≥ 7` (with `Z1 Z2 ≥ 8` absolute) together with the p-11B bremsstrahlung-to-fusion power ratio 1.19, both taken from Rider, LLNL High Energy Density Science seminar, 19 January 2023, "Is There a Better Route to Fusion?" (slides: https://heds-center.llnl.gov/sites/heds_center/files/2023-03/01-19-23_slides_-_rider_.pdf).
 

@@ -1,12 +1,194 @@
-#include "codec.h"
+﻿#include "codec.h"
 
 #include "constants.h"
 #include "kernel.h"
+#include "ledger.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Layer owned-call receipts (defined in layer.c). */
+void hqvm_norm_ruler_commit_inc(void);
+void hqvm_rope_codec_row_inc(void);
+void hqvm_ffn_shell_gate_inc(void);
+
+/*
+ * Codecs + dyad arithmetic. Finite charts (norm ruler, RoPE ticks, shell FFN) are
+ * medium faces when selected. to_f32/from_f32 are interoperability adapters only.
+ */
+
+/* ===== Integer-owned finite binary32 chart ===== */
+
+typedef struct hqvm_dyad_parts {
+    uint64_t sig;
+    int exp2;
+    uint32_t sign;
+} hqvm_dyad_parts;
+
+static int dyad_unpack(hqvm_dyad32_t x, hqvm_dyad_parts *p) {
+    const uint32_t ef = (x.bits >> 23) & 0xffu;
+    const uint32_t frac = x.bits & 0x7fffffu;
+    if (ef == 0xffu) return -1;
+    p->sign = x.bits >> 31;
+    if (ef == 0) {
+        p->sig = frac;
+        p->exp2 = -149;
+    } else {
+        p->sig = (uint64_t)(0x800000u | frac);
+        p->exp2 = (int)ef - 150;
+    }
+    return 0;
+}
+
+static int dyad_msb64(uint64_t x) {
+    int n = -1;
+    while (x) { x >>= 1; ++n; }
+    return n;
+}
+
+static uint64_t dyad_shr_jam(uint64_t x, unsigned d) {
+    if (d == 0) return x;
+    if (d >= 64) return x ? 1u : 0u;
+    return (x >> d) | ((x & ((((uint64_t)1) << d) - 1u)) != 0u);
+}
+
+static uint64_t dyad_round_shr_even(uint64_t x, unsigned d) {
+    uint64_t q, rem, half;
+    if (d == 0) return x;
+    if (d > 64) return 0;
+    if (d == 64) {
+        const uint64_t h = ((uint64_t)1) << 63;
+        return x > h ? 1u : 0u;
+    }
+    q = x >> d;
+    rem = x & ((((uint64_t)1) << d) - 1u);
+    half = ((uint64_t)1) << (d - 1u);
+    if (rem > half || (rem == half && (q & 1u))) ++q;
+    return q;
+}
+
+static int dyad_pack(uint32_t sign, uint64_t sig, int exp2, hqvm_dyad32_t *out) {
+    int top, e;
+    uint64_t q;
+    if (!out) return -1;
+    if (!sig) {
+        out->bits = sign << 31;
+        return 0;
+    }
+    top = dyad_msb64(sig);
+    e = top + exp2;
+    if (e > 127) return -2;
+    if (e >= -126) {
+        const int shift = top - 23;
+        q = shift > 0 ? dyad_round_shr_even(sig, (unsigned)shift)
+                      : sig << (unsigned)(-shift);
+        if (q == 0x1000000u) {
+            q >>= 1;
+            ++e;
+            if (e > 127) return -2;
+        }
+        out->bits = (sign << 31) | ((uint32_t)(e + 127) << 23)
+                  | ((uint32_t)q & 0x7fffffu);
+        return 0;
+    }
+    {
+        const int shift = -(exp2 + 149);
+        q = shift > 0 ? dyad_round_shr_even(sig, (unsigned)shift)
+                      : sig << (unsigned)(-shift);
+        if (q >= 0x800000u) {
+            out->bits = (sign << 31) | 0x00800000u;
+        } else {
+            out->bits = (sign << 31) | (uint32_t)q;
+        }
+    }
+    return 0;
+}
+
+int hqvm_dyad32_is_finite(hqvm_dyad32_t x) { return (x.bits & 0x7f800000u) != 0x7f800000u; }
+int hqvm_dyad32_sign(hqvm_dyad32_t x) { return (int)(x.bits >> 31); }
+hqvm_dyad32_t hqvm_dyad32_abs(hqvm_dyad32_t x) { x.bits &= 0x7fffffffu; return x; }
+int hqvm_dyad32_is_zero(hqvm_dyad32_t x) { return (x.bits & 0x7fffffffu) == 0; }
+
+hqvm_dyad32_t hqvm_dyad32_from_f32(float x) {
+    hqvm_dyad32_t d;
+    memcpy(&d.bits, &x, sizeof(d.bits));
+    return d;
+}
+
+float hqvm_dyad32_to_f32(hqvm_dyad32_t x) {
+    float f;
+    memcpy(&f, &x.bits, sizeof(f));
+    return f;
+}
+
+int hqvm_dyad32_from_i32(int32_t x, hqvm_dyad32_t *out) {
+    const uint32_t sign = x < 0;
+    const uint64_t mag = sign ? (uint64_t)(-(int64_t)x) : (uint64_t)x;
+    return dyad_pack(sign, mag, 0, out);
+}
+
+int hqvm_dyad32_pack_i128(uint32_t sign, uint64_t sig, int exp2, hqvm_dyad32_t *out) {
+    return dyad_pack(sign ? 1u : 0u, sig, exp2, out);
+}
+
+int hqvm_dyad32_add(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out) {
+    hqvm_dyad_parts pa, pb, t;
+    uint64_t sa, sb, sig;
+    uint32_t sign;
+    int d;
+    if (dyad_unpack(a, &pa) != 0 || dyad_unpack(b, &pb) != 0 || !out) return -1;
+    if (!pa.sig) { *out = b; return 0; }
+    if (!pb.sig) { *out = a; return 0; }
+    if (pa.exp2 < pb.exp2) { t = pa; pa = pb; pb = t; }
+    d = pa.exp2 - pb.exp2;
+    sa = pa.sig << 3;
+    sb = dyad_shr_jam(pb.sig << 3, (unsigned)d);
+    if (pa.sign == pb.sign) {
+        sig = sa + sb;
+        sign = pa.sign;
+    } else if (sa >= sb) {
+        sig = sa - sb;
+        sign = pa.sign;
+    } else {
+        sig = sb - sa;
+        sign = pb.sign;
+    }
+    return dyad_pack(sign, sig, pa.exp2 - 3, out);
+}
+
+int hqvm_dyad32_mul(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out) {
+    hqvm_dyad_parts pa, pb;
+    if (dyad_unpack(a, &pa) != 0 || dyad_unpack(b, &pb) != 0 || !out) return -1;
+    return dyad_pack(pa.sign ^ pb.sign, pa.sig * pb.sig, pa.exp2 + pb.exp2, out);
+}
+
+int hqvm_dyad32_div(hqvm_dyad32_t a, hqvm_dyad32_t b, hqvm_dyad32_t *out) {
+    hqvm_dyad_parts pa, pb;
+    uint64_t numerator, q, rem;
+    if (dyad_unpack(a, &pa) != 0 || dyad_unpack(b, &pb) != 0 || !out || !pb.sig) return -1;
+    if (!pa.sig) return dyad_pack(pa.sign ^ pb.sign, 0, 0, out);
+    numerator = pa.sig << 31;
+    q = numerator / pb.sig;
+    rem = numerator % pb.sig;
+    if (rem) q |= 1u;
+    return dyad_pack(pa.sign ^ pb.sign, q, pa.exp2 - pb.exp2 - 31, out);
+}
+
+int hqvm_dyad32_mul_rational(
+    hqvm_dyad32_t x, int32_t num, int32_t den, hqvm_dyad32_t *out)
+{
+    hqvm_dyad32_t n, d, gain, product;
+    int rc;
+    if (den == 0 || !out) return -1;
+    if ((rc = hqvm_dyad32_from_i32(num, &n)) != 0 ||
+        (rc = hqvm_dyad32_from_i32(den, &d)) != 0 ||
+        (rc = hqvm_dyad32_div(n, d, &gain)) != 0 ||
+        (rc = hqvm_dyad32_mul(x, gain, &product)) != 0) return rc;
+    *out = product;
+    return 0;
+}
 
 /* ===== Norm ===== */
 
@@ -191,7 +373,7 @@ float hqvm_norm_g0(void) {
     return s_norm_g0;
 }
 
-/* Encode gain on the Delta-ruler (Formalism §7): n = round(log2(g/g0)/Delta).
+/* Encode gain on the Delta-ruler (Formalism Â§7): n = round(log2(g/g0)/Delta).
  * Signed int16; never clamp negatives to 0. Delta is APERTURE_GAP. */
 int16_t hqvm_norm_encode_gain16(float g, float g0, float Delta) {
     double n_g;
@@ -207,6 +389,37 @@ int16_t hqvm_norm_encode_gain16(float g, float g0, float Delta) {
 float hqvm_norm_decode_gain16(int16_t n, float g0, float Delta) {
     (void)Delta;
     return g0 * hqvm_norm_pow2_delta(n);
+}
+
+/* Committed-chart access: LUT entry for a mantissa in [1,2). */
+float hqvm_norm_rsqrt_mantissa(double mant) {
+    int idx;
+    if (mant < 1.0) mant = 1.0;
+    if (mant >= 2.0) mant = 2.0 - 1e-12;
+    hqvm_rsqrt_lut_init();
+    idx = (int)floor((mant - 1.0) * (double)HQVM_RSQRT_LUT);
+    if (idx < 0) idx = 0;
+    if (idx >= HQVM_RSQRT_LUT) idx = HQVM_RSQRT_LUT - 1;
+    return s_rsqrt_lut[idx];
+}
+
+/* Commit an inverse RMS gain onto the Delta-ruler; decodes the ruler tick. */
+float hqvm_norm_commit_gain(float inv_gain) {
+    const float gg0 = 1.0f;
+    const int16_t ns = hqvm_norm_encode_gain16(inv_gain, gg0, (float)APERTURE_GAP);
+    return hqvm_norm_decode_gain16(ns, gg0, (float)APERTURE_GAP);
+}
+
+/* Learned weight as its own ruler value (two-reference discipline: tensor
+ * geomean reference supplied by the caller). */
+float hqvm_norm_weight_commuted(float w, float ref, float Delta) {
+    const float aw = fabsf(w);
+    if (aw <= 0.0f) return 0.0f;
+    {
+        const int16_t n16 = hqvm_norm_encode_gain16(aw > 0.0f ? aw : ref, ref, Delta);
+        const float wl = hqvm_norm_decode_gain16(n16, ref, Delta);
+        return (w < 0.0f) ? -wl : wl;
+    }
 }
 
 void hqvm_norm_apply_gain_ruler(float *w, int64_t n, float g0, float Delta) {
@@ -401,10 +614,24 @@ void hqvm_rope_codec_audit_report(void) {
 void hqvm_rope_apply_pair(
     float x0, float x1, uint8_t tick, float sin_sign, float *y0, float *y1)
 {
-    const float c = s_rope_cos[tick];
-    const float s = s_rope_sin[tick] * sin_sign;
-    *y0 = x0 * c - x1 * s;
-    *y1 = x0 * s + x1 * c;
+    /* Tick index is finite; Q14 multiply is available via GYRO_ROPE_Q14=1. */
+    static int s_q14 = -1;
+    if (s_q14 < 0) {
+        const char *e = getenv("GYRO_ROPE_Q14");
+        s_q14 = (e && e[0] && e[0] != '0') ? 1 : 0;
+    }
+    if (s_q14) {
+        const int32_t c = (int32_t)s_rope_cos_q14[tick];
+        const int32_t s = (int32_t)((float)s_rope_sin_q14[tick] * sin_sign);
+        const float inv = 1.0f / 16384.0f;
+        *y0 = (x0 * (float)c - x1 * (float)s) * inv;
+        *y1 = (x0 * (float)s + x1 * (float)c) * inv;
+    } else {
+        const float c = s_rope_cos[tick];
+        const float s = s_rope_sin[tick] * sin_sign;
+        *y0 = x0 * c - x1 * s;
+        *y1 = x0 * s + x1 * c;
+    }
     s_rope_codec_calls++;
 }
 
@@ -475,233 +702,26 @@ void hqvm_rope_codec_shadow(
 }
 
 
-/* ===== SiLU ===== */
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-static float s_silu_lut[HQVM_SILU_BINS];
-static float s_silu_clip = 0.0f;
-static int s_silu_init = 0;
-
-static float silu_exact(float x) {
-    return x / (1.0f + expf(-x));
-}
-
-void hqvm_silu_codec_init(void) {
-    hqvm_silu_codec_init_range(10.0f);
-}
-
-void hqvm_silu_codec_init_range(float clip) {
-    int i;
-    if (clip <= 0.0f) clip = 10.0f;
-    s_silu_clip = clip;
-    for (i = 0; i < HQVM_SILU_BINS; ++i) {
-        const float xc = -clip + (2.0f * clip) * ((float)i + 0.5f) / (float)HQVM_SILU_BINS;
-        s_silu_lut[i] = silu_exact(xc);
-    }
-    s_silu_init = 1;
-}
-
-int hqvm_silu_codec_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_SILU_CODEC");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-        if (s) hqvm_silu_codec_init();
-    }
-    return s;
-}
-
-void hqvm_silu_apply(float *x, int64_t n, float clip) {
-    int64_t i;
-    if (!x || n <= 0) return;
-    if (!s_silu_init || clip != s_silu_clip) hqvm_silu_codec_init_range(clip);
-    for (i = 0; i < n; ++i) {
-        float v = x[i];
-        int b;
-        if (v < -clip) v = -clip;
-        if (v > clip) v = clip;
-        b = (int)(((v + clip) / (2.0f * clip)) * (float)HQVM_SILU_BINS);
-        if (b < 0) b = 0;
-        if (b >= HQVM_SILU_BINS) b = HQVM_SILU_BINS - 1;
-        x[i] = s_silu_lut[b];
-    }
-}
-
-void hqvm_swiglu_apply(
-    float *dst, const float *gate, const float *up, int64_t n, float clip)
-{
-    int64_t i;
-    if (!dst || !gate || !up || n <= 0) return;
-    if (!s_silu_init || clip != s_silu_clip) hqvm_silu_codec_init_range(clip);
-    for (i = 0; i < n; ++i) {
-        float v = gate[i];
-        int b;
-        if (v < -clip) v = -clip;
-        if (v > clip) v = clip;
-        b = (int)(((v + clip) / (2.0f * clip)) * (float)HQVM_SILU_BINS);
-        if (b < 0) b = 0;
-        if (b >= HQVM_SILU_BINS) b = HQVM_SILU_BINS - 1;
-        dst[i] = s_silu_lut[b] * up[i];
-    }
-}
-
-void hqvm_silu_codec_shadow(const float *x, int64_t n, float clip) {
-    static int s_print = 0;
-    int64_t i;
-    double dot = 0.0, na = 0.0, nb = 0.0, maxerr = 0.0, maxabs = 0.0;
-    if (!x || n <= 0) return;
-    if (!s_silu_init || clip != s_silu_clip) hqvm_silu_codec_init_range(clip);
-    for (i = 0; i < n; ++i) {
-        float v = x[i], ve = silu_exact(v), vl;
-        int b;
-        float vc = v;
-        double ax = v < 0 ? -(double)v : (double)v;
-        if (ax > maxabs) maxabs = ax;
-        if (vc < -clip) vc = -clip;
-        if (vc > clip) vc = clip;
-        b = (int)(((vc + clip) / (2.0f * clip)) * (float)HQVM_SILU_BINS);
-        if (b < 0) b = 0;
-        if (b >= HQVM_SILU_BINS) b = HQVM_SILU_BINS - 1;
-        vl = s_silu_lut[b];
-        dot += (double)ve * vl;
-        na += (double)ve * ve;
-        nb += (double)vl * vl;
-        {
-            double e = (double)ve - vl;
-            if (e < 0) e = -e;
-            if (e > maxerr) maxerr = e;
-        }
-    }
-    if (s_print < 40 && na > 0.0 && nb > 0.0) {
-        fprintf(stderr, "[hqvm-silu-codec] cos=%.6f maxerr=%.5f maxabs=%.3f n=%lld\n",
-            dot / (sqrt(na) * sqrt(nb)), maxerr, maxabs, (long long)n);
-        s_print++;
-    }
-}
-
-void hqvm_swiglu_codec_shadow(
-    const float *gate, const float *up, int64_t n, float clip)
-{
-    static int s_print = 0;
-    int64_t i;
-    double dot = 0.0, na = 0.0, nb = 0.0, maxabs = 0.0;
-    if (!gate || !up || n <= 0) return;
-    if (!s_silu_init || clip != s_silu_clip) hqvm_silu_codec_init_range(clip);
-    for (i = 0; i < n; ++i) {
-        float g = gate[i], ve = silu_exact(g) * up[i], vl;
-        int b;
-        float vc = g;
-        double ax = g < 0 ? -(double)g : (double)g;
-        if (ax > maxabs) maxabs = ax;
-        if (vc < -clip) vc = -clip;
-        if (vc > clip) vc = clip;
-        b = (int)(((vc + clip) / (2.0f * clip)) * (float)HQVM_SILU_BINS);
-        if (b < 0) b = 0;
-        if (b >= HQVM_SILU_BINS) b = HQVM_SILU_BINS - 1;
-        vl = s_silu_lut[b] * up[i];
-        dot += (double)ve * vl;
-        na += (double)ve * ve;
-        nb += (double)vl * vl;
-    }
-    if (s_print < 40 && na > 0.0 && nb > 0.0) {
-        fprintf(stderr, "[hqvm-swiglu-codec] cos=%.6f maxabs=%.3f n=%lld\n",
-            dot / (sqrt(na) * sqrt(nb)), maxabs, (long long)n);
-        s_print++;
-    }
-}
-
-
-/* ===== Aperture Norm / SiLU ===== */
-int hqvm_aperture_silu_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_APERTURE_SILU");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-/* Aperture RMSNorm: scale = 1 / (rms * (1 - eps_shell)), eps_shell from shell
- * popcount of the row's chirality. Keeps the magnitude channel; enforces that
- * the norm cannot collapse energy to zero (Delta as irreducible opening). */
-void hqvm_aperture_rms_scale(float *row, int64_t n, float Delta) {
-    int64_t i;
-    double ss = 0.0;
-    float rms, scale;
-    uint64_t signs = 0;
-    uint8_t chi;
-    int shell;
-    float eps;
-    if (!row || n <= 0) return;
-    for (i = 0; i < n; ++i) ss += (double)row[i] * (double)row[i];
-    rms = (float)sqrt(ss / (double)n);
-    if (rms <= 0.0f) return;
-    for (i = 0; i < 64 && i < n; ++i) if (row[i] >= 0.0f) signs |= (1ull << i);
-    chi = gyroscopic_chirality_from_signs64(signs);
-    shell = gyroscopic_chirality_distance(chi, 0);
-    eps = (float)(6 - shell) * Delta;
-    if (eps > 0.25f) eps = 0.25f;
-    if (eps < 0.0f) eps = 0.0f;
-    scale = 1.0f / (rms * (1.0f - eps));
-    for (i = 0; i < n; ++i) row[i] *= scale;
-}
-
-/* Aperture SiLU: y = silu(x)*(1-eps) + eps*x. The identity aperture keeps the
- * gate from fully closing (Gate-F cannot annihilate the signal). */
-void hqvm_aperture_silu(float *row, int64_t n, float Delta) {
-    int64_t i;
-    const float eps = Delta;
-    if (!row || n <= 0) return;
-    for (i = 0; i < n; ++i) {
-        const float x = row[i];
-        const float silu = x / (1.0f + expf(-x));
-        row[i] = silu * (1.0f - eps) + eps * x;
-    }
-}
-
-/* ===== FFN shell gate (QuBEC occupation; not SiLU LUT) ===== */
-#define HQVM_LAMBDA_MAX 8.0f
-static float s_gate_factor[4][7];
+/* ===== FFN joint law (Theory_Drop Runtime §4.1.2) =====
+ * Shell-only `up * simplex(λ^N)` discards controller magnitude — do not revive.
+ * Documented production L2: silu(gate)·up·(1+Δ·m)·(1+0.25Δ·m_req).
+ * SiLU here is the pretrained controller chart; shell/family/request enter only
+ * as aperture gains (Analysis §7.4 joint-law parallel). Opt-in GYRO_FFN_NATIVE=1.
+ * Eventual carrier-native nonlinearity (Analysis §7.7) is separate work — not a
+ * softstep / mag-LUT / scale-sweep stand-in for SiLU. */
 static int s_ffn_gate_init = 0;
 static uint64_t s_stock_silu_calls = 0;
 
-static float hqvm_lambda_from_Nc(uint8_t Nc) {
-    /* m = (Nc-3)/3; lambda = (1+m)/(1-m); Nc=6 -> lambda_max */
-    static const float lam[7] = {
-        0.0f, 0.2f, 0.5f, 1.0f, 2.0f, 5.0f, HQVM_LAMBDA_MAX
-    };
-    if (Nc > 6) Nc = 6;
-    return lam[Nc];
-}
-
 void hqvm_ffn_shell_gate_init(void) {
-    int fam, N;
     if (s_ffn_gate_init) return;
-    /* Theory table: factors from normalized lambda^N mass (lambda=1 baseline),
-     * scaled into (0,1]; fam rotates the monotone profile by K4 phase. */
-    for (fam = 0; fam < 4; ++fam) {
-        float sum = 0.0f;
-        float raw[7];
-        for (N = 0; N < 7; ++N) {
-            /* Base monotone in N; fam shifts emphasis */
-            const int Np = (N + fam) % 7;
-            raw[N] = (float)(1 + Np);
-            sum += raw[N];
-        }
-        for (N = 0; N < 7; ++N) {
-            s_gate_factor[fam][N] = raw[N] / sum;
-        }
-    }
     s_ffn_gate_init = 1;
 }
 
 int hqvm_ffn_shell_gate_enabled(void) {
     static int s = -1;
     if (s < 0) {
-        const char *e = getenv("GYRO_FFN_SHELL_GATE");
+        const char *e = getenv("GYRO_FFN_NATIVE");
+        if (!(e && e[0] == '1')) e = getenv("GYRO_FFN_SHELL_GATE");
         s = (e && e[0] && e[0] != '0') ? 1 : 0;
         if (s) hqvm_ffn_shell_gate_init();
     }
@@ -716,32 +736,27 @@ uint64_t hqvm_stock_silu_calls(void) {
     return s_stock_silu_calls;
 }
 
-void hqvm_ffn_shell_gate_apply(
+/* Documented FFN L2 joint law. Not shell-only. Not a SiLU LUT costume for Ω. */
+void hqvm_ffn_shell_gate_apply_native(
     float *dst, const float *gate, const float *up, int64_t n,
     uint8_t fam, uint8_t Nc)
 {
     int64_t b, i;
-    float lam, lam_pow[7];
-    float wN[7];
-    float Z = 0.0f;
+    const float Delta = (float)APERTURE_GAP;
+    float m_req;
+    float g_req;
     if (!dst || !gate || !up || n <= 0) return;
     hqvm_ffn_shell_gate_init();
     fam = (uint8_t)(fam & 3);
-    lam = hqvm_lambda_from_Nc(Nc);
-    lam_pow[0] = 1.0f;
-    for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lam;
-    for (i = 0; i < 7; ++i) {
-        wN[i] = s_gate_factor[fam][i] * lam_pow[i];
-        Z += wN[i];
-    }
-    if (Z <= 0.0f) Z = 1.0f;
-    for (i = 0; i < 7; ++i) wN[i] /= Z;
+    if (Nc > 6) Nc = 6;
+    m_req = ((float)Nc - 3.0f) / 3.0f;
+    g_req = 1.0f + 0.25f * Delta * m_req;
 
     for (b = 0; b + 64 <= n; b += 64) {
         uint64_t signs = 0;
         uint8_t chi;
-        int Ng;
-        float f;
+        int Ng, Nf;
+        float m, g_shell, gain;
         for (i = 0; i < 64; ++i) {
             if (gate[b + i] >= 0.0f) signs |= (1ull << i);
         }
@@ -752,13 +767,365 @@ void hqvm_ffn_shell_gate_apply(
         Ng = __builtin_popcount((unsigned)(chi & 63));
 #endif
         if (Ng > 6) Ng = 6;
-        f = wN[Ng];
+        /* Family rotates shell index (Genealogy phase); m = (N-3)/3. */
+        Nf = (Ng + (int)fam) % 7;
+        m = ((float)Nf - 3.0f) / 3.0f;
+        g_shell = 1.0f + Delta * m;
+        gain = g_shell * g_req;
         for (i = 0; i < 64; ++i) {
-            dst[b + i] = up[b + i] * f;
+            const float z = gate[b + i];
+            const float silu = z / (1.0f + expf(-z));
+            dst[b + i] = silu * up[b + i] * gain;
         }
     }
-    /* Tail < 64: use last shell factor / mean */
-    for (; b < n; ++b) {
-        dst[b] = up[b] * wN[3];
+    if (b < n) {
+        int Ng = (int)Nc;
+        int Nf = (Ng + (int)fam) % 7;
+        float m = ((float)Nf - 3.0f) / 3.0f;
+        float gain = (1.0f + Delta * m) * g_req;
+        for (; b < n; ++b) {
+            const float z = gate[b];
+            const float silu = z / (1.0f + expf(-z));
+            dst[b] = silu * up[b] * gain;
+        }
     }
 }
+
+void hqvm_residual_gain_q16(uint8_t Nc, int32_t *num, int32_t *den) {
+    const int32_t gap = HQVM_APERTURE_GAP_Q16;
+    const int32_t nc = (int32_t)(Nc <= 6u ? Nc : 6u);
+    /* gain = 1 + gap_q16/65536 * (Nc-3)/3 = (3*65536 + gap*(Nc-3)) / (3*65536) */
+    if (num) *num = 3 * 65536 + gap * (nc - 3);
+    if (den) *den = 3 * 65536;
+}
+
+float hqvm_residual_gain_from_Nc(uint8_t Nc) {
+    int32_t num = 0, den = 1;
+    hqvm_residual_gain_q16(Nc, &num, &den);
+    return (float)num / (float)den;
+}
+
+void hqvm_manifold_gain_q16(
+    uint8_t chi_bit0, uint8_t p0, uint8_t chi_bit1, uint8_t p1,
+    int32_t *num, int32_t *den)
+{
+    const int32_t gap = HQVM_APERTURE_GAP_Q16;
+    const int s0 = ((p0 ^ chi_bit0) & 1u) ? 1 : -1;
+    const int s1 = ((p1 ^ chi_bit1) & 1u) ? 1 : -1;
+    /* 1 + gap * 0.5 * (s0+s1) = 1 + gap * half_sum / 65536, half_sum in {-1,0,1} */
+    const int32_t half_sum = (int32_t)((s0 + s1) / 2);
+    if (num) *num = 65536 + gap * half_sum;
+    if (den) *den = 65536;
+}
+
+float hqvm_manifold_gain_from_bits(
+    uint8_t chi_bit0, uint8_t p0, uint8_t chi_bit1, uint8_t p1)
+{
+    int32_t num = 0, den = 1;
+    hqvm_manifold_gain_q16(chi_bit0, p0, chi_bit1, p1, &num, &den);
+    return (float)num / (float)den;
+}
+
+int hqvm_ffn_native_enabled(void) {
+    static int s = -1;
+    if (s < 0) {
+        const char *e = getenv("GYRO_FFN_NATIVE");
+        if (!(e && e[0] == '1')) e = getenv("GYRO_FFN_SHELL_GATE");
+        s = (e && e[0] && e[0] != '0') ? 1 : 0;
+    }
+    return s;
+}
+
+int hqvm_norm_ruler_dyad(
+    const hqvm_dyad32_t *x_in,
+    hqvm_dyad32_t *x_out,
+    int64_t n,
+    const float *g,
+    float g0)
+{
+    static int s_plain = -1;
+    float *tmp = NULL;
+    float scale;
+    int64_t i;
+
+    hqvm_gate_counters_inc_norm();
+    if (!x_in || !x_out || n <= 0) return -1;
+
+    if (s_plain < 0) {
+        const char *e = getenv("GYRO_NATIVE_NORM");
+        s_plain = (e && strcmp(e, "plain") == 0) ? 1 : 0;
+        if (s_plain) {
+            fprintf(stderr, "[hqvm-norm] plain RMS (no Delta-ruler)\n");
+            fflush(stderr);
+        } else {
+            fprintf(stderr, "[hqvm-norm] mode=delta-ruler\n");
+            fflush(stderr);
+        }
+    }
+
+    tmp = (float *)malloc((size_t)n * sizeof(float));
+    if (!tmp) return -1;
+    for (i = 0; i < n; ++i) tmp[i] = hqvm_dyad32_to_f32(x_in[i]);
+
+    if (s_plain) {
+        scale = hqvm_rms_gain(tmp, n, 1e-6f);
+        for (i = 0; i < n; ++i) {
+            const float wi = g ? g[i] : 1.0f;
+            x_out[i] = hqvm_dyad32_from_f32(tmp[i] * scale * wi);
+        }
+        free(tmp);
+        return 0;
+    }
+
+    scale = hqvm_rms_gain_fixed(tmp, n, 1e-6f);
+    hqvm_norm_ruler_commit_inc();
+    {
+        const int16_t ns = hqvm_norm_encode_gain16(scale, 1.0f, (float)APERTURE_GAP);
+        scale = hqvm_norm_decode_gain16(ns, 1.0f, (float)APERTURE_GAP);
+    }
+    for (i = 0; i < n; ++i) {
+        float wi = 1.0f;
+        if (g) {
+            const float gi = fabsf(g[i]);
+            const float g_ref = (g0 > 0.0f) ? g0 : 1.0f;
+            const int16_t n16 = hqvm_norm_encode_gain16(
+                gi > 0.0f ? gi : g_ref, g_ref, (float)APERTURE_GAP);
+            wi = hqvm_norm_decode_gain16(n16, g_ref, (float)APERTURE_GAP);
+            if (g[i] < 0.0f) wi = -wi;
+        }
+        x_out[i] = hqvm_dyad32_from_f32(tmp[i] * scale * wi);
+    }
+    free(tmp);
+    return 0;
+}
+
+static float rope_freq_base(void) {
+    static float s = -1.0f;
+    if (s < 0.0f) {
+        const char *e = getenv("GYRO_ROPE_FREQ_BASE");
+        s = (e && e[0]) ? (float)atof(e) : 1000000.0f;
+        if (s <= 0.0f) s = 1000000.0f;
+        fprintf(stderr, "[hqvm-rope] freq_base=%.0f\n", (double)s);
+        fflush(stderr);
+    }
+    return s;
+}
+
+static float rope_freq_scale(void) {
+    static float s = -1.0f;
+    if (s < 0.0f) {
+        const char *e = getenv("GYRO_ROPE_FREQ_SCALE");
+        s = (e && e[0]) ? (float)atof(e) : 0.25f;
+        if (s <= 0.0f) s = 0.25f;
+        fprintf(stderr, "[hqvm-rope] freq_scale=%g\n", (double)s);
+        fflush(stderr);
+    }
+    return s;
+}
+
+static void rope_yarn_ticks(int32_t token_pos, uint8_t *ticks) {
+    const float freq_base = rope_freq_base();
+    const float freq_scale = rope_freq_scale();
+    const int np = HQVM_HEAD_DIM / 2;
+    const int n_dims = HQVM_HEAD_DIM;
+    const float n_ctx_orig = 16384.0f;
+    const float beta_fast = 32.0f;
+    const float beta_slow = 1.0f;
+    const float ext_factor = 1.0f;
+    float corr0, corr1;
+    float theta = (float)token_pos;
+    const float theta_scale = powf(freq_base, -2.0f / (float)n_dims);
+    int i;
+    hqvm_rope_codec_init();
+    {
+        const float start = (float)n_dims * logf(n_ctx_orig / (beta_fast * 2.0f * (float)GYRO_M_PI))
+            / (2.0f * logf(freq_base));
+        const float end = (float)n_dims * logf(n_ctx_orig / (beta_slow * 2.0f * (float)GYRO_M_PI))
+            / (2.0f * logf(freq_base));
+        corr0 = start < 0.0f ? 0.0f : floorf(start);
+        corr1 = end > (float)(n_dims - 1) ? (float)(n_dims - 1) : ceilf(end);
+    }
+    for (i = 0; i < np; ++i) {
+        const float theta_extrap = theta;
+        const float theta_interp = freq_scale * theta_extrap;
+        float ramp = 1.0f - ((float)i - corr0) / (corr1 - corr0 + 1e-3f);
+        float th;
+        if (ramp < 0.0f) ramp = 0.0f;
+        if (ramp > 1.0f) ramp = 1.0f;
+        ramp *= ext_factor;
+        th = theta_interp * (1.0f - ramp) + theta_extrap * ramp;
+        ticks[i] = hqvm_rope_encode_tick(th);
+        theta *= theta_scale;
+    }
+}
+
+static void rope_apply_head_dyad(hqvm_dyad32_t *row, const uint8_t *ticks) {
+    int i;
+    const int np = HQVM_HEAD_DIM / 2;
+    for (i = 0; i < np; ++i) {
+        float x0 = hqvm_dyad32_to_f32(row[2 * i]);
+        float x1 = hqvm_dyad32_to_f32(row[2 * i + 1]);
+        float y0, y1;
+        hqvm_rope_apply_pair(x0, x1, ticks[i], 1.0f, &y0, &y1);
+        row[2 * i] = hqvm_dyad32_from_f32(y0);
+        row[2 * i + 1] = hqvm_dyad32_from_f32(y1);
+    }
+    hqvm_rope_codec_row_inc();
+}
+
+static void rope_apply_heads_float(
+    hqvm_dyad32_t *Q, hqvm_dyad32_t *K,
+    int32_t n_heads, int32_t n_kv, int32_t token_pos)
+{
+    const float freq_base = rope_freq_base();
+    const float freq_scale = rope_freq_scale();
+    const int np = HQVM_HEAD_DIM / 2;
+    const int n_dims = HQVM_HEAD_DIM;
+    const float n_ctx_orig = 16384.0f;
+    const float beta_fast = 32.0f;
+    const float beta_slow = 1.0f;
+    const float ext_factor = 1.0f;
+    const float mscale = 1.0f;
+    float corr0, corr1;
+    float cos_t[64], sin_t[64];
+    float theta = (float)token_pos;
+    const float theta_scale = powf(freq_base, -2.0f / (float)n_dims);
+    int i, h, kv_h;
+    {
+        const float start = (float)n_dims * logf(n_ctx_orig / (beta_fast * 2.0f * (float)GYRO_M_PI))
+            / (2.0f * logf(freq_base));
+        const float end = (float)n_dims * logf(n_ctx_orig / (beta_slow * 2.0f * (float)GYRO_M_PI))
+            / (2.0f * logf(freq_base));
+        corr0 = start < 0.0f ? 0.0f : floorf(start);
+        corr1 = end > (float)(n_dims - 1) ? (float)(n_dims - 1) : ceilf(end);
+    }
+    for (i = 0; i < np; ++i) {
+        const float theta_extrap = theta;
+        const float theta_interp = freq_scale * theta_extrap;
+        float ramp = 1.0f - ((float)i - corr0) / (corr1 - corr0 + 1e-3f);
+        if (ramp < 0.0f) ramp = 0.0f;
+        if (ramp > 1.0f) ramp = 1.0f;
+        ramp *= ext_factor;
+        {
+            const float th = theta_interp * (1.0f - ramp) + theta_extrap * ramp;
+            cos_t[i] = cosf(th) * mscale;
+            sin_t[i] = sinf(th) * mscale;
+        }
+        theta *= theta_scale;
+    }
+    for (h = 0; h < n_heads; ++h) {
+        hqvm_dyad32_t *qh = Q + h * HQVM_HEAD_DIM;
+        for (i = 0; i < np; ++i) {
+            const float x0 = hqvm_dyad32_to_f32(qh[2 * i]);
+            const float x1 = hqvm_dyad32_to_f32(qh[2 * i + 1]);
+            qh[2 * i] = hqvm_dyad32_from_f32(x0 * cos_t[i] - x1 * sin_t[i]);
+            qh[2 * i + 1] = hqvm_dyad32_from_f32(x0 * sin_t[i] + x1 * cos_t[i]);
+        }
+    }
+    for (kv_h = 0; kv_h < n_kv; ++kv_h) {
+        hqvm_dyad32_t *kh = K + kv_h * HQVM_HEAD_DIM;
+        for (i = 0; i < np; ++i) {
+            const float x0 = hqvm_dyad32_to_f32(kh[2 * i]);
+            const float x1 = hqvm_dyad32_to_f32(kh[2 * i + 1]);
+            kh[2 * i] = hqvm_dyad32_from_f32(x0 * cos_t[i] - x1 * sin_t[i]);
+            kh[2 * i + 1] = hqvm_dyad32_from_f32(x0 * sin_t[i] + x1 * cos_t[i]);
+        }
+    }
+}
+
+int hqvm_rope_qk_dyad(
+    hqvm_dyad32_t *Q,
+    hqvm_dyad32_t *K,
+    int32_t n_heads,
+    int32_t gqa_ratio,
+    int32_t token_pos)
+{
+    static int s_mode = -1;
+    int32_t n_kv;
+    int h, kv_h;
+    uint8_t ticks[HQVM_ROPE_MAX_FREQ];
+
+    hqvm_gate_counters_inc_rope();
+    if (!Q || !K || n_heads <= 0 || gqa_ratio <= 0) return -1;
+
+    if (s_mode < 0) {
+        const char *e = getenv("GYRO_NATIVE_ROPE");
+        if (e && e[0] == '0') s_mode = 1;
+        else if (e && strcmp(e, "float") == 0) s_mode = 2;
+        else s_mode = 0;
+        fprintf(stderr, "[hqvm-rope] mode=%s\n",
+            s_mode == 1 ? "skip" : (s_mode == 2 ? "float" : "tick"));
+        fflush(stderr);
+    }
+
+    n_kv = n_heads / gqa_ratio;
+    if (n_kv <= 0) n_kv = 1;
+
+    if (s_mode == 1) return 0;
+
+    if (s_mode == 2) {
+        rope_apply_heads_float(Q, K, n_heads, n_kv, token_pos);
+        return 0;
+    }
+
+    rope_yarn_ticks(token_pos, ticks);
+    for (h = 0; h < n_heads; ++h) {
+        rope_apply_head_dyad(Q + h * HQVM_HEAD_DIM, ticks);
+    }
+    for (kv_h = 0; kv_h < n_kv; ++kv_h) {
+        rope_apply_head_dyad(K + kv_h * HQVM_HEAD_DIM, ticks);
+    }
+    return 0;
+}
+
+static void stock_swiglu(float *dst, const float *gate, const float *up, int64_t n) {
+    int64_t i;
+    for (i = 0; i < n; ++i) {
+        const float z = gate[i];
+        const float sig = 1.0f / (1.0f + expf(-z));
+        dst[i] = z * sig * up[i];
+    }
+}
+
+int hqvm_ffn_gate_dyad(
+    const hqvm_dyad32_t *gate,
+    const hqvm_dyad32_t *up,
+    hqvm_dyad32_t *dst,
+    int64_t n,
+    uint8_t fam,
+    uint8_t Nc)
+{
+    static int s_logged = 0;
+    float g64[64], u64[64], d64[64];
+    int64_t b, i;
+    const int native = hqvm_ffn_native_enabled();
+
+    hqvm_gate_counters_inc_swiglu();
+    if (!gate || !up || !dst || n <= 0) return -1;
+
+    if (!s_logged) {
+        fprintf(stderr, "[hqvm-ffn] mode=%s\n",
+            native ? "NATIVE-shell (opt-in)" : "stock-SwiGLU");
+        fflush(stderr);
+        s_logged = 1;
+    }
+
+    for (b = 0; b < n; b += 64) {
+        const int64_t chunk = (b + 64 <= n) ? 64 : (n - b);
+        for (i = 0; i < chunk; ++i) {
+            g64[i] = hqvm_dyad32_to_f32(gate[b + i]);
+            u64[i] = hqvm_dyad32_to_f32(up[b + i]);
+        }
+        if (native) {
+            hqvm_ffn_shell_gate_apply_native(d64, g64, u64, chunk, fam, Nc);
+            hqvm_ffn_shell_gate_inc();
+        } else {
+            stock_swiglu(d64, g64, u64, chunk);
+        }
+        for (i = 0; i < chunk; ++i) {
+            dst[b + i] = hqvm_dyad32_from_f32(d64[i]);
+        }
+    }
+    return 0;
+}
+

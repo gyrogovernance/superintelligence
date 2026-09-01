@@ -91,6 +91,8 @@ with:
 
 `manifold_gain = 1 + Δ · mean(sign(parity(mismatch) XOR χ'_0))`
 
+and, in the operational dyadic closure, each row score as exact `A · 2^-64` over a portable signed 128 accumulator from integer 32 coordinate dots `P`, exact binary16 dyadic scales, and Q16 aperture gain. The common power `2^-64` preserves order by integer comparison, so greedy emission needs no floating comparison.
+
 The exact controller product preserves the learned magnitude structure. The manifold gain realizes the selected gyration on the numeric output. Neither aspect can replace the other. Chirality without controller amplitude collapses learned magnitude. Controller amplitude without manifold routing leaves the native datatype causally inert.
 
 This explains why Q8_0 compatibility is semantic rather than merely approximate. The quantized activation participates in mismatch parity. A different rounding tie or a scale stored in a different precision can alter a parity bit, select a different shell, and change the trajectory. Bit-compatible quantization is therefore part of the compiled law.
@@ -180,6 +182,8 @@ This gives three nested notions of ownership:
 2. **Whole-model forward ownership:** embedding entry, blocks, final norm, and logits are native.
 3. **End-to-end generation ownership:** forward map plus token selection are native or explicitly declared chassis boundaries.
 
+A notable closure result is exact greedy tail scoring: every vocabulary row score is `A · 2^-64` with integer dot, exact fp16 dyadic scales, and fixed Q64, so selection is an integer argmax (`exact_tail_rows = 1213352`).
+
 These notions should not be conflated. The current theoretical program ultimately asks for the second, with an explicit decision about the third.
 
 ---
@@ -255,7 +259,7 @@ This joint law avoids two category errors. It does not retain stock Softmax as t
 
 ### 7.5 RoPE
 
-RoPE is phase transport. Its native chart is `T_256^(turn)`, tied to absolute token position and compatible with K4 Genealogy phase. For Bonsai, the finite action must retain the Qwen3 consecutive-pair planes, grouped-query incidence, frequency base `10^6`, and YaRN scale `1/4`.
+RoPE is phase transport. Its native chart is `T_256^(turn)`, tied to absolute token position and compatible with K4 Genealogy phase. For Bonsai, the finite action must retain the Qwen3 consecutive-pair planes, grouped-query incidence, frequency base `10^6`, and YaRN scale `1/4` with the same correction ramp used by the stock chart. Applying `freq_scale` uniformly to every turn increment without that ramp is not the Bonsai rotary law.
 
 This is a chart compilation, not an aperture perturbation of stock angles. Δ governs fractional gain defect. Turn ticks govern rotation.
 
@@ -274,7 +278,7 @@ Two reference moments occur in Qwen3 normalization and must remain distinct:
 
 Using one baseline for both collapses state normalization and learned calibration into one coordinate.
 
-Finite exactness also imposes a word-size condition. At width 4096, direct fixed-point squaring can overflow a signed 64-bit accumulator for valid late-layer residuals. A lawful finite moment therefore normalizes by `amax`, accumulates bounded Q15 squares, and restores the outer scale. This is not a fallback to Euclidean semantics. It is the requirement that a finite chart be closed over the actual dynamic range of the model.
+Finite exactness also imposes a word-size condition. At width 4096, direct fixed-point squaring can overflow a signed 64-bit accumulator for valid late-layer residuals. A lawful finite moment therefore normalizes by `amax`, accumulates bounded Q15 squares, and restores the outer scale. This is not a fallback to Euclidean semantics. It is the requirement that a finite chart be closed over the actual dynamic range of the model. The dyadic residual entry and inter-block dyadic storage make the durable store finite, while per-block normalized rows are the next float boundary to replace, not by narrowing the learned field but by preserving the same `amax` Q15 and two-reference discipline under integer arithmetic.
 
 ### 7.7 FFN and SwiGLU
 
@@ -304,9 +308,9 @@ This residual law is distinct from `P_Q + D_Q`, which decomposes a linear operat
 
 ### 7.9 Common Source projection
 
-External embeddings are not automatically kernel states. A declared projection Pi is required to derive `(u6,v6)` from embedding signs and support structure. Until such a projection is applied, `GENE_MAC_REST` is the universal reference.
+External embeddings are not automatically kernel states. The named Bonsai entry contract is `Pi_summary_sign12`: bipolar signs of embedding dimensions `[0..5]` form `u6` and `[6..11]` form `v6`. Finite apply uses `hqvm_pi_summary_sign12_from_bits`. Until that projection is applied, `GENE_MAC_REST` is the universal reference.
 
-`Pi_basis` preserves basis-level information for operator analysis. `Pi_summary` provides chirality, shell, and resonance summaries for request grouping. Polar encoding can instantiate a summary projection, but it does not prove that an F32 embedding row is itself an element of Ω.
+`Pi_basis` preserves basis-level information for operator analysis. `Pi_summary_sign12` is the production summary used for request Common Source. Polar encoding can instantiate other summaries, but an F32 embedding row is not itself an element of Ω. GGUF may remain chassis storage for the residual seed while the CS anchor is finite.
 
 ---
 
@@ -316,14 +320,14 @@ Native semantics and float-free implementation are related but distinct claims.
 
 A site is semantically native when its decision law is expressed by the datatype, Genealogy, finite charts, and controller exactness rather than by a stock transformer primitive. A runtime is operationally float-free only when its storage and arithmetic also avoid floating-point execution in the hot path.
 
-A tick-based RoPE law applied to F32 row buffers is semantically on the native turn chart but not operationally float-free. A Q1_0 by q8 integer dot whose decoded scales and outputs are held in F32 has an exact integer controller core but still uses a floating interoperability chart. The same distinction applies to residual buffers, normalization gains, and attention accumulation.
+A tick-based RoPE law applied to F32 row buffers is semantically on the native turn chart but not operationally float-free. A Q1_0 by q8 integer dot whose decoded scales and outputs are held in F32 has an exact integer controller core but still uses a floating interoperability chart. The same distinction applies to residual scratch, normalization gains, and attention accumulation. The durable residual store is now dyadic, inter-block `hqvm_dyad32_t` with zero bulk float storage, while per-block Q/K/V and FFN scratch adapters remain the next interoperability boundary, not a permitted final form.
 
 This distinction prevents two opposite mistakes:
 
 - treating zero stock-operation counters as proof of float-free algebra
 - treating temporary F32 coordinates as proof that no native semantic law exists
 
-The final architecture requires both semantic ownership and operational closure of the integer or dyadic chart.
+The final architecture requires both semantic ownership and operational closure of the integer or dyadic chart. The exact tail already demonstrates this closure at the output boundary.
 
 ---
 
@@ -337,11 +341,11 @@ The final architecture requires both semantic ownership and operational closure 
 - Rotating shared GQA key state once per query head.
 - Conflating the residual mixer `1 + Δ·m` with operator defect `P_Q + D_Q`.
 - Treating a SiLU LUT as the final carrier-native nonlinearity.
-- Treating embedding rows as anchors without a declared Pi.
+- Treating embedding rows as anchors without a declared Pi (`Pi_summary_sign12`).
 - Resetting Genealogy per token or advancing it by function-call count.
 - Identifying `HQVMLEDS` with runtime Genealogy.
 - Ignoring parameter-free graph selection because it is not a MatMul.
-- Claiming whole-model ownership when only transformer blocks are native.
+- Claiming whole-model ownership when only transformer blocks are native (tail and emission are separate ownership sites).
 - Claiming float-free execution from stock-op counters alone.
 
 ---
@@ -352,4 +356,4 @@ Gyroscopic inference compiles a frozen transformer into one finite causal trajec
 
 Bonsai and Qwen3 taught an important refinement of this program. Native compilation must preserve the pretrained model's causal topology: per-head Q/K normalization, consecutive rotary planes, grouped-query memory incidence, layer-major prompt dependencies, absolute positions, final-row selection, and the distinct final norm and logits tail. These are the boundary conditions under which the learned operator exists.
 
-The resulting architecture is not a stock transformer plus gyroscopic annotations. It is a gyroscopic trajectory whose controller was learned in transformer form and whose topology is compiled faithfully into the native datatype. Full completion requires extending that ownership through model entry and tail, then eliminating the remaining floating interoperability charts so that semantic and operational native exactness coincide.
+The resulting architecture is not a stock transformer plus gyroscopic annotations. It is a gyroscopic trajectory whose controller was learned in transformer form and whose topology is compiled faithfully into the native datatype. Semantic ownership now covers entry CS via `Pi_summary_sign12`, durable dyadic residual storage, the 36-block chassis, final norm, output projection, and deterministic greedy emission with exact fixed Q64 tail ordering. Full completion still requires eliminating the remaining per-block floating interoperability charts so that semantic and operational native exactness coincide, then closing quality and speed acceptance.

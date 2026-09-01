@@ -230,6 +230,10 @@ In spin coordinates:
     C:   (s(A), s(B)) → (−s(B), −s(A))
     F:   (s(A), s(B)) → (−s(A), −s(B))
 
+Gate covariance with byte transport: for every state s and byte b, T(F s, b ⊕ 0xFE) = F T(s, b). The relation holds for all 4096 × 256 state-byte pairs and follows from two kernel facts: the gate F is the diagonal translation (0, 63, 63), which lies in the center of the signature group, and shadow partners share the carrier action.
+
+Gate covariance with byte transport: for every state s and byte b, T(F s, b ⊕ 0xFE) = F T(s, b). The relation holds for all 4096 × 256 state-byte pairs and follows from two kernel facts: the gate F is the diagonal translation (0, 63, 63), which lies in the center of the signature group, and shadow partners share the carrier action.
+
 ### 5.1.3 Word Actions
 
 A word is a sequence of bytes w = (b₁, b₂, …, b(n)). Its action on any Gyrostate is determined by sequential application of the byte transition rule.
@@ -244,6 +248,10 @@ The translation vector (τ(A), τ(B)) is the image of the zero state under the w
     sig(w₁ ∘ w₂) = compose(sig(w₂), sig(w₁))
 
 This composition law enables circuit optimization without replaying bytes.
+
+Every signature (ε, τ_u, τ_v) shifts the chirality register by the fixed amount δ = τ_u ⊕ τ_v. An even signature acts as (u, v) → (u ⊕ τ_u, v ⊕ τ_v), so χ′ = χ ⊕ (τ_u ⊕ τ_v). An odd signature exchanges the faces and then translates, (u, v) → (v ⊕ τ_u, u ⊕ τ_v), so χ′ = (u ⊕ v) ⊕ (τ_u ⊕ τ_v) = χ ⊕ (τ_u ⊕ τ_v). The shift is therefore independent of the parity ε, and the byte transport law χ′ = χ ⊕ q6(b) of §5.1.1 is the single-byte case of this signature law.
+
+Inverse signatures: an even signature (0, τ_u, τ_v) is its own inverse. The inverse of an odd signature (1, τ_u, τ_v) is (1, τ_v, τ_u). Both hold because the linear part squares to the identity and the translation parts cancel under the swapped composition.
 
 ### 5.1.4 Walsh-Hadamard Transform
 
@@ -405,6 +413,8 @@ Compilation transforms an abstract circuit into a compiled circuit by:
 5. **WHT placement**: determining the target-appropriate implementation of WHT operations.
 
 The optimization guarantee: if two byte sequences produce the same word signature, they produce the same result from every Gyrostate.
+
+Representative length bound. Every affine signature admits a representative byte word of length at most 4. Even signatures are realized by two-byte words with uniform 16-to-1 multiplicity over the 4096 translations. Odd signatures are realized by a single byte composed with a two-byte word. Breadth-first enumeration over words of length at most 4 reaches all 8192 signatures, and a minimal representative of each signature can be cached at compile time for step 4 of the optimization above.
 
 ## 6.4 Depth Structure
 
@@ -772,7 +782,7 @@ The hQVM and gate-model quantum computers share quantum-algebraic foundations bu
 | Measurement | stochastic wavefunction collapse | chart extraction |
 | Entanglement | bipartite Hilbert-space tensor product | holonomic fiber coupling via K4 |
 | Error model | decoherence, gate infidelity | ledger corruption with miss characterization |
-| Non-Clifford resource | T gate, magic state distillation | δ(BU) monodromy defect |
+| Non-Clifford resource | T gate, magic state distillation | δ_BU dual-pole loop angle |
 | Execution medium | superconducting qubits, trapped ions, etc. | standard silicon, integer arithmetic with replayable byte ledgers |
 | Temporal structure | external clock, gate scheduling | intrinsic gyroscopic Moments |
 | Coordination primitive | none (single-device model) | Shared Moments |

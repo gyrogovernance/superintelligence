@@ -1,7 +1,11 @@
 #include "attn.h"
 
 #include "kernel.h"
+#include "codec.h"
+#include "ledger.h"
+#include "runtime.h"
 
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,76 +18,12 @@
 #  include <stdatomic.h>
 #endif
 
-/* ===== KV / Q8 ===== */
 /*
- * hQVM KV coordinate ledger (Arc 2 Phases 3/6/7) + Arc 4B trajectory/receipts.
+ * Attention sites: H5 dyad×Q8 scores + H6 dyad×Q8 V-reduce (Analysis §7.3).
+ * Stock float paths remain for opt-out / f32 V fallback / diagnostics.
  */
 
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#if defined(_MSC_VER)
-#  include <windows.h>
-#else
-#  include <stdatomic.h>
-#endif
-
-static hqvm_kv_ledger g_kv;
-#if defined(_MSC_VER)
-static volatile LONG g_kv_lock = 0;
-#else
-static atomic_flag g_kv_lock = ATOMIC_FLAG_INIT;
-#endif
-
-static void hqvm_kv_lock(void) {
-#if defined(_MSC_VER)
-    while (InterlockedCompareExchange(&g_kv_lock, 1, 0) != 0) { }
-#else
-    while (atomic_flag_test_and_set(&g_kv_lock)) { }
-#endif
-}
-
-static void hqvm_kv_unlock(void) {
-#if defined(_MSC_VER)
-    InterlockedExchange(&g_kv_lock, 0);
-#else
-    atomic_flag_clear(&g_kv_lock);
-#endif
-}
-
-static uint8_t hqvm_popcount8(uint8_t v) {
-#if defined(_MSC_VER)
-    return (uint8_t)__popcnt(v);
-#else
-    return (uint8_t)__builtin_popcount((unsigned)v);
-#endif
-}
-
-static void hqvm_wht64(float data[64]) {
-    int stride, i, j;
-    for (stride = 32; stride >= 1; stride >>= 1) {
-        for (i = 0; i < 64; i += 2 * stride) {
-            for (j = 0; j < stride; ++j) {
-                const float a = data[i + j];
-                const float b = data[i + j + stride];
-                data[i + j] = a + b;
-                data[i + j + stride] = a - b;
-            }
-        }
-    }
-}
-
-hqvm_kv_ledger *hqvm_kv_ledger_global(void) {
-    return &g_kv;
-}
-
-int hqvm_kv_ledger_enabled(void) {
-    const char *e = getenv("GYRO_KV_LEDGER");
-    return (e && e[0] && e[0] != '0') ? 1 : 0;
-}
+/* ===== KV / Q8 (chassis holonomic score hook) ===== */
 
 int hqvm_kv_keys_enabled(void) {
     const char *e = getenv("GYRO_KV_KQ8");
@@ -166,227 +106,13 @@ void hqvm_holonomic_counters_print(void) {
     fflush(stderr);
 }
 
-static int hqvm_streq_ci(const char *a, const char *b) {
-    if (!a || !b) return 0;
-    while (*a && *b) {
-        char ca = *a, cb = *b;
-        if (ca >= 'A' && ca <= 'Z') ca = (char)(ca - 'A' + 'a');
-        if (cb >= 'A' && cb <= 'Z') cb = (char)(cb - 'A' + 'a');
-        if (ca != cb) return 0;
-        ++a; ++b;
-    }
-    return *a == 0 && *b == 0;
-}
-
-/* Mode chosen once at first call — no hot-path string compares after. */
-static int g_hol_mode = -1;
-static unsigned g_hol_seed = 1u;
-
-int hqvm_holonomic_attn_mode(unsigned *seed_out) {
-    if (g_hol_mode < 0) {
-        const char *e = getenv("GYRO_HOLONOMIC_ATTN_MODE");
-        g_hol_mode = HQVM_HOL_MODE_DOT;
-        g_hol_seed = 1u;
-        if (e && e[0]) {
-            if (hqvm_streq_ci(e, "zero_scores")) {
-                g_hol_mode = HQVM_HOL_MODE_ZERO;
-            } else if (strncmp(e, "random_scores", 13) == 0) {
-                const char *p = e + 13;
-                if (*p == ':' || *p == '(') {
-                    unsigned long v = strtoul(p + 1, NULL, 10);
-                    if (v != 0) g_hol_seed = (unsigned)v;
-                }
-                g_hol_mode = HQVM_HOL_MODE_RANDOM;
-            } else if (hqvm_streq_ci(e, "dot") || hqvm_streq_ci(e, "int8")) {
-                g_hol_mode = HQVM_HOL_MODE_DOT;
-            }
-        }
-        fprintf(stderr, "[hqvm-holonomic] mode_init=%d seed=%u\n", g_hol_mode, g_hol_seed);
-        fflush(stderr);
-    }
-    if (seed_out) *seed_out = g_hol_seed;
-    return g_hol_mode;
-}
-
-void hqvm_kv_project_plane64(const float *plane64, gyro_kv_coord_t *out) {
-    float data[64];
-    float best_mag = -1.0f;
-    int best_k = 0;
-    int k;
-    float sumsq = 0.0f;
-    float amax = 0.0f;
-
-    if (!plane64 || !out) return;
-    memset(out, 0, sizeof(*out));
-    for (k = 0; k < 64; ++k) {
-        const float x = plane64[k];
-        float ax = x < 0.0f ? -x : x;
-        data[k] = (x >= 0.0f) ? 1.0f : -1.0f;
-        sumsq += x * x;
-        if (ax > amax) amax = ax;
-    }
-    hqvm_wht64(data);
-    for (k = 0; k < 64; ++k) {
-        float mag = data[k] < 0.0f ? -data[k] : data[k];
-        if (mag > best_mag) {
-            best_mag = mag;
-            best_k = k;
-        }
-    }
-    out->chi6 = (uint8_t)(best_k & 63);
-    out->mean_abs = sqrtf(sumsq);
-    out->d = (amax > 0.0f) ? (amax / 127.0f) : 0.0f;
-    {
-        const float id = (out->d > 0.0f) ? (1.0f / out->d) : 0.0f;
-        for (k = 0; k < 64; ++k) {
-            int v = (int)lrintf(plane64[k] * id);
-            if (v > 127) v = 127;
-            if (v < -127) v = -127;
-            out->q8[k] = (int8_t)v;
-        }
-    }
-}
-
-void hqvm_kv_project_head128(const float *head128, gyro_kv_cell_t *out) {
-    if (!head128 || !out) return;
-    hqvm_kv_project_plane64(head128, &out->key_coords[0]);
-    hqvm_kv_project_plane64(head128 + 64, &out->key_coords[1]);
-}
-
-void hqvm_kv_ledger_reset(hqvm_kv_ledger *L) {
-    if (!L) return;
-    hqvm_kv_lock();
-    free(L->recs);
-    free(L->coords);
-    memset(L, 0, sizeof(*L));
-    hqvm_kv_unlock();
-}
-
-uint32_t hqvm_kv_ledger_count(const hqvm_kv_ledger *L) {
-    return L ? L->n_rec : 0;
-}
-
-uint32_t hqvm_kv_ledger_coord_count(const hqvm_kv_ledger *L) {
-    return L ? L->n_coord : 0;
-}
-
-int hqvm_kv_ledger_store_coord(hqvm_kv_ledger *L, const gyro_kv_coord_t *coord) {
-    if (!L || !coord) return -1;
-    hqvm_kv_lock();
-    if (!L->coords) {
-        L->coord_cap = 4096;
-        L->coords = (gyro_kv_coord_t *)malloc((size_t)L->coord_cap * sizeof(gyro_kv_coord_t));
-        if (!L->coords) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-    }
-    if (L->n_coord >= L->coord_cap) {
-        uint32_t ncap = L->coord_cap * 2u;
-        gyro_kv_coord_t *nr;
-        if (ncap > HQVM_KV_REC_MAX) ncap = HQVM_KV_REC_MAX;
-        if (L->n_coord >= ncap) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-        nr = (gyro_kv_coord_t *)realloc(L->coords, (size_t)ncap * sizeof(gyro_kv_coord_t));
-        if (!nr) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-        L->coords = nr;
-        L->coord_cap = ncap;
-    }
-    L->coords[L->n_coord++] = *coord;
-    hqvm_kv_unlock();
-    return 0;
-}
-
-void hqvm_kv_ledger_gather_histogram(const hqvm_kv_ledger *L, float H[HQVM_KV_CHI_BINS]) {
-    uint32_t i;
-    if (!H) return;
-    for (i = 0; i < HQVM_KV_CHI_BINS; ++i) H[i] = 0.0f;
-    if (!L || !L->coords) return;
-    for (i = 0; i < L->n_coord; ++i) {
-        H[L->coords[i].chi6 & 63] += 1.0f;
-    }
-}
-
-int hqvm_kv_ledger_append_f32(
-    hqvm_kv_ledger *L,
-    uint32_t token_i,
-    const float *x,
-    int64_t n)
-{
-    gyro_kv_coord_t coord;
-    uint8_t chi, shell, dchi;
-    hqvm_kv_rec *rec;
-    int64_t n64;
-
-    if (!L || !x || n <= 0) return -1;
-
-    n64 = n < 64 ? n : 64;
-    {
-        float plane[64];
-        int64_t i;
-        for (i = 0; i < 64; ++i) {
-            plane[i] = (i < n64) ? x[i] : 0.0f;
-        }
-        hqvm_kv_project_plane64(plane, &coord);
-    }
-    chi = coord.chi6;
-    shell = hqvm_popcount8(chi);
-    (void)hqvm_kv_ledger_store_coord(L, &coord);
-
-    hqvm_kv_lock();
-    if (!L->recs) {
-        L->cap = 4096;
-        L->recs = (hqvm_kv_rec *)malloc((size_t)L->cap * sizeof(hqvm_kv_rec));
-        if (!L->recs) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-    }
-    if (L->n_rec >= L->cap) {
-        uint32_t ncap = L->cap * 2u;
-        hqvm_kv_rec *nr;
-        if (ncap > HQVM_KV_REC_MAX) ncap = HQVM_KV_REC_MAX;
-        if (L->n_rec >= ncap) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-        nr = (hqvm_kv_rec *)realloc(L->recs, (size_t)ncap * sizeof(hqvm_kv_rec));
-        if (!nr) {
-            hqvm_kv_unlock();
-            return -1;
-        }
-        L->recs = nr;
-        L->cap = ncap;
-    }
-    dchi = L->has_prev ? (uint8_t)(chi ^ L->prev_chi) : chi;
-    rec = &L->recs[L->n_rec++];
-    rec->token_i = token_i;
-    rec->chi6 = chi;
-    rec->shell = shell;
-    rec->delta_chi = dchi;
-    rec->_pad = 0;
-    rec->mean_abs = coord.mean_abs;
-    L->prev_chi = chi;
-    L->has_prev = 1;
-    hqvm_kv_unlock();
-    return 0;
-}
-
-/* Removed (dead, superseded by Q8_0 cache scoring):
- * hqvm_kv_ledger_load_khat, hqvm_kv_chi_score (Khat never used by live score),
- * hqvm_pack_key_coord / hqvm_key_coord_score_* (Arc 2B-1 ring, superseded),
- * hqvm_kv_keys_{ensure,store,get} (key ring never read by holonomic path),
- * hqvm_kv_shadow_{accum,print} (coord_shadow accumulators never queried). */
-
 /* Arc 2B-2: score directly from ggml Q8_0 K-cache blocks.
  * Layout per block (34 B): fp16 scale + 32 int8 quants. 4 blocks per head128. */
 typedef struct { uint16_t d; int8_t q[HQVM_Q8_BLOCK]; } hqvm_q8_blk;
 
+/*
+ * H5 STOCK float Q·Q8 score. Chassis chart — not a native claim.
+ */
 float hqvm_q8_cache_row_score(
     const float *q_head128,
     const void *k_q8_blocks,
@@ -413,6 +139,71 @@ float hqvm_q8_cache_row_score(
     return s * scale;
 }
 
+/* IEEE binary32 parts (same law as codec dyad_unpack; local to avoid exporting). */
+static int attn_dyad_parts(hqvm_dyad32_t x, uint32_t *sign, uint64_t *sig, int *exp2) {
+    const uint32_t ef = (x.bits >> 23) & 0xffu;
+    const uint32_t frac = x.bits & 0x7fffffu;
+    if (ef == 0xffu) return -1;
+    *sign = x.bits >> 31;
+    if (ef == 0) {
+        *sig = frac;
+        *exp2 = -149;
+    } else {
+        *sig = (uint64_t)(0x800000u | frac);
+        *exp2 = (int)ef - 150;
+    }
+    return 0;
+}
+
+/*
+ * H5 native controller score: dyad Q × Q8 K without materializing float Q[128].
+ * Uses dyad mantissa/exp + integer fp16 K scale; accumulates in double (same
+ * algebraic product as stock float Q·Q8) so we do not truncate negative shifts.
+ * One float at the end for shell-law interop — not a dyad→float→stock converter.
+ */
+float hqvm_dyad_q8_cache_row_score(
+    const hqvm_dyad32_t *q_head_dyad,
+    const void *k_q8_blocks,
+    float scale)
+{
+    const hqvm_q8_blk *blk = (const hqvm_q8_blk *)k_q8_blocks;
+    double acc = 0.0;
+    int b, i;
+    static int s_zero = -1;
+    if (s_zero < 0) {
+        const char *e = getenv("GYRO_COORD_PERTURB");
+        s_zero = (e && strcmp(e, "zero_kq8") == 0) ? 1 : 0;
+    }
+    if (!q_head_dyad || !blk) return 0.0f;
+    if (s_zero) return 0.0f;
+    for (b = 0; b < 4; ++b) {
+        uint16_t mw;
+        int32_t ew;
+        double d_scale;
+        if (hqvm_fp16_decode_nonnegative(blk[b].d, &mw, &ew) != 0) {
+            /* Match stock: fall back to f16→f32 chart if decode rejects. */
+            d_scale = (double)hqvm_f16_to_f32(blk[b].d);
+            mw = 0;
+            ew = 0;
+        } else {
+            d_scale = ldexp((double)mw, ew);
+        }
+        for (i = 0; i < HQVM_Q8_BLOCK; ++i) {
+            uint32_t sign;
+            uint64_t sig;
+            int exp2;
+            int8_t kq = blk[b].q[i];
+            double q;
+            const int idx = b * HQVM_Q8_BLOCK + i;
+            if (attn_dyad_parts(q_head_dyad[idx], &sign, &sig, &exp2) != 0) continue;
+            q = ldexp((double)sig, exp2);
+            if (sign) q = -q;
+            acc += q * (double)kq * d_scale;
+        }
+    }
+    return (float)(acc * (double)scale);
+}
+
 /* Arc 3D: fused Attn@V accumulate from displaced
  * Q8_0 V blocks — blockwise dequant + accumulate, no float V materialized. */
 void hqvm_attn_v_accum_q8(
@@ -436,6 +227,62 @@ void hqvm_attn_v_accum_q8(
     }
 }
 
+/*
+ * H6 native value reduce (Analysis §7.3): dyad attention weights × Q8_0 V.
+ * Owns the accumulate (double acc, same product as stock float×Q8); packs dyad
+ * once per head dim. Not a wrap of hqvm_attn_v_reduce + pack.
+ */
+int hqvm_attn_v_reduce_dyad_q8(
+    hqvm_dyad32_t *out_dyad,
+    int64_t DV,
+    const hqvm_dyad32_t *weights_dyad,
+    int64_t Nk,
+    const void *v_q8_base,
+    size_t v_row_stride)
+{
+    double *acc = NULL;
+    int64_t ik, d;
+    int i;
+    if (!out_dyad || !weights_dyad || !v_q8_base || DV <= 0 || Nk <= 0) return -1;
+    if (DV % HQVM_Q8_BLOCK != 0) return -1;
+    acc = (double *)malloc((size_t)DV * sizeof(double));
+    if (!acc) return -1;
+    for (d = 0; d < DV; ++d) acc[d] = 0.0;
+    for (ik = 0; ik < Nk; ++ik) {
+        uint32_t sign;
+        uint64_t sig;
+        int exp2;
+        double a;
+        const hqvm_q8_blk *blk;
+        if (attn_dyad_parts(weights_dyad[ik], &sign, &sig, &exp2) != 0) continue;
+        a = ldexp((double)sig, exp2);
+        if (sign) a = -a;
+        if (a == 0.0) continue;
+        hqvm_v_q8_inc();
+        blk = (const hqvm_q8_blk *)((const char *)v_q8_base + (size_t)ik * v_row_stride);
+        d = 0;
+        for (; d + HQVM_Q8_BLOCK <= DV; d += HQVM_Q8_BLOCK) {
+            uint16_t mw;
+            int32_t ew;
+            double ds;
+            const int64_t b = d / HQVM_Q8_BLOCK;
+            if (hqvm_fp16_decode_nonnegative(blk[b].d, &mw, &ew) != 0) {
+                ds = (double)hqvm_f16_to_f32(blk[b].d);
+            } else {
+                ds = ldexp((double)mw, ew);
+            }
+            for (i = 0; i < HQVM_Q8_BLOCK; ++i) {
+                acc[d + i] += a * ds * (double)blk[b].q[i];
+            }
+        }
+    }
+    for (d = 0; d < DV; ++d) {
+        out_dyad[d] = hqvm_dyad32_from_f32((float)acc[d]);
+    }
+    free(acc);
+    return 0;
+}
+
 /* Arc 4 Lift: chi6 of a float K head — WHT peak (matches lift store). */
 uint8_t hqvm_k_chi6_from_row(const float *k_head128) {
     uint64_t signs = 0;
@@ -443,6 +290,16 @@ uint8_t hqvm_k_chi6_from_row(const float *k_head128) {
     if (!k_head128) return 0;
     for (i = 0; i < 64; ++i) {
         if (k_head128[i] >= 0.0f) signs |= (1ull << i);
+    }
+    return gyroscopic_chirality_from_signs64(signs);
+}
+
+uint8_t hqvm_k_chi6_from_dyad_head(const hqvm_dyad32_t *k_head128) {
+    uint64_t signs = 0;
+    int i;
+    if (!k_head128) return 0;
+    for (i = 0; i < 64; ++i) {
+        if (!hqvm_dyad32_sign(k_head128[i])) signs |= (1ull << i);
     }
     return gyroscopic_chirality_from_signs64(signs);
 }
@@ -514,7 +371,11 @@ uint16_t hqvm_f32_to_f16(float f) {
         mant = (mant | 0x800000u) >> (1 - exp);
         return (uint16_t)(sign | ((mant + 0x1000u) >> 13));
     }
-    if (exp >= 31) return (uint16_t)(sign | 0x7C00u);
+    if (exp >= 31) {
+        /* Inf or NaN: keep the low mantissa bits so NaN stays NaN with payload. */
+        if (mant == 0) return (uint16_t)(sign | 0x7C00u);
+        return (uint16_t)(sign | 0x7C00u | (mant >> 13));
+    }
     return (uint16_t)(sign | ((uint32_t)exp << 10) | ((mant + 0x1000u) >> 13));
 }
 
@@ -600,101 +461,10 @@ static void hqvm_krow_chi_pair(const void *k_q8_row, uint8_t chi[2]) {
     chi[1] = gyroscopic_chirality_from_signs64(signs1);
 }
 
-/* Coverage table: r -> |Reach| (rank-5 parity plateau 1024). */
-static const int64_t HQVM_REACH_BY_RANK[7] = {2, 4, 16, 64, 256, 1024, 4096};
-static uint64_t s_gate_sum = 0, s_gate_n = 0;
-static int s_gate_layer = -1;
-static uint64_t s_gate_sum_l[36], s_gate_n_l[36];
-
-void hqvm_percolation_gates_report(void) {
-    if (s_gate_n == 0) return;
-    fprintf(stderr, "[hqvm-percolation] gates=%llu/%llu (%.4f)\n", (unsigned long long)s_gate_sum, (unsigned long long)s_gate_n, (double)s_gate_sum / (double)s_gate_n);
-}
-
-void hqvm_percolation_gates(
-    const float *q_head128,
-    const void *k_base_q8,
-    size_t k_row_stride,
-    int64_t Nk,
-    uint8_t *gates)
-{
-    uint8_t chi_q[2];
-    int64_t j;
-    uint64_t qsigns0 = 0, qsigns1 = 0;
-    int i;
-    if (!q_head128 || !k_base_q8 || !gates || Nk <= 0) return;
-    for (i = 0; i < 64; ++i) {
-        if (q_head128[i] >= 0.0f) qsigns0 |= (1ull << i);
-        if (q_head128[64 + i] >= 0.0f) qsigns1 |= (1ull << i);
-    }
-    chi_q[0] = gyroscopic_chirality_from_signs64(qsigns0);
-    chi_q[1] = gyroscopic_chirality_from_signs64(qsigns1);
-
-    {
-        int basis[6] = {0,0,0,0,0,0};
-        int rank = 0;
-        for (j = 0; j < Nk; ++j) {
-            uint8_t chi_k[2];
-            uint8_t t[2];
-            const char *krow = (const char *) k_base_q8 + (size_t)j * k_row_stride;
-            hqvm_krow_chi_pair(krow, chi_k);
-            t[0] = (uint8_t)(chi_q[0] ^ chi_k[0]);
-            t[1] = (uint8_t)(chi_q[1] ^ chi_k[1]);
-            if (j == 0) {
-                gates[0] = 1;
-            } else {
-                int b, grew = 0;
-                for (i = 0; i < 2; ++i) {
-                    int x = t[i];
-                    for (b = 5; b >= 0; --b) {
-                        if (!(x & (1 << b))) continue;
-                        if (!basis[b]) { basis[b] = x; rank++; grew = 1; break; }
-                        x ^= basis[b];
-                    }
-                }
-                gates[j] = grew ? 1 : 0;
-            }
-            s_gate_sum += gates[j];
-            s_gate_n++;
-            if (s_gate_layer >= 0 && s_gate_layer < 36) {
-                s_gate_sum_l[s_gate_layer] += gates[j];
-                s_gate_n_l[s_gate_layer]++;
-            }
-        }
-    }
-}
-
 int hqvm_v_perturb_enabled(void) {
     static int s = -1;
     if (s < 0) {
         const char *e = getenv("GYRO_V_PERTURB");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-int hqvm_percolation_shadow_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_PERCOLATION_SOFTMAX");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-int hqvm_percolation_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_PERCOLATION");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-int hqvm_receipts_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_RECEIPTS");
         s = (e && e[0] && e[0] != '0') ? 1 : 0;
     }
     return s;
@@ -727,47 +497,43 @@ uint64_t hqvm_stock_softmax_calls(void) {
     return s_stock_softmax_calls;
 }
 
-int hqvm_attn_shell_qk_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_ATTN_SHELL_QK");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
 static float hqvm_attn_lambda_from_Nc(uint8_t Nc) {
+    /* m=(Nc-3)/3; λ=(1+m)/(1-m). Nc=0 is the singular pole: use λ=1 so
+     * shell masses stay finite (λ=0 would zero every N>0 term). */
     static const float lam[7] = {
-        0.0f, 0.2f, 0.5f, 1.0f, 2.0f, 5.0f, HQVM_LAMBDA_MAX_ATTN
+        1.0f, 0.2f, 0.5f, 1.0f, 2.0f, 5.0f, HQVM_LAMBDA_MAX_ATTN
     };
     if (Nc > 6) Nc = 6;
     return lam[Nc];
 }
 
-void hqvm_attn_weight_shell_qk(
-    float *scores, const float *q_head128, const void *k_chi_base,
-    int kv_head, int64_t Nk, uint8_t Nc, int top_k)
+/* Shared shell-weight core. chi from flat native KV table when present. */
+static void attn_weight_shell_qk_impl(
+    float *scores, uint8_t chi_q,
+    const uint8_t *k_chi6_flat, int64_t n_kv_heads, int kv_head_flat,
+    int64_t Nk, uint8_t Nc, int top_k)
 {
     int64_t j;
-    uint8_t chi_q;
-    uint64_t qsigns = 0;
     float lam, lam_pow[7];
     float *w = NULL;
     int *shell_of = NULL;
+    uint8_t *taken = NULL;
     int count[7];
     float denom = 0.0f;
     int i, N;
-    if (!scores || !q_head128 || Nk <= 0) return;
+    if (!scores || Nk <= 0) return;
     if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
-    for (i = 0; i < 64; ++i) if (q_head128[i] >= 0.0f) qsigns |= (1ull << i);
-    chi_q = gyroscopic_chirality_from_signs64(qsigns);
+    if (kv_head_flat < 0) kv_head_flat = 0;
+    if (n_kv_heads <= 0) n_kv_heads = HQVM_KV_N_KV_HEAD;
     lam = hqvm_attn_lambda_from_Nc(Nc);
     lam_pow[0] = 1.0f;
     for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lam;
 
     w = (float *)malloc((size_t)Nk * sizeof(float));
     shell_of = (int *)malloc((size_t)Nk * sizeof(int));
-    if (!w || !shell_of) { free(w); free(shell_of); return; }
+    taken = (uint8_t *)malloc((size_t)Nk);
+    if (!w || !shell_of || !taken) { free(w); free(shell_of); free(taken); return; }
+    memset(taken, 0, (size_t)Nk);
     for (N = 0; N < 7; ++N) count[N] = 0;
 
     for (j = 0; j < Nk; ++j) {
@@ -776,11 +542,8 @@ void hqvm_attn_weight_shell_qk(
         w[j] = 0.0f;
         shell_of[j] = -1;
         if (scores[j] <= -1e20f) continue;
-        if (k_chi_base && hqvm_k_chi6_has(k_chi_base)) {
-            chi_k = hqvm_k_chi6_get(k_chi_base, j, kv_head);
-        } else {
-            chi_k = 0;
-        }
+        chi_k = (k_chi6_flat && kv_head_flat >= 0 && kv_head_flat < (int)n_kv_heads)
+            ? k_chi6_flat[j * n_kv_heads + kv_head_flat] : 0;
 #if defined(_MSC_VER)
         Nj = (int)__popcnt((unsigned)((chi_q ^ chi_k) & 63));
 #else
@@ -791,24 +554,50 @@ void hqvm_attn_weight_shell_qk(
         count[Nj]++;
     }
 
-    /* Within each shell: keep top-k by QK score; weight = lambda^N */
+    /* Within each shell: algebraic top-k by QK score. */
     for (N = 0; N < 7; ++N) {
         int need = top_k;
-        int taken = 0;
+        int got = 0;
         if (count[N] <= 0) continue;
         if (need > count[N]) need = count[N];
-        while (taken < need) {
+        while (got < need) {
             int64_t best = -1;
             float best_s = -INFINITY;
             for (j = 0; j < Nk; ++j) {
-                if (shell_of[j] != N) continue;
-                if (w[j] > 0.0f) continue; /* already taken */
+                if (shell_of[j] != N || taken[j]) continue;
                 if (scores[j] > best_s) { best_s = scores[j]; best = j; }
             }
             if (best < 0) break;
-            w[best] = lam_pow[N];
-            denom += lam_pow[N];
-            taken++;
+            taken[best] = 1u;
+            got++;
+        }
+    }
+
+    /* Joint: peaked controller chart of QK energy times lambda^N. */
+    {
+        float M = -INFINITY;
+        int any = 0;
+        for (j = 0; j < Nk; ++j) {
+            if (!taken[j]) continue;
+            if (scores[j] > M) M = scores[j];
+            any = 1;
+        }
+        denom = 0.0f;
+        if (any) {
+            for (j = 0; j < Nk; ++j) {
+                int Nj;
+                float e;
+                if (!taken[j]) {
+                    w[j] = 0.0f;
+                    continue;
+                }
+                Nj = shell_of[j];
+                if (Nj < 0) Nj = 0;
+                if (Nj > 6) Nj = 6;
+                e = expf(scores[j] - M);
+                w[j] = e * lam_pow[Nj];
+                denom += w[j];
+            }
         }
     }
 
@@ -823,377 +612,47 @@ void hqvm_attn_weight_shell_qk(
     }
     free(w);
     free(shell_of);
+    free(taken);
+}
+
+static uint8_t attn_chi_q_from_float_head(const float *q_head128) {
+    uint64_t qsigns = 0;
+    int i;
+    if (!q_head128) return 0;
+    for (i = 0; i < 64; ++i) if (q_head128[i] >= 0.0f) qsigns |= (1ull << i);
+    return gyroscopic_chirality_from_signs64(qsigns);
+}
+
+static uint8_t attn_chi_q_from_dyad_head(const hqvm_dyad32_t *q_head_dyad) {
+    uint64_t qsigns = 0;
+    int i;
+    if (!q_head_dyad) return 0;
+    for (i = 0; i < 64; ++i) if (!hqvm_dyad32_sign(q_head_dyad[i])) qsigns |= (1ull << i);
+    return gyroscopic_chirality_from_signs64(qsigns);
+}
+
+void hqvm_attn_weight_shell_qk(
+    float *scores, const float *q_head128, const void *k_chi_base_unused,
+    int kv_head_unused, int64_t Nk, uint8_t Nc, int top_k)
+{
+    (void)k_chi_base_unused;
+    (void)kv_head_unused;
+    attn_weight_shell_qk_impl(scores, attn_chi_q_from_float_head(q_head128),
+                              NULL, 0, 0, Nk, Nc, top_k);
 }
 
 void hqvm_attn_weight_shell_qk_flat(
     float *scores, const float *q_head128, const uint8_t *k_chi6,
     int64_t n_kv_heads, int kv_head, int64_t Nk, uint8_t Nc, int top_k)
 {
-    int64_t j;
-    uint8_t chi_q;
-    uint64_t qsigns = 0;
-    float lam, lam_pow[7];
-    float *w = NULL;
-    int *shell_of = NULL;
-    int count[7];
-    float denom = 0.0f;
-    int i, N;
-    if (!scores || !q_head128 || Nk <= 0) return;
-    if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
-    if (kv_head < 0) kv_head = 0;
-    if (n_kv_heads <= 0) n_kv_heads = HQVM_KV_N_KV_HEAD;
-    for (i = 0; i < 64; ++i) if (q_head128[i] >= 0.0f) qsigns |= (1ull << i);
-    chi_q = gyroscopic_chirality_from_signs64(qsigns);
-    lam = hqvm_attn_lambda_from_Nc(Nc);
-    lam_pow[0] = 1.0f;
-    for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lam;
-
-    w = (float *)malloc((size_t)Nk * sizeof(float));
-    shell_of = (int *)malloc((size_t)Nk * sizeof(int));
-    if (!w || !shell_of) { free(w); free(shell_of); return; }
-    for (N = 0; N < 7; ++N) count[N] = 0;
-
-    for (j = 0; j < Nk; ++j) {
-        uint8_t chi_k;
-        int Nj;
-        w[j] = 0.0f;
-        shell_of[j] = -1;
-        if (scores[j] <= -1e20f) continue;
-        if (k_chi6 && kv_head >= 0 && kv_head < (int)n_kv_heads) {
-            chi_k = k_chi6[j * n_kv_heads + kv_head];
-        } else {
-            chi_k = 0;
-        }
-#if defined(_MSC_VER)
-        Nj = (int)__popcnt((unsigned)((chi_q ^ chi_k) & 63));
-#else
-        Nj = __builtin_popcount((unsigned)((chi_q ^ chi_k) & 63));
-#endif
-        if (Nj > 6) Nj = 6;
-        shell_of[j] = Nj;
-        count[Nj]++;
-    }
-
-    for (N = 0; N < 7; ++N) {
-        int need = top_k;
-        int taken = 0;
-        if (count[N] <= 0) continue;
-        if (need > count[N]) need = count[N];
-        while (taken < need) {
-            int64_t best = -1;
-            float best_s = -INFINITY;
-            for (j = 0; j < Nk; ++j) {
-                if (shell_of[j] != N) continue;
-                if (w[j] > 0.0f) continue;
-                if (scores[j] > best_s) { best_s = scores[j]; best = j; }
-            }
-            if (best < 0) break;
-            w[best] = lam_pow[N];
-            denom += lam_pow[N];
-            taken++;
-        }
-    }
-
-    if (denom <= 0.0f) {
-        int nu = 0;
-        for (j = 0; j < Nk; ++j) if (scores[j] > -1e20f) nu++;
-        for (j = 0; j < Nk; ++j)
-            scores[j] = (scores[j] > -1e20f && nu > 0) ? (1.0f / (float)nu) : 0.0f;
-    } else {
-        for (j = 0; j < Nk; ++j) scores[j] = w[j] / denom;
-    }
-    free(w);
-    free(shell_of);
+    attn_weight_shell_qk_impl(scores, attn_chi_q_from_float_head(q_head128),
+                              k_chi6, n_kv_heads, kv_head, Nk, Nc, top_k);
 }
 
-/* Shell-occupation softmax (QuBEC §2.2, §23.1). Replaces exp(score) with the
- * native polynomial shell weight: w_j = lambda^N_j, N_j = popcount(chi_Q xor
- * chi_K). Partition (1+lambda)^6 is exact/finite; no exp, no sqrt, no percolation
- * gate. lambda is the shell occupation control (rho = lambda/(1+lambda)).
- * N convention: chi = q XOR k, so N=0 (max alignment) gets weight 1 and N=6 gets
- * lambda^6 — lambda < 1 sharpens toward aligned keys. */
-/* Aperture-constrained softmax (YM mass-gap Δ as irreducible opening).
- * Softmax stays as the max-entropy magnitude decoder; CGM enters as a global
- * aperture: r = GF(2) rank of the transport set {chi_Q xor chi_K_i} over the
- * window, deficit (6-r) * Delta sets the mixing weight eps toward uniform.
- * r is one scalar per window (no per-key gating). exp is not replaced. */
-void hqvm_aperture_softmax(
-    float *logits, const float *q_head128, const void *k_base_q8,
-    size_t k_row_stride, int64_t Nk, float Delta, float eps_max,
-    const void *k_chi_base, int kv_head)
-{
-    int64_t j;
-    uint8_t chi_q[2];
-    uint64_t qsigns0 = 0, qsigns1 = 0;
-    int i;
-    float m = -INFINITY, sum = 0.0f;
-    int basis0[6] = {0,0,0,0,0,0}, basis1[6] = {0,0,0,0,0,0};
-    int r0 = 0, r1 = 0, r, deficit;
-    float eps, uni;
-    const int use_store = (k_chi_base != NULL) && hqvm_k_chi6_has(k_chi_base);
-    if (!logits || !q_head128 || !k_base_q8 || Nk <= 0) return;
-    for (i = 0; i < 64; ++i) {
-        if (q_head128[i] >= 0.0f) qsigns0 |= (1ull << i);
-        if (q_head128[64 + i] >= 0.0f) qsigns1 |= (1ull << i);
-    }
-    chi_q[0] = gyroscopic_chirality_from_signs64(qsigns0);
-    chi_q[1] = gyroscopic_chirality_from_signs64(qsigns1);
-
-    for (j = 0; j < Nk; ++j) {
-        uint8_t chi_k[2];
-        int b, x;
-        if (logits[j] <= -1e20f) continue;
-        if (use_store) {
-            chi_k[0] = hqvm_k_chi6_get(k_chi_base, j, kv_head);
-            chi_k[1] = chi_k[0];
-        } else {
-            const char *krow = (const char *) k_base_q8 + (size_t)j * k_row_stride;
-            hqvm_krow_chi_pair(krow, chi_k);
-        }
-        x = (chi_q[0] ^ chi_k[0]) & 63;
-        for (b = 5; b >= 0; --b) {
-            if (!(x & (1 << b))) continue;
-            if (!basis0[b]) { basis0[b] = x; r0++; break; }
-            x ^= basis0[b];
-        }
-        x = (chi_q[1] ^ chi_k[1]) & 63;
-        for (b = 5; b >= 0; --b) {
-            if (!(x & (1 << b))) continue;
-            if (!basis1[b]) { basis1[b] = x; r1++; break; }
-            x ^= basis1[b];
-        }
-    }
-    r = (r0 + r1 + 1) / 2;
-    deficit = 6 - r;
-    if (deficit < 0) deficit = 0;
-    eps = (float)deficit * Delta;
-    if (eps > eps_max) eps = eps_max;
-    if (eps < 0.0f) eps = 0.0f;
-    uni = 1.0f / (float)Nk;
-
-    for (j = 0; j < Nk; ++j) if (logits[j] > m) m = logits[j];
-    for (j = 0; j < Nk; ++j) {
-        const float e = logits[j] > -1e20f ? expf(logits[j] - m) : 0.0f;
-        logits[j] = e;
-        sum += e;
-    }
-    if (sum > 0.0f) {
-        for (j = 0; j < Nk; ++j)
-            logits[j] = (1.0f - eps) * (logits[j] / sum) + eps * uni;
-    } else {
-        for (j = 0; j < Nk; ++j) logits[j] = uni;
-    }
-}
-
-int hqvm_aperture_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_APERTURE_SOFTMAX");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-/* Shadow: run aperture softmax on a copy, compare to stock on the same logits.
- * Logs KL(stock||ap), top-1 agreement, eps, r. Measurement only. */
-void hqvm_aperture_shadow(
-    const float *logits, const float *q_head128, const void *k_base_q8,
-    size_t k_row_stride, int64_t Nk, float Delta, float eps_max,
-    const void *k_chi_base, int kv_head)
-{
-    float *ap, *st;
-    int64_t j;
-    float m = -INFINITY, ssum = 0.0f;
-    double kl = 0.0;
-    int top_s = -1, top_a = -1;
-    float bs = -1.0f, ba = -1.0f;
-    static int s_print = 0;
-    if (!logits || !q_head128 || !k_base_q8 || Nk <= 0) return;
-    ap = (float *) malloc((size_t)Nk * sizeof(float));
-    st = (float *) malloc((size_t)Nk * sizeof(float));
-    if (!ap || !st) { free(ap); free(st); return; }
-    memcpy(ap, logits, (size_t)Nk * sizeof(float));
-    hqvm_aperture_softmax(ap, q_head128, k_base_q8, k_row_stride, Nk, Delta, eps_max,
-                          k_chi_base, kv_head);
-    for (j = 0; j < Nk; ++j) {
-        if (logits[j] > m) m = logits[j];
-    }
-    for (j = 0; j < Nk; ++j) {
-        st[j] = logits[j] > -1e20f ? expf(logits[j] - m) : 0.0f;
-        ssum += st[j];
-    }
-    if (ssum > 0.0f) for (j = 0; j < Nk; ++j) st[j] /= ssum;
-    for (j = 0; j < Nk; ++j) {
-        const float p = st[j], q = ap[j];
-        if (p > 0.0f && q > 0.0f) kl += p * logf(p / q);
-        if (p > bs) { bs = p; top_s = (int)j; }
-        if (q > ba) { ba = q; top_a = (int)j; }
-    }
-    if (s_print < 40) {
-        fprintf(stderr, "[hqvm-aperture] KL=%.4f top1_agree=%d eps_top_s=%.4g eps_top_a=%.4g\n",
-            kl, top_s == top_a, bs, ba);
-        s_print++;
-    }
-    free(ap);
-    free(st);
-}
-
-int hqvm_aperture_rope_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_APERTURE_ROPE");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-int hqvm_aperture_rms_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_APERTURE_RMS");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-
-void hqvm_shell_softmax(
-    float *logits, const float *q_head128, const void *k_base_q8,
-    size_t k_row_stride, int64_t Nk, float lambda)
-{
-    int64_t j;
-    uint8_t chi_q[2];
-    uint64_t qsigns0 = 0, qsigns1 = 0;
-    int i;
-    float lam_pow[7];
-    float sum = 0.0f;
-    if (!logits || !q_head128 || !k_base_q8 || Nk <= 0) return;
-    for (i = 0; i < 64; ++i) {
-        if (q_head128[i] >= 0.0f) qsigns0 |= (1ull << i);
-        if (q_head128[64 + i] >= 0.0f) qsigns1 |= (1ull << i);
-    }
-    chi_q[0] = gyroscopic_chirality_from_signs64(qsigns0);
-    chi_q[1] = gyroscopic_chirality_from_signs64(qsigns1);
-    lam_pow[0] = 1.0f;
-    for (i = 1; i <= 6; ++i) lam_pow[i] = lam_pow[i - 1] * lambda;
-    for (j = 0; j < Nk; ++j) {
-        uint8_t chi_k[2];
-        const char *krow = (const char *) k_base_q8 + (size_t)j * k_row_stride;
-        int N0, N1, N;
-        hqvm_krow_chi_pair(krow, chi_k);
-        N0 = gyroscopic_chirality_distance(chi_q[0], chi_k[0]);
-        N1 = gyroscopic_chirality_distance(chi_q[1], chi_k[1]);
-        N = (N0 + N1) / 2;
-        logits[j] = lam_pow[N & 6];
-        sum += logits[j];
-    }
-    if (sum > 0.0f) {
-        for (j = 0; j < Nk; ++j) logits[j] /= sum;
-    } else {
-        for (j = 0; j < Nk; ++j) logits[j] = 1.0f / (float)Nk;
-    }
-}
-
-int hqvm_shell_softmax_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_SHELL_SOFTMAX");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    return s;
-}
-
-float hqvm_shell_softmax_lambda(void) {
-    static float s_lam = -1.0f;
-    if (s_lam < 0.0f) {
-        const char *e = getenv("GYRO_SHELL_LAMBDA");
-        s_lam = e ? (float) atof(e) : 0.5f;
-        if (s_lam <= 0.0f) s_lam = 0.5f;
-    }
-    return s_lam;
-}
-
-/* REJECTED (Arc 4): percolation θ as softmax gate — category error.
- * Reachability climate is not per-key energy. Kept behind flag for audit only. */
-void hqvm_percolation_softmax(
-    float *logits, const float *q_head128, const void *k_base_q8,
-    size_t k_row_stride, int64_t Nk)
-{
-    int64_t j;
-    float m = -INFINITY, sum = 0.0f;
-    uint8_t *gates;
-    if (!logits || !q_head128 || !k_base_q8 || Nk <= 0) return;
-    gates = (uint8_t *) malloc((size_t)Nk);
-    if (!gates) return;
-    hqvm_percolation_gates(q_head128, k_base_q8, k_row_stride, Nk, gates);
-    for (j = 0; j < Nk; ++j) if (logits[j] > m) m = logits[j];
-    for (j = 0; j < Nk; ++j) {
-        const float e = logits[j] > -1e20f ? expf(logits[j] - m) : 0.0f;
-        logits[j] = gates[j] ? e : 0.0f;
-        sum += logits[j];
-    }
-    if (sum > 0.0f) {
-        for (j = 0; j < Nk; ++j) logits[j] /= sum;
-    } else {
-        for (j = 0; j < Nk; ++j) logits[j] = 1.0f / (float)Nk;
-    }
-    free(gates);
-}
-
-void hqvm_percolation_shadow(const float *raw_scores, int64_t Nk, float M) {
-    /* θ(gap) = exp(-2*gap) with gap = M - raw_score; compare KL vs stock softmax.
-     * Measurement only — does not change committed weights. */
-    float *theta = NULL;
-    float *stock = NULL;
-    float tsum = 0.0f, ssum = 0.0f;
-    double kl = 0.0;
-    int top_stock = -1, top_perc = -1;
-    float bs = -1.0f, bp = -1.0f;
-    int64_t i;
-    static int s_print = 0;
-
-    if (!raw_scores || Nk <= 0 || M <= -1e20f) return;
-    theta = (float *) malloc((size_t)Nk * sizeof(float));
-    stock = (float *) malloc((size_t)Nk * sizeof(float));
-    if (!theta || !stock) {
-        free(theta);
-        free(stock);
-        return;
-    }
-    for (i = 0; i < Nk; ++i) {
-        float th = 0.0f, st = 0.0f;
-        if (raw_scores[i] > -1e20f) {
-            const float gap = M - raw_scores[i];
-            th = expf(-2.0f * gap);
-            st = expf(raw_scores[i] - M);
-        }
-        theta[i] = th;
-        stock[i] = st;
-        tsum += th;
-        ssum += st;
-    }
-    {
-        const float invT = tsum > 0.0f ? 1.0f / tsum : 0.0f;
-        const float invS = ssum > 0.0f ? 1.0f / ssum : 0.0f;
-        for (i = 0; i < Nk; ++i) {
-            const float p = stock[i] * invS;
-            const float q = theta[i] * invT;
-            if (p > bs) { bs = p; top_stock = (int)i; }
-            if (q > bp) { bp = q; top_perc = (int)i; }
-            if (p > 1e-12f && q > 1e-12f) kl += (double)p * log((double)p / (double)q);
-        }
-    }
-    s_print += 1;
-    if (s_print == 1 || (s_print % 36) == 0) {
-        fprintf(stderr,
-                "[hqvm-perc] KL(stock||perc)=%.4f top1_stock=%d top1_perc=%d agree=%d\n",
-                kl, top_stock, top_perc, top_stock == top_perc ? 1 : 0);
-        fflush(stderr);
-    }
-    free(theta);
-    free(stock);
-}
-
+/*
+ * H6 STOCK float V-reduce (product path). Not a native dyad accumulate.
+ * Do not wrap this under hosting and call the hazard closed.
+ */
 void hqvm_attn_v_reduce(
     float *out,
     int64_t DV,
@@ -1222,85 +681,201 @@ void hqvm_attn_v_reduce(
     }
 }
 
-
-void hqvm_receipts_on_layer(uint8_t intron_byte, int layer_i, int64_t Nk) {
-    (void)intron_byte;
-    (void)Nk;
-    if (!hqvm_receipts_enabled()) return;
-    /* Single carrier: seal from lift traj only. No parallel trajectory. */
-    if (!hqvm_cgm_lift_traj_ready()) {
-        static int s_note = 0;
-        if (s_note < 1) {
-            fprintf(stderr, "[hqvm-receipt] skip: canonical traj not ready (enable GYRO_CGM_LIFT)\n");
-            fflush(stderr);
-            s_note = 1;
-        }
-        return;
+/*
+ * H5 score+weight orchestration.
+ * Stock: float Q row + hqvm_q8_cache_row_score (honest chassis).
+ * Native: hqvm_dyad_q8_cache_row_score (no float Q[128]); chi from dyad signs.
+ * Product must call through hosting — do not claim *_dyad alone is native.
+ */
+int hqvm_attn_head_scores_weights_stock(
+    hqvm_dyad32_t *weights_dyad,
+    const hqvm_dyad32_t *q_head_dyad,
+    const void *k_q8_base, const float *k_f32_base,
+    const float *k_fallback_f32,
+    size_t k_row_stride, size_t floats_per_tok, size_t k_per_head_q8,
+    const uint8_t *chi_layer, int64_t n_kv_heads, int kv_head,
+    int64_t kv_len, uint8_t Nc, int top_k, int attn_level, float attn_scale)
+{
+    float *scores = NULL;
+    float q[HQVM_HEAD_DIM];
+    int64_t j;
+    int i;
+    static int s_polar_env = -1;
+    int polar_on = 0;
+    uint64_t q_anchor = 0;
+    uint8_t q_chi6 = 0;
+    int64_t n_consulted = 0;
+    int64_t n_kept = 0;
+    if (s_polar_env < 0) {
+        const char *e = getenv("GYRO_NATIVE_POLAR_PREFILTER");
+        s_polar_env = (e && e[0] && e[0] != '0') ? 1 : 0;
+        if (s_polar_env && !hqvm_rt_request_cell()) s_polar_env = 0;
     }
-    {
-        hqvm_receipt_t r;
-        r.anchor12 = (uint16_t)(hqvm_cgm_lift_state24() & LAYER_MASK_12);
-        r.k4_family = (uint8_t)((hqvm_cgm_lift_state24() >> 12) & FAMILY_MASK);
-        r.state24 = hqvm_cgm_lift_state24();
-        r.depth = (uint32_t)(hqvm_cgm_lift_layer() + 1);
-        r.fnv1a = hqvm_receipt_seal(&r);
-        if ((layer_i % GYROSCOPIC_DEFAULT_TOTAL_LAYERS) == (GYROSCOPIC_DEFAULT_TOTAL_LAYERS - 1)) {
-            hqvm_receipt_print(&r);
-        }
+    polar_on = s_polar_env;
+    if (!weights_dyad || !q_head_dyad || kv_len <= 0) return -1;
+    if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
+    for (i = 0; i < HQVM_HEAD_DIM; ++i) {
+        q[i] = hqvm_dyad32_to_f32(q_head_dyad[i]);
+        if (q[i] >= 0.0f) q_anchor |= (1ull << i);
     }
+    if (polar_on) {
+        q_chi6 = gyroscopic_chirality_from_signs64(q_anchor & 0xFFFFFFFFFFFFull);
+    }
+    scores = (float *)malloc((size_t)kv_len * sizeof(float));
+    if (!scores) return -1;
+    for (j = 0; j < kv_len; ++j) {
+        float s = 0.0f;
+        if (polar_on && chi_layer && n_kv_heads > 0
+            && kv_head >= 0 && kv_head < (int)n_kv_heads) {
+            const uint8_t chi_k =
+                chi_layer[(size_t)j * (size_t)n_kv_heads + (size_t)kv_head];
+            hqvm_rt_polar_summary qs, ks;
+            qs.chi6 = q_chi6; qs.anchor64 = q_anchor; qs.radius = 1.0f;
+            ks.chi6 = chi_k; ks.anchor64 = 0; ks.radius = 1.0f;
+            ++n_consulted;
+            if (hqvm_rt_polar_score(&qs, &ks) <= 0.0f) {
+                scores[j] = -INFINITY;
+                continue;
+            }
+            ++n_kept;
+        }
+        if (k_f32_base) {
+            const float *kh = k_f32_base + (size_t)j * floats_per_tok + (size_t)kv_head * (size_t)HQVM_HEAD_DIM;
+            int d; for (d = 0; d < HQVM_HEAD_DIM; ++d) s += q[d] * kh[d];
+            s *= attn_scale;
+        } else if (k_q8_base) {
+            const char *krow = (const char *)k_q8_base + (size_t)j * k_row_stride + (size_t)kv_head * k_per_head_q8;
+            s = hqvm_q8_cache_row_score(q, krow, attn_scale);
+        } else {
+            const float *kh;
+            if (k_fallback_f32) {
+                kh = k_fallback_f32 + kv_head * HQVM_HEAD_DIM;
+            } else {
+                static int s_selfscore_warned = 0;
+                if (!s_selfscore_warned) {
+                    fprintf(stderr,
+                        "[hqvm-attn] no K source (f32/q8/fallback); scoring Q against Q\n");
+                    fflush(stderr);
+                    s_selfscore_warned = 1;
+                }
+                kh = q;
+            }
+            int d; for (d = 0; d < HQVM_HEAD_DIM; ++d) s += q[d] * kh[d];
+            s *= attn_scale;
+        }
+        scores[j] = s;
+    }
+    if (polar_on) hqvm_rt_prefilter_report(n_consulted, n_kept);
+    if (attn_level < 0) {
+        float M = -INFINITY, Z = 0.0f;
+        for (j = 0; j < kv_len; ++j) if (scores[j] > M) M = scores[j];
+        for (j = 0; j < kv_len; ++j) { scores[j] = expf(scores[j] - M); Z += scores[j]; }
+        if (Z <= 0.0f) Z = 1.0f;
+        for (j = 0; j < kv_len; ++j) scores[j] /= Z;
+        hqvm_stock_softmax_inc();
+    } else if (attn_level == 0) {
+        int64_t best = 0; float best_s = -INFINITY;
+        for (j = 0; j < kv_len; ++j) if (scores[j] > best_s) { best_s = scores[j]; best = j; }
+        for (j = 0; j < kv_len; ++j) scores[j] = 0.0f;
+        if (kv_len > 0) scores[best] = 1.0f;
+    } else {
+        hqvm_attn_shell_weight_inc();
+        if (chi_layer) hqvm_attn_weight_shell_qk_flat(scores, q, chi_layer, n_kv_heads, kv_head, kv_len,
+            attn_level == 1 ? 3 : Nc, top_k);
+        else hqvm_attn_weight_shell_qk(scores, q, NULL, kv_head, kv_len,
+            attn_level == 1 ? 3 : Nc, top_k);
+    }
+    for (j = 0; j < kv_len; ++j) weights_dyad[j] = hqvm_dyad32_from_f32(scores[j]);
+    free(scores);
+    return 0;
 }
 
-void hqvm_residual_shadow_log(const float *row, int64_t n, int is_f16) {
-    static int s_en = -1;
-    static int s_print = 0;
-    static int s_depth = 0;
-    double s2 = 0.0;
-    int64_t i, nn;
-    (void)is_f16;
-    if (s_en < 0) {
-        const char *e = getenv("GYRO_RESIDUAL_SHADOW");
-        s_en = (e && e[0] && e[0] != '0') ? 1 : 0;
-    }
-    if (!s_en || !row || n <= 0) return;
-    s_print += 1;
-    if (!(s_print == 1 || (s_print % 72) == 0)) return;
-    nn = n <= (int64_t)OMEGA_SIZE ? n : (int64_t)OMEGA_SIZE;
-    for (i = 0; i < nn; ++i) s2 += (double)row[i] * (double)row[i];
-    s_depth += 1;
-    fprintf(stderr, "[hqvm-resid] add_call=%d depth=%d rms=%.4f ne0=%lld\n",
-            s_print, s_depth, (nn > 0 ? sqrt(s2 / (double)nn) : 0.0), (long long)n);
-    fflush(stderr);
-}
+/*
+ * H5 native: dyad×Q8 integer scores + shell joint law. f32 K falls back to stock
+ * for that row source (debug KV). No float Q[128] on the Q8 path.
+ */
+int hqvm_attn_head_scores_weights_native(
+    hqvm_dyad32_t *weights_dyad,
+    const hqvm_dyad32_t *q_head_dyad,
+    const void *k_q8_base, const float *k_f32_base,
+    const float *k_fallback_f32,
+    size_t k_row_stride, size_t floats_per_tok, size_t k_per_head_q8,
+    const uint8_t *chi_layer, int64_t n_kv_heads, int kv_head,
+    int64_t kv_len, uint8_t Nc, int top_k, int attn_level, float attn_scale)
+{
+    float *scores = NULL;
+    int64_t j;
+    uint8_t chi_q;
+    static int s_polar_env = -1;
+    int polar_on = 0;
+    uint64_t q_anchor = 0;
+    int64_t n_consulted = 0;
+    int64_t n_kept = 0;
+    int i;
 
-void hqvm_shell_norm_shadow_log(const float *x, int64_t n) {
-    static int s_en = -1;
-    static int s_print = 0;
-    double s2 = 0.0, rms;
-    uint64_t signbits = 0;
-    int64_t i, nb, nn;
-    uint8_t chi6;
-    int shell;
-    if (s_en < 0) {
-        const char *e = getenv("GYRO_SHELL_NORM");
-        s_en = (e && e[0] && e[0] != '0') ? 1 : 0;
+    if (!weights_dyad || !q_head_dyad || kv_len <= 0) return -1;
+    /* f32 KV / missing Q8: not the native chart — use stock for honesty. */
+    if (!k_q8_base || k_f32_base) {
+        return hqvm_attn_head_scores_weights_stock(
+            weights_dyad, q_head_dyad, k_q8_base, k_f32_base, k_fallback_f32,
+            k_row_stride, floats_per_tok, k_per_head_q8,
+            chi_layer, n_kv_heads, kv_head, kv_len, Nc, top_k, attn_level, attn_scale);
     }
-    if (!s_en || !x || n <= 0) return;
-    s_print += 1;
-    if (!(s_print == 1 || (s_print % 36) == 0)) return;
-    nn = n <= (int64_t)OMEGA_SIZE ? n : (int64_t)OMEGA_SIZE;
-    for (i = 0; i < nn; ++i) s2 += (double)x[i] * (double)x[i];
-    rms = sqrt(s2 / (nn > 0 ? (double)nn : 1.0));
-    nb = nn < 64 ? nn : 64;
-    for (i = 0; i < nb; ++i) if (x[i] >= 0.0f) signbits |= (1ull << i);
-    chi6 = gyroscopic_chirality_from_signs64(signbits);
-#if defined(_MSC_VER)
-    shell = (int)__popcnt((unsigned)chi6);
-#else
-    shell = __builtin_popcount((unsigned)chi6);
-#endif
-    fprintf(stderr, "[hqvm-shell] rms=%.4f chi6=%u shell=%d\n",
-            rms, (unsigned)chi6, shell);
-    fflush(stderr);
+    if (top_k <= 0) top_k = HQVM_ATTN_SHELL_TOPK;
+    if (s_polar_env < 0) {
+        const char *e = getenv("GYRO_NATIVE_POLAR_PREFILTER");
+        s_polar_env = (e && e[0] && e[0] != '0') ? 1 : 0;
+        if (s_polar_env && !hqvm_rt_request_cell()) s_polar_env = 0;
+    }
+    polar_on = s_polar_env;
+    chi_q = attn_chi_q_from_dyad_head(q_head_dyad);
+    for (i = 0; i < 64; ++i) if (!hqvm_dyad32_sign(q_head_dyad[i])) q_anchor |= (1ull << i);
+
+    scores = (float *)malloc((size_t)kv_len * sizeof(float));
+    if (!scores) return -1;
+    for (j = 0; j < kv_len; ++j) {
+        const char *krow = (const char *)k_q8_base + (size_t)j * k_row_stride
+            + (size_t)kv_head * k_per_head_q8;
+        if (polar_on && chi_layer && n_kv_heads > 0
+            && kv_head >= 0 && kv_head < (int)n_kv_heads) {
+            const uint8_t chi_k =
+                chi_layer[(size_t)j * (size_t)n_kv_heads + (size_t)kv_head];
+            hqvm_rt_polar_summary qs, ks;
+            qs.chi6 = chi_q; qs.anchor64 = q_anchor; qs.radius = 1.0f;
+            ks.chi6 = chi_k; ks.anchor64 = 0; ks.radius = 1.0f;
+            ++n_consulted;
+            if (hqvm_rt_polar_score(&qs, &ks) <= 0.0f) {
+                scores[j] = -INFINITY;
+                continue;
+            }
+            ++n_kept;
+        }
+        scores[j] = hqvm_dyad_q8_cache_row_score(q_head_dyad, krow, attn_scale);
+    }
+    if (polar_on) hqvm_rt_prefilter_report(n_consulted, n_kept);
+    if (attn_level < 0) {
+        float M = -INFINITY, Z = 0.0f;
+        for (j = 0; j < kv_len; ++j) if (scores[j] > M) M = scores[j];
+        for (j = 0; j < kv_len; ++j) { scores[j] = expf(scores[j] - M); Z += scores[j]; }
+        if (Z <= 0.0f) Z = 1.0f;
+        for (j = 0; j < kv_len; ++j) scores[j] /= Z;
+        hqvm_stock_softmax_inc();
+    } else if (attn_level == 0) {
+        int64_t best = 0; float best_s = -INFINITY;
+        for (j = 0; j < kv_len; ++j) if (scores[j] > best_s) { best_s = scores[j]; best = j; }
+        for (j = 0; j < kv_len; ++j) scores[j] = 0.0f;
+        if (kv_len > 0) scores[best] = 1.0f;
+    } else {
+        hqvm_attn_shell_weight_inc();
+        attn_weight_shell_qk_impl(
+            scores, chi_q,
+            chi_layer, n_kv_heads, kv_head,
+            kv_len, attn_level == 1 ? 3 : Nc, top_k);
+    }
+    for (j = 0; j < kv_len; ++j) weights_dyad[j] = hqvm_dyad32_from_f32(scores[j]);
+    free(scores);
+    (void)k_fallback_f32;
+    return 0;
 }
 
 
@@ -1316,26 +891,13 @@ void hqvm_shell_norm_shadow_log(const float *x, int64_t n) {
 #  include <intrin.h>
 #endif
 
-/* BYTE_OF_Q6_FAM[q6][fam] — inverse of intron = byte^GENE_MIC_S split. */
-static uint8_t s_byte_of_q6_fam[64][4];
+/* BYTE_OF_Q6_FAM lives in kernel.c; attn re-exports via attn.h for lift path. */
+
 static int s_init = 0;
 static int s_table_ok = 0;
 
 static uint64_t s_lift_calls = 0;
-static uint64_t s_chi6_writes = 0;
 static uint64_t s_invariant_fails = 0;
-
-/* chi6 side-store: identify stream by K tensor base pointer. */
-#define HQVM_CHI_STREAMS 96
-#define HQVM_CHI_CAP     8192
-typedef struct {
-    const void *base;
-    uint8_t chi[HQVM_CHI_CAP][HQVM_KV_N_KV_HEAD];
-    int64_t max_idx;
-} hqvm_chi_stream_t;
-
-static hqvm_chi_stream_t s_chi[HQVM_CHI_STREAMS];
-static int s_chi_n = 0;
 
 static gyro_trajectory_state_t s_traj;
 static int s_traj_init = 0;
@@ -1352,67 +914,21 @@ static uint32_t s_rope_clock_token_pos = 0;
 static uint32_t s_seq_len = 0;     /* tokens observed; next decode index */
 static int s_decode_mode = 0;      /* last lift was decode (Nq==1) */
 static uint8_t s_last_byte = 0;
-static uint64_t s_residual_hits = 0;
 static uint8_t s_pi_u6 = 0;
 static uint8_t s_pi_v6 = 0;
 static int s_pi_pending = 0;
 static int s_pi_applied = 0;
 
-static uint8_t fam_of_intron(uint8_t intron) {
-    return (uint8_t)((intron & 1u) | ((intron >> 6) & 2u));
-}
-
-static uint8_t q6_of_intron(uint8_t intron) {
-    return (uint8_t)((intron >> 1) & CHIRALITY_MASK_6);
-}
-
 void hqvm_cgm_lift_init(void) {
-    int b, ok = 1;
-    int q, f;
     if (s_init) return;
-    memset(s_byte_of_q6_fam, 0, sizeof(s_byte_of_q6_fam));
-    for (b = 0; b < 256; ++b) {
-        const uint8_t intron = (uint8_t)(b ^ (int)GENE_MIC_S);
-        const uint8_t q6 = q6_of_intron(intron);
-        const uint8_t fam = fam_of_intron(intron);
-        s_byte_of_q6_fam[q6][fam] = (uint8_t)b;
-    }
-    for (b = 0; b < 256; ++b) {
-        const uint8_t intron = (uint8_t)(b ^ (int)GENE_MIC_S);
-        const uint8_t q6 = q6_of_intron(intron);
-        const uint8_t fam = fam_of_intron(intron);
-        if (s_byte_of_q6_fam[q6][fam] != (uint8_t)b) ok = 0;
-        if (q6_of_intron((uint8_t)(b ^ (int)GENE_MIC_S)) != q6) ok = 0;
-        if (fam_of_intron((uint8_t)(b ^ (int)GENE_MIC_S)) != fam) ok = 0;
-    }
-    for (q = 0; q < 64; ++q) {
-        for (f = 0; f < 4; ++f) {
-            const uint8_t byte = s_byte_of_q6_fam[q][f];
-            const uint8_t intron = (uint8_t)(byte ^ (int)GENE_MIC_S);
-            if (q6_of_intron(intron) != (uint8_t)q) ok = 0;
-            if (fam_of_intron(intron) != (uint8_t)f) ok = 0;
-        }
-    }
-    s_table_ok = ok;
-    if (!ok) {
+    hqvm_byte_table_init();
+    s_table_ok = hqvm_byte_table_ok();
+    if (!s_table_ok) {
         fprintf(stderr, "[hqvm-cgm-lift] BYTE_OF_Q6_FAM verify FAIL\n");
     } else {
         fprintf(stderr, "[hqvm-cgm-lift] BYTE_OF_Q6_FAM verify PASS\n");
     }
     s_init = 1;
-}
-
-uint8_t hqvm_byte_of_q6_fam(uint8_t q6, uint8_t fam) {
-    if (!s_init) hqvm_cgm_lift_init();
-    return s_byte_of_q6_fam[q6 & 63][fam & 3];
-}
-
-uint8_t hqvm_q6_of_byte(uint8_t byte) {
-    return q6_of_intron((uint8_t)(byte ^ (int)GENE_MIC_S));
-}
-
-uint8_t hqvm_fam_of_byte(uint8_t byte) {
-    return fam_of_intron((uint8_t)(byte ^ (int)GENE_MIC_S));
 }
 
 int hqvm_byte_of_q6_fam_ok(void) {
@@ -1426,15 +942,6 @@ int hqvm_cgm_lift_enabled(void) {
         const char *e = getenv("GYRO_CGM_LIFT");
         s = (e && e[0] && e[0] != '0') ? 1 : 0;
         if (s) hqvm_cgm_lift_init();
-    }
-    return s;
-}
-
-int hqvm_cgm_lift_perturb_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *e = getenv("GYRO_CGM_LIFT_PERTURB");
-        s = (e && e[0] && e[0] != '0') ? 1 : 0;
     }
     return s;
 }
@@ -1466,7 +973,23 @@ uint8_t hqvm_cgm_lift_last_byte(void) {
     return s_last_byte;
 }
 
-void hqvm_pi_stash_from_embd_row(const float *e, int64_t n) {
+void hqvm_pi_summary_sign12_from_bits(uint8_t u6, uint8_t v6) {
+    static int s_pi_from_embd = -1;
+    if (s_pi_from_embd < 0) {
+        const char *env = getenv("GYRO_PI_FROM_EMBD");
+        /* Default on. Set 0 to keep GENE_MAC_REST. */
+        s_pi_from_embd = (env && env[0] == '0') ? 0 : 1;
+    }
+    if (!s_pi_from_embd) {
+        s_pi_pending = 0;
+        return;
+    }
+    s_pi_u6 = (uint8_t)(u6 & 63);
+    s_pi_v6 = (uint8_t)(v6 & 63);
+    s_pi_pending = 1;
+}
+
+void hqvm_pi_summary_sign12_from_embd(const float *e, int64_t n) {
     uint8_t u = 0, v = 0;
     int i;
     if (!e || n < 12) return;
@@ -1474,9 +997,11 @@ void hqvm_pi_stash_from_embd_row(const float *e, int64_t n) {
         if (e[i] < 0.0f) u |= (uint8_t)(1u << i);
         if (e[6 + i] < 0.0f) v |= (uint8_t)(1u << i);
     }
-    s_pi_u6 = u;
-    s_pi_v6 = v;
-    s_pi_pending = 1;
+    hqvm_pi_summary_sign12_from_bits(u, v);
+}
+
+void hqvm_pi_stash_from_embd_row(const float *e, int64_t n) {
+    hqvm_pi_summary_sign12_from_embd(e, n);
 }
 
 int hqvm_pi_applied(void) {
@@ -1616,87 +1141,19 @@ uint32_t hqvm_rope_clock_token_pos_get(void) {
     return s_rope_clock_token_pos;
 }
 
-int hqvm_residual_law_enabled(void) {
-    static int s = -1;
-    if (s < 0) {
-        const char *law = getenv("GYRO_RESIDUAL_LAW");
-        const char *hyb = getenv("GYRO_RESIDUAL_HYBRID");
-        s = 0;
-        if (law && law[0] && law[0] != '0') s = 1;
-        else if (hyb && hyb[0] && hyb[0] != '0') s = 1;
-    }
-    return s;
-}
-
-int hqvm_residual_hybrid_enabled(void) {
-    return hqvm_residual_law_enabled();
-}
-
-float hqvm_residual_gain(void) {
-    uint8_t chi6;
-    int shell;
-    float m;
-    if (!hqvm_residual_law_enabled()) return 1.0f;
-    if (s_traj_init) {
-        chi6 = gyroscopic_chirality_word6(s_traj.state24);
-    } else {
-        chi6 = (uint8_t)((s_pi_u6 ^ s_pi_v6) & 63);
-    }
-#if defined(_MSC_VER)
-    shell = (int)__popcnt((unsigned)chi6);
-#else
-    shell = __builtin_popcount((unsigned)chi6);
-#endif
-    m = (float)(shell - 3) / 3.0f;
-    return 1.0f + (float)APERTURE_GAP * m;
-}
-
-void hqvm_residual_law_hit(void) {
-    s_residual_hits++;
-    if (s_residual_hits == 1ull || (s_residual_hits % 72ull) == 0ull) {
-        hqvm_residual_law_counters_print();
-    }
-}
-
-void hqvm_residual_hybrid_hit(void) {
-    hqvm_residual_law_hit();
-}
-
-uint64_t hqvm_residual_law_hits(void) {
-    return s_residual_hits;
-}
-
-uint64_t hqvm_residual_hybrid_hits(void) {
-    return s_residual_hits;
-}
-
-void hqvm_residual_law_counters_print(void) {
-    fprintf(stderr,
-        "[hqvm-residual] hits=%llu gain=%.6f state24=%06x\n",
-        (unsigned long long)s_residual_hits,
-        (double)hqvm_residual_gain(),
-        s_traj_init ? (unsigned)(s_traj.state24 & 0xFFFFFFu) : 0u);
-    fflush(stderr);
-}
-
-void hqvm_residual_hybrid_counters_print(void) {
-    hqvm_residual_law_counters_print();
-}
-
 void hqvm_cgm_lift_counters_get(
     uint64_t *lift_calls, uint64_t *chi6_writes, uint64_t *invariant_fails)
 {
     if (lift_calls) *lift_calls = s_lift_calls;
-    if (chi6_writes) *chi6_writes = s_chi6_writes;
+    if (chi6_writes) *chi6_writes = 0;
     if (invariant_fails) *invariant_fails = s_invariant_fails;
 }
 
 void hqvm_cgm_lift_counters_print(void) {
     fprintf(stderr,
-        "[hqvm-cgm-lift] cgm_lift_calls=%llu k_chi6_write_calls=%llu invariant_fails=%llu "
+        "[hqvm-cgm-lift] cgm_lift_calls=%llu invariant_fails=%llu "
         "phase_idx=%u state24=%06x table_ok=%d\n",
         (unsigned long long)s_lift_calls,
-        (unsigned long long)s_chi6_writes,
         (unsigned long long)s_invariant_fails,
         s_traj_init ? (unsigned)s_traj.phase_idx : 0u,
         s_traj_init ? (unsigned)(s_traj.state24 & 0xFFFFFFu) : 0u,
@@ -1705,185 +1162,112 @@ void hqvm_cgm_lift_counters_print(void) {
     hqvm_genealogy_counters_print();
 }
 
-static hqvm_chi_stream_t *chi_stream(const void *base, int create) {
-    int i;
-    if (!base) return NULL;
-    for (i = 0; i < s_chi_n; ++i) {
-        if (s_chi[i].base == base) return &s_chi[i];
+int hqvm_attn_scores_native_enabled(void) {
+    static int s = -1;
+    if (s < 0) {
+        const char *e = getenv("GYRO_NATIVE_ATTN_SCORES");
+        s = (e && e[0] == '1') ? 1 : 0;
     }
-    if (!create || s_chi_n >= HQVM_CHI_STREAMS) return NULL;
-    s_chi[s_chi_n].base = base;
-    s_chi[s_chi_n].max_idx = -1;
-    memset(s_chi[s_chi_n].chi, 0, sizeof(s_chi[s_chi_n].chi));
-    return &s_chi[s_chi_n++];
+    return s;
 }
 
-void hqvm_k_chi6_store(
-    const void *k_base, int64_t idx, const float *row_f32, int64_t n_heads, int64_t head_dim)
+int hqvm_vreduce_native_enabled(void) {
+    static int s = -1;
+    if (s < 0) {
+        const char *e = getenv("GYRO_NATIVE_VREDUCE");
+        s = (e && e[0] == '1') ? 1 : 0;
+    }
+    return s;
+}
+
+int hqvm_attn_head_scores_dyad(
+    hqvm_dyad32_t *weights_dyad,
+    const hqvm_dyad32_t *q_head_dyad,
+    const void *k_q8_base,
+    const float *k_f32_base,
+    const float *k_fallback_f32,
+    size_t k_row_stride,
+    size_t floats_per_tok,
+    size_t k_per_head_q8,
+    const uint8_t *chi_layer,
+    int64_t n_kv_heads,
+    int kv_head,
+    int64_t kv_len,
+    uint8_t Nc,
+    int top_k,
+    int attn_level,
+    float attn_scale)
 {
-    hqvm_chi_stream_t *S;
-    int64_t h;
-    if (!k_base || !row_f32 || idx < 0 || idx >= HQVM_CHI_CAP) return;
-    if (n_heads <= 0) n_heads = HQVM_KV_N_KV_HEAD;
-    if (head_dim <= 0) head_dim = HQVM_KV_HEAD_DIM;
-    S = chi_stream(k_base, 1);
-    if (!S) return;
-    s_chi6_writes++;
-    {
-        static int s_store_note = 0;
-        if (s_store_note < 2) {
-            fprintf(stderr, "[hqvm-cgm-lift] chi6_store base=%p idx=%lld n_heads=%lld\n",
-                k_base, (long long)idx, (long long)n_heads);
-            s_store_note++;
-        }
+    static int s_logged = 0;
+    int native = hqvm_attn_scores_native_enabled();
+    int rc;
+
+    hqvm_gate_counters_inc_attn();
+    if (!s_logged) {
+        fprintf(stderr, "[hqvm-attn] mode=%s\n",
+            native ? "NATIVE-dyad-q8" : "stock-float-QK");
+        fflush(stderr);
+        s_logged = 1;
     }
-    for (h = 0; h < n_heads && h < HQVM_KV_N_KV_HEAD; ++h) {
-        uint64_t signs = 0;
-        int i;
-        const float *plane = row_f32 + h * head_dim;
-        for (i = 0; i < 64 && i < head_dim; ++i) {
-            if (plane[i] >= 0.0f) signs |= (1ull << i);
-        }
-        S->chi[idx][h] = gyroscopic_chirality_from_signs64(signs);
+    if (native) {
+        rc = hqvm_attn_head_scores_weights_native(
+            weights_dyad, q_head_dyad, k_q8_base, k_f32_base, k_fallback_f32,
+            k_row_stride, floats_per_tok, k_per_head_q8,
+            chi_layer, n_kv_heads, kv_head, kv_len, Nc, top_k, attn_level, attn_scale);
+    } else {
+        rc = hqvm_attn_head_scores_weights_stock(
+            weights_dyad, q_head_dyad, k_q8_base, k_f32_base, k_fallback_f32,
+            k_row_stride, floats_per_tok, k_per_head_q8,
+            chi_layer, n_kv_heads, kv_head, kv_len, Nc, top_k, attn_level, attn_scale);
     }
-    if (idx > S->max_idx) S->max_idx = idx;
+    return rc;
 }
 
-uint8_t hqvm_k_chi6_get(const void *k_base, int64_t idx, int head) {
-    hqvm_chi_stream_t *S = chi_stream(k_base, 0);
-    if (idx < 0 || idx >= HQVM_CHI_CAP) return 0;
-    if (head < 0 || head >= HQVM_KV_N_KV_HEAD) return 0;
-    if (!S) return 0;
-    return S->chi[idx][head];
-}
-
-int hqvm_k_chi6_has(const void *k_base) {
-    return chi_stream(k_base, 0) != NULL;
-}
-
-void hqvm_lift_attention_phase(
-    const float *scores, const void *k_base, int64_t Nk, int head,
-    uint8_t chi_q, uint32_t token_pos, uint32_t layer_idx,
-    float Delta, float eps_max, gyro_lift_attn_t *out)
+int hqvm_v_reduce_dyad(
+    hqvm_dyad32_t *out_dyad,
+    int64_t DV,
+    const hqvm_dyad32_t *weights_dyad,
+    int64_t Nk,
+    const void *v_base,
+    size_t v_row_stride,
+    int v_is_q8)
 {
-    int64_t i, i_star = -1;
-    float best = -INFINITY;
-    uint8_t *qvals = NULL;
-    int r = 0;
-    float eps = 0.0f;
-    uint8_t q6, fam, byte;
-    uint64_t depth;
-    static int s_print = 0;
-    static int s_inv_note = 0;
-    static int s_chi_strict_note = 0;
+    static int s_logged = 0;
+    int native = hqvm_vreduce_native_enabled();
+    int v_pert = hqvm_v_perturb_enabled();
+    float *weights_f = NULL;
+    float *out_f = NULL;
+    int64_t j, d;
+    int rc = 0;
 
-    if (!out) return;
-    memset(out, 0, sizeof(*out));
-    out->chi_q = chi_q;
-    out->argmax = -1;
-    if (!scores || !k_base || Nk <= 0) return;
-    if (!s_init) hqvm_cgm_lift_init();
-    if (!s_seq_active) hqvm_cgm_lift_reset_sequence();
-    if (!s_traj_init) { hqvm_traj_reset(&s_traj); s_traj_init = 1; }
+    hqvm_gate_counters_inc_vreduce();
+    if (!s_logged) {
+        fprintf(stderr, "[hqvm-vreduce] mode=%s\n",
+            (native && !v_pert) ? "NATIVE-dyad-q8" : "stock-float");
+        fflush(stderr);
+        s_logged = 1;
+    }
+    if (!out_dyad || !weights_dyad || !v_base || DV <= 0 || Nk <= 0) return -1;
 
-    depth = hqvm_genealogy_depth(token_pos, layer_idx);
-    if (depth > (uint64_t)UINT32_MAX) {
-        static int s_depth_warn = 0;
-        if (s_depth_warn < 3) {
-            fprintf(stderr,
-                "[hqvm-gyro-clock] depth=%llu exceeds UINT32_MAX; phase_idx clamped\n",
-                (unsigned long long)depth);
-            s_depth_warn++;
-        }
+    if (native && v_is_q8 && !v_pert) {
+        return hqvm_attn_v_reduce_dyad_q8(
+            out_dyad, DV, weights_dyad, Nk, v_base, v_row_stride);
     }
 
-    for (i = 0; i < Nk; ++i) {
-        if (scores[i] > best) { best = scores[i]; i_star = i; }
+    weights_f = (float *)malloc((size_t)Nk * sizeof(float));
+    out_f = (float *)malloc((size_t)DV * sizeof(float));
+    if (!weights_f || !out_f) {
+        free(weights_f);
+        free(out_f);
+        return -2;
     }
-    if (i_star < 0 || best <= -1e20f) return;
-
-    out->argmax = (int)i_star;
-    if (!hqvm_k_chi6_has(k_base)) {
-        const char *strict = getenv("GYRO_LEDGER_STRICT");
-        if (strict && strict[0] && strict[0] != '0') {
-            fprintf(stderr,
-                "[hqvm-cgm-lift] STRICT abort: chi stream missing for lift "
-                "token_pos=%u layer=%u\n",
-                (unsigned)token_pos, (unsigned)layer_idx);
-            fflush(stderr);
-            abort();
-        }
-        if (s_chi_strict_note < 3) {
-            fprintf(stderr,
-                "[hqvm-cgm-lift] chi missing (return 0) token_pos=%u layer=%u\n",
-                (unsigned)token_pos, (unsigned)layer_idx);
-            s_chi_strict_note++;
-        }
-    }
-    q6 = (uint8_t)((chi_q ^ hqvm_k_chi6_get(k_base, i_star, head)) & 63);
-    /* GyroClock family: fam = depth & 3 (not call-count). */
-    fam = (uint8_t)(depth & 3u);
-    out->phase_idx = (uint32_t)(depth > (uint64_t)UINT32_MAX ? UINT32_MAX : depth);
-
-    if (hqvm_cgm_lift_perturb_enabled()) {
-        /* Strong coupling probe: flip several q6 bits + fam — magnitude path untouched. */
-        q6 = (uint8_t)((q6 ^ 0x2Au) & 63);
-        fam = (uint8_t)((fam ^ 3u) & 3);
-    }
-
-    byte = hqvm_byte_of_q6_fam(q6, fam);
-    if (hqvm_q6_of_byte(byte) != q6 || hqvm_fam_of_byte(byte) != fam) {
-        s_invariant_fails++;
-        if (s_inv_note < 3) {
-            fprintf(stderr,
-                "[hqvm-cgm-lift] INVARIANT FAIL byte=%02x q6=%u/%u fam=%u/%u\n",
-                (unsigned)byte, (unsigned)q6, (unsigned)hqvm_q6_of_byte(byte),
-                (unsigned)fam, (unsigned)hqvm_fam_of_byte(byte));
-            s_inv_note++;
-        }
-    }
-
-    out->q6 = q6;
-    out->fam = fam;
-    out->byte = byte;
-    s_last_byte = byte;
-
-    qvals = (uint8_t *) malloc((size_t)Nk);
-    if (qvals) {
-        for (i = 0; i < Nk; ++i) {
-            qvals[i] = (uint8_t)((chi_q ^ hqvm_k_chi6_get(k_base, i, head)) & 63);
-        }
-        r = hqvm_rank_gf2_6(qvals, Nk);
-        free(qvals);
-    }
-    out->rank_r = (uint8_t)r;
-    eps = (float)(6 - r) * Delta;
-    if (eps < 0.0f) eps = 0.0f;
-    if (eps > eps_max) eps = eps_max;
-    out->eps = eps;
-
-    hqvm_traj_step(&s_traj, out->byte);
-    /* Record formula depth on traj for genealogy; do not use phase_idx++ as fam source. */
-    s_traj.phase_idx = out->phase_idx;
-    s_lift_calls++;
-    out->state24 = s_traj.state24;
-
-    if (s_step_count == 0 || depth < s_depth_min) s_depth_min = depth;
-    if (s_step_count == 0 || depth > s_depth_max) s_depth_max = depth;
-    if (s_step_count == 0) s_depth_start = depth;
-    s_step_count++;
-    s_depth_end = s_depth_max + 1ull;
-    hqvm_rope_clock_token_pos_set(token_pos);
-
-    if (s_print < 12 || (s_step_count % 36ull) == 0ull) {
-        fprintf(stderr,
-            "[hqvm-cgm-lift] depth=%llu token_pos=%u layer=%u head=%d argmax=%d "
-            "q6=%u fam=%u byte=%02x phase=%u r=%d eps=%.4f state=%06x\n",
-            (unsigned long long)depth, (unsigned)token_pos, (unsigned)layer_idx,
-            head, out->argmax, (unsigned)out->q6, (unsigned)out->fam,
-            (unsigned)out->byte, (unsigned)out->phase_idx, r, eps,
-            (unsigned)(s_traj.state24 & 0xFFFFFFu));
-        s_print++;
-    }
+    for (j = 0; j < Nk; ++j) weights_f[j] = hqvm_dyad32_to_f32(weights_dyad[j]);
+    hqvm_attn_v_reduce(
+        out_f, DV, weights_f, Nk, v_base, v_row_stride, v_is_q8, v_pert);
+    for (d = 0; d < DV; ++d) out_dyad[d] = hqvm_dyad32_from_f32(out_f[d]);
+    free(weights_f);
+    free(out_f);
+    return rc;
 }
+
 

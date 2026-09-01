@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import struct
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -70,7 +71,7 @@ def build_byte_table(n_bin: int = N_BIN) -> np.ndarray:
 def write_ledger(
     path: Path | str | None = None,
     *,
-    allows: list[str] | None = None,
+    allows: Sequence[str] | None = None,
     attn_only: bool = False,
 ) -> Path:
     """Write HQVMLEDS v1 ledger. Returns output path."""
@@ -100,7 +101,7 @@ def ensure_ledger(
     path: Path | str | None = None,
     *,
     force: bool = False,
-    allows: list[str] | None = None,
+    allows: Sequence[str] | None = None,
     attn_only: bool = False,
 ) -> Path:
     """Return ledger path, writing HQVMLEDS if missing (or if force=True)."""

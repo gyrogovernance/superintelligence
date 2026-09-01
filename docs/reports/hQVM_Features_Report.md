@@ -4,19 +4,61 @@
 
 Inventory of every verified quantum feature and physics result for the Gyroscopic ASI hQVM Kernel. Each entry names the evidence source, the verification method, and (where applicable) the executable experiment script.
 
+**Cross-repo canonical copies:** [superintelligence `docs/reports/hQVM_Features_Report.md`](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Features_Report.md) · Tier A pytest in [gyrogovernance/superintelligence](https://github.com/gyrogovernance/superintelligence) · Tier B executables in [gyrogovernance/science](https://github.com/gyrogovernance/science) (`experiments/`). All document links below use absolute GitHub blob URLs so this file resolves identically from either repository.
+
+### Repository map
+
+| Repo | Role | Base URL |
+|------|------|----------|
+| [gyrogovernance/superintelligence](https://github.com/gyrogovernance/superintelligence) | Kernel pytest (Tier A), specs, test reports | `https://github.com/gyrogovernance/superintelligence/blob/main/` |
+| [gyrogovernance/science](https://github.com/gyrogovernance/science) | Analysis manuscripts (Tier B), experiment scripts | `https://github.com/gyrogovernance/science/blob/main/` |
+
 ### Evidence sources
 
-| Document / repo | Role |
-|-----------------|------|
-| [Physics_Tests_Report.md](Physics_Tests_Report.md) | Kernel conformance, mask code, affine/spinorial dynamics, CGM constants bridge, depth-4 K4 fiber |
-| [hQVM_Tests_Report_1.md](hQVM_Tests_Report_1.md) | Native register, horizons, gates, Hilbert lift, tamper detection, computational advantages |
-| [hQVM_Tests_Report_2.md](hQVM_Tests_Report_2.md) | SDK layer: future-cone theorems, Omega-chart, shell/Krawtchouk, q-fiber, GF(64), native GEMV/WHT |
-| [Moments_Tests_Report.md](Moments_Tests_Report.md) | Clifford unitaries, 8192-operator family, stabilisers, frame certification |
-| [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) | Wavefunction theorems T1-T10 on Omega |
-| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) | Kernel gravity invariants and continuous field-theory bridge |
-| [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md) | Electroweak mass-coordinate law and compact ruler |
-| [hQVM_SDK_Quantum_Computing.md](../specs/hQVM_SDK_Quantum_Computing.md) | Normative SDK specification cross-references |
-| [gyrogovernance/science](https://github.com/gyrogovernance/science) | Executable verification of the three analysis manuscripts (`experiments/hqvm_*.py`) |
+#### Superintelligence ([gyrogovernance/superintelligence](https://github.com/gyrogovernance/superintelligence))
+
+| Document | Role |
+|----------|------|
+| [Physics_Tests_Report.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Physics_Tests_Report.md) | Kernel conformance, mask code, affine/spinorial dynamics, CGM constants bridge, depth-4 K4 fiber |
+| [hQVM_Tests_Report_1.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Tests_Report_1.md) | Native register, horizons, gates, Hilbert lift, tamper detection, computational advantages |
+| [hQVM_Tests_Report_2.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Tests_Report_2.md) | SDK layer: future-cone theorems, Omega-chart, shell/Krawtchouk, q-fiber, GF(64), native GEMV/WHT |
+| [Moments_Tests_Report.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Moments_Tests_Report.md) | Clifford unitaries, 8192-operator family, stabilisers, frame certification |
+| [hQVM_SDK_Quantum_Computing.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_SDK_Quantum_Computing.md) | Normative SDK specification cross-references |
+| [hQVM_QuBEC_Theory.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_QuBEC_Theory.md) | QuBEC formalism, future-cone entropy, thermodynamic structure |
+| [hQVM_Specs_Formalism.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md) | Byte formalism, intron families, 6-bit runtime |
+| [Gyroscopic_ASI_Foundations.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_Foundations.md) | Normative hQVM and SDK architecture |
+
+#### Science ([gyrogovernance/science](https://github.com/gyrogovernance/science))
+
+| Document | Role |
+|----------|------|
+| [Analysis_hQVM_Wavefunction.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Wavefunction.md) | Wavefunction theorems T1–T10 on Omega |
+| [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) | Kernel gravity invariants and continuous field-theory bridge |
+| [Analysis_Compact_Geometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Compact_Geometry.md) | Electroweak mass-coordinate law and compact ruler |
+| [Analysis_hQVM_Percolation.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Percolation.md) | Square-Root Cluster Theorem, byte/word regimes, hQVM(d) scaling |
+| [Analysis_hQVM_Cohomology.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Cohomology.md) | Finite site cohomology, shell grading, Grothendieck/CHSH gap |
+| [Analysis_hQVM_CGM_Trestleboard.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Trestleboard.md) | Shared Δ-ruler: nuclear isomer, deuteron, decay, fusion, magic numbers |
+| [Analysis_hQVM_CGM_YM_Mass_Gap.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_YM_Mass_Gap.md) | Aperture-first Yang–Mills mass-gap construction and Wilson certificates |
+| [Analysis_hQVM_CGM_Allometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Allometry.md) | Source-accessibility channel basis, Kleiber band, catalog audits |
+| [Analysis_hQVM_Moments_Fiat.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Moments_Fiat.md) | NTP/QR receipt geometry, coordinate ledger, inference-host co-execution |
+| [Yang_Mills_Mass_Gap_Solution.md](https://github.com/gyrogovernance/science/blob/main/experiments/hQVM_CGM_YM_Gap/Yang_Mills_Mass_Gap_Solution.md) | Primary YM mass-gap construction manuscript (experiments bundle) |
+| [experiments/](https://github.com/gyrogovernance/science/tree/main/experiments) | Runnable verification (`hqvm_*.py`, `hQVM_CGM_YM_Gap/`) |
+
+#### Source shorthand (feature tables)
+
+Short labels in the **Source** columns map to the blob-linked documents above:
+
+| Shorthand | Document |
+|-----------|----------|
+| Physics Report | [Physics_Tests_Report.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Physics_Tests_Report.md) |
+| hQVM Report 1 | [hQVM_Tests_Report_1.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Tests_Report_1.md) |
+| hQVM Report 2 | [hQVM_Tests_Report_2.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/hQVM_Tests_Report_2.md) |
+| Moments Report | [Moments_Tests_Report.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Moments_Tests_Report.md) |
+| SDK Spec | [hQVM_SDK_Quantum_Computing.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_SDK_Quantum_Computing.md) |
+| QuBEC Theory | [hQVM_QuBEC_Theory.md](https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_QuBEC_Theory.md) |
+| Compact Geometry | [Analysis_Compact_Geometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Compact_Geometry.md) |
+| Gravity Analysis | [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) |
+| [15] | [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md) |
 
 ---
 
@@ -26,9 +68,9 @@ Features are tagged by how they are established:
 
 | Tier | Label | Meaning |
 |------|-------|---------|
-| **A** | Kernel pytest | Passing automated tests in **this repo** (`tests/physics/`, `tests/test_hQVM_*.py`, `tests/test_moments_physics_*.py`, `tests/test_holography*.py`) |
-| **B** | Science executable | Runnable experiment scripts in **[gyrogovernance/science](https://github.com/gyrogovernance/science)** (`experiments/hqvm_*.py`); exhaustive Omega integer work or numerical closure checks tied to the analysis manuscripts |
-| **C** | Formal manuscript | Results established by formal proof or manuscript argument only (e.g. modal independence in [15]); no dedicated experiment script |
+| **A** | Kernel pytest | Passing automated tests in **[gyrogovernance/superintelligence](https://github.com/gyrogovernance/superintelligence)** (`tests/physics/`, `tests/test_hQVM_*.py`, `tests/test_moments_physics_*.py`, `tests/test_holography*.py`) |
+| **B** | Science executable | Runnable experiment scripts in **[gyrogovernance/science](https://github.com/gyrogovernance/science/tree/main/experiments)** (`experiments/hqvm_*.py`, `hQVM_CGM_YM_Gap/`); exhaustive Omega integer work or numerical closure checks tied to the analysis manuscripts |
+| **C** | Formal manuscript | Results established by formal proof or manuscript argument only (e.g. modal independence in [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md)); no dedicated experiment script |
 
 ### Tier A: superintelligence pytest (documented status, not re-run here)
 
@@ -45,14 +87,14 @@ Reports note intentional overlap: later suites reference properties already prov
 
 ### Tier B: science repository executable verification
 
-The three analysis manuscripts are backed by executable scripts in the science repo. Local checkout: `F:\Development\science\experiments\`. Combined output: `hqvm_gravity_analysis.txt` (via `hqvm_gravity_runner.py`).
+hQVM analysis manuscripts are backed by executable scripts in the [science repository](https://github.com/gyrogovernance/science/tree/main/experiments). Combined gravity output: `hqvm_gravity_analysis.txt` (via `hqvm_gravity_runner.py`).
 
 | Analysis manuscript | Primary scripts | What they verify |
 |--------------------|-----------------|------------------|
-| [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` | Holonomy diagnostics, BU-Egress/Ingress duality, spectral probes; **theorems T1-T10** exhaustive on all 4096 Omega states |
-| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) | `hqvm_gravity_common.py` (library), `hqvm_gravity_analysis_1.py` through `_10.py`, `hqvm_gravity_runner.py` | Kernel invariants (D=24, Gauss law, plaquette census, Regge/tau_G), coupling chain (c4, tau_cycle, G prediction), nonlinear G(psi), antimatter parity, PPN, GW, TOV, optical cosmology |
-| [Analysis Gravity](docs/Findings/Analysis_Gravity.md) (corrections) | `hqvm_corrections_analysis_1.py` | Transport-corrected fine-structure constant (0.043 ppb vs CODATA) |
-| [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md) | `hqvm_compact_geom_core.py`, `hqvm_compact_geom_kernel.py`, `hqvm_compact_geom_report.py` | Exhaustive Omega enumeration, shell transition algebra, electroweak mass law, null-model audit, lepton/quark diagnostics |
+| [Analysis_hQVM_Wavefunction.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Wavefunction.md) | `hqvm_wavefunction_1.py`, `hqvm_wavefunction_2.py` | Holonomy diagnostics, BU-Egress/Ingress duality, spectral probes; **theorems T1-T10** exhaustive on all 4096 Omega states |
+| [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) | `hqvm_gravity_common.py` (library), `hqvm_gravity_analysis_1.py` through `_10.py`, `hqvm_gravity_runner.py` | Kernel invariants (D=24, Gauss law, plaquette census, Regge/tau_G), coupling chain (c4, tau_cycle, G prediction), nonlinear G(psi), antimatter parity, PPN, GW, TOV, optical cosmology |
+| [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) (corrections) | `hqvm_corrections_analysis_1.py` | Transport-corrected fine-structure constant (≈ 33.8 ppb vs CODATA 2018) |
+| [Analysis_Compact_Geometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Compact_Geometry.md) | `hqvm_compact_geom_core.py`, `hqvm_compact_geom_kernel.py`, `hqvm_compact_geom_report.py` | Exhaustive Omega enumeration, shell transition algebra, electroweak mass law, null-model audit, lepton/quark diagnostics |
 
 #### Script ownership (from script headers)
 
@@ -295,12 +337,12 @@ Algebraic quantum structure on the 4096-state manifold Omega, established primar
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
-| 106 | **BU monodromy defect delta(BU) = 0.195342176580 rad**: representation-independent constant from depth-4 closure | SDK Spec SS9.1; hQVM Report 1 SS10.1 | CGM derivation + verification |
-| 107 | **delta(BU) far from all Clifford angles**: nearest distance 0.195 rad (multiples of pi/4) | hQVM Report 1 SS10.2 | All 8 Clifford angles tested |
-| 108 | **No periodicity up to order 100,000**: closest return at k=22,805, distance 4.59e-5 | hQVM Report 1 SS10.3 | Exhaustive search |
-| 109 | **Dense U(1) equidistribution**: {k x delta(BU) mod 2pi} fills [0,2pi) uniformly; chi^2=0.212 vs critical 142.4 | hQVM Report 1 SS10.3 | 50,000 points, 100 bins |
+| 106 | **BU dual-pole loop angle δ_BU = 4·arctan(k(π/4)·k(m_a)) ≈ 0.195342178258 rad**: representation-independent constant from depth-4 closure | SDK Spec SS9.1; hQVM Report 1 SS10.1 | CGM derivation + verification |
+| 107 | **delta(BU) far from all Clifford angles**: nearest distance 0.195342 rad (multiples of pi/4) | hQVM Report 1 SS10.2 | All 8 Clifford angles tested |
+| 108 | **No periodicity up to order 100,000**: closest return at k=22,805, distance 7.62e-6 | hQVM Report 1 SS10.3 | Exhaustive search |
+| 109 | **Dense U(1) equidistribution**: {k x delta(BU) mod 2pi} fills [0,2pi) uniformly; chi^2=0.232 vs critical 142.4 | hQVM Report 1 SS10.3 | 50,000 points, 100 bins |
 | 110 | **Magic state Wigner negativity**: \|delta> has W(0,1) = -0.043771 | hQVM Report 1 SS10.4 | Discrete Wigner function computation |
-| 111 | **Aperture gap Delta = 1-delta(BU)/m_a ~ 0.0207**: \|delta(BU)-m_a\| = Delta x m_a exactly | hQVM Report 1 SS10.5 | Exact equality verified |
+| 111 | **Aperture gap Delta = 1-delta(BU)/m_a ≈ 0.020699545503**: \|delta(BU)-m_a\| = Delta x m_a = 0.004128961943 exactly | hQVM Report 1 SS10.5 | Exact equality verified |
 | 112 | **Three universality ingredients**: Clifford backbone, non-Clifford delta(BU), entangling gate S | hQVM Report 1 SS12.1 | Moments Report + hQVM tests |
 | 113 | **Topological entanglement via holonomic gates**: localized A perturbation transported to B by gate S | hQVM Report 1 SS9.3 | Explicit mask 0x003 perturbation test |
 | 114 | **Non-Clifford certification by 4 independent tests**: distance from Clifford, no periodicity, dense equidistribution, Wigner negativity | SDK Spec SS9.2 | Each independently verified |
@@ -374,10 +416,10 @@ Discrete physics of the byte-driven transition rule, established by Physics test
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
 | 151 | **Fundamental aperture constraint**: Q_G x m_a^2 = 1/2 | Physics Report Part 9.1 | Exact algebraic identity |
-| 152 | **Fine-structure constant prediction**: alpha_CGM = delta_BU^4/m_a = 0.007297352563, matching experiment to 0.04% (400 ppm) | Physics Report Part 9.2 | Comparison with CODATA |
+| 152 | **Fine-structure constant prediction**: α₀ = δ_BU⁴/m_a ≈ 0.007299683573; transport-corrected α ≈ 0.007297352816 (≈ 33.8 ppb vs CODATA 2018) | Physics Report Part 9.2 | Comparison with CODATA |
 | 153 | **K_QG identity**: two derivations agree to <10^-12 | Physics Report Part 9.3 | Numerical verification |
 | 154 | **Stage action ratios**: E_ONA/E_CS = 1/2 exact; E_UNA/E_CS = 2/(pi*sqrt(2)) to 12 decimal places | Physics Report Part 9.4 | Geometric values |
-| 155 | **Aperture quantization chain**: 5/256 (byte) < Delta (continuous) < 1/48 (depth-4) | Physics Report Part 9.5 | Three scales verified |
+| 155 | **Aperture quantization chain**: 5/256 (byte) < Delta ≈ 0.020699545503 (continuous) < 1/48 (depth-4); 48·Δ ≈ 0.993578 | Physics Report Part 9.5 | Three scales verified |
 | 156 | **DOF doubling theorem**: 2^(2x1)=4 (CS), 2^(2x3)=64 (UNA), 2^(2x6)=4096 (ONA) | Physics Report Part 10 | BFS with restricted byte subsets |
 | 157 | **Optical conjugacy on Omega**: constant density 0.5 at every state | Physics Report Part 9; test_physics_5 | Product structure U x V |
 
@@ -404,7 +446,7 @@ Discrete physics of the byte-driven transition rule, established by Physics test
 
 ## Part III: Wavefunction and Holonomy (Tier B)
 
-Verified by [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunction.md) and executable in science repo `hqvm_wavefunction_1.py` / `hqvm_wavefunction_2.py`. Overlaps conceptually with K4 gate tests (Part I SS3) but proves micro_ref-universal operator algebra.
+Verified by [Analysis_hQVM_Wavefunction.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Wavefunction.md) and executable in [science repo](https://github.com/gyrogovernance/science/tree/main/experiments) `hqvm_wavefunction_1.py` / `hqvm_wavefunction_2.py`. Overlaps conceptually with K4 gate tests (Part I SS3) but proves micro_ref-universal operator algebra.
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -413,7 +455,7 @@ Verified by [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunctio
 | 168 | **T3: W2' maps shell s -> 6-s** identically | `hqvm_wavefunction_2.py` `run_T2_T4` | Algebraic proof + verified |
 | 169 | **T4: Gate F preserves shell** (Z2 within pole) | `hqvm_wavefunction_2.py` `run_T2_T4` | chi xor 63 xor 63 = chi; verified |
 | 170 | **T5: Depth-4 confines to opposite constitutional pole** | `hqvm_wavefunction_2.py` `run_T5` | 64x64 states |
-| 171 | **T6: Depth-8 = K4 composition**, not new modal depth | `hqvm_wavefunction_2.py` `run_T6` | Signature algebra |
+| 171 | **T6: F = W2 ∘ W2′ is the K4 operator product of two depth-four half-words** | `hqvm_wavefunction_2.py` `run_T6` | Signature algebra |
 | 172 | **T7: CS forces canonical family ordering** | `hqvm_wavefunction_2.py` `run_T7` | 64 micro_refs |
 | 173 | **T8: BU-Egress = W2 involution** (depth-4 squares to identity on Omega) | `hqvm_wavefunction_2.py` `run_T8_T9` | 4096 states + complement horizon |
 | 174 | **T9: BU-Ingress = W2 pole-pairing** (shadow = memory) | `hqvm_wavefunction_2.py` `run_T8_T9` | 4096 states |
@@ -431,7 +473,7 @@ Verified by [Analysis hQVM Wavefunction](docs/Findings/Analysis_hQVM_Wavefunctio
 
 ## Part IV: Gravitational Kernel Invariants (Tier B)
 
-Discrete combinatorial invariants linking the kernel to [Analysis Gravity](docs/Findings/Analysis_Gravity.md). Executable in science repo `hqvm_gravity_analysis_*.py` (orchestrated by `hqvm_gravity_runner.py`).
+Discrete combinatorial invariants linking the kernel to [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md). Executable in [science repo](https://github.com/gyrogovernance/science/tree/main/experiments) `hqvm_gravity_analysis_*.py` (orchestrated by `hqvm_gravity_runner.py`).
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -452,7 +494,7 @@ Discrete combinatorial invariants linking the kernel to [Analysis Gravity](docs/
 
 ## Part V: Electroweak Mass-Coordinate Law (Tier B)
 
-From [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md). Kernel algebra proved in `hqvm_compact_geom_kernel.py`; mass law and audits reported by `hqvm_compact_geom_report.py` (computes via `hqvm_compact_geom_core.py`).
+From [Analysis_Compact_Geometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Compact_Geometry.md). Kernel algebra proved in `hqvm_compact_geom_kernel.py`; mass law and audits reported by `hqvm_compact_geom_report.py` (computes via `hqvm_compact_geom_core.py`).
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
@@ -477,13 +519,13 @@ From [Analysis Compact Geometry](docs/Findings/Analysis_Compact_Geometry.md). Ke
 
 ## Part VI: Continuous Gravity Phenomenology (Tier B)
 
-Continuous field-theory predictions anchored on kernel invariants. Documented in [Analysis Gravity](docs/Findings/Analysis_Gravity.md) and numerically closed in science repo scripts `hqvm_gravity_analysis_4.py` through `_10.py` and `hqvm_corrections_analysis_1.py`.
+Continuous field-theory predictions anchored on kernel invariants. Documented in [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) and numerically closed in [science repo](https://github.com/gyrogovernance/science/tree/main/experiments) scripts `hqvm_gravity_analysis_4.py` through `_10.py` and `hqvm_corrections_analysis_1.py`.
 
 | # | Feature | Experiment | Method |
 |---|---------|------------|--------|
 | 206 | **Q_G = 4pi as quantum of gravity** (horizon normalization) | `hqvm_gravity_analysis_2.py` S12; `hqvm_gravity_common.py` | GNS + kernel ratio |
 | 207 | **Virial condition 2T+V=0** as structural consequence of ancestry preservation | `hqvm_gravity_analysis_6.py` Section C | Kernel invariant D=24 |
-| 208 | **Transport-corrected alpha matches CODATA to 0.043 ppb** | `hqvm_corrections_analysis_1.py` | Three geometric corrections in powers of Delta |
+| 208 | **Transport-corrected alpha matches CODATA to ≈ 33.8 ppb** | `hqvm_corrections_analysis_1.py` | Three geometric corrections in powers of Delta |
 | 209 | **Delta self-consistency**: 3-factor reconstruction converges; D^3 fixed-point residual <10^-15 | `hqvm_compact_geom_core.py` | Iterative computation |
 | 210 | **Position-dependent coupling**: G(psi) = G0 exp(g1 psi) with g1 = -0.6456 | `hqvm_gravity_analysis_4.py`; `hqvm_gravity_analysis_1.py` Part E | Three independent routes |
 | 211 | **Weak-field G matches CODATA to 0.074 ppm** | `hqvm_gravity_analysis_1.py` Part E | G_pred = G_kernel exp(-tau_G)/v^2 |
@@ -518,20 +560,126 @@ Continuous field-theory predictions anchored on kernel invariants. Documented in
 
 ---
 
-## Part VII: CGM Modal Structure (Tier C)
+## Part VII: Generator-Restricted Percolation (Tier B)
 
-Formal modal-logic and manuscript-only results from [Analysis Gravity](docs/Findings/Analysis_Gravity.md) and companion proof [15]. No dedicated experiment script in the science repo.
+From [Analysis_hQVM_Percolation.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Percolation.md). Executable in `hqvm_percolation_analysis_run.py` (`_1.py` through `_5.py`); family kernel in `gyroscopic/hQVM/family.py`.
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 244 | **Square-Root Cluster Theorem**: `\|Reach_d(A)\| = (2^r(A))^2` under fiber-complete restriction | `hqvm_percolation_analysis_5.py` | Verified `d = 1` through `8` (52/52 gates) |
+| 245 | **Byte regime**: unclosed spinorial half-cycles connect maximally on full 4096-state product | `hqvm_percolation_analysis_1.py` | Exhaustive reachability census |
+| 246 | **Word regime**: depth-four closure confines reachability to 128 horizon states from rest | `hqvm_percolation_analysis_2.py` | Canonical word operators |
+| 247 | **Five coverage observables** turn on at separable generator fractions on one restriction dial | `hqvm_percolation_analysis_3.py` | Exact threshold labels |
+| 248 | **Exact rank thresholds at d = 6**: micro-reference `p_c ≈ 0.0908`, Q6-class `p_c ≈ 0.1053` | `hqvm_percolation_analysis_4.py` | GF(2) rank machinery |
+| 249 | **hQVM(d) family**: closed-form register-protocol thresholds and asymptotic square-root scaling | `hqvm_percolation_analysis_5.py`; `family.py` | Finite-size scaling suite |
+| 250 | **Gravity bridge**: percolation transport closes to gravitational self-energy identities | `hqvm_percolation_analysis_3.py` | Structural observables |
+
+**Part VII subtotal (Tier B percolation): 7 features**
+
+---
+
+## Part VIII: Cohomology and Obstruction Census (Tier B)
+
+From [Analysis_hQVM_Cohomology.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Cohomology.md). Executable in `hqvm_Cohomology_analysis_run.py` (`_1.py` through `_4.py`).
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 251 | **Shell census from exterior-algebra grading**: 64, 384, 960, 1280, 960, 384, 64 with discrete Poincaré duality | `hqvm_Cohomology_analysis_2.py` | Graded dimension derivation |
+| 252 | **Parity 1-cocycle**: even-weight restriction confines reachability to even shells (32² = 1024 cluster) | `hqvm_Cohomology_analysis_2.py` | Kernel excludes odd shells |
+| 253 | **H¹(K4, GF(2)^6) family-fiber cohomology** classifies generator-restriction obstructions | `hqvm_Cohomology_analysis_2.py` | Group cohomology census |
+| 254 | **Grothendieck constant K_G^R(2) = √2**: Boolean CHSH 2 vs Hilbert lift CHSH 2√2 on horizon ensemble | `hqvm_Cohomology_analysis_3.py` | Walsh vs Hilbert comparison |
+| 255 | **CHSH gap localizes to 2×2 projection** (full 63×63 observable matrix gives ratio 1) | `hqvm_Cohomology_analysis_3.py` | Block projection audit |
+| 256 | **Lefschetz census**: 252/256 bytes have zero fixed points; 4 bytes fix 64 states each | `hqvm_Cohomology_analysis_4.py` | Fixed-point enumeration |
+| 257 | **Aperture bridge**: Δ = 1 − δ_BU/m_a identifies finite transport obstruction with BU closure residual | `hqvm_Cohomology_analysis_1.py` | Obstruction scalar link |
+
+**Part VIII subtotal (Tier B cohomology): 7 features**
+
+---
+
+## Part IX: Nuclear Trestleboard on the Shared Δ-Ruler (Tier B)
+
+From [Analysis_hQVM_CGM_Trestleboard.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Trestleboard.md). Executable in `hqvm_cgm_trestleboard_run.py` (`_1.py` through `_5.py`).
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 258 | **W/Z mass-ratio aperture lock**: implied Δ agrees with constants-chain Δ_ref to 8.34×10⁻¹⁰ absolute error | `hqvm_cgm_trestleboard_1.py` | Level instrument |
+| 259 | **Th-229m optical isomer**: E_min = 8.3563 eV vs Zhang CaF₂ 8.3557335(8) eV (rel error 7.19×10⁻⁵) | `hqvm_cgm_trestleboard_2.py` | Forced class (6,2) |
+| 260 | **Deuteron binding**: E_d = v·Δ³ + v·Δ⁴·(2/√5) = 2.2242 MeV vs PDG 2.2240 MeV (rel error 8.89×10⁻⁵) | `hqvm_cgm_trestleboard_2.py` | Strong bare + tensor correction |
+| 261 | **Alpha Gate F**: shell, shell-parity, daughter \|N−Z\| mod 7 preserved on 314/314 LiveChart alpha parents | `hqvm_cgm_trestleboard_3.py` | Carrier-word census |
+| 262 | **Beta routing**: shell-parity on 801/801 β⁻ parents; daughter J agreement 402/402 on depth-1 stratum | `hqvm_cgm_trestleboard_3.py` | IAEA LiveChart census |
+| 263 | **Fusion map**: barriers for seven fuels on k = 3 strong-family; 5/7 literature resonances at percolation landmarks | `hqvm_cgm_trestleboard_4.py` | S-factor holdout tables |
+| 264 | **Magic numbers 2, 8, 20, 28, 50, 82, 126** from mixed Nilsson at (κ, μ) = (1/32, 1/5) with left chirality | `hqvm_cgm_trestleboard_5.py` | Gap-closure ranking |
+| 265 | **Chirality flip removes intruders 28, 50, 82, 126** from mixed large-gap dominant set | `hqvm_cgm_trestleboard_5.py` | Ancestry-preservation bias test |
+
+**Part IX subtotal (Tier B trestleboard): 8 features**
+
+---
+
+## Part X: Yang–Mills Mass Gap as Aperture Readout (Tier B)
+
+From [Analysis_hQVM_CGM_YM_Mass_Gap.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_YM_Mass_Gap.md) and [Yang_Mills_Mass_Gap_Solution.md](https://github.com/gyrogovernance/science/blob/main/experiments/hQVM_CGM_YM_Gap/Yang_Mills_Mass_Gap_Solution.md). Executable in `Yang_Mills_Mass_Gap_run.py` (`_1.py` through `_5.py`).
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 266 | **Oriented aperture Δ = 1 − δ_BU/m_a ≈ 0.020699545503**; discrete anchor 5/256; depth-four alignment 48·Δ ≈ 0.993578 | `Yang_Mills_Mass_Gap_1.py` | Carrier aperture readout |
+| 267 | **Unoriented shadow lock Δ_W(n) = n/(2(n−1)) → 1/2** dichotomy with oriented aperture regime | `Yang_Mills_Mass_Gap_2.py` | Track B shadow formula |
+| 268 | **Carrier commutator defect**: commuting fraction 1/64; grade-2 multiplicity C₂ = 15 | `Yang_Mills_Mass_Gap_3.py` | Defect spectrum census |
+| 269 | **Route A continuum mass readout m_gap = C₂·v·Δ² ≈ 1.582473 GeV** in lattice light-scalar glueball window | `Yang_Mills_Mass_Gap_4.py` | Saturated grade-2 multiplet |
+| 270 | **Route B CS-normalized cross-check ≈ 1.661555 GeV** (relative deviation ≈ 4.76%) | `Yang_Mills_Mass_Gap_4.py` | Independent normalization |
+| 271 | **Defining Q₈ Wilson chart, Aut(Q₈) symmetry, OS Gram positivity** on audited finite charts | `Yang_Mills_Mass_Gap_5.py` | Wilson/OS certificates |
+
+**Part X subtotal (Tier B Yang–Mills mass gap): 6 features**
+
+---
+
+## Part XI: Organismal Allometry from Channel Basis (Tier B)
+
+From [Analysis_hQVM_CGM_Allometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Allometry.md). Executable in `hqvm_cgm_allometry_run.py` (`_1.py` through `_3.py`).
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 272 | **Channel basis at d = 6**: a_SR = 1/2, a_surf = 2/3, a_bulk = 3/4, a_time = 1/4, a_service = 1/12 | `hqvm_cgm_allometry_1.py` | Source-accessibility exponents |
+| 273 | **QuBEC thermal point ⟨N⟩ = d/2 = 3**; a_bulk = ⟨N⟩/(⟨N⟩+1) = 3/4 (Kleiber) | `hqvm_cgm_allometry_1.py` | Shell moment M_shell = 192 |
+| 274 | **Three hQVM(d) consistency relations** (Rel I–III) each lock uniquely at d = 6 | `hqvm_cgm_allometry_1.py` | Family consistency gates |
+| 275 | **Chemical clock at T = 310 K**: E_a ≈ 0.645 eV inside 0.6–0.7 eV MTE band | `hqvm_cgm_allometry_1.py` | Δ-ruler activation energy |
+| 276 | **Catalog Kleiber audits in μ-band [2/3, 3/4]**: PanTHERIA BMR OLS 0.717; AnAge metabolic OLS 0.713 | `hqvm_cgm_allometry_2.py` | OLS/RMA with bootstrap |
+| 277 | **Damuth dual-null pattern**: population density OLS −0.741 near −3/4; RMA −0.980 near −1 | `hqvm_cgm_allometry_2.py` | External trait catalogs |
+
+**Part XI subtotal (Tier B allometry): 6 features**
+
+---
+
+## Part XII: Moments Fiat Coordination Receipts (Tier B)
+
+From [Analysis_hQVM_Moments_Fiat.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Moments_Fiat.md). Executable in `hqvm_moments_fiat_analysis_run.py` (`_1.py` through `_3.py`).
+
+| # | Feature | Experiment | Method |
+|---|---------|------------|--------|
+| 278 | **Compact receipts 16–20 bytes fit QR Version 1–2**; single payload bit flip fails seal, parity, and event | `hqvm_moments_fiat_analysis_1.py` | Tamper detection layers |
+| 279 | **Receipt time field width = 8 bytes**, one complete Z₂ holonomy cycle (F² rest round trip) | `hqvm_moments_fiat_analysis_1.py` | Z₂ cycle width identity |
+| 280 | **Frame-aligned layouts L16/L20** keep genealogy archive on stationary 4-byte depth-4 frames | `hqvm_moments_fiat_analysis_1.py` | Ledger frame hygiene |
+| 281 | **Coordinate ledger storage ≈ 1 byte/receipt** (depth delta + anchor); species-scale headroom large | `hqvm_moments_fiat_analysis_2.py` | Capacity and time-address audit |
+| 282 | **FNV-1a name layer**: 10,000 sequential payloads, zero 64-bit collisions | `hqvm_moments_fiat_analysis_2.py` | Append-gate dispersion |
+| 283 | **Kernel transport replay**: chi == chi₀ xor Q(word); inverse restores rest; shell seal determinism | `hqvm_moments_fiat_analysis_1.py` | Trajectory verification |
+
+**Part XII subtotal (Tier B Moments Fiat): 6 features**
+
+---
+
+## Part XIII: CGM Modal Structure (Tier C)
+
+Formal modal-logic and manuscript-only results from [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) and companion proof [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md). No dedicated experiment script in the science repo.
 
 | # | Feature | Source | Method |
 |---|---------|--------|--------|
 | 235 | **Five foundational conditions** logically independent in core modal system | Gravity Analysis App. A | Counterexample frames |
 | 236 | **Consistency verified** via three-world Kripke frame | Gravity Analysis App. A | Model construction |
-| 237 | **3D necessity**: n=3 unique dimension satisfying all 5 conditions | Gravity Analysis SS2.4; [15] | Formal proof |
-| 238 | **SE(3) = SU(2) rtimes R^3** forced by bi-gyrogroup consistency from ONA | Gravity Analysis SS2.4; [15] | Formal proof |
-| 239 | **sl(2) from BCH**: depth-4 commutator forces Lie algebra to close on 3 generators | Gravity Analysis SS2.4; [15] | Hall word exclusion |
+| 237 | **3D necessity**: n=3 unique dimension satisfying all 5 conditions | Gravity Analysis SS2.4; [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md) | Formal proof |
+| 238 | **SE(3) = SU(2) rtimes R^3** forced by bi-gyrogroup consistency from ONA | Gravity Analysis SS2.4; [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md) | Formal proof |
+| 239 | **sl(2) from BCH**: depth-4 commutator forces Lie algebra to close on 3 generators | Gravity Analysis SS2.4; [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md) | Hall word exclusion |
 | 241 | **Intelligence = BU closure** (preserve ancestry + identity + individuality) | Gravity Analysis SS2.1 | Operational definition |
 
-**Part VII subtotal (Tier C formal): 6 features**
+**Part XIII subtotal (Tier C formal): 6 features**
 
 ---
 
@@ -541,10 +689,10 @@ Formal modal-logic and manuscript-only results from [Analysis Gravity](docs/Find
 
 | Tier | Label | Count | What it means |
 |------|-------|------:|---------------|
-| **A** | Kernel pytest (this repo) | **165** | `tests/physics/`, `tests/test_hQVM_*.py`, Moments, Holography |
-| **B** | Science executable | **72** | 16 wavefunction + 10 gravity kernel + 14 electroweak + 32 continuous gravity |
-| **C** | Formal manuscript | **6** | Modal logic independence, 3D necessity, SE(3); proofs in [15] |
-| | **Grand total** | **243** | |
+| **A** | Kernel pytest (superintelligence) | **165** | [superintelligence `tests/`](https://github.com/gyrogovernance/superintelligence/tree/main/tests) |
+| **B** | Science executable | **112** | 16 wavefunction + 10 gravity kernel + 14 electroweak + 32 continuous gravity + 7 percolation + 7 cohomology + 8 trestleboard + 6 YM mass gap + 6 allometry + 6 Moments Fiat |
+| **C** | Formal manuscript | **6** | Modal logic independence, 3D necessity, SE(3); proofs in [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md) |
+| | **Grand total** | **283** | |
 
 ### By domain
 
@@ -555,16 +703,28 @@ Formal modal-logic and manuscript-only results from [Analysis Gravity](docs/Find
 | Hardware / native execution | 8 | 0 | 0 | 8 |
 | Electroweak mass law | 0 | 14 | 0 | 14 |
 | Continuous gravity phenomenology | 0 | 32 | 0 | 32 |
+| Generator-restricted percolation | 0 | 7 | 0 | 7 |
+| Cohomology and obstructions | 0 | 7 | 0 | 7 |
+| Nuclear trestleboard (Δ-ruler) | 0 | 8 | 0 | 8 |
+| Yang–Mills mass-gap readout | 0 | 6 | 0 | 6 |
+| Organismal allometry | 0 | 6 | 0 | 6 |
+| Moments Fiat coordination | 0 | 6 | 0 | 6 |
 | CGM modal formal structure | 0 | 0 | 6 | 6 |
-| **Total** | **165** | **72** | **6** | **243** |
+| **Total** | **165** | **112** | **6** | **283** |
 
 ### Cross-repo verification map
 
 | Manuscript | Tier A overlap | Tier B science scripts | Tier C only |
 |------------|----------------|------------------------|-------------|
-| Analysis_hQVM_Wavefunction | K4 gates (Part I) partially overlap | `hqvm_wavefunction_1.py`, `_2.py` (T1-T10 exhaustive) | none |
-| Analysis_Gravity | Physics/hQVM tests cover many kernel items | `hqvm_gravity_analysis_1-10.py`, `hqvm_gravity_common.py`, `hqvm_corrections_analysis_1.py` | App. A modal proofs (#235-239) |
-| Analysis_Compact_Geometry | Shell structure in hQVM SDK tests | `hqvm_compact_geom_kernel.py`, `_core.py`, `_report.py` | none |
+| [Analysis_hQVM_Wavefunction.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Wavefunction.md) | K4 gates (Part I) partially overlap | `hqvm_wavefunction_1.py`, `_2.py` (T1-T10 exhaustive) | none |
+| [Analysis_Gravity.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Gravity.md) | Physics/hQVM tests cover many kernel items | `hqvm_gravity_analysis_1-10.py`, `hqvm_gravity_common.py`, `hqvm_corrections_analysis_1.py` | App. A modal proofs (#235-239) |
+| [Analysis_Compact_Geometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_Compact_Geometry.md) | Shell structure in hQVM SDK tests | `hqvm_compact_geom_kernel.py`, `_core.py`, `_report.py` | none |
+| [Analysis_hQVM_Percolation.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Percolation.md) | Reachability partially in Physics tests | `hqvm_percolation_analysis_1-5.py`, `hqvm_percolation_analysis_run.py` | none |
+| [Analysis_hQVM_Cohomology.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Cohomology.md) | CHSH/Grothendieck overlaps Part I Hilbert lift | `hqvm_Cohomology_analysis_1-4.py`, `hqvm_Cohomology_analysis_run.py` | none |
+| [Analysis_hQVM_CGM_Trestleboard.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Trestleboard.md) | Δ-ruler overlaps compact geometry | `hqvm_cgm_trestleboard_1-5.py`, `hqvm_cgm_trestleboard_run.py` | none |
+| [Analysis_hQVM_CGM_YM_Mass_Gap.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_YM_Mass_Gap.md) | Aperture Δ in kernel tests | `hQVM_CGM_YM_Gap/Yang_Mills_Mass_Gap_1-5.py`, `_run.py` | continuum dependency chain |
+| [Analysis_hQVM_CGM_Allometry.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Allometry.md) | Square-Root Cluster overlaps percolation | `hqvm_cgm_allometry_1-3.py`, `hqvm_cgm_allometry_run.py` | Tier C urban/development |
+| [Analysis_hQVM_Moments_Fiat.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_Moments_Fiat.md) | K4/Z2 holonomy overlaps wavefunction | `hqvm_moments_fiat_analysis_1-3.py`, `hqvm_moments_fiat_analysis_run.py` | economy whitepaper layer |
 
 Run all gravity scripts and capture output:
 
@@ -577,10 +737,10 @@ python experiments/hqvm_gravity_runner.py
 
 **Tier A (165 features).** Kernel pytest establishes the Gyroscopic hQVM Kernel as an exactly solvable finite algebraic quantum system on standard silicon: 4096-state manifold, K4 gates, Hilbert lift to 10^-12, computational advantages, non-Clifford delta(BU), self-dual code, CGM constants bridge.
 
-**Tier B (72 features).** Science repo executables extend verification to the three analysis manuscripts: wavefunction theorems T1-T10 on all Omega states, gravity kernel invariants (D=24, plaquette/Regge/tau_G), electroweak mass law to 6e-9 tick error, and continuous gravity phenomenology (PPN, shadow, TOV, GW) to numerical closure.
+**Tier B (112 features).** Science repo executables extend verification through compact geometry, percolation, cohomology, nuclear trestleboard, Yang–Mills mass-gap readout, organismal allometry, and Moments Fiat receipt geometry, in addition to wavefunction theorems T1-T10, gravity kernel invariants, electroweak mass law, and continuous gravity phenomenology.
 
-**Tier C (6 features).** Formal modal-logic results (independence of CS/UNA/ONA/BU, 3D necessity, SE(3) emergence) proved in manuscript [15], not wrapped as experiment scripts.
+**Tier C (6 features).** Formal modal-logic results (independence of CS/UNA/ONA/BU, 3D necessity, SE(3) emergence) proved in [Analysis_3D_6DOF_Proof.md](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_3D_6DOF_Proof.md), not wrapped as experiment scripts.
 
 ---
 
-*Last updated from superintelligence verification reports, analysis manuscripts, and science repo experiment script headers. This inventory does not re-run any suite.*
+*Last updated 2026-08-12 from superintelligence verification reports, analysis manuscripts (through 1.3.9.2-hQVM_Moments_Fiat), and science repo experiment script headers. This inventory does not re-run any suite.*

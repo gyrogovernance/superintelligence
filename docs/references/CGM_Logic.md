@@ -154,7 +154,50 @@ Exact finite consequences:
 - The byte alphabet forms a four-to-one cover of the six-bit transport space with a Klein deck action, reflecting the spinorial double cover.
 - Shell geometry has binomial populations across seven shells, with horizon shells at the extremes and bulk shells between them.
 
-## 12. Percolation
+## 12. Gyrogroup bridge
+
+When the transitions vary smoothly, the most economical continuous model of “composing displacements while preserving ancestry” is the same structure that appears in special relativity as velocity composition.
+
+Take the open unit ball in R3. A point u in the ball is a displacement coordinate with magnitude less than 1. Composition is not ordinary vector addition. It is Einstein addition, written u ⊕ v. The key fact is that this composition is not associative in general. The failure of associativity is controlled by an automorphism called a gyration:
+
+gyr[u, v] w = (−(u ⊕ v)) ⊕ (u ⊕ (v ⊕ w))
+
+Gyrations are rotations. In physics they are the Thomas-Wigner rotations that appear when two non-collinear boosts are composed. This is the continuous prototype of path memory. A closed walk can return to its starting point in position while leaving a residual rotation in the carried frame.
+
+CGM’s depth-two contingency (UNA and ONA) is exactly the regime where this order sensitivity is allowed but not absolute. ONA adds comparability so that different orderings remain within one shared geometry. Together, these conditions select a setting where:
+
+- the state update is a non-associative composition u ⊕ v
+- the residual operator gyr[u, v] records which path was taken
+
+Balance (BU) then imposes a depth-four closure in the observable sector while retaining a bounded residual operator that carries memory. In the gyrogroup realization, the simplest loop that isolates this residual departs from the depth-two boundary of the nested lemmas, crosses the Balance Egress and Balance Ingress poles, and returns. In stage coordinates that boundary sits at the common lemma angle pi/4, so the loop may be written
+
+ONA -> BU+ -> BU- -> ONA
+
+The middle edge BU+ -> BU- is collinear, so the origin-based gyration on that edge is the identity. The loop operator H_BU is therefore generated at the two corners between the depth-two boundary and the dual-pole amplitude, and it is a single spatial rotation. Its conjugacy-invariant angle is the BU dual-pole loop angle δ_BU.
+
+At these stages the magnitudes are fixed by the thresholds. The corner boost of magnitude pi/4 is the common lemma angle shared by UNA and ONA. BU contributes the balance amplitude scale m_a. Orthogonality here is the geometric form of independence between the depth-two boundary and the dual-pole amplitude. Non-collinear composition is what produces a gyration at all.
+
+Using the half-rapidity radius
+
+k(beta) = beta / (1 + sqrt(1 - beta^2))
+
+the corner Thomas-Wigner angle for an orthogonal pair of magnitudes beta1 and beta2 is
+
+omega = 2 * arctan(k(beta1) * k(beta2))
+
+and the dual-pole loop angle is twice the corner angle:
+
+delta_BU = 2 omega
+delta_BU = 4 * arctan(k(pi/4) * k(m_a))
+
+This equation defines delta_BU. The continuous derivation and the finite W2 realization of the dual are given in the Holonomy analysis. The derived closure quantities are then:
+
+rho = delta_BU / m_a
+Delta = 1 - rho
+
+BU-Egress is the statement that the loop closes in the observable configuration. BU-Ingress is the statement that the residual operator H_BU, together with the small opening Delta, carries enough information for reconstruction to remain possible. The gyrogroup bridge therefore presents the nested chain at depth four. The depth-two boundary supplies the shared lemma turn. The dual poles supply Egress and Ingress. The residual rotation of the loop is the minimal continuous form of path memory compatible with depth-four balance.
+
+## 13. Percolation
 
 Percolation studies which restricted operation sets preserve ancestry globally on the reachable set. The question is: given a subset A of the byte alphabet, does the system still reach all 4096 states from rest with reconstructible ledger ancestry?
 
@@ -166,7 +209,7 @@ where r is the rank of {q6(b) : b in A}. Full span of the 4096-state set require
 
 This law is the finite check of the reachability requirement from Section 8. It confirms that ancestry propagation depends on the algebraic span of the available operations, rather than their count.
 
-## 13. Gravity and Physical Readout
+## 14. Gravity and Physical Readout
 
 Gravity is the continuum condition preserving ancestry under displacement. The horizon is the boundary of that preservation.
 
@@ -176,7 +219,7 @@ G_kernel = Q_G / D = pi/6
 
 Gravity couples only to the five bulk shells that carry symmetric trace-free anisotropy. The two horizon shells carry none. Attenuation per holonomy cycle is rho^5, where rho is the structural closure fraction. This accumulates into a refractive depth:
 
-tau_G = |Omega| * Delta * rho^5 * (1 - 4*rho*Delta^2 - (7/4)*Delta^4)
+tau_G = |Omega| * Delta * rho^5 * (1 - 4*rho*Delta^2)
 
 The dimensional coupling uses one energy anchor, the electroweak scale v:
 
@@ -192,7 +235,7 @@ alpha_0 * zeta = rho^4 / (pi * sqrt(3))
 
 where zeta = 8 / (m_a * sqrt(3)). This identity is falsifiable through independent measurements of alpha and G.
 
-## 14. Formal Layers
+## 15. Formal Layers
 
 CGM is one requirement chain realized in multiple formal layers.
 

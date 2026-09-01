@@ -27,11 +27,11 @@ The Gyroscopic ASI hQVM Kernel, the AIR coordination framework, and the Moments 
 
 This specification operates within the scientific and architectural commitments established in three prior frameworks:
 
-1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations (Governance, Information, Inference, and Intelligence) on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **monodromy defect (δ_BU)** governing closure properties.
+1. **Common Governance Model (CGM):** the theoretical basis for structured intelligence, defining four recursive epistemic operations (Governance, Information, Inference, and Intelligence) on a tetrahedral stage geometry. These operations give rise to **invariants** such as the **aperture scale (mₐ)** and the **BU dual-pole loop angle (δ_BU)** governing closure properties.
 
 2. **The Human Mark (THM):** an alignment framework classifying category errors between human (Direct) and artificial (Indirect) Authority and Agency. The substrate complies with THM by maintaining strict **Indirect classification**: it transforms information but does not constitute Direct Authority or Agency, decide, or authorize. See [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md), Appendix G, for the canonical Mark block.
 
-3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.0207)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
+3. **Gyroscopic Global Governance (GGG):** a simulation and formal theory of post-AGI governance. It shows that long-term coherence, especially in economy, education, employment and ecology, depends on maintaining **aperture equilibrium (A* ≈ 0.020699545503)**, derived from CGM. The substrate provides a physical medium that naturally exhibits this balance through its internal geometry.
 4. **Gyroscopic ASI hQVM Kernel Specification:** the normative digital reference defining the 24-bit state model, the spinorial transition rule, the 4,096-state reachable space, the self-dual [12,6,2] mask code, and the depth-4 frame structure. The substrate is evaluated for fidelity against this specification.
 
 These frameworks are fully specified in the GyroGovernance repositories ([tools](https://github.com/gyrogovernance/tools), [science](https://github.com/gyrogovernance/science)), but this document is functionally self-contained and focused on physical implementation.
@@ -64,7 +64,7 @@ The substrate inherits no assumptions about upstream or downstream architecture 
 
 These substrate specifications draw formal constraints from the:
 
-- **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, monodromy defect δ_BU, canonical aperture A*)
+- **Common Governance Model (CGM):** defining tetrahedral epistemic operations and closure constants (aperture scale mₐ, BU dual-pole loop angle δ_BU, canonical aperture A*)
 - **The Human Mark (THM):** defining Direct (human) and Indirect (artificial) class distinctions for AI governance risk classification. Canonical Mark: [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md), Appendix G.
 - **Gyroscopic Global Governance (GGG):** defining the operational significance of aperture, alignment, and post-AGI equilibrium
 - **Gyroscopic ASI hQVM Kernel Specification:** defining the 24-bit state model, spinorial transition rule, mask expansion, depth-4 frame structure, and all kernel invariants that the substrate must reproduce
@@ -131,9 +131,9 @@ The substrate is calibrated and evaluated against the following constants. The f
 |-----------|--------|-------|------|
 | Horizon constant | Q_G | 4π steradians | Global normalization |
 | Aperture scale | m_a | 1/(2√(2π)) | Operational scale parameter |
-| BU monodromy defect | δ_BU | 0.19534 rad | Loop closure residual |
-| Closure ratio | δ_BU/m_a | 0.9793 | Structural closure fraction |
-| Canonical aperture | A* | 0.0207 | Dynamic aperture fraction |
+| BU dual-pole loop angle | δ_BU | ≈ 0.195342178258 rad | Loop closure residual |
+| Closure ratio | δ_BU/m_a | ≈ 0.979300454497 | Structural closure fraction |
+| Canonical aperture | A* | ≈ 0.020699545503 | Dynamic aperture fraction |
 | Byte-scale quantization | A_kernel | 5/256 = 0.01953 | Discrete aperture approximation |
 
 ---
@@ -387,11 +387,11 @@ C4 = dist(Apply([L][R][L][R], M0), Apply([R][L][R][L], M0))
 
 **Requirement:** C4 MUST be significantly smaller than Δ2 under matched write budgets within a defined calibrated regime. The ratio C4/Δ2 MUST be reported as part of acceptance testing.
 
-**Physical basis:** The palindromic structure of balanced depth-four sequences causes lower-order noncommutative contributions to cancel, leaving only a residual that corresponds to the BU monodromy.
+**Physical basis:** The palindromic structure of balanced depth-four sequences causes lower-order noncommutative contributions to cancel, leaving only a residual that corresponds to the BU dual-pole loop angle.
 
 ### 10.3 BU Monodromy Protocol
 
-The substrate MUST implement the canonical BU dual-pole loop used to extract the monodromy residual.
+The substrate MUST implement the canonical BU dual-pole loop used to extract the loop-angle residual.
 
 **Protocol definition:**
 
@@ -429,7 +429,7 @@ The implementation MAY compute an SU(2) trace-angle surrogate if it has a valida
 
 - The protocol MUST be repeatable with controlled uncertainty
 - The residual MUST NOT collapse to zero under correct operation
-- The estimated residual SHOULD agree with δ_BU ≈ 0.1953 rad within stated tolerance (±5% for prototype systems, tighter for production systems)
+- The estimated residual SHOULD agree with δ_BU ≈ 0.195342178258 rad within stated tolerance (±5% for prototype systems, tighter for production systems)
 
 ---
 
@@ -655,7 +655,7 @@ The ledger enables complete replay, audit, and verification. It provides inferen
 
 - Residual is nonzero (MUST NOT collapse to zero)
 - Residual is stable across repeats (coefficient of variation < 10%)
-- Mean residual agrees with δ_BU ≈ 0.1953 rad within stated tolerance
+- Mean residual agrees with δ_BU ≈ 0.195342178258 rad within stated tolerance
 
 ### 15.4 Retention Test
 
@@ -821,7 +821,7 @@ This section provides rationale and context for the architectural choices. It is
 
 ### 19.1 Governance Through Physical Structure
 
-The substrate introduces physical constraints on system behavior. The BU monodromy defect functions as an intrinsic limit: systems operating on this substrate exhibit specific closure properties because the molecular dynamics support those configurations. This complements policy-based governance with physics-based constraints.
+The substrate introduces physical constraints on system behavior. The BU dual-pole loop angle functions as an intrinsic limit: systems operating on this substrate exhibit specific closure properties because the molecular dynamics support those configurations. This complements policy-based governance with physics-based constraints.
 
 ### 19.2 Path-Dependent Context
 

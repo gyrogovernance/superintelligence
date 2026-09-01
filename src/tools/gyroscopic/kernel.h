@@ -145,7 +145,7 @@ GYROSCOPIC_EXPORT float gyroscopic_gravity_scale(
     uint8_t shell
 );
 
-/** Rényi-2 effective support M̂₂ = W²/Σh² and spectral damping η from chi_hist64 (QuBEC §21.3). */
+/** Rényi-2 effective support M̂₂ = W²/Σh² and spectral damping η from chi_hist64 (hQVM_QuBEC_Theory.md §21.3). */
 GYROSCOPIC_EXPORT void gyroscopic_chi_hist_m2_eta(
     const uint32_t hist[64],
     float *          m2_out,
@@ -256,6 +256,59 @@ GYROSCOPIC_EXPORT void gyroscopic_tile_decompose_ratios(
 /** Native 64-point Walsh-Hadamard transform on a float vector (in place). */
 GYROSCOPIC_EXPORT void gyroscopic_wht64_float(float data[64]);
 
+/** Dense chirality climate: x <- M^n x with M row-major 64x64. */
+GYROSCOPIC_EXPORT void gyroscopic_climate_dense_nstep(
+    float *       x64,
+    const float * M64x64,
+    int           n_steps);
+
+/** Spectral climate: WHT, pointwise phi^n, iWHT (/64). Cost independent of dense M^n. */
+GYROSCOPIC_EXPORT void gyroscopic_climate_spectral_nstep(
+    float *       x64,
+    const float * phi64,
+    int           n_steps);
+
+/** Collapse chi[64] -> shell hist[7] by popcount; apply 7 gains; expand uniform on shell. */
+GYROSCOPIC_EXPORT void gyroscopic_shell7_apply(
+    float *       chi64,
+    const float * gains7);
+
+/** Build XOR-circulant M[i,j]=f[i^j] and phi=WHT(f) for spectral/dense agreement smoke. */
+GYROSCOPIC_EXPORT void gyroscopic_climate_from_kernel(
+    const float * f64,
+    float *       M64x64,
+    float *       phi64);
+
+/* ---------------------------------------------------------------------------
+ * G-equivariant 2080-sector layer (Group Theory sec 10.2/12.3, QuBEC 18.3).
+ *
+ * G = (GF(2)^6 x GF(2)^6) rt C2 acts on Omega=(u,v) by translations and the
+ * coordinate swap. Orbits on Omega x Omega are classified by the unordered
+ * pair {u^u', v^v'} of raw 6-bit XOR differences: C(64,2)+64 = 2080 classes,
+ * matching the multiplicity-free sector count (64 one-dim + 2016 two-dim).
+ * End_G(L^2(Omega)) is the 2080-dim algebra of orbital kernels
+ *   K[(u,v),(u',v')] = gains[tri(min(du,dv), max(du,dv))],
+ * applied as one structured 4096x4096 matvec using 2080 parameters
+ * (vs 16,777,216 dense entries).
+ * ------------------------------------------------------------------------- */
+#define HQVM_EQUIV2080_GAINS 2080
+
+/** Triangular orbital index for du,dv in [0,63]: a=min, b=max,
+ *  idx = a*64 - a*(a-1)/2 + (b-a), range 0..2079. */
+GYROSCOPIC_EXPORT int hqvm_equiv2080_sector_index(uint8_t du, uint8_t dv);
+
+/** out[s] = sum_t K[s,t] psi[t] with the 2080 orbital gains (structured matvec). */
+GYROSCOPIC_EXPORT void hqvm_equiv2080_apply(
+    const float * psi4096,
+    float *       out4096,
+    const float * gains2080);
+
+/** Plain dense 4096x4096 row-major matvec (baseline for the equivariant apply). */
+GYROSCOPIC_EXPORT void hqvm_dense4096_matvec(
+    const float * M4096x4096,
+    const float * x4096,
+    float *       y4096);
+
 /** y[i] = sum_j f[i^j] * x[j] (chi-circulant matvec). */
 GYROSCOPIC_EXPORT void gyroscopic_chi_circulant_matvec(
     const float * f,
@@ -354,6 +407,144 @@ GYROSCOPIC_EXPORT void hqvm_traj_reset(gyro_trajectory_state_t *t);
 GYROSCOPIC_EXPORT void hqvm_traj_step(gyro_trajectory_state_t *t, uint8_t intron_byte);
 GYROSCOPIC_EXPORT uint32_t hqvm_receipt_seal(const hqvm_receipt_t *r);
 GYROSCOPIC_EXPORT void hqvm_receipt_print(const hqvm_receipt_t *r);
+
+/* ---------------------------------------------------------------------------
+ * Wavefunction sparse-wave, byte-fiber, and Omega sig13 helpers (formerly wave.h).
+ * K4 operators, step_omega12, chirality: already above / constants.h.
+ * ------------------------------------------------------------------------- */
+
+#ifndef HQVM_W2_BYTE0
+#define HQVM_W2_BYTE0  0xAAu
+#endif
+#ifndef HQVM_W2_BYTE1
+#define HQVM_W2_BYTE1  0xABu
+#endif
+#ifndef HQVM_W2P_BYTE0
+#define HQVM_W2P_BYTE0 0x2Au
+#endif
+#ifndef HQVM_W2P_BYTE1
+#define HQVM_W2P_BYTE1 0x2Bu
+#endif
+#ifndef HQVM_CHI_FLIP_6
+#define HQVM_CHI_FLIP_6 0x3Fu
+#endif
+
+typedef struct hqvm_byte_fiber {
+    uint8_t byte;
+    uint8_t intron;
+    uint8_t q6;
+    uint8_t family;
+    uint8_t phase_net;
+    uint8_t phase_common;
+    uint8_t fold_degree;
+    uint8_t is_flat;
+} hqvm_byte_fiber;
+
+typedef struct hqvm_wave_term {
+    uint16_t omega_index;
+    int8_t   sign;
+    uint8_t  multiplicity;
+} hqvm_wave_term;
+
+typedef struct hqvm_carrier_cell {
+    uint32_t state24;
+    uint16_t program_id;
+    uint16_t memory_id;
+} hqvm_carrier_cell;
+
+typedef struct hqvm_wave_grammar_result {
+    int w2_sig_ok;
+    int w2p_sig_ok;
+    int w2_involution_ok;
+    int w2p_involution_ok;
+    int f_composition_ok;
+    int t2_chi_ok;
+    int t2_shell_ok;
+    int sparse_k4_ok;
+    int byte_table_ok;
+} hqvm_wave_grammar_result;
+
+GYROSCOPIC_EXPORT void hqvm_byte_table_init(void);
+GYROSCOPIC_EXPORT int  hqvm_byte_table_ok(void);
+GYROSCOPIC_EXPORT uint8_t hqvm_byte_of_q6_fam(uint8_t q6, uint8_t fam);
+GYROSCOPIC_EXPORT uint8_t hqvm_q6_of_byte(uint8_t byte);
+GYROSCOPIC_EXPORT uint8_t hqvm_fam_of_byte(uint8_t byte);
+GYROSCOPIC_EXPORT void hqvm_decompose_byte(uint8_t byte, hqvm_byte_fiber * out);
+
+GYROSCOPIC_EXPORT void hqvm_state24_to_uv6(uint32_t state24, uint8_t * u6, uint8_t * v6);
+GYROSCOPIC_EXPORT uint32_t hqvm_uv6_to_state24(uint8_t u6, uint8_t v6);
+GYROSCOPIC_EXPORT uint8_t hqvm_chi6_uv(uint8_t u6, uint8_t v6);
+GYROSCOPIC_EXPORT int hqvm_code_shell(uint8_t u6, uint8_t v6);
+
+GYROSCOPIC_EXPORT void hqvm_trace_word_bytes(
+    const uint8_t * word,
+    int             n_bytes,
+    uint8_t         u6_in,
+    uint8_t         v6_in,
+    uint8_t *       u6_out,
+    uint8_t *       v6_out);
+GYROSCOPIC_EXPORT uint32_t hqvm_trace_word_state24(const uint8_t * word, int n_bytes, uint32_t state24);
+
+/*
+ * Packed Omega chart: state12 = (u6 << 6) | v6.
+ * Packed sig13 = (parity << 12) | (tau_u6 << 6) | tau_v6.  (|G| = 8192 = 2^13)
+ */
+GYROSCOPIC_EXPORT uint16_t hqvm_pack_state12(uint8_t u6, uint8_t v6);
+GYROSCOPIC_EXPORT void     hqvm_unpack_state12(uint16_t s12, uint8_t * u6, uint8_t * v6);
+GYROSCOPIC_EXPORT uint16_t hqvm_step_state12_by_byte(uint16_t s12, uint8_t byte);
+GYROSCOPIC_EXPORT uint16_t hqvm_trace_word_state12(uint16_t s12, const uint8_t * word, int n_bytes);
+
+GYROSCOPIC_EXPORT uint16_t hqvm_sig13_compile(const uint8_t * word, int n_bytes);
+GYROSCOPIC_EXPORT uint16_t hqvm_sig13_compose(uint16_t left, uint16_t right);
+GYROSCOPIC_EXPORT uint16_t hqvm_sig13_inv(uint16_t sig);
+GYROSCOPIC_EXPORT uint16_t hqvm_sig13_apply(uint16_t s12, uint16_t sig);
+GYROSCOPIC_EXPORT void     hqvm_sig13_apply_batch(
+    const uint16_t * states,
+    int              n_states,
+    uint16_t         sig,
+    uint16_t *       out);
+
+GYROSCOPIC_EXPORT int hqvm_route2_witnesses(
+    uint16_t src12,
+    uint16_t tgt12,
+    uint8_t  out_b1[16],
+    uint8_t  out_b2[16]);
+
+/* Closed-form 16 witnesses (flag enumeration); same set as brute route2. */
+GYROSCOPIC_EXPORT int hqvm_route2_synthesize(
+    uint16_t src12,
+    uint16_t tgt12,
+    uint8_t  out_b1[16],
+    uint8_t  out_b2[16]);
+
+/* 8192-entry ACTION table: cache[sig] = packed apply key (identity fill = sig). */
+GYROSCOPIC_EXPORT void hqvm_sig13_cache_build(uint16_t cache[8192]);
+GYROSCOPIC_EXPORT void hqvm_sig13_cache_apply_batch(
+    const uint16_t * states,
+    int              n_states,
+    uint16_t         sig,
+    const uint16_t * cache,
+    uint16_t *       out);
+GYROSCOPIC_EXPORT void hqvm_sig13_apply_many_sigs(
+    const uint16_t * states,
+    int              n_states,
+    const uint16_t * sigs,
+    int              n_sigs,
+    const uint16_t * cache);
+GYROSCOPIC_EXPORT void hqvm_sig13_compile_apply_many(
+    const uint16_t * states,
+    int              n_states,
+    const uint8_t *  words_flat,
+    const int *      lens,
+    int              n_words);
+
+GYROSCOPIC_EXPORT int hqvm_wave_apply_k4(
+    hqvm_wave_term * terms,
+    int              n_terms,
+    int              k4_gate,
+    int              max_terms);
+GYROSCOPIC_EXPORT int hqvm_wave_merge(hqvm_wave_term * terms, int * n_terms);
+GYROSCOPIC_EXPORT int hqvm_wave_grammar_verify(hqvm_wave_grammar_result * receipt);
 
 #ifdef __cplusplus
 }

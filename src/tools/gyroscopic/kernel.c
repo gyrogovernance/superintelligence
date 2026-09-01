@@ -259,6 +259,188 @@ GYROSCOPIC_EXPORT void gyroscopic_wht64_float(float data[64]) {
     }
 }
 
+GYROSCOPIC_EXPORT void gyroscopic_climate_dense_nstep(
+    float *       x64,
+    const float * M64x64,
+    int           n_steps)
+{
+    float tmp[64];
+    int   step, i, j;
+    if (!x64 || !M64x64 || n_steps <= 0) {
+        return;
+    }
+    for (step = 0; step < n_steps; ++step) {
+        for (i = 0; i < 64; ++i) {
+            float s = 0.0f;
+            const float * row = M64x64 + (size_t) i * 64u;
+            for (j = 0; j < 64; ++j) {
+                s += row[j] * x64[j];
+            }
+            tmp[i] = s;
+        }
+        memcpy(x64, tmp, sizeof(tmp));
+    }
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_climate_spectral_nstep(
+    float *       x64,
+    const float * phi64,
+    int           n_steps)
+{
+    int i;
+    if (!x64 || !phi64 || n_steps < 0) {
+        return;
+    }
+    wht64_float(x64);
+    if (n_steps == 0) {
+        /* iWHT only */
+    } else if (n_steps == 1) {
+        for (i = 0; i < 64; ++i) {
+            x64[i] *= phi64[i];
+        }
+    } else {
+        for (i = 0; i < 64; ++i) {
+            x64[i] *= powf(phi64[i], (float) n_steps);
+        }
+    }
+    wht64_float(x64);
+    for (i = 0; i < 64; ++i) {
+        x64[i] *= (1.0f / 64.0f);
+    }
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_shell7_apply(
+    float *       chi64,
+    const float * gains7)
+{
+    float shells[7];
+    int   i, n, pop;
+    if (!chi64 || !gains7) {
+        return;
+    }
+    for (n = 0; n < 7; ++n) {
+        shells[n] = 0.0f;
+    }
+    for (i = 0; i < 64; ++i) {
+        pop = 0;
+        {
+            unsigned v = (unsigned) i;
+            while (v) {
+                pop += (int) (v & 1u);
+                v >>= 1;
+            }
+        }
+        shells[pop] += chi64[i];
+    }
+    for (n = 0; n < 7; ++n) {
+        shells[n] *= gains7[n];
+    }
+    for (i = 0; i < 64; ++i) {
+        pop = 0;
+        {
+            unsigned v = (unsigned) i;
+            while (v) {
+                pop += (int) (v & 1u);
+                v >>= 1;
+            }
+        }
+        /* Uniform expand: each chi on shell gets shells[N] / C(6,N). */
+        {
+            static const float inv_binom[7] = {
+                1.0f / 1.0f,
+                1.0f / 6.0f,
+                1.0f / 15.0f,
+                1.0f / 20.0f,
+                1.0f / 15.0f,
+                1.0f / 6.0f,
+                1.0f / 1.0f,
+            };
+            chi64[i] = shells[pop] * inv_binom[pop];
+        }
+    }
+}
+
+GYROSCOPIC_EXPORT void gyroscopic_climate_from_kernel(
+    const float * f64,
+    float *       M64x64,
+    float *       phi64)
+{
+    int i, j;
+    if (!f64) {
+        return;
+    }
+    if (phi64) {
+        memcpy(phi64, f64, 64 * sizeof(float));
+        wht64_float(phi64);
+    }
+    if (M64x64) {
+        for (i = 0; i < 64; ++i) {
+            for (j = 0; j < 64; ++j) {
+                M64x64[i * 64 + j] = f64[i ^ j];
+            }
+        }
+    }
+}
+
+/* ================================================================== */
+/* G-equivariant 2080-sector commutant layer (Group Theory 10.2/12.3). */
+/* ================================================================== */
+
+GYROSCOPIC_EXPORT int hqvm_equiv2080_sector_index(uint8_t du, uint8_t dv)
+{
+    const int a = (du <= dv) ? du : dv;
+    const int b = (du <= dv) ? dv : du;
+    /* idx(a,b) with 0<=a<=b<=63: a*64 - a*(a-1)/2 + (b-a); total C(65,2)=2080. */
+    return a * 64 - (a * (a - 1)) / 2 + (b - a);
+}
+
+GYROSCOPIC_EXPORT void hqvm_equiv2080_apply(
+    const float * psi4096,
+    float *       out4096,
+    const float * gains2080)
+{
+    int su, sv, tu, tv;
+    if (!psi4096 || !out4096 || !gains2080) {
+        return;
+    }
+    for (su = 0; su < 64; ++su) {
+        for (sv = 0; sv < 64; ++sv) {
+            const int s_idx = su * 64 + sv;
+            double acc = 0.0;
+            for (tu = 0; tu < 64; ++tu) {
+                const uint8_t du = (uint8_t) (su ^ tu);
+                const size_t row = (size_t) tu * 64u;
+                for (tv = 0; tv < 64; ++tv) {
+                    const uint8_t dv = (uint8_t) (sv ^ tv);
+                    acc += (double) gains2080[
+                        hqvm_equiv2080_sector_index(du, dv)]
+                        * (double) psi4096[row + (size_t) tv];
+                }
+            }
+            out4096[s_idx] = (float) acc;
+        }
+    }
+}
+
+GYROSCOPIC_EXPORT void hqvm_dense4096_matvec(
+    const float * M4096x4096,
+    const float * x4096,
+    float *       y4096)
+{
+    int i, j;
+    if (!M4096x4096 || !x4096 || !y4096) {
+        return;
+    }
+    for (i = 0; i < 4096; ++i) {
+        const float * row = M4096x4096 + (size_t) i * 4096u;
+        double acc = 0.0;
+        for (j = 0; j < 4096; ++j) {
+            acc += (double) row[j] * (double) x4096[j];
+        }
+        y4096[i] = (float) acc;
+    }
+}
+
 GYROSCOPIC_EXPORT uint8_t gyroscopic_chirality_from_signs64(uint64_t signs) {
     int32_t data[64];
     int k;
@@ -1368,3 +1550,621 @@ GYROSCOPIC_EXPORT void hqvm_receipt_print(const hqvm_receipt_t *r) {
     fflush(stderr);
 }
 
+
+/* Wavefunction grammar (formerly wave.c). */
+static uint8_t s_byte_of_q6_fam[64][4];
+static int     s_byte_table_ready = 0;
+static int     s_byte_table_ok    = 0;
+
+static int popcount8(uint8_t x) {
+#if defined(_MSC_VER)
+    return (int) __popcnt((unsigned) x);
+#elif defined(__GNUC__) || defined(__clang__)
+    return (int) __builtin_popcount((unsigned) x);
+#else
+    int n = 0;
+    while (x) { n += (int) (x & 1u); x >>= 1; }
+    return n;
+#endif
+}
+
+static uint8_t fam_of_intron(uint8_t intron) {
+    return (uint8_t) ((intron & 1u) | ((intron >> 6) & 2u));
+}
+
+static uint8_t q6_of_intron(uint8_t intron) {
+    return (uint8_t) ((intron >> 1) & CHIRALITY_MASK_6);
+}
+
+void hqvm_byte_table_init(void) {
+    int b, ok = 1;
+    int q, f;
+    if (s_byte_table_ready) {
+        return;
+    }
+    memset(s_byte_of_q6_fam, 0, sizeof(s_byte_of_q6_fam));
+    for (b = 0; b < 256; ++b) {
+        const uint8_t intron = (uint8_t) (b ^ (int) GENE_MIC_S);
+        const uint8_t q6     = q6_of_intron(intron);
+        const uint8_t fam    = fam_of_intron(intron);
+        s_byte_of_q6_fam[q6][fam] = (uint8_t) b;
+    }
+    for (b = 0; b < 256; ++b) {
+        const uint8_t intron = (uint8_t) (b ^ (int) GENE_MIC_S);
+        const uint8_t q6     = q6_of_intron(intron);
+        const uint8_t fam    = fam_of_intron(intron);
+        if (s_byte_of_q6_fam[q6][fam] != (uint8_t) b) {
+            ok = 0;
+        }
+    }
+    for (q = 0; q < 64; ++q) {
+        for (f = 0; f < 4; ++f) {
+            const uint8_t byte   = s_byte_of_q6_fam[q][f];
+            const uint8_t intron = (uint8_t) (byte ^ (int) GENE_MIC_S);
+            if (q6_of_intron(intron) != (uint8_t) q) {
+                ok = 0;
+            }
+            if (fam_of_intron(intron) != (uint8_t) f) {
+                ok = 0;
+            }
+        }
+    }
+    s_byte_table_ok    = ok;
+    s_byte_table_ready = 1;
+}
+
+int hqvm_byte_table_ok(void) {
+    if (!s_byte_table_ready) {
+        hqvm_byte_table_init();
+    }
+    return s_byte_table_ok;
+}
+
+uint8_t hqvm_byte_of_q6_fam(uint8_t q6, uint8_t fam) {
+    if (!s_byte_table_ready) {
+        hqvm_byte_table_init();
+    }
+    return s_byte_of_q6_fam[q6 & 63][fam & 3];
+}
+
+uint8_t hqvm_q6_of_byte(uint8_t byte) {
+    return q6_of_intron((uint8_t) (byte ^ (int) GENE_MIC_S));
+}
+
+uint8_t hqvm_fam_of_byte(uint8_t byte) {
+    return fam_of_intron((uint8_t) (byte ^ (int) GENE_MIC_S));
+}
+
+void hqvm_decompose_byte(uint8_t byte, hqvm_byte_fiber * out) {
+    uint8_t intron;
+    uint8_t fwd;
+    uint8_t rev;
+    uint8_t b[8];
+    int     i;
+    if (!out) {
+        return;
+    }
+    intron = (uint8_t) (byte ^ (int) GENE_MIC_S);
+    fwd    = (uint8_t) (intron & 0x0Fu);
+    rev    = (uint8_t) ((intron >> 4) & 0x0Fu);
+    for (i = 0; i < 8; ++i) {
+        b[i] = (uint8_t) ((intron >> i) & 1u);
+    }
+    out->byte         = byte;
+    out->intron       = intron;
+    out->q6           = hqvm_q6_of_byte(byte);
+    out->family       = hqvm_fam_of_byte(byte);
+    out->phase_net    = (uint8_t) ((b[0] ^ b[7]) | ((b[1] ^ b[6]) << 1) | ((b[2] ^ b[5]) << 2) | ((b[3] ^ b[4]) << 3));
+    out->phase_common = (uint8_t) ((b[0] & b[7]) | ((b[1] & b[6]) << 1) | ((b[2] & b[5]) << 2) | ((b[3] & b[4]) << 3));
+    out->fold_degree  = (uint8_t) popcount8(out->phase_net);
+    out->is_flat      = (uint8_t) (fwd == rev);
+}
+
+void hqvm_state24_to_uv6(uint32_t state24, uint8_t * u6, uint8_t * v6) {
+    const uint16_t a12 = (uint16_t) ((state24 >> 12) & LAYER_MASK_12);
+    const uint16_t b12 = (uint16_t) (state24 & LAYER_MASK_12);
+    const uint16_t ua12 = (uint16_t) (a12 ^ (uint16_t) GENE_MAC_A12);
+    const uint16_t vb12 = (uint16_t) (b12 ^ (uint16_t) GENE_MAC_A12);
+    uint8_t        u   = 0;
+    uint8_t        v   = 0;
+    int            j;
+    if (!u6 || !v6) {
+        return;
+    }
+    for (j = 0; j < 6; ++j) {
+        if ((ua12 >> (2 * j)) & 3u) {
+            u |= (uint8_t) (1u << j);
+        }
+        if ((vb12 >> (2 * j)) & 3u) {
+            v |= (uint8_t) (1u << j);
+        }
+    }
+    *u6 = u;
+    *v6 = v;
+}
+
+uint32_t hqvm_uv6_to_state24(uint8_t u6, uint8_t v6) {
+    uint16_t a12 = (uint16_t) GENE_MAC_A12;
+    uint16_t b12 = (uint16_t) GENE_MAC_A12;
+    int      j;
+    for (j = 0; j < 6; ++j) {
+        if ((u6 >> j) & 1u) {
+            a12 ^= (uint16_t) (3u << (2 * j));
+        }
+        if ((v6 >> j) & 1u) {
+            b12 ^= (uint16_t) (3u << (2 * j));
+        }
+    }
+    return ((uint32_t) (a12 & LAYER_MASK_12) << 12) | (uint32_t) (b12 & LAYER_MASK_12);
+}
+
+uint8_t hqvm_chi6_uv(uint8_t u6, uint8_t v6) {
+    return (uint8_t) (u6 ^ v6);
+}
+
+int hqvm_code_shell(uint8_t u6, uint8_t v6) {
+    return popcount8((uint8_t) (u6 ^ v6));
+}
+
+static void trace_word_state24(
+    const uint8_t * word,
+    int             n_bytes,
+    uint32_t        state24,
+    uint8_t *       u6_out,
+    uint8_t *       v6_out)
+{
+    int i;
+    for (i = 0; i < n_bytes; ++i) {
+        state24 = gyroscopic_step_omega12(state24, word[i]);
+    }
+    hqvm_state24_to_uv6(state24, u6_out, v6_out);
+}
+
+void hqvm_trace_word_bytes(
+    const uint8_t * word,
+    int             n_bytes,
+    uint8_t         u6_in,
+    uint8_t         v6_in,
+    uint8_t *       u6_out,
+    uint8_t *       v6_out)
+{
+    trace_word_state24(word, n_bytes, hqvm_uv6_to_state24(u6_in, v6_in), u6_out, v6_out);
+}
+
+uint32_t hqvm_trace_word_state24(const uint8_t * word, int n_bytes, uint32_t state24) {
+    int i;
+    for (i = 0; i < n_bytes; ++i) {
+        state24 = gyroscopic_step_omega12(state24, word[i]);
+    }
+    return state24;
+}
+
+static int omega_perm_index(int gate, int u6, int v6) {
+    const uint8_t comp = (uint8_t) CHIRALITY_MASK_6;
+    switch (gate) {
+        case GYROSCOPIC_K4_ID:
+            return u6 * 64 + v6;
+        case GYROSCOPIC_K4_W2:
+            return ((int) (u6 ^ comp)) * 64 + v6;
+        case GYROSCOPIC_K4_W2P:
+            return u6 * 64 + (int) (v6 ^ comp);
+        case GYROSCOPIC_K4_F:
+            return ((int) (u6 ^ comp)) * 64 + (int) (v6 ^ comp);
+        default:
+            return u6 * 64 + v6;
+    }
+}
+
+int hqvm_wave_merge(hqvm_wave_term * terms, int * n_terms) {
+    int i = 0;
+    int w = 0;
+    if (!terms || !n_terms || *n_terms <= 0) {
+        return -1;
+    }
+    while (i < *n_terms) {
+        int j = i + 1;
+        int acc = (int) terms[i].sign * (int) terms[i].multiplicity;
+        while (j < *n_terms && terms[j].omega_index == terms[i].omega_index) {
+            acc += (int) terms[j].sign * (int) terms[j].multiplicity;
+            ++j;
+        }
+        if (acc != 0) {
+            terms[w].omega_index  = terms[i].omega_index;
+            terms[w].sign         = (int8_t) (acc > 0 ? 1 : -1);
+            terms[w].multiplicity = (uint8_t) (acc > 0 ? acc : -acc);
+            ++w;
+        }
+        i = j;
+    }
+    *n_terms = w;
+    return 0;
+}
+
+int hqvm_wave_apply_k4(
+    hqvm_wave_term * terms,
+    int              n_terms,
+    int              k4_gate,
+    int              max_terms)
+{
+    hqvm_wave_term tmp[4096];
+    int            i;
+    if (!terms || n_terms <= 0 || n_terms > 4096 || max_terms <= 0) {
+        return -1;
+    }
+    if (k4_gate == GYROSCOPIC_K4_ID) {
+        return n_terms;
+    }
+    if (n_terms > max_terms) {
+        return -1;
+    }
+    for (i = 0; i < n_terms; ++i) {
+        const int u6 = (int) (terms[i].omega_index / 64);
+        const int v6 = (int) (terms[i].omega_index % 64);
+        tmp[i]         = terms[i];
+        tmp[i].omega_index = (uint16_t) omega_perm_index(k4_gate, u6, v6);
+    }
+    memcpy(terms, tmp, (size_t) n_terms * sizeof(hqvm_wave_term));
+    return hqvm_wave_merge(terms, &n_terms) == 0 ? n_terms : -1;
+}
+
+static int check_w2_signature(const uint8_t * word, int expect_tau_u, int expect_tau_v) {
+    uint8_t uo, vo;
+    hqvm_trace_word_bytes(word, 2, 0, 0, &uo, &vo);
+    return uo == (uint8_t) expect_tau_u && vo == (uint8_t) expect_tau_v;
+}
+
+static int check_w2_t2(const uint8_t * word) {
+    int u, v;
+    int chi_bad = 0;
+    int shell_bad = 0;
+    for (u = 0; u < 64; ++u) {
+        for (v = 0; v < 64; ++v) {
+            const uint8_t chi = hqvm_chi6_uv((uint8_t) u, (uint8_t) v);
+            uint8_t       uo, vo;
+            hqvm_trace_word_bytes(word, 2, (uint8_t) u, (uint8_t) v, &uo, &vo);
+            if (hqvm_chi6_uv(uo, vo) != (uint8_t) (chi ^ HQVM_CHI_FLIP_6)) {
+                ++chi_bad;
+            }
+            if (hqvm_code_shell(uo, vo) != (6 - hqvm_code_shell((uint8_t) u, (uint8_t) v))) {
+                ++shell_bad;
+            }
+        }
+    }
+    return chi_bad == 0 && shell_bad == 0;
+}
+
+static int check_sparse_k4(void) {
+    hqvm_wave_term terms[4];
+    int            n = 3;
+    terms[0].omega_index  = (uint16_t) (10 * 64 + 20);
+    terms[0].sign         = 1;
+    terms[0].multiplicity = 1;
+    terms[1].omega_index  = (uint16_t) (10 * 64 + 20);
+    terms[1].sign         = -1;
+    terms[1].multiplicity = 1;
+    terms[2].omega_index  = (uint16_t) (5 * 64 + 7);
+    terms[2].sign         = 1;
+    terms[2].multiplicity = 2;
+        if (hqvm_wave_merge(terms, &n) != 0 || n != 1) {
+        return 0;
+    }
+    if (terms[0].omega_index != (uint16_t) (5 * 64 + 7)) {
+        return 0;
+    }
+    n = 1;
+    if (hqvm_wave_apply_k4(terms, n, GYROSCOPIC_K4_W2, 8) != 1) {
+        return 0;
+    }
+    if (terms[0].omega_index != (uint16_t) omega_perm_index(GYROSCOPIC_K4_W2, 5, 7)) {
+        return 0;
+    }
+    return 1;
+}
+
+uint16_t hqvm_pack_state12(uint8_t u6, uint8_t v6) {
+    return (uint16_t) (((u6 & CHIRALITY_MASK_6) << 6) | (v6 & CHIRALITY_MASK_6));
+}
+
+void hqvm_unpack_state12(uint16_t s12, uint8_t * u6, uint8_t * v6) {
+    if (u6) {
+        *u6 = (uint8_t) ((s12 >> 6) & CHIRALITY_MASK_6);
+    }
+    if (v6) {
+        *v6 = (uint8_t) (s12 & CHIRALITY_MASK_6);
+    }
+}
+
+/* Exact Omega affine step on (u,v): same map as src.api.step_omega12_by_byte. */
+static void step_uv6(uint8_t * u6, uint8_t * v6, uint8_t byte) {
+    const uint8_t intron = (uint8_t) (byte ^ (uint8_t) GENE_MIC_S);
+    const uint8_t mr     = (uint8_t) ((intron >> 1) & CHIRALITY_MASK_6);
+    const uint8_t ea     = (uint8_t) ((intron & 1u) ? CHIRALITY_MASK_6 : 0u);
+    const uint8_t eb     = (uint8_t) ((intron & 0x80u) ? CHIRALITY_MASK_6 : 0u);
+    const uint8_t u_next = (uint8_t) ((*v6) ^ ea);
+    const uint8_t v_next = (uint8_t) ((*u6) ^ mr ^ eb);
+    *u6 = u_next;
+    *v6 = v_next;
+}
+
+uint16_t hqvm_step_state12_by_byte(uint16_t s12, uint8_t byte) {
+    uint8_t u = (uint8_t) ((s12 >> 6) & CHIRALITY_MASK_6);
+    uint8_t v = (uint8_t) (s12 & CHIRALITY_MASK_6);
+    step_uv6(&u, &v, byte);
+    return hqvm_pack_state12(u, v);
+}
+
+uint16_t hqvm_trace_word_state12(uint16_t s12, const uint8_t * word, int n_bytes) {
+    int i;
+    uint8_t u = (uint8_t) ((s12 >> 6) & CHIRALITY_MASK_6);
+    uint8_t v = (uint8_t) (s12 & CHIRALITY_MASK_6);
+    if (!word || n_bytes < 0) {
+        return s12;
+    }
+    for (i = 0; i < n_bytes; ++i) {
+        step_uv6(&u, &v, word[i]);
+    }
+    return hqvm_pack_state12(u, v);
+}
+
+uint16_t hqvm_sig13_compile(const uint8_t * word, int n_bytes) {
+    uint8_t u = 0;
+    uint8_t v = 0;
+    int     i;
+    if (!word || n_bytes <= 0) {
+        return 0;
+    }
+    for (i = 0; i < n_bytes; ++i) {
+        step_uv6(&u, &v, word[i]);
+    }
+    return (uint16_t) (((n_bytes & 1) << 12) | ((u & CHIRALITY_MASK_6) << 6) | (v & CHIRALITY_MASK_6));
+}
+
+uint16_t hqvm_sig13_compose(uint16_t left, uint16_t right) {
+    const uint8_t lp = (uint8_t) ((left >> 12) & 1u);
+    const uint8_t lu = (uint8_t) ((left >> 6) & CHIRALITY_MASK_6);
+    const uint8_t lv = (uint8_t) (left & CHIRALITY_MASK_6);
+    const uint8_t rp = (uint8_t) ((right >> 12) & 1u);
+    const uint8_t ru0 = (uint8_t) ((right >> 6) & CHIRALITY_MASK_6);
+    const uint8_t rv0 = (uint8_t) (right & CHIRALITY_MASK_6);
+    const uint8_t ru = lp ? rv0 : ru0;
+    const uint8_t rv = lp ? ru0 : rv0;
+    return (uint16_t) (((lp ^ rp) << 12) | (((ru ^ lu) & CHIRALITY_MASK_6) << 6) | ((rv ^ lv) & CHIRALITY_MASK_6));
+}
+
+uint16_t hqvm_sig13_inv(uint16_t sig) {
+    const uint8_t p  = (uint8_t) ((sig >> 12) & 1u);
+    const uint8_t tu = (uint8_t) ((sig >> 6) & CHIRALITY_MASK_6);
+    const uint8_t tv = (uint8_t) (sig & CHIRALITY_MASK_6);
+    if (p == 0) {
+        return sig;
+    }
+    return (uint16_t) ((1u << 12) | ((tv & CHIRALITY_MASK_6) << 6) | (tu & CHIRALITY_MASK_6));
+}
+
+uint16_t hqvm_sig13_apply(uint16_t s12, uint16_t sig) {
+    const uint8_t p  = (uint8_t) ((sig >> 12) & 1u);
+    const uint8_t tu = (uint8_t) ((sig >> 6) & CHIRALITY_MASK_6);
+    const uint8_t tv = (uint8_t) (sig & CHIRALITY_MASK_6);
+    const uint8_t u  = (uint8_t) ((s12 >> 6) & CHIRALITY_MASK_6);
+    const uint8_t v  = (uint8_t) (s12 & CHIRALITY_MASK_6);
+    if (p == 0) {
+        return hqvm_pack_state12((uint8_t) (u ^ tu), (uint8_t) (v ^ tv));
+    }
+    return hqvm_pack_state12((uint8_t) (v ^ tu), (uint8_t) (u ^ tv));
+}
+
+void hqvm_sig13_apply_batch(
+    const uint16_t * states,
+    int              n_states,
+    uint16_t         sig,
+    uint16_t *       out)
+{
+    int i;
+    if (!states || !out || n_states <= 0) {
+        return;
+    }
+    for (i = 0; i < n_states; ++i) {
+        out[i] = hqvm_sig13_apply(states[i], sig);
+    }
+}
+
+int hqvm_route2_witnesses(
+    uint16_t src12,
+    uint16_t tgt12,
+    uint8_t  out_b1[16],
+    uint8_t  out_b2[16])
+{
+    int b1;
+    int b2;
+    int n = 0;
+    for (b1 = 0; b1 < 256; ++b1) {
+        const uint16_t mid = hqvm_step_state12_by_byte(src12, (uint8_t) b1);
+        for (b2 = 0; b2 < 256; ++b2) {
+            if (hqvm_step_state12_by_byte(mid, (uint8_t) b2) == tgt12) {
+                if (n < 16) {
+                    if (out_b1) {
+                        out_b1[n] = (uint8_t) b1;
+                    }
+                    if (out_b2) {
+                        out_b2[n] = (uint8_t) b2;
+                    }
+                }
+                ++n;
+            }
+        }
+    }
+    return n;
+}
+
+int hqvm_route2_synthesize(
+    uint16_t src12,
+    uint16_t tgt12,
+    uint8_t  out_b1[16],
+    uint8_t  out_b2[16])
+{
+    const uint8_t u0 = (uint8_t) ((src12 >> 6) & CHIRALITY_MASK_6);
+    const uint8_t v0 = (uint8_t) (src12 & CHIRALITY_MASK_6);
+    const uint8_t ut = (uint8_t) ((tgt12 >> 6) & CHIRALITY_MASK_6);
+    const uint8_t vt = (uint8_t) (tgt12 & CHIRALITY_MASK_6);
+    const uint8_t du = (uint8_t) (ut ^ u0);
+    const uint8_t dv = (uint8_t) (vt ^ v0);
+    const uint8_t mic = (uint8_t) GENE_MIC_S;
+    int flags;
+
+    for (flags = 0; flags < 16; ++flags) {
+        const uint8_t ea1 = (uint8_t) ((flags & 1) ? CHIRALITY_MASK_6 : 0u);
+        const uint8_t eb1 = (uint8_t) ((flags & 2) ? CHIRALITY_MASK_6 : 0u);
+        const uint8_t ea2 = (uint8_t) ((flags & 4) ? CHIRALITY_MASK_6 : 0u);
+        const uint8_t eb2 = (uint8_t) ((flags & 8) ? CHIRALITY_MASK_6 : 0u);
+        const uint8_t mr1 = (uint8_t) (du ^ eb1 ^ ea2);
+        const uint8_t mr2 = (uint8_t) (dv ^ ea1 ^ eb2);
+        const uint8_t in1 = (uint8_t) (((flags & 2) ? 0x80u : 0u) | ((mr1 & CHIRALITY_MASK_6) << 1) | ((flags & 1) ? 1u : 0u));
+        const uint8_t in2 = (uint8_t) (((flags & 8) ? 0x80u : 0u) | ((mr2 & CHIRALITY_MASK_6) << 1) | ((flags & 4) ? 1u : 0u));
+        if (out_b1) {
+            out_b1[flags] = (uint8_t) (in1 ^ mic);
+        }
+        if (out_b2) {
+            out_b2[flags] = (uint8_t) (in2 ^ mic);
+        }
+    }
+    return 16;
+}
+
+void hqvm_sig13_cache_build(uint16_t cache[8192]) {
+    int i;
+    if (!cache) {
+        return;
+    }
+    for (i = 0; i < 8192; ++i) {
+        cache[i] = (uint16_t) i;
+    }
+}
+
+void hqvm_sig13_cache_apply_batch(
+    const uint16_t * states,
+    int              n_states,
+    uint16_t         sig,
+    const uint16_t * cache,
+    uint16_t *       out)
+{
+    uint16_t key;
+    if (!states || !out || !cache || n_states <= 0) {
+        return;
+    }
+    key = cache[sig & 0x1FFF];
+    hqvm_sig13_apply_batch(states, n_states, key, out);
+}
+
+/* Apply many known sigs (cache optional; NULL => use sigs directly). */
+void hqvm_sig13_apply_many_sigs(
+    const uint16_t * states,
+    int              n_states,
+    const uint16_t * sigs,
+    int              n_sigs,
+    const uint16_t * cache)
+{
+    int i;
+    uint16_t out_stack[4096];
+    uint16_t * out = out_stack;
+    uint16_t * heap = NULL;
+    if (!states || !sigs || n_states <= 0 || n_sigs <= 0) {
+        return;
+    }
+    if (n_states > 4096) {
+        heap = (uint16_t *) malloc((size_t) n_states * sizeof(uint16_t));
+        if (!heap) {
+            return;
+        }
+        out = heap;
+    }
+    for (i = 0; i < n_sigs; ++i) {
+        const uint16_t key = cache ? cache[sigs[i] & 0x1FFF] : (uint16_t) (sigs[i] & 0x1FFF);
+        hqvm_sig13_apply_batch(states, n_states, key, out);
+    }
+    if (heap) {
+        free(heap);
+    }
+}
+
+/* Compile each word then apply to all states (LEDGER-style compile tax). */
+void hqvm_sig13_compile_apply_many(
+    const uint16_t * states,
+    int              n_states,
+    const uint8_t *  words_flat,
+    const int *      lens,
+    int              n_words)
+{
+    int i;
+    int off = 0;
+    uint16_t out_stack[4096];
+    uint16_t * out = out_stack;
+    uint16_t * heap = NULL;
+    if (!states || !words_flat || !lens || n_states <= 0 || n_words <= 0) {
+        return;
+    }
+    if (n_states > 4096) {
+        heap = (uint16_t *) malloc((size_t) n_states * sizeof(uint16_t));
+        if (!heap) {
+            return;
+        }
+        out = heap;
+    }
+    for (i = 0; i < n_words; ++i) {
+        const int n = lens[i];
+        const uint16_t sig = hqvm_sig13_compile(words_flat + off, n);
+        hqvm_sig13_apply_batch(states, n_states, sig, out);
+        off += n;
+    }
+    if (heap) {
+        free(heap);
+    }
+}
+
+int hqvm_wave_grammar_verify(hqvm_wave_grammar_result * receipt) {
+    static const uint8_t w2[2]  = { HQVM_W2_BYTE0, HQVM_W2_BYTE1 };
+    static const uint8_t w2p[2] = { HQVM_W2P_BYTE0, HQVM_W2P_BYTE1 };
+    uint8_t              ru, rv, rback_u, rback_v;
+    uint8_t              u_rest, v_rest;
+    uint32_t             s_rest, s_w2;
+    hqvm_wave_grammar_result local;
+
+    if (!receipt) {
+        receipt = &local;
+    }
+    memset(receipt, 0, sizeof(*receipt));
+
+    hqvm_byte_table_init();
+    receipt->byte_table_ok = s_byte_table_ok;
+
+    receipt->w2_sig_ok  = check_w2_signature(w2, 63, 0);
+    receipt->w2p_sig_ok = check_w2_signature(w2p, 0, 63);
+
+    hqvm_state24_to_uv6(GENE_MAC_REST, &u_rest, &v_rest);
+    hqvm_trace_word_bytes(w2, 2, u_rest, v_rest, &ru, &rv);
+    receipt->w2_involution_ok = (ru == 63 && rv == 63);
+    hqvm_trace_word_bytes(w2, 2, ru, rv, &rback_u, &rback_v);
+    receipt->w2_involution_ok = receipt->w2_involution_ok && (rback_u == u_rest && rback_v == v_rest);
+
+    hqvm_trace_word_bytes(w2p, 2, u_rest, v_rest, &ru, &rv);
+    receipt->w2p_involution_ok = (ru == 0 && rv == 0);
+    hqvm_trace_word_bytes(w2p, 2, ru, rv, &rback_u, &rback_v);
+    receipt->w2p_involution_ok = receipt->w2p_involution_ok && (rback_u == u_rest && rback_v == v_rest);
+
+    s_rest = GENE_MAC_REST;
+    s_w2   = hqvm_trace_word_state24(w2, 2, s_rest);
+    {
+        uint8_t uo, vo;
+        hqvm_trace_word_bytes(w2, 2, u_rest, v_rest, &uo, &vo);
+        receipt->f_composition_ok = (hqvm_uv6_to_state24(uo, vo) == s_w2);
+    }
+
+    receipt->t2_chi_ok   = check_w2_t2(w2);
+    receipt->t2_shell_ok = receipt->t2_chi_ok;
+    receipt->sparse_k4_ok = check_sparse_k4();
+
+    return (receipt->w2_sig_ok && receipt->w2p_sig_ok && receipt->w2_involution_ok &&
+            receipt->w2p_involution_ok && receipt->f_composition_ok && receipt->t2_chi_ok &&
+            receipt->t2_shell_ok && receipt->sparse_k4_ok && receipt->byte_table_ok)
+               ? 0
+               : -1;
+}

@@ -4,7 +4,7 @@
 
 ## Abstract
 
-The Common Governance Model (CGM) presents a geometric framework where physical units and constants emerge from pure observational geometry. Beginning from the single axiom "The Source is Common," the framework derives a four-stage hierarchy (CS, UNA, ONA, BU) that generates the complete energy landscape from Planck to electroweak scales. The central innovation is treating Quantum Gravity as the invariant Q_G = 4π, representing the complete solid angle required for coherent observation in three-dimensional space. This approach yields the optical conjugacy relation E^UV × E^IR = const connecting ultraviolet and infrared physics through geometric necessity, predicts the fine-structure constant to 0.0316% accuracy, and establishes a consistent unit system where physical constants express geometric requirements rather than empirical measurements.
+The Common Governance Model (CGM) presents a geometric framework where physical units and constants emerge from pure observational geometry. Beginning from the single axiom "The Source is Common," the framework derives a four-stage hierarchy (CS, UNA, ONA, BU) that generates the complete energy landscape from Planck to electroweak scales. The central innovation is treating Quantum Gravity as the invariant Q_G = 4π, representing the complete solid angle required for coherent observation in three-dimensional space. This approach yields the optical conjugacy relation E^UV × E^IR = const connecting ultraviolet and infrared physics through geometric necessity, predicts the fine-structure constant with base α₀ at about 319.43 ppm from CODATA 2018 and with the aperture correction chain at about 33.8 ppb, and establishes a consistent unit system where physical constants express geometric requirements rather than empirical measurements.
 
 ## 1. Paradigm Foundation: Observation as Reality's Source
 
@@ -58,14 +58,14 @@ Stage 3: ONA (Opposition Non-Absolute)
 Stage 4: BU (Balance Universal)
 - Threshold:  m_a = 1/(2√(2π)) ≈ 0.199471
 - Meaning: Vibrational motion at the IR observation focus; bounded oscillation amplitude m_a about the depth-four closed configuration
-- Depth-four commutative closure (both gyrations equivalent at □B); monodromy phase defect encodes memory of the vibrational mode
+- Dual propositions Balance Egress and Balance Ingress. Depth-four commutative closure. The dual-pole loop angle encodes memory of the vibrational mode.
 
 ### 2.3 Geometric Necessity
 
 These thresholds satisfy the gyrotriangle defect condition ensuring closure:
 δ = π - (π/2 + π/4 + π/4) = 0
 
-This exact closure was verified through exhaustive numerical analysis, finding this solution unique within machine precision. The geometric necessity means these values are not adjustable parameters but requirements for coherent three-dimensional observation.
+Equivalently the horizon angle partitions as θ_CS = θ_UNA + θ_ONA with θ_UNA = θ_ONA = π/4. This exact closure was verified through exhaustive numerical analysis, finding this solution unique within machine precision. The geometric necessity means these values are not adjustable parameters but requirements for coherent three-dimensional observation.
 
 ## 3. Stage Actions and Energy Hierarchy
 
@@ -150,26 +150,26 @@ This makes spacetime metric components into operators since [g_μν(X), P] ≠ 0
 The identity that fixes the observational aperture scale:
 Q_G × m_a² = 1/2
 
-This links the solid angle Q_G = 4π to m_a. It is distinct from the closure ratio ρ = δ_BU/m_a ≈ 0.9793 and the aperture gap Δ = 1 − ρ ≈ 0.0207 (about 2.07%). The latter pair measures how BU dual-pole monodromy fills the aperture scale: ρ is structural phase closure, Δ is the residual vibrational amplitude that keeps observation possible. The half-integer in Q_G m_a² = 1/2 connects to SU(2) double-cover structure (spin-1/2).
+This links the solid angle Q_G = 4π to m_a. It is distinct from the closure ratio ρ = δ_BU/m_a ≈ 0.979300454497 and the aperture gap Δ = 1 − ρ ≈ 0.020699545503 (about 2.07%). The latter pair measures how the BU dual-pole loop angle fills the aperture scale: ρ is structural phase closure, Δ is the residual vibrational amplitude that keeps observation possible. The half-integer in Q_G m_a² = 1/2 connects to SU(2) double-cover structure (spin-1/2).
 
-### 5.3 Monodromy and Memory
+### 5.3 Holonomy and Memory
 
-Incomplete closure creates monodromy, geometric memory that encodes the complete recursive history. This memory manifests as:
-- Elementary transitions: δ = 0.097671 rad per stage
-- Dual-pole traversal: δ_BU = 0.195342 rad
+Incomplete closure creates holonomy, geometric memory that encodes the complete recursive history. This memory manifests as:
+- Elementary transitions: ω = 2 · arctan(k(π/4) · k(m_a)) ≈ 0.097671089129 rad per corner
+- Dual-pole traversal: δ_BU = 4 · arctan(k(π/4) · k(m_a)) ≈ 0.195342178258 rad
 - Complete cycles: Various values encoding different memory depths
 
 ## 6. Physical Constant Predictions
 
 ### 6.1 Fine-Structure Constant
 
-From BU dual-pole monodromy through quartic scaling:
+From the BU dual-pole loop angle through quartic scaling:
 
-α = (δ_BU)^4 /  m_a = 0.007299734
+α₀ = (δ_BU)^4 / m_a ≈ 0.007299683573
 
-Compared to CODATA value α = 0.007297353: +0.0316% deviation (+319 ppm).
+Compared to CODATA 2018 α = 1/137.035999084 ≈ 0.007297352569: about +319.43 ppm.
 
-The transport-corrected formula in the fine-structure analysis [24, 27] yields α ≈ 0.007297352563, matching CODATA to nine significant figures.
+The aperture correction chain in Analysis_CGM_Constants.md and Analysis_Fine_Structure.md yields α ≈ 0.007297352816, about 33.8 ppb from that CODATA reference.
 
 The quartic dependence emerges from the geometric requirement for dual commutators and poles in BU traversal processes.
 
@@ -198,7 +198,7 @@ The CGM framework treats reality as emerging through recursive self-observation,
 
 Rather than seeking mathematical unification of forces, CGM unifies physics through shared observational origin:
 - Quantum effects: From commutator preventing simultaneous eigenvalues
-- Gravitational effects: From monodromy creating spacetime memory  
+- Gravitational effects: From holonomy creating spacetime memory  
 - Electromagnetic structure: From aperture balance requirements
 - Nuclear forces: From geometric conditions at different scales
 
@@ -219,7 +219,7 @@ The arrow of time is fixed by primordial left-chirality encoded in the CS axiom.
 ### 8.1 Precision Tests
 
 The framework makes precise quantitative predictions testable with current technology:
-- Fine-structure constant: α = 0.007299734 (parts per billion precision)
+- Fine-structure constant: α₀ ≈ 0.007299683573; aperture-corrected α ≈ 0.007297352816
 - Neutrino masses: ~0.06 eV (oscillation experiments)
 - CMB multipole enhancements at specific values
 - Electromagnetic duality angles
@@ -227,7 +227,7 @@ The framework makes precise quantitative predictions testable with current techn
 ### 8.2 Novel Predictions
 
 Beyond reproducing known physics, CGM predicts:
-- Specific monodromy relationships in quantum systems
+- Specific holonomy relationships in quantum systems
 - Cross-scale correlations following optical conjugacy
 - Geometric conditions on particle spectra
 - Observable signatures in analog gravity systems
@@ -237,7 +237,7 @@ Beyond reproducing known physics, CGM predicts:
 The framework is falsifiable through:
 - Violation of predicted threshold relationships
 - Breakdown of optical conjugacy at any scale  
-- Absence of monodromy signatures in quantum systems
+- Absence of holonomy signatures in quantum systems
 - Deviation from geometric constant predictions
 
 ## 9. Future Directions
@@ -256,14 +256,14 @@ The framework suggests new approaches to:
 - Inflation as geometric expansion of observational capacity
 - Dark matter as geometric shadow effects
 - Dark energy as observational coherence pressure
-- Structure formation through scale-dependent monodromy
+- Structure formation through scale-dependent holonomy
 
 ### 9.3 Quantum Information
 
 CGM's emphasis on observation suggests deep connections to:
 - Quantum error correction through geometric conditions
 - Entanglement as shared observational processes
-- Information paradoxes resolved through monodromy
+- Information paradoxes resolved through holonomy
 - Holographic principles from aperture requirements
 
 ## 10. Conclusions

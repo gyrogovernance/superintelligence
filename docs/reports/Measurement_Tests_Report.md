@@ -52,7 +52,7 @@ Aperture (A) is the ratio of cycle energy to total energy. It measures the propo
 
 The Common Governance Model defines a canonical alignment target of A* approximately equal to 0.0207.
 
-This value is derived from the CGM invariants, specifically the BU monodromy defect and the aperture scale fixed by the horizon constraint. It represents the structural equilibrium at which a governance system is neither rigidly over-determined nor chaotically under-determined.
+This value is derived from the CGM invariants, specifically the BU dual-pole loop angle and the aperture scale fixed by the horizon constraint. It represents the structural equilibrium at which a governance system is neither rigidly over-determined nor chaotically under-determined.
 
 Alignment, in this framework, is the condition where A(y) equals A*.
 

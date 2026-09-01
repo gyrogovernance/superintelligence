@@ -98,31 +98,67 @@ L0_BIT_0: int = _k.L0_BIT_0
 L0_BIT_7: int = _k.L0_BIT_7
 BYTE_COUNT: int = _k.BYTE_COUNT
 
-# Process environment variables for the live ledger path / harness.
+# Process environment variables for live getenv("GYRO_*") sites.
+# Keep in sync with C/ggml/llama hooks. Deprecated aliases: GYRO_ENV_DEPRECATED.
 GYRO_ENV_VAR_NAMES: tuple[str, ...] = (
     "GYRO_LEDGER_PATH",
     "GYRO_LEDGER_STRICT",
     "GYRO_LEDGER_ALLOW",
     "GYRO_LEDGER_VERBOSE",
     "GYRO_LEDGER_TENSOR",
-    "GYRO_KV_LEDGER",
     "GYRO_KV_KQ8",
     "GYRO_KV_V",
-    "GYRO_V_PERTURB",
     "GYRO_HOLONOMIC_ATTN",
-    "GYRO_HOLONOMIC_ATTN_MODE",
-    "GYRO_COORD_PERTURB",
-    "GYRO_APERTURE_SOFTMAX",
-    "GYRO_ROPE_CODEC",
-    "GYRO_SILU_CODEC",
-    "GYRO_CGM_LIFT",
-    "GYRO_CGM_LIFT_PERTURB",
-    "GYRO_RESIDUAL_LAW",
-    "GYRO_RESIDUAL_HYBRID",
+    "GYRO_NATIVE_FORWARD",
+    "GYRO_NATIVE_EMISSION",
+    "GYRO_NATIVE_GENEALOGY",
+    "GYRO_GENEALOGY_PATH",
+    "GYRO_NATIVE_GROUP",
+    "GYRO_NATIVE_POLAR_PREFILTER",
+    "GYRO_NATIVE_RESET",
+    "GYRO_NATIVE_N_CTX",
+    "GYRO_NATIVE_KV",
+    "GYRO_NATIVE_NORM",
+    "GYRO_NATIVE_ROPE",
+    "GYRO_NATIVE_RESIDUAL",
+    "GYRO_NATIVE_IDENTITY",
+    "GYRO_NATIVE_MAX_LAYER",
+    "GYRO_NATIVE_SKIP_QKNORM",
+    "GYRO_NATIVE_SKIP_ATTN",
+    "GYRO_NATIVE_SKIP_FFN",
+    "GYRO_NATIVE_VREDUCE",
+    "GYRO_FFN_NATIVE",
+    "GYRO_NATIVE_ATTN_SCORES",
+    "GYRO_NATIVE_NUMSTAT",
+    "GYRO_RESIDUAL_CAPTURE",
+    "GYRO_RESIDUAL_CAPTURE_MAX_LAYERS",
+    "GYRO_RESIDUAL_CAPTURE_MAX_TOKENS",
+    "GYRO_ATTN_LEVEL",
+    "GYRO_ATTN_SHELL_QK",
     "GYRO_NORM_CODEC",
     "GYRO_NORM_COMMIT",
     "GYRO_NORM_G0",
-    "GYRO_RECEIPTS",
+    "GYRO_ROPE_CODEC",
+    "GYRO_ROPE_Q14",
+    "GYRO_ROPE_FREQ_BASE",
+    "GYRO_ROPE_FREQ_SCALE",
+    "GYRO_CGM_LIFT",
+    "GYRO_PI_FROM_EMBD",
+    "GYRO_COORD_PERTURB",
+    "GYRO_V_PERTURB",
+    "GYRO_CGM_LIFT_PERTURB",
+)
+
+# Still read in C for compatibility; do not set in production_gyroscopic_env.
+GYRO_ENV_DEPRECATED: tuple[str, ...] = (
+    "GYRO_RESIDUAL_HYBRID",
+    "GYRO_RESIDUAL_LAW",  # chassis hook deleted; native driver always applies shell gain
+    "GYRO_KV_LEDGER",      # Arc-2 coordinate ledger deleted from chassis
+    "GYRO_HOLONOMIC_ATTN_MODE",  # holonomic chassis collapsed to dot-only
+    "GYRO_CGM_LIFT_PERTURB",  # chassis lift hook deleted
+    "GYRO_FFN_LEVEL",        # replaced by GYRO_FFN_NATIVE=1 opt-in
+    "GYRO_FFN_SHELL_GATE",   # alias of GYRO_FFN_NATIVE
+    "GYRO_NATIVE_SILU",      # hybrid SiLU-chart FFN converter removed
 )
 
 _C_HEADER_MAP: dict[str, int | float] = {

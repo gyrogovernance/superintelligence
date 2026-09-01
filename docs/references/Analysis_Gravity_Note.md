@@ -83,7 +83,7 @@ Balance Ingress (BU-In) requires memory reconstruction from the closed state:
 S → (□B → ([R]S ↔ S ∧ ¬([L]S ↔ S) ∧ ¬□E ∧ ¬□¬E))
 ```
 
-The consequent states that once balance holds, the closed configuration retains the original chirality and both non-absolute lemmas. Ingress represents the centripetal binding that reconstructs the original context without erasing structural distinctions. Memory is encoded as the monodromy phase defect of bounded vibrational motion at the 2.07% aperture amplitude.
+The consequent states that once balance holds, the closed configuration retains the original chirality and both non-absolute lemmas. Ingress represents the centripetal binding that reconstructs the original context without erasing structural distinctions. Memory is encoded as the holonomy phase defect of bounded vibrational motion at the 2.07% aperture amplitude.
 
 The dual nature of balance is the resulting state of the two lemmas. Their operational displacement cost manifests as gravitational attraction. Mass represents the accumulated memory of this balance. In the relativistic limit, this structure maps directly to the gravitoelectric and gravitomagnetic fields [2].
 
@@ -254,16 +254,16 @@ Q_G × m_a² = 1/2   (The solid angle and aperture are bound by the spinorial st
 
 where the product Q_G m_a² = 1/2 is the half-integer quantum pass of the double cover.
 
-**3.3. The Observational Aperture and Holonomy**
+**3.3. The Observational Aperture and Loop Angle**
 
-Gravity requires quantization. The continuous sphere resolves into discrete operational passes governed by the aperture. The BU dual-pole holonomy δ_BU measures the phase accumulated on the path between the constitutional poles. The closure ratio ρ and the aperture gap Δ measure how this holonomy sits relative to the aperture.
+Gravity requires quantization. The continuous sphere resolves into discrete operational passes governed by the aperture. With δ_BU = 4 · arctan(k(π/4) · k(m_a)) and k(β) = β/(1 + √(1 − β²)), the BU dual-pole loop angle measures the phase accumulated on the path between the constitutional poles BU+ and BU−, which carry Balance Egress and Balance Ingress. The factor π/4 is the common lemma angle of the nested depth-two boundary. The closure ratio ρ and the aperture gap Δ measure how this loop angle sits relative to the aperture.
 
 ```text
-ρ = δ_BU / m_a   ≈ 0.9793
-Δ = 1 − ρ        ≈ 0.0207
+ρ = δ_BU / m_a   ≈ 0.979300454497
+Δ = 1 − ρ        ≈ 0.020699545503
 ```
 
-where δ_BU is the BU dual-pole monodromy, ρ is the closure ratio (structural closure fraction), and Δ is the aperture gap (dynamic opening fraction). The system maintains near-total closure with a fractional opening. Full closure would leave no aperture and render observation impossible. The aperture gap Δ is the expansion parameter for gravitational and electromagnetic attenuation. Observation is possible precisely because Δ > 0.
+where δ_BU is the BU dual-pole loop angle, ρ is the closure ratio (structural closure fraction), and Δ is the aperture gap (dynamic opening fraction). The system maintains about 97.93% closure with about 2.07% opening. Full closure would leave no aperture and render observation impossible. The aperture gap Δ is the expansion parameter for gravitational and electromagnetic attenuation. Observation is possible precisely because Δ > 0.
 
 **3.4. Optical Conjugacy and the Energy Ladder**
 
@@ -280,17 +280,17 @@ where E_i^UV and E_i^IR are the ultraviolet and infrared conjugate energies of s
 Electromagnetic coupling emerges at the observable BU focus [13]. The base formula reflects the quartic scaling of dual commutators and dual poles, normalized by the observational aperture.
 
 ```text
-α₀ = δ_BU⁴ / m_a   ≈ 0.00729968
+α₀ = δ_BU⁴ / m_a   ≈ 0.007299683573
 ```
 
-where α₀ is the base electromagnetic coupling at the BU focus, δ_BU is the dual-pole monodromy, and m_a is the observational aperture. This value differs from the measured fine-structure constant [8] by 319 ppm, reflecting the base geometric kernel prior to UV-IR transport corrections. The quartic dependence emerges from the geometric requirement for dual commutators and poles in the BU traversal.
+where α₀ is the base electromagnetic coupling at the BU focus, δ_BU is the dual-pole loop angle, and m_a is the observational aperture. Relative to CODATA 2018 this differs by about 319.43 ppm, reflecting the base geometric kernel prior to UV-IR transport corrections. The quartic dependence emerges from the geometric requirement for dual commutators and poles in the BU traversal.
 
 **3.6. The Gravitational-Electromagnetic Coupling Identity**
 
 Electromagnetic and gravitational couplings share the aperture geometry, producing a testable relationship between them. With the gravitational aperture parameter ζ = 8 / (m_a √(3)), the product of the base electromagnetic coupling and the gravitational aperture satisfies a constant product identity.
 
 ```text
-α₀ × ζ = ρ⁴ / (π √3)   ≈ 0.169025920321
+α₀ × ζ = ρ⁴ / (π √3)   ≈ 0.169025926127
 ```
 
 where ζ is the gravitational aperture parameter and ρ is the closure ratio. The aperture parameter m_a cancels entirely. This identity binds the electromagnetic and gravitational couplings at the kernel level. Independent measurements of α and G that violate this product falsify the framework.
@@ -315,10 +315,10 @@ where D is the total Hamming distance through shell space traversed by a complet
 Gravity couples exclusively to the five bulk shells carrying the symmetric trace-free orientational degrees of freedom. The two horizons carry zero anisotropy and contribute no gravitational signal. Coherent survival across the bulk sector produces an attenuation factor of exactly five powers of the closure ratio per holonomy cycle. The Refractive Depth is the integral of this attenuation accumulated between the Planck and electroweak anchors.
 
 ```text
-τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ² − 7/4 Δ⁴)   (Refractive Depth from STF attenuation)
+τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ²)   (Refractive Depth from STF attenuation)
 ```
 
-where |Ω| = 4096 is the reachable state count, Δ is the aperture gap, ρ is the closure ratio, and the polynomial correction (1 − 4ρΔ² − 7/4 Δ⁴) accounts for the c₄ closure charge. The Refractive Depth is explicitly a Regge curvature sum on the compact manifold. The curvature spectrum of plaquette defects matches the binomial shell spectrum exactly, and the Regge action reproduces the closed-form τ_G to relative precision 3.7 × 10⁻¹⁶ (Appendix C).
+where |Ω| = 4096 is the reachable state count, Δ is the aperture gap, and ρ is the closure ratio. The isotropic stress channel supplies the separate scalar τ_trace = |Ω| Δ ρ⁵ c₄ Δ⁴ with c₄ = −7/4. The Refractive Depth is explicitly a Regge curvature sum on the compact manifold. The curvature spectrum of plaquette defects matches the binomial shell spectrum exactly, and the Regge action reproduces the closed-form τ_G to relative precision 3.7 × 10⁻¹⁶ (Appendix C).
 
 Converting the dimensionless coupling to the physical G requires the electroweak scale v [9] as the single energy anchor. The gravitational coupling is therefore determined entirely by kernel invariants and one measured scale.
 
@@ -472,10 +472,10 @@ where |Ω| = 4096 is the reachable state count. This reproduces the shell displa
 The main text introduces the Refractive Depth formula:
 
 ```text
-τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ² − 7/4 Δ⁴)
+τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ²)
 ```
 
-where |Ω| = 4096, Δ is the aperture gap, ρ is the closure ratio, and the c₄ = −7/4 correction is fixed by two independent kernel routes (Appendix C).
+where |Ω| = 4096, Δ is the aperture gap, and ρ is the closure ratio. The isotropic-channel scalar τ_trace = |Ω| Δ ρ⁵ c₄ Δ⁴ with c₄ = −7/4 is fixed by two independent kernel routes (Appendix C).
 
 This appendix derives this closed form from the binomial-weighted holonomy transport.
 
@@ -495,7 +495,7 @@ Expanding the transport integral as a polynomial in the aperture gap Δ yields t
 τ_G⁰ = |Ω| Δ ρ⁵ (1 − 4ρΔ²)
 ```
 
-The additive correction δτ = |Ω| Δ ρ⁵ c₄ Δ⁴ is fixed by two independent routes. Route A derives c₄ = −(1 + Tr(σ_iso)) = −7/4 from the isotropic stress trace. Route B derives c₄ = q_W from the closure charge on gyroscopic edge increments, yielding the same value. The two routes are mathematically independent; Route A uses the second-moment structure of the payload bit distribution, while Route B uses the edge-increment structure of the K4 gate composition. Adding δτ reduces the residual in τ from 2.46×10⁻⁵ to 7.36×10⁻⁸.
+The isotropic-channel scalar τ_trace = |Ω| Δ ρ⁵ c₄ Δ⁴ is fixed by two independent routes. Route A derives c₄ = −(1 + Tr(σ_iso)) = −7/4 from the isotropic stress trace. Route B derives c₄ = q_W from the closure charge on gyroscopic edge increments, yielding the same value. The two routes are mathematically independent; Route A uses the second-moment structure of the payload bit distribution, while Route B uses the edge-increment structure of the K4 gate composition. τ_trace does not enter the STF coupling depth. The residual of τ_G versus τ_required is about −2.99 × 10⁻⁶.
 
 ### C.7 Regge Action Verification
 
@@ -505,7 +505,7 @@ To convert defect magnitude to an angle scale, define the plaquette deficit angl
 α(d) = (popcount(d) / 6) × δ_BU
 ```
 
-where popcount(d) is the defect magnitude in GF(2)^6 and δ_BU is the BU dual-pole monodromy. This fixes the curvature unit.
+where popcount(d) is the defect magnitude in GF(2)^6 and δ_BU is the BU Dual-Pole Loop. This fixes the curvature unit.
 
 The Regge action sums deficit angles weighted by hinge area. In the kernel, the hinge weight is the anisotropy (symmetric trace-free content) of the shell at which the holonomy step occurs.
 
@@ -525,10 +525,10 @@ Evaluating S_cycle on the 64 micro-reference holonomy cycles yields S_cycle = 0.
 The total Refractive Depth is:
 
 ```text
-τ_G = N_cycles × τ_cycle = 76.237916638581
+τ_G = N_cycles × τ_cycle = 76.237913573567
 ```
 
-where N_cycles = |Ω| is the total cycle count over the reachable manifold. This matches the closed-form expression τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ² + c₄Δ⁴) to relative precision 3.7 × 10⁻¹⁶. The closed form is the Regge sum, evaluated analytically.
+where N_cycles = |Ω| is the total cycle count over the reachable manifold. This matches the closed-form expression τ_G = |Ω| Δ ρ⁵ (1 − 4ρΔ²) to relative precision 3.7 × 10⁻¹⁶. The closed form is the Regge sum, evaluated analytically.
 
 ## Appendix D: Derivation of the Exact Vacuum Solution and Self-Energy
 
@@ -617,7 +617,7 @@ The rest-frame energy equals +M_obs c²/4, balancing the self-energy locally. Se
 
 [11] Korompilias, B. (2025). Formal proof of three-dimensional necessity and six degrees of freedom in the Common Governance Model. Companion analysis (docs/Findings/Analysis_3D_6DOF_Proof.md).
 
-[12] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (docs/specs/hQVM_Specs_Formalism.md).
+[12] Korompilias, B. (2025). Gyroscopic byte formalism: The 6-bit runtime and depth-4 closure. Companion specification (https://github.com/gyrogovernance/superintelligence/blob/main/docs/specs/hQVM_Specs_Formalism.md).
 
 [13] Korompilias, B. (2025). The fine-structure constant from geometric first principles. Companion analysis (docs/Findings/Analysis_Fine_Structure.md).
 

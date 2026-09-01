@@ -41,7 +41,7 @@ The fundamental unit of computation is a 24-bit state S, decomposed into two cou
 Each 12-bit component represents a topological grid of dimensions 2 times 3 times 2:
 
 - 2 Frames: Represent the two fundamental phases or chiral components of the system. In CGM terms, this corresponds to the active and passive phases.
-- 3 Rows: Represent the three spatial dimensions. The division of intrinsic parameters by 3 maps directly to the reconstruction of the monodromy defect angle in the kernel dynamics, linking the discrete grid to physical 3D space.
+- 3 Rows: Represent the three spatial dimensions. The division of intrinsic parameters by 3 maps directly to the reconstruction of the dual-pole loop angle in the kernel dynamics, linking the discrete grid to physical 3D space.
 - 2 Columns: Represent the binary orientation within each spatial dimension.
 
 The bit positions are indexed as follows. Bit k of a 12-bit component is defined as the value of the k-th power of 2 in the binary representation, where bit 0 is the least significant and bit 11 is the most significant. The coordinate mapping assigns bits 0 through 5 to frame 0 and bits 6 through 11 to frame 1, with each frame containing 3 rows of 2 columns.

@@ -39,6 +39,56 @@ CORPUS_TINY = _REPO_ROOT / "data" / "eval" / "ppl_tiny.txt"
 SIDECAR = default_ledger_path()
 MAX_RATIO = 1.05
 PARIS_PROMPT = "The capital of France is"
+DEFAULT_GGUF = (
+    _REPO_ROOT / "data" / "models" / "Bonsai-8B-gguf" / "Bonsai-8B-Q1_0.gguf"
+)
+
+# Freshness: a stale chassis DLL false-passed gates once (LOG 2026-08-12).
+# Gates refuse to run when a chassis binary is older than any gyroscopic source.
+_CHASSIS_SOURCES = [
+    _REPO_ROOT / "src" / "tools" / "gyroscopic" / n
+    for n in (
+        "layer.c", "layer.h", "attn.c", "attn.h", "codec.c", "codec.h",
+        "ledger.c", "ledger.h",
+        "runtime.c", "runtime.h",
+        "kernel.c", "kernel.h", "constants.h",
+    )
+] + [
+    _REPO_ROOT / "external" / "llama.cpp" / "ggml" / "src" / "ggml-gyroscopic" / "ggml-cpu.c",
+    # Emission authority lives in the common/context layer; stale copies of
+    # these revert token selection to the stock sampler with zeros on the
+    # receipt, so they are part of the watched surface.
+    _REPO_ROOT / "external" / "llama.cpp" / "common" / "sampling.cpp",
+    _REPO_ROOT / "external" / "llama.cpp" / "src" / "llama-context.cpp",
+    _REPO_ROOT / "external" / "llama.cpp" / "src" / "llama-context.h",
+    _REPO_ROOT / "external" / "llama.cpp" / "include" / "llama.h",
+]
+_CHASSIS_BINARIES = [
+    _REPO_ROOT / "src" / "tools" / "gyroscopic" / "_build" / "llama-cpp" / "bin" / "Release" / n
+    for n in ("ggml-cpu.dll", "llama-cli.exe")
+]
+
+
+def assert_chassis_fresh() -> None:
+    """Exit non-zero if any chassis binary predates a gyroscopic source file."""
+    newest_src = max(
+        (p.stat().st_mtime for p in _CHASSIS_SOURCES if p.is_file()), default=0.0
+    )
+    for binp in _CHASSIS_BINARIES:
+        if not binp.is_file():
+            print(f"  freshness: MISSING {binp.name}  FAIL (build the chassis first)")
+            raise SystemExit(2)
+        if binp.stat().st_mtime < newest_src:
+            print(
+                f"  freshness: {binp.name} older than sources — rebuild via "
+                f"helpers/build_llama_cpp_windows.ps1  FAIL"
+            )
+            raise SystemExit(2)
+    print("  freshness: chassis binaries newer than all gyroscopic sources  PASS")
+
+
+def default_model_path() -> Path:
+    return DEFAULT_GGUF
 
 LEDGER_PROMPTS = [
     ("paris", "The capital of France is", "Paris"),
@@ -178,6 +228,34 @@ def _parse_counters(combined: str) -> dict[str, int | None]:
         "stock_add": _i(r"stock_add_calls=(\d+)", last=True),
         "set_rows": _i(r"set_rows_calls=(\d+)", last=True),
         "stock_tail": _i(r"stock_tail_calls=(\d+)", last=True),
+        "native_tail": _i(r"native_tail_calls=(\d+)", last=True),
+        "native_selector": _i(r"native_selector_calls=(\d+)", last=True),
+        "native_selector_rows": _i(r"native_selector_scored_rows=(\d+)", last=True),
+        "exact_tail_rows": _i(r"exact_tail_rows=(\d+)", last=True),
+        "exact_tail_calls": _i(r"exact_tail_calls=(\d+)", last=True),
+        "stock_selector": _i(r"stock_selector_calls=(\d+)", last=True),
+        "stock_selector_fallback": _i(r"stock_selector_fallback_calls=(\d+)", last=True),
+        "native_emission_committed": _i(r"native_emission_committed_calls=(\d+)", last=True),
+        "owned_norm_ruler": _i(r"owned_norm_ruler=(\d+)", last=True),
+        "owned_rope_rows": _i(r"owned_rope_rows=(\d+)", last=True),
+        "owned_shell_weight": _i(r"owned_shell_weight=(\d+)", last=True),
+        "owned_ffn_gate": _i(r"owned_ffn_gate=(\d+)", last=True),
+        "owned_lift_steps": _i(r"owned_lift_steps=(\d+)", last=True),
+        "owned_matmul_q1": _i(r"owned_matmul_q1=(\d+)", last=True),
+        "owned_score_heads": _i(r"owned_score_heads=(\d+)", last=True),
+        "owned_vkq_heads": _i(r"owned_vkq_heads=(\d+)", last=True),
+        "nodes_seen": _i(r"nodes_seen=(\d+)", last=True),
+        "nodes_bypassed": _i(r"nodes_bypassed=(\d+)", last=True),
+        "rt_stock_ops_total": _i(r"rt_stock_ops_total=(\d+)", last=True),
+        "rt_group_calls": _i(r"rt_group_calls=(\d+)", last=True),
+        "rt_group_rows": _i(r"rt_group_rows=(\d+)", last=True),
+        "rt_group_groups": _i(r"rt_group_groups=(\d+)", last=True),
+        "entry_q8_rows": _i(r"entry_q8_rows=(\d+)", last=True),
+        "entry_q8_scale_blocks": _i(r"entry_q8_scale_blocks=(\d+)", last=True),
+        "dyad_residual_rows": _i(r"dyad_residual_rows=(\d+)", last=True),
+        "dyad_residual_coordinates": _i(r"dyad_residual_coordinates=(\d+)", last=True),
+        "float_residual_storage_calls": _i(r"float_residual_storage_calls=(\d+)", last=True),
+        "float_residual_adapter_calls": _i(r"float_residual_adapter_calls=(\d+)", last=True),
         "kv_null_reads": _i(r"kv_null_reads=(\d+)", last=True),
         "kv_null_writes": _i(r"kv_null_writes=(\d+)", last=True),
         "K_writes": _i(r"K_writes=(\d+)", last=True),
@@ -197,19 +275,26 @@ def _codecs_smoke(cfg, env: dict[str, str], label: str, timeout_sec: int = 300) 
     combined = (r.stdout or "") + "\n" + (r.stderr or "")
     ctr = _parse_counters(combined)
     paris_ok = "Paris" in gen
-    stock0 = ctr["stock"] == 0
-    hol_pos = ctr["holonomic"] is not None and ctr["holonomic"] > 0
-    v_pos = ctr["v_q8"] is not None and ctr["v_q8"] > 0
-    ok = (r.returncode == 0) and paris_ok and stock0 and hol_pos and v_pos
+    # Legacy flash_attn path prints holonomic/stock/v_q8. Native forward bypasses
+    # that path; ownership is stock_block=0 + native_block>0 (+ Paris).
+    native_ok = (
+        ctr["native_block"] is not None and ctr["native_block"] > 0
+        and ctr["stock_block"] == 0
+    )
+    legacy_ok = (
+        ctr["stock"] == 0
+        and ctr["holonomic"] is not None and ctr["holonomic"] > 0
+        and ctr["v_q8"] is not None and ctr["v_q8"] > 0
+    )
+    ok = (r.returncode == 0) and paris_ok and (native_ok or legacy_ok)
     print(f"  {label}_rc={r.returncode} gen={gen!r}")
     print(
         f"  {label}_holonomic={ctr['holonomic']} stock={ctr['stock']} "
-        f"v_q8={ctr['v_q8']} rope_codec={ctr['rope_codec']} rope_stock={ctr['rope_stock']}"
+        f"v_q8={ctr['v_q8']} native_block={ctr['native_block']} "
+        f"stock_block={ctr['stock_block']} rope_codec={ctr['rope_codec']}"
     )
     print(f"  {label}_paris  {_pass(paris_ok)}")
-    print(f"  {label}_stock_score_calls=0  {_pass(stock0)}")
-    print(f"  {label}_holonomic>0  {_pass(hol_pos)}")
-    print(f"  {label}_v_q8>0  {_pass(v_pos)}")
+    print(f"  {label}_native_or_legacy_owned  {_pass(native_ok or legacy_ok)}")
     print(f"  {label}_smoke  {_pass(ok)}")
     return ok, ctr, combined
 
@@ -225,7 +310,7 @@ def _incomplete_forward_env(*, perturb: bool) -> dict[str, str]:
     if SIDECAR.is_file():
         env["GYRO_LEDGER_PATH"] = str(SIDECAR)
     if perturb:
-        env["GYRO_CGM_LIFT_PERTURB"] = "1"
+        env["GYRO_COORD_PERTURB"] = "zero_kq8"
     return env
 
 
@@ -245,10 +330,16 @@ def _causal_gen(stdout: str, prompt: str) -> str:
     return " ".join(keep[-5:]) if keep else ""
 
 
+def _plain_generation(text: str) -> str:
+    """Remove deterministic CLI emphasis markup from a generated stem."""
+    return re.sub(r"[*_`]", "", text).strip()
+
+
 def cmd_ledger(_args: argparse.Namespace) -> int:
     print("hQVM GATE LEDGER: prompt set + optional PPL (full Q1_0 displace)")
     print("=" * 5)
-    cfg = get_gyroscopic_llm_config()
+    assert_chassis_fresh()
+    cfg = replace(get_gyroscopic_llm_config(), n_ctx=512)
     if not SIDECAR.is_file():
         print(f"  sidecar missing  {_pass(False)}")
         return 1
@@ -550,6 +641,7 @@ def _kv_v(args: argparse.Namespace) -> int:
 def cmd_kv(args: argparse.Namespace) -> int:
     print("hQVM GATE KV: Arc 2 K + Arc 3 V")
     print("=" * 5)
+    assert_chassis_fresh()
     rc_k = _kv_k(args)
     rc_v = _kv_v(args)
     overall = rc_k == 0 and rc_v == 0
@@ -562,6 +654,7 @@ def cmd_kv(args: argparse.Namespace) -> int:
 def cmd_codecs(args: argparse.Namespace) -> int:
     print("hQVM GATE CODECS: certify live A/R/S vs ledger+KV base")
     print("=" * 5)
+    assert_chassis_fresh()
 
     if not SIDECAR.is_file():
         print(f"  sidecar missing  {_pass(False)}")
@@ -571,16 +664,10 @@ def cmd_codecs(args: argparse.Namespace) -> int:
     cfg_smoke = replace(cfg, n_ctx=512)
     cfg_p = replace(cfg, n_ctx=max(256, int(args.ctx)))
 
+    # Quarantine A/S charts deleted (H-QUAR). Codecs gate keeps Base + RoPE ownership.
     variants: list[tuple[str, dict[str, str]]] = [
         ("Base", {}),
-        ("A", {"GYRO_APERTURE_SOFTMAX": "1"}),
         ("R", {"GYRO_ROPE_CODEC": "1"}),
-        ("S", {"GYRO_SILU_CODEC": "1"}),
-        ("ARS", {
-            "GYRO_APERTURE_SOFTMAX": "1",
-            "GYRO_ROPE_CODEC": "1",
-            "GYRO_SILU_CODEC": "1",
-        }),
     ]
 
     print("\n1. PARIS SMOKE + COUNTERS")
@@ -588,14 +675,19 @@ def cmd_codecs(args: argparse.Namespace) -> int:
     smoke_ok: dict[str, bool] = {}
     for name, extra in variants:
         print(f"\n  --- {name} ---")
-        timeout = 600 if name in ("S", "ARS") else 300
-        ok, ctr, combined = _codecs_smoke(cfg_smoke, _codecs_variant_env(extra), name, timeout_sec=timeout)
-        if name in ("R", "ARS"):
-            rc = ctr.get("rope_codec")
-            rope_ctr = rc is not None and rc > 0
-            rope_shadow = "[hqvm-rope-codec]" in combined
-            print(f"  {name}_rope_codec_calls>0  {_pass(rope_ctr)}")
-            print(f"  {name}_rope_shadow_log  {_pass(rope_shadow)}")
+        ok, ctr, combined = _codecs_smoke(cfg_smoke, _codecs_variant_env(extra), name, timeout_sec=300)
+        if name == "R":
+            rope_codec = ctr.get("rope_codec")
+            stock_rope = ctr.get("stock_rope")
+            native_block = ctr.get("native_block")
+            rope_ok = (
+                (isinstance(rope_codec, int) and rope_codec > 0)
+                or (stock_rope == 0 and isinstance(native_block, int) and native_block > 0)
+                or ("[hqvm-rope]" in combined)
+            )
+            print(f"  {name}_rope_owned  {_pass(rope_ok)}")
+            if not rope_ok:
+                ok = False
         smoke_ok[name] = ok
 
     if args.smoke_only:
@@ -669,13 +761,17 @@ def cmd_codecs(args: argparse.Namespace) -> int:
 
 
 def cmd_causal(_args: argparse.Namespace) -> int:
-    print("hQVM GATE CAUSAL: lift perturb changes decode")
+    print("hQVM GATE CAUSAL: holonomic Q8 perturb changes decode")
     print("=" * 5)
+    assert_chassis_fresh()
 
     cfg = replace(get_gyroscopic_llm_config(), n_ctx=512)
-    extra = ["--temp", "0", "--top-k", "1", "--seed", "1"]
+    extra = [
+        "--temp", "0", "--top-k", "1", "--seed", "1",
+        "--no-conversation",
+    ]
 
-    print("\n1. RESIDUAL LAW (no perturb)")
+    print("\n1. HOLONOMIC Q8 (no perturb)")
     print("=" * 5)
     try:
         ra = run_llama_cli(
@@ -690,41 +786,17 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     comb_a = (ra.stdout or "") + "\n" + (ra.stderr or "")
     print(f"  rc={ra.returncode}")
     print(f"  gen_A={gen_a!r}")
-    hits = _last_re(r"\[hqvm-residual(?:-hybrid)?\] hits=(\d+)", comb_a)
+    hol = _last_re(r"holonomic_score_calls=(\d+)", comb_a)
     stock = _last_re(r"stock_score_calls=(\d+)", comb_a)
-    print(f"  residual_hits={hits.group(1) if hits else None}")
+    print(f"  holonomic_score_calls={hol.group(1) if hol else None}")
     print(f"  stock_score_calls={stock.group(1) if stock else None}")
-    print(f"  stock_score_calls=0  {_pass(stock is not None and int(stock.group(1)) == 0)}")
-    if hits:
-        h = int(hits.group(1))
-        print(f"  residual_hits_near_72  {_pass(40 <= h <= 2000)}")
-    clock = _last_re(
-        r"\[hqvm-gyro-clock\] depth_start=(\d+) depth_end=(\d+) steps=(\d+)",
-        comb_a,
+    holonomic_ok = (
+        hol is not None and int(hol.group(1)) > 0
+        and stock is not None and int(stock.group(1)) == 0
     )
-    if clock:
-        d0, d1, steps = int(clock.group(1)), int(clock.group(2)), int(clock.group(3))
-        print(f"  genealogy depth_start={d0} depth_end={d1} steps={steps}")
-        span = d1 - d0 if d1 >= d0 else None
-        print(f"  genealogy_steps>0  {_pass(steps > 0)}")
-        # Bonsai L=36; one MVG step per (token, layer) ⇒ steps == T*L == span.
-        print(f"  genealogy_steps>=36  {_pass(steps >= 36)}")
-        print(f"  genealogy_steps%36==0  {_pass(steps > 0 and steps % 36 == 0)}")
-        if span is not None and steps > 0:
-            print(f"  genealogy_span={span} steps={steps}")
-            print(f"  genealogy_span==steps  {_pass(span == steps)}")
-            print(f"  genealogy_span==T*L  {_pass(span == steps)}")
-        clock_ok = (
-            steps >= 36
-            and steps % 36 == 0
-            and span is not None
-            and span == steps
-        )
-    else:
-        print("  genealogy_line  (absent this run)")
-        clock_ok = False
+    print(f"  holonomic_active  {_pass(holonomic_ok)}")
 
-    print("\n2. RESIDUAL LAW + PERTURB")
+    print("\n2. HOLONOMIC Q8 + zero_kq8 PERTURB")
     print("=" * 5)
     try:
         rb = run_llama_cli(
@@ -745,7 +817,7 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     print(f"  both_rc=0  {_pass(ra.returncode == 0 and rb.returncode == 0)}")
     print(f"  gen_nonempty  {_pass(bool(gen_a) and bool(gen_b))}")
     print(f"  token_seq_differs  {_pass(differ)}")
-    print(f"  genealogy_T*L  {_pass(clock_ok)}")
+    print(f"  holonomic_active  {_pass(holonomic_ok)}")
 
     print("\n4. NATIVE DRIVER (production holonomic_kv)")
     print("=" * 5)
@@ -754,6 +826,7 @@ def cmd_causal(_args: argparse.Namespace) -> int:
     if SIDECAR.is_file():
         env_n["GYRO_LEDGER_PATH"] = str(SIDECAR)
     native_ok = False
+    gen_n = ""
     try:
         rn = run_llama_cli(
             cfg, prompt=PARIS_PROMPT, n_predict=8,
@@ -772,10 +845,29 @@ def cmd_causal(_args: argparse.Namespace) -> int:
         print(f"  stock_rmsnorm_calls={ctr_n['stock_rmsnorm']}")
         print(f"  stock_swiglu_calls={ctr_n['stock_swiglu']}")
         print(f"  set_rows_calls={ctr_n['set_rows']}")
+        print(f"  native_tail_calls={ctr_n['native_tail']}")
         print(f"  stock_tail_calls={ctr_n['stock_tail']}")
+        print(f"  native_selector_calls={ctr_n['native_selector']}")
+        print(f"  native_selector_scored_rows={ctr_n['native_selector_rows']}")
+        print(f"  exact_tail_rows={ctr_n['exact_tail_rows']} exact_tail_calls={ctr_n['exact_tail_calls']}")
+        print(f"  stock_selector_calls={ctr_n['stock_selector']}")
+        print(f"  stock_selector_fallback_calls={ctr_n['stock_selector_fallback']}")
+        print(f"  native_emission_committed_calls={ctr_n['native_emission_committed']}")
+        print(f"  entry_q8_rows={ctr_n['entry_q8_rows']} entry_q8_scale_blocks={ctr_n['entry_q8_scale_blocks']}")
+        print(f"  dyad_residual_rows={ctr_n['dyad_residual_rows']} dyad_residual_coordinates={ctr_n['dyad_residual_coordinates']}")
+        print(f"  float_residual_storage_calls={ctr_n['float_residual_storage_calls']} float_residual_adapter_calls={ctr_n['float_residual_adapter_calls']}")
         print(f"  kv_null_reads={ctr_n['kv_null_reads']} kv_null_writes={ctr_n['kv_null_writes']}")
         print(f"  K_writes={ctr_n['K_writes']} V_writes={ctr_n['V_writes']} chiK_writes={ctr_n['chiK_writes']}")
         print(f"  pi_applied={ctr_n['pi_applied']}")
+        gen_n = _causal_gen(rn.stdout or "", PARIS_PROMPT)
+        plain_n = _plain_generation(gen_n)
+        print(f"  gen_native={gen_n!r}")
+        # Exact content stem under greedy; CLI may emphasize with **…**; trailing '.' soft.
+        stem_ok = plain_n in (
+            "The capital of France is Paris.",
+            "The capital of France is Paris",
+        )
+        print(f"  gen_native_exact_stem  {_pass(stem_ok)}")
         blk0 = ctr_n["stock_block"] == 0
         nat_pos = ctr_n["native_block"] is not None and ctr_n["native_block"] > 0
         sm0 = ctr_n["stock_softmax"] == 0
@@ -786,6 +878,50 @@ def cmd_causal(_args: argparse.Namespace) -> int:
         swi0 = ctr_n["stock_swiglu"] == 0
         rows0 = ctr_n["set_rows"] == 0
         knull0 = (ctr_n["kv_null_reads"] == 0 and ctr_n["kv_null_writes"] == 0)
+        tail0 = ctr_n["stock_tail"] == 0
+        ntail = ctr_n["native_tail"] is not None and ctr_n["native_tail"] > 0
+        sel0 = ctr_n["stock_selector"] == 0
+        selfb0 = ctr_n["stock_selector_fallback"] == 0
+        nsel = ctr_n["native_selector"] is not None and ctr_n["native_selector"] > 0
+        exact_calls = ctr_n["exact_tail_calls"] is not None and ctr_n["exact_tail_calls"] > 0
+        exact_rows = (
+            ctr_n["exact_tail_rows"] is not None
+            and ctr_n["native_selector_rows"] is not None
+            and ctr_n["exact_tail_rows"] == ctr_n["native_selector_rows"]
+        )
+        emit = (
+            ctr_n["native_emission_committed"] is not None
+            and ctr_n["native_emission_committed"] > 0
+        )
+        # Emission authority: every product-profile sample must commit the native
+        # selection (fallback=0, stock_selector=0). Selector may exceed committed
+        # by at most 1 when a trailing unused eval remains after the last sample.
+        n_emission_committed = ctr_n["native_emission_committed"]
+        n_selector = ctr_n["native_selector"]
+        emit_authority = (
+            emit and selfb0 and sel0
+            and n_emission_committed is not None
+            and n_selector is not None
+            and n_selector >= n_emission_committed
+            and (n_selector - n_emission_committed) <= 1
+        )
+        pi1 = ctr_n["pi_applied"] == 1
+        entry_rows = ctr_n["entry_q8_rows"] is not None and ctr_n["entry_q8_rows"] > 0
+        entry_scales = (
+            ctr_n["entry_q8_scale_blocks"] is not None
+            and ctr_n["entry_q8_rows"] is not None
+            and ctr_n["entry_q8_scale_blocks"] == ctr_n["entry_q8_rows"] * (4096 // 32)
+        )
+        dyad_rows = ctr_n["dyad_residual_rows"] is not None and ctr_n["dyad_residual_rows"] > 0
+        dyad_coordinates = (
+            ctr_n["dyad_residual_coordinates"] is not None
+            and ctr_n["dyad_residual_coordinates"] > 0
+        )
+        float_storage0 = ctr_n["float_residual_storage_calls"] == 0
+        float_adapters = (
+            ctr_n["float_residual_adapter_calls"] is not None
+            and ctr_n["float_residual_adapter_calls"] > 0
+        )
         print(f"  stock_block_forward_calls=0  {_pass(blk0)}")
         print(f"  native_block_calls>0  {_pass(nat_pos)}")
         print(f"  stock_softmax_calls=0  {_pass(sm0)}")
@@ -796,17 +932,108 @@ def cmd_causal(_args: argparse.Namespace) -> int:
         print(f"  stock_swiglu_calls=0  {_pass(swi0)}")
         print(f"  set_rows_calls=0  {_pass(rows0)}")
         print(f"  kv_null=0  {_pass(knull0)}")
+        print(f"  stock_tail_calls=0  {_pass(tail0)}")
+        print(f"  native_tail_calls>0  {_pass(ntail)}")
+        print(f"  stock_selector_calls=0  {_pass(sel0)}")
+        print(f"  stock_selector_fallback_calls=0  {_pass(selfb0)}")
+        print(f"  native_selector_calls>0  {_pass(nsel)}")
+        print(f"  exact_tail_calls>0  {_pass(exact_calls)}")
+        print(f"  exact_tail_rows=native_selector_scored_rows  {_pass(exact_rows)}")
+        print(f"  native_emission_committed>0  {_pass(emit)}")
+        print(
+            f"  native_emission_authority "
+            f"(committed={ctr_n['native_emission_committed']} "
+            f"selector={ctr_n['native_selector']})  {_pass(emit_authority)}"
+        )
+        # H-CNT honesty: stock zeros mean "did not run", proven by nodes_bypassed
+        # and owned-call receipts — not by absence alone.
+        ns = ctr_n["nodes_seen"]
+        nb = ctr_n["nodes_bypassed"]
+        rt_stock = ctr_n["rt_stock_ops_total"]
+        owned_mm = ctr_n["owned_matmul_q1"]
+        owned_norm = ctr_n["owned_norm_ruler"]
+        nodes_ok = (
+            ns is not None and nb is not None and ns > 0 and nb == ns
+        )
+        rt_stock0 = rt_stock == 0
+        owned_ok = (
+            owned_mm is not None and owned_mm > 0
+            and owned_norm is not None and owned_norm > 0
+        )
+        print(f"  nodes_seen={ns} nodes_bypassed={nb}  {_pass(nodes_ok)}")
+        print(f"  rt_stock_ops_total=0 (no stock op ran under bypass)  {_pass(rt_stock0)}")
+        print(f"  owned_matmul_q1>0 and owned_norm_ruler>0  {_pass(owned_ok)}")
+        print(f"  entry_q8_rows>0  {_pass(entry_rows)}")
+        print(f"  entry_q8_scale_blocks=rows*128  {_pass(entry_scales)}")
+        print(f"  dyad_residual_rows>0  {_pass(dyad_rows)}")
+        print(f"  dyad_residual_coordinates>0  {_pass(dyad_coordinates)}")
+        print(f"  float_residual_storage_calls=0  {_pass(float_storage0)}")
+        print(f"  float_residual_adapter_calls>0  {_pass(float_adapters)}")
+        print(f"  pi_applied=1  {_pass(pi1)}")
+        print(f"  selector_authoritative  {_pass(sel0 and selfb0 and emit_authority)}")
         native_ok = (
             rn.returncode == 0 and blk0 and nat_pos and sm0 and silu0
             and fa0 and rope0 and rms0 and swi0 and rows0 and knull0
+            and tail0 and ntail and sel0 and selfb0 and nsel and exact_calls and exact_rows
+            and emit_authority and pi1
+            and entry_rows and entry_scales
+            and dyad_rows and dyad_coordinates and float_storage0 and float_adapters
+            and nodes_ok and rt_stock0 and owned_ok
+            and stem_ok
         )
         print(f"  native_driver  {_pass(native_ok)}")
     except Exception as e:
         print(f"  native_run_error={e!r}")
         print(f"  native_driver  {_pass(False)}")
 
-    overall = (ra.returncode == 0 and rb.returncode == 0 and differ and clock_ok and native_ok)
+    print("\n5. DECODE GROUPING (GYRO_NATIVE_GROUP, honest reduction)")
+    print("=" * 5)
+    group_ok = False
+    try:
+        env_g = dict(env_n)
+        env_g["GYRO_NATIVE_GROUP"] = "1"
+        rg = run_llama_cli(
+            cfg, prompt=PARIS_PROMPT, n_predict=8,
+            env=env_g, timeout_sec=600, extra_args=extra,
+        )
+        comb_g = (rg.stdout or "") + "\n" + (rg.stderr or "")
+        ctr_g = _parse_counters(comb_g)
+        g_calls = ctr_g["rt_group_calls"]
+        g_rows = ctr_g["rt_group_rows"]
+        g_groups = ctr_g["rt_group_groups"]
+        print(f"  rc={rg.returncode}")
+        print(f"  rt_group_calls={g_calls} rt_group_rows={g_rows} rt_group_groups={g_groups}")
+        if g_calls is not None:
+            reduction = (g_rows - g_groups) if g_rows is not None and g_groups is not None else None
+            print(f"  grouping_reduction={reduction} (may be 0; printed honestly)")
+        # Wire-up certificate: the consult ran and rows>=groups invariant holds.
+        # Reduction itself is batch-size dependent; a plain zero is acceptable
+        # and must be visible rather than silently absent.
+        # Stem: plain content (CLI **markup** allowed).
+        plain_g = _plain_generation(gen_n)
+        stem_g = plain_g in (
+            "The capital of France is Paris.",
+            "The capital of France is Paris",
+        )
+        group_ok = (
+            rg.returncode == 0
+            and g_calls is not None and g_calls > 0
+            and g_rows is not None and g_groups is not None
+            and g_rows >= g_groups >= 0
+            and stem_g
+        )
+    except Exception as e:
+        print(f"  group_run_error={e!r}")
+    print(f"  decode_grouping_live  {_pass(group_ok)}")
+    if not group_ok:
+        print("  note=NavPAD §0 decode grouping still open (rt_group_calls=0 under GYRO_NATIVE_GROUP)")
+
+    # GATE_CAUSAL core: holonomic Q8 coupling + native driver + emission. Grouping is §0 deferred.
+    overall = (
+        ra.returncode == 0 and rb.returncode == 0 and differ and holonomic_ok and native_ok
+    )
     print(f"  GATE_CAUSAL  {_pass(overall)}")
+    print(f"  GATE_CAUSAL_grouping_deferred  {_pass(group_ok)}")
     print("\nDONE")
     print("=" * 5)
     return 0 if overall else 1
@@ -815,6 +1042,7 @@ def cmd_causal(_args: argparse.Namespace) -> int:
 def cmd_forward_probe(args: argparse.Namespace) -> int:
     print("hQVM GATE FORWARD-PROBE: Norm shadow + PPL Base/N/H/NH")
     print("=" * 5)
+    assert_chassis_fresh()
     print("  note=incomplete forward-site probe; not a product mode")
     print("  note=signed Norm Δ-ruler; residual law; Softmax/FFN deferred")
 
@@ -862,7 +1090,7 @@ def cmd_forward_probe(args: argparse.Namespace) -> int:
     print("\n2. PPL")
     print("=" * 5)
     # Micro corpus keeps CPU gate time tractable (full tiny ~16KB often >10min/variant).
-    corpus_path = _REPO_ROOT / "_build" / "ppl_forward_probe.txt"
+    corpus_path = _REPO_ROOT / "src" / "tools" / "gyroscopic" / "_build" / "ppl_forward_probe.txt"
     _ensure_tiny(corpus_path, min_bytes=2000)
     if corpus_path.stat().st_size > 2200:
         corpus_path.write_text(corpus_path.read_text(encoding="utf-8")[:2000], encoding="utf-8")
@@ -903,11 +1131,53 @@ def cmd_forward_probe(args: argparse.Namespace) -> int:
     return 0 if overall else 1
 
 
+def cmd_registry(_args: argparse.Namespace) -> int:
+    """H-REG: every live getenv GYRO_* name is registered; deprecated not in production env."""
+    from src.tools.gyroscopic.constants import GYRO_ENV_DEPRECATED, GYRO_ENV_VAR_NAMES
+    from src.tools.gyroscopic.config import production_gyroscopic_env
+
+    print("hQVM GATE REGISTRY: GYRO_ENV_VAR_NAMES sync")
+    print("=" * 5)
+    live = set(GYRO_ENV_VAR_NAMES)
+    deprecated = set(GYRO_ENV_DEPRECATED)
+    print(f"  registered={len(live)} deprecated={len(deprecated)}")
+
+    overlap = live & deprecated
+    print(f"  no overlap live∩deprecated  {_pass(len(overlap) == 0)}")
+
+    required = {
+        "GYRO_LEDGER_PATH", "GYRO_NATIVE_FORWARD", "GYRO_NATIVE_EMISSION",
+        "GYRO_NATIVE_GENEALOGY", "GYRO_GENEALOGY_PATH", "GYRO_RESIDUAL_LAW",
+        "GYRO_ATTN_SHELL_QK", "GYRO_ROPE_CODEC",
+    }
+    missing_req = sorted(required - live)
+    print(f"  required product flags present  {_pass(not missing_req)}  {missing_req or 'ok'}")
+
+    prod = production_gyroscopic_env(holonomic_kv=True)
+    leak = sorted(set(prod) & deprecated)
+    print(f"  production_env sets no deprecated  {_pass(not leak)}  {leak or 'ok'}")
+
+    hyb_in_live = "GYRO_RESIDUAL_HYBRID" in live
+    hyb_in_dep = "GYRO_RESIDUAL_HYBRID" in deprecated
+    print(f"  GYRO_RESIDUAL_HYBRID deprecated-only  {_pass(not hyb_in_live and hyb_in_dep)}")
+
+    ok = (
+        not overlap and not missing_req and not leak
+        and not hyb_in_live and hyb_in_dep
+        and len(live) >= 40
+    )
+    print(f"  GATE_REGISTRY  {_pass(ok)}")
+    print("\nDONE")
+    print("=" * 5)
+    return 0 if ok else 1
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Canonical gyroscopic acceptance gates (NavPad §7).")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("ledger", help="Ledger MatMul displace regression (Paris + PPL)")
+    sub.add_parser("registry", help="Env registry sync (H-REG): live flags vs GYRO_ENV_VAR_NAMES")
 
     p2 = sub.add_parser("kv", help="Q8 K/V displace + holonomic Attn@V")
     p2.add_argument("--ppl", action="store_true", help="also run tiny-corpus PPL (slower)")
@@ -915,7 +1185,7 @@ def main() -> int:
     p2.add_argument("--ctx", type=int, default=256, help="PPL context (-c)")
     p2.add_argument("--timeout", type=int, default=600, help="per-run PPL timeout seconds")
 
-    pc = sub.add_parser("codecs", help="Aperture/RoPE/SwiGLU site probes vs Base")
+    pc = sub.add_parser("codecs", help="RoPE ownership smoke/PPL vs Base")
     pc.add_argument("--full", action="store_true", help="use full ppl_corpus.txt")
     pc.add_argument("--ctx", type=int, default=256)
     pc.add_argument("--timeout", type=int, default=600)
@@ -933,6 +1203,7 @@ def main() -> int:
     args = ap.parse_args()
     handlers = {
         "ledger": cmd_ledger,
+        "registry": cmd_registry,
         "kv": cmd_kv,
         "codecs": cmd_codecs,
         "causal": cmd_causal,

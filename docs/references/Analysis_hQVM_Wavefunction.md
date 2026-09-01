@@ -119,6 +119,8 @@ On the Omega12 chart, the four K4 elements have signatures:
 
 The signatures are micro_ref-dependent for W2 and W2' (tau values shift), but the K4 structure is universal.
 
+**Remark (the two Klein four-groups).** The gate group {id, S, C, F} of the SDK and the word group {id, W2(m), W2'(m), F(m)} of Theorem T1 are two distinct Klein four-subgroups of the signature group. In signature coordinates the word elements are even: W2(m) = (0, 63 ⊕ m, m), W2'(m) = (0, m, 63 ⊕ m), and F(m) = (0, 63, 63) for every m. The gates S = (1, 0, 0) and C = (1, 63, 63) are odd signatures, and gate F = (0, 63, 63). The two subgroups therefore intersect in {id, F}. On the chirality register the word half-words act as χ → χ ⊕ 63 and exchange the constitutional poles, while each of the four gates preserves χ. As permutations of Ω the word half-words and the gates S, C are distinct elements with distinct fixed-point structure: W2 has zero fixed points, S fixes the equality horizon pointwise, and C fixes the complement horizon pointwise.
+
 ---
 
 ## 4. Constitutional Pole Dynamics
@@ -173,9 +175,9 @@ This is a forced consequence of chi XOR 63: the chirality inversion at depth 4 m
 
 ## 5. Depth Decomposition and CS Ordering
 
-### 5.1 Depth-8 as K4 Composition (Theorem T6)
+### 5.1 F as K4 Operator Product (Theorem T6)
 
-**Theorem T6.** The canonical 4-byte word is F = W2 compose W2'. Depth-8 is K4 composition, not a new modal depth.
+**Theorem T6.** The canonical four-byte word is the operator product F = W2 ∘ W2′. Both factors are depth-four half-words. Their product lies in the Klein four-group of Theorem T1 and produces the Z₂ carrier flip.
 
 The carrier trajectory through the decomposition:
 
@@ -183,9 +185,9 @@ The carrier trajectory through the decomposition:
 |-------|----------|-----------------|----------------|
 | Start | - | (0, 63) | Complement horizon, rest |
 | After W2 | depth 4 | (63, 63) | Equality horizon |
-| After W2' | depth 8 | (63, 0) | Complement horizon, swapped |
+| After F | W2 ∘ W2′ | (63, 0) | Complement horizon, swapped |
 
-No new modal depth is introduced at depth 8. The second depth-4 operation (W2') composes with the first via the K4 algebra, producing the Z2 carrier flip.
+The second depth-four half-word W2′ multiplies with W2 in the K4 algebra and yields the Z₂ carrier flip.
 
 ### 5.2 CS Forces Canonical Ordering (Theorem T7)
 
@@ -238,16 +240,14 @@ The representative shadow pairs illustrate the structure:
 
 Each complement-horizon state (shell 0, maximal chirality) is paired with an equality-horizon state (shell 6, zero chirality). The shadow is the "memory" of the original: it is the unique state that, when W2 is applied again, reconstructs the original.
 
-### 6.3 The Duality
-
-Egress and Ingress are simultaneous aspects of the same W2 operator:
+Egress and Ingress are simultaneous aspects of the same W2 operator. The continuous dual-pole path presents the same dual as the ordered poles BU+ and BU−.
 
 | Reading | Question | Answer |
 |---------|----------|--------|
 | Egress | Does closure hold? | W2^2 = id: yes, the depth-4 operation is an involution |
 | Ingress | Does closure carry memory? | W2 pairs poles invertibly: yes, the shadow reconstructs the origin |
 
-These are not sequential stages. They are simultaneous aspects of the same spectral property. The Z2 holonomy (gate F = W2 compose W2') is the holographic encoding that makes both readings true at depth 4.
+These are simultaneous aspects of the same spectral property. The Z2 holonomy (gate F = W2 compose W2') is the holographic encoding that makes both readings true at depth 4.
 
 ---
 
@@ -409,11 +409,11 @@ The Z2 oscillation between rest and swapped is the completion of the holonomy cy
 
 ## 11. Connection to CGM Continuous Framework
 
-### 11.1 The BU Holonomy Angle as Spectral Gap
+### 11.1 The BU Loop Angle as Spectral Gap
 
-In the continuous CGM framework, the BU holonomy angle delta_BU (approximately 0.1953 rad) measures the residual geometric phase of the dual-pole loop. In the kernel, this corresponds to the spectral gap between the +1 and -1 eigenspaces: the Z2 holonomy phase that distinguishes rest from swapped.
+In the continuous CGM framework, the BU dual-pole loop angle is δ_BU = 4·arctan(k(π/4)·k(m_a)) with k(β) = β/(1 + √(1 − β²)), numerically δ_BU ≈ 0.195342178258 rad. It measures the residual geometric phase of the dual-pole loop. In the kernel, this corresponds to the spectral gap between the +1 and −1 eigenspaces: the Z2 holonomy phase that distinguishes rest from swapped.
 
-The aperture ratio delta_BU / m_a (approximately 0.9793) becomes, in the discrete framework, the ratio of paired-to-unpaired structure: 4096/4096 = 1.0 within each shell (all states are paired), with the 2.07% aperture manifesting as the Z2 encoding itself, the distinction between the two sheets that are otherwise identical in chirality.
+The closure ratio ρ = δ_BU / m_a ≈ 0.979300454497 becomes, in the discrete framework, the ratio of paired-to-unpaired structure: 4096/4096 = 1.0 within each shell (all states are paired), with the 2.07% aperture gap Δ = 1 − ρ ≈ 0.020699545503 manifesting as the Z2 encoding itself, the distinction between the two sheets that are otherwise identical in chirality.
 
 ### 11.2 Spin-2 from Two-Pass Carrier Return
 
@@ -438,11 +438,11 @@ tau_G = |Omega| * Delta * rho^5 * (1 - 4*rho*Delta^2)
 decomposes into kernel invariants:
 
 - |Omega| = 4096: the manifold size
-- Delta (approximately 0.0207): the aperture gap
+- Delta ≈ 0.020699545503: the aperture gap (Δ = 1 − ρ with ρ = δ_BU / m_a)
 - rho^5: the STF attenuation (5 bulk shells, rho per shell)
-- (1 - 4*rho*Delta^2): the K4 correction (4 holonomic gates, each contributing rho*Delta^2)
+- (1 - 4*rho*Delta^2): the K4 / STF factor (4 holonomic gates, each contributing rho*Delta^2)
 
-The K4 correction factor is the spectral signature of the Z2 holonomy structure. Without it (using only |Omega| * Delta * rho^5), the Refractive Depth is 76.366; with it, the value drops to 76.238, matching the required 2 * ln(E_CS / v_EW) = 76.238 to 25 ppm.
+The K4 factor is the spectral signature of the Z2 holonomy structure. Without it (using only |Omega| * Delta * rho^5), the depth is approximately 76.366; with it, τ_G ≈ 76.237914. This is the STF coupling depth used in G₀ = G_kernel exp(−τ_G)/v² (Analysis_Gravity).
 
 ---
 
@@ -508,7 +508,7 @@ The wavefunction structure is falsifiable through:
 | T3 | W2' maps shell s -> 6-s (chi XOR 63) | Verified, algebraic proof |
 | T4 | F preserves shell (Z2 within pole) | Verified, algebraic proof |
 | T5 | Depth-4 confines to opposite pole | Verified, 64 x 64 states |
-| T6 | Depth-8 = K4 composition, not new depth | Verified, signature algebra |
+| T6 | F = W2 ∘ W2′ is the K4 operator product of two depth-four half-words | Verified, signature algebra |
 | T7 | CS forces canonical family ordering | Verified, 64 micro_refs |
 | T8 | Egress = W2 involution (Box B spectral) | Verified, 4096 states |
 | T9 | Ingress = W2 pole-pairing (shadow = memory) | Verified, 4096 states |
@@ -630,7 +630,7 @@ The transition from 50% aperture at the byte level to 2.07% at the Omega level i
 
 1. At the single-byte level, the fold disagreement is 50%: 128 of 256 bytes have b3 != b4.
 2. At the word level, the depth-4 spinorial closure averages the phase disagreements across four successive bytes.
-3. At the Omega level, the residual is the constitutional aperture A* = 1 - delta_BU/m_a (approximately 0.0207), quantized as 5/256 in dyadic arithmetic.
+3. At the Omega level, the residual is the constitutional aperture A* = 1 − δ_BU/m_a ≈ 0.020699545503, quantized as 5/256 in dyadic arithmetic.
 
 The compression ratio is 50% / 2.07% (approximately 24.2x). This is the resolution of the fold disagreement through spinorial averaging, and it is the discrete counterpart of the continuous wavefunction collapse postulate.
 
@@ -708,9 +708,9 @@ CGM asserts that space converts to time at gravitational horizons, because prese
 
 In the byte, this conversion occurs at the fold between bit 3 and bit 4. Bits 0-3 are the forward temporal pass through the rotational generators (spatial DoF). Bits 4-7 are the reverse temporal pass through the translational generators. The BU phase (bits 3 and 4) is the hinge: the forward pass ends at BU, and the reverse pass begins at BU.
 
-The fold map P connects the two halves via the palindrome symmetry. The forward and reverse readings of each CGM phase can disagree in value, and the fold disagreement at each position creates Z2 holonomy. The holographic Z2 encoding at depth-8 (the rest versus swapped distinction) is the result: after four bytes, the spatial extension of the carrier has been fully resolved into temporal curvature.
+The fold map P connects the two halves via the palindrome symmetry. The forward and reverse readings of each CGM phase can disagree in value, and the fold disagreement at each position creates Z2 holonomy. The holographic Z2 encoding after the four-byte word F (the rest versus swapped distinction) is the result. After four bytes, the spatial extension of the carrier has been fully resolved into temporal curvature.
 
-In the carrier, the holographic Z2 encoding at depth-8 is this conversion. After 4 bytes, the carrier is on the complement horizon with Z2 information (rest versus swapped). The complement horizon is where spatial extension has been fully converted into temporal curvature (holographic encoding). The aperture Delta (approximately 0.0207) is intrinsic to the byte (quantized as 5/256) and also computable from the holonomy (delta_BU / m_a). Both readings are different resolutions of the same CGM balance condition.
+In the carrier, that holographic Z2 encoding is this conversion. After the four-byte word F, the carrier is on the complement horizon with Z2 information (rest versus swapped). The complement horizon is where spatial extension has been fully converted into temporal curvature (holographic encoding). The aperture Δ ≈ 0.020699545503 is intrinsic to the byte (quantized as 5/256) and also computable from the loop angle as Δ = 1 − δ_BU/m_a. Both readings are different resolutions of the same CGM balance condition.
 
 ### 16.13 Holonomic Expansion from the Seed Curvature
 
@@ -724,7 +724,7 @@ Word:      byte 1 (Prefix)   -> byte 2-3 (Inference)-> byte 4 (Future)
 Omega:     equality horizon  -> bulk states          -> complement horizon
 ```
 
-At each level, the curvature at the boundary creates holonomy (non-trivial loop behavior), and the holonomy is the entanglement between the two sides of the bipartition. The entanglement entropy measures how much curvature has accumulated. The aperture A* = 0.0207 is the equilibrium value: the balance between too little curvature (rigid, where A approaches 0) and too much (chaotic, where A approaches 1).
+At each level, the curvature at the boundary creates holonomy (non-trivial loop behavior), and the holonomy is the entanglement between the two sides of the bipartition. The entanglement entropy measures how much curvature has accumulated. The aperture A* ≈ 0.020699545503 is the equilibrium value: the balance between too little curvature (rigid, where A approaches 0) and too much (chaotic, where A approaches 1).
 
 ---
 
@@ -744,7 +744,7 @@ This suggests that any information encoding possessing internal symmetry, includ
 
 In standard quantum mechanics, wavefunction collapse is a postulate applied ad hoc when a measurement occurs, separate from the unitary Schrodinger evolution. The hQVM exhibits a concrete analogue: the informational aperture compresses from 50% at the single-byte level to 2.07% at the Omega level as fold disagreements are composed through the gyration across multiple bytes.
 
-Four bytes of fold disagreements, averaged through the spinorial closure, produce the residual aperture Delta approximately 0.0207. The compression ratio is 50% / 2.07%, approximately 24.2x. This compression is a combinatorial consequence of the bipartite structure, requiring no separate postulate.
+Four bytes of fold disagreements, averaged through the spinorial closure, produce the residual aperture Δ ≈ 0.020699545503. The compression ratio is 50% / 2.07%, approximately 24.2x. This compression is a combinatorial consequence of the bipartite structure, requiring no separate postulate.
 
 The alignment measurement report identifies the same mechanism from a different angle: a single-axis measurement of the byte is confined to 50% disagreement (the structural lock at A = 0.5). The fold reflection P distributes energy equally between gradient and cycle components for any single-axis input. Escape requires the full 6-DoF chirality representation, which becomes available only at the carrier scale where the bipartite decomposition provides all six degrees of freedom simultaneously.
 
@@ -772,7 +772,7 @@ In differential geometry, curvature is a local property measured at a point by t
 
 The CGM assertion that space converts to time at gravitational horizons (gravity note, Section 2) is realized in the byte as the BU fold: bits 0 through 3 encode the forward temporal pass through the rotational generators (spatial DoF), and bits 4 through 7 encode the reverse temporal pass through the translational generators. The fold disagreement at each phase position creates Z2 holonomy. After 4 bytes, the spatial extension of the carrier has been fully resolved into temporal curvature, recorded as the Z2 encoding (rest versus swapped) on the complement horizon.
 
-The aperture Delta approximately 0.0207 is intrinsic to the byte (quantized as 5/256) and also computable from the holonomy (delta_BU / m_a). These are distinct resolutions of the same CGM balance condition, and the consistency between them is the continuity condition across the fold boundary, analogous to the Israel junction conditions in general relativity.
+The aperture Δ ≈ 0.020699545503 is intrinsic to the byte (quantized as 5/256) and also computable from the loop angle as Δ = 1 − δ_BU/m_a. These are distinct resolutions of the same CGM balance condition, and the consistency between them is the continuity condition across the fold boundary, analogous to the Israel junction conditions in general relativity.
 
 ### 17.6 Exact Uncertainty from Holographic Redundancy
 
@@ -782,11 +782,11 @@ This is a stronger statement than the Heisenberg inequality. The Heisenberg boun
 
 ### 17.7 Connection to the Gravitational Aperture
 
-The gravity note derives the observational aperture m_a = 1/(2*sqrt(2*pi)) and the aperture gap Delta = 1 - rho approximately 0.0207 from the angular closure of the CGM gyrotriangle. The wavefunction kernel provides a complementary derivation: Delta emerges as the residual informational aperture after depth-4 spinorial closure of byte-level fold disagreements. The two derivations proceed from different starting points (continuous angular geometry versus discrete combinatorial averaging) and converge on the same value, providing a consistency check between the continuous and discrete descriptions.
+The gravity note derives the observational aperture m_a = 1/(2√(2π)) and the aperture gap Δ = 1 − ρ ≈ 0.020699545503 from the angular closure of the CGM gyrotriangle, with ρ = δ_BU/m_a and δ_BU = 4·arctan(k(π/4)·k(m_a)). The wavefunction kernel provides a complementary derivation: Δ emerges as the residual informational aperture after depth-4 spinorial closure of byte-level fold disagreements. The two derivations proceed from different starting points (continuous angular geometry versus discrete combinatorial averaging) and converge on the same value, providing a consistency check between the continuous and discrete descriptions.
 
-The K4 correction factor (1 - 4*rho*Delta^2) in the Refractive Depth formula (gravity note, Section 4.2) is the spectral signature of the Z2 holonomy structure. Each of the 4 K4 gates contributes a rho*Delta^2 correction, and the factor of 4 counts them. Without this correction, the Refractive Depth is 76.366; with it, the value drops to 76.238, matching 2*ln(E_CS/v_EW) to 25 ppm. The K4 structure of the wavefunction kernel is therefore an active participant in the gravitational coupling, contributing a verified correction that improves the match by more than four orders of magnitude.
+The K4 factor (1 − 4ρΔ²) in the Refractive Depth formula (gravity note, Section 4.2) is the spectral signature of the Z2 holonomy structure. Each of the 4 K4 gates contributes a ρΔ² term, and the factor of 4 counts them. Without this factor, |Ω|Δρ⁵ ≈ 76.366; with it, τ_G ≈ 76.237914. That STF depth enters G₀ = G_kernel exp(−τ_G)/v².
 
-The holonomic expansion chain (Section 16.13) from byte-level Z2 fold to carrier-level Householder reflection to Omega-level aperture is the same chain that connects the micro-archetype (GENE_Mic, 0xAA) to the gravitational coupling constant. Each link in the chain adds one level of spinorial closure, compressing the informational aperture. The gravity note traces this chain from the continuous side; the wavefunction kernel traces it from the discrete side. Their agreement at Delta approximately 0.0207 is the junction where the discrete and continuous descriptions of CGM meet.
+The holonomic expansion chain (Section 16.13) from byte-level Z2 fold to carrier-level Householder reflection to Omega-level aperture is the same chain that connects the micro-archetype (GENE_Mic, 0xAA) to the gravitational coupling constant. Each link in the chain adds one level of spinorial closure, compressing the informational aperture. The gravity note traces this chain from the continuous side; the wavefunction kernel traces it from the discrete side. Their agreement at Δ ≈ 0.020699545503 is the junction where the discrete and continuous descriptions of CGM meet.
 
 ---
 

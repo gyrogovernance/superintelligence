@@ -95,6 +95,22 @@ It provides:
 
 ---
 
+## 🎛️ NEW - hQVM AE: Group-Equivariant Autoencoder
+
+The hQVM is a deterministic universe in miniature. Its 4,096 states, 256 byte operations, and full symmetry group are all exactly known and enumerable. That makes the kernel two things at once: an unusually clean laboratory for studying how neural networks represent structure, and a substrate whose learned representations can be checked against exact ground truth.
+
+The hQVM AE is the learning arm of the kernel program. It trains autoencoders on the kernel's state space with the kernel's symmetries built into the architecture, so a learned code cannot drift away from the algebra it is meant to describe. The product is a verified dictionary of embeddings for states, bytes, and words, together with probes that measure how structure survives compression.
+
+What we use it for:
+
+- **Mechanistic interpretability.** A machine we can fully audit is the ideal testbed for interpretability. The models show which features of a state survive in a learned code, and the symmetry diagnostics show when a network starts to break the kernel's laws.
+- **Genomics analysis.** Our science program maps the genome onto the same carrier, with codons as states and codon pairs as transitions. The AE turns that mapping into learned, testable representations, from climate-profile scoring of coding sequences to codon-pair structure.
+- **Scale.** The same machinery extends to multi-cell product registers and to any domain that maps onto the carrier, with each learned structure certified against the kernel.
+
+Every dataset and label routes through the kernel, so the learning stack re-implements none of its laws. Train, evaluate, verify, and export with one command (`python -m src.tools.autoencoder.cli`). The [autoencoder README](src/tools/autoencoder/README.md) has the full tour.
+
+---
+
 ## 🔬 Why This Matters for Computer Science
 
 - **Processing**: Replayable stream-processing with deterministic recomputation, compact state updates, and composable operator signatures, suitable for event sourcing, reproducible workflows, and governance-grade logs.
@@ -176,6 +192,9 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 🧪 [Computational Climate Control Brief](docs/programs/Computational_Climate_Control_Brief.md) - How the architecture bypasses floating-point hardware bottlenecks
 - 💰 [Moments Economy Whitepaper](docs/programs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
+### Tools
+- 🎛️ [hQVM AE: Group-Equivariant Autoencoder](src/tools/autoencoder/README.md) - The learning arm of the kernel program, from mechanistic interpretability to genomics
+
 ### Core Specifications
 
 Read in layer order: **Foundations** → **SDK** → **QuBEC Theory** → **Runtime**.
@@ -244,17 +263,17 @@ Canonical source: [gyrogovernance/tools](https://github.com/gyrogovernance/tools
 **CGM analyses**
 - 📖 [Analysis: CGM Constants](docs/references/Analysis_CGM_Constants.md) - Mathematical structure of fundamental constants and the aperture parameter
 - 📖 [Analysis: CGM Units](docs/references/Analysis_CGM_Units.md) - Geometric foundation of physical units and energy scales
-- 📖 [Analysis: Monodromy](docs/references/Analysis_Monodromy.md) - Geometric memory across closed loops and fine-structure connections
+- 📖 [Analysis: CGM Holonomy](docs/references/Analysis_Holonomy.md) - Path memory across closed loops, with the BU dual-pole loop angle in closed form
 - 📖 [Analysis: Gravity](docs/references/Analysis_Gravity.md) - Gravitational theory from causal preservation of ancestry
 - 📖 [Analysis: Gravity Note](docs/references/Analysis_Gravity_Note.md) - Work-in-progress companion to the gravity analysis
+- 📖 [Analysis: hQVM CGM Trestleboard](docs/references/Analysis_hQVM_CGM_Trestleboard.md) - Nuclear isomer physics and the Delta-ruler on the CGM/hQVM carrier
 
 **hQVM analyses**
-- 📖 [Analysis: Gyroscopic Multiplication](docs/references/Analysis_Gyroscopic_Multiplication.md) - Arithmetic layer and cross-layer structural analysis
-- 📖 [Analysis: hQVM Cohomology](docs/references/Analysis_hQVM_Cohomology.md) - Étale cohomology, Grothendieck structure, and transport obstructions
 - 📖 [Analysis: hQVM Percolation](docs/references/Analysis_hQVM_Percolation.md) - Generator-restricted percolation and universality of ancestry preservation
 - 📖 [Analysis: hQVM Percolation Note](docs/references/Analysis_hQVM_Percolation_Note.md) - Companion note to the percolation analysis
 - 📖 [Analysis: hQVM Wavefunction](docs/references/Analysis_hQVM_Wavefunction.md) - Wavefunction chart analysis of the hQVM kernel
-- 📖 [Analysis: hQVM Wavefunction Corrections](docs/references/Analysis_hQVM_Wavefunction_Corrections.md) - Coordinate and signature reference for the wavefunction kernel
+- 📖 [Analysis: hQVM CGM Group Theory](docs/references/Analysis_hQVM_CGM_Group_Theory.md) - Finite symmetry group of the byte alphabet and its representation structure
+- 📖 [Analysis: hQVM CGM Genomics](docs/references/Analysis_hQVM_CGM_Genomics.md) - The genome read as a scale-recursive realization of the hQVM carrier
 
 ---
 
@@ -273,7 +292,8 @@ If you are evaluating this work for research, policy, or implementation:
 - `src/api.py` : Precomputed tables, chirality register, word signatures, Walsh helpers, and public algebra API
 - `src/kernel.py` : Reference kernel execution and replay surfaces
 - `src/sdk.py` : Public SDK surface for state, Moments, spectral, tensor, and runtime operations
-- `src/tools/gyroscopic/` : Gyroscopic kernel backend (`kernel` / `ledger` / `attn` / `codec`); SoT `runtime_NavPAD.md`; llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
+- `src/tools/gyroscopic/` : Gyroscopic kernel backend (`kernel` / `ledger` / `attn` / `codec`), SoT `runtime_NavPAD.md`, llama.cpp hook (`external/llama.cpp/ggml/src/ggml-gyroscopic/`)
+- `src/tools/autoencoder/` : Group-equivariant autoencoder learning stack for the hQVM carrier (see its [README](src/tools/autoencoder/README.md))
 - `src/app/` : AIR coordinator, events, domain ledgers, aperture (governance balance metric), console, and CLI
 - `docs/` : Specifications, reports, and supporting theory
 - `tests/` : Exhaustive verification suites for kernel physics, hQVM properties, SDK surfaces, and governance measurement
