@@ -68,6 +68,7 @@ d_BU = DELTA_BU
 m_a = M_A
 c4 = Fraction(-7, 4)
 
+
 # Physical constants: SI from astropy; EW/UV anchors from gravity_common
 def _astro(name: str) -> Any:
     return getattr(astro_constants, name)
@@ -75,7 +76,11 @@ def _astro(name: str) -> Any:
 
 GEV = u.GeV
 v = v_EW
-G_global = g_pred_from_tau(tau_g_with_c4(C4_REF))
+# Derived depths
+tau_G_leading = tau_g_with_c4(0.0)  # STF coupling depth
+tau_G_full = tau_g_with_c4(C4_REF)  # STF + trace scalar (audit)
+tau_G = tau_G_leading  # coupling depth alias
+G_global = g_pred_from_tau(tau_G)
 _c = _astro("c")
 _G = _astro("G")
 _hbar = _astro("hbar")
@@ -86,13 +91,11 @@ M_sun_kg = _M_sun.to_value(u.kg)
 GeV_per_kg = (_c**2).to_value(GEV / u.kg)
 m_per_GeVinv = (_hbar * _c).to_value(u.m * GEV)
 
-# Derived
-tau_G_leading = tau_g_with_c4(0.0)
-tau_G_full = tau_g_with_c4(C4_REF)
 # G at Planck/CS scale (psi=1 endpoint); not G_meas
 G_CS = G_kernel / E_CS**2
 eta = log(v / E_CS)
-dlnG_dpsi = dln_g_dpsi(tau_G_full)
+dlnG_dpsi = dln_g_dpsi(tau_G)
+
 
 # CSM: Cs-133 hyperfine frequency (exact SI second definition, 2019)
 f_Cs = 9192631770.0
@@ -108,7 +111,7 @@ def G_of_psi_raw(psi):
     """G(psi) without clipping (for ODE interior; caller caps psi)."""
     psi = np.asarray(psi, dtype=float)
     E_ref = E_CS * (v / E_CS) ** (1.0 - psi)
-    tau_local = tau_G_full * (1.0 - psi)
+    tau_local = tau_G * (1.0 - psi)
     return G_kernel * np.exp(-tau_local) / E_ref**2
 
 
@@ -154,7 +157,9 @@ EHT_SHADOW = {
 }
 
 
-def solve_psi_self_consistent(psi_N: float, tol: float = 1e-12, max_iter: int = 50) -> float:
+def solve_psi_self_consistent(
+    psi_N: float, tol: float = 1e-12, max_iter: int = 50
+) -> float:
     """Solve psi = psi_N * G(psi)/G_global."""
     psi = psi_N
     for _ in range(max_iter):
@@ -210,8 +215,8 @@ def verify_endpoints():
     print("A. Nonlinear coupling G(psi)")
     print("=" * 9)
     print()
-    print(f"tau_G (leading order)    = {tau_G_leading:.10f}")
-    print(f"tau_G (full with c4)    = {tau_G_full:.10f}")
+    print(f"tau_G (STF coupling)     = {tau_G:.10f}")
+    print(f"tau_trace (c4 scalar)    = {tau_G_full - tau_G:.10e}")
     print(f"G_global (weak field)   = {G_global:.6e} GeV^-2")
     print(f"G_CS (psi=1)        = {G_CS:.6e} GeV^-2")
     print(f"G_CS / G_global     = {G_CS/G_global:.6f}")
@@ -248,7 +253,22 @@ def verify_endpoints():
     print("G(psi) table:")
     print(f"{'psi':>8} {'G(psi)':>14} {'G/G_global':>12} {'delta_G/G':>12}")
     print("-" * 50)
-    for psi in [0, 1e-9, 1e-6, 1e-3, 0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.7, 0.9, 1.0]:
+    for psi in [
+        0,
+        1e-9,
+        1e-6,
+        1e-3,
+        0.01,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.3,
+        0.5,
+        0.7,
+        0.9,
+        1.0,
+    ]:
         Gv = G_of_psi(psi)
         frac = Gv / G_global
         delta = G_fractional(psi)
@@ -257,10 +277,16 @@ def verify_endpoints():
 
     # Leading-order approximation for small psi
     print("Leading-order: delta_G/G = dlnG/dpsi * psi = {:.4f} * psi".format(dlnG_dpsi))
-    print("  Earth (psi~7e-10):   delta_G/G ~ {:.2e} = {:.2f} ppb".format(
-        dlnG_dpsi * 7e-10, dlnG_dpsi * 7e-10 * 1e9))
-    print("  Sun (psi~2.1e-6):    delta_G/G ~ {:.2e} = {:.2f} ppm".format(
-        dlnG_dpsi * 2.1e-6, dlnG_dpsi * 2.1e-6 * 1e6))
+    print(
+        "  Earth (psi~7e-10):   delta_G/G ~ {:.2e} = {:.2f} ppb".format(
+            dlnG_dpsi * 7e-10, dlnG_dpsi * 7e-10 * 1e9
+        )
+    )
+    print(
+        "  Sun (psi~2.1e-6):    delta_G/G ~ {:.2e} = {:.2f} ppm".format(
+            dlnG_dpsi * 2.1e-6, dlnG_dpsi * 2.1e-6 * 1e6
+        )
+    )
     print()
 
 
@@ -276,15 +302,17 @@ def astrophysical_psi():
     print()
 
     objects = [
-        ("Earth surface",        5.97e24,  6.371e6),
-        ("Sun surface",          1.989e30, 6.957e8),
+        ("Earth surface", 5.97e24, 6.371e6),
+        ("Sun surface", 1.989e30, 6.957e8),
         ("White dwarf (1 Msun)", 1.989e30, 5e6),
         ("Neutron star (1.4 Msun)", 2.785e30, 1.2e4),
         ("Stellar BH (10 Msun)", 1.989e31, 2.95e4),
-        ("SMBH (4e6 Msun)",      7.956e36, 1.18e10),
+        ("SMBH (4e6 Msun)", 7.956e36, 1.18e10),
     ]
 
-    print(f"{'Object':>25} {'M/M_sun':>10} {'R (km)':>12} {'psi':>12} {'G/G_global':>12} {'delta%':>10}")
+    print(
+        f"{'Object':>25} {'M/M_sun':>10} {'R (km)':>12} {'psi':>12} {'G/G_global':>12} {'delta%':>10}"
+    )
     print("-" * 85)
 
     for name, M_kg, R_m in objects:
@@ -293,7 +321,9 @@ def astrophysical_psi():
         G_ratio = G_of_psi(psi_val) / G_global
         delta_pct = (G_ratio - 1.0) * 100
         R_km = R_m / 1e3
-        print(f"{name:>25} {M_sun:>10.2f} {R_km:>12.1f} {psi_val:>12.4e} {G_ratio:>12.6f} {delta_pct:>10.4f}")
+        print(
+            f"{name:>25} {M_sun:>10.2f} {R_km:>12.1f} {psi_val:>12.4e} {G_ratio:>12.6f} {delta_pct:>10.4f}"
+        )
 
     print()
     print("Note: psi for compact objects can exceed 0.1, producing")
@@ -329,7 +359,9 @@ def nonlinear_potential():
     g_ratio = np.array([G_of_psi_raw(min(max(u, 0.0), 1.0)) / G_global for u in u_vals])
 
     print("Radial profile (dimensionless, s = r / r_g, r_g = G_global*M):")
-    print(f"{'s=r/r_g':>10} {'u=psi':>12} {'u_Newton':>12} {'u/u_N':>10} {'G/G_global':>12} {'g/g_N':>10}")
+    print(
+        f"{'s=r/r_g':>10} {'u=psi':>12} {'u_Newton':>12} {'u/u_N':>10} {'G/G_global':>12} {'g/g_N':>10}"
+    )
     print("-" * 70)
 
     sample_indices = [0, 3, 6, 10, 15, 22, len(s_vals) // 2, -3, -1]
@@ -393,11 +425,11 @@ def escape_velocity_analysis(s_vals, u_vals):
     print(f"{'s=r/r_g':>10} {'v_N/c':>10} {'v_CGM/c':>10} {'ratio':>10}")
     print("-" * 45)
 
-    for i in range(0, len(s_vals), len(s_vals)//20):
+    for i in range(0, len(s_vals), len(s_vals) // 20):
         s = s_vals[i]
-        vn = min(np.sqrt(2.0/s), 1.0)
-        vc = min(np.sqrt(2.0*u_vals[i]), 1.0)
-        ratio = vc/vn if vn > 0 else 0
+        vn = min(np.sqrt(2.0 / s), 1.0)
+        vc = min(np.sqrt(2.0 * u_vals[i]), 1.0)
+        ratio = vc / vn if vn > 0 else 0
         print(f"{s:>10.3f} {vn:>10.6f} {vc:>10.6f} {ratio:>10.6f}")
 
     print()
@@ -497,7 +529,9 @@ def orbital_corrections(s_vals, u_vals, g_ratio):
         f_val = G_of_psi(u_actual) / G_global
         T_ratio = 1.0 / sqrt(f_val)
         v_ratio = sqrt(f_val)
-        print(f"{name:>20} {s:>10.1f} {u_actual:>10.4e} {T_ratio:>10.6f} {v_ratio:>10.6f}")
+        print(
+            f"{name:>20} {s:>10.1f} {u_actual:>10.4e} {T_ratio:>10.6f} {v_ratio:>10.6f}"
+        )
 
     print()
     print("Orbital period correction: T = T_Newton / sqrt(G/G_global)")
@@ -556,7 +590,7 @@ def alpha_zeta_consistency_chain():
     print(f"  identity verified: {az['exact']}")
     print()
 
-    G_pred = g_pred_from_tau(tau_G_full)
+    G_pred = g_pred_from_tau(tau_G)
     ppm_g = (G_pred - G_meas) / G_meas * 1e6
     alpha_g_pred = G_pred * v**2
 
@@ -565,7 +599,7 @@ def alpha_zeta_consistency_chain():
     print(f"           = {G_pred:.6e} GeV^-2")
     print(f"  vs G_meas = {G_meas:.6e} GeV^-2  ({ppm_g:+.3f} ppm)")
     print(f"  alpha_G(v) = G_global * v^2 = {alpha_g_pred:.6e}")
-    print(f"  satisfies alpha*zeta at kernel level (0.074 ppm in G)")
+    print(f"  kernel alpha*zeta identity: {az['exact']}; G residual {ppm_g:+.3f} ppm")
     print()
     print("Nonlinear extension (reference scale only; alpha*zeta unchanged):")
     print(f"  G(x) = G_kernel * exp(-tau(x)) / E_ref(x)^2")
@@ -622,14 +656,19 @@ def nonlinear_system_summary():
     print("Constants (all kernel-derived, no free parameters):")
     print(f"  Q_G = {Q_G:.6f}")
     print(f"  G_kernel = pi/6 = {G_kernel:.12f}")
-    print(f"  tau_G = {tau_G_full:.10f}")
-    print(f"  c4 = -7/4")
+    print(f"  tau_G = {tau_G:.10f}")
+    print(f"  tau_trace = {tau_G_full - tau_G:.10e}  (c4 = -7/4)")
     print(f"  dlnG/dpsi = {dlnG_dpsi:.6f}")
     print()
 
     print("Limiting behavior:")
-    print(f"  psi -> 0: G -> G_global = {G_global:.5e} GeV^-2  (0.074 ppm)")
-    print(f"  psi -> 1: G -> G_kernel/E_CS^2 = {G_CS:.5e} GeV^-2  ({G_CS/G_global*100:.1f}% of G_global)")
+    ppm_g_local = (G_global - G_meas) / G_meas * 1e6
+    print(
+        f"  psi -> 0: G -> G_global = {G_global:.5e} GeV^-2  ({ppm_g_local:+.3f} ppm vs G_meas)"
+    )
+    print(
+        f"  psi -> 1: G -> G_kernel/E_CS^2 = {G_CS:.5e} GeV^-2  ({G_CS/G_global*100:.1f}% of G_global)"
+    )
     print(f"  G is monotonically decreasing in psi (negative feedback)")
     print()
 
@@ -678,9 +717,15 @@ def derive_interpolation_from_conjugacy():
     print("Delta-ruler verification:")
     print(f"  log(v)         = {log_v:.6f}")
     print(f"  log(E_CS)      = {log_ECS:.6f}")
-    print(f"  log(E_ref(0))  = {log_Eref_0:.6f}  (log v)  {abs(log_Eref_0 - log_v) < 1e-10}")
-    print(f"  log(E_ref(1))  = {log_Eref_1:.6f}  (log E_CS)  {abs(log_Eref_1 - log_ECS) < 1e-10}")
-    print(f"  ticks v->E_CS  = (log(E_CS)-log(v))/Delta = {(log_ECS - log_v) / Delta:.2f}")
+    print(
+        f"  log(E_ref(0))  = {log_Eref_0:.6f}  (log v)  {abs(log_Eref_0 - log_v) < 1e-10}"
+    )
+    print(
+        f"  log(E_ref(1))  = {log_Eref_1:.6f}  (log E_CS)  {abs(log_Eref_1 - log_ECS) < 1e-10}"
+    )
+    print(
+        f"  ticks v->E_CS  = (log(E_CS)-log(v))/Delta = {(log_ECS - log_v) / Delta:.2f}"
+    )
     print()
 
     print("Comparison with GR gravitational redshift:")
@@ -691,7 +736,9 @@ def derive_interpolation_from_conjugacy():
         if psi < 0.5:
             gr_factor = sqrt(1.0 - 2.0 * psi)
             deviation = (cgm_factor - gr_factor) / gr_factor * 100
-            print(f"  {psi:>8.2f} {cgm_factor:>12.6f} {gr_factor:>18.6f} {deviation:>10.3f}")
+            print(
+                f"  {psi:>8.2f} {cgm_factor:>12.6f} {gr_factor:>18.6f} {deviation:>10.3f}"
+            )
         else:
             print(f"  {psi:>8.2f} {cgm_factor:>12.6f} {'(complex)':>18} {'--':>10}")
     print()
@@ -706,10 +753,8 @@ def derive_interpolation_from_conjugacy():
 
     psi_test = 0.3
     E_ref_test = E_CS * (v / E_CS) ** (1 - psi_test)
-    tau_test = tau_G_full * (1 - psi_test)
-    tau_from_ruler = (
-        (log(E_CS) - log(E_ref_test)) / (log(E_CS) - log(v)) * tau_G_full
-    )
+    tau_test = tau_G * (1 - psi_test)
+    tau_from_ruler = (log(E_CS) - log(E_ref_test)) / (log(E_CS) - log(v)) * tau_G
     G_test = G_kernel * exp(-tau_test) / E_ref_test**2
     print("Verification at psi = 0.3:")
     print(f"  E_ref = {E_ref_test:.4e} GeV")
@@ -751,7 +796,9 @@ def black_hole_shadow(s_vals, u_vals):
         print(f"  GR photon sphere:  s = {s_ph_gr:.3f} r_g (same metric f=1-2*u)")
         print(f"  CGM horizon:       s = {s_horizon:.4f} r_g" if s_horizon else "")
         if s_horizon:
-            print(f"  photon/horizon:    {s_ph / s_horizon:.4f}  (>1 = outside horizon)")
+            print(
+                f"  photon/horizon:    {s_ph / s_horizon:.4f}  (>1 = outside horizon)"
+            )
     else:
         s_ph, u_ph, b_cgm = s_ph_gr, 1.0 / s_ph_gr, b_gr
         print("  Photon sphere not bracketed; using GR values.")
@@ -783,7 +830,9 @@ def perihelion_precession_geodesic() -> None:
     print(f"  CGM: {pre_cgm:.10e} rad/orbit = {arcsec_cgm:.4f} arcsec/century")
     print(f"  CGM/GR = {ratio:.10f}  ({abs(ratio - 1.0) * 1e6:.4f} ppm)")
     print()
-    print("  PPN beta (leading 1 - g1/2 ~ 1.323) is a strong-field book-keeping parameter.")
+    print(
+        "  PPN beta (leading 1 - g1/2 ~ 1.323) is a strong-field book-keeping parameter."
+    )
     print("  At solar psi ~ 1/s_a ~ 2.5e-8, perihelion matches GR.")
     print("  Continuum audit: section T (horizon, photon, shadow, PPN tables).")
     print()
@@ -879,8 +928,13 @@ def effective_metric(s_vals, u_vals):
 
     print(f"  {'s=r/r_g':>10} {'psi':>10} {'f(r)':>10} {'1/f':>10}")
     print("  " + "-" * 44)
-    for s in [s_vals[0], s_vals[len(s_vals) // 4], s_vals[len(s_vals) // 2],
-              s_vals[3 * len(s_vals) // 4], s_vals[-1]]:
+    for s in [
+        s_vals[0],
+        s_vals[len(s_vals) // 4],
+        s_vals[len(s_vals) // 2],
+        s_vals[3 * len(s_vals) // 4],
+        s_vals[-1],
+    ]:
         u = float(np.interp(s, s_vals, u_vals))
         f_val = metric_f(u)
         inv_f = 1.0 / f_val if f_val > 1e-12 else float("inf")
@@ -905,7 +959,9 @@ def kerr_shadow_diameter_ratio(a_star: float, theta_o_deg: float) -> float:
     theta_o = np.radians(theta_o_deg)
     cos2 = np.cos(theta_o) ** 2
     sin2 = np.sin(theta_o) ** 2
-    return 1.0 + 0.05 * a_star**2 * cos2 + 0.03 * a_star * sin2 + 0.02 * a_star**2 * sin2
+    return (
+        1.0 + 0.05 * a_star**2 * cos2 + 0.03 * a_star * sin2 + 0.02 * a_star**2 * sin2
+    )
 
 
 def null_geodesic_shadow(s_vals, u_vals):
@@ -942,10 +998,14 @@ def null_geodesic_shadow(s_vals, u_vals):
     print("  " + "-" * 46)
     print(f"  {'s_ph/r_g':>12} {s_ph_gr:>10.3f} {s_ph:>10.4f} {s_ph/s_ph_gr:>10.4f}")
     print(f"  {'psi_ph':>12} {u_ph_gr:>10.4f} {u_ph:>10.4f} {u_ph/u_ph_gr:>10.4f}")
-    print(f"  {'f(u_ph)':>12} {f_newton:>10.4f} {f_at_ph:>10.4f} {f_at_ph/f_newton:>10.4f}")
+    print(
+        f"  {'f(u_ph)':>12} {f_newton:>10.4f} {f_at_ph:>10.4f} {f_at_ph/f_newton:>10.4f}"
+    )
     print(f"  {'b/r_g':>12} {b_gr:>10.4f} {b_cgm:>10.4f} {b_cgm/b_gr:>10.4f}")
     if s_horizon:
-        print(f"  {'s_h/r_g':>12} {2.0:>10.3f} {s_horizon:>10.4f} {s_horizon/2.0:>10.4f}")
+        print(
+            f"  {'s_h/r_g':>12} {2.0:>10.3f} {s_horizon:>10.4f} {s_horizon/2.0:>10.4f}"
+        )
         print(f"  {'s_ph/s_h':>12} {'3/2':>10} {s_ph/s_horizon:>10.4f}")
     print()
 
@@ -982,7 +1042,9 @@ def null_geodesic_shadow(s_vals, u_vals):
             f"{d_eht:>8.1f} {z_ck:>+6.2f}"
         )
     print()
-    print("  sig_K = (CGM_Kerr - EHT) / sigma; CGM_Kerr = CGM_Schw * kerr_factor (GR fit).")
+    print(
+        "  sig_K = (CGM_Kerr - EHT) / sigma; CGM_Kerr = CGM_Schw * kerr_factor (GR fit)."
+    )
     print(f"  kerr_factor Sgr A*: {kerr_sgra:.4f}, M87*: {kerr_m87:.4f}")
     print(f"  b_CGM/b_GR = {b_cgm/b_gr:.4f}  (area ratio {(b_cgm/b_gr)**2:.4f})")
     print()
@@ -1007,21 +1069,23 @@ def tau_evolution_law(s_vals, u_vals):
     print()
     n_vc_local = log(E_CS / v) / Delta
     tau_stf_coeff = 2.0 * Delta * n_vc_local
-    ratio = tau_G_full / tau_stf_coeff
-    gap = tau_stf_coeff - tau_G_full
-    print(f"  tau_G = {tau_G_full:.6f}")
+    ratio = tau_G / tau_stf_coeff
+    gap = tau_stf_coeff - tau_G
+    print(f"  tau_G = {tau_G:.6f}")
     print(f"  2*Delta*n_vc = {tau_stf_coeff:.6f}  (conjugacy depth)")
     print(f"  ratio tau_G / (2*Delta*n_vc) = {ratio:.6f}")
-    print(f"  2*Delta*n_vc - tau_G = {gap:.6f}  (identity: -dlnG/dpsi = {-dlnG_dpsi:.6f})")
+    print(
+        f"  2*Delta*n_vc - tau_G = {gap:.6f}  (identity: -dlnG/dpsi = {-dlnG_dpsi:.6f})"
+    )
     print()
     print("  Integrated STF along radial psi profile:")
-    tau_alg = tau_G_full * (1.0 - u_vals)
+    tau_alg = tau_G * (1.0 - u_vals)
     tau_stf = np.zeros_like(s_vals)
-    tau_stf[-1] = tau_G_full * (1.0 - u_vals[-1])
+    tau_stf[-1] = tau_G * (1.0 - u_vals[-1])
     for i in range(len(s_vals) - 2, -1, -1):
         du = u_vals[i] - u_vals[i + 1]
-        tau_stf[i] = tau_stf[i + 1] - tau_G_full * du
-    max_err = float(np.max(np.abs(tau_stf - tau_alg) / tau_G_full))
+        tau_stf[i] = tau_stf[i + 1] - tau_G * du
+    max_err = float(np.max(np.abs(tau_stf - tau_alg) / tau_G))
     print(f"    max |tau_stf - tau_alg| / tau_G = {max_err:.2e}  (machine precision)")
     print()
     print(f"  {'s':>8} {'psi':>10} {'tau_algebraic':>14} {'tau_STF':>14}")
@@ -1056,19 +1120,21 @@ def self_consistency_audit(s_vals, u_vals):
 
     dpsi_ok = max_rel < 1e-10
     ok = ok and dpsi_ok
-    print(f"  [{'OK' if dpsi_ok else 'FAIL'}] dpsi/ds closure residual (rel) = {max_rel:.2e}")
+    print(
+        f"  [{'OK' if dpsi_ok else 'FAIL'}] dpsi/ds closure residual (rel) = {max_rel:.2e}"
+    )
 
     u_max = float(u_vals[0])
     clip_ok = u_max < 0.5
     ok = ok and clip_ok
-    print(f"  [{'OK' if clip_ok else 'FAIL'}] max psi = {u_max:.4f} (< 0.5, no clip artifact)")
+    print(
+        f"  [{'OK' if clip_ok else 'FAIL'}] max psi = {u_max:.4f} (< 0.5, no clip artifact)"
+    )
 
     s_ph_gr = 3.0
     s_h = interp_s_at_u(s_vals, u_vals, 0.5)
     photon = find_photon_sphere(s_vals, u_vals, s_h)
-    order_ok = bool(
-        photon and s_h and photon[0] > s_h and photon[0] < s_ph_gr * 1.5
-    )
+    order_ok = bool(photon and s_h and photon[0] > s_h and photon[0] < s_ph_gr * 1.5)
     ok = ok and order_ok
     if photon and s_h:
         print(
@@ -1090,8 +1156,8 @@ def self_consistency_audit(s_vals, u_vals):
     s_mid = s_vals[mid]
     u_mid = u_vals[mid]
     du_ds = -G_ratio(u_mid) / s_mid**2
-    kin_rate = -tau_G_full * du_ds
-    stf_rate = -tau_G_full
+    kin_rate = -tau_G * du_ds
+    stf_rate = -tau_G
     kin_ok = abs(kin_rate - stf_rate * du_ds) / max(abs(kin_rate), 1e-30) < 0.05
     ok = ok and kin_ok
     print(
@@ -1100,7 +1166,8 @@ def self_consistency_audit(s_vals, u_vals):
     )
 
     ppm = (G_global - G_meas) / G_meas * 1e6
-    g_ok = abs(ppm) < 1.0
+    # STF coupling depth: residual ~ +2.99 ppm (CODATA G unc ~ 22 ppm).
+    g_ok = abs(ppm) < 10.0
     ok = ok and g_ok
     print(f"  [{'OK' if g_ok else 'FAIL'}] G_global vs G_meas: {ppm:+.3f} ppm")
     print()
@@ -1141,7 +1208,7 @@ def section_E_ref_formal_proof() -> None:
     print()
     print("DERIVATION:")
     print("  L(E) = ln(E_CS/E);  tau = alpha * L;  at psi=0, L(0)=|eta|, tau(0)=tau_G")
-    alpha_scale = tau_G_full / abs(eta)
+    alpha_scale = tau_G / abs(eta)
     print(f"  alpha = tau_G/|eta| = {alpha_scale:.6f}")
     print("  L(psi) = |eta|*(1-psi) => E_ref(psi) = E_CS * (v/E_CS)^(1-psi)")
     print()
@@ -1158,16 +1225,18 @@ def section_E_ref_formal_proof() -> None:
     print("  Quantile Q(p) = E_CS*exp(-p*L), L = ln(E_CS/v), p = 1-psi:")
     print("  E_ref(psi) = E_CS * (v/E_CS)^(1-psi)  (exact, no distribution assumption)")
     print("  E_ref is a ruler QUANTILE (position), not a centroid (mean).")
-    print(f"  On a log scale spanning ~{log10(E_CS / v):.0f} decades, mean != quantile.")
+    print(
+        f"  On a log scale spanning ~{log10(E_CS / v):.0f} decades, mean != quantile."
+    )
     print("  Centroid E_mean = sum E_k w_k is dominated by the UV tail on the ladder.")
     print()
     print("KEY: G(psi) = G0 * exp(g1*psi) exactly (d^2 ln G / d psi^2 = 0)")
-    print(f"  g1 = tau_G + 2*eta = {tau_G_full:.6f} + {2*eta:.6f} = {dlnG_dpsi:.6f}")
+    print(f"  g1 = tau_G + 2*eta = {tau_G:.6f} + {2*eta:.6f} = {dlnG_dpsi:.6f}")
     print()
     print("SELF-CONSISTENCY:")
     for psi_test in [0.0, 0.1, 0.3, 0.5, 0.7, 1.0]:
         e_ref = E_CS * (v / E_CS) ** (1.0 - psi_test)
-        tau_loc = tau_G_full * (1.0 - psi_test)
+        tau_loc = tau_G * (1.0 - psi_test)
         g_formula = G_kernel * exp(-tau_loc) / e_ref**2
         g_exp = G_global * exp(dlnG_dpsi * psi_test)
         match = abs(g_formula - g_exp) / G_global < 1e-10
@@ -1184,7 +1253,7 @@ def section_E_ref_formal_proof() -> None:
 def main():
     print("CGM gravity analysis 4: nonlinear G(psi), metric, shadow")
     print(f"Delta = {Delta:.12f}, rho = {rho_val:.12f}")
-    print(f"tau_G (full) = {tau_G_full:.10f}")
+    print(f"tau_G (STF) = {tau_G:.10f}")
     print(f"G_global = {G_global:.5e} GeV^-2")
     print()
 

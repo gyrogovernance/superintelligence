@@ -48,6 +48,7 @@ import hqvm_percolation_analysis_2 as pa2
 import hqvm_percolation_analysis_3 as pa3
 
 from gyroscopic.hQVM.api import q_word6
+from gyroscopic.hQVM.constants import M_A
 
 N_OMEGA = 4096
 N_HORIZON = 64
@@ -55,7 +56,6 @@ CHI_BITS = 6
 K4_ORDER = 4
 HOLONOMY_WORD_LENGTH = 4
 N_MICROREFS = 64
-M_A = 1.0 / (2.0 * math.sqrt(2.0 * math.pi))
 FLUX_QUANTUM = 4.0 * math.pi
 
 
@@ -78,6 +78,7 @@ def _gate(name: str, ok: bool, detail: str) -> None:
 
 def _configure_stdout_utf8() -> None:
     import codecs
+
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
 
@@ -195,7 +196,9 @@ def reach_rectangle(
     return rcount, nu, nv, rect
 
 
-def _rank_cases(bcs: dict[int, pa1.ByteClassification]) -> List[Tuple[str, List[int], int | None]]:
+def _rank_cases(
+    bcs: dict[int, pa1.ByteClassification],
+) -> List[Tuple[str, List[int], int | None]]:
     by_weight: dict[int, list[int]] = {w: [] for w in range(7)}
     by_fold: dict[int, list[int]] = {d: [] for d in range(5)}
     for bc in bcs.values():
@@ -215,7 +218,9 @@ def _rank_cases(bcs: dict[int, pa1.ByteClassification]) -> List[Tuple[str, List[
     return cases
 
 
-def _find_crossing(p_vals: List[float], probs: List[float], target: float = 0.5) -> float | None:
+def _find_crossing(
+    p_vals: List[float], probs: List[float], target: float = 0.5
+) -> float | None:
     for i in range(len(p_vals) - 1):
         if probs[i] <= target <= probs[i + 1]:
             p0, p1 = p_vals[i], p_vals[i + 1]
@@ -229,6 +234,7 @@ def _find_crossing(p_vals: List[float], probs: List[float], target: float = 0.5)
 # ---------------------------------------------------------------------------
 # 1. Holographic root identity
 # ---------------------------------------------------------------------------
+
 
 def section_1_holographic_root(engine: pa1.TransitionEngine, omega: List[int]) -> None:
     print("\n" + "=" * 5)
@@ -268,6 +274,7 @@ def section_1_holographic_root(engine: pa1.TransitionEngine, omega: List[int]) -
 # 2. Fiber-complete product cluster theorem
 # ---------------------------------------------------------------------------
 
+
 def section_2_square_root_cluster(
     engine: pa1.TransitionEngine,
     bcs: dict[int, pa1.ByteClassification],
@@ -288,7 +295,9 @@ def section_2_square_root_cluster(
     n_cases = 0
     n_fiber = 0
 
-    print(f"  {'case':<22}{'r':>3}{'fc':>3}{'|Reach|':>8}{'pred':>8}{'|U|':>6}{'|V|':>6}{'rect':>6}  ok")
+    print(
+        f"  {'case':<22}{'r':>3}{'fc':>3}{'|Reach|':>8}{'pred':>8}{'|U|':>6}{'|V|':>6}{'rect':>6}  ok"
+    )
     print("  " + "-" * 5)
 
     for name, alphabet, expect_r in _rank_cases(bcs):
@@ -357,7 +366,11 @@ def _section_2_fiber_incomplete_scope(
     for fam in range(4):
         alphabet = [bc.byte for bc in bcs.values() if bc.family == fam]
         size_ok, rect_ok, sym_ok, r = _verify_cluster_case(
-            engine, alphabet, bcs, u_idx, v_idx,
+            engine,
+            alphabet,
+            bcs,
+            u_idx,
+            v_idx,
         )
         reach = sum(pa1.reachable_mask(engine, alphabet, [engine.start_idx]))
         fc = is_fiber_complete(alphabet, bcs)
@@ -414,20 +427,26 @@ def _section_2_fiber_incomplete_scope(
             confined_1024 += 1
         if reach == N_OMEGA:
             full_hits += 1
-    print(f"    even-q6 |A| in [20,64]: P(1024)={confined_1024/300:.3f}  P(full)={full_hits/300:.3f}")
+    print(
+        f"    even-q6 |A| in [20,64]: P(1024)={confined_1024/300:.3f}  P(full)={full_hits/300:.3f}"
+    )
 
     anticorr = 0
     for _ in range(200):
         even_reach = sum(
             pa1.reachable_mask(
-                engine, rng.sample(even_pool, 24), [engine.start_idx],
+                engine,
+                rng.sample(even_pool, 24),
+                [engine.start_idx],
             )
         )
         basis = _independent_q6_basis(6, rng)
         odd_alphabet = [rng.choice(q6_map[q]) for q in basis]
         while len(odd_alphabet) < 24:
             odd_alphabet.append(rng.choice(odd_pool))
-        odd_reach = sum(pa1.reachable_mask(engine, odd_alphabet[:24], [engine.start_idx]))
+        odd_reach = sum(
+            pa1.reachable_mask(engine, odd_alphabet[:24], [engine.start_idx])
+        )
         if even_reach < odd_reach:
             anticorr += 1
     print(f"    |A|=24 even vs fiber-incomplete odd: P(even<odd)={anticorr/200:.3f}")
@@ -437,6 +456,7 @@ def _section_2_fiber_incomplete_scope(
 # 3. Parity obstruction
 # ---------------------------------------------------------------------------
 
+
 def section_3_parity_obstruction(
     engine: pa1.TransitionEngine,
     bcs: dict[int, pa1.ByteClassification],
@@ -444,7 +464,9 @@ def section_3_parity_obstruction(
     print("\n" + "=" * 5)
     print("3. PARITY OBSTRUCTION")
     print("=" * 5)
-    print("  Even-q6 alphabets confine to even shells; full Omega requires odd shell.\n")
+    print(
+        "  Even-q6 alphabets confine to even shells; full Omega requires odd shell.\n"
+    )
 
     even_bytes = [bc.byte for bc in bcs.values() if bc.q6_weight % 2 == 0]
     vis = pa1.reachable_mask(engine, even_bytes, [engine.start_idx])
@@ -481,6 +503,7 @@ def section_3_parity_obstruction(
 # ---------------------------------------------------------------------------
 # 4. Word confinement as root-only action
 # ---------------------------------------------------------------------------
+
 
 def section_4_word_root_confinement(omega: List[int]) -> None:
     print("\n" + "=" * 5)
@@ -567,6 +590,7 @@ def section_4_word_root_confinement(omega: List[int]) -> None:
 # 5. Root-dimension criticality hierarchy
 # ---------------------------------------------------------------------------
 
+
 def _fword_bytes(m: int) -> Tuple[int, int, int, int]:
     return (
         pa2.byte_from_family_micro(0, m),
@@ -589,8 +613,7 @@ def microref_completion_fraction(allowed: Sequence[int]) -> float:
     """Mean fraction of micro_refs with all four F-word bytes present."""
     aset = set(allowed)
     covered = sum(
-        1 for m in range(N_MICROREFS)
-        if all(b in aset for b in _fword_bytes(m))
+        1 for m in range(N_MICROREFS) if all(b in aset for b in _fword_bytes(m))
     )
     return covered / N_MICROREFS
 
@@ -600,7 +623,7 @@ def predicted_word_availability(p: float) -> float:
 
 
 def predicted_mean_completion(p: float) -> float:
-    return p ** HOLONOMY_WORD_LENGTH
+    return p**HOLONOMY_WORD_LENGTH
 
 
 def _p_hit_span(engine: pa1.TransitionEngine, allowed: List[int]) -> bool:
@@ -669,8 +692,26 @@ def section_5_criticality_hierarchy(engine: pa1.TransitionEngine) -> None:
     print("=" * 5)
     print("  Generator restriction dial p; weak (50%) and strong (90%) onsets.\n")
 
-    p_vals = [0.01, 0.015, 0.02, 0.022, 0.025, 0.03, 0.035, 0.04, 0.05,
-              0.06, 0.08, 0.10, 0.15, 0.20, 0.30, 0.50, 0.70, 1.0]
+    p_vals = [
+        0.01,
+        0.015,
+        0.02,
+        0.022,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.05,
+        0.06,
+        0.08,
+        0.10,
+        0.15,
+        0.20,
+        0.30,
+        0.50,
+        0.70,
+        1.0,
+    ]
     n_mc = 200
     rng = random.Random(20260703)
 
@@ -733,12 +774,16 @@ def section_5_criticality_hierarchy(engine: pa1.TransitionEngine) -> None:
     print("\n  weak onset p_c (50%):")
     for k in weak_keys:
         pc = weak_pc[k]
-        print(f"    {k:<12} {pc:.4f}" if pc is not None else f"    {k:<12} not in range")
+        print(
+            f"    {k:<12} {pc:.4f}" if pc is not None else f"    {k:<12} not in range"
+        )
 
     print("\n  strong onset p_c (50% of strong criterion):")
     for k in strong_keys:
         pc = strong_pc[k]
-        print(f"    {k:<12} {pc:.4f}" if pc is not None else f"    {k:<12} not in range")
+        print(
+            f"    {k:<12} {pc:.4f}" if pc is not None else f"    {k:<12} not in range"
+        )
 
     order_ok = True
     prev_p = 0.0
@@ -777,7 +822,9 @@ def section_5b_holonomy_word_scaling(engine: pa1.TransitionEngine) -> None:
     n_mc = 300
     rng = random.Random(20260704)
 
-    print(f"  {'p':<8}{'E[evt]':<10}{'pred_evt':<12}{'E[frac]':<10}{'pred_frac':<12}{'|err|':<8}")
+    print(
+        f"  {'p':<8}{'E[evt]':<10}{'pred_evt':<12}{'E[frac]':<10}{'pred_frac':<12}{'|err|':<8}"
+    )
     print("  " + "-" * 5)
 
     evt_err_max = 0.0
@@ -801,8 +848,10 @@ def section_5b_holonomy_word_scaling(engine: pa1.TransitionEngine) -> None:
         frac_err = abs(e_frac - p_frac)
         evt_err_max = max(evt_err_max, evt_err)
         frac_err_max = max(frac_err_max, frac_err)
-        print(f"  {p:<8.3f}{e_evt:<10.4f}{p_evt:<12.4f}{e_frac:<10.4f}{p_frac:<12.4f}"
-              f"{max(evt_err, frac_err):<8.4f}")
+        print(
+            f"  {p:<8.3f}{e_evt:<10.4f}{p_evt:<12.4f}{e_frac:<10.4f}{p_frac:<12.4f}"
+            f"{max(evt_err, frac_err):<8.4f}"
+        )
 
     tol = 0.08
     _gate(
@@ -820,6 +869,7 @@ def section_5b_holonomy_word_scaling(engine: pa1.TransitionEngine) -> None:
 # ---------------------------------------------------------------------------
 # 6. Flux normalization bridge (D, Q_G, G_kernel)
 # ---------------------------------------------------------------------------
+
 
 def section_6_loop_normalization_bridge() -> None:
     print("\n" + "=" * 5)
@@ -900,7 +950,9 @@ def print_summary() -> int:
 def main() -> None:
     _configure_stdout_utf8()
     print("hQVM Percolation Fiber-Complete Product Cluster (analysis_4)")
-    print(f"|Omega| = {N_OMEGA}  |H| = {N_HORIZON}  sqrt(|Omega|) = {int(math.isqrt(N_OMEGA))}")
+    print(
+        f"|Omega| = {N_OMEGA}  |H| = {N_HORIZON}  sqrt(|Omega|) = {int(math.isqrt(N_OMEGA))}"
+    )
 
     omega = pa1.enumerate_omega()
     engine = pa1.build_transition_engine(omega)

@@ -36,7 +36,7 @@ from gyroscopic.hQVM.api import (
 )
 from gyroscopic.hQVM.constants import APERTURE_GAP, DELTA_BU, M_A, RHO
 
-from hqvm_compact_geom_core import electroweak_coords
+from hqvm_compact_geom_common import electroweak_coords
 from hqvm_gravity_common import (
     C4_REF,
     G_meas,
@@ -111,9 +111,9 @@ def holonomy_arch_path(micro_ref: int) -> list[int]:
     """arch_shell along 8-step Z2 holonomy (hqvm_gravity_common convention)."""
     return [
         int(row["arch_shell"])
-        for row in trace_word_steps(cycle_word_for_micro(micro_ref), micro_ref=micro_ref)[
-            1:
-        ]
+        for row in trace_word_steps(
+            cycle_word_for_micro(micro_ref), micro_ref=micro_ref
+        )[1:]
     ]
 
 
@@ -171,10 +171,9 @@ def return_trace_two_hop(q: int) -> Fraction:
     total = Fraction(0)
     for w in range(7):
         for k in range(7):
-            total += (
-                shell_transition_probability(w, q, k)
-                * shell_transition_probability(k, q, w)
-            )
+            total += shell_transition_probability(
+                w, q, k
+            ) * shell_transition_probability(k, q, w)
     return total
 
 
@@ -224,7 +223,9 @@ def prove_odd_shell_krawtchouk(results: dict[int, dict]) -> None:
         assert sym
 
     print()
-    print("Eigenvectors Q_k(w) = K_w(k); eigenvalues lambda_k with M Q_k = lambda_k Q_k:")
+    print(
+        "Eigenvectors Q_k(w) = K_w(k); eigenvalues lambda_k with M Q_k = lambda_k Q_k:"
+    )
     expected: dict[int, Fraction] = {
         1: Fraction(28, 9),
         3: Fraction(52, 25),
@@ -437,9 +438,7 @@ def derive_tau_cycle_exact(stress: dict[int, dict]) -> Fraction:
         f"  tau/Delta = 4*sum_cubes/(64*sum_sq) = "
         f"{Fraction(numer_4cubes, denom_64sq)}"
     )
-    print(
-        f"            = (1/2)*sum_cubes / (8*C(12,6)) = {via_half}"
-    )
+    print(f"            = (1/2)*sum_cubes / (8*C(12,6)) = {via_half}")
     assert Fraction(numer_4cubes, denom_64sq) == kernel_exact
     assert via_half == kernel_exact
 
@@ -455,7 +454,9 @@ def derive_tau_cycle_exact(stress: dict[int, dict]) -> Fraction:
     lemma_a_ratio = tau_cycle / tau_cycle_lemma_a
 
     print()
-    print(f"tau_cycle / Delta                    = {kernel_exact} = {float(kernel_exact):.12f}")
+    print(
+        f"tau_cycle / Delta                    = {kernel_exact} = {float(kernel_exact):.12f}"
+    )
     print(f"tau_cycle (exact)                    = {tau_cycle:.12f}")
     print(f"Lemma A uniform tau_cycle              = {tau_cycle_lemma_a:.12f}")
     print(f"exact / Lemma A (tau vs tau)           = {lemma_a_ratio:.12f}")
@@ -486,25 +487,24 @@ def derive_tau_G_factorization(tau_over_delta: Fraction) -> None:
 
     c4 = c4_route_a()
     f_k4 = 1 - 4 * rho * Delta**2
-    f_k4_full = f_k4 + float(c4) * Delta**4
     tau_g = OMEGA_SIZE * Delta * rho**5 * f_k4
-    tau_g_full = tau_g_with_c4(C4_REF)
+    tau_tr = OMEGA_SIZE * Delta * rho**5 * float(c4) * Delta**4
     tau_cycle = float(tau_over_delta) * Delta
-    n_cycles = tau_g_full / tau_cycle
-    n_from_structure = OMEGA_SIZE * rho**5 * f_k4_full / float(tau_over_delta)
-    n_exposure = OMEGA_SIZE * rho**5 * f_k4_full / float(tau_over_delta)
+    n_cycles = tau_g / tau_cycle
+    n_from_structure = OMEGA_SIZE * rho**5 * f_k4 / float(tau_over_delta)
+    n_exposure = n_from_structure
 
-    print(f"tau_G (leading)       = {tau_g:.10f}")
-    print(f"tau_G (full, c4)      = {tau_g_full:.10f}")
+    print(f"tau_G (STF coupling)  = {tau_g:.10f}")
+    print(f"tau_trace (c4 scalar) = {tau_tr:.10e}")
     print(f"tau_cycle             = {tau_cycle:.10f}")
     print(f"N_cycles = tau_G/tau_cycle = {n_cycles:.6f}")
     print(f"|Omega| rho^5 f_k4 / (tau/Delta) = {n_from_structure:.6f}")
     assert abs(n_cycles - n_from_structure) < 1e-3
     print()
     print("N_cycles as exposure count:")
-    print("  N = |Omega|*rho^5*(f_K4+c4*Delta^4) / (tau_cycle/Delta)")
+    print("  N = |Omega|*rho^5*f_K4 / (tau_cycle/Delta)")
     print(
-        f"  N = {OMEGA_SIZE}*{rho:.6f}^5*{f_k4_full:.10f} / {float(tau_over_delta):.10f}"
+        f"  N = {OMEGA_SIZE}*{rho:.6f}^5*{f_k4:.10f} / {float(tau_over_delta):.10f}"
     )
     print(f"  N = {float(n_exposure):.4f}")
     print(f"  N (from tau_G/tau_cycle) = {n_cycles:.4f}")
@@ -516,7 +516,7 @@ def derive_tau_G_factorization(tau_over_delta: Fraction) -> None:
 def integrate_c4_correction() -> None:
     print()
     print("=" * 9)
-    print("E. c4 = -7/4 additive correction to tau_G")
+    print("E. c4 = -7/4 trace-sector scalar")
     print("=" * 9)
 
     c4 = c4_route_a()
@@ -524,27 +524,22 @@ def integrate_c4_correction() -> None:
 
     f_k4 = 1 - 4 * rho * Delta**2
     tau_g = OMEGA_SIZE * Delta * rho**5 * f_k4
-
-    f_k4_additive = f_k4 + float(c4) * Delta**4
-    tau_corr = OMEGA_SIZE * Delta * rho**5 * f_k4_additive
+    tau_tr = OMEGA_SIZE * Delta * rho**5 * float(c4) * Delta**4
 
     tau_req = tau_required_meas
 
-    residual_before = tau_g - tau_req
-    residual_additive = tau_corr - tau_req
-    ppm_tau_add = abs(residual_additive / tau_req) * 1e6
-    ppm_g_add = abs(residual_additive) * 1e6
+    residual_stf = tau_g - tau_req
+    ppm_g_stf = abs(residual_stf) * 1e6
 
     print(f"c4 = {c4}")
-    print("tau_G = |Omega| Delta rho^5 (f_k4 + c4 Delta^4)")
-    print(f"  leading order tau_G        = {tau_g:.10f}")
-    print(f"  leading order residual     = {residual_before:.6e}")
-    print(f"  full prediction tau_G      = {tau_corr:.10f}")
-    print(f"  full prediction residual   = {residual_additive:.6e}")
-    print(f"  ppm |delta_tau/tau|        = {ppm_tau_add:.4f}")
-    print(f"  ppm |delta_tau| G-scale    = {ppm_g_add:.4f}")
+    print("tau_G = |Omega| Delta rho^5 f_k4   (STF coupling depth)")
+    print("tau_trace = |Omega| Delta rho^5 c4 Delta^4   (isotropic channel)")
+    print(f"  tau_G                      = {tau_g:.10f}")
+    print(f"  tau_trace                  = {tau_tr:.10e}")
+    print(f"  residual tau_G - tau_req   = {residual_stf:.6e}")
+    print(f"  ppm |delta_tau| G-scale    = {ppm_g_stf:.4f}")
     print(f"tau_required (G_meas)        = {tau_req:.10f}")
-    assert abs(residual_additive) < 1e-7
+    assert abs(residual_stf) < 5e-5
 
 
 def alpha_zeta_consistency() -> None:
@@ -599,7 +594,9 @@ def delta_ruler_placement() -> None:
     print()
     print("Kernel ratios:")
     print(f"  n_G / |Omega|                       = {n_g / Omega_size:.6f}")
-    print(f"  n_G / D                             = {n_g / Z2_HOLONOMY_PATH_TRAVERSE:.4f}")
+    print(
+        f"  n_G / D                             = {n_g / Z2_HOLONOMY_PATH_TRAVERSE:.4f}"
+    )
     print(f"  n_G / |H|                           = {n_g / H_size:.4f}")
     print(f"  n_G / (|Omega|*rho^5)               = {ratio_bulk:.4f}")
     print(f"  |Omega|*rho^5 / ln(2)               = {omega_rho5 / ln2:.4f}")

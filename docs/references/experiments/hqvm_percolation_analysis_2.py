@@ -67,7 +67,7 @@ SECTIONS (analysis_2)
   9     Probe-word reachability (same-fam, F^2, reverse, constitutional)
   10    Helix Z2 cycle (F^2 = id from rest)
   11    Flat vs curved payload pools (fiber bundle dial)
-  12    Constitutional byte shell trace (depth-4 and depth-8)
+  12    Constitutional byte shell trace (depth-4 half-word and F / F² turns)
 
 Run the full study: python experiments/hqvm_percolation_analysis_run.py
 
@@ -116,6 +116,7 @@ FAMILY_RAY_REF = 1  # reference micro_ref (wavefunction helix evolution)
 # 1. Build Omega, the byte transition table, and the canonical word
 #    permutations W2[m], W2'[m], F[m] (m = 0..63).
 
+
 def enumerate_omega() -> List[int]:
     code: set = set()
     for m in range(64):
@@ -133,6 +134,7 @@ def enumerate_omega() -> List[int]:
             out.append(((a12 & LAYER_MASK_12) << 12) | (b12 & LAYER_MASK_12))
     return out
 
+
 def byte_from_family_micro(family: int, micro_ref: int) -> int:
     """Unique byte carrying (family, micro_ref). QuBEC decomposition
     (Gyroscopic_ASI_Specs_Formalism.md Sec 4)."""
@@ -141,20 +143,23 @@ def byte_from_family_micro(family: int, micro_ref: int) -> int:
     intron = (bit7 << 7) | ((micro_ref & 0x3F) << 1) | bit0
     return intron ^ 0xAA
 
+
 @dataclass(frozen=True)
 class WordEngine:
     """Canonical word permutations on Omega (index space)."""
+
     n: int
     state_to_idx: Dict[int, int]
     shell: List[int]
     start_idx: int
-    comp_idx: List[int]      # complement-horizon state indices (shell 6)
-    eq_idx: List[int]        # equality-horizon state indices (shell 0)
-    w2: List[List[int]]      # w2[m][i]  = W2(m)(state i)
-    w2p: List[List[int]]     # w2p[m][i] = W2'(m)(state i)
-    fp: List[List[int]]      # fp[m][i]  = F(m)(state i)
-    q6_of_byte: List[int]    # q_word6(b) for b in 0..255
+    comp_idx: List[int]  # complement-horizon state indices (shell 6)
+    eq_idx: List[int]  # equality-horizon state indices (shell 0)
+    w2: List[List[int]]  # w2[m][i]  = W2(m)(state i)
+    w2p: List[List[int]]  # w2p[m][i] = W2'(m)(state i)
+    fp: List[List[int]]  # fp[m][i]  = F(m)(state i)
+    q6_of_byte: List[int]  # q_word6(b) for b in 0..255
     byte_trans: List[List[int]]  # 4096x256 byte transition table (for the null model)
+
 
 def build_word_engine(omega: List[int]) -> WordEngine:
     print("  Building byte transition table (4096 x 256)...", flush=True)
@@ -168,7 +173,9 @@ def build_word_engine(omega: List[int]) -> WordEngine:
         for b in range(256):
             row[b] = state_to_idx[step_state_by_byte(s, b)]
 
-    print("  Composing canonical word permutations W2, W2', F (64 x 4096)...", flush=True)
+    print(
+        "  Composing canonical word permutations W2, W2', F (64 x 4096)...", flush=True
+    )
     w2: List[List[int]] = []
     w2p: List[List[int]] = []
     fp: List[List[int]] = []
@@ -182,24 +189,44 @@ def build_word_engine(omega: List[int]) -> WordEngine:
         fm = [0] * n
         for i in range(n):
             j = trans[i][b00]
-            w2m[i] = trans[j][b01]              # W2(m) = T_b01 o T_b00
+            w2m[i] = trans[j][b01]  # W2(m) = T_b01 o T_b00
             k = trans[i][b10]
-            w2pm[i] = trans[k][b11]             # W2'(m) = T_b11 o T_b10
+            w2pm[i] = trans[k][b11]  # W2'(m) = T_b11 o T_b10
             fm[i] = trans[w2m[i]][b10]
-            fm[i] = trans[fm[i]][b11]           # F(m) = T_b11 o T_b10 o W2(m)
+            fm[i] = trans[fm[i]][b11]  # F(m) = T_b11 o T_b10 o W2(m)
         w2.append(w2m)
         w2p.append(w2pm)
         fp.append(fm)
 
-    comp_idx = [i for i, s in enumerate(omega) if is_on_horizon(s) and not is_on_equality_horizon(s)]
+    comp_idx = [
+        i
+        for i, s in enumerate(omega)
+        if is_on_horizon(s) and not is_on_equality_horizon(s)
+    ]
     eq_idx = [i for i, s in enumerate(omega) if is_on_equality_horizon(s)]
     q6_of_byte = [q_word6(b) for b in range(256)]
-    print(f"  |comp_horizon|={len(comp_idx)}  |eq_horizon|={len(eq_idx)}  "
-          f"(expect 64/64, holographic 64^2=4096)", flush=True)
-    return WordEngine(n, state_to_idx, shell, state_to_idx[GENE_MAC_REST],
-                      comp_idx, eq_idx, w2, w2p, fp, q6_of_byte, trans)
+    print(
+        f"  |comp_horizon|={len(comp_idx)}  |eq_horizon|={len(eq_idx)}  "
+        f"(expect 64/64, holographic 64^2=4096)",
+        flush=True,
+    )
+    return WordEngine(
+        n,
+        state_to_idx,
+        shell,
+        state_to_idx[GENE_MAC_REST],
+        comp_idx,
+        eq_idx,
+        w2,
+        w2p,
+        fp,
+        q6_of_byte,
+        trans,
+    )
+
 
 # 2. Verify the K4 word algebra against THIS engine (ground the study).
+
 
 def verify_word_algebra(eng: WordEngine) -> None:
     print("\n" + "=" * 5)
@@ -231,15 +258,22 @@ def verify_word_algebra(eng: WordEngine) -> None:
     print(f"  T2  W2  : shell s -> 6-s         : {'VERIFIED' if t2 else 'FAILED'}")
     print(f"  T3  W2' : shell s -> 6-s         : {'VERIFIED' if t3 else 'FAILED'}")
     print(f"  T4  F   : shell s -> s           : {'VERIFIED' if t4 else 'FAILED'}")
-    print(f"  T6  W2^2 = W2'^2 = F^2 = id      : "
-          f"{'VERIFIED' if (t6_w2 and t6_w2p and t6_f) else 'FAILED'}")
-    print(f"  T9  W2 : comp-horizon <-> eq-horizon bijection : {'VERIFIED' if t9 else 'FAILED'}")
+    print(
+        f"  T6  W2^2 = W2'^2 = F^2 = id      : "
+        f"{'VERIFIED' if (t6_w2 and t6_w2p and t6_f) else 'FAILED'}"
+    )
+    print(
+        f"  T9  W2 : comp-horizon <-> eq-horizon bijection : {'VERIFIED' if t9 else 'FAILED'}"
+    )
     print("  (T10 q-transport is byte-level; re-checked via q_word6 below.)")
+
 
 # 3. Single-pole non-transitivity theorem (exact, deterministic).
 
-def _bfs_reach(eng: WordEngine, perms_list: List[List[int]],
-               starts: List[int], max_depth: int = 16) -> bytearray:
+
+def _bfs_reach(
+    eng: WordEngine, perms_list: List[List[int]], starts: List[int], max_depth: int = 16
+) -> bytearray:
     n = eng.n
     visited = bytearray(n)
     frontier = []
@@ -259,6 +293,7 @@ def _bfs_reach(eng: WordEngine, perms_list: List[List[int]],
                     nxt.append(t)
         frontier = nxt
     return visited
+
 
 def single_pole_theorem(eng: WordEngine) -> None:
     print("\n" + "=" * 5)
@@ -288,11 +323,17 @@ def single_pole_theorem(eng: WordEngine) -> None:
     w2_two_hop = w2_one_hop | {eng.w2[m][j] for m in range(64) for j in w2_one_hop}
     f_one_hop = {eng.fp[m][eng.start_idx] for m in range(64)}
     print(f"\n  W2-only one-hop from rest  : |{{W2(m)(rest)}}| = {len(w2_one_hop)}")
-    print(f"  W2-only two-hop closure    : {len(w2_two_hop)}  (BFS reach {sum(vis_w2)})")
-    print(f"  F-only one-hop from rest   : |{{F(m)(rest)}}| = {len(f_one_hop)}  "
-          f"(BFS reach {sum(vis_f)})")
+    print(
+        f"  W2-only two-hop closure    : {len(w2_two_hop)}  (BFS reach {sum(vis_w2)})"
+    )
+    print(
+        f"  F-only one-hop from rest   : |{{F(m)(rest)}}| = {len(f_one_hop)}  "
+        f"(BFS reach {sum(vis_f)})"
+    )
+
 
 # 4. Canonical-word percolation sweep (the CGM percolation threshold).
+
 
 def _perms_for_mode(eng: WordEngine, M: List[int], mode: str) -> List[List[int]]:
     """Collect word permutations for micro_refs in M under edge mode."""
@@ -345,7 +386,9 @@ def _print_word_sweep_table(
     rows: List[Tuple[float, float, float, float, float, float, float]],
 ) -> None:
     """Compact table for word percolation sweep rows."""
-    print(f"  {'p':<7}{'E[#m]':<7}{'P(pair)':<9}{'P(full)':<9}{'CI95':<10}{'<Reach>':<9}")
+    print(
+        f"  {'p':<7}{'E[#m]':<7}{'P(pair)':<9}{'P(full)':<9}{'CI95':<10}{'<Reach>':<9}"
+    )
     print("  " + "-" * 5)
     keep = {0, len(rows) - 1}
     for i, row in enumerate(rows):
@@ -387,7 +430,10 @@ def word_percolation_sweep(eng: WordEngine, n_samples: int = 200) -> None:
     rows: List[Tuple[float, float, float, float, float, float, float]] = []
     for pi, p in enumerate(p_values):
         if pi % 10 == 0:
-            print(f"  progress: word sweep {pi + 1}/{len(p_values)} (p={p:.3f})", flush=True)
+            print(
+                f"  progress: word sweep {pi + 1}/{len(p_values)} (p={p:.3f})",
+                flush=True,
+            )
         hit = pair = full = 0
         reach_sum = 0
         nonzero = 0
@@ -416,7 +462,11 @@ def word_percolation_sweep(eng: WordEngine, n_samples: int = 200) -> None:
     _print_word_sweep_table(rows)
 
     print("\n  Thresholds (conditional on |M|>0):")
-    for name, col in (("E1 hit_eq_word", 2), ("E2 full_pairing", 3), ("E3 full_omega", 4)):
+    for name, col in (
+        ("E1 hit_eq_word", 2),
+        ("E2 full_pairing", 3),
+        ("E3 full_omega", 4),
+    ):
         p_c = _word_sweep_crossing(rows, col)
         if p_c is not None:
             print(f"    {name:<18}: p_c = {p_c:.4f}  E[#m] = {64 * p_c:.2f} of 64")
@@ -436,7 +486,9 @@ def word_percolation_sweep(eng: WordEngine, n_samples: int = 200) -> None:
                 successes += 1
         if successes > 0:
             found_k = k
-            print(f"    k={k:2d} micro_refs : {successes}/{trials} subsets achieve full_omega")
+            print(
+                f"    k={k:2d} micro_refs : {successes}/{trials} subsets achieve full_omega"
+            )
             if successes >= trials * 0.5:
                 break
     if found_k is not None:
@@ -444,7 +496,9 @@ def word_percolation_sweep(eng: WordEngine, n_samples: int = 200) -> None:
     else:
         print("    no subset of <=16 micro_refs achieves full_omega in search")
 
+
 # 5. Transport-curvature spectrum completion percolation.
+
 
 def curvature_spectrum_sweep(eng: WordEngine, n_samples: int = 200) -> None:
     print("\n" + "=" * 5)
@@ -467,7 +521,7 @@ def curvature_spectrum_sweep(eng: WordEngine, n_samples: int = 200) -> None:
         for _ in range(n_samples):
             B = [b for b in range(256) if random.random() < p]
             if len(B) < 2:
-                wsum += (1 if B else 0)
+                wsum += 1 if B else 0
                 continue
             nonzero += 1
             weights = set()
@@ -486,16 +540,26 @@ def curvature_spectrum_sweep(eng: WordEngine, n_samples: int = 200) -> None:
     # threshold
     for i in range(len(rows) - 1):
         if rows[i][2] < 0.5 <= rows[i + 1][2]:
-            frac = (0.5 - rows[i][2]) / (rows[i + 1][2] - rows[i][2]) if rows[i + 1][2] > rows[i][2] else 0.5
+            frac = (
+                (0.5 - rows[i][2]) / (rows[i + 1][2] - rows[i][2])
+                if rows[i + 1][2] > rows[i][2]
+                else 0.5
+            )
             p_c = rows[i][0] + frac * (rows[i + 1][0] - rows[i][0])
-            print(f"\n  E4 curvature-complete p_c ~ {p_c:.4f}  ->  E[#bytes] at p_c = {256*p_c:.1f}")
+            print(
+                f"\n  E4 curvature-complete p_c ~ {p_c:.4f}  ->  E[#bytes] at p_c = {256*p_c:.1f}"
+            )
             break
     else:
         print("\n  E4 no 0.5-crossing in range")
 
+
 # 6. Curve-level null with CI (shuffle byte -> transition mapping).
 
-def null_model_curve(eng: WordEngine, n_samples: int = 120, n_shuffles: int = 5) -> None:
+
+def null_model_curve(
+    eng: WordEngine, n_samples: int = 120, n_shuffles: int = 5
+) -> None:
     print("\n" + "=" * 5)
     print("6. NULL MODEL -- SHUFFLED BYTE->TRANSITION MAPPING (curve-level)")
     print("=" * 5)
@@ -525,7 +589,9 @@ def null_model_curve(eng: WordEngine, n_samples: int = 120, n_shuffles: int = 5)
 
     p_values = [0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 1.0]
     z = 1.96
-    print(f"  {'p':<7}{'Real P(full)':<14}{'Shuffled P(full)':<18}{'gap':<8}{'Real CI95':<14}")
+    print(
+        f"  {'p':<7}{'Real P(full)':<14}{'Shuffled P(full)':<18}{'gap':<8}{'Real CI95':<14}"
+    )
     print("  " + "-" * 5)
     for p in p_values:
         # real
@@ -567,6 +633,7 @@ def null_model_curve(eng: WordEngine, n_samples: int = 120, n_shuffles: int = 5)
 
 # 7. Sector- and shell-resolved confinement (full W2+W2' word graph).
 
+
 def sector_confinement_profile(eng: WordEngine) -> None:
     print("\n" + "=" * 5)
     print("7. SECTOR/SHELL CONFINEMENT (all 64 micro_refs, W2+W2')")
@@ -594,7 +661,9 @@ def sector_confinement_profile(eng: WordEngine) -> None:
         else:
             bulk_hit += 1
 
-    print(f"  Reach from rest: {reach} / {eng.n}   full_omega={full}   bulk_hit={bulk_hit}")
+    print(
+        f"  Reach from rest: {reach} / {eng.n}   full_omega={full}   bulk_hit={bulk_hit}"
+    )
     print(f"  comp_horizon reached: {comp_hit} / {len(comp_set)}")
     print(f"  eq_horizon reached:   {eq_hit} / {len(eq_set)}")
     print(f"\n  {'Shell':<8}{'Count':<8}{'Of shell':<10}")
@@ -604,13 +673,13 @@ def sector_confinement_profile(eng: WordEngine) -> None:
         print(f"  {s:<8}{shell_counts[s]:<8}{shell_sizes[s]:<10}")
 
     # Multi-source from full complement horizon
-    vis_c, reach_c, _, pairing_c, full_c = _word_reach_generic(
-        eng, perms, eng.comp_idx)
+    vis_c, reach_c, _, pairing_c, full_c = _word_reach_generic(eng, perms, eng.comp_idx)
     print(f"\n  From ALL comp_horizon sources:")
     print(f"    reach={reach_c}  full_pairing(eq)={pairing_c}  full_omega={full_c}")
 
 
 # 8. Edge-mode percolation (F-only vs W2+W2' vs all three).
+
 
 def edge_mode_percolation(eng: WordEngine, n_samples: int = 150) -> None:
     print("\n" + "=" * 5)
@@ -645,7 +714,10 @@ def edge_mode_percolation(eng: WordEngine, n_samples: int = 150) -> None:
 
 # 9. Probe words (wavefunction Sec 13 structured nulls).
 
-def _compose_byte_word(trans: List[List[int]], n: int, byte_seq: List[int]) -> List[int]:
+
+def _compose_byte_word(
+    trans: List[List[int]], n: int, byte_seq: List[int]
+) -> List[int]:
     perm = [0] * n
     for i in range(n):
         j = i
@@ -671,13 +743,13 @@ def probe_word_reachability(eng: WordEngine) -> None:
     # Canonical 4-family W2(m) = [fam00,fam01,fam10,fam11] per micro_ref
     probes.append(("canonical 4-fam W2", eng.w2))
 
-    # F^2 = id (depth-8 canonical x2)
+    # F^2 = id (Z₂ return, two F words)
     f2 = []
     for m in range(64):
         fm = eng.fp[m]
         f2m = [fm[fm[i]] for i in range(n)]
         f2.append(f2m)
-    probes.append(("canonical F^2 (depth-8)", f2))
+    probes.append(("canonical F^2 (Z2 return)", f2))
 
     # Same-family 4-byte words (fam 00 and 11)
     for fam, label in ((0, "same-fam 00"), (3, "same-fam 11")):
@@ -716,7 +788,7 @@ def constitutional_shell_trace(eng: WordEngine, omega: List[int]) -> None:
             return "comp-horizon"
         return "bulk"
 
-    for n_turns, label in ((1, "depth-4 (1 turn)"), (2, "depth-8 (2 turns)")):
+    for n_turns, label in ((1, "F (1 turn)"), (2, "F² Z2 cycle (2 turns)")):
         state = omega[eng.start_idx]
         shells = [eng.shell[eng.start_idx]]
         sectors = [sector_label(state)]
@@ -736,9 +808,10 @@ def constitutional_shell_trace(eng: WordEngine, omega: List[int]) -> None:
 
 # 10. Helix Z2 cycle and flat/curved payload dial.
 
+
 def helix_z2_cycle(eng: WordEngine) -> None:
     print("\n" + "=" * 5)
-    print("10. HELIX Z2 CYCLE (F involution, depth-8 from rest)")
+    print("10. HELIX Z2 CYCLE (F involution, F² return from rest)")
     print("=" * 5)
     print("  rest --F(m)--> swapped --F(m)--> rest  (T6, all m).\n")
 
@@ -754,7 +827,9 @@ def helix_z2_cycle(eng: WordEngine) -> None:
 
     # Shell after one F(m) from rest (expect shell 0, Z2 sheet flip)
     shells_after_f = Counter(eng.shell[eng.fp[m][rest]] for m in range(64))
-    print(f"  Shell distribution after one F(m) from rest: {dict(sorted(shells_after_f.items()))}")
+    print(
+        f"  Shell distribution after one F(m) from rest: {dict(sorted(shells_after_f.items()))}"
+    )
 
 
 def flat_curved_payload(eng: WordEngine, n_samples: int = 150) -> None:
@@ -776,7 +851,9 @@ def flat_curved_payload(eng: WordEngine, n_samples: int = 150) -> None:
     print(f"  Flat micro_refs: {len(flat_m)}   Curved micro_refs: {len(curved_m)}")
 
     p_values = [0.1, 0.2, 0.3, 0.5, 1.0]
-    print(f"\n  {'p':<7}{'flat P(pair)':<14}{'curved P(pair)':<16}{'flat Reach':<12}{'curved Reach':<12}")
+    print(
+        f"\n  {'p':<7}{'flat P(pair)':<14}{'curved P(pair)':<16}{'flat Reach':<12}{'curved Reach':<12}"
+    )
     print("  " + "-" * 5)
     for p in p_values:
         stats: Dict[str, Tuple[float, float]] = {}
@@ -802,8 +879,10 @@ def flat_curved_payload(eng: WordEngine, n_samples: int = 150) -> None:
 
 # Main
 
+
 def main() -> None:
     import codecs
+
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
     random.seed(20260702)
 
@@ -832,6 +911,7 @@ def main() -> None:
     print("\n" + "=" * 5)
     print("END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.")
     print("=" * 5)
+
 
 if __name__ == "__main__":
     main()

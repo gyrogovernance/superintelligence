@@ -9,7 +9,7 @@ hQVM(d) finite-size scaling (analysis_5)
 0. d=6 API CROSS-CHECK
 =====
   status: PASS
-  detail: q_word and step_uv match api at d=6
+  detail: q_word, step_uv, gates match api at d=6
 
 =====
 0c. BRIDGE GATE: micro-ref E_full <=> rank=d  [exhaustive d<=4]
@@ -633,11 +633,11 @@ hQVM(d) finite-size scaling (analysis_5)
   7    0.009766   0.937500     28.000    
   8    0.004883   0.968750     32.000    
 
-  d=6 APERTURE_GAP     = 0.020699553913
+  d=6 APERTURE_GAP     = 0.020699545503
   d=6 1/(8d) = 1/48   = 0.020833333333
   d=6 Delta_spinorial  = 0.020833333333
-  |1/48 - APERTURE_GAP| = 0.000133779420
-  |Delta_spin - APERTURE_GAP| = 0.000133779420
+  |1/48 - APERTURE_GAP| = 0.000133787831
+  |Delta_spin - APERTURE_GAP| = 0.000133787831
 
   d=6 fold_disagreement vs hqvm_wavefunction_kernel:
     mismatches / 256 = 0  PASS

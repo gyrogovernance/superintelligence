@@ -86,13 +86,17 @@ ENGINES: Dict[int, HqvmD] = {}
 
 def _configure_stdout_utf8() -> None:
     import codecs
+
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
 
 
 def _engine(d: int) -> HqvmD:
     if d not in ENGINES:
-        print(f"  building hQVM({d}): |Omega|={1 << (2 * d)}, |A|={1 << (d + 2)}...", flush=True)
+        print(
+            f"  building hQVM({d}): |Omega|={1 << (2 * d)}, |A|={1 << (d + 2)}...",
+            flush=True,
+        )
         ENGINES[d] = build_hqvm_d(d)
     return ENGINES[d]
 
@@ -183,7 +187,9 @@ def _interp_at_z(
     return None
 
 
-def _micro_threshold_rows(micro_rows: Dict[int, list]) -> List[Tuple[int, float, float, float, float, float]]:
+def _micro_threshold_rows(
+    micro_rows: Dict[int, list],
+) -> List[Tuple[int, float, float, float, float, float]]:
     """Per d: d, p_c full, z_c full, p_c rank MC, gap at p_c, chi_z_max."""
     out: List[Tuple[int, float, float, float, float, float]] = []
     for d in sorted(micro_rows):
@@ -204,7 +210,16 @@ def _micro_threshold_rows(micro_rows: Dict[int, list]) -> List[Tuple[int, float,
             dz = z1 - z0
             if dz > 0:
                 chi_max = max(chi_max, (th1 - th0) / dz)
-        out.append((d, p_full, z_root_micro_ref(p_full, d), p_rank or float("nan"), gap, chi_max))
+        out.append(
+            (
+                d,
+                p_full,
+                z_root_micro_ref(p_full, d),
+                p_rank or float("nan"),
+                gap,
+                chi_max,
+            )
+        )
     return out
 
 
@@ -219,6 +234,7 @@ def _alphabet_q_weight_at_most(eng: HqvmD, w: int) -> List[int]:
 # ---------------------------------------------------------------------------
 # §0
 # ---------------------------------------------------------------------------
+
 
 def section_0_api_check() -> None:
     print("\n" + "=" * 5)
@@ -271,6 +287,7 @@ def section_0e_root_rank_lock() -> None:
 # §1
 # ---------------------------------------------------------------------------
 
+
 def section_1_square_root(d_values: Sequence[int]) -> Tuple[int, int]:
     print("\n" + "=" * 5)
     print("1. SQUARE-ROOT IDENTITY BY d")
@@ -298,7 +315,9 @@ def section_1_square_root(d_values: Sequence[int]) -> Tuple[int, int]:
             if not ok:
                 fails += 1
             label = "full" if w > d else str(w)
-            print(f"  {d:<4} {label:<4} {r:<6} {reach:<10} {pred:<10} {'PASS' if ok else 'FAIL':<6}")
+            print(
+                f"  {d:<4} {label:<4} {r:<6} {reach:<10} {pred:<10} {'PASS' if ok else 'FAIL':<6}"
+            )
     print(f"\n  aggregate: {tests - fails}/{tests} PASS")
     return tests - fails, tests
 
@@ -306,6 +325,7 @@ def section_1_square_root(d_values: Sequence[int]) -> Tuple[int, int]:
 # ---------------------------------------------------------------------------
 # §2
 # ---------------------------------------------------------------------------
+
 
 def section_2_rank_analytics(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
@@ -337,7 +357,9 @@ def section_2_rank_analytics(d_values: Sequence[int]) -> None:
         print(f"  {spread:<8.3f}" if vals else f"  {'--':<8}")
 
     print("\n  2b. p_c(rank), z_root,c, closed form")
-    print(f"\n  {'d':<4} {'2^d':<8} {'p_c':<12} {'z_root,c':<10} {'p_form':<12} {'|err|':<10}")
+    print(
+        f"\n  {'d':<4} {'2^d':<8} {'p_c':<12} {'z_root,c':<10} {'p_form':<12} {'|err|':<10}"
+    )
     print("  " + "-" * 5)
     for d in d_values:
         p_c = _bisect_p_c_rank(d)
@@ -381,6 +403,7 @@ def section_2c_asymptotic_convergence() -> None:
 # §3
 # ---------------------------------------------------------------------------
 
+
 def section_3_thermodynamic_shell(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
     print("3. SHELL CENSUS AND Z1(lam)")
@@ -404,11 +427,14 @@ def section_3_thermodynamic_shell(d_values: Sequence[int]) -> None:
 # §4
 # ---------------------------------------------------------------------------
 
+
 def section_4_fold_curvature(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
     print("4. FOLD DISAGREEMENT VS d")
     print("=" * 5)
-    print(f"\n  {'d':<4} {'pairs':<6} {'|A|':<8} {'flat':<8} {'curved':<8} {'curve rate':<12}")
+    print(
+        f"\n  {'d':<4} {'pairs':<6} {'|A|':<8} {'flat':<8} {'curved':<8} {'curve rate':<12}"
+    )
     print("  " + "-" * 5)
     for d in d_values:
         eng = _engine(d)
@@ -416,12 +442,15 @@ def section_4_fold_curvature(d_values: Sequence[int]) -> None:
         curved = eng.n_bytes - flat
         rate = curved / eng.n_bytes
         npairs = max_fold_disagreement_d(d)
-        print(f"  {d:<4} {npairs:<6} {eng.n_bytes:<8} {flat:<8} {curved:<8} {rate:<12.6f}")
+        print(
+            f"  {d:<4} {npairs:<6} {eng.n_bytes:<8} {flat:<8} {curved:<8} {rate:<12.6f}"
+        )
 
 
 # ---------------------------------------------------------------------------
 # §5–7
 # ---------------------------------------------------------------------------
+
 
 def _group_sweep(
     eng: HqvmD,
@@ -434,11 +463,16 @@ def _group_sweep(
     """Row: p, P(span/full/rank)_uncond, P(span/full/rank)_cond, E[r]/d|cond, theta|cond, z."""
     n_omega = eng.n_omega
     d = eng.d
-    rows: List[Tuple[float, float, float, float, float, float, float, float, float, float]] = []
+    rows: List[
+        Tuple[float, float, float, float, float, float, float, float, float, float]
+    ] = []
 
     for pi, p in enumerate(p_values):
         if pi % 10 == 0:
-            print(f"    progress {label} d={d} {pi + 1}/{len(p_values)} p={p:.4f}", flush=True)
+            print(
+                f"    progress {label} d={d} {pi + 1}/{len(p_values)} p={p:.4f}",
+                flush=True,
+            )
 
         span_u = full_u = rank_u = 0
         span_c = full_c = rank_c = 0
@@ -480,18 +514,20 @@ def _group_sweep(
 
         z = z_fn(p, d)
         if nz > 0:
-            rows.append((
-                p,
-                span_u / n_samples,
-                full_u / n_samples,
-                rank_u / n_samples,
-                span_c / nz,
-                full_c / nz,
-                rank_c / nz,
-                rank_sum / nz,
-                theta_sum / nz,
-                z,
-            ))
+            rows.append(
+                (
+                    p,
+                    span_u / n_samples,
+                    full_u / n_samples,
+                    rank_u / n_samples,
+                    span_c / nz,
+                    full_c / nz,
+                    rank_c / nz,
+                    rank_sum / nz,
+                    theta_sum / nz,
+                    z,
+                )
+            )
         else:
             rows.append((p, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, z))
 
@@ -508,11 +544,15 @@ def section_5_micro_ref_mc(d_values: Sequence[int]) -> Dict[int, list]:
         n = _n_mc(d)
         p_vals = _p_grid(d)
         print(f"\n  --- d={d}, n={n} ---")
-        rows = _group_sweep(eng, eng.micro_ref_groups, p_vals, n, "micro_ref", z_root_micro_ref)
+        rows = _group_sweep(
+            eng, eng.micro_ref_groups, p_vals, n, "micro_ref", z_root_micro_ref
+        )
         out[d] = rows
         p_c = _find_crossing(rows, COL_P_FULL_U)
         p_c_rank = _find_crossing(rows, COL_P_RANK_U)
-        print(f"\n  {'p':<9} {'z_root':<8} {'P(full)':<10} {'P(rank=d)':<10} {'theta':<10}")
+        print(
+            f"\n  {'p':<9} {'z_root':<8} {'P(full)':<10} {'P(rank=d)':<10} {'theta':<10}"
+        )
         print("  " + "-" * 5)
         keep = {0, len(rows) - 1}
         if p_c is not None:
@@ -543,7 +583,9 @@ def section_6_qclass_mc(d_values: Sequence[int]) -> None:
         n = _n_mc(d)
         p_vals = _p_grid(d)
         print(f"\n  --- d={d}, n={n} ---")
-        rows = _group_sweep(eng, eng.q_class_groups, p_vals, n, "q_class", rank_excess_z)
+        rows = _group_sweep(
+            eng, eng.q_class_groups, p_vals, n, "q_class", rank_excess_z
+        )
         p_c = _find_crossing(rows, COL_P_FULL_U)
         if p_c is not None:
             print(f"  p_c(full) ~ {p_c:.5f}  z_c ~ {rank_excess_z(p_c, d):.4f}")
@@ -561,7 +603,10 @@ def _byte_sweep(
     rows: List[Tuple[float, float, float, float, float, float, float]] = []
     for pi, p in enumerate(p_values):
         if pi % 10 == 0:
-            print(f"    progress byte d={d} {pi + 1}/{len(p_values)} p={p:.4f}", flush=True)
+            print(
+                f"    progress byte d={d} {pi + 1}/{len(p_values)} p={p:.4f}",
+                flush=True,
+            )
         span_c = full_c = rank_full_c = 0
         rank_sum = theta_sum = 0.0
         nz = 0
@@ -582,11 +627,17 @@ def _byte_sweep(
             if r == d:
                 rank_full_c += 1
         z_byte = p * n_bytes - d
-        rows.append((
-            p, span_c / n_samples, full_c / n_samples,
-            rank_sum / max(nz, 1), theta_sum / max(nz, 1), z_byte,
-            rank_full_c / max(nz, 1),
-        ))
+        rows.append(
+            (
+                p,
+                span_c / n_samples,
+                full_c / n_samples,
+                rank_sum / max(nz, 1),
+                theta_sum / max(nz, 1),
+                z_byte,
+                rank_full_c / max(nz, 1),
+            )
+        )
     return rows
 
 
@@ -610,9 +661,7 @@ def section_7_byte_mc(d_values: Sequence[int]) -> Dict[int, list]:
             p_c_val = p_c
             best = min(rows, key=lambda r: abs(r[0] - p_c_val))
             gap = best[BYTE_COL_P_FULL_U] - best[BYTE_COL_P_RANK_C]
-            print(
-                f"  p_c(full) ~ {p_c:.5f}  gap P(full)-P(rank=d) ~ {gap:.4f}"
-            )
+            print(f"  p_c(full) ~ {p_c:.5f}  gap P(full)-P(rank=d) ~ {gap:.4f}")
         if p_rank is not None:
             print(f"  p_c(rank=d) ~ {p_rank:.5f}")
     return out
@@ -621,6 +670,7 @@ def section_7_byte_mc(d_values: Sequence[int]) -> Dict[int, list]:
 # ---------------------------------------------------------------------------
 # §8
 # ---------------------------------------------------------------------------
+
 
 def section_8_scaling_collapse(micro_rows: Dict[int, list]) -> None:
     print("\n" + "=" * 5)
@@ -709,6 +759,7 @@ def section_8_scaling_collapse(micro_rows: Dict[int, list]) -> None:
 # §9
 # ---------------------------------------------------------------------------
 
+
 def section_9_rank_full_gap(
     micro_rows: Dict[int, list],
     byte_rows: Dict[int, list],
@@ -720,7 +771,9 @@ def section_9_rank_full_gap(
         print("  SKIP micro-ref: no MC rows (--fast mode)")
     else:
         print("\n  9a. Micro-ref at p_c(full)")
-        print(f"\n  {'d':<4} {'p_c':<10} {'z_c':<10} {'P(rank)':<10} {'P(full)':<10} {'gap':<10}")
+        print(
+            f"\n  {'d':<4} {'p_c':<10} {'z_c':<10} {'P(rank)':<10} {'P(full)':<10} {'gap':<10}"
+        )
         print("  " + "-" * 5)
         for d, p_full, z_c, _, gap, _ in _micro_threshold_rows(micro_rows):
             rows = micro_rows[d]
@@ -755,6 +808,7 @@ def section_9_rank_full_gap(
 # §10
 # ---------------------------------------------------------------------------
 
+
 def section_10_parity(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
     print("10. PARITY OBSTRUCTION")
@@ -777,6 +831,7 @@ def section_10_parity(d_values: Sequence[int]) -> None:
 # §11
 # ---------------------------------------------------------------------------
 
+
 def section_11_holonomy(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
     print("11. HOLONOMY 1-(1-p^4)^(2^d)")
@@ -796,6 +851,7 @@ def section_11_holonomy(d_values: Sequence[int]) -> None:
 # ---------------------------------------------------------------------------
 # §12
 # ---------------------------------------------------------------------------
+
 
 def section_12_susceptibility(micro_rows: Dict[int, list]) -> None:
     print("\n" + "=" * 5)
@@ -837,7 +893,9 @@ def section_12b_exact_susceptibility(
     print(f"  z grid: {list(Z_CHI_GRID)}")
     print("  theta from exact rank PMF (Mobius, all d in D_VALUES)")
 
-    print(f"\n  {'d':<4} {'chi exact':<12} {'z at max':<12} {'chi MC':<12} {'|gap|':<10}")
+    print(
+        f"\n  {'d':<4} {'chi exact':<12} {'z at max':<12} {'chi MC':<12} {'|gap|':<10}"
+    )
     print("  " + "-" * 5)
     for d in sorted(d_values):
         chi_max = 0.0
@@ -880,6 +938,7 @@ def section_12b_exact_susceptibility(
 # §13
 # ---------------------------------------------------------------------------
 
+
 def section_13_threshold_summary(micro_rows: Dict[int, list]) -> None:
     print("\n" + "=" * 5)
     print("13. THRESHOLD SUMMARY")
@@ -921,6 +980,7 @@ def section_13_threshold_summary(micro_rows: Dict[int, list]) -> None:
 # §14
 # ---------------------------------------------------------------------------
 
+
 def section_14_d6_pa1_crosscheck() -> None:
     print("\n" + "=" * 5)
     print("14. d=6 BFS vs analysis_1")
@@ -954,6 +1014,7 @@ def section_14_d6_pa1_crosscheck() -> None:
 # §15
 # ---------------------------------------------------------------------------
 
+
 def section_15_aperture_delta(d_values: Sequence[int]) -> None:
     print("\n" + "=" * 5)
     print("15. DEPTH-4 APERTURE Delta(d)")
@@ -968,8 +1029,10 @@ def section_15_aperture_delta(d_values: Sequence[int]) -> None:
     except ImportError:
         APERTURE_GAP = None
 
-    print(f"\n  {'d':<4} {'8d':<6} {'mean_fd':<10} {'E[S]/d':<10} {'S exact':<8} "
-          f"{'Delta_sp':<10} {'1/(8d)':<10} {'8d*D':<10} {'F^2 rest':<10}")
+    print(
+        f"\n  {'d':<4} {'8d':<6} {'mean_fd':<10} {'E[S]/d':<10} {'S exact':<8} "
+        f"{'Delta_sp':<10} {'1/(8d)':<10} {'8d*D':<10} {'F^2 rest':<10}"
+    )
     print("  " + "-" * 5)
     for d in d_values:
         mean_fd = mean_fold_disagreement_d(d)
@@ -1021,6 +1084,7 @@ def section_15_aperture_delta(d_values: Sequence[int]) -> None:
 # §16
 # ---------------------------------------------------------------------------
 
+
 def section_16_headline_checklist(
     d_values: Sequence[int],
     micro_rows: Dict[int, list],
@@ -1054,9 +1118,12 @@ def section_16_headline_checklist(
     print("\n  4. Rank threshold p_c(rank) [asymptotic d>=6, root variable]")
     d_gate = (14, 16, 18, 20)
     max_err = max(
-        abs(_bisect_p_c_rank(d) - closed_form_p_c_rank_micro_ref(d, c_star)) for d in d_gate
+        abs(_bisect_p_c_rank(d) - closed_form_p_c_rank_micro_ref(d, c_star))
+        for d in d_gate
     )
-    print(f"     max |p_c - p_form| (d=14..20) = {max_err:.2e}  {'PASS' if max_err < 1e-4 else 'check'}")
+    print(
+        f"     max |p_c - p_form| (d=14..20) = {max_err:.2e}  {'PASS' if max_err < 1e-4 else 'check'}"
+    )
     print(f"     finite-size 1/d correction at small d:")
     for d in (6, 7, 8):
         err = abs(_bisect_p_c_rank(d) - closed_form_p_c_rank_micro_ref(d, c_star))
@@ -1119,7 +1186,9 @@ def _run_analysis(*, fast: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="hQVM(d) finite-size scaling (analysis_5)")
+    parser = argparse.ArgumentParser(
+        description="hQVM(d) finite-size scaling (analysis_5)"
+    )
     parser.add_argument(
         "--fast",
         action="store_true",

@@ -22,38 +22,26 @@ import math
 # Bit-width constants
 # ================================================================
 
+LAYER_BITS: int = 12
 LAYER_MASK_12: int = 0xFFF
 MASK_STATE24: int = 0xFFFFFF
-
-# ================================================================
-# Byte structure masks (from Gyroscopic Byte Formalism)
-# ================================================================
-L0_BIT_0: int = 0x01  # Family bit 0 (controls A complement)
-L0_BIT_7: int = 0x80  # Family bit 7 (controls B complement)
-SHADOW_PARTNER_MASK: int = 0xFE  # Shadow partner XOR mask
-
-# ================================================================
-# Structural topology constants (from Gyroscopic Byte Formalism)
-# ================================================================
-LAYER_BITS: int = 12
-FAMILY_MASK: int = 0x03
-BYTE_COUNT: int = 256  # 256 valid byte instructions
-GAUGE_COUNT: int = 4
-
-# Integer-width masks
+BYTE_COUNT: int = 256
 UINT8_MASK: int = 0xFF
-UINT16_MASK: int = 0xFFFF
-UINT32_MASK: int = 0xFFFFFFFF
-UINT64_MASK: int = 0xFFFFFFFFFFFFFFFF
+MASK_CODE_SIZE: int = 64  # |C64| distinct 12-bit mask codewords
+SHELL_COUNT: int = 7  # Hamming shells 0..6 over 6 chirality bits
+SHADOW_PARTNER_MASK: int = 0xFE  # b ⊕ 0xFE shares the same Ω-permutation
+SHADOW_STATES: int = 128  # SO(3)/SU(2) 2-to-1 projection of 256 bytes
 
 # ================================================================
 # CGM bit masks (palindromic intron positions)
 # ================================================================
 
-L0_MASK: int = 0b10000001  # bits 0, 7 — Left Identity (boundary)
-LI_MASK: int = 0b01000010  # bits 1, 6 — Left Inverse
-FG_MASK: int = 0b00100100  # bits 2, 5 — Forward Gyration
-BG_MASK: int = 0b00011000  # bits 3, 4 — Backward Gyration
+L0_BIT_0: int = 0x01  # intron bit 0 (family / Left Identity)
+L0_BIT_7: int = 0x80  # intron bit 7 (family / Left Identity)
+L0_MASK: int = 0b10000001  # bits 0, 7: Left Identity (boundary)
+LI_MASK: int = 0b01000010  # bits 1, 6: Left Inverse
+FG_MASK: int = 0b00100100  # bits 2, 5: Forward Gyration
+BG_MASK: int = 0b00011000  # bits 3, 4: Backward Gyration
 
 # ================================================================
 # GENE_Mic (archetype) and GENE_Mac (tensor rest state)
@@ -66,11 +54,11 @@ GENE_MAC_B12: int = 0x555
 GENE_MAC_REST: int = (GENE_MAC_A12 << 12) | GENE_MAC_B12
 
 # ================================================================
-# Intrinsic gates (QuBEC Theory Part II §10)
+# Holonomic gates (Appendix G: horizon-preserving operations)
 # ================================================================
 
-GATE_S_BYTES: tuple[int, int] = (0xAA, 0x54)   # Swap: (A,B) -> (B,A)
-GATE_C_BYTES: tuple[int, int] = (0xD5, 0x2B)   # Complement-swap: (A,B) -> (B^F,A^F)
+GATE_S_BYTES: tuple[int, int] = (0xAA, 0x54)  # Swap: (A,B) -> (B,A)
+GATE_C_BYTES: tuple[int, int] = (0xD5, 0x2B)  # Complement-swap: (A,B) -> (B^F,A^F)
 HORIZON_GATE_BYTES: tuple[int, ...] = GATE_S_BYTES + GATE_C_BYTES
 
 # ----------------------------------------
@@ -84,27 +72,8 @@ OMEGA_SIZE: int = 4096
 HORIZON_SIZE: int = 64
 BOUNDARY_SIZE: int = 128
 BULK_SIZE: int = OMEGA_SIZE - BOUNDARY_SIZE
-SHELL_MAX: int = CHIRALITY_QUBITS_6
-SHELL_COUNT: int = SHELL_MAX + 1  # 7
-SHELL_MIDPOINT: int = SHELL_COUNT >> 1
-COMPLEMENTARITY_SUM: int = LAYER_BITS
-SHELL_MAX_POPULATION: int = 1280
 
-# Physical capacity medium (CSM - Formalism §11)
-F_CS_HZ: int = 9_192_631_770
-N_PHYS: float = (4.0 / 3.0) * math.pi * float(F_CS_HZ) ** 3
-CSM_MU: float = N_PHYS / OMEGA_SIZE
-
-# Structural and aperture invariants
-DEPTH_CLOSURE: int = 4
-MASK_CODE_SIZE: int = 64
-SHADOW_STATES: int = 128
-Q_G: float = 4.0 * math.pi
-COMPLEMENT_MASK_12: int = LAYER_MASK_12
-
-PAIR_MASKS_12: tuple[int, ...] = tuple(
-    0x3 << (2 * i) for i in range(CHIRALITY_QUBITS_6)
-)
+PAIR_MASKS_12: tuple[int, ...] = tuple(0x3 << (2 * i) for i in range(6))
 GATE_NAMES: tuple[str, ...] = ("id", "S", "C", "F")
 
 
@@ -126,27 +95,39 @@ Q0: int = 0x033
 Q1: int = 0x0F0
 
 # ================================================================
-# Aperture quantization (CGM Byte Formalism §7)
+# Aperture / BU holonomy (declared payload embedding)
 # ================================================================
+# Under orthogonal boosts of magnitudes theta_ona = pi/4 and m_a:
+#   BU_HOLONOMY_ANGLE = 4 * atan(k(theta_ona) * k(m_a))
+#   k(beta) = beta / (1 + sqrt(1 - beta^2))
+# DELTA_BU / RHO / APERTURE_GAP are retained as aliases.
+
+
+def _half_rapidity_tanh(beta: float) -> float:
+    b = float(beta)
+    if not (0.0 <= b < 1.0):
+        raise ValueError("beta must satisfy 0 <= beta < 1")
+    return b / (1.0 + math.sqrt(1.0 - b * b))
+
+
+def bu_holonomy_angle(
+    theta_ona: float | None = None,
+    m_a: float | None = None,
+) -> float:
+    """Analytic BU Dual-Pole Loop angle under the declared embedding."""
+    th = math.pi / 4.0 if theta_ona is None else float(theta_ona)
+    ma = M_A if m_a is None else float(m_a)
+    return 4.0 * math.atan(_half_rapidity_tanh(th) * _half_rapidity_tanh(ma))
+
 
 M_A: float = 1.0 / (2.0 * math.sqrt(2.0 * math.pi))
+BU_HOLONOMY_ANGLE: float = bu_holonomy_angle()
+BU_CLOSURE_RATIO: float = BU_HOLONOMY_ANGLE / M_A
+BU_APERTURE_GAP: float = 1.0 - BU_CLOSURE_RATIO
 
-
-def _poincare_half_rapidity(beta: float) -> float:
-    """k(β) = β / (1 + √(1 − β²)) = tanh(atanh(β)/2)."""
-    return beta / (1.0 + math.sqrt(max(0.0, 1.0 - beta * beta)))
-
-
-def bu_holonomy_angle() -> float:
-    """BU dual-pole loop angle δ_BU = 4 · arctan(k(π/4) · k(m_a))."""
-    return 4.0 * math.atan(
-        _poincare_half_rapidity(math.pi / 4.0) * _poincare_half_rapidity(M_A)
-    )
-
-
-DELTA_BU: float = bu_holonomy_angle()
-RHO: float = DELTA_BU / M_A
-APERTURE_GAP: float = 1.0 - RHO  # ≈ 0.020699545503
+DELTA_BU: float = BU_HOLONOMY_ANGLE
+RHO: float = BU_CLOSURE_RATIO
+APERTURE_GAP: float = BU_APERTURE_GAP
 APERTURE_GAP_Q256: int = 5  # best 8-bit dyadic approximation: 5/256
 
 
@@ -252,9 +233,9 @@ def micro_ref_to_mask12(micro_ref: int) -> int:
     6-bit payload -> 12-bit mask.
     Payload bit i controls dipole pair i (mask bits 2i and 2i+1).
     """
-    m = int(micro_ref) & CHIRALITY_MASK_6
+    m = int(micro_ref) & 0x3F
     mask12 = 0
-    for i in range(CHIRALITY_QUBITS_6):
+    for i in range(6):
         if (m >> i) & 1:
             mask12 |= 0x3 << (2 * i)
     return mask12 & LAYER_MASK_12
@@ -266,7 +247,7 @@ def expand_intron_to_mask12(intron: int) -> int:
 
 
 _MASK12_BY_INTRON: tuple[int, ...] = tuple(
-    expand_intron_to_mask12(i) for i in range(BYTE_COUNT)
+    expand_intron_to_mask12(i) for i in range(256)
 )
 
 
@@ -275,9 +256,7 @@ _MASK12_BY_INTRON: tuple[int, ...] = tuple(
 # ================================================================
 
 
-def _transition_internals(
-    state24: int, byte: int
-) -> tuple[int, int, int, int, int]:
+def _transition_internals(state24: int, byte: int) -> tuple[int, int, int, int, int]:
     """
     Returns (intron, a_mut, a_next, b_next, next_state24).
     Single canonical implementation for step and trace.
@@ -287,8 +266,8 @@ def _transition_internals(
     a12 = (int(state24) >> 12) & LAYER_MASK_12
     b12 = int(state24) & LAYER_MASK_12
     a_mut = (a12 ^ m12) & LAYER_MASK_12
-    invert_a = COMPLEMENT_MASK_12 if (intron & L0_BIT_0) else 0
-    invert_b = COMPLEMENT_MASK_12 if (intron & L0_BIT_7) else 0
+    invert_a = LAYER_MASK_12 if (intron & 0x01) else 0
+    invert_b = LAYER_MASK_12 if (intron & 0x80) else 0
     a_next = (b12 ^ invert_a) & LAYER_MASK_12
     b_next = (a_mut ^ invert_b) & LAYER_MASK_12
     next_state24 = pack_state(a_next, b_next)
@@ -320,8 +299,8 @@ def inverse_step_by_byte(state24: int, byte: int) -> int:
     m12 = _MASK12_BY_INTRON[intron]
     a_next = (int(state24) >> 12) & LAYER_MASK_12
     b_next = int(state24) & LAYER_MASK_12
-    invert_a = COMPLEMENT_MASK_12 if (intron & L0_BIT_0) else 0
-    invert_b = COMPLEMENT_MASK_12 if (intron & L0_BIT_7) else 0
+    invert_a = LAYER_MASK_12 if (intron & 0x01) else 0
+    invert_b = LAYER_MASK_12 if (intron & 0x80) else 0
     b_pred = (a_next ^ invert_a) & LAYER_MASK_12
     a_pred = ((b_next ^ invert_b) ^ m12) & LAYER_MASK_12
     return pack_state(a_pred, b_pred)
@@ -333,9 +312,7 @@ def single_step_trace(state24: int, byte: int) -> dict[str, int]:
 
     Returns: cs (intron), una (a_mut), ona (a_next), bu (b_next), state24.
     """
-    intron, a_mut, a_next, b_next, next_state24 = _transition_internals(
-        state24, byte
-    )
+    intron, a_mut, a_next, b_next, next_state24 = _transition_internals(state24, byte)
     return {
         "cs": intron,
         "una": a_mut,
@@ -361,16 +338,16 @@ def archetype_distance(state24: int) -> int:
 
 
 def horizon_distance(a12: int, b12: int) -> int:
-    """Horizon distance: popcount(A12 ^ (B12 ^ COMPLEMENT_MASK_12)).
+    """Horizon distance: popcount(A12 ^ (B12 ^ 0xFFF)).
     Zero on the S-sector where chirality is maximal."""
-    return popcount(int(a12) ^ (int(b12) ^ COMPLEMENT_MASK_12))
+    return popcount(int(a12) ^ (int(b12) ^ LAYER_MASK_12))
 
 
 def is_on_horizon(state24: int) -> bool:
-    """Whether state satisfies A12 = B12 ^ COMPLEMENT_MASK_12
+    """Whether state satisfies A12 = B12 ^ 0xFFF
     (complement horizon, maximal chirality, S-sector)."""
     a, b = unpack_state(state24)
-    return a == (b ^ COMPLEMENT_MASK_12)
+    return a == (b ^ LAYER_MASK_12)
 
 
 def ab_distance(a12: int, b12: int) -> int:
@@ -380,11 +357,11 @@ def ab_distance(a12: int, b12: int) -> int:
 
 def complementarity_invariant(a12: int, b12: int) -> bool:
     """True iff horizon_distance + ab_distance == 12 (antipodal pole conservation)."""
-    return horizon_distance(a12, b12) + ab_distance(a12, b12) == LAYER_BITS
+    return horizon_distance(a12, b12) + ab_distance(a12, b12) == 12
 
 
 # ----------------------------------------
-# Intrinsic gate actions (K4 on 24-bit state)
+# Holonomic gate actions (K4 on 24-bit state)
 # ----------------------------------------
 
 
@@ -395,15 +372,15 @@ def apply_gate_S(state24: int) -> int:
 
 
 def apply_gate_C(state24: int) -> int:
-    """Gate C (complement-swap): (A, B) -> (B^F, A^F), F=COMPLEMENT_MASK_12."""
+    """Gate C (complement-swap): (A, B) -> (B^F, A^F), F=0xFFF."""
     a, b = unpack_state(state24)
-    return pack_state(b ^ COMPLEMENT_MASK_12, a ^ COMPLEMENT_MASK_12)
+    return pack_state(b ^ LAYER_MASK_12, a ^ LAYER_MASK_12)
 
 
 def apply_gate_F(state24: int) -> int:
     """Gate F = S o C (global complement): (A, B) -> (A^F, B^F)."""
     a, b = unpack_state(state24)
-    return pack_state(a ^ COMPLEMENT_MASK_12, b ^ COMPLEMENT_MASK_12)
+    return pack_state(a ^ LAYER_MASK_12, b ^ LAYER_MASK_12)
 
 
 def apply_gate(state24: int, name: str) -> int:
@@ -424,7 +401,7 @@ def apply_gate(state24: int, name: str) -> int:
 
 def component_density(component12: int) -> float:
     """Component density: popcount / 12."""
-    return popcount(int(component12)) / LAYER_BITS
+    return popcount(int(component12)) / 12.0
 
 
 # ================================================================

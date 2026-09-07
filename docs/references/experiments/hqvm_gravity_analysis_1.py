@@ -208,9 +208,7 @@ def part_a_residual_closure() -> tuple[float, float]:
     print("-" * 9)
     c4_kernel_frac = -(Fraction(1, 1) + tr_iso_frac)
     c4_kernel = float(c4_kernel_frac)
-    c4_anchor = (
-        tau_required / (Omega_size * Delta * rho**5) - f_ordered
-    ) / (Delta**4)
+    c4_anchor = (tau_required / (Omega_size * Delta * rho**5) - f_ordered) / (Delta**4)
     print(f"c4_kernel exact                 = {c4_kernel_frac}")
     print(f"c4_kernel decimal               = {c4_kernel:.12f}")
     print()
@@ -284,8 +282,10 @@ def part_b_rho5_structure() -> tuple[list[int], list[int], int]:
         ortho_trace = abs(np.sum(E_stf[i] * E_trace))
         if abs(tr) > 1e-10 or ortho_trace > 1e-10:
             all_ok = False
-        print(f"  E_stf[{i}]: trace={tr:+.1e}, norm_sq={norm:.4f}, "
-              f"ortho_trace={ortho_trace:.1e}")
+        print(
+            f"  E_stf[{i}]: trace={tr:+.1e}, norm_sq={norm:.4f}, "
+            f"ortho_trace={ortho_trace:.1e}"
+        )
     print(f"  All trace-free and orthogonal to trace: {all_ok}")
 
     gram = np.zeros((6, 6))
@@ -298,7 +298,9 @@ def part_b_rho5_structure() -> tuple[list[int], list[int], int]:
 
     print()
     print("STF decomposition by payload population:")
-    print(f"{'pop':>4} {'Tr(sigma)':>10} {'p':>8} {'||pi||':>8} {'STF amp':>10} {'STF>0':>8}")
+    print(
+        f"{'pop':>4} {'Tr(sigma)':>10} {'p':>8} {'||pi||':>8} {'STF amp':>10} {'STF>0':>8}"
+    )
     print("-" * 9)
     for pop in range(7):
         tr_sigma = TR_SIGMA_SHELL[pop]
@@ -311,8 +313,10 @@ def part_b_rho5_structure() -> tuple[list[int], list[int], int]:
             pi_norm = 0.0
             stf_amp = 0.0
             stf_flag = "NO"
-        print(f"{pop:>4} {tr_sigma:>10.4f} {p:>8.4f} {pi_norm:>8.4f} "
-              f"{stf_amp:>10.4f} {stf_flag:>8}")
+        print(
+            f"{pop:>4} {tr_sigma:>10.4f} {p:>8.4f} {pi_norm:>8.4f} "
+            f"{stf_amp:>10.4f} {stf_flag:>8}"
+        )
 
     print()
     print("STF attenuation rho^5 and Refractive Depth")
@@ -343,8 +347,10 @@ def part_b_rho5_structure() -> tuple[list[int], list[int], int]:
     shell_pops = [64 * comb(6, k) for k in range(7)]
     bulk_shells: list[int] = []
     horizon_shells: list[int] = []
-    print(f"{'arch_shell':>10} {'Population':>10} {'Fraction':>10} "
-          f"{'Tr(sigma)':>10} {'||pi||':>8} {'Type':>15}")
+    print(
+        f"{'arch_shell':>10} {'Population':>10} {'Fraction':>10} "
+        f"{'Tr(sigma)':>10} {'||pi||':>8} {'Type':>15}"
+    )
     print("-" * 9)
     for k in range(7):
         frac = shell_pops[k] / Omega_size
@@ -359,13 +365,17 @@ def part_b_rho5_structure() -> tuple[list[int], list[int], int]:
         else:
             stype = "BULK"
             bulk_shells.append(k)
-        print(f"{k:>10} {shell_pops[k]:>10} {frac:>10.4f} {tr_sigma:>10.4f} "
-              f"{pi_norm:>8.4f} {stype:>15}")
+        print(
+            f"{k:>10} {shell_pops[k]:>10} {frac:>10.4f} {tr_sigma:>10.4f} "
+            f"{pi_norm:>8.4f} {stype:>15}"
+        )
     print()
     print(f"Horizon arch_shells (||pi||=0): {horizon_shells}")
     print(f"Bulk shells (||pi||>0): {bulk_shells}")
-    print(f"Bulk shell count = STF count = {len(bulk_shells)} = {n_STF}: "
-          f"{len(bulk_shells) == n_STF}")
+    print(
+        f"Bulk shell count = STF count = {len(bulk_shells)} = {n_STF}: "
+        f"{len(bulk_shells) == n_STF}"
+    )
 
     return bulk_shells, horizon_shells, n_STF
 
@@ -442,8 +452,9 @@ def part_c_kernel_transport() -> None:
                 w_sum_f += w
         tau_word = tau_sum / w_sum_f if w_sum_f > 0 else 0.0
         tau_fam.append(tau_word)
-        print(f"  family {fam}: tau_word={tau_word:.9f}  "
-              f"tau_step={tau_word / 4:.9f}")
+        print(
+            f"  family {fam}: tau_word={tau_word:.9f}  " f"tau_step={tau_word / 4:.9f}"
+        )
     mean_tw = sum(tau_fam) / 4.0
     var_tw = sum((t - mean_tw) ** 2 for t in tau_fam)
     print(f"  mean tau_word: {mean_tw:.9f}  var: {var_tw:.6e}")
@@ -470,8 +481,7 @@ def part_c_kernel_transport() -> None:
         p = bin(micro).count("1")
         per_pop.setdefault(p, []).append(tau_path_kappa(micro, binom_shell))
     pop_parts = [
-        f"p{p}={sum(v)/len(v):.6f}(n={len(v)})"
-        for p, v in sorted(per_pop.items())
+        f"p{p}={sum(v)/len(v):.6f}(n={len(v)})" for p, v in sorted(per_pop.items())
     ]
     print(f"  per-pop tau: {' '.join(pop_parts)}")
 
@@ -586,10 +596,9 @@ def part_e_summary(
     print("=" * 10)
 
     tau_leading = tau_G_formula
-    tau_full = tau_g_with_c4(-7.0 / 4.0)
-    G_leading = g_pred_from_tau(tau_leading)
-    G_pred = g_pred_from_tau(tau_full)
-    alpha_G_pred = G_kernel * math.exp(-tau_full)
+    tau_tr = tau_g_with_c4(-7.0 / 4.0) - tau_leading
+    G_pred = g_pred_from_tau(tau_leading)
+    alpha_G_pred = G_kernel * math.exp(-tau_leading)
 
     print("CGM invariants:")
     print(f"  Q_G    = {Q_G:.10f}")
@@ -604,20 +613,21 @@ def part_e_summary(
     print(f"  D        = {Z2_HOLONOMY_PATH_TRAVERSE}")
     print(f"  G_kernel = pi/6 = {G_kernel:.12f}")
     print()
-    print("Refractive Depth:")
-    print(f"  leading order tau_G = {tau_leading:.12f}")
-    print(f"  full prediction     = {tau_full:.12f}")
+    print("Refractive Depth (STF coupling):")
+    print(f"  tau_G               = {tau_leading:.12f}")
+    print(f"  tau_trace (c4=-7/4) = {tau_tr:.12e}")
     print()
     print("Gravitational coupling:")
-    print(f"  G_pred (full)        = {G_pred:.6e} GeV^-2")
+    print(f"  G_pred               = {G_pred:.6e} GeV^-2")
     print(f"  G_meas               = {G_meas:.6e} GeV^-2")
-    print(f"  ppm (full)           = {(G_pred/G_meas - 1)*1e6:+.3f}")
-    print(f"  ppm (leading)        = {(G_leading/G_meas - 1)*1e6:+.3f}")
+    print(f"  ppm                  = {(G_pred/G_meas - 1)*1e6:+.3f}")
     print()
     print("Three routes to exponent 5:")
     print(f"  A (STF):    dim(STF(3)) = {n_STF}")
-    print(f"  B (shells): bulk shells {bulk_shells} (count {len(bulk_shells)}); "
-          f"horizons {horizon_shells}")
+    print(
+        f"  B (shells): bulk shells {bulk_shells} (count {len(bulk_shells)}); "
+        f"horizons {horizon_shells}"
+    )
     print(f"  C (cycle):  rho exponent 8 - 3 = 5")
 
     print()
@@ -627,8 +637,8 @@ def part_e_summary(
     print(f"  rho = {rho:.12f}")
     print(f"  Delta = {Delta:.12f}")
     print(f"  STF dim = {n_STF}, bulk shells = {len(bulk_shells)}, |K4| = 4")
-    print(f"  tau_G (full) = {tau_full:.6f}")
-    print(f"  G_pred/G_meas - 1 (full) = {(G_pred/G_meas - 1) * 1e6:.3f} ppm")
+    print(f"  tau_G (STF) = {tau_leading:.6f}")
+    print(f"  G_pred/G_meas - 1 = {(G_pred/G_meas - 1) * 1e6:.3f} ppm")
 
 
 # ============================================================

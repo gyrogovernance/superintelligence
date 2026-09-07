@@ -85,7 +85,9 @@ except ImportError:
     CGM_DELTA = APERTURE_GAP
     CGM_RHO = RHO
     CGM_OMEGA = 4096
-    tau_G_formula = CGM_OMEGA * CGM_DELTA * CGM_RHO**5
+    tau_G_formula = (
+        CGM_OMEGA * CGM_DELTA * CGM_RHO**5 * (1.0 - 4.0 * CGM_RHO * CGM_DELTA**2)
+    )
     binom_shell = [comb(6, s) / 64.0 for s in range(7)]
     tau_cycle_per_delta_exact = None
     kernel_exposure_constants = None
@@ -102,7 +104,7 @@ except ImportError:
     tau_cycle_per_delta_kernel_exact = None
 
 try:
-    from hqvm_compact_geom_core import carrier_trace, shell_return_trace
+    from hqvm_compact_geom_common import carrier_trace, shell_return_trace
 except ImportError:
     carrier_trace = None
     shell_return_trace = None
@@ -152,12 +154,14 @@ def _shannon_bits(counts: Counter) -> float:
 
 
 def _porosity_pi_grid() -> List[float]:
-    return sorted(set(
-        [i / 100 for i in range(0, 10)]
-        + [i / 1000 for i in range(10, 41)]
-        + [i / 100 for i in range(4, 21)]
-        + [i / 10 for i in range(3, 11)]
-    ))
+    return sorted(
+        set(
+            [i / 100 for i in range(0, 10)]
+            + [i / 1000 for i in range(10, 41)]
+            + [i / 100 for i in range(4, 21)]
+            + [i / 10 for i in range(3, 11)]
+        )
+    )
 
 
 def _build_uv_indices(omega: List[int]) -> Tuple[List[int], List[int]]:
@@ -197,8 +201,7 @@ def verify_commutation_laws(
     print("  Bytes x,y commute on Omega iff q6(x) = q6(y).\n")
 
     commute = sum(
-        1 for b1 in range(256) for b2 in range(256)
-        if q_word6(b1) == q_word6(b2)
+        1 for b1 in range(256) for b2 in range(256) if q_word6(b1) == q_word6(b2)
     )
     print(f"  Commuting ordered pairs (exhaustive): {commute} / 65536")
     print(f"  Rate = {commute / 65536:.6f}  (expect 1024/65536 = {1024/65536:.6f})")
@@ -214,8 +217,10 @@ def verify_commutation_laws(
     for q in (0, 31, 63):
         allowed = q_groups[q]
         r = pa1.compute_reachability(engine, allowed)
-        print(f"    q6={q:02d}: |B|={len(allowed)}  Reach={r.reachable}  "
-              f"Full={r.full_omega}  Span={r.spans}")
+        print(
+            f"    q6={q:02d}: |B|={len(allowed)}  Reach={r.reachable}  "
+            f"Full={r.full_omega}  Span={r.spans}"
+        )
 
     print("\n  MC sweep: single random q-class vs independent bytes (n=200):")
     p_values = [0.1, 0.2, 0.3, 0.5, 1.0]
@@ -242,8 +247,10 @@ def verify_commutation_laws(
                     b_full += 1
                 q_div_sum += len({q_word6(b) for b in allowed_b})
         denom = max(nz, 1)
-        print(f"  {p:<7.3f}{sq_full/n_samples:<18.4f}{b_full/n_samples:<14.4f}"
-              f"{q_div_sum/denom:<10.2f}")
+        print(
+            f"  {p:<7.3f}{sq_full/n_samples:<18.4f}{b_full/n_samples:<14.4f}"
+            f"{q_div_sum/denom:<10.2f}"
+        )
 
     print("\n  Q-diversity threshold (independent bytes, n=300):")
     print(f"  {'p':<8}{'P(full)':<10}{'E[#q]':<10}{'E[|A|]':<10}{'E[reach]':<10}")
@@ -264,8 +271,10 @@ def verify_commutation_laws(
             size_sum += len(allowed)
             reach_sum += r.reachable
         denom = max(nz, 1)
-        print(f"  {p:<8.3f}{full_hits/denom:<10.4f}{q_sum/denom:<10.2f}"
-              f"{size_sum/denom:<10.1f}{reach_sum/denom:<10.1f}")
+        print(
+            f"  {p:<8.3f}{full_hits/denom:<10.4f}{q_sum/denom:<10.2f}"
+            f"{size_sum/denom:<10.1f}{reach_sum/denom:<10.1f}"
+        )
 
 
 def run_future_cone_entropy(
@@ -298,8 +307,10 @@ def run_future_cone_entropy(
             r1_sum += r1
             r2_sum += r2
         denom = max(n_samples, 1)
-        print(f"  {p:<7.3f}{h1_sum/denom:<10.3f}{h2_sum/denom:<10.3f}"
-              f"{r1_sum/denom:<10.1f}{r2_sum/denom:<10.1f}")
+        print(
+            f"  {p:<7.3f}{h1_sum/denom:<10.3f}{h2_sum/denom:<10.3f}"
+            f"{r1_sum/denom:<10.1f}{r2_sum/denom:<10.1f}"
+        )
 
     # State-independence: Features 77-79 hold at every Omega state at full alphabet
     print("\n  State-independence (full alphabet, fixed starts):")
@@ -343,7 +354,9 @@ def run_uv_factorization(
     start = engine.start_idx
     p_values = [0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
 
-    print(f"  {'p':<7}{'|U_hit|':<9}{'|V_hit|':<9}{'|UxV|':<9}{'Reach':<8}{'P(full)':<8}")
+    print(
+        f"  {'p':<7}{'|U_hit|':<9}{'|V_hit|':<9}{'|UxV|':<9}{'Reach':<8}{'P(full)':<8}"
+    )
     print("  " + "-" * 5)
 
     for p in p_values:
@@ -369,8 +382,10 @@ def run_uv_factorization(
             if rcount == N_OMEGA:
                 full += 1
         denom = max(n_samples, 1)
-        print(f"  {p:<7.3f}{u_hit/denom:<9.1f}{v_hit/denom:<9.1f}"
-              f"{uv_pairs/denom:<9.1f}{reach_sum/denom:<8.1f}{full/denom:<8.4f}")
+        print(
+            f"  {p:<7.3f}{u_hit/denom:<9.1f}{v_hit/denom:<9.1f}"
+            f"{uv_pairs/denom:<9.1f}{reach_sum/denom:<8.1f}{full/denom:<8.4f}"
+        )
 
 
 def run_shell_enrichment(
@@ -386,8 +401,20 @@ def run_shell_enrichment(
     start = engine.start_idx
     shell = engine.shell
     p_values = [
-        0.01, 0.015, 0.02, 0.022, 0.025, 0.03, 0.035, 0.04, 0.05,
-        0.1, 0.2, 0.3, 0.5, 1.0,
+        0.01,
+        0.015,
+        0.02,
+        0.022,
+        0.025,
+        0.03,
+        0.035,
+        0.04,
+        0.05,
+        0.1,
+        0.2,
+        0.3,
+        0.5,
+        1.0,
     ]
 
     print(f"  {'p':<8}{'E[|R|]':<10}{'E[S]':<8}", end="")
@@ -446,10 +473,14 @@ def run_two_step_uniformization(
         for b2 in full_allowed:
             mult_full[trans[mid][b2]] += 1
     vals = list(mult_full.values())
-    print(f"  Full alphabet: min={min(vals)} max={max(vals)} "
-          f"unique multiplicities={len(set(vals))}  (expect all 16)")
+    print(
+        f"  Full alphabet: min={min(vals)} max={max(vals)} "
+        f"unique multiplicities={len(set(vals))}  (expect all 16)"
+    )
 
-    print(f"\n  {'p':<7}{'E[min]':<9}{'E[max]':<9}{'E[std]':<9}{'E[CV]':<9}{'E[cover]':<10}")
+    print(
+        f"\n  {'p':<7}{'E[min]':<9}{'E[max]':<9}{'E[std]':<9}{'E[CV]':<9}{'E[cover]':<10}"
+    )
     print("  " + "-" * 5)
 
     for p in p_values:
@@ -477,8 +508,10 @@ def run_two_step_uniformization(
             cvs.append(std / mean if mean > 0 else 0.0)
             covers.append(len(mult) / N_OMEGA)
         denom = max(len(mins), 1)
-        print(f"  {p:<7.3f}{sum(mins)/denom:<9.2f}{sum(maxs)/denom:<9.1f}"
-              f"{sum(stds)/denom:<9.2f}{sum(cvs)/denom:<9.3f}{sum(covers)/denom:<10.4f}")
+        print(
+            f"  {p:<7.3f}{sum(mins)/denom:<9.2f}{sum(maxs)/denom:<9.1f}"
+            f"{sum(stds)/denom:<9.2f}{sum(cvs)/denom:<9.3f}{sum(covers)/denom:<10.4f}"
+        )
 
 
 def run_fold_phase_complete_tables(
@@ -502,7 +535,9 @@ def run_fold_phase_complete_tables(
     for d in range(5):
         allowed = fd_bytes[d]
         r = pa1.compute_reachability(engine, allowed)
-        print(f"  fd={d} only    {len(allowed):5d}{r.reachable:7d}{str(r.full_omega):>6}")
+        print(
+            f"  fd={d} only    {len(allowed):5d}{r.reachable:7d}{str(r.full_omega):>6}"
+        )
     for d in range(5):
         cumul.extend(fd_bytes[d])
         r = pa1.compute_reachability(engine, cumul)
@@ -532,10 +567,10 @@ def run_minimal_boundary_subsets(
 
     for mask in range(1 << n_b):
         allowed = [
-            bc.byte for bc in bclass
+            bc.byte
+            for bc in bclass
             if all(
-                (bc.connection_chain[i] == 0.0) or ((mask >> i) & 1)
-                for i in range(n_b)
+                (bc.connection_chain[i] == 0.0) or ((mask >> i) & 1) for i in range(n_b)
             )
         ]
         r = pa1.compute_reachability(engine, allowed)
@@ -575,7 +610,8 @@ def run_minimal_boundary_subsets(
                 if mask.bit_count() != pop:
                     continue
                 allowed = [
-                    bc.byte for bc in bclass
+                    bc.byte
+                    for bc in bclass
                     if all(
                         (bc.connection_chain[i] == 0.0) or ((mask >> i) & 1)
                         for i in range(n_b)
@@ -601,9 +637,9 @@ def run_permutation_class_sweep(
     print("=" * 5)
     print(f"  {len(perm_classes)} classes (2 bytes per class via b^0xFE shadow).\n")
 
-    p_values = sorted(set(
-        [0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)]
-    ))
+    p_values = sorted(
+        set([0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)])
+    )
     # one representative per class (min byte)
     groups_repr = [[min(g)] for g in perm_classes]
     groups_both = [g for g in perm_classes]
@@ -611,25 +647,29 @@ def run_permutation_class_sweep(
     for label, groups in (("one_repr", groups_repr), ("both_shadow", groups_both)):
         print(f"\n  --- Mode: {label} ({len(groups)} groups) ---")
         data = pa1._random_subset_sweep(
-            engine, groups, p_values, n_samples, f"perm-{label}")
+            engine, groups, p_values, n_samples, f"perm-{label}"
+        )
         pa1._print_sweep_table(data, n_samples)
 
 
-def _byte_map(bclass: List[pa1.ByteClassification]) -> Dict[int, pa1.ByteClassification]:
+def _byte_map(
+    bclass: List[pa1.ByteClassification],
+) -> Dict[int, pa1.ByteClassification]:
     return {bc.byte: bc for bc in bclass}
 
 
-def _boundary_porosity(allowed: Sequence[int], bc_map: Dict[int, pa1.ByteClassification],
-                       boundary_idx: int) -> float:
+def _boundary_porosity(
+    allowed: Sequence[int], bc_map: Dict[int, pa1.ByteClassification], boundary_idx: int
+) -> float:
     if not allowed:
         return 0.0
-    active = sum(
-        1 for b in allowed if bc_map[b].connection_chain[boundary_idx] > 0.0
-    )
+    active = sum(1 for b in allowed if bc_map[b].connection_chain[boundary_idx] > 0.0)
     return active / len(allowed)
 
 
-def _fold_porosity(allowed: Sequence[int], bc_map: Dict[int, pa1.ByteClassification]) -> float:
+def _fold_porosity(
+    allowed: Sequence[int], bc_map: Dict[int, pa1.ByteClassification]
+) -> float:
     if not allowed:
         return 0.0
     vals = [_boundary_porosity(allowed, bc_map, i) for i in FOLD_BOUNDARY_IDXS]
@@ -662,18 +702,24 @@ def run_geometric_porosity_sweeps(
     print("=" * 5)
     print("  pi_j(A) = fraction of bytes in A with nonzero connection at boundary j.")
     print("  pi_BU is BU|BU (fold boundary). pi_fold averages ONA|BU, BU|BU, BU|ONA.")
-    print(f"  CGM constants: Delta={CGM_DELTA:.6f}  5/256={FIVE_OVER_256:.6f}  "
-          f"1/48={ONE_OVER_48:.6f}\n")
+    print(
+        f"  CGM constants: Delta={CGM_DELTA:.6f}  5/256={FIVE_OVER_256:.6f}  "
+        f"1/48={ONE_OVER_48:.6f}\n"
+    )
 
     bc_map = _byte_map(bclass)
     bu_active = [bc.byte for bc in bclass if bc.connection_chain[BU_BOUNDARY_IDX] > 0.0]
-    bu_inactive = [bc.byte for bc in bclass if bc.connection_chain[BU_BOUNDARY_IDX] == 0.0]
+    bu_inactive = [
+        bc.byte for bc in bclass if bc.connection_chain[BU_BOUNDARY_IDX] == 0.0
+    ]
     boundaries = pa1.PHASE_BOUNDARIES
 
     # Stratified porosity sweep: control pi_BU by mixing active/inactive pools
     pi_grid = _porosity_pi_grid()
 
-    print(f"  {'pi_BU':<8}{'P(span)':<10}{'P(full)':<10}{'E[|A|]':<10}{'E[pi_fold]':<12}")
+    print(
+        f"  {'pi_BU':<8}{'P(span)':<10}{'P(full)':<10}{'E[|A|]':<10}{'E[pi_fold]':<12}"
+    )
     print("  " + "-" * 5)
 
     span_curve: List[Tuple[float, float]] = []
@@ -687,9 +733,7 @@ def run_geometric_porosity_sweeps(
             n_inact = min(len(bu_inactive), n_a - n_act)
             if n_act + n_inact == 0:
                 continue
-            allowed = (
-                random.sample(bu_active, n_act) if n_act else []
-            ) + (
+            allowed = (random.sample(bu_active, n_act) if n_act else []) + (
                 random.sample(bu_inactive, n_inact) if n_inact else []
             )
             nz += 1
@@ -703,8 +747,10 @@ def run_geometric_porosity_sweeps(
         denom = max(nz, 1)
         p_span = span_hits / denom
         span_curve.append((pi_target, p_span))
-        print(f"  {pi_target:<8.3f}{p_span:<10.4f}{full_hits/denom:<10.4f}"
-              f"{size_sum/denom:<10.1f}{fold_sum/denom:<12.4f}")
+        print(
+            f"  {pi_target:<8.3f}{p_span:<10.4f}{full_hits/denom:<10.4f}"
+            f"{size_sum/denom:<10.1f}{fold_sum/denom:<12.4f}"
+        )
 
     # Estimate pi_BU at P(span)=0.5 via linear interpolation
     p_c_span_pi = None
@@ -717,7 +763,9 @@ def run_geometric_porosity_sweeps(
     if p_c_span_pi is not None:
         print(f"\n  pi_BU at P(span)=0.5 (interpolated): {p_c_span_pi:.4f}")
         print(f"    vs Delta={CGM_DELTA:.4f}  ratio={p_c_span_pi/CGM_DELTA:.3f}")
-        print(f"    vs 5/256={FIVE_OVER_256:.4f}  ratio={p_c_span_pi/FIVE_OVER_256:.3f}")
+        print(
+            f"    vs 5/256={FIVE_OVER_256:.4f}  ratio={p_c_span_pi/FIVE_OVER_256:.3f}"
+        )
         print(f"    vs 1/48={ONE_OVER_48:.4f}  ratio={p_c_span_pi/ONE_OVER_48:.3f}")
 
     print("\n  All-boundary porosities at full alphabet (reference):")
@@ -756,7 +804,9 @@ def run_plaquette_loop_defect(
             mean_sum += md
             size_sum += len(allowed)
         denom = max(nz, 1)
-        print(f"  {p:<7.3f}{d_sum/denom:<12.4f}{mean_sum/denom:<12.4f}{size_sum/denom:<10.1f}")
+        print(
+            f"  {p:<7.3f}{d_sum/denom:<12.4f}{mean_sum/denom:<12.4f}{size_sum/denom:<10.1f}"
+        )
 
     # Convergence vs alphabet size (coupon-collector style)
     print("\n  D(A) vs |A| (random subsets, n=150 each size):")
@@ -768,7 +818,9 @@ def run_plaquette_loop_defect(
         d_sum = mean_sum = 0.0
         reps = 150 if size < 256 else 1
         for _ in range(reps):
-            allowed = random.sample(range(256), size) if size < 256 else list(range(256))
+            allowed = (
+                random.sample(range(256), size) if size < 256 else list(range(256))
+            )
             d_a, md = _plaquette_D(allowed)
             d_sum += d_a
             mean_sum += md
@@ -788,7 +840,21 @@ def run_spanning_transmission(
     print(f"  tau_G (kernel closed form) = {tau_G_formula:.6f}\n")
 
     bc_map = _byte_map(bclass)
-    p_values = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.08, 0.10, 0.15, 0.20]
+    p_values = [
+        0.005,
+        0.01,
+        0.015,
+        0.02,
+        0.025,
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.08,
+        0.10,
+        0.15,
+        0.20,
+    ]
 
     print(f"  {'p':<8}{'P(span)':<10}{'-ln T':<10}{'E[bulk hit]':<12}{'E[pi_BU]':<10}")
     print("  " + "-" * 5)
@@ -812,14 +878,18 @@ def run_spanning_transmission(
         denom = max(nz, 1)
         p_span = span_hits / denom
         neg_log = -math.log(max(p_span, 1e-6))
-        print(f"  {p:<8.3f}{p_span:<10.4f}{neg_log:<10.4f}"
-              f"{bulk_sum/denom:<12.3f}{pi_sum/denom:<10.4f}")
+        print(
+            f"  {p:<8.3f}{p_span:<10.4f}{neg_log:<10.4f}"
+            f"{bulk_sum/denom:<12.3f}{pi_sum/denom:<10.4f}"
+        )
 
     # rho^5 attenuation reference: shells 1-5 each with closure prob rho
-    rho5 = CGM_RHO ** 5
+    rho5 = CGM_RHO**5
     print(f"\n  Reference: rho^5 = {rho5:.6f}  (5 STF shell closure factors)")
     print(f"  tau_G / |Omega| = {tau_G_formula/CGM_OMEGA:.6f}")
-    print(f"  Delta * rho^5 * f_ordered = {CGM_DELTA * rho5 * (1 - 4*CGM_RHO*CGM_DELTA**2):.6f}")
+    print(
+        f"  Delta * rho^5 * f_ordered = {CGM_DELTA * rho5 * (1 - 4*CGM_RHO*CGM_DELTA**2):.6f}"
+    )
     print("  At p=0.020, T~0.44, -ln T~0.81; bulk fraction~0.45.")
 
 
@@ -903,8 +973,10 @@ def run_uv_rectangularity(
             u_sum += nu
             v_sum += nv
         denom = max(nz, 1)
-        print(f"  {p:<7.3f}{rect_sum/denom:<10.4f}{r_sum/denom:<10.1f}"
-              f"{u_sum/denom:<8.1f}{v_sum/denom:<8.1f}")
+        print(
+            f"  {p:<7.3f}{rect_sum/denom:<10.4f}{r_sum/denom:<10.1f}"
+            f"{u_sum/denom:<8.1f}{v_sum/denom:<8.1f}"
+        )
 
 
 def _fold_active_count(bc: pa1.ByteClassification) -> int:
@@ -939,11 +1011,9 @@ def _mask_allowed_bytes(
     mask: int,
 ) -> List[int]:
     return [
-        bc.byte for bc in bclass
-        if all(
-            (bc.connection_chain[i] == 0.0) or ((mask >> i) & 1)
-            for i in range(7)
-        )
+        bc.byte
+        for bc in bclass
+        if all((bc.connection_chain[i] == 0.0) or ((mask >> i) & 1) for i in range(7))
     ]
 
 
@@ -958,15 +1028,19 @@ def run_fold_triple_porosity_controlled(
     print("  Fix |A|=k; vary pi_fold via pool[0] vs pool[3] bytes.")
     print("  pool[c] = bytes active on exactly c of {ONA|BU, BU|BU, BU|ONA}.")
     print("  Phase A: all 256 bytes.  Phase B: 64-byte minimal 5-boundary mask.")
-    print(f"  CGM: Delta={CGM_DELTA:.6f}  5/256={FIVE_OVER_256:.6f}  "
-          f"1/48={ONE_OVER_48:.6f}\n")
+    print(
+        f"  CGM: Delta={CGM_DELTA:.6f}  5/256={FIVE_OVER_256:.6f}  "
+        f"1/48={ONE_OVER_48:.6f}\n"
+    )
 
     bc_map = _byte_map(bclass)
     pools = _build_fold_pools(bclass)
     minimal_mask = 61
     minimal_pool = set(_mask_allowed_bytes(bclass, minimal_mask))
-    print(f"  Pool sizes (all bytes): c=0:{len(pools[0])}  c=1:{len(pools[1])}  "
-          f"c=2:{len(pools[2])}  c=3:{len(pools[3])}")
+    print(
+        f"  Pool sizes (all bytes): c=0:{len(pools[0])}  c=1:{len(pools[1])}  "
+        f"c=2:{len(pools[2])}  c=3:{len(pools[3])}"
+    )
     print(f"  Minimal-mask pool |B|={len(minimal_pool)}  mask={minimal_mask}\n")
 
     pi_grid = [i / 1000 for i in range(0, 51)] + [i / 100 for i in range(6, 21)]
@@ -1002,9 +1076,14 @@ def run_fold_triple_porosity_controlled(
                 denom = max(nz, 1)
                 p_span = span_hits / denom
                 span_curve.append((pi_sum / denom, p_span))
-                if pi_target in (0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.20, 0.50, 1.0) or abs(pi_target - CGM_DELTA) < 0.0005:
-                    print(f"  {pi_target:<9.3f}{p_span:<10.4f}{full_hits/denom:<10.4f}"
-                          f"{pi_sum/denom:<12.4f}")
+                if (
+                    pi_target in (0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.20, 0.50, 1.0)
+                    or abs(pi_target - CGM_DELTA) < 0.0005
+                ):
+                    print(
+                        f"  {pi_target:<9.3f}{p_span:<10.4f}{full_hits/denom:<10.4f}"
+                        f"{pi_sum/denom:<12.4f}"
+                    )
 
             p_half = None
             for i in range(1, len(span_curve)):
@@ -1015,14 +1094,22 @@ def run_fold_triple_porosity_controlled(
                         p_half = p0 + (0.5 - s0) * (p1 - p0) / (s1 - s0)
                     break
             if p_half is not None:
-                print(f"  P(span)=0.5 at pi_fold ~ {p_half:.4f}  "
-                      f"(Delta={CGM_DELTA:.4f}, ratio={p_half/CGM_DELTA:.2f})")
+                print(
+                    f"  P(span)=0.5 at pi_fold ~ {p_half:.4f}  "
+                    f"(Delta={CGM_DELTA:.4f}, ratio={p_half/CGM_DELTA:.2f})"
+                )
             print()
     print("  Interpretation per Wavefunction analysis:")
-    print("    Delta (~0.0207) is the residual aperture AFTER depth-4 holonomic closure,")
+    print(
+        f"    Delta ({CGM_DELTA:.12f}) is the residual aperture after depth-4 closure,"
+    )
     print("    not the classical critical porosity for horizon spanning (E_span).")
-    print("    Byte-level fold disagreement is structurally 50%; closure compresses it to ~2.07%.")
-    print("    The relevant 'aperture event' is holonomy-word availability or H2 onset, not E_span.")
+    print(
+        "    Byte-level fold disagreement is structurally 50%; closure compresses it to ~2.07%."
+    )
+    print(
+        "    The relevant aperture event is holonomy-word availability or H2 onset, not E_span."
+    )
 
 
 def _kappa_binom_dest(shell_k: int) -> float:
@@ -1083,7 +1170,9 @@ HOLONOMY_WORD_LENGTH = 4
 N_MICROREFS = 64
 
 
-def expected_micro_cov(p: float, L: int = HOLONOMY_WORD_LENGTH, n_micro: int = N_MICROREFS) -> float:
+def expected_micro_cov(
+    p: float, L: int = HOLONOMY_WORD_LENGTH, n_micro: int = N_MICROREFS
+) -> float:
     """Analytic expectation for fraction of micro-refs with full holonomy word available.
     Assumes independent byte inclusion with prob p.
     """
@@ -1092,7 +1181,7 @@ def expected_micro_cov(p: float, L: int = HOLONOMY_WORD_LENGTH, n_micro: int = N
     if p >= 1:
         return 1.0
     # Prob one specific micro-ref word is fully present
-    p_one = p ** L
+    p_one = p**L
     # Prob at least one complete (union bound approx for small, or exact 1 - (1-p_one)^n )
     return 1.0 - (1.0 - p_one) ** n_micro
 
@@ -1147,18 +1236,26 @@ def run_tau_percolation_identity(
 
     tau_step_full = _tau_step_channel(engine, list(full_set))
     tau_like_full = _tau_like_cycle(engine, list(full_set))
-    print(f"\n  Channel full alphabet: tau_step={tau_step_full:.10f}  "
-          f"4*tau_step={tau_like_full:.10f}")
+    print(
+        f"\n  Channel full alphabet: tau_step={tau_step_full:.10f}  "
+        f"4*tau_step={tau_like_full:.10f}"
+    )
 
     if kernel_exposure_constants is not None:
         n_cycles, tau_cycle, tau_g_full, tau_od = kernel_exposure_constants()
         print(f"  Kernel tau_cycle     = {tau_cycle:.10f}")
         print(f"  4*tau_step/tau_cycle = {tau_like_full / tau_cycle:.6f}")
-        print("  Note: holonomy tau matches kernel exactly (per Wavefunction: depth-4 holonomy path).")
-        print("        Channel tau samples all rest-reachable edges (different measure; ratio is conversion factor).")
+        print(
+            "  Note: holonomy tau matches kernel exactly (per Wavefunction: depth-4 holonomy path)."
+        )
+        print(
+            "        Channel tau samples all rest-reachable edges (different measure; ratio is conversion factor)."
+        )
 
     p_values = [0.01, 0.015, 0.02, 0.025, 0.03, 0.05, 0.10, 0.20, 0.50, 1.0]
-    print(f"\n  {'p':<8}{'hol/Delta':<14}{'q/Delta':<14}{'micro_cov':<12}{'E[micro_cov]':<14}{'4*tau_step':<14}")
+    print(
+        f"\n  {'p':<8}{'hol/Delta':<14}{'q/Delta':<14}{'micro_cov':<12}{'E[micro_cov]':<14}{'4*tau_step':<14}"
+    )
     print("  " + "-" * 5)
     ref_channel = tau_like_full if tau_like_full > 0 else 1.0
     for p in p_values:
@@ -1181,14 +1278,22 @@ def run_tau_percolation_identity(
         denom = max(nz, 1)
         tl = like_sum / denom
         hol_avg = float(hol_tau_p / denom) if holonomy_arch_path else 0.0
-        cov_avg = float((hol_cov_p / denom) / full_hol_cov) if holonomy_arch_path else 0.0
+        cov_avg = (
+            float((hol_cov_p / denom) / full_hol_cov) if holonomy_arch_path else 0.0
+        )
         q_avg = float(q_tau_sum / denom)
         e_cov = expected_micro_cov(p)
-        print(f"  {p:<8.3f}{hol_avg:<14.6f}{q_avg:<14.6f}{cov_avg:<12.4f}{e_cov:<14.4f}"
-              f"{tl:<14.10f}")
-    print("\n  Analytic micro_cov derivation (independent inclusion, L=4 for canonical F word):")
+        print(
+            f"  {p:<8.3f}{hol_avg:<14.6f}{q_avg:<14.6f}{cov_avg:<12.4f}{e_cov:<14.4f}"
+            f"{tl:<14.10f}"
+        )
+    print(
+        "\n  Analytic micro_cov derivation (independent inclusion, L=4 for canonical F word):"
+    )
     print("    E[micro_cov] = 1 - (1 - p^L)^64")
-    print("  This is the percolation law for holonomy-word availability (the relevant event for aperture/tau_cycle).")
+    print(
+        "  This is the percolation law for holonomy-word availability (the relevant event for aperture/tau_cycle)."
+    )
 
 
 def _empirical_shell_matrix(
@@ -1241,7 +1346,9 @@ def run_shell_transition_operators(
 
     full = list(range(256))
     m_spec_sum = 0.0
-    print(f"  {'q':<4}{'Tr(M)':<12}{'Tr(M^2)':<12}{'C(q) emp':<12}{'C(q) exact':<14}{'|bytes|':<8}")
+    print(
+        f"  {'q':<4}{'Tr(M)':<12}{'Tr(M^2)':<12}{'C(q) emp':<12}{'C(q) exact':<14}{'|bytes|':<8}"
+    )
     print("  " + "-" * 5)
     for q in range(7):
         M = _empirical_shell_matrix(engine, full, q_weight=q)
@@ -1256,11 +1363,19 @@ def run_shell_transition_operators(
         n_b = sum(1 for b in full if q_word6(b).bit_count() == q)
         m_spec_sum += q * cq
         exact_s = str(exact) if exact is not None else "n/a"
-        match = "OK" if exact is not None and abs(float(cq) - float(exact)) < 1e-12 else ""
-        print(f"  {q:<4}{tr:<12.6f}{tr2:<12.6f}{cq:<12.6f}{exact_s:<14}{n_b:<8} {match}")
+        match = (
+            "OK" if exact is not None and abs(float(cq) - float(exact)) < 1e-12 else ""
+        )
+        print(
+            f"  {q:<4}{tr:<12.6f}{tr2:<12.6f}{cq:<12.6f}{exact_s:<14}{n_b:<8} {match}"
+        )
     m_shell_binom = sum(k * comb(6, k) for k in range(7))
-    print(f"  M_shell (binom sum k*C(6,k)) = {m_shell_binom}  (population moment, per Compact Geometry)")
-    print("  Per-q C(q) matches carrier_trace exactly (Tr(M) for even q, Tr(M^2) for odd q).")
+    print(
+        f"  M_shell (binom sum k*C(6,k)) = {m_shell_binom}  (population moment, per Compact Geometry)"
+    )
+    print(
+        "  Per-q C(q) matches carrier_trace exactly (Tr(M) for even q, Tr(M^2) for odd q)."
+    )
 
     p_values = [0.05, 0.10, 0.20, 0.50, 1.0]
     print(f"\n  Restricted C(3) and Tr(M_3) vs p (n={n_samples}):")
@@ -1281,8 +1396,10 @@ def run_shell_transition_operators(
             cq_sum += _return_trace_matrix(M)
             size_sum += len(allowed)
         denom = max(nz, 1)
-        print(f"  {p:<8.3f}{tr_sum/denom:<12.6f}{cq_sum/denom:<12.6f}"
-              f"{size_sum/denom:<10.1f}")
+        print(
+            f"  {p:<8.3f}{tr_sum/denom:<12.6f}{cq_sum/denom:<12.6f}"
+            f"{size_sum/denom:<10.1f}"
+        )
 
 
 def run_word_bulk_anchor_test(
@@ -1310,9 +1427,11 @@ def run_word_bulk_anchor_test(
     bulk2_idx = next(i for i in range(n) if shell[i] == 2)
     eq_idx = next(i for i in range(n) if shell[i] == 0)
 
-    for label, start_idx in (("rest (shell 6)", rest_idx),
-                             ("bulk (shell 2)", bulk2_idx),
-                             ("equality horizon (shell 0)", eq_idx)):
+    for label, start_idx in (
+        ("rest (shell 6)", rest_idx),
+        ("bulk (shell 2)", bulk2_idx),
+        ("equality horizon (shell 0)", eq_idx),
+    ):
         vis = bytearray(n)
         frontier = [start_idx]
         vis[start_idx] = 1
@@ -1383,9 +1502,12 @@ def run_self_energy_closure() -> None:
 def main() -> None:
     import argparse
     import codecs
+
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
 
-    parser = argparse.ArgumentParser(description="hQVM percolation structural completeness")
+    parser = argparse.ArgumentParser(
+        description="hQVM percolation structural completeness"
+    )
     parser.add_argument(
         "--sections",
         type=str,
@@ -1454,8 +1576,16 @@ def main() -> None:
         run_permutation_class_sweep(engine, perm_classes, n_samples=200)
 
     bridges = (
-        want("9") or want("9b") or want("10") or want("11") or want("11b")
-        or want("12") or want("13") or want("14") or want("15") or want("16")
+        want("9")
+        or want("9b")
+        or want("10")
+        or want("11")
+        or want("11b")
+        or want("12")
+        or want("13")
+        or want("14")
+        or want("15")
+        or want("16")
     )
     if bridges:
         print("\n" + "=" * 5, flush=True)

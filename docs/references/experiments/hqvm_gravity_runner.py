@@ -38,7 +38,9 @@ GRAVITY_SCRIPTS: tuple[str, ...] = (
 )
 
 
-def run_script(script_name: str, timeout_s: float | None) -> tuple[int, str, str, float]:
+def run_script(
+    script_name: str, timeout_s: float | None
+) -> tuple[int, str, str, float]:
     path = _EXPERIMENTS / script_name
     if not path.is_file():
         return 127, "", f"missing file: {path}\n", 0.0
@@ -60,10 +62,17 @@ def run_script(script_name: str, timeout_s: float | None) -> tuple[int, str, str
         err = str(exc.stderr or "") + f"\nTIMEOUT after {timeout_s}s\n"
         return 124, str(out), str(err), dt
 
-    return proc.returncode, proc.stdout or "", proc.stderr or "", time.perf_counter() - t0
+    return (
+        proc.returncode,
+        proc.stdout or "",
+        proc.stderr or "",
+        time.perf_counter() - t0,
+    )
 
 
-def format_block(script_name: str, code: int, stdout: str, stderr: str, dt: float) -> str:
+def format_block(
+    script_name: str, code: int, stdout: str, stderr: str, dt: float
+) -> str:
     header = f"######## {script_name} ########"
     lines = [header, ""]
     if stdout:
@@ -99,7 +108,9 @@ def run_all(output_path: Path, timeout_s: float | None) -> int:
         status = "ok" if code == 0 else f"exit {code}"
         print(f"  {status} ({dt:.1f}s)", flush=True)
 
-    blocks.append(f"finished: {datetime.now().astimezone().isoformat(timespec='seconds')}")
+    blocks.append(
+        f"finished: {datetime.now().astimezone().isoformat(timespec='seconds')}"
+    )
     blocks.append(f"total_duration={total_dt:.2f}s")
     blocks.append(f"worst_exit={worst_code}")
 
@@ -111,7 +122,9 @@ def run_all(output_path: Path, timeout_s: float | None) -> int:
 
 def main() -> None:
     configure_stdout_utf8()
-    parser = argparse.ArgumentParser(description="Run all CGM gravity scripts; save output.")
+    parser = argparse.ArgumentParser(
+        description="Run all CGM gravity scripts; save output."
+    )
     parser.add_argument(
         "-o",
         "--output",

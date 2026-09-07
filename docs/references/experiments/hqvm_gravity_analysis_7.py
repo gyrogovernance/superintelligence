@@ -65,6 +65,7 @@ from hqvm_gravity_common import (
     photon_sphere_closed,
     psi_point_mass,
     rho,
+    tau_g_stf_depth,
     tau_g_with_c4,
     v_EW,
 )
@@ -119,7 +120,7 @@ def epsilon_g(psi):
 
 def n_grav(psi):
     f = 1.0 - 2.0 * psi
-    return 1.0 / math.sqrt(f) if f > 0 else float('inf')
+    return 1.0 / math.sqrt(f) if f > 0 else float("inf")
 
 
 def f_metric(psi):
@@ -176,23 +177,36 @@ def V_eff_dimless(s, ell):
 
 
 def format_time(t_s):
-    if t_s < 1e-12: return f"{t_s*1e15:.2f} fs"
-    if t_s < 1e-9:  return f"{t_s*1e12:.2f} ps"
-    if t_s < 1e-6:  return f"{t_s*1e9:.2f} ns"
-    if t_s < 1e-3:  return f"{t_s*1e6:.2f} us"
-    if t_s < 1:     return f"{t_s*1e3:.2f} ms"
-    if t_s < 60:    return f"{t_s:.4f} s"
-    if t_s < 3600:  return f"{t_s/60:.2f} min"
-    if t_s < 86400: return f"{t_s/3600:.2f} hr"
+    if t_s < 1e-12:
+        return f"{t_s*1e15:.2f} fs"
+    if t_s < 1e-9:
+        return f"{t_s*1e12:.2f} ps"
+    if t_s < 1e-6:
+        return f"{t_s*1e9:.2f} ns"
+    if t_s < 1e-3:
+        return f"{t_s*1e6:.2f} us"
+    if t_s < 1:
+        return f"{t_s*1e3:.2f} ms"
+    if t_s < 60:
+        return f"{t_s:.4f} s"
+    if t_s < 3600:
+        return f"{t_s/60:.2f} min"
+    if t_s < 86400:
+        return f"{t_s/3600:.2f} hr"
     return f"{t_s/(86400*365.25):.2f} yr"
 
 
 def format_freq(f_hz):
-    if f_hz > 1e9:  return f"{f_hz/1e9:.2f} GHz"
-    if f_hz > 1e6:  return f"{f_hz/1e6:.2f} MHz"
-    if f_hz > 1e3:  return f"{f_hz/1e3:.2f} kHz"
-    if f_hz > 1:    return f"{f_hz:.2f} Hz"
-    if f_hz > 1e-3: return f"{f_hz*1e3:.4f} mHz"
+    if f_hz > 1e9:
+        return f"{f_hz/1e9:.2f} GHz"
+    if f_hz > 1e6:
+        return f"{f_hz/1e6:.2f} MHz"
+    if f_hz > 1e3:
+        return f"{f_hz/1e3:.2f} kHz"
+    if f_hz > 1:
+        return f"{f_hz:.2f} Hz"
+    if f_hz > 1e-3:
+        return f"{f_hz*1e3:.4f} mHz"
     return f"{f_hz:.4e} Hz"
 
 
@@ -218,8 +232,9 @@ def compute_reflection(omega_tilde, ell, s_max=300.0):
         dw = (dv * f_v - v * df) / f_v**2
         return [w.real, w.imag, dw.real, dw.imag]
 
-    sol = solve_ivp(ode, [s_start, s_max], y0, method='RK45',
-                    max_step=0.5, rtol=1e-10, atol=1e-12)
+    sol = solve_ivp(
+        ode, [s_start, s_max], y0, method="RK45", max_step=0.5, rtol=1e-10, atol=1e-12
+    )
     if not sol.success:
         return None
 
@@ -235,16 +250,16 @@ def compute_reflection(omega_tilde, ell, s_max=300.0):
     if abs(den) < 1e-30:
         R_sq = 1.0
     else:
-        R_sq = min(max(float(abs(num / den)**2), 0.0), 1.0)
+        R_sq = min(max(float(abs(num / den) ** 2), 0.0), 1.0)
     T_sq = max(1.0 - R_sq, 0.0)
-    flux_ratio = flux_end / flux_start if abs(flux_start) > 1e-30 else float('nan')
+    flux_ratio = flux_end / flux_start if abs(flux_start) > 1e-30 else float("nan")
 
     return {
-        'R_sq': R_sq,
-        'T_sq': T_sq,
-        'flux_ratio': flux_ratio,
-        'flux_start': flux_start,
-        'flux_end': flux_end,
+        "R_sq": R_sq,
+        "T_sq": T_sq,
+        "flux_ratio": flux_ratio,
+        "flux_start": flux_start,
+        "flux_end": flux_end,
     }
 
 
@@ -357,18 +372,22 @@ def section_A():
     print("  PV: no horizon at psi_N=0.5 (kappa finite).")
     print("  CGM: horizon at psi=1/2 (n -> inf, complete light trapping).")
     print()
-    print(f"{'psi_N':>10s} {'n_E1911':>10s} {'n_GR1st':>10s} {'n_PV':>10s} {'n_GR':>10s} {'n_CGM':>10s}")
+    print(
+        f"{'psi_N':>10s} {'n_E1911':>10s} {'n_GR1st':>10s} {'n_PV':>10s} {'n_GR':>10s} {'n_CGM':>10s}"
+    )
     print("-" * 62)
     for psi_N in [1e-6, 1e-4, 0.01, 0.05, 0.10, 0.20, 0.30, 0.50]:
         n_1911 = 1 + psi_N
         n_gr1st = 1 + 2 * psi_N
         n_pv = math.exp(psi_N)
-        n_gr = 1.0 / math.sqrt(1 - 2 * psi_N) if psi_N < 0.5 else float('inf')
+        n_gr = 1.0 / math.sqrt(1 - 2 * psi_N) if psi_N < 0.5 else float("inf")
         s = 1.0 / psi_N
         psi_c = psi_at_s(s)
-        n_cgm = 1.0 / math.sqrt(1 - 2 * psi_c) if psi_c < 0.5 else float('inf')
+        n_cgm = 1.0 / math.sqrt(1 - 2 * psi_c) if psi_c < 0.5 else float("inf")
         fmt = lambda v: f"{v:.6f}" if v < 100 else "inf"
-        print(f"{psi_N:10.4e} {n_1911:10.6f} {n_gr1st:10.6f} {n_pv:10.6f} {fmt(n_gr):>10s} {fmt(n_cgm):>10s}")
+        print(
+            f"{psi_N:10.4e} {n_1911:10.6f} {n_gr1st:10.6f} {n_pv:10.6f} {fmt(n_gr):>10s} {fmt(n_cgm):>10s}"
+        )
 
 
 # ============================================================
@@ -463,17 +482,21 @@ def section_B():
     print("Flux F = Im(conj(u) * v) where v = f * du/ds.")
     print("Conservation: F(start) = F(end) => R + T = 1.")
     print()
-    print(f"  {'omega':>8s} {'ell':>4s} {'R_true':>12s} {'T_true':>12s} {'R+T-1':>12s} {'F_end/F_start':>14s}")
+    print(
+        f"  {'omega':>8s} {'ell':>4s} {'R_true':>12s} {'T_true':>12s} {'R+T-1':>12s} {'F_end/F_start':>14s}"
+    )
     print("  " + "-" * 66)
     for omega_t in [0.5, 1.0, 2.0, 5.0]:
         for ell in [0, 2]:
             res = compute_reflection(omega_t, ell)
             if res is not None:
-                R = res['R_sq']
-                T = res['T_sq']
+                R = res["R_sq"]
+                T = res["T_sq"]
                 rplus = R + T - 1.0
-                fr = res['flux_ratio']
-                print(f"  {omega_t:8.1f} {ell:4d} {R:12.4e} {T:12.4e} {rplus:12.2e} {fr:14.6f}")
+                fr = res["flux_ratio"]
+                print(
+                    f"  {omega_t:8.1f} {ell:4d} {R:12.4e} {T:12.4e} {rplus:12.2e} {fr:14.6f}"
+                )
     print()
     print("Flux conservation verified: R + T = 1 to solver precision.")
     print("All vacuum reflection comes from V_l(s) tunneling; zero")
@@ -490,14 +513,18 @@ def section_C():
     print("=" * 9)
     print()
     print("Null geodesics: (dr/dlam)^2 = E^2 [1 - f(s)*beta^2/s^2]")
-    print("Deflection: Delta_phi = 2*int_{s_min}^{inf} beta/(s^2*sqrt(1-f*beta^2/s^2)) ds - pi")
+    print(
+        "Deflection: Delta_phi = 2*int_{s_min}^{inf} beta/(s^2*sqrt(1-f*beta^2/s^2)) ds - pi"
+    )
     print(f"  b_c/r_g = {b_c_over_rg:.6f}, s_ph = {s_ph:.6f} r_g")
     print()
     print("  Integral uses u=1/s compactification and t^2 substitution")
     print("  near the turning point to remove the sqrt singularity.")
     print()
     beta_fracs = [1.001, 1.005, 1.01, 1.05, 1.1, 1.2, 1.5, 2.0, 3.0, 5.0, 10.0]
-    print(f"  {'beta/b_c':>10s} {'beta/r_g':>10s} {'s_min/r_g':>10s} {'Delta_phi(rad)':>14s} {'Delta_phi(deg)':>14s}")
+    print(
+        f"  {'beta/b_c':>10s} {'beta/r_g':>10s} {'s_min/r_g':>10s} {'Delta_phi(rad)':>14s} {'Delta_phi(deg)':>14s}"
+    )
     print("  " + "-" * 62)
     for bf in beta_fracs:
         beta = b_c_over_rg * bf
@@ -505,11 +532,17 @@ def section_C():
         if s_min is not None:
             dphi = deflection_angle(beta)
             if dphi is not None:
-                print(f"  {bf:10.3f} {beta:10.4f} {s_min:10.4f} {dphi:14.6f} {math.degrees(dphi):14.4f}")
+                print(
+                    f"  {bf:10.3f} {beta:10.4f} {s_min:10.4f} {dphi:14.6f} {math.degrees(dphi):14.4f}"
+                )
             else:
-                print(f"  {bf:10.3f} {beta:10.4f} {s_min:10.4f} {'integration failed':>14s} {'N/A':>14s}")
+                print(
+                    f"  {bf:10.3f} {beta:10.4f} {s_min:10.4f} {'integration failed':>14s} {'N/A':>14s}"
+                )
         else:
-            print(f"  {bf:10.3f} {beta:10.4f} {'captured':>10s} {'captured':>14s} {'captured':>14s}")
+            print(
+                f"  {bf:10.3f} {beta:10.4f} {'captured':>10s} {'captured':>14s} {'captured':>14s}"
+            )
     print()
     print("CONVERGENCE NEAR b_c:")
     prev = None
@@ -518,7 +551,9 @@ def section_C():
         dphi = deflection_angle(beta)
         if dphi is not None:
             delta = f"  delta={abs(dphi - prev):.2e}" if prev is not None else ""
-            print(f"  beta/b_c = {1+eps:.4f}: Delta_phi = {dphi:.4f} rad = {math.degrees(dphi):.2f} deg{delta}")
+            print(
+                f"  beta/b_c = {1+eps:.4f}: Delta_phi = {dphi:.4f} rad = {math.degrees(dphi):.2f} deg{delta}"
+            )
             prev = dphi
     print("  Delta_phi diverges as beta -> b_c^+; numeric method stable.")
     print()
@@ -546,8 +581,10 @@ def section_D():
     print(f"  b_c/r_g = {b_c_over_rg:.6f}")
     print()
     s_vals = [1.70, 1.80, 2.00, s_ph, 3.00, 5.00, 10.0, 50.0, 100.0]
-    print(f"{'s=r/r_g':>10s} {'psi':>10s} {'n':>10s} {'Z/Z_0':>8s} "
-          f"{'c_coord':>8s} {'theta_c(deg)':>12s} {'P_esc':>8s}")
+    print(
+        f"{'s=r/r_g':>10s} {'psi':>10s} {'n':>10s} {'Z/Z_0':>8s} "
+        f"{'c_coord':>8s} {'theta_c(deg)':>12s} {'P_esc':>8s}"
+    )
     print("-" * 70)
     for s in s_vals:
         psi = psi_at_s(s)
@@ -558,8 +595,10 @@ def section_D():
         P = P_escape_geodesic(s)
         n_s = f"{n:.4f}" if n < 100 else "inf"
         s_fmt = f"{s:.4f}" if s < 5 else f"{s:.2f}"
-        print(f"{s_fmt:>10s} {psi:10.6f} {n_s:>10s} {Z:8.4f} "
-              f"{c_c:8.6f} {math.degrees(tc):12.4f} {P:8.4f}")
+        print(
+            f"{s_fmt:>10s} {psi:10.6f} {n_s:>10s} {Z:8.4f} "
+            f"{c_c:8.6f} {math.degrees(tc):12.4f} {P:8.4f}"
+        )
     print()
     print("P_esc = (1 +/- sqrt(1-R))/2, R = b_c^2*f/s^2: geodesic escape fraction.")
     print("P_esc = 0.5 at photon sphere; -> 1 far out; -> 0 at horizon.")
@@ -569,12 +608,14 @@ def section_D():
     for s in [10, 5, 3, s_ph, 2.0, 1.80, 1.70]:
         psi_N = 1.0 / s
         psi_c = psi_at_s(s)
-        z_gr = 1.0 / math.sqrt(1 - 2 * psi_N) - 1 if psi_N < 0.5 else float('inf')
-        z_cgm = 1.0 / math.sqrt(1 - 2 * psi_c) - 1 if psi_c < 0.5 else float('inf')
+        z_gr = 1.0 / math.sqrt(1 - 2 * psi_N) - 1 if psi_N < 0.5 else float("inf")
+        z_cgm = 1.0 / math.sqrt(1 - 2 * psi_c) - 1 if psi_c < 0.5 else float("inf")
         fmt6 = lambda v: f"{v:.6f}" if abs(v) < 100 else "inf"
         s_fmt = f"{s:.4f}" if s < 5 else f"{s:.2f}"
-        print(f"  s={s_fmt}  psi_N={psi_N:.6f}  psi_CGM={psi_c:.6f}  "
-              f"z_GR={fmt6(z_gr)}  z_CGM={fmt6(z_cgm)}")
+        print(
+            f"  s={s_fmt}  psi_N={psi_N:.6f}  psi_CGM={psi_c:.6f}  "
+            f"z_GR={fmt6(z_gr)}  z_CGM={fmt6(z_cgm)}"
+        )
 
 
 # ============================================================
@@ -612,8 +653,11 @@ def section_F():
     print("F. Horizon criticality: WHERE and WHEN")
     print("=" * 9)
     print()
-    print("WHERE: s_h = {:.4f} r_g, s_ph = {:.4f} r_g (common: horizon_s, photon_sphere_closed)".format(
-        s_h, s_ph))
+    print(
+        "WHERE: s_h = {:.4f} r_g, s_ph = {:.4f} r_g (common: horizon_s, photon_sphere_closed)".format(
+            s_h, s_ph
+        )
+    )
     print(f"  n -> inf, Z -> 0, c_coord -> 0, P_esc -> 0")
     print(f"  rho_MU/rho0 = {rho_MU_ratio(0.5):.2e}")
     print(f"  epsilon_g = {epsilon_g(0.5):.6f}")
@@ -632,15 +676,22 @@ def section_F():
     print(f"  T_Z2 = (6/pi)*GM/c^3 = {alpha_Z2:.4f}*GM/c^3")
     print("  D = 24 steps per holonomy cycle.")
     print()
-    objects = [("Earth", 5.972e24), ("Sun", 1.989e30),
-              ("NS (1.4 Msun)", 1.4*1.989e30), ("BH (10 Msun)", 10*1.989e30),
-              ("Sgr A*", 4e6*1.989e30), ("M87*", 6.5e9*1.989e30)]
+    objects = [
+        ("Earth", 5.972e24),
+        ("Sun", 1.989e30),
+        ("NS (1.4 Msun)", 1.4 * 1.989e30),
+        ("BH (10 Msun)", 10 * 1.989e30),
+        ("Sgr A*", 4e6 * 1.989e30),
+        ("M87*", 6.5e9 * 1.989e30),
+    ]
     print(f"{'Object':>20s} {'M/Msun':>12s} {'T_Z2':>14s} {'f_Z2':>14s}")
     print("-" * 62)
     for name, M in objects:
         T = alpha_Z2 * grav_time(M)
-        f = 1.0 / T if T > 0 else float('inf')
-        print(f"{name:>20s} {M/M_sun_kg:12.2e} {format_time(T):>14s} {format_freq(f):>14s}")
+        f = 1.0 / T if T > 0 else float("inf")
+        print(
+            f"{name:>20s} {M/M_sun_kg:12.2e} {format_time(T):>14s} {format_freq(f):>14s}"
+        )
     M_day = (86400.0 / alpha_Z2) * c_SI**3 / G_SI
     print(f"\nT_Z2 = 24 hr => M = {M_day/M_sun_kg:.2e} Msun")
     print()
@@ -664,7 +715,11 @@ def section_G():
     c_conv_cgm = c_conv_gr * k_ratio
     print("THEOREM: kappa_GR * T_Z2 = [D/(4*Q_G)] * c = 3c/(2*pi)")
     print()
-    print("  D/(4*Q_G) = 24/(16*pi) = {:.6f} = 3/(2*pi)  [kernel-locked]".format(conversion_ratio))
+    print(
+        "  D/(4*Q_G) = 24/(16*pi) = {:.6f} = 3/(2*pi)  [kernel-locked]".format(
+            conversion_ratio
+        )
+    )
     print()
     print("CGM SURFACE GRAVITY FROM CGM METRIC:")
     print(f"  kappa_CGM/kappa_GR = 4*exp(g1/2)/s_h^2 = {k_ratio:.6f}")
@@ -673,13 +728,20 @@ def section_G():
     print(f"  kappa_CGM * T_Z2 = {c_conv_cgm:.2f} m/s = {c_conv_cgm/c_SI:.6f} c")
     print()
     print("DEPTH-DEPENDENT CONVERSION (kappa_CGM):")
-    print(f"  {'Depth':>25s} {'psi':>10s} {'n':>10s} "
-          f"{'k_CGM*T(m/s)':>14s} {'k_CGM*T/c':>10s}")
-    print("-" * 72)
-    for name, psi in [("Far field", 0.0), ("Sun surface", 2.12e-6),
-                       ("WD surface", 3e-4), ("NS surface", 0.15),
-                       ("Photon sphere", psi_ph), ("Near horizon", 0.49),
-                       ("Horizon", 0.50)]:
+    print(
+        f"  {'Depth':>25s} {'psi':>10s} {'n':>10s} "
+        f"{'k_CGM*T(m/s)':>14s} {'k_CGM*T/c':>10s}"
+    )
+    print("-" * 5)
+    for name, psi in [
+        ("Far field", 0.0),
+        ("Sun surface", 2.12e-6),
+        ("WD surface", 3e-4),
+        ("NS surface", 0.15),
+        ("Photon sphere", psi_ph),
+        ("Near horizon", 0.49),
+        ("Horizon", 0.50),
+    ]:
         f = f_metric(psi)
         n = n_grav(psi)
         kT = c_conv_cgm * math.sqrt(f) if f > 0 else 0.0
@@ -703,10 +765,14 @@ def section_H():
     print()
     phase_deficit = abs(delta_BU - m_a)
     total_deficit = N_cycles * phase_deficit
-    print(f"Phase deficit per cycle: {phase_deficit:.12f} rad "
-          f"({phase_deficit / m_a * 100:.4f}% of m_a)")
-    print(f"Accumulated over N={N_cycles:.1f}: {total_deficit:.4f} rad "
-          f"= {total_deficit / (2 * math.pi):.4f} cycles")
+    print(
+        f"Phase deficit per cycle: {phase_deficit:.12f} rad "
+        f"({phase_deficit / m_a * 100:.4f}% of m_a)"
+    )
+    print(
+        f"Accumulated over N={N_cycles:.1f}: {total_deficit:.4f} rad "
+        f"= {total_deficit / (2 * math.pi):.4f} cycles"
+    )
     print()
     print("UNIVERSAL LUMINOSITY SCALE")
     print("L_0 = |E_self|/T_Z2 = pi*c^5/(24*G) = (G_kernel/4)*L_Planck")
@@ -717,11 +783,11 @@ def section_H():
     print("HAWKING LUMINOSITY vs L_0 (greybody = 1)")
     print(f"  {'Object':>20s} {'M/Msun':>12s} {'L_H(W)':>14s} {'L_H/L_0':>12s}")
     print("  " + "-" * 60)
-    for name, M in [("10 Msun BH", 10*M_sun_kg), ("Sgr A*", 4e6*M_sun_kg)]:
+    for name, M in [("10 Msun BH", 10 * M_sun_kg), ("Sgr A*", 4e6 * M_sun_kg)]:
         r_g = G_SI * M / c_SI**2
         r_h = r_g * s_h
         A = 4.0 * math.pi * r_h**2
-        kappa_val = c_SI**4 * math.exp(g1/2) / (s_h**2 * G_SI * M)
+        kappa_val = c_SI**4 * math.exp(g1 / 2) / (s_h**2 * G_SI * M)
         T_H = hbar_SI * kappa_val / (2.0 * math.pi * k_B_SI * c_SI)
         L_H = sigma_SB_SI * A * T_H**4
         print(f"  {name:>20s} {M/M_sun_kg:12.2e} {L_H:14.2e} {L_H/L_0:12.4e}")
@@ -746,7 +812,7 @@ def section_I():
     print()
     print("DERIVATION CHAIN FOR c:")
     print("  Kernel: Q_G, G_kernel, tau_G, Delta, m_a")
-    print("  => G to 0.074 ppm => alpha_0 = delta_BU^4/m_a")
+    print("  => G from tau_G (weak-field) => alpha_0 = delta_BU^4/m_a")
     print("  => hbar from alpha = e^2/(4*pi*eps_0*hbar*c)")
     print("  => c from M_Planck = sqrt(hbar*c/G)")
     print()
@@ -770,9 +836,11 @@ def section_I():
     print("which the excitation can traverse the manifold.")
     print()
     print(f"  E_CS = {E_CS_GeV:.4e} GeV  (Planck energy, well depth)")
-    for name, freq_hz in [("Cs-133 hyperfine", 9.192631770e9),
-                          ("Optical (500 nm)", c_SI / 500e-9),
-                          ("Gamma (1 MeV)", 1e6 * eV_to_J / hbar_SI)]:
+    for name, freq_hz in [
+        ("Cs-133 hyperfine", 9.192631770e9),
+        ("Optical (500 nm)", c_SI / 500e-9),
+        ("Gamma (1 MeV)", 1e6 * eV_to_J / hbar_SI),
+    ]:
         E_eV = hbar_SI * 2 * math.pi * freq_hz / eV_to_J
         E_GeV = E_eV * 1e-9
         print(f"  {name:>20s}: E/E_CS = {E_GeV/E_CS_GeV:.4e}")
@@ -842,8 +910,10 @@ def section_J():
     print()
 
     s_vals = [1.70, 1.75, 1.80, 2.00, s_ph, 3.00, 5.00, 10.0, 50.0, 100.0]
-    print(f"  {'s':>8s} {'psi':>10s} {'Phi_CS':>8s} {'Phi_UNA':>8s} "
-          f"{'Phi_ONA':>10s} {'Phi_BU':>8s} {'r*(r_g)':>10s}")
+    print(
+        f"  {'s':>8s} {'psi':>10s} {'Phi_CS':>8s} {'Phi_UNA':>8s} "
+        f"{'Phi_ONA':>10s} {'Phi_BU':>8s} {'r*(r_g)':>10s}"
+    )
     print("  " + "-" * 66)
 
     s_ref = 100.0
@@ -865,8 +935,10 @@ def section_J():
         phi_bu = P_escape_geodesic(s)
         r_star_s, _ = quad(tortoise_integrand, s_h * 1.001, s, limit=200)
         s_fmt = f"{s:.4f}" if s < 5 else f"{s:.2f}"
-        print(f"  {s_fmt:>8s} {psi:10.6f} {phi_cs:8.4f} {phi_una:8.4f} "
-              f"{phi_ona:10.4e} {phi_bu:8.4f} {r_star_s:10.4f}")
+        print(
+            f"  {s_fmt:>8s} {psi:10.6f} {phi_cs:8.4f} {phi_una:8.4f} "
+            f"{phi_ona:10.4e} {phi_bu:8.4f} {r_star_s:10.4f}"
+        )
 
     print()
     print("  Phi_CS >= 1 at all depths: source registration amplifies")
@@ -879,7 +951,9 @@ def section_J():
 
     print("J.3 HORIZON CHANNEL SPLIT (detail: section F)")
     print("  Identity (CS+UNA+ONA): Phi_CS, Phi_UNA, Phi_ONA finite at psi=1/2.")
-    print("  Individuality (BU): Phi_BU = P_esc -> 0; tortoise r* diverges (analysis_6 B.3).")
+    print(
+        "  Individuality (BU): Phi_BU = P_esc -> 0; tortoise r* diverges (analysis_6 B.3)."
+    )
     print("  I = 1/2, E_self: analysis_6 C.4/C.5.")
     print()
     print("J.4 TIME-LIGHT CONVERSION (section G)")
@@ -931,7 +1005,9 @@ def section_L():
     k_ratio = kappa_cgm_over_kappa_gr()
     c_conv_cgm = conversion_ratio * c_SI * k_ratio
     print("1. epsilon_g = exp(-g1*psi): gravitational permittivity.")
-    print(f"   Coupling channel: T_coupl = G/G_0 = exp(g1*psi), tau = {tau_opt_coeff:.4f}*psi.")
+    print(
+        f"   Coupling channel: T_coupl = G/G_0 = exp(g1*psi), tau = {tau_opt_coeff:.4f}*psi."
+    )
     print()
     print("2. n = 1/sqrt(1-2*psi): metric refractive index.")
     print("   Scalar wave impedance Z = f*k = omega is CONSTANT")

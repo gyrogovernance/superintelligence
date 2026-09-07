@@ -32,6 +32,7 @@ from hqvm_gravity_common import (
     d_BU,
     dpsi_ds_analytic,
     find_photon_sphere_spin,
+    g_pred_from_tau,
     helix_z2_activation,
     kernel_exposure_constants,
     m_a,
@@ -39,6 +40,7 @@ from hqvm_gravity_common import (
     psi_analytic,
     tau_cycle_per_delta_exact,
     tau_g_with_c4,
+    G_meas,
 )
 from hqvm_gravity_analysis_4 import (
     Delta,
@@ -57,12 +59,12 @@ from hqvm_gravity_analysis_4 import (
     rho_val,
     shadow_diameter_muas,
     solve_point_mass_profile,
+    tau_G,
     tau_G_full,
     v,
 )
 
 v_EW = v
-tau_G = tau_G_full
 n_vc = log(E_CS / v_EW) / Delta
 tau_stf_coeff = 2.0 * Delta * n_vc
 
@@ -102,7 +104,9 @@ def reconcile_stf_tau(s_vals, u_vals):
     print("  Algebraic (Delta ruler):  tau(psi) = tau_G * (1 - psi)")
     print("  STF (kernel ladder):      d tau/d psi = -2*Delta*n_vc = -tau_G")
     print(f"  Check: tau_G = {tau_G:.6f}, 2*Delta*n_vc = {tau_stf_coeff:.6f}")
-    print(f"        ratio = {tau_G/tau_stf_coeff:.6f}  (slip: -dlnG/dpsi = {-dlnG_dpsi:.6f})")
+    print(
+        f"        ratio = {tau_G/tau_stf_coeff:.6f}  (slip: -dlnG/dpsi = {-dlnG_dpsi:.6f})"
+    )
     print()
     tau_alg = tau_G * (1.0 - u_vals)
     tau_stf = np.zeros_like(s_vals)
@@ -112,18 +116,17 @@ def reconcile_stf_tau(s_vals, u_vals):
         tau_stf[i] = tau_stf[i + 1] - tau_G * du
 
     max_err = float(np.max(np.abs(tau_stf - tau_alg) / tau_G))
-    print(f"  Integrated STF along psi(s) profile: max |tau_stf-tau_alg|/tau_G = {max_err:.2e}")
+    print(
+        f"  Integrated STF along psi(s) profile: max |tau_stf-tau_alg|/tau_G = {max_err:.2e}"
+    )
     print()
     delta_stf = tau_stf_coeff - tau_G
-    f_ordered = 1.0 - 4.0 * rho_val * Delta**2
-    tau_leading = OMEGA_SIZE * Delta * rho_val**5 * f_ordered
-    c4_in_tau = tau_G - tau_leading
+    tau_tr = tau_G_full - tau_G
     print(f"  tau_G              = {tau_G:.6f}")
     print(f"  2*Delta*n_vc       = {tau_stf_coeff:.6f}")
     print(f"  ratio              = {tau_G/tau_stf_coeff:.6f}")
     print(f"  2*Dn - tau_G       = {delta_stf:.6f}")
-    print(f"  tau_G (no c4)      = {tau_leading:.6f}")
-    print(f"  tau_G - leading    = {c4_in_tau:.6f}")
+    print(f"  tau_trace (c4)     = {tau_tr:.6e}")
     print()
 
 
@@ -154,7 +157,9 @@ def energy_conservation(s_vals, u_vals):
     print("  Nonlinear Gauss law: div[(G_global/G(x))*g] = -Q_G*G_global*rho")
     print("  Binding energy (point mass):")
     u_in = float(u_vals[0])
-    integrand = np.array([G_ratio(float(np.interp(s, s_vals, u_vals))) / s**2 for s in s_vals])
+    integrand = np.array(
+        [G_ratio(float(np.interp(s, s_vals, u_vals))) / s**2 for s in s_vals]
+    )
     phi_bind = float(np.trapezoid(integrand, s_vals))
     print(f"    |Phi|(0) ~ integral g ds = {phi_bind:.6f} (dimensionless)")
     print(f"    vs psi(inner) = {u_in:.6f} from analytic profile")
@@ -173,7 +178,9 @@ def nonlinear_pde_general():
     print("    G(psi) = G_kernel exp(-tau_G(1-psi)) / E_ref(psi)^2")
     print("    E_ref(psi) = E_CS (v/E_CS)^(1-psi)")
     print()
-    print("  Point mass (rho = M delta(r)): analytic psi(s) in hqvm_gravity_common; analysis_4 tables.")
+    print(
+        "  Point mass (rho = M delta(r)): analytic psi(s) in hqvm_gravity_common; analysis_4 tables."
+    )
     print("    du/ds = -G(psi(u))/G_global / s^2")
     print()
     print("  Extended density rho(r) propto r^n:")
@@ -186,9 +193,7 @@ def nonlinear_pde_general():
             def ode(s, y):
                 u = max(y[0], 0.0)
                 m_frac = (s / s_ref) ** (n_power + 3)
-                return [
-                    -G_of_psi_raw(min(u, 0.499)) / G_global * m_frac / s**2
-                ]
+                return [-G_of_psi_raw(min(u, 0.499)) / G_global * m_frac / s**2]
 
             return ode
 
@@ -279,7 +284,9 @@ def derive_mu_density_bridge():
     print()
 
 
-def solve_psi_self_consistent(psi_N: float, tol: float = 1e-12, max_iter: int = 50) -> float:
+def solve_psi_self_consistent(
+    psi_N: float, tol: float = 1e-12, max_iter: int = 50
+) -> float:
     """Solve psi = psi_N * G(psi)/G_global."""
     psi = psi_N
     for _ in range(max_iter):
@@ -305,7 +312,9 @@ def neutron_star_interior():
     print(f"  M = 1.4 Msun, R = 12 km, r_g = {r_g:.1f} m")
     print()
     print("  TOV with G(psi(r)):")
-    print("    dP/dr = -G(psi)*rho*m/r^2 * (1+P/(rho*c^2)) * (1+4pi*r^3*P/m) / (1-2Gm/rc^2)")
+    print(
+        "    dP/dr = -G(psi)*rho*m/r^2 * (1+P/(rho*c^2)) * (1+4pi*r^3*P/m) / (1-2Gm/rc^2)"
+    )
     print("    dm/dr = 4*pi*r^2*rho")
     print("    psi self-consistent: psi = G(psi)*m/(r*c^2)")
     print()
@@ -397,7 +406,10 @@ def neutron_star_interior():
     m_arr = sol.y[0, pos_mask]
     P_arr = sol.y[1, pos_mask]
     psi_arr = np.array(
-        [solve_psi_self_consistent(G_SI * m / (r * c_SI**2)) for m, r in zip(m_arr, r_arr)]
+        [
+            solve_psi_self_consistent(G_SI * m / (r * c_SI**2))
+            for m, r in zip(m_arr, r_arr)
+        ]
     )
     i_surf = len(r_arr) - 1
     m_surf = m_arr[i_surf]
@@ -482,7 +494,9 @@ def derive_kernel_cycle_constants() -> tuple[float, Fraction, Fraction]:
     num_raw = 4 * sum_cubes
     den_raw = 64 * vandermonde
     g = gcd(num_raw, den_raw)
-    print(f"  tau_cycle/Delta = {num_raw // g}/{den_raw // g}  (common: {tau_over_delta})")
+    print(
+        f"  tau_cycle/Delta = {num_raw // g}/{den_raw // g}  (common: {tau_over_delta})"
+    )
     print(f"  tau_cycle       = {tau_cycle:.10f}")
     print(f"  tau_G (full)    = {tau_G:.10f}")
     print(f"  N_cycles        = {n_cycles:.6f}")
@@ -533,8 +547,7 @@ def alpha_z_oscillation_params() -> dict[str, float]:
     sensitivity = 4.0 / rho_val
     deviations_norm = [shell_pop[k] / pop_sum - 1.0 / 7.0 for k in range(7)]
     a_f1 = abs(
-        (2.0 / 7.0)
-        * sum(deviations_norm[k] * np.cos(2 * pi * k / 7) for k in range(7))
+        (2.0 / 7.0) * sum(deviations_norm[k] * np.cos(2 * pi * k / 7) for k in range(7))
     )
     damping = float(np.exp(-Delta / (7.0 * log(2.0))))
     bu_closure = 1.0 - rho_val
@@ -597,15 +610,16 @@ def section_alpha_z_oscillation() -> None:
     total_weight = sum(
         shell_pop[k] * CARRIER_TRACE_BULK.get(k, 0.0) for k in range(1, 6)
     )
-    mean_mod = sum(
-        shell_pop[k] * CARRIER_TRACE_BULK.get(k, 0.0) * (f_k[k] - 1.0)
-        for k in range(1, 6)
-    ) / total_weight
+    mean_mod = (
+        sum(
+            shell_pop[k] * CARRIER_TRACE_BULK.get(k, 0.0) * (f_k[k] - 1.0)
+            for k in range(1, 6)
+        )
+        / total_weight
+    )
     rms_mod = sqrt(
         sum(
-            shell_pop[k]
-            * CARRIER_TRACE_BULK.get(k, 0.0)
-            * (f_k[k] - 1.0) ** 2
+            shell_pop[k] * CARRIER_TRACE_BULK.get(k, 0.0) * (f_k[k] - 1.0) ** 2
             for k in range(1, 6)
         )
         / total_weight
@@ -623,22 +637,21 @@ def section_alpha_z_oscillation() -> None:
     print("Step 4: alpha(z) oscillation parameters")
     print(f"  Main period in ln(1+z): {period_main:.6f} (= Delta)")
     print(f"  Sub-period in ln(1+z):  {period_sub:.6f} (= Delta/7)")
-    print(f"  Peak-to-peak (RMS est): {a_alpha_rms:.2e}  ({a_alpha_rms * 1e4:.2f} x 1e-4)")
+    print(
+        f"  Peak-to-peak (RMS est): {a_alpha_rms:.2e}  ({a_alpha_rms * 1e4:.2f} x 1e-4)"
+    )
     print()
 
     pop_sum = float(shell_pop.sum())
     deviations_norm = [shell_pop[k] / pop_sum - 1.0 / 7.0 for k in range(7)]
     a_f1 = abs(
-        (2.0 / 7.0)
-        * sum(deviations_norm[k] * np.cos(2 * pi * k / 7) for k in range(7))
+        (2.0 / 7.0) * sum(deviations_norm[k] * np.cos(2 * pi * k / 7) for k in range(7))
     )
     a_f2 = abs(
-        (2.0 / 7.0)
-        * sum(deviations_norm[k] * np.cos(4 * pi * k / 7) for k in range(7))
+        (2.0 / 7.0) * sum(deviations_norm[k] * np.cos(4 * pi * k / 7) for k in range(7))
     )
     a_f3 = abs(
-        (2.0 / 7.0)
-        * sum(deviations_norm[k] * np.cos(6 * pi * k / 7) for k in range(7))
+        (2.0 / 7.0) * sum(deviations_norm[k] * np.cos(6 * pi * k / 7) for k in range(7))
     )
 
     print("Step 5: Fourier decomposition of shell modulation")
@@ -658,7 +671,9 @@ def section_alpha_z_oscillation() -> None:
     print(f"  From all 3 modes:   {a_total:.2e}")
     print(f"  Damping (exp(-Delta/(7*ln2))): {damping:.6f}")
     print(f"  BU closure factor (1-rho): {bu_closure:.6f}")
-    print(f"  Damped amplitude:   {a_alpha_damped:.2e}  ({a_alpha_damped * 1e4:.2f} x 1e-4)")
+    print(
+        f"  Damped amplitude:   {a_alpha_damped:.2e}  ({a_alpha_damped * 1e4:.2f} x 1e-4)"
+    )
     print()
 
     az_params = alpha_z_oscillation_params()
@@ -674,7 +689,9 @@ def section_alpha_z_oscillation() -> None:
     print()
     z_falsify = exp(Delta) - 1.0
     print("FALSIFICATION: survey spanning >= 1 period in ln(1+z)")
-    print(f"  (Delta z from 0 to {z_falsify:.4f}) with no oscillation at ~{az_params['amplitude']:.1e}")
+    print(
+        f"  (Delta z from 0 to {z_falsify:.4f}) with no oscillation at ~{az_params['amplitude']:.1e}"
+    )
     print("  would falsify shell-opacity / EM coupling link.")
     print()
 
@@ -832,7 +849,9 @@ def section_full_einstein_tensor(s_vals: np.ndarray, u_vals: np.ndarray) -> None
     print()
 
     print("Step 5: Modified TOV (G -> G(psi), psi self-consistent)")
-    print("  dP/dr = -G(psi) rho m/r^2 * [(1+P/(rho c^2))(1+4 pi r^3 P/m)] / [1-2G(psi)m/(r c^2)]")
+    print(
+        "  dP/dr = -G(psi) rho m/r^2 * [(1+P/(rho c^2))(1+4 pi r^3 P/m)] / [1-2G(psi)m/(r c^2)]"
+    )
     print()
 
     print("Step 6: Energy conditions")
@@ -886,7 +905,9 @@ def section_ppn_analytical_final(s_vals: np.ndarray, u_vals: np.ndarray) -> None
     print("Step 4: PPN parameters")
     print("  gamma = 1 (exact, static spherical metric)")
     print(f"  beta (leading analytical) = 1 - g1/2 = {beta_leading:.6f}")
-    print("  Weak-field fit to Schwarzschild coords is not standard isotropic PPN beta.")
+    print(
+        "  Weak-field fit to Schwarzschild coords is not standard isotropic PPN beta."
+    )
     print("  Solar-system geodesics: section E (~GR at Mercury).")
     print()
 
@@ -896,11 +917,19 @@ def section_ppn_analytical_final(s_vals: np.ndarray, u_vals: np.ndarray) -> None
 
     print("Step 5: PPN observables (formulas; strong-field interpretation only)")
     print("  1. Light deflection: leading order = 4GM/(c^2 b), same as GR")
-    print(f"     CGM O((GM/bc^2)^2) ~ {(beta - 1) * (4.25e-6)**2:.2e} rad (unobservable)")
-    print("  2. Shapiro delay: gamma=1 at leading order; path correction ~ dlnG/dpsi * psi")
+    print(
+        f"     CGM O((GM/bc^2)^2) ~ {(beta - 1) * (4.25e-6)**2:.2e} rad (unobservable)"
+    )
+    print(
+        "  2. Shapiro delay: gamma=1 at leading order; path correction ~ dlnG/dpsi * psi"
+    )
     print("  3. Perihelion precession:")
-    print(f"     naive (4-beta)/3 at this beta = {precession_factor:.4f}  (not used at Mercury)")
-    print(f"     Mercury GR: {mercury_gr:.1f} arcsec/century; geodesic ratio ~1: analysis_4 section E")
+    print(
+        f"     naive (4-beta)/3 at this beta = {precession_factor:.4f}  (not used at Mercury)"
+    )
+    print(
+        f"     Mercury GR: {mercury_gr:.1f} arcsec/century; geodesic ratio ~1: analysis_4 section E"
+    )
     print("  4. Strong field: O(1) CGM/GR deviation when psi ~ 1/|beta-1|")
     print()
 
@@ -910,7 +939,9 @@ def section_ppn_analytical_final(s_vals: np.ndarray, u_vals: np.ndarray) -> None
 
     print("Step 7: Nordtvedt effect")
     eta_ppn_scalar = 4.0 * beta - 1.0 - 3.0
-    print(f"  PPN scalar-tensor formula: eta_N = 4*beta - gamma - 3 = {eta_ppn_scalar:.4f}")
+    print(
+        f"  PPN scalar-tensor formula: eta_N = 4*beta - gamma - 3 = {eta_ppn_scalar:.4f}"
+    )
     print("  CGM: G(psi) is position-dependent, not composition-dependent")
     print("  psi is slaved to metric (no free scalar); correct prediction eta_N = 0")
     print("  Lunar ranging |eta_N| < 2.2e-5  OK")
@@ -947,9 +978,9 @@ def section_EFE_closure(s_arr: np.ndarray, psi_arr: np.ndarray) -> None:
 
     psi_double_prime = np.zeros_like(psi_arr)
     if n > 2:
-        psi_double_prime[1:-1] = (
-            psi_arr[2:] - 2.0 * psi_arr[1:-1] + psi_arr[:-2]
-        ) / ((s_arr[2:] - s_arr[:-2]) / 2.0) ** 2
+        psi_double_prime[1:-1] = (psi_arr[2:] - 2.0 * psi_arr[1:-1] + psi_arr[:-2]) / (
+            (s_arr[2:] - s_arr[:-2]) / 2.0
+        ) ** 2
 
     f_arr = 1.0 - 2.0 * psi_arr
     f_prime = -2.0 * psi_prime_ode
@@ -960,8 +991,10 @@ def section_EFE_closure(s_arr: np.ndarray, psi_arr: np.ndarray) -> None:
 
     with np.errstate(divide="ignore", invalid="ignore"):
         g_rr = -2.0 * (psi_arr + s_arr * psi_prime_ode) / (s_arr**2 * f_arr)
-        g_thth = s_arr / (2.0 * f_arr) * (
-            f_double_prime + f_prime / s_arr - f_prime**2 / (2.0 * f_arr)
+        g_thth = (
+            s_arr
+            / (2.0 * f_arr)
+            * (f_double_prime + f_prime / s_arr - f_prime**2 / (2.0 * f_arr))
         )
 
     safe = np.abs(f_arr) > 0.01
@@ -980,7 +1013,9 @@ def section_EFE_closure(s_arr: np.ndarray, psi_arr: np.ndarray) -> None:
         p_rad = -g_rr / (8.0 * np.pi * g_ratio_arr)
         p_tan = -g_thth / (8.0 * np.pi * g_ratio_arr)
 
-    print(f"  {'s':>10} {'psi':>12} {'rho_eff':>12} {'P_rad':>12} {'P_tan':>12} {'P/rho':>10}")
+    print(
+        f"  {'s':>10} {'psi':>12} {'rho_eff':>12} {'P_rad':>12} {'P_tan':>12} {'P/rho':>10}"
+    )
     print("  " + "-" * 62)
     for idx in [0, n // 8, n // 4, n // 2, 3 * n // 4, -1]:
         s = float(s_arr[idx])
@@ -989,7 +1024,9 @@ def section_EFE_closure(s_arr: np.ndarray, psi_arr: np.ndarray) -> None:
         pr = float(p_rad[idx]) if np.isfinite(p_rad[idx]) else 0.0
         pt = float(p_tan[idx]) if np.isfinite(p_tan[idx]) else 0.0
         p_over_r = pr / r if abs(r) > 1e-30 else 0.0
-        print(f"  {s:10.1f} {psi:12.6e} {r:12.4e} {pr:12.4e} {pt:12.4e} {p_over_r:10.4f}")
+        print(
+            f"  {s:10.1f} {psi:12.6e} {r:12.4e} {pr:12.4e} {pt:12.4e} {p_over_r:10.4f}"
+        )
     print()
 
     print("Step 4: T_munu = T_m + T_G (point-mass exterior: T_m = 0)")
@@ -1071,7 +1108,9 @@ def section_variational_einstein(s_vals: np.ndarray, u_vals: np.ndarray) -> None
             dpsi_num = (u_vals[idx + 1] - u_vals[idx - 1]) / (
                 2.0 * (s_vals[idx + 1] - s_vals[idx - 1])
             )
-            max_ode_err = max(max_ode_err, abs(dpsi_num - dpsi_ode) / max(abs(dpsi_ode), 1e-30))
+            max_ode_err = max(
+                max_ode_err, abs(dpsi_num - dpsi_ode) / max(abs(dpsi_ode), 1e-30)
+            )
     print(f"  max |dpsi_num - dpsi_model| / |dpsi_model| = {max_ode_err:.2e}")
     print("  Poisson (tt) satisfied; rr, th from metric + G-field stress")
     print()
@@ -1196,9 +1235,7 @@ def bianchi_exchange_table(
     return [bianchi_exchange_at_s(s, g1_val) for s in s_values]
 
 
-def section_anisotropic_equilibrium(
-    s_vals: np.ndarray, u_vals: np.ndarray
-) -> None:
+def section_anisotropic_equilibrium(s_vals: np.ndarray, u_vals: np.ndarray) -> None:
     """Anisotropic equilibrium via Einstein tensor identity (not barotropic TOV)."""
     print("=" * 9)
     print("Y. Anisotropic equilibrium verification")
@@ -1233,7 +1270,9 @@ def section_anisotropic_equilibrium(
     print()
 
     print("Step 2: Effective stress components")
-    print(f"  {'s':>10} {'psi':>12} {'rho_eff':>14} {'P_rad':>14} {'P_tan':>14} {'P_t/P_r':>10}")
+    print(
+        f"  {'s':>10} {'psi':>12} {'rho_eff':>14} {'P_rad':>14} {'P_tan':>14} {'P_t/P_r':>10}"
+    )
     print("  " + "-" * 68)
 
     g1 = dlnG_dpsi
@@ -1252,8 +1291,10 @@ def section_anisotropic_equilibrium(
         f_prime = -2.0 * dpsi_ds
         f_pp = -2.0 * d2psi
         if abs(f_val) > 0.01:
-            g_th = s_test / (2.0 * f_val) * (
-                f_pp + f_prime / s_test - f_prime**2 / (2.0 * f_val)
+            g_th = (
+                s_test
+                / (2.0 * f_val)
+                * (f_pp + f_prime / s_test - f_prime**2 / (2.0 * f_val))
             )
         else:
             g_th = float("nan")
@@ -1287,9 +1328,7 @@ def section_anisotropic_equilibrium(
     print()
 
 
-def section_complete_gravity_system(
-    s_vals: np.ndarray, u_vals: np.ndarray
-) -> None:
+def section_complete_gravity_system(s_vals: np.ndarray, u_vals: np.ndarray) -> None:
     """Summary of closed derivation paths (kernel to continuum)."""
     print("=" * 9)
     print("W. Complete CGM gravity system")
@@ -1304,7 +1343,7 @@ def section_complete_gravity_system(
     print("  c4=-7/4")
     print()
     print("CONTINUUM:")
-    print(f"  tau_G={tau_G:.6f}, G_global predicted ~0.074 ppm vs CODATA")
+    print(f"  tau_G={tau_G:.6f}, G_global vs G_meas ~{(g_pred_from_tau(tau_G)/G_meas - 1.0)*1e6:+.3f} ppm")
     print("  Q_G=4pi, 8pi=2*Q_G")
     print()
     print("NONLINEAR:")
@@ -1325,7 +1364,9 @@ def section_complete_gravity_system(
     print("  alpha(z) ~5e-4 damped; GW: indistinguishable from GR at HT precision")
     print()
     print("BRIDGES (kernel -> observation):")
-    print("  Gauss law, Poisson + analytic psi(s), metric f=1-2*psi, shadow, PPN, SEP: closed")
+    print(
+        "  Gauss law, Poisson + analytic psi(s), metric f=1-2*psi, shadow, PPN, SEP: closed"
+    )
     print()
 
 
@@ -1372,7 +1413,9 @@ def shadow_spin_table(
     z2_amp = helix_z2_activation()
 
     print(f"  helix Z2 activation = {z2_amp:.4f}")
-    print(f"  kappa_metric = {KAPPA_METRIC:.4f}  (W2={W2_SHELL_DISPLACEMENT} * {KAPPA_KERNEL:.2f})")
+    print(
+        f"  kappa_metric = {KAPPA_METRIC:.4f}  (W2={W2_SHELL_DISPLACEMENT} * {KAPPA_KERNEL:.2f})"
+    )
     print()
     print(
         f"  {'Source':>8} {'s_ph':>7} {'CGM_Schw':>9} {'CGM_spin':>9} "
@@ -1383,9 +1426,7 @@ def shadow_spin_table(
     s_max = float(s_vals[-1]) if len(s_vals) else 1e6
     for name, a_star, theta_o in [("M87*", 0.5, 163.0), ("Sgr A*", 0.9, 17.0)]:
         obs = eht_shadow[name]
-        ph_spin = find_photon_sphere_spin(
-            a_star, theta_o, dlnG_dpsi, s_max
-        )
+        ph_spin = find_photon_sphere_spin(a_star, theta_o, dlnG_dpsi, s_max)
         if ph_spin is None:
             d_spin = shadow_diameter_muas(b_schw, obs["M_kg"], obs["D_m"])
             s_spin = s_schw
@@ -1405,7 +1446,9 @@ def shadow_spin_table(
 
 def main():
     print("CGM gravity analysis 5: field derivations")
-    print(f"tau_G = {tau_G:.6f},  n_vc = {n_vc:.2f},  2*Delta*n_vc = {tau_stf_coeff:.6f}")
+    print(
+        f"tau_G = {tau_G:.6f},  n_vc = {n_vc:.2f},  2*Delta*n_vc = {tau_stf_coeff:.6f}"
+    )
     print()
 
     print_e_ref_quantile_note()

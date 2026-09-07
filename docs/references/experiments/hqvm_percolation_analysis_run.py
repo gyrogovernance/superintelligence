@@ -42,6 +42,7 @@ SCRIPTS: dict[str, str] = {
 
 def _configure_stdout_utf8() -> None:
     import codecs
+
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
 
@@ -75,10 +76,17 @@ def run_script(
         err = str(exc.stderr or "") + f"\nTIMEOUT after {timeout_s}s\n"
         return 124, str(out), str(err), dt
 
-    return proc.returncode, proc.stdout or "", proc.stderr or "", time.perf_counter() - t0
+    return (
+        proc.returncode,
+        proc.stdout or "",
+        proc.stderr or "",
+        time.perf_counter() - t0,
+    )
 
 
-def format_block(script_name: str, code: int, stdout: str, stderr: str, dt: float) -> str:
+def format_block(
+    script_name: str, code: int, stdout: str, stderr: str, dt: float
+) -> str:
     lines = [f"######## {script_name} ########", ""]
     if stdout:
         lines.append(stdout.rstrip())
@@ -120,7 +128,9 @@ def run_all(
         status = "ok" if code == 0 else f"exit {code}"
         print(f"  {status} ({dt:.1f}s)", flush=True)
 
-    blocks.append(f"finished: {datetime.now().astimezone().isoformat(timespec='seconds')}")
+    blocks.append(
+        f"finished: {datetime.now().astimezone().isoformat(timespec='seconds')}"
+    )
     blocks.append(f"total_duration={total_dt:.2f}s")
     blocks.append(f"worst_exit={worst_code}")
 
@@ -180,9 +190,7 @@ def main() -> None:
     print("hQVM CGM Percolation -- runner")
     print("=" * 5)
     print(f"  Output: {args.output.resolve()}")
-    raise SystemExit(
-        run_all(args.output.resolve(), parts, args.timeout, script_extra)
-    )
+    raise SystemExit(run_all(args.output.resolve(), parts, args.timeout, script_extra))
 
 
 if __name__ == "__main__":

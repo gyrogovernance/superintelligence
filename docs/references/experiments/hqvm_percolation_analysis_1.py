@@ -79,9 +79,13 @@ if str(_EXPERIMENTS_DIR) not in sys.path:
     sys.path.insert(0, str(_EXPERIMENTS_DIR))
 
 from gyroscopic.hQVM.constants import (
+    APERTURE_GAP,
+    BU_HOLONOMY_ANGLE,
     GENE_MAC_REST,
     HORIZON_GATE_BYTES,
     LAYER_MASK_12,
+    M_A,
+    RHO,
     byte_to_intron,
     byte_micro_ref,
     intron_family,
@@ -107,25 +111,26 @@ from hqvm_wavefunction_kernel import (
 )
 
 # Constants
-M_A = 1.0 / (2.0 * np.sqrt(2.0 * np.pi))
-DELTA_BU = 0.195342176580
-RHO = DELTA_BU / M_A
-DELTA = 1.0 - RHO
+DELTA_BU = BU_HOLONOMY_ANGLE
+DELTA = APERTURE_GAP
 INV48 = 1.0 / 48.0
 DYADIC_5_256 = 5.0 / 256.0
 
 N_OMEGA = 4096
 GIANT_THRESHOLD = N_OMEGA // 2  # 2048
-MAX_BFS_DEPTH = 12  # enough for depth-8 holonomy cycle + margin
+MAX_BFS_DEPTH = 12  # enough for F² Z2 holonomy cycle + margin
+
 
 @dataclass(frozen=True)
 class TransitionEngine:
     """Precomputed 4096 x 256 byte transition table for fast BFS."""
+
     transitions: List[List[int]]
     shell: List[int]
     start_idx: int
     state_to_idx: Dict[int, int]
     n: int
+
 
 def build_transition_engine(omega: List[int]) -> TransitionEngine:
     print("  Precomputing transition table (4096 states x 256 bytes)...", flush=True)
@@ -142,13 +147,19 @@ def build_transition_engine(omega: List[int]) -> TransitionEngine:
     print("  Transition table ready.", flush=True)
     return TransitionEngine(transitions, shell, start_idx, state_to_idx, n)
 
-def build_shuffled_engine(engine: TransitionEngine, perm: List[int]) -> TransitionEngine:
+
+def build_shuffled_engine(
+    engine: TransitionEngine, perm: List[int]
+) -> TransitionEngine:
     """Return a TransitionEngine where byte b's dynamics is swapped for
     byte perm[b]'s dynamics, while shell/start/state_to_idx (labels) are
     unchanged. Used for the corrected null model (Section X, Model 3):
     decouples classification labels from actual transition dynamics."""
     shuffled = [[row[perm[b]] for b in range(256)] for row in engine.transitions]
-    return TransitionEngine(shuffled, engine.shell, engine.start_idx, engine.state_to_idx, engine.n)
+    return TransitionEngine(
+        shuffled, engine.shell, engine.start_idx, engine.state_to_idx, engine.n
+    )
+
 
 def build_byte_partitions(
     bclass: List[ByteClassification],
@@ -177,21 +188,24 @@ def build_byte_partitions(
         "micro_ref": micro_ref_bytes,
     }
 
+
 @dataclass(frozen=True)
 class ByteClassification:
     """Complete CGM-native classification of a single byte."""
+
     byte: int
     intron: int
-    family: int                  # 0..3 (K4 sector)
-    k4_gate: str                 # 'id', 'S', 'C', 'F'
-    micro_ref: int                # 6-bit payload (bits 1-6); the CGM-native dial
-    q6: int                      # 6-bit chirality transport class
-    q6_weight: int               # popcount(q6), 0..6
-    fold_disagree: int           # 0..4
+    family: int  # 0..3 (K4 sector)
+    k4_gate: str  # 'id', 'S', 'C', 'F'
+    micro_ref: int  # 6-bit payload (bits 1-6); the CGM-native dial
+    q6: int  # 6-bit chirality transport class
+    q6_weight: int  # popcount(q6), 0..6
+    fold_disagree: int  # 0..4
     phase_net: Tuple[int, int, int, int]  # XOR per phase (CS, UNA, ONA, BU)
-    curvature_2form: float       # |F|^2 at BU fold
-    connection_chain: Tuple[float, ...]    # 7 boundary magnitudes
-    is_flat: bool                # fwd == rev (fold disagreement = 0)
+    curvature_2form: float  # |F|^2 at BU fold
+    connection_chain: Tuple[float, ...]  # 7 boundary magnitudes
+    is_flat: bool  # fwd == rev (fold disagreement = 0)
+
 
 def classify_all_bytes() -> List[ByteClassification]:
     """Classify all 256 bytes by every CGM-native axis."""
@@ -201,21 +215,24 @@ def classify_all_bytes() -> List[ByteClassification]:
         chain = compute_connection_chain(b)
         curv = curvature_2form(b)
         chain_t = tuple(c.A_magnitude for c in chain)
-        result.append(ByteClassification(
-            byte=b,
-            intron=bf.intron,
-            family=bf.family,
-            k4_gate=classify_galois4_gate(b),
-            micro_ref=byte_micro_ref(b),
-            q6=bf.q6,
-            q6_weight=bf.q6.bit_count(),
-            fold_disagree=fold_disagreement(b),
-            phase_net=bf.phase_net,
-            curvature_2form=curv,
-            connection_chain=chain_t,
-            is_flat=bf.is_flat,
-        ))
+        result.append(
+            ByteClassification(
+                byte=b,
+                intron=bf.intron,
+                family=bf.family,
+                k4_gate=classify_galois4_gate(b),
+                micro_ref=byte_micro_ref(b),
+                q6=bf.q6,
+                q6_weight=bf.q6.bit_count(),
+                fold_disagree=fold_disagreement(b),
+                phase_net=bf.phase_net,
+                curvature_2form=curv,
+                connection_chain=chain_t,
+                is_flat=bf.is_flat,
+            )
+        )
     return result
+
 
 def enumerate_omega() -> List[int]:
     """Enumerate all 4096 Omega states."""
@@ -235,8 +252,10 @@ def enumerate_omega() -> List[int]:
             out.append(((a12 & LAYER_MASK_12) << 12) | (b12 & LAYER_MASK_12))
     return out
 
+
 def get_shell(state24: int) -> int:
     return chirality_word6(state24).bit_count()
+
 
 def byte_from_family_micro(family: int, micro_ref: int) -> int:
     """Inverse of (intron_family, intron_micro_ref): construct the unique
@@ -247,8 +266,10 @@ def byte_from_family_micro(family: int, micro_ref: int) -> int:
     intron = (bit7 << 7) | ((micro_ref & 0x3F) << 1) | bit0
     return intron ^ 0xAA
 
+
 # I.5 K4 Algebraic Cross-Check (exact, exhaustive; grounds the percolation
 #     study in the theorems already proved in Analysis_hQVM_Wavefunction.md)
+
 
 def run_k4_algebraic_verification(engine: TransitionEngine) -> None:
     """Exhaustively re-verify, against this script's transition table,
@@ -310,22 +331,35 @@ def run_k4_algebraic_verification(engine: TransitionEngine) -> None:
             if f_i != f_alt:
                 closure_ok = False
 
-    print(f"\n  T2 (W2: shell -> 6-shell, all m, all states):    {'VERIFIED' if t2_ok else 'FAILED'}")
-    print(f"  T3 (W2': shell -> 6-shell, all m, all states):   {'VERIFIED' if t3_ok else 'FAILED'}")
-    print(f"  T4 (F preserves shell, all m, all states):       {'VERIFIED' if t4_ok else 'FAILED'}")
-    print(f"  W2 involution (W2 o W2 = id, all m, all states): {'VERIFIED' if involution_ok else 'FAILED'}")
-    print(f"  K4 commutation (W2.W2' = W2'.W2 = F, sampled):   {'VERIFIED' if closure_ok else 'FAILED'}")
+    print(
+        f"\n  T2 (W2: shell -> 6-shell, all m, all states):    {'VERIFIED' if t2_ok else 'FAILED'}"
+    )
+    print(
+        f"  T3 (W2': shell -> 6-shell, all m, all states):   {'VERIFIED' if t3_ok else 'FAILED'}"
+    )
+    print(
+        f"  T4 (F preserves shell, all m, all states):       {'VERIFIED' if t4_ok else 'FAILED'}"
+    )
+    print(
+        f"  W2 involution (W2 o W2 = id, all m, all states): {'VERIFIED' if involution_ok else 'FAILED'}"
+    )
+    print(
+        f"  K4 commutation (W2.W2' = W2'.W2 = F, sampled):   {'VERIFIED' if closure_ok else 'FAILED'}"
+    )
+
 
 @dataclass(frozen=True)
 class ReachabilityResult:
     """Result of a reachability computation."""
-    reachable: int                          # |reachable set|
-    shells_reached: Tuple[int, ...]         # which shells are present
-    spans: bool                             # shell 0 -> shell 6 path exists
-    giant: bool                             # |reachable| >= 2048
-    first_span_depth: Optional[int]         # depth at which spanning first occurs
-    shell_first_depth: Dict[int, int]       # shell -> first depth reached
-    full_omega: bool                        # reachable == 4096
+
+    reachable: int  # |reachable set|
+    shells_reached: Tuple[int, ...]  # which shells are present
+    spans: bool  # shell 0 -> shell 6 path exists
+    giant: bool  # |reachable| >= 2048
+    first_span_depth: Optional[int]  # depth at which spanning first occurs
+    shell_first_depth: Dict[int, int]  # shell -> first depth reached
+    full_omega: bool  # reachable == 4096
+
 
 def compute_reachability(
     engine: TransitionEngine,
@@ -406,6 +440,7 @@ def compute_reachability(
         full_omega=visited_count == N_OMEGA,
     )
 
+
 def reachable_mask(
     engine: TransitionEngine,
     allowed_bytes: List[int],
@@ -436,8 +471,10 @@ def reachable_mask(
         frontier = next_frontier
     return visited
 
+
 def complement_horizon_states(omega: List[int]) -> Set[int]:
     return {s for s in omega if is_on_horizon(s) and not is_on_equality_horizon(s)}
+
 
 def equality_horizon_states(omega: List[int]) -> Set[int]:
     return {s for s in omega if is_on_equality_horizon(s)}
@@ -463,7 +500,9 @@ AXIS_MICRO_MASKS: Dict[str, int] = {
 }
 
 
-def axis_micro_ref_groups(micro_ref_bytes: Dict[int, List[int]], axis: str) -> List[List[int]]:
+def axis_micro_ref_groups(
+    micro_ref_bytes: Dict[int, List[int]], axis: str
+) -> List[List[int]]:
     """micro_ref buckets whose payload touches the given se(3) axis."""
     mask = AXIS_MICRO_MASKS[axis]
     return [micro_ref_bytes[m] for m in range(64) if m & mask]
@@ -508,7 +547,9 @@ def compute_horizon_confinement(
             for b in allowed_tuple:
                 ni = row[b]
                 if not on_horizon_pred(omega[ni]):
-                    return HorizonConfinementResult(visited_count, False, visited_count == n)
+                    return HorizonConfinementResult(
+                        visited_count, False, visited_count == n
+                    )
                 if not visited[ni]:
                     visited[ni] = 1
                     visited_count += 1
@@ -553,7 +594,10 @@ def _random_q_fiber_sweep(
     sweep_data: List[Tuple[float, float, float, float, float, int]] = []
     for pi, p in enumerate(p_values):
         if pi % 10 == 0:
-            print(f"  progress: q-fiber/{mode} {pi + 1}/{len(p_values)} (p={p:.3f})", flush=True)
+            print(
+                f"  progress: q-fiber/{mode} {pi + 1}/{len(p_values)} (p={p:.3f})",
+                flush=True,
+            )
         span_count = 0
         giant_count = 0
         full_count = 0
@@ -589,15 +633,18 @@ def _random_q_fiber_sweep(
                 giant_count += 1
             if r.full_omega:
                 full_count += 1
-        sweep_data.append((
-            p,
-            span_count / n_samples,
-            giant_count / n_samples,
-            total_reach / max(nz, 1),
-            full_count / n_samples,
-            nz,
-        ))
+        sweep_data.append(
+            (
+                p,
+                span_count / n_samples,
+                giant_count / n_samples,
+                total_reach / max(nz, 1),
+                full_count / n_samples,
+                nz,
+            )
+        )
     return sweep_data
+
 
 def run_deterministic_analysis(
     bclass: List[ByteClassification],
@@ -615,8 +662,10 @@ def run_deterministic_analysis(
     for bc in bclass:
         family_bytes[bc.family].append(bc.byte)
 
-    print(f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}")
+    print(
+        f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}"
+    )
     print("-" * 5)
 
     family_singles: List[ReachabilityResult] = []
@@ -626,26 +675,36 @@ def run_deterministic_analysis(
         family_singles.append(r)
         _print_reach_row(f"Family {fam:02b}", len(allowed), r)
 
-    pair_alloweds = [family_bytes[f1] + family_bytes[f2]
-                     for f1, f2 in itertools.combinations(range(4), 2)]
-    triple_alloweds = [family_bytes[f1] + family_bytes[f2] + family_bytes[f3]
-                       for f1, f2, f3 in itertools.combinations(range(4), 3)]
+    pair_alloweds = [
+        family_bytes[f1] + family_bytes[f2]
+        for f1, f2 in itertools.combinations(range(4), 2)
+    ]
+    triple_alloweds = [
+        family_bytes[f1] + family_bytes[f2] + family_bytes[f3]
+        for f1, f2, f3 in itertools.combinations(range(4), 3)
+    ]
     ref_fam = family_singles[0]
     if _combo_results_uniform(engine, pair_alloweds + triple_alloweds, ref_fam):
-        print(f"  {'all pairs/triples (10 combos)':<25} "
-              f"{'':>5} {ref_fam.reachable:6d} "
-              f"{str(ref_fam.shells_reached):>12} {str(ref_fam.spans):>5} "
-              f"{str(ref_fam.giant):>6} {str(ref_fam.full_omega):>5} "
-              f"{'(same)':>7}")
+        print(
+            f"  {'all pairs/triples (10 combos)':<25} "
+            f"{'':>5} {ref_fam.reachable:6d} "
+            f"{str(ref_fam.shells_reached):>12} {str(ref_fam.spans):>5} "
+            f"{str(ref_fam.giant):>6} {str(ref_fam.full_omega):>5} "
+            f"{'(same)':>7}"
+        )
     else:
         for f1, f2 in itertools.combinations(range(4), 2):
             allowed = family_bytes[f1] + family_bytes[f2]
-            _print_reach_row(f"Families {f1:02b}+{f2:02b}", len(allowed),
-                             compute_reachability(engine, allowed))
+            _print_reach_row(
+                f"Families {f1:02b}+{f2:02b}",
+                len(allowed),
+                compute_reachability(engine, allowed),
+            )
 
     allowed_all = list(range(256))
-    _print_reach_row("All families", len(allowed_all),
-                     compute_reachability(engine, allowed_all))
+    _print_reach_row(
+        "All families", len(allowed_all), compute_reachability(engine, allowed_all)
+    )
 
     # --- B. K4 gate restrictions ---
     print("\n--- B. K4 Gate Restrictions ---")
@@ -653,33 +712,40 @@ def run_deterministic_analysis(
     for bc in bclass:
         gate_bytes[bc.k4_gate].append(bc.byte)
 
-    print(f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}")
+    print(
+        f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}"
+    )
     print("-" * 5)
 
     gate_singles: List[ReachabilityResult] = []
-    for gate in ['id', 'S', 'C', 'F']:
+    for gate in ["id", "S", "C", "F"]:
         allowed = gate_bytes[gate]
         r = compute_reachability(engine, allowed)
         gate_singles.append(r)
         _print_reach_row(f"Gate {gate} only", len(allowed), r)
 
-    pair_alloweds_g = [gate_bytes[g1] + gate_bytes[g2]
-                       for g1, g2 in itertools.combinations(['id', 'S', 'C', 'F'], 2)]
+    pair_alloweds_g = [
+        gate_bytes[g1] + gate_bytes[g2]
+        for g1, g2 in itertools.combinations(["id", "S", "C", "F"], 2)
+    ]
     ref_gate = gate_singles[0]
     if _combo_results_uniform(engine, pair_alloweds_g, ref_gate):
-        print(f"  {'all gate pairs (6 combos)':<25} "
-              f"{'':>5} {ref_gate.reachable:6d} "
-              f"{str(ref_gate.shells_reached):>12} {str(ref_gate.spans):>5} "
-              f"{str(ref_gate.giant):>6} {str(ref_gate.full_omega):>5} "
-              f"{'(same)':>7}")
+        print(
+            f"  {'all gate pairs (6 combos)':<25} "
+            f"{'':>5} {ref_gate.reachable:6d} "
+            f"{str(ref_gate.shells_reached):>12} {str(ref_gate.spans):>5} "
+            f"{str(ref_gate.giant):>6} {str(ref_gate.full_omega):>5} "
+            f"{'(same)':>7}"
+        )
     else:
-        for g1, g2 in itertools.combinations(['id', 'S', 'C', 'F'], 2):
+        for g1, g2 in itertools.combinations(["id", "S", "C", "F"], 2):
             allowed = gate_bytes[g1] + gate_bytes[g2]
-            _print_reach_row(f"Gates {g1}+{g2}", len(allowed),
-                             compute_reachability(engine, allowed))
+            _print_reach_row(
+                f"Gates {g1}+{g2}", len(allowed), compute_reachability(engine, allowed)
+            )
 
-    for label, gates in [("id+F (preserve)", ['id', 'F']), ("S+C (swap)", ['S', 'C'])]:
+    for label, gates in [("id+F (preserve)", ["id", "F"]), ("S+C (swap)", ["S", "C"])]:
         allowed = gate_bytes[gates[0]] + gate_bytes[gates[1]]
         _print_reach_row(label, len(allowed), compute_reachability(engine, allowed))
 
@@ -689,8 +755,10 @@ def run_deterministic_analysis(
     for bc in bclass:
         qw_bytes[bc.q6_weight].append(bc.byte)
 
-    print(f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}")
+    print(
+        f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}"
+    )
     print("-" * 5)
 
     # Single layers
@@ -698,9 +766,11 @@ def run_deterministic_analysis(
         allowed = qw_bytes[w]
         r = compute_reachability(engine, allowed)
         sd = str(r.first_span_depth) if r.first_span_depth is not None else "-"
-        print(f"  Q6 weight={w} only      {len(allowed):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5} {sd:>7}")
+        print(
+            f"  Q6 weight={w} only      {len(allowed):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5} {sd:>7}"
+        )
 
     # Cumulative
     print()
@@ -709,9 +779,11 @@ def run_deterministic_analysis(
         cumul.extend(qw_bytes[w])
         r = compute_reachability(engine, cumul)
         sd = str(r.first_span_depth) if r.first_span_depth is not None else "-"
-        print(f"  Q6 weight <= {w}        {len(cumul):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5} {sd:>7}")
+        print(
+            f"  Q6 weight <= {w}        {len(cumul):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5} {sd:>7}"
+        )
 
     # --- D. Fold disagreement restrictions ---
     print("\n--- D. Fold Disagreement Restrictions ---")
@@ -719,17 +791,21 @@ def run_deterministic_analysis(
     for bc in bclass:
         fd_bytes[bc.fold_disagree].append(bc.byte)
 
-    print(f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}")
+    print(
+        f"\n{'Alphabet':<25} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6} {'Full':>5} {'Span@D':>7}"
+    )
     print("-" * 5)
 
     for d in range(5):
         allowed = fd_bytes[d]
         r = compute_reachability(engine, allowed)
         sd = str(r.first_span_depth) if r.first_span_depth is not None else "-"
-        print(f"  Fold disagree={d} only   {len(allowed):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5} {sd:>7}")
+        print(
+            f"  Fold disagree={d} only   {len(allowed):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5} {sd:>7}"
+        )
 
     print()
     cumul_fd: List[int] = []
@@ -737,9 +813,11 @@ def run_deterministic_analysis(
         cumul_fd.extend(fd_bytes[d])
         r = compute_reachability(engine, cumul_fd)
         sd = str(r.first_span_depth) if r.first_span_depth is not None else "-"
-        print(f"  Fold disagree <= {d}     {len(cumul_fd):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5} {sd:>7}")
+        print(
+            f"  Fold disagree <= {d}     {len(cumul_fd):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5} {sd:>7}"
+        )
 
     # --- E. Curvature 2-form restricted ---
     print("\n--- E. Curvature 2-Form Magnitude Restrictions ---")
@@ -749,17 +827,20 @@ def run_deterministic_analysis(
         key = round(bc.curvature_2form, 6)
         curv_bytes[key].append(bc.byte)
 
-    print(f"\n{'|F|^2 at fold':<18} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6} {'Full':>5}")
+    print(
+        f"\n{'|F|^2 at fold':<18} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6} {'Full':>5}"
+    )
     print("-" * 5)
     for cv in sorted(curv_bytes.keys()):
         allowed = curv_bytes[cv]
         r = compute_reachability(engine, allowed)
-        print(f"  {cv:<16.6f} {len(allowed):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5}")
+        print(
+            f"  {cv:<16.6f} {len(allowed):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5}"
+        )
 
-    
     # before each cumulative reachability test (fixes premature-print bug
     # where only the first byte of a new tier was included).
     print("\n  Cumulative (ascending |F|^2):")
@@ -770,9 +851,11 @@ def run_deterministic_analysis(
     for cv in sorted(curv_groups.keys()):
         cumul_curv.extend(curv_groups[cv])
         r = compute_reachability(engine, cumul_curv)
-        print(f"    |F|^2 <= {cv:<12.6f}  {len(cumul_curv):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-              f"{str(r.full_omega):>5}")
+        print(
+            f"    |F|^2 <= {cv:<12.6f}  {len(cumul_curv):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+            f"{str(r.full_omega):>5}"
+        )
 
     # --- F. Phase-net restrictions ---
     print("\n--- F. Phase-Net Vector Restrictions ---")
@@ -781,23 +864,28 @@ def run_deterministic_analysis(
     for bc in bclass:
         pn_bytes[bc.phase_net].append(bc.byte)
 
-    print(f"\n{'Phase-net':<20} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
-          f"{'Span':>5} {'Giant':>6}")
+    print(
+        f"\n{'Phase-net':<20} {'|B|':>5} {'Reach':>6} {'Shells':>12} "
+        f"{'Span':>5} {'Giant':>6}"
+    )
     print("-" * 5)
     for pn in sorted(pn_bytes.keys()):
         allowed = pn_bytes[pn]
         r = compute_reachability(engine, allowed)
-        print(f"  {str(pn):<20s} {len(allowed):5d} {r.reachable:6d} "
-              f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6}")
+        print(
+            f"  {str(pn):<20s} {len(allowed):5d} {r.reachable:6d} "
+            f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6}"
+        )
 
     # Phase-net cumulative: require each phase to be "active" (net=1)
     print("\n  Cumulative by active phases (net=1 in that phase):")
     for n_active in range(5):
-        allowed = [bc.byte for bc in bclass
-                    if sum(bc.phase_net) >= n_active]
+        allowed = [bc.byte for bc in bclass if sum(bc.phase_net) >= n_active]
         r = compute_reachability(engine, allowed)
-        print(f"    >= {n_active} active phases: {len(allowed):5d} bytes  "
-              f"Reach={r.reachable:6d}  Span={r.spans}  Giant={r.giant}")
+        print(
+            f"    >= {n_active} active phases: {len(allowed):5d} bytes  "
+            f"Reach={r.reachable:6d}  Span={r.spans}  Giant={r.giant}"
+        )
 
     # --- G. Connection 1-form boundary restrictions ---
     print("\n--- G. Connection 1-Form Boundary Restrictions ---")
@@ -808,9 +896,11 @@ def run_deterministic_analysis(
         allowed_z = [bc.byte for bc in bclass if bc.connection_chain[bi] == 0]
         r_nz = compute_reachability(engine, allowed_nz)
         r_z = compute_reachability(engine, allowed_z)
-        print(f"  {bname:8s}:  |A|>0 -> {len(allowed_nz):4d}B  "
-              f"Reach={r_nz.reachable:5d} Span={str(r_nz.spans):>5}  |  "
-              f"|A|=0 -> {len(allowed_z):4d}B  Reach={r_z.reachable:5d} Span={str(r_z.spans):>5}")
+        print(
+            f"  {bname:8s}:  |A|>0 -> {len(allowed_nz):4d}B  "
+            f"Reach={r_nz.reachable:5d} Span={str(r_nz.spans):>5}  |  "
+            f"|A|=0 -> {len(allowed_z):4d}B  Reach={r_z.reachable:5d} Span={str(r_z.spans):>5}"
+        )
 
     # --- H. Horizon-to-horizon coverage under byte edges (baseline) ---
     # Byte-graph diagnostic only. NOT the W2 word-level pole pairing (T9);
@@ -829,18 +919,25 @@ def run_deterministic_analysis(
         "Family 01 only": family_bytes[1],
         "Family 10 only": family_bytes[2],
         "Family 11 only": family_bytes[3],
-        "Gate id+F (shell-preserving)": [bc.byte for bc in bclass if bc.k4_gate in ('id', 'F')],
-        "Gate S+C (pole-swap)": [bc.byte for bc in bclass if bc.k4_gate in ('S', 'C')],
+        "Gate id+F (shell-preserving)": [
+            bc.byte for bc in bclass if bc.k4_gate in ("id", "F")
+        ],
+        "Gate S+C (pole-swap)": [bc.byte for bc in bclass if bc.k4_gate in ("S", "C")],
     }
-    print(f"\n  {'Restriction':<32} {'|B|':>5} {'Reach':>6} {'|Eq hit|':>9} {'Eq cover':>9} {'full_O':>7}")
+    print(
+        f"\n  {'Restriction':<32} {'|B|':>5} {'Reach':>6} {'|Eq hit|':>9} {'Eq cover':>9} {'full_O':>7}"
+    )
     print("  " + "-" * 5)
     for label, allowed in h2h_restrictions.items():
         mask = reachable_mask(engine, allowed, comp_idx)
         reach = sum(mask)
         eq_hit = sum(1 for i in eq_idx_set if mask[i])
         full_pairing = eq_hit == 64
-        print(f"  {label:<32} {len(allowed):5d} {reach:6d} {eq_hit:9d} "
-              f"{str(full_pairing):>13} {str(reach == N_OMEGA):>11}")
+        print(
+            f"  {label:<32} {len(allowed):5d} {reach:6d} {eq_hit:9d} "
+            f"{str(full_pairing):>13} {str(reach == N_OMEGA):>11}"
+        )
+
 
 def _print_reach_row(
     label: str,
@@ -849,9 +946,11 @@ def _print_reach_row(
     width: int = 25,
 ) -> None:
     sd = str(r.first_span_depth) if r.first_span_depth is not None else "-"
-    print(f"  {label:<{width}} {nbytes:5d} {r.reachable:6d} "
-          f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
-          f"{str(r.full_omega):>5} {sd:>7}")
+    print(
+        f"  {label:<{width}} {nbytes:5d} {r.reachable:6d} "
+        f"{str(r.shells_reached):>12} {str(r.spans):>5} {str(r.giant):>6} "
+        f"{str(r.full_omega):>5} {sd:>7}"
+    )
 
 
 def _combo_results_uniform(
@@ -862,7 +961,10 @@ def _combo_results_uniform(
     for allowed in combo_alloweds:
         r = compute_reachability(engine, allowed)
         if (r.reachable, r.full_omega, r.spans, r.giant) != (
-            ref.reachable, ref.full_omega, ref.spans, ref.giant
+            ref.reachable,
+            ref.full_omega,
+            ref.spans,
+            ref.giant,
         ):
             return False
     return True
@@ -902,14 +1004,16 @@ def _random_subset_sweep(
                 giant_count += 1
             if r.full_omega:
                 full_count += 1
-        sweep_data.append((
-            p,
-            span_count / n_samples,
-            giant_count / n_samples,
-            total_reach / max(nz, 1),
-            full_count / n_samples,
-            nz,
-        ))
+        sweep_data.append(
+            (
+                p,
+                span_count / n_samples,
+                giant_count / n_samples,
+                total_reach / max(nz, 1),
+                full_count / n_samples,
+                nz,
+            )
+        )
     return sweep_data
 
 
@@ -947,7 +1051,11 @@ def _compact_sweep_indices(
             if abs(row[0] - p_c) <= 0.025:
                 keep.add(i)
     plateau_i = next(
-        (i for i in range(1, n) if data[i][col_full] >= 0.999 and data[i - 1][col_full] < 0.999),
+        (
+            i
+            for i in range(1, n)
+            if data[i][col_full] >= 0.999 and data[i - 1][col_full] < 0.999
+        ),
         None,
     )
     if plateau_i is not None:
@@ -970,24 +1078,34 @@ def _print_sweep_table(
         row = sweep_data[i]
         p, _, _, reach_c, pf, nz = row
         pf_nz = pf * n_samples / nz if nz else 0.0
-        print(f"  {p:<7.3f} {pf:<9.4f} {pf_nz:<9.4f} {nz / n_samples:<8.3f} {reach_c:<8.1f}")
+        print(
+            f"  {p:<7.3f} {pf:<9.4f} {pf_nz:<9.4f} {nz / n_samples:<8.3f} {reach_c:<8.1f}"
+        )
         prev_i = i
     p_c = _find_crossing(sweep_data, 4)
     if p_c is not None:
         print(f"  p_c(P(full)) ~ {p_c:.4f}")
     plateau_i = next(
-        (i for i in range(1, len(sweep_data))
-         if sweep_data[i][4] >= 0.999 and sweep_data[i - 1][4] < 0.999),
+        (
+            i
+            for i in range(1, len(sweep_data))
+            if sweep_data[i][4] >= 0.999 and sweep_data[i - 1][4] < 0.999
+        ),
         None,
     )
     if plateau_i is not None and plateau_i not in indices:
         p0, _, _, _, pf0, _ = sweep_data[plateau_i]
         omitted = len(sweep_data) - plateau_i - 1
         if omitted > 0:
-            print(f"  ... p >= {p0:.3f}: P(full) = {pf0:.4f} ({omitted} plateau rows omitted)")
+            print(
+                f"  ... p >= {p0:.3f}: P(full) = {pf0:.4f} ({omitted} plateau rows omitted)"
+            )
     omitted_total = len(sweep_data) - len(indices)
     if omitted_total > 0:
-        print(f"  ({omitted_total} of {len(sweep_data)} p-values omitted; see p_c above)")
+        print(
+            f"  ({omitted_total} of {len(sweep_data)} p-values omitted; see p_c above)"
+        )
+
 
 def run_probabilistic_sweeps(
     bclass: List[ByteClassification],
@@ -1017,32 +1135,35 @@ def run_probabilistic_sweeps(
     family_bytes: Dict[int, List[int]] = partitions["family"]
     q6_classes: Dict[int, List[int]] = partitions["q6"]
     micro_ref_bytes: Dict[int, List[int]] = partitions["micro_ref"]
-    p_values = sorted(set(
-        [0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)]
-    ))
+    p_values = sorted(
+        set([0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)])
+    )
 
     # --- A. Family fraction sweep (4 groups: pure gauge dial) ---
     print("\n--- A. Family Fraction Sweep ---")
     print("  p = probability of including each of the 4 families (gauge only)")
     sweep_data = _random_subset_sweep(
-        engine, [family_bytes[f] for f in range(4)], p_values, n_samples, "family")
-    results['family'] = sweep_data
+        engine, [family_bytes[f] for f in range(4)], p_values, n_samples, "family"
+    )
+    results["family"] = sweep_data
     _print_sweep_table(sweep_data, n_samples)
 
     # --- B. Full Byte Fraction Sweep ---
     print("\n--- B. Full Byte Fraction Sweep ---")
     print("  p = probability of including each of the 256 bytes")
     sweep_data_b = _random_subset_sweep(
-        engine, [[b] for b in range(256)], p_values, n_samples, "byte")
-    results['byte'] = sweep_data_b
+        engine, [[b] for b in range(256)], p_values, n_samples, "byte"
+    )
+    results["byte"] = sweep_data_b
     _print_sweep_table(sweep_data_b, n_samples)
 
     # --- C. Q6 Class Fraction Sweep ---
     print("\n--- C. Q6 Class Fraction Sweep ---")
     print("  p = probability of including each of the 64 q6-transport classes")
     sweep_data_q = _random_subset_sweep(
-        engine, list(q6_classes.values()), p_values, n_samples, "q6")
-    results['q6_class'] = sweep_data_q
+        engine, list(q6_classes.values()), p_values, n_samples, "q6"
+    )
+    results["q6_class"] = sweep_data_q
     _print_sweep_table(sweep_data_q, n_samples)
 
     # --- D. Micro-Ref (6-bit Payload) Fraction Sweep ---
@@ -1050,11 +1171,13 @@ def run_probabilistic_sweeps(
     print("  p = probability of including each of the 64 micro_refs")
     print("  (each micro_ref carries all 4 families/gauge phases together)")
     sweep_data_m = _random_subset_sweep(
-        engine, list(micro_ref_bytes.values()), p_values, n_samples, "micro_ref")
-    results['micro_ref'] = sweep_data_m
+        engine, list(micro_ref_bytes.values()), p_values, n_samples, "micro_ref"
+    )
+    results["micro_ref"] = sweep_data_m
     _print_sweep_table(sweep_data_m, n_samples)
 
     return results
+
 
 def run_shell_resolved(
     bclass: List[ByteClassification],
@@ -1067,8 +1190,22 @@ def run_shell_resolved(
     print("=" * 5)
 
     all_bytes = list(range(256))
-    p_values = [0.0, 0.005, 0.01, 0.02, 0.03, 0.05, 0.08, 0.1,
-                0.15, 0.2, 0.3, 0.5, 0.7, 1.0]
+    p_values = [
+        0.0,
+        0.005,
+        0.01,
+        0.02,
+        0.03,
+        0.05,
+        0.08,
+        0.1,
+        0.15,
+        0.2,
+        0.3,
+        0.5,
+        0.7,
+        1.0,
+    ]
 
     print(f"\n  {'p':<8}", end="")
     for s in range(7):
@@ -1078,7 +1215,10 @@ def run_shell_resolved(
 
     for pi, p in enumerate(p_values):
         if pi % 3 == 0:
-            print(f"  progress: shell sweep {pi + 1}/{len(p_values)} (p={p:.3f})", flush=True)
+            print(
+                f"  progress: shell sweep {pi + 1}/{len(p_values)} (p={p:.3f})",
+                flush=True,
+            )
         shell_probs = [0.0] * 7
         for _ in range(n_samples):
             allowed = [b for b in all_bytes if random.random() < p]
@@ -1092,6 +1232,7 @@ def run_shell_resolved(
         for s in range(7):
             print(f" {shell_probs[s]/n_samples:>8.3f}", end="")
         print()
+
 
 def run_depth_resolved(
     bclass: List[ByteClassification],
@@ -1109,8 +1250,8 @@ def run_depth_resolved(
         "Families 10+11": [bc.byte for bc in bclass if bc.family in (2, 3)],
         "Families 00+10": [bc.byte for bc in bclass if bc.family in (0, 2)],
         "Families 01+11": [bc.byte for bc in bclass if bc.family in (1, 3)],
-        "Gate id+F": [bc.byte for bc in bclass if bc.k4_gate in ('id', 'F')],
-        "Gate S+C": [bc.byte for bc in bclass if bc.k4_gate in ('S', 'C')],
+        "Gate id+F": [bc.byte for bc in bclass if bc.k4_gate in ("id", "F")],
+        "Gate S+C": [bc.byte for bc in bclass if bc.k4_gate in ("S", "C")],
         "Q6 weight >= 3": [bc.byte for bc in bclass if bc.q6_weight >= 3],
         "Fold disagree >= 2": [bc.byte for bc in bclass if bc.fold_disagree >= 2],
     }
@@ -1151,11 +1292,15 @@ def run_depth_resolved(
             if has_span and span_depth is None:
                 span_depth = depth
 
-            marker = "S" if (has_span and span_depth == depth) else (
-                "." if not has_span else "s")
+            marker = (
+                "S"
+                if (has_span and span_depth == depth)
+                else ("." if not has_span else "s")
+            )
             print(f" {marker:>5}", end="")
 
         print(f"  |  Span@D={span_depth}")
+
 
 def run_k4_analysis(
     bclass: List[ByteClassification],
@@ -1177,11 +1322,11 @@ def run_k4_analysis(
     print("  Key question: Does spanning REQUIRE at least one pole-swap gate?")
 
     # Test: only shell-preserving gates (id + F)
-    allowed_preserve = gate_bytes['id'] + gate_bytes['F']
+    allowed_preserve = gate_bytes["id"] + gate_bytes["F"]
     r_preserve = compute_reachability(engine, allowed_preserve)
 
     # Test: only pole-swap gates (S + C)
-    allowed_swap = gate_bytes['S'] + gate_bytes['C']
+    allowed_swap = gate_bytes["S"] + gate_bytes["C"]
     r_swap = compute_reachability(engine, allowed_swap)
 
     print(f"\n  Shell-preserving only (id+F): {len(allowed_preserve)} bytes")
@@ -1195,14 +1340,16 @@ def run_k4_analysis(
     # Test minimum gate combination for spanning
     print("\n  Minimum gate combinations for spanning:")
     for n_gates in range(1, 5):
-        for combo in itertools.combinations(['id', 'S', 'C', 'F'], n_gates):
+        for combo in itertools.combinations(["id", "S", "C", "F"], n_gates):
             allowed = []
             for g in combo:
                 allowed.extend(gate_bytes[g])
             r = compute_reachability(engine, allowed)
             if r.spans:
-                print(f"    {combo}: SPANS (|B|={len(allowed)}, "
-                      f"Reach={r.reachable}, Span@D={r.first_span_depth})")
+                print(
+                    f"    {combo}: SPANS (|B|={len(allowed)}, "
+                    f"Reach={r.reachable}, Span@D={r.first_span_depth})"
+                )
 
     # Test: within each family pair, which produces W2?
     print("\n  W2 structure by family pair:")
@@ -1211,8 +1358,11 @@ def run_k4_analysis(
         allowed = [bc.byte for bc in bclass if bc.family in (f1, f2)]
         r = compute_reachability(engine, allowed)
         # Check if this pair acts as a pole-swap involution
-        print(f"    Families {f1:02b}+{f2:02b}: Reach={r.reachable}  "
-              f"Span={r.spans}  Giant={r.giant}  Span@D={r.first_span_depth}")
+        print(
+            f"    Families {f1:02b}+{f2:02b}: Reach={r.reachable}  "
+            f"Span={r.spans}  Giant={r.giant}  Span@D={r.first_span_depth}"
+        )
+
 
 def run_curvature_analysis(
     bclass: List[ByteClassification],
@@ -1236,14 +1386,19 @@ def run_curvature_analysis(
         # Exclude bytes with nonzero A at this boundary
         allowed_excl = [bc.byte for bc in bclass if bc.connection_chain[bi] == 0]
         r = compute_reachability(engine, allowed_excl)
-        print(f"    Exclude {bname:8s}: {len(allowed_excl):4d}B remaining  "
-              f"Reach={r.reachable:5d}  Span={r.spans}")
+        print(
+            f"    Exclude {bname:8s}: {len(allowed_excl):4d}B remaining  "
+            f"Reach={r.reachable:5d}  Span={r.spans}"
+        )
 
     # Test: bytes with curvature ONLY at the fold (BU|BU)
     print("\n  Bytes with curvature ONLY at the BU|BU fold:")
-    fold_only = [bc.byte for bc in bclass
-                  if bc.connection_chain[3] > 0 and
-                  sum(1 for x in bc.connection_chain if x > 0) == 1]
+    fold_only = [
+        bc.byte
+        for bc in bclass
+        if bc.connection_chain[3] > 0
+        and sum(1 for x in bc.connection_chain if x > 0) == 1
+    ]
     r_fo = compute_reachability(engine, fold_only)
     print(f"    Count: {len(fold_only)}  Reach={r_fo.reachable}  Span={r_fo.spans}")
 
@@ -1259,8 +1414,11 @@ def run_curvature_analysis(
     for cv in curv_vals:
         with_cv = [bc.byte for bc in bclass if round(bc.curvature_2form, 6) >= cv]
         r = compute_reachability(engine, with_cv)
-        print(f"    |F|^2 >= {cv:.6f}: {len(with_cv):4d}B  "
-              f"Reach={r.reachable:5d}  Span={r.spans}")
+        print(
+            f"    |F|^2 >= {cv:.6f}: {len(with_cv):4d}B  "
+            f"Reach={r.reachable:5d}  Span={r.spans}"
+        )
+
 
 N_GROUPS_PER_SWEEP = {"family": 4, "byte": 256, "q6_class": 64, "micro_ref": 64}
 
@@ -1289,7 +1447,7 @@ def run_aperture_hypothesis(
         "1 - rho": 1 - RHO,
         "m_a": M_A,
         "rho * Delta": RHO * DELTA,
-        "Delta^2": DELTA ** 2,
+        "Delta^2": DELTA**2,
     }
 
     print("\n  CGM constants (candidate threshold scales):")
@@ -1302,20 +1460,26 @@ def run_aperture_hypothesis(
         p_null = 1 - 0.5 ** (1.0 / k)
         print(f"    {sweep_name:<12s} (k={k:3d}): p_null = {p_null:.6f}")
 
-    for event_name, col in (("hit_equality (weak, P(span))", 1), ("full_omega (strong, P(full))", 4)):
+    for event_name, col in (
+        ("hit_equality (weak, P(span))", 1),
+        ("full_omega (strong, P(full))", 4),
+    ):
         print(f"\n  --- Thresholds for event: {event_name} ---")
         for sweep_name, data in sweep_results.items():
             p_c = _find_crossing(data, col)
             if p_c is not None:
                 k = N_GROUPS_PER_SWEEP.get(sweep_name, 1)
                 n_gen = k * p_c
-                print(f"\n    {sweep_name} sweep:  p_c ~ {p_c:.6f}  "
-                      f"(expected included groups at p_c: {n_gen:.2f} of {k})")
+                print(
+                    f"\n    {sweep_name} sweep:  p_c ~ {p_c:.6f}  "
+                    f"(expected included groups at p_c: {n_gen:.2f} of {k})"
+                )
                 for name, val in cgm_constants.items():
-                    ratio = p_c / val if val > 0 else float('inf')
+                    ratio = p_c / val if val > 0 else float("inf")
                     print(f"        p_c / {name:<30s} = {ratio:.6f}")
             else:
                 print(f"\n    {sweep_name} sweep:  no threshold detected in range")
+
 
 def run_holographic_test(
     bclass: List[ByteClassification],
@@ -1340,8 +1504,10 @@ def run_holographic_test(
 
     p_values = [0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0]
 
-    print(f"  {'p':<8} {'<|Omega_r|>':<12} {'<|H_comp_r|>':<14} "
-          f"{'<|H_comp_r|^2>':<16} {'Ratio':<10}")
+    print(
+        f"  {'p':<8} {'<|Omega_r|>':<12} {'<|H_comp_r|>':<14} "
+        f"{'<|H_comp_r|^2>':<16} {'Ratio':<10}"
+    )
     print("  " + "-" * 5)
 
     for p in p_values:
@@ -1359,17 +1525,21 @@ def run_holographic_test(
             h_comp_r = sum(1 for si in comp_hor_idx if visited[si])
             total_omega_r += omega_r
             total_h_comp_r += h_comp_r
-            total_h_sq += h_comp_r ** 2
+            total_h_sq += h_comp_r**2
 
         avg_omega_r = total_omega_r / n_samples
         avg_h_comp_r = total_h_comp_r / n_samples
         avg_h_sq = total_h_sq / n_samples
         ratio = avg_h_sq / avg_omega_r if avg_omega_r > 0 else 0
 
-        print(f"  {p:<8.3f} {avg_omega_r:<12.1f} {avg_h_comp_r:<14.1f} "
-              f"{avg_h_sq:<16.1f} {ratio:<10.4f}")
+        print(
+            f"  {p:<8.3f} {avg_omega_r:<12.1f} {avg_h_comp_r:<14.1f} "
+            f"{avg_h_sq:<16.1f} {ratio:<10.4f}"
+        )
+
 
 # X. Null Model Comparison
+
 
 def run_null_model(
     bclass: List[ByteClassification],
@@ -1433,7 +1603,9 @@ def run_null_model(
                     sc += 1
             span_counts.append(sc / (n_samples // 5))
         avg_ps = sum(span_counts) / len(span_counts)
-        print(f"    p={p:.2f}: P(span) = {avg_ps:.4f}  (real vs shuffled diff reveals CGM structure)")
+        print(
+            f"    p={p:.2f}: P(span) = {avg_ps:.4f}  (real vs shuffled diff reveals CGM structure)"
+        )
 
     # Null model 2: Random byte subset (no family structure)
     print("\n--- Null Model 2: Random Byte Subset (No Family Structure) ---")
@@ -1488,7 +1660,9 @@ def run_null_model(
     n_shuffles = 5
     print(f"\n  Real dynamics vs shuffled dynamics (avg over {n_shuffles} shuffles),")
     print("  Family Fraction Sweep, event = full_omega (the discriminating one):")
-    print(f"\n  {'p':<8} {'Real P(full)':<14} {'Shuffled P(full)':<18} {'Real P(span)':<14} {'Shuffled P(span)':<18}")
+    print(
+        f"\n  {'p':<8} {'Real P(full)':<14} {'Shuffled P(full)':<18} {'Real P(span)':<14} {'Shuffled P(span)':<18}"
+    )
     print("  " + "-" * 5)
 
     fam_groups = [real_family_bytes[f] for f in range(4)]
@@ -1529,10 +1703,12 @@ def run_null_model(
             shuf_full_list.append(sf / denom)
             shuf_span_list.append(ss / denom)
 
-        print(f"  {p:<8.2f} {real_full/n_samples:<14.4f} "
-              f"{sum(shuf_full_list)/len(shuf_full_list):<18.4f} "
-              f"{real_span/n_samples:<14.4f} "
-              f"{sum(shuf_span_list)/len(shuf_span_list):<18.4f}")
+        print(
+            f"  {p:<8.2f} {real_full/n_samples:<14.4f} "
+            f"{sum(shuf_full_list)/len(shuf_full_list):<18.4f} "
+            f"{real_span/n_samples:<14.4f} "
+            f"{sum(shuf_span_list)/len(shuf_span_list):<18.4f}"
+        )
 
 
 def run_horizon_stabilizer_percolation(
@@ -1562,21 +1738,28 @@ def run_horizon_stabilizer_percolation(
 
     stabilizers_comp = [b for b, c in comp_census.items() if c == n_comp]
     stabilizers_eq = [b for b, c in eq_census.items() if c == n_eq]
-    print(f"\n  Bytes preserving ALL comp_horizon states (1-step): "
-          f"{len(stabilizers_comp)}")
+    print(
+        f"\n  Bytes preserving ALL comp_horizon states (1-step): "
+        f"{len(stabilizers_comp)}"
+    )
     for b in sorted(stabilizers_comp):
         print(f"    0x{b:02X}")
-    print(f"  Declared HORIZON_GATE_BYTES: "
-          f"{', '.join(f'0x{x:02X}' for x in HORIZON_GATE_BYTES)}")
+    print(
+        f"  Declared HORIZON_GATE_BYTES: "
+        f"{', '.join(f'0x{x:02X}' for x in HORIZON_GATE_BYTES)}"
+    )
     print(f"  Bytes preserving ALL eq_horizon states (1-step): {len(stabilizers_eq)}")
     for b in sorted(stabilizers_eq):
         print(f"    0x{b:02X}")
 
     r_gates = compute_horizon_confinement(
-        engine, omega, list(HORIZON_GATE_BYTES), comp_idx, on_comp)
+        engine, omega, list(HORIZON_GATE_BYTES), comp_idx, on_comp
+    )
     print(f"\n  BFS from comp_horizon, alphabet=4 gate bytes only:")
-    print(f"    Reach={r_gates.reachable}  confined={r_gates.horizon_confined}  "
-          f"full_omega={r_gates.full_omega}")
+    print(
+        f"    Reach={r_gates.reachable}  confined={r_gates.horizon_confined}  "
+        f"full_omega={r_gates.full_omega}"
+    )
 
     p_values = [0.0, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 1.0]
     print(f"\n  MC horizon confinement (conditional on nonempty alphabet):")
@@ -1616,9 +1799,9 @@ def run_axis_sweeps(
     print("  (Formalism Sec 2.1: LI pairs 0,5; FG pairs 1,4; BG pairs 2,3).\n")
 
     micro_ref_bytes: Dict[int, List[int]] = partitions["micro_ref"]
-    p_values = sorted(set(
-        [0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)]
-    ))
+    p_values = sorted(
+        set([0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)])
+    )
     results: Dict[str, List[Tuple[float, float, float, float, float, int]]] = {}
 
     for axis in ("LI", "FG", "BG"):
@@ -1626,7 +1809,8 @@ def run_axis_sweeps(
         n_bytes = sum(len(g) for g in groups)
         print(f"\n--- {axis} axis: {len(groups)} micro_ref groups, {n_bytes} bytes ---")
         sweep_data = _random_subset_sweep(
-            engine, groups, p_values, n_samples, f"axis-{axis}")
+            engine, groups, p_values, n_samples, f"axis-{axis}"
+        )
         results[axis] = sweep_data
         _print_sweep_table(sweep_data, n_samples)
 
@@ -1646,15 +1830,14 @@ def run_shadow_pair_sweeps(
     print("  (Feature 55). Modes: full_fiber | one_repr | shadow_one.\n")
 
     q6_groups = [partitions["q6"][q] for q in sorted(partitions["q6"])]
-    p_values = sorted(set(
-        [0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)]
-    ))
+    p_values = sorted(
+        set([0.0] + [i / 100 for i in range(1, 31)] + [i / 10 for i in range(4, 11)])
+    )
     results: Dict[str, List[Tuple[float, float, float, float, float, int]]] = {}
 
     for mode in ("full_fiber", "one_repr", "shadow_one"):
         print(f"\n--- q-fiber mode: {mode} ---")
-        sweep_data = _random_q_fiber_sweep(
-            engine, q6_groups, p_values, n_samples, mode)
+        sweep_data = _random_q_fiber_sweep(engine, q6_groups, p_values, n_samples, mode)
         results[mode] = sweep_data
         _print_sweep_table(sweep_data, n_samples)
 
@@ -1686,9 +1869,11 @@ def run_summary(
         print(f"    Single bytes that span: {len(single_spanners)}")
         for b in single_spanners[:10]:
             bc = bclass[b]
-            print(f"      0x{b:02X}: fam={bc.family:02b} gate={bc.k4_gate} "
-                  f"q6_w={bc.q6_weight} fd={bc.fold_disagree} "
-                  f"|F|^2={bc.curvature_2form:.4f} phase_net={bc.phase_net}")
+            print(
+                f"      0x{b:02X}: fam={bc.family:02b} gate={bc.k4_gate} "
+                f"q6_w={bc.q6_weight} fd={bc.fold_disagree} "
+                f"|F|^2={bc.curvature_2form:.4f} phase_net={bc.phase_net}"
+            )
     else:
         print("    No single byte achieves spanning.")
 
@@ -1722,9 +1907,11 @@ def run_summary(
             bc1, bc2 = bclass[b1], bclass[b2]
             same_family = bc1.family == bc2.family
             same_gate = bc1.k4_gate == bc2.k4_gate
-            print(f"      0x{b1:02X}+0x{b2:02X}: fams={bc1.family:02b}+{bc2.family:02b} "
-                  f"gates={bc1.k4_gate}+{bc2.k4_gate} "
-                  f"same_fam={same_family} same_gate={same_gate}")
+            print(
+                f"      0x{b1:02X}+0x{b2:02X}: fams={bc1.family:02b}+{bc2.family:02b} "
+                f"gates={bc1.k4_gate}+{bc2.k4_gate} "
+                f"same_fam={same_family} same_gate={same_gate}"
+            )
 
     # CGM constant ratios (full_omega event)
     print("\n  THRESHOLD RATIOS vs CGM CONSTANTS (full_omega event):")
@@ -1754,8 +1941,8 @@ def run_summary(
     for bc in bclass:
         gate_bytes_d[bc.k4_gate].append(bc.byte)
 
-    r_preserve = compute_reachability(engine, gate_bytes_d['id'] + gate_bytes_d['F'])
-    r_swap = compute_reachability(engine, gate_bytes_d['S'] + gate_bytes_d['C'])
+    r_preserve = compute_reachability(engine, gate_bytes_d["id"] + gate_bytes_d["F"])
+    r_swap = compute_reachability(engine, gate_bytes_d["S"] + gate_bytes_d["C"])
     print(f"    Shell-preserving only (id+F): Span={r_preserve.spans}")
     print(f"    Pole-swap only (S+C):        Span={r_swap.spans}")
 
@@ -1773,8 +1960,10 @@ def run_summary(
         if r.spans:
             print(f"      {f1:02b}+{f2:02b}: Span@D={r.first_span_depth}")
 
+
 def main() -> None:
     import codecs
+
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
     random.seed(20260702)
 
@@ -1800,7 +1989,9 @@ def main() -> None:
     curv_counts = Counter(round(bc.curvature_2form, 6) for bc in bclass)
 
     print(f"\n  Family distribution: {dict(sorted(family_counts.items()))}")
-    print(f"  K4 gate distribution: {dict(sorted(gate_counts.items(), key=lambda x: x[0]))}")
+    print(
+        f"  K4 gate distribution: {dict(sorted(gate_counts.items(), key=lambda x: x[0]))}"
+    )
     print(f"  Q6 weight distribution: {dict(sorted(qw_counts.items()))}")
     print(f"  Fold disagreement distribution: {dict(sorted(fd_counts.items()))}")
     print(f"  Phase-net vectors: {len(pn_counts)} distinct")
@@ -1856,6 +2047,7 @@ def main() -> None:
     print("\n" + "=" * 5)
     print("END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.")
     print("=" * 5)
+
 
 if __name__ == "__main__":
     main()

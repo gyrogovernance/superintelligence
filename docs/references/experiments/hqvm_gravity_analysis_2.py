@@ -41,6 +41,10 @@ if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
 from gyroscopic.hQVM.constants import (
+    BU_APERTURE_GAP,
+    BU_CLOSURE_RATIO,
+    BU_HOLONOMY_ANGLE,
+    M_A,
     GENE_MAC_REST,
     GENE_MIC_S,
     GENE_MAC_A12,
@@ -72,10 +76,9 @@ configure_stdout_utf8()
 # Constants
 # ============================================================
 
-DELTA_BU = 0.195342176580
-M_A = 1.0 / (2.0 * sqrt(2.0 * pi))
-RHO = DELTA_BU / M_A
-DELTA = 1.0 - RHO
+DELTA_BU = BU_HOLONOMY_ANGLE
+RHO = BU_CLOSURE_RATIO
+DELTA = BU_APERTURE_GAP
 F_ORDERED = 1.0 - 4.0 * RHO * DELTA**2
 
 OMEGA_SIZE = 4096
@@ -157,12 +160,19 @@ class Z2HolonomyChecks:
     mid_sh6: bool
 
     def ok(self) -> bool:
-        return all([
-            self.q_w2_63, self.q_w2p_63, self.q_f_0,
-            self.w2_comp_to_eq, self.w2p_eq_to_comp,
-            self.f_rest_to_swapped, self.ff_returns,
-            self.mid_chi_0, self.mid_sh6,
-        ])
+        return all(
+            [
+                self.q_w2_63,
+                self.q_w2p_63,
+                self.q_f_0,
+                self.w2_comp_to_eq,
+                self.w2p_eq_to_comp,
+                self.f_rest_to_swapped,
+                self.ff_returns,
+                self.mid_chi_0,
+                self.mid_sh6,
+            ]
+        )
 
 
 def run_z2_holonomy_checks() -> Z2HolonomyChecks:
@@ -200,10 +210,15 @@ def run_z2_holonomy_checks() -> Z2HolonomyChecks:
             ff_returns = False
 
     return Z2HolonomyChecks(
-        q_w2_63=q_w2_63, q_w2p_63=q_w2p_63, q_f_0=q_f_0,
-        w2_comp_to_eq=w2_comp_to_eq, w2p_eq_to_comp=w2p_eq_to_comp,
-        f_rest_to_swapped=f_rest_to_swapped, ff_returns=ff_returns,
-        mid_chi_0=mid_chi_0, mid_sh6=mid_sh6,
+        q_w2_63=q_w2_63,
+        q_w2p_63=q_w2p_63,
+        q_f_0=q_f_0,
+        w2_comp_to_eq=w2_comp_to_eq,
+        w2p_eq_to_comp=w2p_eq_to_comp,
+        f_rest_to_swapped=f_rest_to_swapped,
+        ff_returns=ff_returns,
+        mid_chi_0=mid_chi_0,
+        mid_sh6=mid_sh6,
     )
 
 
@@ -594,8 +609,12 @@ def main() -> None:
     print("-" * 9)
     print("PROVEN (computational theorems, exhaustive):")
     print(f"  1. Z2 holonomy parity                      : {tp.ok()}")
-    print(f"  2. |Omega| = {len(omega)} (BFS)                     : {len(omega) == OMEGA_SIZE}")
-    print(f"  3. |comp| = {hm['comp_size']}, |eq| = {hm['eq_size']}               : verified")
+    print(
+        f"  2. |Omega| = {len(omega)} (BFS)                     : {len(omega) == OMEGA_SIZE}"
+    )
+    print(
+        f"  3. |comp| = {hm['comp_size']}, |eq| = {hm['eq_size']}               : verified"
+    )
     print(f"  4. W2 bijection comp<->eq                   : {hm['w2_bijection']}")
     print(f"  5. |H|^2 = |Omega|                          : {hm['h_sq_equals_omega']}")
     print(f"  6. Shell path [k,6,k,0]x2                   : {sp['all_ok']}")
@@ -606,7 +625,9 @@ def main() -> None:
     print(f" 11. c4 = -7/4 (routes A,B)                   : {c4_a == c4_b}")
     print(f" 12. Gauss-law flux closure                   : {gl['ok_flux']}")
     print(f" 13. alpha*zeta = rho^4/(pi*sqrt(3))          : {az['exact']}")
-    print(f" 14. 2*Q_G = 8*pi, D*G_kernel = Q_G           : {epd['two_qg_eq_eight_pi'] and epd['d_g_eq_q_g']}")
+    print(
+        f" 14. 2*Q_G = 8*pi, D*G_kernel = Q_G           : {epd['two_qg_eq_eight_pi'] and epd['d_g_eq_q_g']}"
+    )
     print(f" 15. O(Delta^3) vanishes (Z2)                 : structural")
     print()
 
@@ -632,7 +653,9 @@ def main() -> None:
         print(f"tau_corr           = {tk:.12f}")
         print(f"tau_corr - tau_req = {tk - tr_val:.12e}")
         print()
-        print(f"c4_anchor_check    = {c4o:.12f}  (inverse from G_meas, validation only)")
+        print(
+            f"c4_anchor_check    = {c4o:.12f}  (inverse from G_meas, validation only)"
+        )
         print(f"c4_anchor - kernel = {c4o - float(c4_a):.12e}")
         print()
         print(f"G_geo              = {g_geo:.12e}  ppm={ppm_err(g_geo, g_m):+.6f}")

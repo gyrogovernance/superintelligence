@@ -1,5 +1,5 @@
 hQVM CGM percolation study
-started: 2026-07-04T02:37:42+03:00
+started: 2026-08-17T01:32:09+03:00
 python: C:\Python314\python.exe
 parts: 1, 2, 3, 4
 
@@ -479,14 +479,14 @@ VIII. APERTURE THRESHOLD HYPOTHESIS TESTING
 =====
 
   CGM constants (candidate threshold scales):
-    Delta (aperture gap)                = 0.0206995539
+    Delta (aperture gap)                = 0.0206995455
     1/48 (geometric quantization)       = 0.0208333333
     5/256 (dyadic approximant)          = 0.0195312500
     6/256 (6-generator dyadic)          = 0.0234375000
-    1 - rho                             = 0.0206995539
+    1 - rho                             = 0.0206995455
     m_a                                 = 0.1994711402
-    rho * Delta                         = 0.0202710824
-    Delta^2                             = 0.0004284715
+    rho * Delta                         = 0.0202710743
+    Delta^2                             = 0.0004284712
 
   Non-empty-selection null (k = number of independent groups):
   p_null solves 1-(1-p)^k = 0.5  =>  p_null = 1 - 0.5^(1/k)
@@ -498,34 +498,34 @@ VIII. APERTURE THRESHOLD HYPOTHESIS TESTING
   --- Thresholds for event: hit_equality (weak, P(span)) ---
 
     family sweep:  p_c ~ 0.150000  (expected included groups at p_c: 0.60 of 4)
-        p_c / Delta (aperture gap)           = 7.246533
+        p_c / Delta (aperture gap)           = 7.246536
         p_c / 1/48 (geometric quantization)  = 7.200000
         p_c / 5/256 (dyadic approximant)     = 7.680000
         p_c / 6/256 (6-generator dyadic)     = 6.400000
-        p_c / 1 - rho                        = 7.246533
+        p_c / 1 - rho                        = 7.246536
         p_c / m_a                            = 0.751988
-        p_c / rho * Delta                    = 7.399704
-        p_c / Delta^2                        = 350.081601
+        p_c / rho * Delta                    = 7.399706
+        p_c / Delta^2                        = 350.081886
 
     byte sweep:  p_c ~ 0.021505  (expected included groups at p_c: 5.51 of 256)
-        p_c / Delta (aperture gap)           = 1.038929
+        p_c / Delta (aperture gap)           = 1.038930
         p_c / 1/48 (geometric quantization)  = 1.032258
         p_c / 5/256 (dyadic approximant)     = 1.101075
         p_c / 6/256 (6-generator dyadic)     = 0.917563
-        p_c / 1 - rho                        = 1.038929
+        p_c / 1 - rho                        = 1.038930
         p_c / m_a                            = 0.107812
-        p_c / rho * Delta                    = 1.060889
-        p_c / Delta^2                        = 50.190911
+        p_c / rho * Delta                    = 1.060890
+        p_c / Delta^2                        = 50.190951
 
     q6_class sweep:  p_c ~ 0.090698  (expected included groups at p_c: 5.80 of 64)
-        p_c / Delta (aperture gap)           = 4.381625
+        p_c / Delta (aperture gap)           = 4.381626
         p_c / 1/48 (geometric quantization)  = 4.353488
         p_c / 5/256 (dyadic approximant)     = 4.643721
         p_c / 6/256 (6-generator dyadic)     = 3.869767
-        p_c / 1 - rho                        = 4.381625
+        p_c / 1 - rho                        = 4.381626
         p_c / m_a                            = 0.454691
-        p_c / rho * Delta                    = 4.474239
-        p_c / Delta^2                        = 211.677247
+        p_c / rho * Delta                    = 4.474241
+        p_c / Delta^2                        = 211.677419
 
     micro_ref sweep:  p_c ~ 0.010845  (expected included groups at p_c: 0.69 of 64)
         p_c / Delta (aperture gap)           = 0.523928
@@ -535,19 +535,19 @@ VIII. APERTURE THRESHOLD HYPOTHESIS TESTING
         p_c / 1 - rho                        = 0.523928
         p_c / m_a                            = 0.054369
         p_c / rho * Delta                    = 0.535002
-        p_c / Delta^2                        = 25.311064
+        p_c / Delta^2                        = 25.311085
 
   --- Thresholds for event: full_omega (strong, P(full)) ---
 
     family sweep:  p_c ~ 0.150000  (expected included groups at p_c: 0.60 of 4)
-        p_c / Delta (aperture gap)           = 7.246533
+        p_c / Delta (aperture gap)           = 7.246536
         p_c / 1/48 (geometric quantization)  = 7.200000
         p_c / 5/256 (dyadic approximant)     = 7.680000
         p_c / 6/256 (6-generator dyadic)     = 6.400000
-        p_c / 1 - rho                        = 7.246533
+        p_c / 1 - rho                        = 7.246536
         p_c / m_a                            = 0.751988
-        p_c / rho * Delta                    = 7.399704
-        p_c / Delta^2                        = 350.081601
+        p_c / rho * Delta                    = 7.399706
+        p_c / Delta^2                        = 350.081886
 
     byte sweep:  p_c ~ 0.028750  (expected included groups at p_c: 7.36 of 256)
         p_c / Delta (aperture gap)           = 1.388919
@@ -557,27 +557,27 @@ VIII. APERTURE THRESHOLD HYPOTHESIS TESTING
         p_c / 1 - rho                        = 1.388919
         p_c / m_a                            = 0.144131
         p_c / rho * Delta                    = 1.418277
-        p_c / Delta^2                        = 67.098974
+        p_c / Delta^2                        = 67.099028
 
     q6_class sweep:  p_c ~ 0.112353  (expected included groups at p_c: 7.19 of 64)
-        p_c / Delta (aperture gap)           = 5.427795
+        p_c / Delta (aperture gap)           = 5.427797
         p_c / 1/48 (geometric quantization)  = 5.392941
         p_c / 5/256 (dyadic approximant)     = 5.752471
         p_c / 6/256 (6-generator dyadic)     = 4.793725
-        p_c / 1 - rho                        = 5.427795
+        p_c / 1 - rho                        = 5.427797
         p_c / m_a                            = 0.563254
-        p_c / rho * Delta                    = 5.542523
-        p_c / Delta^2                        = 262.217984
+        p_c / rho * Delta                    = 5.542525
+        p_c / Delta^2                        = 262.218197
 
     micro_ref sweep:  p_c ~ 0.089394  (expected included groups at p_c: 5.72 of 64)
-        p_c / Delta (aperture gap)           = 4.318641
+        p_c / Delta (aperture gap)           = 4.318643
         p_c / 1/48 (geometric quantization)  = 4.290909
         p_c / 5/256 (dyadic approximant)     = 4.576970
         p_c / 6/256 (6-generator dyadic)     = 3.814141
-        p_c / 1 - rho                        = 4.318641
+        p_c / 1 - rho                        = 4.318643
         p_c / m_a                            = 0.448155
-        p_c / rho * Delta                    = 4.409924
-        p_c / Delta^2                        = 208.634490
+        p_c / rho * Delta                    = 4.409926
+        p_c / Delta^2                        = 208.634659
 
 =====
 IX. HOLOGRAPHIC IDENTITY UNDER PARTIAL ALPHABET
@@ -1022,7 +1022,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
   THRESHOLD RATIOS vs CGM CONSTANTS (full_omega event):
 
     family: p_c(full_omega) ~ 0.150000
-      p_c / Delta    = 7.246533
+      p_c / Delta    = 7.246536
       p_c / 1/48     = 7.200000
       p_c / 5/256    = 7.680000
       p_c / 6/256    = 6.400000
@@ -1038,7 +1038,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.144131
 
     q6_class: p_c(full_omega) ~ 0.112353
-      p_c / Delta    = 5.427795
+      p_c / Delta    = 5.427797
       p_c / 1/48     = 5.392941
       p_c / 5/256    = 5.752471
       p_c / 6/256    = 4.793725
@@ -1046,7 +1046,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.563254
 
     micro_ref: p_c(full_omega) ~ 0.089394
-      p_c / Delta    = 4.318641
+      p_c / Delta    = 4.318643
       p_c / 1/48     = 4.290909
       p_c / 5/256    = 4.576970
       p_c / 6/256    = 3.814141
@@ -1054,7 +1054,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.448155
 
     axis_LI: p_c(full_omega) ~ 0.117143
-      p_c / Delta    = 5.659197
+      p_c / Delta    = 5.659199
       p_c / 1/48     = 5.622857
       p_c / 5/256    = 5.997714
       p_c / 6/256    = 4.998095
@@ -1062,7 +1062,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.587267
 
     axis_FG: p_c(full_omega) ~ 0.115000
-      p_c / Delta    = 5.555675
+      p_c / Delta    = 5.555678
       p_c / 1/48     = 5.520000
       p_c / 5/256    = 5.888000
       p_c / 6/256    = 4.906667
@@ -1070,7 +1070,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.576525
 
     axis_BG: p_c(full_omega) ~ 0.117778
-      p_c / Delta    = 5.689870
+      p_c / Delta    = 5.689873
       p_c / 1/48     = 5.653333
       p_c / 5/256    = 6.030222
       p_c / 6/256    = 5.025185
@@ -1078,7 +1078,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.590450
 
     qfiber_full_fiber: p_c(full_omega) ~ 0.107778
-      p_c / Delta    = 5.206768
+      p_c / Delta    = 5.206770
       p_c / 1/48     = 5.173333
       p_c / 5/256    = 5.518222
       p_c / 6/256    = 4.598519
@@ -1086,7 +1086,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.540318
 
     qfiber_one_repr: p_c(full_omega) ~ 0.110909
-      p_c / Delta    = 5.358043
+      p_c / Delta    = 5.358045
       p_c / 1/48     = 5.323636
       p_c / 5/256    = 5.678545
       p_c / 6/256    = 4.732121
@@ -1094,7 +1094,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
       p_c / m_a      = 0.556016
 
     qfiber_shadow_one: p_c(full_omega) ~ 0.105000
-      p_c / Delta    = 5.072573
+      p_c / Delta    = 5.072575
       p_c / 1/48     = 5.040000
       p_c / 5/256    = 5.376000
       p_c / 6/256    = 4.480000
@@ -1120,7 +1120,7 @@ XIV. SUMMARY AND THRESHOLD INVENTORY
 END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
 =====
 
-exit=0  duration=661.84s
+exit=0  duration=683.98s
 
 ######## hqvm_percolation_analysis_2.py ########
 
@@ -1320,7 +1320,7 @@ Gyroscopic_ASI_Specs_Formalism.md Sec 2.2/4 (6-bit payload dial).
   -----
   canonical F                 2   False         0
   canonical 4-fam W2        128   False        64
-  canonical F^2 (depth-8)      1   False         0
+  canonical F^2 (Z2 return)    1   False         0
   same-fam 00                 1   False         0
   same-fam 11                 1   False         0
   reverse fam order           2   False         0
@@ -1335,13 +1335,13 @@ Gyroscopic_ASI_Specs_Formalism.md Sec 2.2/4 (6-bit payload dial).
     shells  = [6, 5, 0, 5, 6]
     sectors = ['comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon']
     bytes   = A8 A9 28 29
-  depth-8 (2 turns):
+  F² Z2 cycle (2 turns):
     shells  = [6, 5, 0, 5, 6, 5, 0, 5, 6]
     sectors = ['comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon', 'bulk', 'eq-horizon', 'bulk', 'comp-horizon']
     bytes   = A8 A9 28 29 A8 A9 28 29
 
 =====
-10. HELIX Z2 CYCLE (F involution, depth-8 from rest)
+10. HELIX Z2 CYCLE (F involution, F² return from rest)
 =====
   rest --F(m)--> swapped --F(m)--> rest  (T6, all m).
 
@@ -1368,7 +1368,7 @@ Gyroscopic_ASI_Specs_Formalism.md Sec 2.2/4 (6-bit payload dial).
 END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
 =====
 
-exit=0  duration=16.13s
+exit=0  duration=19.18s
 
 ######## hqvm_percolation_analysis_3.py ########
 
@@ -1909,10 +1909,10 @@ SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
   0.200    0.0000    0.0000    0.0000      
 
   Interpretation per Wavefunction analysis:
-    Delta (~0.0207) is the residual aperture AFTER depth-4 holonomic closure,
+    Delta (0.020699545503) is the residual aperture after depth-4 closure,
     not the classical critical porosity for horizon spanning (E_span).
     Byte-level fold disagreement is structurally 50%; closure compresses it to ~2.07%.
-    The relevant 'aperture event' is holonomy-word availability or H2 onset, not E_span.
+    The relevant aperture event is holonomy-word availability or H2 onset, not E_span.
 
 =====
 10. PLAQUETTE LOOP DEFECT D(A) (Gravity Sec 5.0, 5.6)
@@ -1949,7 +1949,7 @@ SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
 =====
   T(A) = P(constitutional span from rest under alphabet A).
   STF bulk = shells 1-5; horizons 0,6 are endpoints.
-  tau_G (kernel closed form) = 76.237941
+  tau_G (kernel closed form) = 76.237914
 
   p       P(span)   -ln T     E[bulk hit] E[pi_BU]  
   -----
@@ -1984,24 +1984,24 @@ SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
   Micro-ref weight covered: 1.000000
   Q-weight closed form:   tau_cycle/Delta = 7591/7392
 
-  Channel full alphabet: tau_step=0.0046594211  4*tau_step=0.0186376843
-  Kernel tau_cycle     = 0.0212568065
+  Channel full alphabet: tau_step=0.0046594192  4*tau_step=0.0186376767
+  Kernel tau_cycle     = 0.0212567979
   4*tau_step/tau_cycle = 0.876787
   Note: holonomy tau matches kernel exactly (per Wavefunction: depth-4 holonomy path).
         Channel tau samples all rest-reachable edges (different measure; ratio is conversion factor).
 
   p       hol/Delta     q/Delta       micro_cov   E[micro_cov]  4*tau_step    
   -----
-  0.010   0.000000      0.513128      0.0000      0.0000        0.0138060943  
-  0.015   0.000000      0.683883      0.0000      0.0000        0.0162790453  
-  0.020   0.000000      0.748215      0.0000      0.0000        0.0171425200  
-  0.025   0.000000      0.864689      0.0000      0.0000        0.0180989432  
-  0.030   0.000000      0.888640      0.0000      0.0001        0.0183348671  
-  0.050   0.000000      0.986871      0.0000      0.0004        0.0186225235  
-  0.100   0.004687      1.023588      0.0001      0.0064        0.0186376843  
-  0.200   0.077813      1.026848      0.0014      0.0974        0.0186376843  
-  0.500   0.984169      1.026921      0.0643      0.9839        0.0186376843  
-  1.000   1.026921      1.026921      1.0000      1.0000        0.0186376843  
+  0.010   0.000000      0.513128      0.0000      0.0000        0.0138060887  
+  0.015   0.000000      0.683883      0.0000      0.0000        0.0162790387  
+  0.020   0.000000      0.748215      0.0000      0.0000        0.0171425131  
+  0.025   0.000000      0.864689      0.0000      0.0000        0.0180989358  
+  0.030   0.000000      0.888640      0.0000      0.0001        0.0183348596  
+  0.050   0.000000      0.986871      0.0000      0.0004        0.0186225159  
+  0.100   0.004687      1.023588      0.0001      0.0064        0.0186376767  
+  0.200   0.077813      1.026848      0.0014      0.0974        0.0186376767  
+  0.500   0.984169      1.026921      0.0643      0.9839        0.0186376767  
+  1.000   1.026921      1.026921      1.0000      1.0000        0.0186376767  
 
   Analytic micro_cov derivation (independent inclusion, L=4 for canonical F word):
     E[micro_cov] = 1 - (1 - p^L)^64
@@ -2150,13 +2150,13 @@ SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
   Horizon condition fixes psi(s_h)=1/2.
 
   tau_cycle/Delta = 7591/7392  (1.026920995671)
-  tau_cycle       = 0.021256806515
-  tau_G           = 76.237916638581
-  N_cycles        = 3586.517880
-  g1              = -0.645567722244
-  s_h             = 1.694550962999
+  tau_cycle       = 0.021256797878
+  tau_G           = 76.237913573567
+  N_cycles        = 3586.519193
+  g1              = -0.645570787258
+  s_h             = 1.694549594812
   I_exact         = 0.500000000000
-  I_numeric       = 0.499937270873  err=2.32e-09
+  I_numeric       = 0.499937270904  err=2.32e-09
   E_rest/Mc^2     = 0.250000000000
   E_self/Mc^2     = -0.250000000000
   M_obs/M_bare    = 0.800000000000
@@ -2169,7 +2169,7 @@ SECTIONS 9-16: GRAVITY / POROSITY BRIDGES
 END. See docs/Findings/Analysis_hQVM_Percolation.md for the writeup.
 =====
 
-exit=0  duration=500.61s
+exit=0  duration=625.72s
 
 ######## hqvm_percolation_analysis_4.py ########
 
@@ -2395,8 +2395,8 @@ SUMMARY
 =====
   gates: 27 pass, 0 fail, 27 total
 
-exit=0  duration=97.28s
+exit=0  duration=135.41s
 
-finished: 2026-07-04T02:58:58+03:00
-total_duration=1275.85s
+finished: 2026-08-17T01:56:34+03:00
+total_duration=1464.28s
 worst_exit=0

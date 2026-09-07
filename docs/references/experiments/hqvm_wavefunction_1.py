@@ -3,7 +3,7 @@
 hqvm_wavefunction_1.py
 hQVM wavefunction holonomy diagnostics.
 
-Structural principles (corrected):
+Structural principles:
 - CS (GENE_Mic/0xAA) = reference frame, not a state in Ω
 - Carrier rest (0xAAA555) = point on complement horizon, NOT CS
 - Each byte = one full [L][R] operation with 4 internal CGM sub-phases
@@ -21,7 +21,7 @@ Structural principles (corrected):
 - Z2 holonomy = spectral property: U_W^2 = I, eigenvalues +/-1
   Z2 phase on -1 eigenspace IS the holonomy
 - No return to CS: the helix overlays the origin, never revisits it
-  Carrier rest at depth 8 = Z2 holonomy cycle complete
+  Carrier rest after F² = Z2 holonomy cycle complete
 - Chirality is preserved by the canonical word; holonomy acts on carrier only
 """
 from __future__ import annotations
@@ -77,6 +77,7 @@ FAMILY_RAY_REF: Final[int] = 1
 # Byte / word helpers
 # ---------------------------------------------------------------------------
 
+
 def byte_from_family_and_micro(family: int, micro_ref: int) -> int:
     family &= 0x03
     micro_ref &= 0x3F
@@ -109,6 +110,7 @@ def yn(value: bool) -> str:
 # Ω enumeration
 # ---------------------------------------------------------------------------
 
+
 def enumerate_mask_code() -> list[int]:
     masks: set[int] = set()
     for micro in range(64):
@@ -135,11 +137,12 @@ def enumerate_omega() -> list[int]:
 # Constitutional classification
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class Constitutional:
-    sector: str   # "comp-horizon", "eq-horizon", "bulk"
-    shell: int    # arch_shell (0-6), -1 if not pair-diagonal
-    z2: str       # "rest", "swapped", "-"
+    sector: str  # "comp-horizon", "eq-horizon", "bulk"
+    shell: int  # arch_shell (0-6), -1 if not pair-diagonal
+    z2: str  # "rest", "swapped", "-"
     chi6: int
     chi_weight: int  # popcount(chi6)
 
@@ -183,6 +186,7 @@ def classify_state(state24: int) -> Constitutional:
 # ---------------------------------------------------------------------------
 # Permutation and cycle analysis
 # ---------------------------------------------------------------------------
+
 
 def build_permutation(word: list[int], omega: list[int]) -> dict[int, int]:
     perm: dict[int, int] = {}
@@ -276,6 +280,7 @@ def sector_eigenspace_dimensions(
 # Holographic dictionary
 # ---------------------------------------------------------------------------
 
+
 @dataclass(frozen=True)
 class ShadowPair:
     state_a: int
@@ -316,6 +321,7 @@ def compute_holographic_dictionary(
 # K4 gate classification
 # ---------------------------------------------------------------------------
 
+
 def classify_word_as_k4_gate(word: list[int]) -> str:
     """Classify word's action on Omega as a K4 gate via Omega12 signature."""
     sig = omega_word_signature(word)
@@ -334,6 +340,7 @@ def classify_word_as_k4_gate(word: list[int]) -> str:
 # ---------------------------------------------------------------------------
 # Half-step primitives
 # ---------------------------------------------------------------------------
+
 
 def half_step_L(state24: int, byte: int) -> int:
     a12, b12 = unpack_state(state24)
@@ -371,7 +378,8 @@ def verify_bu_egress_byte_order(
         "T10": s10,
         "equal": s01 == s10,
         "both_on_comp_horizon": is_on_horizon(s01) and is_on_horizon(s10),
-        "both_on_eq_horizon": is_on_equality_horizon(s01) and is_on_equality_horizon(s10),
+        "both_on_eq_horizon": is_on_equality_horizon(s01)
+        and is_on_equality_horizon(s10),
     }
 
 
@@ -381,12 +389,8 @@ def verify_bu_egress_primitive_lrlr(
 ) -> dict[str, int | bool]:
     """Single-byte depth-4: primitive LRLR vs RLRL sequence."""
     s = start_state
-    lrlr = half_step_R(
-        half_step_L(half_step_R(half_step_L(s, byte), byte), byte), byte
-    )
-    rlrl = half_step_L(
-        half_step_R(half_step_L(half_step_R(s, byte), byte), byte), byte
-    )
+    lrlr = half_step_R(half_step_L(half_step_R(half_step_L(s, byte), byte), byte), byte)
+    rlrl = half_step_L(half_step_R(half_step_L(half_step_R(s, byte), byte), byte), byte)
     return {
         "LRLR": lrlr,
         "RLRL": rlrl,
@@ -436,15 +440,21 @@ def run_bu_egress_verification(canonical: list[int]) -> None:
     print("BU-EGRESS VERIFICATION (kernel):")
     print("  Depth-4 = 2 bytes; each byte = L then R (4 primitives).")
     ref = verify_bu_egress_byte_order(FAMILY_RAY_REF)
-    print(f"  Families 00+01 (micro={FAMILY_RAY_REF}): "
-          f"b0=0x{ref['b0']:02X} b1=0x{ref['b1']:02X}")
+    print(
+        f"  Families 00+01 (micro={FAMILY_RAY_REF}): "
+        f"b0=0x{ref['b0']:02X} b1=0x{ref['b1']:02X}"
+    )
     cls01 = classify_state(int(ref["T01"]))
     cls10 = classify_state(int(ref["T10"]))
-    print(f"    T(b0,b1)=0x{ref['T01']:06X}  sector={cls01.sector}  "
-          f"T(b1,b0)=0x{ref['T10']:06X}  sector={cls10.sector}")
-    print(f"    order_equal={yn(bool(ref['equal']))}  "
-          f"both_comp_horizon={yn(bool(ref['both_on_comp_horizon']))}  "
-          f"both_eq_horizon={yn(bool(ref['both_on_eq_horizon']))}")
+    print(
+        f"    T(b0,b1)=0x{ref['T01']:06X}  sector={cls01.sector}  "
+        f"T(b1,b0)=0x{ref['T10']:06X}  sector={cls10.sector}"
+    )
+    print(
+        f"    order_equal={yn(bool(ref['equal']))}  "
+        f"both_comp_horizon={yn(bool(ref['both_on_comp_horizon']))}  "
+        f"both_eq_horizon={yn(bool(ref['both_on_eq_horizon']))}"
+    )
 
     all_equal = all(verify_bu_egress_byte_order(m)["equal"] for m in range(64))
     all_comp = all(
@@ -453,15 +463,21 @@ def run_bu_egress_verification(canonical: list[int]) -> None:
     all_eq = all(
         verify_bu_egress_byte_order(m)["both_on_eq_horizon"] for m in range(64)
     )
-    print(f"  Exhaustive 64 payloads: order_commutes={yn(all_equal)}  "
-          f"both_comp_horizon={yn(all_comp)}  both_eq_horizon={yn(all_eq)}")
+    print(
+        f"  Exhaustive 64 payloads: order_commutes={yn(all_equal)}  "
+        f"both_comp_horizon={yn(all_comp)}  both_eq_horizon={yn(all_eq)}"
+    )
     if not all_equal:
-        print("  => Byte order matters at depth-4 (UNA); []B is projection, not path equality.")
+        print(
+            "  => Byte order matters at depth-4 (UNA); []B is projection, not path equality."
+        )
     if len(canonical) >= 2:
         prim = verify_bu_egress_primitive_lrlr(canonical[1])
-        print(f"  Primitive LRLR vs RLRL (byte 2 = 0x{canonical[1]:02X}): "
-              f"equal={yn(bool(prim['equal']))}  "
-              f"both_on_horizon={yn(bool(prim['both_on_horizon']))}")
+        print(
+            f"  Primitive LRLR vs RLRL (byte 2 = 0x{canonical[1]:02X}): "
+            f"equal={yn(bool(prim['equal']))}  "
+            f"both_on_horizon={yn(bool(prim['both_on_horizon']))}"
+        )
 
     ex = verify_bu_primitive_lrlr_exhaustive(
         enumerate_omega(),
@@ -482,6 +498,7 @@ def run_bu_egress_verification(canonical: list[int]) -> None:
 # ---------------------------------------------------------------------------
 # Printers
 # ---------------------------------------------------------------------------
+
 
 def print_table(headers: list[str], rows: list[list[str]], title: str = "") -> None:
     if title:
@@ -504,6 +521,7 @@ def print_table(headers: list[str], rows: list[list[str]], title: str = "") -> N
 # ---------------------------------------------------------------------------
 # Diagnostic sections
 # ---------------------------------------------------------------------------
+
 
 def run_decomposition_verify() -> None:
     canonical = family_word_for_micro(FAMILY_RAY_REF)
@@ -548,8 +566,12 @@ def run_omega_census(omega: list[int]) -> None:
         print(f"    weight {w}: {chi_weight_counts[w]}")
     print()
     print("  Holographic identity: |H|^2 = |Omega|")
-    print(f"    |comp-horizon|^2 = {sector_counts['comp-horizon']}^2 = {sector_counts['comp-horizon']**2}")
-    print(f"    |eq-horizon|^2   = {sector_counts['eq-horizon']}^2 = {sector_counts['eq-horizon']**2}")
+    print(
+        f"    |comp-horizon|^2 = {sector_counts['comp-horizon']}^2 = {sector_counts['comp-horizon']**2}"
+    )
+    print(
+        f"    |eq-horizon|^2   = {sector_counts['eq-horizon']}^2 = {sector_counts['eq-horizon']**2}"
+    )
     print(f"    |Omega|         = {len(omega)}")
     print(f"    |H|^2 = |Omega|: {sector_counts['comp-horizon']**2 == len(omega)}")
 
@@ -609,10 +631,14 @@ def run_holographic_dictionary(omega: list[int]) -> None:
             else:
                 rest_state, rest_cls = p.state_b, p.cls_b
                 swap_state, swap_cls = p.state_a, p.cls_a
-            print(f"  |rest>    = 0x{rest_state:06X}  sector={rest_cls.sector}  "
-                  f"shell={rest_cls.shell}  chi={bin6(rest_cls.chi6)}")
-            print(f"  |swapped> = 0x{swap_state:06X}  sector={swap_cls.sector}  "
-                  f"shell={swap_cls.shell}  chi={bin6(swap_cls.chi6)}")
+            print(
+                f"  |rest>    = 0x{rest_state:06X}  sector={rest_cls.sector}  "
+                f"shell={rest_cls.shell}  chi={bin6(rest_cls.chi6)}"
+            )
+            print(
+                f"  |swapped> = 0x{swap_state:06X}  sector={swap_cls.sector}  "
+                f"shell={swap_cls.shell}  chi={bin6(swap_cls.chi6)}"
+            )
             print(f"  U_W|rest> = |swapped>  (Z2 flip = gate F)")
             print(f"  Holonomy eigenvectors on this orbit:")
             print(f"    |+> = (|rest> + |swapped>)/sqrt(2)   eigenvalue +1")
@@ -630,13 +656,17 @@ def run_holographic_dictionary(omega: list[int]) -> None:
         for p in sp[:3]:
             omega_a = state24_to_omega12(p.state_a)
             omega_b = state24_to_omega12(p.state_b)
-            print(f"    0x{p.state_a:06X} <-> 0x{p.state_b:06X}  "
-                  f"shell={p.cls_a.shell}  "
-                  f"chi_a={bin6(p.cls_a.chi6)}  chi_b={bin6(p.cls_b.chi6)}  "
-                  f"u=({omega_a.u6:2d},{omega_a.v6:2d})<->({omega_b.u6:2d},{omega_b.v6:2d})")
+            print(
+                f"    0x{p.state_a:06X} <-> 0x{p.state_b:06X}  "
+                f"shell={p.cls_a.shell}  "
+                f"chi_a={bin6(p.cls_a.chi6)}  chi_b={bin6(p.cls_b.chi6)}  "
+                f"u=({omega_a.u6:2d},{omega_a.v6:2d})<->({omega_b.u6:2d},{omega_b.v6:2d})"
+            )
 
     # Chirality preservation
-    chi_preserved = all(p.cls_a.chi6 == p.cls_b.chi6 for p in pairs if p.pair_type == "2-cycle")
+    chi_preserved = all(
+        p.cls_a.chi6 == p.cls_b.chi6 for p in pairs if p.pair_type == "2-cycle"
+    )
     q_transport = q_word6_for_items(canonical)
     print(f"\nChirality preservation: {yn(chi_preserved)}")
     print(f"  Cumulative q-transport = 0x{q_transport:02X} = {q_transport}")
@@ -647,7 +677,10 @@ def run_spectral_decomposition(omega: list[int]) -> None:
     canonical = family_word_for_micro(FAMILY_RAY_REF)
     same_fam = [canonical[0]] * 4
 
-    for label, word in [("canonical 4-family", canonical), ("same-family 00", same_fam)]:
+    for label, word in [
+        ("canonical 4-family", canonical),
+        ("same-family 00", same_fam),
+    ]:
         perm = build_permutation(word, omega)
         cycles = cycle_decomposition(perm)
 
@@ -670,41 +703,60 @@ def run_spectral_decomposition(omega: list[int]) -> None:
         print(f"    dim(+1): {eig_dims['+1']}  (symmetric / fixed modes)")
         print(f"    dim(-1): {eig_dims['-1']}  (antisymmetric / Z2 holonomy modes)")
         print(f"    dim(other): {eig_dims['other']}")
-        print(f"    sum: {eig_dims['+1'] + eig_dims['-1'] + eig_dims['other']}  "
-              f"(|Omega| = {len(omega)})")
+        print(
+            f"    sum: {eig_dims['+1'] + eig_dims['-1'] + eig_dims['other']}  "
+            f"(|Omega| = {len(omega)})"
+        )
 
-        headers = ["sector", "dim(+1)", "dim(-1)", "dim(other)", "mixed_cycles", "states"]
+        headers = [
+            "sector",
+            "dim(+1)",
+            "dim(-1)",
+            "dim(other)",
+            "mixed_cycles",
+            "states",
+        ]
         rows = []
         for sector in ["comp-horizon", "eq-horizon", "bulk"]:
             sd = sector_dims[sector]
             n_states = sum(1 for s in omega if classify_state(s).sector == sector)
-            rows.append([
-                sector,
-                str(sd["+1"]),
-                str(sd["-1"]),
-                str(sd["other"]),
-                str(sd["mixed_cycles"]),
-                str(n_states),
-            ])
+            rows.append(
+                [
+                    sector,
+                    str(sd["+1"]),
+                    str(sd["-1"]),
+                    str(sd["other"]),
+                    str(sd["mixed_cycles"]),
+                    str(n_states),
+                ]
+            )
         print_table(headers, rows, "Eigenspace dimensions x constitutional sector")
 
         # Key orbits
         rest_img = perm[GENE_MAC_REST]
         rest_cls = classify_state(rest_img)
-        print(f"  U_W|rest>    = 0x{rest_img:06X}  Z2={rest_cls.z2}  sector={rest_cls.sector}")
+        print(
+            f"  U_W|rest>    = 0x{rest_img:06X}  Z2={rest_cls.z2}  sector={rest_cls.sector}"
+        )
 
         if GENE_MAC_SWAPPED in perm:
             sw_img = perm[GENE_MAC_SWAPPED]
             sw_cls = classify_state(sw_img)
-            print(f"  U_W|swapped> = 0x{sw_img:06X}  Z2={sw_cls.z2}  sector={sw_cls.sector}")
+            print(
+                f"  U_W|swapped> = 0x{sw_img:06X}  Z2={sw_cls.z2}  sector={sw_cls.sector}"
+            )
 
         # Holonomy interpretation
         if is_involution and eig_dims["-1"] > 0:
             print()
             print("  Z2 holonomy = Z2 phase on dim(-1) eigenspace")
-            print(f"    dim(-1) = {eig_dims['-1']}  ({n_2cycles} two-cycles, "
-                  f"{2 * n_2cycles} basis states)")
-            print("  Basis states in 2-cycles are not eigenvectors; |+>, |-> are superpositions.")
+            print(
+                f"    dim(-1) = {eig_dims['-1']}  ({n_2cycles} two-cycles, "
+                f"{2 * n_2cycles} basis states)"
+            )
+            print(
+                "  Basis states in 2-cycles are not eigenvectors; |+>, |-> are superpositions."
+            )
             print("  This is a SPECTRAL property, not a carrier trajectory")
 
 
@@ -731,21 +783,28 @@ def run_bu_duality(omega: list[int]) -> None:
     cls_2 = classify_state(state_2)
     chi_2 = chirality_word6(state_2)
 
-    # After byte 4 (depth 8): BU manifest in carrier
+    # After byte 4 (four-byte word F): BU manifest in carrier
     state_4 = apply_word_to_state(canonical[:4], GENE_MAC_REST)
     cls_4 = classify_state(state_4)
 
     print("Constitutional trajectory through the canonical word:")
     print()
-    print(f"  Start (depth 0):    comp-horizon, rest       [carrier reference point; CS is the frame]")
-    print(f"  After byte 1 (d=2): {cls_1.sector}, shell={cls_1.shell}  "
-          f"[UNA: variety introduced, departed from horizon]")
-    print(f"  After byte 2 (d=4): {cls_2.sector}, shell={cls_2.shell}  "
-          f"[ONA+BU: equality transit, S-sector closure]")
-    print(f"  After byte 3 (d=6): bulk, shell=1             "
-          f"[BU carrier approach]")
-    print(f"  After byte 4 (d=8): {cls_4.sector}, {cls_4.z2}      "
-          f"[BU holographic: complement horizon, Z2 encoding]")
+    print(
+        f"  Start (depth 0):    comp-horizon, rest       [carrier reference point; CS is the frame]"
+    )
+    print(
+        f"  After byte 1 (d=2): {cls_1.sector}, shell={cls_1.shell}  "
+        f"[UNA: variety introduced, departed from horizon]"
+    )
+    print(
+        f"  After byte 2 (d=4): {cls_2.sector}, shell={cls_2.shell}  "
+        f"[ONA+BU: equality transit, S-sector closure]"
+    )
+    print(f"  After byte 3:       bulk, shell=1             " f"[BU carrier approach]")
+    print(
+        f"  After byte 4 (F):   {cls_4.sector}, {cls_4.z2}      "
+        f"[BU holographic: complement horizon, Z2 encoding]"
+    )
     print()
 
     # Egress reading at depth 4
@@ -753,14 +812,18 @@ def run_bu_duality(omega: list[int]) -> None:
     print(f"  Carrier state: 0x{state_2:06X}")
     print(f"  Constitutional: {cls_2.sector}, shell={cls_2.shell}")
     print(f"  Chirality: {bin6(chi_2)} (weight {chi_2.bit_count()})")
-    print("  []B holds: depth-4 commutator vanishes in S-sector projection (see verification above)")
-    print(f"  Carrier position: equality horizon (shell {cls_2.shell}, "
-          f"opposite pole from complement horizon)")
+    print(
+        "  []B holds: depth-4 commutator vanishes in S-sector projection (see verification above)"
+    )
+    print(
+        f"  Carrier position: equality horizon (shell {cls_2.shell}, "
+        f"opposite pole from complement horizon)"
+    )
     print("  Closure is a PROJECTION property, not a carrier position")
     print()
 
-    # Ingress reading at depth 8
-    print("INGRESS READING (after byte 4, depth 8):")
+    # Ingress reading after the four-byte word F
+    print("INGRESS READING (after byte 4, word F):")
     print(f"  Carrier state: 0x{state_4:06X}")
     print(f"  Constitutional: {cls_4.sector}, Z2={cls_4.z2}")
     print("  Carrier on complement horizon with Z2 encoding (swapped != rest)")
@@ -793,16 +856,22 @@ def run_bu_duality(omega: list[int]) -> None:
         depth_L = 2 * i + 1
         depth_R = 2 * i + 2
         print(f"  Byte {i+1} (0x{byte:02X}):")
-        print(f"    L (depth {depth_L}): 0x{after_L:06X}  "
-              f"{cls_L.sector:14s} sh={cls_L.shell} Z2={cls_L.z2}")
+        print(
+            f"    L (depth {depth_L}): 0x{after_L:06X}  "
+            f"{cls_L.sector:14s} sh={cls_L.shell} Z2={cls_L.z2}"
+        )
         if cls_L.sector == "comp-horizon" and depth_L > 0:
             print(f"      *** Complement horizon at primitive depth {depth_L} ***")
-        print(f"    R (depth {depth_R}): 0x{after_R:06X}  "
-              f"{cls_R.sector:14s} sh={cls_R.shell} Z2={cls_R.z2}")
+        print(
+            f"    R (depth {depth_R}): 0x{after_R:06X}  "
+            f"{cls_R.sector:14s} sh={cls_R.shell} Z2={cls_R.z2}"
+        )
         if cls_R.sector == "eq-horizon":
             print(f"      *** Equality horizon at primitive depth {depth_R} (ONA) ***")
         if cls_R.z2 == "swapped" and cls_R.sector == "comp-horizon":
-            print(f"      *** Z2 encoding at primitive depth {depth_R} (BU holographic) ***")
+            print(
+                f"      *** Z2 encoding at primitive depth {depth_R} (BU holographic) ***"
+            )
         state = after_R
 
 
@@ -846,8 +915,10 @@ def run_chirality_preservation(omega: list[int]) -> None:
         shell_states = [s for s in omega if classify_state(s).shell == shell]
         n_pairs = len(shell_states) // 2
         n_fixed = sum(1 for s in shell_states if perm[s] == s)
-        print(f"    Shell {shell}: {len(shell_states):5d} states, "
-              f"{n_pairs} shadow pairs, {n_fixed} fixed points")
+        print(
+            f"    Shell {shell}: {len(shell_states):5d} states, "
+            f"{n_pairs} shadow pairs, {n_fixed} fixed points"
+        )
 
 
 def run_helix_evolution() -> None:
@@ -866,16 +937,34 @@ def run_helix_evolution() -> None:
     rows = []
 
     cls = classify_state(state)
-    rows.append(["0", "--", f"0x{state:06X}", cls.sector,
-                 str(cls.shell), cls.z2, bin6(cls.chi6)])
+    rows.append(
+        [
+            "0",
+            "--",
+            f"0x{state:06X}",
+            cls.sector,
+            str(cls.shell),
+            cls.z2,
+            bin6(cls.chi6),
+        ]
+    )
 
     for turn in range(1, 4):
         for i, byte in enumerate(canonical):
             state = step_state_by_byte(state, byte)
             cls = classify_state(state)
             label = f"{turn}.{i+1}"
-            rows.append([label, f"{byte:02X}", f"0x{state:06X}",
-                        cls.sector, str(cls.shell), cls.z2, bin6(cls.chi6)])
+            rows.append(
+                [
+                    label,
+                    f"{byte:02X}",
+                    f"0x{state:06X}",
+                    cls.sector,
+                    str(cls.shell),
+                    cls.z2,
+                    bin6(cls.chi6),
+                ]
+            )
 
     print_table(headers, rows)
 
@@ -929,8 +1018,14 @@ def run_probe_suite(omega: list[int]) -> None:
     ]
 
     headers = [
-        "name", "n", "gate", "+1", "-1", "inv",
-        "rest->", "chi_ok",
+        "name",
+        "n",
+        "gate",
+        "+1",
+        "-1",
+        "inv",
+        "rest->",
+        "chi_ok",
     ]
     rows = []
     for name, word in probes:
@@ -947,11 +1042,18 @@ def run_probe_suite(omega: list[int]) -> None:
         q_total = q_word6_for_items(word)
         chi_ok = q_total == 0
 
-        rows.append([
-            name, str(len(word)), k4_gate,
-            str(eig_dims["+1"]), str(eig_dims["-1"]),
-            yn(is_inv), rest_to, yn(chi_ok),
-        ])
+        rows.append(
+            [
+                name,
+                str(len(word)),
+                k4_gate,
+                str(eig_dims["+1"]),
+                str(eig_dims["-1"]),
+                yn(is_inv),
+                rest_to,
+                yn(chi_ok),
+            ]
+        )
 
     print_table(headers, rows, "Wavefunction Probe Suite (Spectral)")
     print("  n: word length | gate: K4 gate on carrier | +1/-1: dim(+1)/dim(-1)")
@@ -961,6 +1063,7 @@ def run_probe_suite(omega: list[int]) -> None:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     print("hQVM Wavefunction Holonomy Diagnostic")
@@ -975,7 +1078,7 @@ def main() -> None:
     print("  BU-Egress/Ingress = dual readings of depth-4, NOT sequential")
     print("  Z2 holonomy = spectral property, NOT carrier trajectory")
     print("  Chirality preserved by canonical word; holonomy on carrier only")
-    print("  Carrier rest at depth 8 = Z2 cycle complete, NOT 'back to CS'")
+    print("  Carrier rest after F² = Z2 cycle complete, NOT 'back to CS'")
     print()
 
     run_decomposition_verify()

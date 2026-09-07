@@ -39,6 +39,7 @@ from hqvm_gravity_common import (
     psi_analytic,
     psi_point_mass,
     s_from_psi,
+    tau_g_stf_depth,
     tau_g_with_c4,
     v_EW,
 )
@@ -291,7 +292,7 @@ def section_g_optical_inflation() -> dict[str, float | bool]:
     print("=" * 9)
     print("G. Inflation as optical depth (not cosmic time)")
     print("=" * 9)
-    tau_g = tau_g_with_c4(C4_REF)
+    tau_g = tau_g_stf_depth()
     psi_reh = 1.0 / math.e
     psi_end_optical = 1.0
     n_reh = n_ruler_psi(psi_reh)
@@ -359,7 +360,7 @@ def section_summary(
 
 def main() -> None:
     print("CGM gravity analysis 10: E_CS continuous Planck boundary")
-    tau_g = tau_g_with_c4(C4_REF)
+    tau_g = tau_g_stf_depth()
     g1 = dln_g_dpsi(tau_g)
     print(f"E_CS = {E_CS:.4e} GeV  v = {v_EW:.4f} GeV  g1 = {g1:.6f}")
     print()

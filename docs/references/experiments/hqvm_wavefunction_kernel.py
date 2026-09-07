@@ -29,11 +29,12 @@ from typing import Final
 
 import numpy as np
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]
+_REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.constants import (
+from gyroscopic.hQVM.constants import (
+    APERTURE_GAP,
     GENE_MAC_REST,
     LAYER_MASK_12,
     byte_family,
@@ -44,7 +45,7 @@ from src.constants import (
     is_on_horizon,
     step_state_by_byte,
 )
-from src.api import (
+from gyroscopic.hQVM.api import (
     OmegaState12,
     chirality_word6,
     omega12_to_state24,
@@ -58,6 +59,7 @@ from src.api import (
 # A. Fiber bundle primitives
 # ════════════════════════════════════════════════════════════════════════
 
+
 @dataclass(frozen=True)
 class ByteFiber:
     """Decomposition of an 8-bit byte into its fiber bundle structure.
@@ -70,15 +72,16 @@ class ByteFiber:
     The net XOR of each pair is the cycle component; the AND is the
     gradient component (Hodge decomposition on Z2).
     """
+
     byte: int
     intron: int
-    fwd: int                                   # 4-bit forward half
-    rev: int                                   # 4-bit reverse half
-    phase_net: tuple[int, int, int, int]        # XOR per phase (CS, UNA, ONA, BU)
-    phase_common: tuple[int, int, int, int]     # AND per phase
-    family: int                                 # 2-bit gauge selector (boundary bits)
-    q6: int                                     # 6-bit chirality transport
-    is_flat: bool                               # True iff fwd == rev (P acts as identity)
+    fwd: int  # 4-bit forward half
+    rev: int  # 4-bit reverse half
+    phase_net: tuple[int, int, int, int]  # XOR per phase (CS, UNA, ONA, BU)
+    phase_common: tuple[int, int, int, int]  # AND per phase
+    family: int  # 2-bit gauge selector (boundary bits)
+    q6: int  # 6-bit chirality transport
+    is_flat: bool  # True iff fwd == rev (P acts as identity)
 
 
 def decompose_byte(byte: int) -> ByteFiber:
@@ -89,25 +92,31 @@ def decompose_byte(byte: int) -> ByteFiber:
     b = [(intron >> i) & 1 for i in range(8)]
 
     phase_net = (
-        b[0] ^ b[7],   # CS
-        b[1] ^ b[6],   # UNA
-        b[2] ^ b[5],   # ONA
-        b[3] ^ b[4],   # BU
+        b[0] ^ b[7],  # CS
+        b[1] ^ b[6],  # UNA
+        b[2] ^ b[5],  # ONA
+        b[3] ^ b[4],  # BU
     )
     phase_common = (
-        b[0] & b[7],   # CS
-        b[1] & b[6],   # UNA
-        b[2] & b[5],   # ONA
-        b[3] & b[4],   # BU
+        b[0] & b[7],  # CS
+        b[1] & b[6],  # UNA
+        b[2] & b[5],  # ONA
+        b[3] & b[4],  # BU
     )
     family = intron_family(intron)
     q6 = q_word6(byte)
-    is_flat = (fwd == rev)
+    is_flat = fwd == rev
 
     return ByteFiber(
-        byte=byte, intron=intron, fwd=fwd, rev=rev,
-        phase_net=phase_net, phase_common=phase_common,
-        family=family, q6=q6, is_flat=is_flat,
+        byte=byte,
+        intron=intron,
+        fwd=fwd,
+        rev=rev,
+        phase_net=phase_net,
+        phase_common=phase_common,
+        family=family,
+        q6=q6,
+        is_flat=is_flat,
     )
 
 
@@ -170,13 +179,13 @@ def fold_eigenspace(byte: int) -> dict[str, list[np.ndarray]]:
 # ════════════════════════════════════════════════════════════════════════
 
 PHASE_BOUNDARIES: Final[list[str]] = [
-    "CS|UNA",    # bit 0-1: gauge meets mutation
-    "UNA|ONA",   # bit 1-2: mutation meets gyration
-    "ONA|BU",    # bit 2-3: gyration meets commitment
-    "BU|BU",     # bit 3-4: the fold (frame transition)
-    "BU|ONA",    # bit 4-5: commitment meets gyration (unwind)
-    "ONA|UNA",   # bit 5-6: gyration meets mutation (unwind)
-    "UNA|CS",    # bit 6-7: mutation meets gauge (closing)
+    "CS|UNA",  # bit 0-1: gauge meets mutation
+    "UNA|ONA",  # bit 1-2: mutation meets gyration
+    "ONA|BU",  # bit 2-3: gyration meets commitment
+    "BU|BU",  # bit 3-4: the fold (frame transition)
+    "BU|ONA",  # bit 4-5: commitment meets gyration (unwind)
+    "ONA|UNA",  # bit 5-6: gyration meets mutation (unwind)
+    "UNA|CS",  # bit 6-7: mutation meets gauge (closing)
 ]
 
 
@@ -189,6 +198,7 @@ class ConnectionForm:
         A_magnitude: |A|^2, the local curvature contribution
         is_fold:    True only at the BU|BU boundary
     """
+
     boundary: str
     A_magnitude: float
     is_fold: bool
@@ -204,10 +214,10 @@ def compute_connection_chain(byte: int) -> list[ConnectionForm]:
     intron = byte_to_intron(byte)
     bits = [(intron >> i) & 1 for i in range(8)]
     pairs = [
-        (bits[0], bits[7]),   # CS
-        (bits[1], bits[6]),   # UNA
-        (bits[2], bits[5]),   # ONA
-        (bits[3], bits[4]),   # BU
+        (bits[0], bits[7]),  # CS
+        (bits[1], bits[6]),  # UNA
+        (bits[2], bits[5]),  # ONA
+        (bits[3], bits[4]),  # BU
     ]
 
     chain: list[ConnectionForm] = []
@@ -221,8 +231,10 @@ def compute_connection_chain(byte: int) -> list[ConnectionForm]:
             a, b = pairs[rev_i]
             next_a, next_b = pairs[rev_i - 1] if rev_i > 0 else (0, 0)
             mag = float((a ^ next_a) + (b ^ next_b)) / 4.0
-        is_fold = (boundary == "BU|BU")
-        chain.append(ConnectionForm(boundary=boundary, A_magnitude=mag, is_fold=is_fold))
+        is_fold = boundary == "BU|BU"
+        chain.append(
+            ConnectionForm(boundary=boundary, A_magnitude=mag, is_fold=is_fold)
+        )
     return chain
 
 
@@ -237,12 +249,13 @@ def curvature_2form(byte: int) -> float:
     fold_forms = [c for c in chain if c.is_fold]
     if not fold_forms:
         return 0.0
-    return sum(c.A_magnitude ** 2 for c in fold_forms)
+    return sum(c.A_magnitude**2 for c in fold_forms)
 
 
 # ════════════════════════════════════════════════════════════════════════
 # D. Entanglement entropy — bipartite A12|B12
 # ════════════════════════════════════════════════════════════════════════
+
 
 @dataclass(frozen=True)
 class EntanglementSpectrum:
@@ -254,6 +267,7 @@ class EntanglementSpectrum:
         S_vn:          von Neumann entropy (normalized to [0, 1])
         S_bits:        entropy in bits (= shell for GF(2)^6)
     """
+
     shell: int
     multiplicity: int
     S_vn: Fraction
@@ -275,12 +289,14 @@ def compute_entanglement_spectrum(omega: list[int]) -> list[EntanglementSpectrum
     spectrum: list[EntanglementSpectrum] = []
     for shell in range(7):
         pop = sum(1 for s in omega if entanglement_entropy_state(s) == shell)
-        spectrum.append(EntanglementSpectrum(
-            shell=shell,
-            multiplicity=pop,
-            S_vn=Fraction(shell, 6),
-            S_bits=float(shell),
-        ))
+        spectrum.append(
+            EntanglementSpectrum(
+                shell=shell,
+                multiplicity=pop,
+                S_vn=Fraction(shell, 6),
+                S_bits=float(shell),
+            )
+        )
     return spectrum
 
 
@@ -297,6 +313,7 @@ def average_entanglement_entropy(omega: list[int]) -> float:
 # E. Quantum measurement identification
 # ════════════════════════════════════════════════════════════════════════
 
+
 @dataclass(frozen=True)
 class MeasurementStructure:
     """Quantum measurement structure of an hQVM byte application.
@@ -307,6 +324,7 @@ class MeasurementStructure:
         born_prob:     Born rule probability for the outcome
         kraus_update:  post-measurement state (Kraus operator result)
     """
+
     p: bool
     povm_outcome: str
     born_prob: Fraction
@@ -354,6 +372,7 @@ def classify_galois4_gate(byte: int) -> str:
 # F. Holographic hierarchy — |Space| = |Subspace|^2 at all scales
 # ════════════════════════════════════════════════════════════════════════
 
+
 @dataclass(frozen=True)
 class HolographicLevel:
     """One level in the holographic scale hierarchy.
@@ -366,6 +385,7 @@ class HolographicLevel:
         dimension:   dim = 2 * dof = log2(space)
         redundancy:  fraction that is provenance (holographic dual) = 0.5
     """
+
     name: str
     dof: int
     subspace: int
@@ -384,10 +404,18 @@ def holographic_hierarchy() -> list[HolographicLevel]:
     bipartite decomposition at that scale.
     """
     return [
-        HolographicLevel(name="Family",  dof=1, subspace=2,  space=4,    dimension=2,  redundancy=0.5),
-        HolographicLevel(name="4-Phase", dof=2, subspace=4,  space=16,   dimension=4,  redundancy=0.5),
-        HolographicLevel(name="Byte",    dof=4, subspace=16, space=256,  dimension=8,  redundancy=0.5),
-        HolographicLevel(name="Carrier", dof=6, subspace=64, space=4096, dimension=12, redundancy=0.5),
+        HolographicLevel(
+            name="Family", dof=1, subspace=2, space=4, dimension=2, redundancy=0.5
+        ),
+        HolographicLevel(
+            name="4-Phase", dof=2, subspace=4, space=16, dimension=4, redundancy=0.5
+        ),
+        HolographicLevel(
+            name="Byte", dof=4, subspace=16, space=256, dimension=8, redundancy=0.5
+        ),
+        HolographicLevel(
+            name="Carrier", dof=6, subspace=64, space=4096, dimension=12, redundancy=0.5
+        ),
     ]
 
 
@@ -395,11 +423,7 @@ def holographic_hierarchy() -> list[HolographicLevel]:
 # G. Aperture collapse — wavefunction collapse in CGM
 # ════════════════════════════════════════════════════════════════════════
 
-# A* = 1 - delta_BU / m_a  where delta_BU is the BU aperture unit
-# and m_a = 1/(2 sqrt(2 pi)) is the normalization constant.
-APERTURE_GAP: Final[float] = 1.0 - (
-    0.195342176580 / (1.0 / (2.0 * np.sqrt(2.0 * np.pi)))
-)
+# A* = BU_APERTURE_GAP = 1 - BU_HOLONOMY_ANGLE / M_A (shared constants).
 
 
 @dataclass(frozen=True)
@@ -412,6 +436,7 @@ class AperturePoint:
         aperture:    fraction of total state space that is undetermined
         description: physical interpretation
     """
+
     depth: int
     label: str
     aperture: float
@@ -421,32 +446,35 @@ class AperturePoint:
 def aperture_collapse_curve() -> list[AperturePoint]:
     """The aperture curve from raw byte level to constitutional convergence.
 
-    This curve realises wavefunction collapse in CGM: the byte-level
-    fold disagreement (50% aperture) compresses to the constitutional
+    Byte-level fold disagreement (50% aperture) compresses to the constitutional
     A* (~2.07%) through spinorial averaging across depth-4 closure.
 
-    The compression ratio is 50% / 2.07% ~ 24.2x.
+    Compression ratio ~ 50% / A*.
     """
     return [
         AperturePoint(
-            depth=1, label="Single byte",
+            depth=1,
+            label="Single byte",
             aperture=0.5,
             description="Fold disagreement: 128/256 bytes have b3!=b4",
         ),
         AperturePoint(
-            depth=2, label="Two bytes",
+            depth=2,
+            label="Two bytes",
             aperture=0.5,
             description="Byte-level independence: each byte still 50%",
         ),
         AperturePoint(
-            depth=4, label="Canonical word",
+            depth=4,
+            label="Canonical word",
             aperture=0.5,
-            description="Spinorial closure emerges; aperture from holonomy",
+            description="Spinorial closure emerges; aperture from loop angle",
         ),
         AperturePoint(
-            depth=0, label="Omega",
+            depth=0,
+            label="Omega",
             aperture=APERTURE_GAP,
-            description="Constitutional uniformization: A* ~ 0.0207",
+            description=f"Constitutional uniformization: A* = {APERTURE_GAP:.12f}",
         ),
     ]
 
@@ -454,6 +482,7 @@ def aperture_collapse_curve() -> list[AperturePoint]:
 # ════════════════════════════════════════════════════════════════════════
 # H. Kernel integration
 # ════════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class WavefunctionKernel:
@@ -468,6 +497,7 @@ class WavefunctionKernel:
         entangled_spectrum: shell-level entanglement spectrum (lazy)
         aperture_points:    wavefunction collapse trajectory
     """
+
     omega: list[int]
     bytes_flat: list[int]
     bytes_curved: list[int]
@@ -577,6 +607,7 @@ def _w2_affine_swapped(m: int, u: int, v: int) -> tuple[int, int]:
 @dataclass(frozen=True)
 class K4VerificationResult:
     """Pass flags for K4 half-word checks on Omega."""
+
     w2_sig_ok: bool
     w2p_sig_ok: bool
     w2_rest_ok: bool
@@ -633,9 +664,9 @@ def verify_k4_w2() -> K4VerificationResult:
     theory_w2_ok = th_w2 == kr_w2
     theory_w2p_ok = th_w2p == kr_w2p
     affine_w2_ok = _w2_affine(0, rest.u6, rest.v6) == kr_w2
-    swapped_is_fam01_ok = _w2_affine_swapped(0, rest.u6, rest.v6) == _omega12_step_theory(
-        1, 0, rest.u6, rest.v6
-    )
+    swapped_is_fam01_ok = _w2_affine_swapped(
+        0, rest.u6, rest.v6
+    ) == _omega12_step_theory(1, 0, rest.u6, rest.v6)
 
     s24 = GENE_MAC_REST
     for b in W2_BYTES:
@@ -667,18 +698,28 @@ def print_k4_w2_verification(result: K4VerificationResult) -> None:
     print("-" * 5)
     sig_w2 = omega_word_signature(W2_BYTES)
     sig_w2p = omega_word_signature(W2P_BYTES)
-    print(f"  W2 signature (parity, tau_u6, tau_v6): ({sig_w2.parity}, {sig_w2.tau_u6}, {sig_w2.tau_v6})")
+    print(
+        f"  W2 signature (parity, tau_u6, tau_v6): ({sig_w2.parity}, {sig_w2.tau_u6}, {sig_w2.tau_v6})"
+    )
     print(f"  PASS W2 sig == (0, 63, 0): {result.w2_sig_ok}")
-    print(f"  W2' signature (parity, tau_u6, tau_v6): ({sig_w2p.parity}, {sig_w2p.tau_u6}, {sig_w2p.tau_v6})")
+    print(
+        f"  W2' signature (parity, tau_u6, tau_v6): ({sig_w2p.parity}, {sig_w2p.tau_u6}, {sig_w2p.tau_v6})"
+    )
     print(f"  PASS W2' sig == (0, 0, 63): {result.w2p_sig_ok}")
 
-    print(f"\n  rest (u6,v6): ({rest.u6}, {rest.v6})  chi={rest.chirality6:#04x}  code_shell={_code_shell(rest.u6, rest.v6)}")
-    print(f"  W2(rest) -> ({w2_out.u6}, {w2_out.v6})  chi={w2_out.chirality6:#04x}  state24={omega12_to_state24(w2_out):#08x}")
+    print(
+        f"\n  rest (u6,v6): ({rest.u6}, {rest.v6})  chi={rest.chirality6:#04x}  code_shell={_code_shell(rest.u6, rest.v6)}"
+    )
+    print(
+        f"  W2(rest) -> ({w2_out.u6}, {w2_out.v6})  chi={w2_out.chirality6:#04x}  state24={omega12_to_state24(w2_out):#08x}"
+    )
     print(f"  PASS W2 rest -> (63, 63) equality horizon: {result.w2_rest_ok}")
     print(f"  PASS W2^2 == id on rest: {result.w2_involution_ok}")
     print(f"  PASS omega12 chart == step_state_by_byte: {result.omega_chart_ok}")
 
-    print(f"\n  T2 over 4096 states: chi' != chi^63 mismatches = {0 if result.t2_chi_ok else 'FAIL'}")
+    print(
+        f"\n  T2 over 4096 states: chi' != chi^63 mismatches = {0 if result.t2_chi_ok else 'FAIL'}"
+    )
     print(f"  PASS T2 chi flip: {result.t2_chi_ok}")
     print(f"  PASS T2 code_shell s -> 6-s: {result.t2_shell_ok}")
 
@@ -686,7 +727,9 @@ def print_k4_w2_verification(result: K4VerificationResult) -> None:
     print(f"\n  theory step W2(rest): {th_w2}")
     print(f"  kernel step W2(rest): ({w2_out.u6}, {w2_out.v6})")
     print(f"  affine W2 (u^m^63, v^m): {_w2_affine(0, rest.u6, rest.v6)}")
-    print(f"  swapped (v^m^63, u^m): {_w2_affine_swapped(0, rest.u6, rest.v6)}  [single-byte fam-01 only]")
+    print(
+        f"  swapped (v^m^63, u^m): {_w2_affine_swapped(0, rest.u6, rest.v6)}  [single-byte fam-01 only]"
+    )
     print(f"  PASS theory == kernel: {result.theory_w2_ok}")
     print(f"  PASS affine formula == kernel: {result.affine_w2_ok}")
     print(f"  PASS swapped formula == single-byte fam-01: {result.swapped_is_fam01_ok}")
@@ -695,6 +738,7 @@ def print_k4_w2_verification(result: K4VerificationResult) -> None:
 # ════════════════════════════════════════════════════════════════════════
 # J. Diagnostics
 # ════════════════════════════════════════════════════════════════════════
+
 
 def run_diagnostics() -> None:
     """Print full wavefunction kernel diagnostics."""
@@ -714,7 +758,9 @@ def run_diagnostics() -> None:
     print("\n  Flat bytes:")
     for b in k.bytes_flat:
         f = decompose_byte(b)
-        print(f"    0x{b:02X}  intron=0x{f.intron:02X}  fwd={f.fwd:04b}  rev={f.rev:04b}")
+        print(
+            f"    0x{b:02X}  intron=0x{f.intron:02X}  fwd={f.fwd:04b}  rev={f.rev:04b}"
+        )
 
     disagree_counts = Counter()
     for byte in range(256):
@@ -786,7 +832,9 @@ def run_diagnostics() -> None:
     print("  Level       DoF  Subspace   Space  dim  Redundancy")
     print("  ----------  ---  --------  -----  ---  ----------")
     for lvl in k.hierarchy:
-        print(f"  {lvl.name:10s}  {lvl.dof:2d}  {lvl.subspace:7d}  {lvl.space:5d}  {lvl.dimension:2d}  {lvl.redundancy:.0%}")
+        print(
+            f"  {lvl.name:10s}  {lvl.dof:2d}  {lvl.subspace:7d}  {lvl.space:5d}  {lvl.dimension:2d}  {lvl.redundancy:.0%}"
+        )
     print("\n  Pattern: |Space| = |Subspace|^2,  dim = 2*DoF")
     print("  The squaring = holographic double-cover from fold reflection P")
     print("  50% redundancy = provenance (dual reading) = entanglement entropy")
@@ -810,6 +858,7 @@ def run_diagnostics() -> None:
 
 
 # ════════════════════════════════════════════════════════════════════════
+
 
 def main() -> None:
     import argparse

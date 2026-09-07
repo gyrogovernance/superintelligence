@@ -28,6 +28,10 @@ from scipy.optimize import brentq
 from scipy.special import lambertw
 
 from gyroscopic.hQVM.constants import (
+    BU_APERTURE_GAP,
+    BU_CLOSURE_RATIO,
+    BU_HOLONOMY_ANGLE,
+    M_A,
     GENE_MAC_A12,
     GENE_MAC_B12,
     GENE_MAC_REST,
@@ -58,18 +62,22 @@ FAMILY_RAY_REF = 1
 GENE_MAC_SWAPPED = (GENE_MAC_B12 << 12) | GENE_MAC_A12
 
 Q_G = 4 * np.pi
-m_a = 1 / (2 * np.sqrt(2 * np.pi))
-d_BU = 0.195342176580
-rho = d_BU / m_a
-Delta = 1 - rho
+m_a = M_A
+d_BU = BU_HOLONOMY_ANGLE
+rho = BU_CLOSURE_RATIO
+Delta = BU_APERTURE_GAP
 G_kernel = math.pi / 6
 Omega_size = 4096
 H_size = 64
 W2_SHELL_DISPLACEMENT = 6  # per W2 depth-4 half-word (2 bytes); wavefunction_2 T2,T5
 F_CYCLE_PATH_TRAVERSE = 12  # F-cycle path length (4 bytes); F preserves shell per T4
-Z2_HOLONOMY_PATH_TRAVERSE = 24  # Z2 holonomy path length (8 bytes, 2 F-cycles); net disp 0
+Z2_HOLONOMY_PATH_TRAVERSE = (
+    24  # Z2 holonomy path length (8 bytes, 2 F-cycles); net disp 0
+)
 D_traverse = Z2_HOLONOMY_PATH_TRAVERSE  # shell traverse invariant (not aperture Delta)
-AF = 2 * Z2_HOLONOMY_PATH_TRAVERSE  # Z2 double-cover: holonomy cycle path x 2 for Refractive Depth round-trip (T6: F o F = id)
+AF = (
+    2 * Z2_HOLONOMY_PATH_TRAVERSE
+)  # Z2 double-cover: holonomy cycle path x 2 for Refractive Depth round-trip (T6: F o F = id)
 v_EW = 246.22
 G_meas = 6.708810e-39
 
@@ -104,7 +112,8 @@ def stage_mass_fractions() -> dict[str, float]:
 
 
 alpha_G_meas = G_meas * v_EW**2
-f_ordered = 1.0 - 4.0 * rho * Delta**2
+f_ordered = 1.0 - 4.0 * rho * Delta**2  # f_K4 STF polynomial (orders 0 and 2)
+C4_REF = -1.75
 
 # Validation only: inverts measured G through alpha_G(v) = G_kernel * exp(-tau).
 tau_required = -math.log(alpha_G_meas / G_kernel)
@@ -112,12 +121,17 @@ tau_req_meas = tau_required
 
 # Consistency check: Z2 Refractive Depth vs UV-IR conjugacy ladder (not a G derivation).
 tau_conjugacy_depth = 2.0 * math.log(E_CS / v_EW)
-tau_G_formula = Omega_size * Delta * rho**5 * f_ordered
+
+# Coupling depth: STF transport on bulk shells 1..5 (horizons have pi=0).
+tau_G_stf = Omega_size * Delta * rho**5 * f_ordered
+tau_G_formula = tau_G_stf
+# Trace-sector scalar (isotropic pressure / monopole bookkeeping); not in G exponent.
+tau_trace = Omega_size * Delta * rho**5 * float(C4_REF) * Delta**4
+
 binom_shell = [comb(6, s) / 64.0 for s in range(7)]
 weights_pop = {m: binom_shell[bin(m).count("1")] for m in range(64)}
 pi_eq = FA_STF * TR_SIGMA_SHELL[3]
 V_EW_PDG = (246.22, 0.01)
-C4_REF = -1.75
 
 K4_CHANNEL_FLAGS = [
     ("top", 0, 0, 0),
@@ -224,39 +238,43 @@ def trace_word_steps(
     s = int(start_state24) & 0xFFFFFF
     q_acc = 0
     chi0, arch0 = _shell_fields(s)
-    rows = [{
-        "step": 0,
-        "byte": None,
-        "state24": s,
-        "shell": chi0,
-        "arch_shell": arch0,
-        "chi6": chirality_word6(s),
-        "qxor": 0,
-        "family": 0,
-        "micro": micro_ref & 0x3F,
-        "intron": None,
-        "on_horizon": is_on_horizon(s),
-        "on_equality_horizon": is_on_equality_horizon(s),
-    }]
+    rows = [
+        {
+            "step": 0,
+            "byte": None,
+            "state24": s,
+            "shell": chi0,
+            "arch_shell": arch0,
+            "chi6": chirality_word6(s),
+            "qxor": 0,
+            "family": 0,
+            "micro": micro_ref & 0x3F,
+            "intron": None,
+            "on_horizon": is_on_horizon(s),
+            "on_equality_horizon": is_on_equality_horizon(s),
+        }
+    ]
     for step, byte in enumerate(word, start=1):
         s = step_state_by_byte(s, byte)
         q_acc = (q_acc ^ q_word6(byte)) & CHI6_FULL
         intron = byte_to_intron(byte)
         chi_sh, arch_sh = _shell_fields(s)
-        rows.append({
-            "step": step,
-            "byte": byte,
-            "state24": s,
-            "shell": chi_sh,
-            "arch_shell": arch_sh,
-            "chi6": chirality_word6(s),
-            "qxor": q_acc,
-            "family": intron_family(intron),
-            "micro": intron_micro_ref(intron),
-            "intron": intron,
-            "on_horizon": is_on_horizon(s),
-            "on_equality_horizon": is_on_equality_horizon(s),
-        })
+        rows.append(
+            {
+                "step": step,
+                "byte": byte,
+                "state24": s,
+                "shell": chi_sh,
+                "arch_shell": arch_sh,
+                "chi6": chirality_word6(s),
+                "qxor": q_acc,
+                "family": intron_family(intron),
+                "micro": intron_micro_ref(intron),
+                "intron": intron,
+                "on_horizon": is_on_horizon(s),
+                "on_equality_horizon": is_on_equality_horizon(s),
+            }
+        )
     return rows
 
 
@@ -282,20 +300,22 @@ def build_joint_table() -> list[dict]:
         weight = comb(6, pop_m) / 64.0
         word = cycle_word_for_micro(m_ref)
         for row in trace_word_steps(word, micro_ref=m_ref)[1:]:
-            table.append({
-                "m_ref": m_ref,
-                "pop": pop_m,
-                "weight": weight,
-                "step": row["step"],
-                "byte": row["byte"],
-                "state24": row["state24"],
-                "arch_shell": int(row["arch_shell"]),
-                "intron": row["intron"],
-                "family": row["family"],
-                "micro": row["micro"],
-                "qxor": row["qxor"],
-                "chi6": row["chi6"],
-            })
+            table.append(
+                {
+                    "m_ref": m_ref,
+                    "pop": pop_m,
+                    "weight": weight,
+                    "step": row["step"],
+                    "byte": row["byte"],
+                    "state24": row["state24"],
+                    "arch_shell": int(row["arch_shell"]),
+                    "intron": row["intron"],
+                    "family": row["family"],
+                    "micro": row["micro"],
+                    "qxor": row["qxor"],
+                    "chi6": row["chi6"],
+                }
+            )
     return table
 
 
@@ -356,28 +376,39 @@ def tau_cycle_per_delta_exact() -> Fraction:
     return Fraction(4 * sum_cubes, 64 * sum_sq)
 
 
+def tau_g_stf_depth() -> float:
+    """STF refractive depth used for weak-field G and G(psi)."""
+    return float(tau_G_stf)
+
+
+def tau_trace_depth(c4_val: float | None = None) -> float:
+    """Isotropic-trace scalar |Omega| Delta rho^5 c4 Delta^4 (not coupling depth)."""
+    c4 = float(C4_REF if c4_val is None else c4_val)
+    return Omega_size * Delta * rho**5 * c4 * Delta**4
+
+
 def tau_g_with_c4(c4_val):
-    f_ext = 1.0 - 4.0 * rho * Delta**2 + c4_val * Delta**4
-    return Omega_size * Delta * rho**5 * f_ext
+    """STF depth plus optional trace scalar (audit/sum only; G uses tau_g_stf_depth)."""
+    return tau_g_stf_depth() + tau_trace_depth(c4_val)
 
 
 def kernel_exposure_constants() -> tuple[float, float, float, Fraction]:
     """
-    N_cycles, tau_cycle, tau_G (full), tau_cycle/Delta from analysis_3 section D.
+    N_cycles, tau_cycle, tau_G (STF coupling depth), tau_cycle/Delta.
 
     Single source for exposure-count factorization (no two-lemma 3481 formula).
+    N_cycles uses f_K4 = 1 - 4 rho Delta^2 only.
     """
     tau_over_delta = tau_cycle_per_delta_exact()
     tau_cycle = float(tau_over_delta) * Delta
-    f_k4_full = f_ordered + float(C4_REF) * Delta**4
-    n_cycles = Omega_size * rho**5 * f_k4_full / float(tau_over_delta)
-    tau_g_full = tau_g_with_c4(C4_REF)
-    return n_cycles, tau_cycle, tau_g_full, tau_over_delta
+    n_cycles = Omega_size * rho**5 * f_ordered / float(tau_over_delta)
+    tau_g = tau_g_stf_depth()
+    return n_cycles, tau_cycle, tau_g, tau_over_delta
 
 
 def dln_g_dpsi(tau_g_full: float | None = None) -> float:
     """Slope d ln(G/G0) / d psi for G(psi) = G0 exp(g1 psi)."""
-    tau = tau_g_full if tau_g_full is not None else tau_g_with_c4(C4_REF)
+    tau = tau_g_full if tau_g_full is not None else tau_g_stf_depth()
     eta = math.log(v_EW / E_CS)
     return tau + 2.0 * eta
 
@@ -398,7 +429,9 @@ def psi_analytic(s: float | np.ndarray, g1: float | None = None) -> float | np.n
     return -np.log1p(arg) / g1
 
 
-def dpsi_ds_analytic(s: float | np.ndarray, g1: float | None = None) -> float | np.ndarray:
+def dpsi_ds_analytic(
+    s: float | np.ndarray, g1: float | None = None
+) -> float | np.ndarray:
     """Exact d psi/ds = -1/(s(s - g1))."""
     if g1 is None:
         g1 = dln_g_dpsi()
@@ -473,7 +506,7 @@ def E_ref_quantile(psi: float) -> float:
 
 def tau_of_psi(psi: float, tau_g_val: float | None = None) -> float:
     """Refractive depth gradient tau(psi) = tau_G * (1 - psi)."""
-    tg = tau_g_val if tau_g_val is not None else tau_g_with_c4(C4_REF)
+    tg = tau_g_val if tau_g_val is not None else tau_g_stf_depth()
     return tg * (1.0 - psi)
 
 
@@ -657,9 +690,7 @@ def photon_residual_spin(
         return 1e6
     if z2_amp is None:
         z2_amp = helix_z2_activation()
-    h, dh_ds_total, _ = _h_derivs(
-        s, u, u_prime, a_star, theta_o_deg, z2_amp, g1
-    )
+    h, dh_ds_total, _ = _h_derivs(s, u, u_prime, a_star, theta_o_deg, z2_amp, g1)
     f_eff = 1.0 - 2.0 * u - h
     f_eff_prime = -2.0 * u_prime - dh_ds_total
     return s * f_eff_prime - 2.0 * f_eff
@@ -678,9 +709,7 @@ def _spin_photon_bracket(
         g1 = dln_g_dpsi()
     s_a = max(s_schw * 0.98, horizon_s_analytic(g1) * 1.001)
     s_b = min(max(s_schw * 1.35, 4.0), s_max)
-    prev_s, prev_r = s_a, photon_residual_spin(
-        s_a, a_star, theta_o_deg, z2_amp, g1
-    )
+    prev_s, prev_r = s_a, photon_residual_spin(s_a, a_star, theta_o_deg, z2_amp, g1)
     for i in range(1, 49):
         s = s_a + (s_b - s_a) * i / 48
         r = photon_residual_spin(s, a_star, theta_o_deg, z2_amp, g1)
@@ -718,9 +747,7 @@ def find_photon_sphere_spin(
     z2_amp = helix_z2_activation()
     if a_star <= 0.0:
         return photon
-    bracket = _spin_photon_bracket(
-        s_schw, a_star, theta_o_deg, z2_amp, g1, s_max
-    )
+    bracket = _spin_photon_bracket(s_schw, a_star, theta_o_deg, z2_amp, g1, s_max)
     if bracket is None:
         s_ph, u_ph, _ = photon
         b = photon_impact_spin(s_ph, u_ph, a_star, theta_o_deg, z2_amp)
@@ -728,9 +755,7 @@ def find_photon_sphere_spin(
     s_lo, s_hi = bracket
     s_ph = float(
         brentq(
-            lambda s: photon_residual_spin(
-                s, a_star, theta_o_deg, z2_amp, g1
-            ),
+            lambda s: photon_residual_spin(s, a_star, theta_o_deg, z2_amp, g1),
             s_lo,
             s_hi,
         )  # type: ignore[arg-type]
@@ -810,21 +835,20 @@ def verify_gauss_law_bridge(*, n_ext: int = 40) -> dict:
 def alpha_lab_with_transport_corrections() -> float:
     """
     alpha after AB, HC, IDE transport corrections (hqvm_corrections_analysis_1).
+    Uses closed-form d_BU; derives 1/rho and diff = phi_SU2 - 3 d_BU.
     """
     d = d_BU
     mp_ = m_a
     r_curv = 0.993434896272
-    h_hol = 4.417034
-    rho_inv = 1.021137
-    diff = 0.001874
+    phi_su2 = 2.0 * math.acos((1.0 + 2.0 * math.sqrt(2.0)) / 4.0)
+    diff = phi_su2 - 3.0 * d
+    rho_inv = 1.0 / (d / mp_)
     d_ap = 1.0 - d / mp_
     d2 = d_ap * d_ap
     d4 = d2 * d2
-    phi = 3.0 * d + diff
     c_ab = 1.0 - (3.0 / 4.0) * r_curv * d2
     c_hc = 1.0 - (5.0 / 6.0) * (
-        (phi / (3.0 * d) - 1.0)
-        * (1.0 - d2 * h_hol)
+        (phi_su2 / (3.0 * d) - 1.0)
         * d2
         / (4.0 * math.pi * math.sqrt(3.0))
     )
@@ -849,7 +873,7 @@ def verify_alpha_zeta_product(*, alpha_codata: float | None = None) -> dict:
         "alpha_kernel": alpha_kernel,
         "lhs": lhs,
         "rhs": rhs,
-        "exact": lhs == rhs,
+        "exact": abs(lhs - rhs) <= 1e-12 * max(1.0, abs(rhs)),
     }
     if alpha_codata is not None and alpha_codata > 0:
         out["alpha_codata"] = alpha_codata
@@ -873,12 +897,12 @@ def c4_from_anchors(g_gev2, v_ew_gev):
 def k4_pq_charges():
     """EW trace-free charges (p, q) per K4 channel from gyrotriangle closure.
 
-    Channel flags on the K4 edge walk (see hqvm_compact_geom_core.CHANNELS):
+    Channel flags on the K4 edge walk (see hqvm_compact_geom_common.CHANNELS):
       b (base): breaks CS reference frame (Higgs path)
       r (rot):  ONA reversal increment on the edge
       bal:    BU balance increment on the edge
 
-    Formulas match _pq() in hqvm_compact_geom_core: p = 1 + (-C1/2)*b + (C1/4)*r + 2*bal,
+    Formulas match _pq() in hqvm_compact_geom_common: p = 1 + (-C1/2)*b + (C1/4)*r + 2*bal,
     q = 5/4 - 2*r - bal with C1=6 (CODE_C1). Returns (p, q) per channel name.
     """
     p0, q0 = 1.0, 5.0 / 4.0

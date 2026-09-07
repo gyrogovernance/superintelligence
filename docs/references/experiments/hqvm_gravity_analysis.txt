@@ -1,12 +1,12 @@
 CGM gravity script runner
-started: 2026-06-01T14:18:04+03:00
+started: 2026-08-17T01:56:35+03:00
 python: C:\Python314\python.exe
 scripts: 10
 
 ######## hqvm_gravity_analysis_3.py ########
 
 CGM gravity analysis 3: Kernel-derived theorems
-Delta = 0.020699553913, rho = 0.979300446087
+Delta = 0.020699545503, rho = 0.979300454497
 shell weights w=0..6: ['1/64', '3/32', '15/64', '5/16', '15/64', '3/32', '1/64']
 
 =========
@@ -154,9 +154,9 @@ STF anisotropy kernel (same weights, depth ~ ||pi||^2):
   K * anisotropy                     = 7591/7392
 
 tau_cycle / Delta                    = 7591/7392 = 1.026920995671
-tau_cycle (exact)                    = 0.021256806515
-Lemma A uniform tau_cycle              = 0.021898549682
-exact / Lemma A (tau vs tau)           = 0.970694718301
+tau_cycle (exact)                    = 0.021256797878
+Lemma A uniform tau_cycle              = 0.021898531322
+exact / Lemma A (tau vs tau)           = 0.970695137720
 
 K factor decomposition:
   K = (7591*99) / (7392*5) = 751509/36960
@@ -169,45 +169,44 @@ K factor decomposition:
 =========
 D. tau_G = N_cycles x tau_cycle
 =========
-tau_G (leading)       = 76.2379411734
-tau_G (full, c4)      = 76.2379166386
-tau_cycle             = 0.0212568065
-N_cycles = tau_G/tau_cycle = 3586.517880
-|Omega| rho^5 f_k4 / (tau/Delta) = 3586.517880
+tau_G (STF coupling)  = 76.2379135736
+tau_trace (c4 scalar) = -2.4534760677e-05
+tau_cycle             = 0.0212567979
+N_cycles = tau_G/tau_cycle = 3586.519193
+|Omega| rho^5 f_k4 / (tau/Delta) = 3586.519193
 
 N_cycles as exposure count:
-  N = |Omega|*rho^5*(f_K4+c4*Delta^4) / (tau_cycle/Delta)
-  N = 4096*0.979300^5*0.9983212693 / 1.0269209957
-  N = 3586.5179
-  N (from tau_G/tau_cycle) = 3586.5179
+  N = |Omega|*rho^5*f_K4 / (tau_cycle/Delta)
+  N = 4096*0.979300^5*0.9983215919 / 1.0269209957
+  N = 3586.5192
+  N (from tau_G/tau_cycle) = 3586.5192
   Match: True
   N_cycles DERIVED as exposure count (no tau_G reference in formula)
 
 =========
-E. c4 = -7/4 additive correction to tau_G
+E. c4 = -7/4 trace-sector scalar
 =========
 c4 = -7/4
-tau_G = |Omega| Delta rho^5 (f_k4 + c4 Delta^4)
-  leading order tau_G        = 76.2379411734
-  leading order residual     = 2.460845e-05
-  full prediction tau_G      = 76.2379166386
-  full prediction residual   = 7.364341e-08
-  ppm |delta_tau/tau|        = 0.0010
-  ppm |delta_tau| G-scale    = 0.0736
+tau_G = |Omega| Delta rho^5 f_k4   (STF coupling depth)
+tau_trace = |Omega| Delta rho^5 c4 Delta^4   (isotropic channel)
+  tau_G                      = 76.2379135736
+  tau_trace                  = -2.4534760677e-05
+  residual tau_G - tau_req   = -2.991371e-06
+  ppm |delta_tau| G-scale    = 2.9914
 tau_required (G_meas)        = 76.2379165649
 
 =========
 F. alpha_0*zeta_geom consistency (kernel layer)
 =========
-alpha_0 * zeta_geom        = 0.169025920321
-rho^4/(pi*sqrt(3))       = 0.169025920321
+alpha_0 * zeta_geom        = 0.169025926127
+rho^4/(pi*sqrt(3))       = 0.169025926127
 exact identity           = True
-alpha_0 (kernel)           = 0.007299683322
+alpha_0 (kernel)           = 0.007299683573
 alpha_CODATA             = 0.007297352569
-alpha_0/alpha_CODATA - 1 = 3.193971e-04  (+319 ppm)
+alpha_0/alpha_CODATA - 1 = 3.194315e-04  (+319 ppm)
 zeta_geom (kernel)       = 23.155240145865
-zeta from CODATA alpha   = 23.162635862228
-zeta_from/zeta_geom - 1  = 3.193971e-04
+zeta from CODATA alpha   = 23.162636657941
+zeta_from/zeta_geom - 1  = 3.194315e-04
 
 Kernel identity: alpha_0 * zeta_geom = rho^4/(pi sqrt(3)) (exact). The zeta offset (3.19e-04) equals alpha_0/alpha_CODATA - 1.
 
@@ -217,17 +216,17 @@ G. Delta-ruler placement of alpha_G(v)
 
 Gravitational coupling on the Delta ruler (interpretive, not a theorem):
   alpha_G(v) = G_meas * v^2           = 4.067168e-34
-  n_G = -log2(alpha_G) / Delta        = 3714.3287
-    log2(6/pi) / Delta                = 31.2581
-    tau_G / (Delta*ln2)               = 5313.5493
-    sum                               = 5344.8074
+  n_G = -log2(alpha_G) / Delta        = 3714.3302
+    log2(6/pi) / Delta                = 31.2582
+    tau_G / (Delta*ln2)               = 5313.5495
+    sum                               = 5344.8077
 
 Kernel ratios:
   n_G / |Omega|                       = 0.906819
-  n_G / D                             = 154.7637
+  n_G / D                             = 154.7638
   n_G / |H|                           = 58.0364
   n_G / (|Omega|*rho^5)               = 1.0068
-  |Omega|*rho^5 / ln(2)               = 5322.4826
+  |Omega|*rho^5 / ln(2)               = 5322.4828
 
   n_G / (|Omega|*rho^5) ~ 1.007: gravity sits near |Omega|*rho^5 ticks from the EW anchor (deep relational bulk).
 
@@ -242,15 +241,15 @@ EW mass coords (order 5, same Delta, compact geometry):
 ANALYSIS COMPLETE
 =========
 
-exit=0  duration=0.75s
+exit=0  duration=0.91s
 
 ######## hqvm_gravity_analysis_2.py ########
 
 CGM Gravity: Kernel Theorems and Classification
 =========
-Delta       = 0.020699553913221
-Delta^4     = 1.835878539112425e-07
-rho         = 0.979300446086779
+Delta       = 0.020699545502670
+Delta^4     = 1.835875555330305e-07
+rho         = 0.979300454497330
 |Omega|     = 4096
 
 S1  Z2 holonomy parity
@@ -351,7 +350,7 @@ inverse-square ok           = True
 S11 alpha * zeta (audit; derivation: analysis_3 F)
 ---------
 exact identity              = True
-zeta_from/zeta_geom - 1     = 3.193971e-04
+zeta_from/zeta_geom - 1     = 3.194315e-04
 
 S12 8pi = 2 * Q_G decomposition
 ---------
@@ -389,17 +388,17 @@ S14 Anchor validation (optional)
 v_EW               = 246.220000
 G_meas             = 6.708810000000e-39
 tau_required       = 76.237916564937
-tau_geo            = 76.237941173390
-tau_corr           = 76.237916638581
-tau_corr - tau_req = 7.364340603999e-08
+tau_geo            = 76.237913573567
+tau_corr           = 76.237889038806
+tau_corr - tau_req = -2.752613141865e-05
 
-c4_anchor_check    = -1.755252780201  (inverse from G_meas, validation only)
-c4_anchor - kernel = -5.252780200913e-03
+c4_anchor_check    = 0.213366613907  (inverse from G_meas, validation only)
+c4_anchor - kernel = 1.963366613907e+00
 
-G_geo              = 6.708644908597e-39  ppm=-24.608150
-G_corr             = 6.708809505940e-39  ppm=-0.073643
+G_geo              = 6.708830068568e-39  ppm=+2.991375
+G_corr             = 6.708994670127e-39  ppm=+27.526510
 
-exit=0  duration=1.53s
+exit=0  duration=1.62s
 
 ######## hqvm_gravity_analysis_1.py ########
 
@@ -432,24 +431,24 @@ c4_kernel exact                 = -7/4
 c4_kernel decimal               = -1.750000000000
 
 Anchor check (inverse from G_meas, validation only):
-c4_anchor                       = -1.755252780201
-c4_anchor - c4_kernel           = -5.252780200913e-03
+c4_anchor                       = 0.213366613907
+c4_anchor - c4_kernel           = 1.963366613907e+00
 
 4. Refractive Depth
 ---------
-tau_G (leading order)           = 76.237941173390
+tau_G (leading order)           = 76.237913573567
 tau_required                    = 76.237916564937
-tau_G (full prediction)         = 76.237916638581
-leading_residual                = 2.460845287544e-05
-full_residual                   = 7.364340603999e-08
+tau_G (full prediction)         = 76.237889038806
+leading_residual                = -2.991370749328e-06
+full_residual                   = -2.752613141865e-05
 
 5. Gravitational coupling
 ---------
-G_pred (leading order)          = 6.708644908597e-39
-G_pred (full prediction)        = 6.708809505940e-39
+G_pred (leading order)          = 6.708830068568e-39
+G_pred (full prediction)        = 6.708994670127e-39
 G_measured                      = 6.708810000000e-39
-ppm leading                     = -24.608150
-ppm full                        = -0.073643
+ppm leading                     = +2.991375
+ppm full                        = +27.526510
 
 c4 = -(1 + Tr_sigma_iso)
    = -(1 + 3/4)
@@ -488,20 +487,20 @@ STF decomposition by payload population:
 
 STF attenuation rho^5 and Refractive Depth
 ---------
-  dim(STF(3)) = 5; rho^5 = 0.9006991682
+  dim(STF(3)) = 5; rho^5 = 0.9006992069
   per-channel tau_1 = -ln(rho) = 0.020917
 
   Refractive Depth comparison:
-    Naive (|Omega|*Delta):              84.785373
-    With rho^5:                         76.366115
-    With K4 (1-4*rho*Delta^2):          76.237941
+    Naive (|Omega|*Delta):              84.785338
+    With rho^5:                         76.366087
+    With K4 (1-4*rho*Delta^2):          76.237914
     Required (-ln alpha_G/G_kernel):    76.237917
     Conjugacy depth (2 ln E_CS/v):      76.883484
 
   K4 correction factor (1 - 4 rho Delta^2):
-    tau without K4: 76.366115
-    tau with K4:    76.237941
-    4*rho*D^2:      1.678409e-03
+    tau without K4: 76.366087
+    tau with K4:    76.237914
+    4*rho*D^2:      1.678408e-03
 
 Kernel shells: 5 bulk + 2 horizons
 ---------
@@ -556,47 +555,47 @@ C.4  Tr / ||pi|| along Z2 holonomy cycle (64 micro avg)
   (bulk steps: 1,3,5,7; horizon steps: 2,4,6,8)
 
 C.5  Per-family tau (depth-4 word)
-  family 0: tau_word=0.009408891  tau_step=0.002352223
-  family 1: tau_word=0.009408891  tau_step=0.002352223
-  family 2: tau_word=0.009408891  tau_step=0.002352223
-  family 3: tau_word=0.009408891  tau_step=0.002352223
-  mean tau_word: 0.009408891  var: 0.000000e+00
+  family 0: tau_word=0.009408887  tau_step=0.002352222
+  family 1: tau_word=0.009408887  tau_step=0.002352222
+  family 2: tau_word=0.009408887  tau_step=0.002352222
+  family 3: tau_word=0.009408887  tau_step=0.002352222
+  mean tau_word: 0.009408887  var: 0.000000e+00
 
 C.6  N_cycles (from analysis_3 section D)
   Definitive derivation: hqvm_gravity_analysis_3.py section D
   tau_cycle/Delta     = 7591/7392 (exact rational)
-  N_cycles            = 3586.5179  (exposure count)
-  N * tau_cycle       = 76.237917
-  tau_G (full)        = 76.237917
+  N_cycles            = 3586.5192  (exposure count)
+  N * tau_cycle       = 76.237914
+  tau_G (full)        = 76.237914
   Match N*tau = tau_G: rel err 0.00e+00
 
 C.7  tau_cycle (binom shell weights)
-  tau_binom shell-weighted        = 0.021256807
+  tau_binom shell-weighted        = 0.021256798
   tau_binom / tau_cycle (exact)   = 1.000000
   Horizon steps (arch_shell 0,6): ||pi||=0, zero contribution.
   per-pop tau: p0=0.000000(n=1) p1=0.007762(n=6) p2=0.019406(n=15) p3=0.025874(n=20) p4=0.019406(n=15) p5=0.007762(n=6) p6=0.000000(n=1)
 
 C.8  Effective rho exponent (data-driven)
-  a_fit        = 5.000015
-  rho^5        = 0.900699168199
-  rho^(8-3)    = 0.900699168199
+  a_fit        = 4.999998
+  rho^5        = 0.900699206877
+  rho^(8-3)    = 0.900699206877
 
 C.9  Binomial generating functions
   b5/b6/diff/b5(k-1): k0:1/1/0/0 | k1:5/6/1/1 | k2:10/15/5/5 | k3:10/20/10/10 | k4:5/15/10/10 | k5:1/6/5/5 | k6:0/1/1/1
   (1-Delta)^5 coeffs: [1, -5, 10, -10, 5, -1]
   (1+Delta)^6 coeffs: [1, 6, 15, 20, 15, 6, 1]
-  rho^5 numeric: 0.900699168199
-  (1-Delta)^5 binom: 0.900699168199
+  rho^5 numeric: 0.900699206877
+  (1-Delta)^5 binom: 0.900699206877
 
 C.10 Residual scaled by |Omega|*Delta^n
-  Delta^3=0.000677 Delta^4=0.032725 Delta^5=1.580955
-  residual / (tau_G * Delta^4): 1.758204
+  Delta^3=-0.000082 Delta^4=-0.003978 Delta^5=-0.192179
+  residual / (tau_G * Delta^4): -0.213725
   7/4 reference: 1.750000
 
 C.11 F-cycle counting
   N cycles = tau_G / tau_cycle: 3586.5
   tau_G / tau_required: 1.000000
-  K4 factor: 0.998321590549
+  K4 factor: 0.998321591899
 
 C.12 Full-payload micro 63 (complement-horizon anchor)
   pop=6  arch_shell=0 at rest
@@ -636,9 +635,9 @@ Part E: Coupling summary
 CGM invariants:
   Q_G    = 12.5663706144
   m_a    = 0.199471140201
-  d_BU   = 0.195342176580
-  rho    = 0.979300446087
-  Delta  = 0.020699553913
+  d_BU   = 0.195342178258
+  rho    = 0.979300454497
+  Delta  = 0.020699545503
 
 Kernel invariants:
   |Omega|  = 4096
@@ -646,15 +645,14 @@ Kernel invariants:
   D        = 24
   G_kernel = pi/6 = 0.523598775598
 
-Refractive Depth:
-  leading order tau_G = 76.237941173390
-  full prediction     = 76.237916638581
+Refractive Depth (STF coupling):
+  tau_G               = 76.237913573567
+  tau_trace (c4=-7/4) = -2.453476068354e-05
 
 Gravitational coupling:
-  G_pred (full)        = 6.708810e-39 GeV^-2
+  G_pred               = 6.708830e-39 GeV^-2
   G_meas               = 6.708810e-39 GeV^-2
-  ppm (full)           = -0.074
-  ppm (leading)        = -24.608
+  ppm                  = +2.991
 
 Three routes to exponent 5:
   A (STF):    dim(STF(3)) = 5
@@ -664,62 +662,62 @@ Three routes to exponent 5:
 ==========
 SUMMARY
 ==========
-  rho = 0.979300446087
-  Delta = 0.020699553913
+  rho = 0.979300454497
+  Delta = 0.020699545503
   STF dim = 5, bulk shells = 5, |K4| = 4
-  tau_G (full) = 76.237917
-  G_pred/G_meas - 1 (full) = -0.074 ppm
+  tau_G (STF) = 76.237914
+  G_pred/G_meas - 1 = 2.991 ppm
 
-exit=0  duration=0.77s
+exit=0  duration=0.84s
 
 ######## hqvm_gravity_analysis_4.py ########
 
 CGM gravity analysis 4: nonlinear G(psi), metric, shadow
-Delta = 0.020699553913, rho = 0.979300446087
-tau_G (full) = 76.2379166386
-G_global = 6.70881e-39 GeV^-2
+Delta = 0.020699545503, rho = 0.979300454497
+tau_G (STF) = 76.2379135736
+G_global = 6.70883e-39 GeV^-2
 
 =========
 A. Nonlinear coupling G(psi)
 =========
 
-tau_G (leading order)    = 76.2379411734
-tau_G (full with c4)    = 76.2379166386
-G_global (weak field)   = 6.708810e-39 GeV^-2
+tau_G (STF coupling)     = 76.2379135736
+tau_trace (c4 scalar)    = -2.4534760684e-05
+G_global (weak field)   = 6.708830e-39 GeV^-2
 G_CS (psi=1)        = 3.517863e-39 GeV^-2
-G_CS / G_global     = 0.524365
+G_CS / G_global     = 0.524363
 eta = ln(v/E_CS)        = -38.441742
-dlnG/dpsi = tau_G+2*eta = -0.645568
+dlnG/dpsi = tau_G+2*eta = -0.645571
 
-G(psi=0)                = 6.708810e-39 GeV^-2
-  vs G_global           = 6.708810e-39 GeV^-2
+G(psi=0)                = 6.708830e-39 GeV^-2
+  vs G_global           = 6.708830e-39 GeV^-2
   relative error        = 0.00e+00  (should be ~0)
 
 G(psi=1)                = 3.517863e-39 GeV^-2
   vs G_kernel/E_CS^2    = 3.517863e-39 GeV^-2
   relative error        = 0.00e+00  (should be ~0)
 
-dlnG/dpsi (analytic)    = -0.645568
-dlnG/dpsi (numerical)   = -0.645568
+dlnG/dpsi (analytic)    = -0.645571
+dlnG/dpsi (numerical)   = -0.645569
   agreement             = True
 
 G(psi) table:
      psi         G(psi)   G/G_global    delta_G/G
 --------------------------------------------------
- 0.0e+00   6.708810e-39     1.000000     0.000000
- 1.0e-09   6.708810e-39     1.000000    -0.000000
- 1.0e-06   6.708805e-39     0.999999    -0.000001
- 1.0e-03   6.704480e-39     0.999355    -0.000645
- 1.0e-02   6.665639e-39     0.993565    -0.006435
- 5.0e-02   6.495718e-39     0.968237    -0.031763
- 1.0e-01   6.289394e-39     0.937483    -0.062517
- 1.5e-01   6.089624e-39     0.907706    -0.092294
- 2.0e-01   5.896199e-39     0.878874    -0.121126
- 3.0e-01   5.527586e-39     0.823929    -0.176071
- 5.0e-01   4.858053e-39     0.724130    -0.275870
- 7.0e-01   4.269617e-39     0.636419    -0.363581
- 9.0e-01   3.752456e-39     0.559333    -0.440667
- 1.0e+00   3.517863e-39     0.524365    -0.475635
+ 0.0e+00   6.708830e-39     1.000000     0.000000
+ 1.0e-09   6.708830e-39     1.000000    -0.000000
+ 1.0e-06   6.708826e-39     0.999999    -0.000001
+ 1.0e-03   6.704500e-39     0.999355    -0.000645
+ 1.0e-02   6.665659e-39     0.993565    -0.006435
+ 5.0e-02   6.495737e-39     0.968237    -0.031763
+ 1.0e-01   6.289411e-39     0.937483    -0.062517
+ 1.5e-01   6.089640e-39     0.907705    -0.092295
+ 2.0e-01   5.896214e-39     0.878874    -0.121126
+ 3.0e-01   5.527598e-39     0.823929    -0.176071
+ 5.0e-01   4.858060e-39     0.724129    -0.275871
+ 7.0e-01   4.269621e-39     0.636418    -0.363582
+ 9.0e-01   3.752457e-39     0.559331    -0.440669
+ 1.0e+00   3.517863e-39     0.524363    -0.475637
 
 Leading-order: delta_G/G = dlnG/dpsi * psi = -0.6456 * psi
   Earth (psi~7e-10):   delta_G/G ~ -4.52e-10 = -0.45 ppb
@@ -732,13 +730,13 @@ B. Astrophysical psi values and G corrections
 psi = GM/(r*c^2) = gravitational potential / c^2
 
                    Object    M/M_sun       R (km)          psi   G/G_global     delta%
--------------------------------------------------------------------------------------
+----------
             Earth surface       0.00       6371.0   6.9587e-10     1.000000    -0.0000
               Sun surface       1.00     695700.0   2.1231e-06     0.999999    -0.0001
      White dwarf (1 Msun)       1.00       5000.0   2.9541e-04     0.999809    -0.0191
-  Neutron star (1.4 Msun)       1.40         12.0   1.7235e-01     0.894704   -10.5296
-     Stellar BH (10 Msun)      10.00         29.5   5.0070e-01     0.723803   -27.6197
-          SMBH (4e6 Msun) 4001187.14   11800000.0   5.0070e-01     0.723803   -27.6197
+  Neutron star (1.4 Msun)       1.40         12.0   1.7235e-01     0.894703   -10.5297
+     Stellar BH (10 Msun)      10.00         29.5   5.0070e-01     0.723802   -27.6198
+          SMBH (4e6 Msun) 4001187.14   11800000.0   5.0070e-01     0.723802   -27.6198
 
 Note: psi for compact objects can exceed 0.1, producing
 measurable G corrections (>1%). Neutron stars and black holes
@@ -794,8 +792,8 @@ Derivation of tau(psi) from the Delta ruler:
 
 Verification at psi = 0.3:
   E_ref = 2.5109e+07 GeV
-  tau(formula) = 53.366542
-  tau(ruler)   = 53.366542
+  tau(formula) = 53.366540
+  tau(ruler)   = 53.366540
   match: True
   G(psi=0.3) = 5.5276e-39 GeV^-2
 
@@ -805,19 +803,19 @@ C. Nonlinear point-mass potential
 
 ODE: d psi/ds = -exp(g1*psi)/s^2  (G/G0 = exp(g1*psi))
 Exact: psi(s) = -(1/g1) ln(1 - g1/s)
-g1 = dlnG/dpsi = -0.645568
+g1 = dlnG/dpsi = -0.645571
 Newtonian: psi = 1/s
 
 Radial profile (dimensionless, s = r / r_g, r_g = G_global*M):
    s=r/r_g        u=psi     u_Newton      u/u_N   G/G_global      g/g_N
 ----------------------------------------------------------------------
-     1.696 4.995730e-01 5.895373e-01   0.847399     0.724330   0.724330
-     1.837 4.664367e-01 5.442756e-01   0.856986     0.739992   0.739992
-     1.990 4.352020e-01 5.024888e-01   0.866093     0.755064   0.755064
-     2.214 3.963864e-01 4.517205e-01   0.877504     0.774224   0.774224
-     2.529 3.521652e-01 3.954113e-01   0.890630     0.796645   0.796645
-     3.047 2.976504e-01 3.281708e-01   0.906998     0.825180   0.825180
-  1319.856 7.574734e-04 7.576586e-04   0.999756     0.999511   0.999511
+     1.696 4.995730e-01 5.895378e-01   0.847398     0.724329   0.724329
+     1.837 4.664367e-01 5.442760e-01   0.856986     0.739991   0.739991
+     1.990 4.352021e-01 5.024892e-01   0.866092     0.755063   0.755063
+     2.214 3.963865e-01 4.517208e-01   0.877503     0.774223   0.774223
+     2.529 3.521653e-01 3.954116e-01   0.890630     0.796644   0.796644
+     3.047 2.976505e-01 3.281711e-01   0.906998     0.825179   0.825179
+  1319.855 7.574737e-04 7.576589e-04   0.999756     0.999511   0.999511
 
 Key radii:
 --------------------------------------------------
@@ -827,8 +825,8 @@ psi = 0.10  at s = 9.68 r_g  (G/G_global = 0.937483)
 At Newtonian Schwarzschild radius (s = 2):
   psi_Newton = 0.5000
   psi_CGM    = 0.4334
-  G/G_global = 0.755964
-  g/g_Newton = 0.755964
+  G/G_global = 0.755963
+  g/g_Newton = 0.755963
 
 =========
 D. Modified escape velocity and critical radius
@@ -839,7 +837,7 @@ Escape velocity profile (v_esc / c):
 ---------------------------------------------
      1.696   1.000000   0.999573   0.999573
      3.301   0.778429   0.743934   0.955687
-     6.422   0.558042   0.544734   0.976153
+     6.422   0.558042   0.544734   0.976152
     12.497   0.400051   0.395024   0.987435
     24.317   0.286789   0.284913   0.993457
     47.316   0.205594   0.204898   0.996614
@@ -847,16 +845,16 @@ Escape velocity profile (v_esc / c):
    179.149   0.105659   0.105564   0.999101
    348.593   0.075745   0.075710   0.999537
    678.301   0.054300   0.054288   0.999762
-  1319.856   0.038927   0.038922   0.999878
-  2568.208   0.027906   0.027904   0.999937
-  4997.283   0.020005   0.020005   0.999968
-  9723.839   0.014342   0.014341   0.999983
- 18920.888   0.010281   0.010281   0.999991
- 36816.737   0.007370   0.007370   0.999996
- 71638.925   0.005284   0.005284   0.999998
-139396.810   0.003788   0.003788   0.999999
-271241.793   0.002715   0.002715   0.999999
-527789.054   0.001947   0.001947   1.000000
+  1319.855   0.038927   0.038922   0.999878
+  2568.207   0.027906   0.027904   0.999937
+  4997.282   0.020005   0.020005   0.999968
+  9723.836   0.014342   0.014341   0.999983
+ 18920.884   0.010281   0.010281   0.999991
+ 36816.729   0.007370   0.007370   0.999996
+ 71638.914   0.005284   0.005284   0.999998
+139396.793   0.003788   0.003788   0.999999
+271241.772   0.002715   0.002715   0.999999
+527789.033   0.001947   0.001947   1.000000
 
 CGM horizon (v_esc = c, 2*u = 1):
   Newtonian (GR):  s = 2.000 r_g
@@ -871,7 +869,7 @@ Coupling feedback (dlnG/dpsi < 0):
 
 Maximum psi in point-mass solution: 0.499573
   at s = 1.6962 r_g
-  G/G_global at max = 0.724330
+  G/G_global at max = 0.724329
 
 =========
 E. Perihelion precession (weak-field geodesic)
@@ -892,19 +890,19 @@ E. Perihelion precession (weak-field geodesic)
 T. Analytic continuum audit (point-mass exterior)
 =========
 
-g1 = dlnG/dpsi = -0.645568
+g1 = dlnG/dpsi = -0.645571
 
 Cross-check vs legacy numerical ODE samples:
            s        psi_ana        psi_ode     ok
   ------------------------------------------------
-       1.746       0.487357       0.487453    yes
-       2.000       0.433322       0.433322    yes
+       1.746       0.487356       0.487453    yes
+       2.000       0.433321       0.433322    yes
        5.000       0.188102       0.188100    yes
       10.000       0.096905       0.096900    yes
      100.000       0.009968       0.010000    yes
     1000.000       0.001000       0.001000    yes
 
-Horizon s_h = 1.6946 r_g  (psi = 1/2)
+Horizon s_h = 1.6945 r_g  (psi = 1/2)
 Photon: psi_ph = 0.345257, s_ph = 2.5856 r_g, b/r_g = 4.6477
 
 Shadow (EHT priors):
@@ -912,7 +910,7 @@ Shadow (EHT priors):
   Sgr A*: 45.3 uas  (EHT 51.8 +/- 2.3)
 
 PPN / perihelion context:
-  Leading beta = 1 - g1/2 = 1.322784
+  Leading beta = 1 - g1/2 = 1.322785
   Mercury CGM/GR = 0.9999999973  (section E)
   Naive (4-beta)/3 at beta=1.305 would be 0.8983 (wrong at Mercury)
   Standard vacuum PPN does not map without full metric + geodesics.
@@ -934,10 +932,10 @@ Orbital period corrections
 Orbital corrections at key radii:
               Object    s=r/r_g        psi      T/T_N      v/v_N
 -------------------------------------------------------
-        Earth (1 AU) 101312431.9 9.8705e-09   1.000000   1.000000
-             Mercury 39217934.0 2.5499e-08   1.000000   1.000000
+        Earth (1 AU) 101312121.4 9.8705e-09   1.000000   1.000000
+             Mercury 39217813.8 2.5499e-08   1.000000   1.000000
       NS close orbit       11.6 8.2178e-02   1.026881   0.973823
-             BH ISCO        6.0 1.5609e-01   1.051673   0.950866
+             BH ISCO        6.0 1.5609e-01   1.051674   0.950865
 
 Orbital period correction: T = T_Newton / sqrt(G/G_global)
 For psi << 1: delta_T/T ~ -0.5 * dlnG/dpsi * psi
@@ -969,10 +967,10 @@ M. Effective CGM metric from nonlinear potential
 
      s=r/r_g        psi       f(r)        1/f
   --------------------------------------------
-       1.696   0.499573   0.000854  1171.0680
+       1.696   0.499573   0.000854  1171.0689
       47.316   0.020992   0.958017     1.0438
-    1319.856   0.000757   0.998485     1.0015
-   36816.737   0.000027   0.999946     1.0001
+    1319.855   0.000757   0.998485     1.0015
+   36816.729   0.000027   0.999946     1.0001
   1000000.000   0.000001   0.999998     1.0000
 
   Horizon: s = 1.6945 r_g  (GR: 2.000)
@@ -1029,32 +1027,32 @@ O. Tau evolution law: STF accumulation vs algebraic tau
   STF (kernel ladder):      d tau / d psi = -tau_G
   => integrated STF = tau_G*(1-psi), agreeing with algebraic law.
 
-  tau_G = 76.237917
+  tau_G = 76.237914
   2*Delta*n_vc = 76.883484  (conjugacy depth)
   ratio tau_G / (2*Delta*n_vc) = 0.991603
-  2*Delta*n_vc - tau_G = 0.645568  (identity: -dlnG/dpsi = 0.645568)
+  2*Delta*n_vc - tau_G = 0.645571  (identity: -dlnG/dpsi = 0.645571)
 
   Integrated STF along radial psi profile:
-    max |tau_stf - tau_alg| / tau_G = 1.86e-15  (machine precision)
+    max |tau_stf - tau_alg| / tau_G = 1.68e-15  (machine precision)
 
          s        psi  tau_algebraic        tau_STF
   --------------------------------------------------
-      1.70   0.499573      38.151509      38.151509
-     47.32   0.020992      74.637558      74.637558
-   1319.86   0.000757      76.180168      76.180168
-  36816.74   0.000027      76.235846      76.235846
-  1000000.00   0.000001      76.237840      76.237840
+      1.70   0.499573      38.151507      38.151507
+     47.32   0.020992      74.637554      74.637554
+   1319.86   0.000757      76.180165      76.180165
+  36816.73   0.000027      76.235843      76.235843
+  1000000.00   0.000001      76.237837      76.237837
 
 =========
 P. Full self-consistency audit
 =========
 
-  [OK] dpsi/ds closure residual (rel) = 7.41e-15
+  [OK] dpsi/ds closure residual (rel) = 6.75e-15
   [OK] max psi = 0.4996 (< 0.5, no clip artifact)
   [OK] horizon s=1.695 < photon s=2.586
   [OK] shadow units: 39.7 muas (not 0)
   [OK] tau law at mid-r: -tau_G*du/ds=4.3743e-05, (-tau_G)*du/ds from d tau/d psi
-  [OK] G_global vs G_meas: -0.074 ppm
+  [OK] G_global vs G_meas: +2.991 ppm
 
   Overall: PASS
 
@@ -1103,14 +1101,14 @@ PROOF: E_ref is a ruler quantile, not a centroid
   Centroid E_mean = sum E_k w_k is dominated by the UV tail on the ladder.
 
 KEY: G(psi) = G0 * exp(g1*psi) exactly (d^2 ln G / d psi^2 = 0)
-  g1 = tau_G + 2*eta = 76.237917 + -76.883484 = -0.645568
+  g1 = tau_G + 2*eta = 76.237914 + -76.883484 = -0.645571
 
 SELF-CONSISTENCY:
-  psi=0.0: G(formula)=6.708810e-39, G(exp)=6.708810e-39, match=True
-  psi=0.1: G(formula)=6.289394e-39, G(exp)=6.289394e-39, match=True
-  psi=0.3: G(formula)=5.527586e-39, G(exp)=5.527586e-39, match=True
-  psi=0.5: G(formula)=4.858053e-39, G(exp)=4.858053e-39, match=True
-  psi=0.7: G(formula)=4.269617e-39, G(exp)=4.269617e-39, match=True
+  psi=0.0: G(formula)=6.708830e-39, G(exp)=6.708830e-39, match=True
+  psi=0.1: G(formula)=6.289411e-39, G(exp)=6.289411e-39, match=True
+  psi=0.3: G(formula)=5.527598e-39, G(exp)=5.527598e-39, match=True
+  psi=0.5: G(formula)=4.858060e-39, G(exp)=4.858060e-39, match=True
+  psi=0.7: G(formula)=4.269621e-39, G(exp)=4.269621e-39, match=True
   psi=1.0: G(formula)=3.517863e-39, G(exp)=3.517863e-39, match=True
 
 =========
@@ -1138,10 +1136,10 @@ G. alpha*zeta and G(psi) chain
 
 Chain to weak-field G_global (electroweak anchor):
   G_global = G_kernel * exp(-tau_G) / v^2
-           = 6.708810e-39 GeV^-2
-  vs G_meas = 6.708810e-39 GeV^-2  (-0.074 ppm)
-  alpha_G(v) = G_global * v^2 = 4.067168e-34
-  satisfies alpha*zeta at kernel level (0.074 ppm in G)
+           = 6.708830e-39 GeV^-2
+  vs G_meas = 6.708810e-39 GeV^-2  (+2.991 ppm)
+  alpha_G(v) = G_global * v^2 = 4.067180e-34
+  kernel alpha*zeta identity: True; G residual +2.991 ppm
 
 Nonlinear extension (reference scale only; alpha*zeta unchanged):
   G(x) = G_kernel * exp(-tau(x)) / E_ref(x)^2
@@ -1153,9 +1151,9 @@ Nonlinear extension (reference scale only; alpha*zeta unchanged):
      Earth     1.000000  -4.5190e-10
        Sun     0.999999  -1.3557e-06
         NS     0.896061  -1.0394e-01
-   BH hor.     0.724130  -2.7587e-01
+   BH hor.     0.724129  -2.7587e-01
 
-  zeta_from_CODATA / zeta_geom - 1: 3.193971e-04
+  zeta_from_CODATA / zeta_geom - 1: 3.194315e-04
 
 =========
 H. Complete nonlinear CGM gravity system
@@ -1187,12 +1185,12 @@ Position-dependent coupling:
 Constants (all kernel-derived, no free parameters):
   Q_G = 12.566371
   G_kernel = pi/6 = 0.523598775598
-  tau_G = 76.2379166386
-  c4 = -7/4
-  dlnG/dpsi = -0.645568
+  tau_G = 76.2379135736
+  tau_trace = -2.4534760684e-05  (c4 = -7/4)
+  dlnG/dpsi = -0.645571
 
 Limiting behavior:
-  psi -> 0: G -> G_global = 6.70881e-39 GeV^-2  (0.074 ppm)
+  psi -> 0: G -> G_global = 6.70883e-39 GeV^-2  (+2.991 ppm vs G_meas)
   psi -> 1: G -> G_kernel/E_CS^2 = 3.51786e-39 GeV^-2  (52.4% of G_global)
   G is monotonically decreasing in psi (negative feedback)
 
@@ -1206,12 +1204,12 @@ Sample G reductions:
 ANALYSIS COMPLETE
 =========
 
-exit=0  duration=0.95s
+exit=0  duration=1.09s
 
 ######## hqvm_gravity_analysis_5.py ########
 
 CGM gravity analysis 5: field derivations
-tau_G = 76.237917,  n_vc = 1857.13,  2*Delta*n_vc = 76.883484
+tau_G = 76.237914,  n_vc = 1857.13,  2*Delta*n_vc = 76.883484
 
 =========
 A. E_ref(psi) (Delta ruler quantile)
@@ -1227,17 +1225,16 @@ B. STF accumulation vs algebraic tau
 
   Algebraic (Delta ruler):  tau(psi) = tau_G * (1 - psi)
   STF (kernel ladder):      d tau/d psi = -2*Delta*n_vc = -tau_G
-  Check: tau_G = 76.237917, 2*Delta*n_vc = 76.883484
-        ratio = 0.991603  (slip: -dlnG/dpsi = 0.645568)
+  Check: tau_G = 76.237914, 2*Delta*n_vc = 76.883484
+        ratio = 0.991603  (slip: -dlnG/dpsi = 0.645571)
 
-  Integrated STF along psi(s) profile: max |tau_stf-tau_alg|/tau_G = 1.86e-15
+  Integrated STF along psi(s) profile: max |tau_stf-tau_alg|/tau_G = 1.68e-15
 
-  tau_G              = 76.237917
+  tau_G              = 76.237914
   2*Delta*n_vc       = 76.883484
   ratio              = 0.991603
-  2*Dn - tau_G       = 0.645568
-  tau_G (no c4)      = 76.237941
-  tau_G - leading    = -0.000025
+  2*Dn - tau_G       = 0.645571
+  tau_trace (c4)     = -2.453476e-05
 
 =========
 C. Energy conservation (static spherical)
@@ -1252,9 +1249,9 @@ C. Energy conservation (static spherical)
   Gauss check (dimensionless s=r/r_g, unit effective mass):
          s     G/G_gl flux 4pi*s^2*g   4pi*G/G_gl
   ------------------------------------------------
-       2.0   0.755964       9.499725     9.499725
-       5.0   0.885634      11.129208    11.129208
-      10.0   0.939349      11.804207    11.804207
+       2.0   0.755963       9.499714     9.499714
+       5.0   0.885634      11.129202    11.129202
+      10.0   0.939349      11.804203    11.804203
      100.0   0.993585      12.485761    12.485761
     1000.0   0.999355      12.558262    12.558262
 
@@ -1317,8 +1314,8 @@ F. Gravitational radiation with G(psi)
 
   Binary NS proxy: M=1.4 Msun each, r_orb=10 km
     psi_source = 0.4135
-    G(psi)/G_global = 0.765740
-    P_rad ratio (CGM/Newton) = 0.765740
+    G(psi)/G_global = 0.765739
+    P_rad ratio (CGM/Newton) = 0.765739
     (~23.4% reduction in luminosity)
 
 =========
@@ -1367,12 +1364,12 @@ H. Neutron star interior with G(x)
         0.30     0.0000   0.000208   0.999866   0.998973
         1.80     0.0069   0.007879   0.994926   0.952213
         3.32     0.0418   0.025611   0.983602   0.844125
-        4.84     0.1223   0.050593   0.967867   0.692756
+        4.84     0.1223   0.050593   0.967866   0.692756
         6.36     0.2562   0.079173   0.950173   0.521708
-        7.88     0.4392   0.107541   0.932930   0.355164
+        7.88     0.4392   0.107541   0.932930   0.355165
         9.40     0.6548   0.132263   0.918159   0.212960
        10.92     0.8764   0.150590   0.907360   0.107065
-       12.44     1.0716   0.160579   0.901528   0.040355
+       12.44     1.0716   0.160579   0.901527   0.040355
        13.96     1.2068   0.161093   0.901228   0.007879
        15.36     1.2530   0.152759   0.906090   0.000002
 
@@ -1392,7 +1389,7 @@ J. Modified Gauss law verification
     s=      1.70: modified_flux = 12.56637061  (4pi = 12.56637061)
     s=     47.32: modified_flux = 12.56637061  (4pi = 12.56637061)
     s=   1319.86: modified_flux = 12.56637061  (4pi = 12.56637061)
-    s=  36816.74: modified_flux = 12.56637061  (4pi = 12.56637061)
+    s=  36816.73: modified_flux = 12.56637061  (4pi = 12.56637061)
     s=1000000.00: modified_flux = 12.56637061  (4pi = 12.56637061)
   max relative deviation from 4*pi: 2.83e-16
 
@@ -1401,10 +1398,10 @@ L. Kernel cycle constants (N_cycles, K)
 =========
 
   tau_cycle/Delta = 7591/7392  (common: 7591/7392)
-  tau_cycle       = 0.0212568065
-  tau_G (full)    = 76.2379166386
-  N_cycles        = 3586.517880
-  N * tau_cycle   = 76.2379166386
+  tau_cycle       = 0.0212567979
+  tau_G (full)    = 76.2379135736
+  N_cycles        = 3586.519193
+  N * tau_cycle   = 76.2379135736
 
   anisotropy/Delta (STF)     = 5/99
   K = transport/anisotropy   = 22773/1120
@@ -1416,9 +1413,9 @@ M. tau_G vs Delta ruler
 =========
 
   2*Delta*n_vc = 76.8834843608
-  tau_G        = 76.2379166386
-  gap          = 0.6455677222
-  dlnG/dpsi    = -0.6455677222
+  tau_G        = 76.2379135736
+  gap          = 0.6455707873
+  dlnG/dpsi    = -0.6455707873
   gap + dlnG   = 0.00e+00
 
   n_vc = ln(E_CS/v)/Delta  =>  2*Delta*n_vc = -2*ln(v/E_CS) = -2*eta
@@ -1468,15 +1465,15 @@ Step 6: Total alpha(z) oscillation amplitude
 Step 7: Sample alpha(z) predictions
        z    ln(1+z)    phase       dalpha     alpha_pred
   ------------------------------------------------------
-    0.01     0.0100   0.3649    +3.60e-04   0.0073023122
-    0.05     0.0488   0.4994    +1.67e-06   0.0072996955
-    0.10     0.0953   0.2312    +4.77e-04   0.0073031619
-    0.50     0.4055   0.1168    +3.21e-04   0.0073020288
-    1.00     0.6931   0.4026    +2.76e-04   0.0073016949
-    2.00     1.0986   0.5194    -5.84e-05   0.0072992572
-    3.00     1.3863   0.8053    -4.51e-04   0.0072963896
-    5.00     1.7918   0.9221    -2.26e-04   0.0072980355
-   10.00     2.3979   0.8999    -2.82e-04   0.0072976231
+    0.01     0.0100   0.3649    +3.60e-04   0.0073023124
+    0.05     0.0488   0.4995    +1.65e-06   0.0072996956
+    0.10     0.0953   0.2312    +4.77e-04   0.0073031622
+    0.50     0.4055   0.1168    +3.21e-04   0.0073020300
+    1.00     0.6931   0.4027    +2.75e-04   0.0073016935
+    2.00     1.0986   0.5196    -5.88e-05   0.0072992542
+    3.00     1.3863   0.8055    -4.51e-04   0.0072963913
+    5.00     1.7918   0.9223    -2.25e-04   0.0072980406
+   10.00     2.3979   0.9003    -2.81e-04   0.0072976292
 
 FALSIFICATION: survey spanning >= 1 period in ln(1+z)
   (Delta z from 0 to 0.0209) with no oscillation at ~4.8e-04
@@ -1538,10 +1535,10 @@ Q. Full Einstein tensor
 Step 3: Numerical components (dimensionless scaling)
            s          psi     G_tt s^2     G_rr s^2       G_th s rho_eff/rho_N
   ----------------------------------------------------------------
-         1.7 4.995730e-01  -4.3065e-05   1.8296e+02  -1.4713e+05      -0.8065
-        47.3 2.099164e-02  -1.2118e-07   9.0036e-04  -3.4336e-01      -0.9910
-      1319.9 7.574734e-04  -2.1227e-13   1.1484e-06  -3.3860e-01      -0.9997
-     36816.7 2.716132e-05  -3.5134e-19   1.4755e-09  -3.3843e-01      -1.0000
+         1.7 4.995730e-01  -4.3066e-05   1.8296e+02  -1.4713e+05      -0.8065
+        47.3 2.099165e-02  -1.2118e-07   9.0036e-04  -3.4336e-01      -0.9910
+      1319.9 7.574737e-04  -2.1227e-13   1.1484e-06  -3.3860e-01      -0.9997
+     36816.7 2.716133e-05  -3.5134e-19   1.4755e-09  -3.3843e-01      -1.0000
    1000000.0 9.999997e-07  -6.4557e-25   2.0000e-12   1.0000e-12          nan
 
 Step 4: Stress-energy decomposition
@@ -1562,17 +1559,17 @@ R. PPN parameters and observables (analytical)
 
 Step 1: G(psi) is exactly exponential
   G(psi) = G0 * exp(g1*psi)
-  g1 = dlnG/dpsi = tau_G + 2*eta = -0.645568
+  g1 = dlnG/dpsi = tau_G + 2*eta = -0.645571
   d^2 ln G / d psi^2 = 0
 
 Step 2: Perturbative expansion of psi(s)
   psi(s) = a1/s + a2/s^2 + a3/s^3 + ...  with a_n = g1^(n-1)/n
-  a1=1, a2=-0.322784, a3=0.138919, a4=-0.067261, a5=0.034737
+  a1=1, a2=-0.322785, a3=0.138921, a4=-0.067262, a5=0.034738
 
 Step 3: Verification against analytic profile
            s       psi_grid       psi_pert      rel_err
   ------------------------------------------------------
-         100   9.968504e-03   9.967860e-03     6.46e-05
+         100   9.968504e-03   9.967860e-03     6.47e-05
          500   1.999061e-03   1.998710e-03     1.76e-04
         1000   9.998505e-04   9.996774e-04     1.73e-04
         5000   1.999899e-04   1.999871e-04     1.40e-05
@@ -1580,7 +1577,7 @@ Step 3: Verification against analytic profile
 
 Step 4: PPN parameters
   gamma = 1 (exact, static spherical metric)
-  beta (leading analytical) = 1 - g1/2 = 1.322784
+  beta (leading analytical) = 1 - g1/2 = 1.322785
   Weak-field fit to Schwarzschild coords is not standard isotropic PPN beta.
   Solar-system geodesics: section E (~GR at Mercury).
 
@@ -1604,9 +1601,9 @@ Step 7: Nordtvedt effect
 
 Step 8: PPN summary
   gamma = 1
-  beta  = 1.322784  (leading: 1 - g1/2)
+  beta  = 1.322785  (leading: 1 - g1/2)
   eta_N = 0 (SEP)
-  xi_1  = dlnG/dpsi = -0.645568
+  xi_1  = dlnG/dpsi = -0.645571
   Solar System conditions satisfied; strong-field tests at psi > 0.01
 
 =========
@@ -1642,7 +1639,7 @@ Step 6: Consistency with analytic psi(s)
 
 Step 7: Final Lagrangian form
   L = [1/(16piG0)] sqrt(-g) R exp(-g1*psi) + sqrt(-g) L_m
-  g1 = -0.645568
+  g1 = -0.645571
   Static limit -> Poisson; full theory = coupled Einstein + psi
 
 Step 8: vs Brans-Dicke
@@ -1662,16 +1659,16 @@ Step 1: Einstein tensor for f = 1 - 2*psi(s)
 Step 2: Components from psi(s) profile
   Check: G_rr = G_tt / f^2 (metric identity)
     Mean ratio: 1.0000000000  (expect 1)
-    Max |ratio - 1|: 3.33e-16
+    Max |ratio - 1|: 4.44e-16
 
 Step 3: Effective stress-energy (8*pi*G(psi) units, x r_g^2)
            s          psi      rho_eff        P_rad        P_tan      P/rho
   --------------------------------------------------------------
-         1.7 4.995730e-01   2.3657e-06   3.2443e+00   8.0821e+03 1371400.2668
-         8.8 1.091790e-01   3.2101e-06   5.2542e-06   4.3399e-05     1.6368
-        47.3 2.099164e-02   4.8874e-09   5.3252e-09   1.5071e-07     1.0896
-      1319.9 7.574734e-04   8.4502e-15   8.4759e-15   2.1099e-12     1.0030
-     36816.7 2.716132e-05   1.3980e-20   1.3981e-20  -4.9203e-15     1.0001
+         1.7 4.995730e-01   2.3657e-06   3.2443e+00   8.0821e+03 1371402.2541
+         8.8 1.091790e-01   3.2102e-06   5.2542e-06   4.3399e-05     1.6368
+        47.3 2.099165e-02   4.8874e-09   5.3252e-09   1.5071e-07     1.0896
+      1319.9 7.574737e-04   8.4503e-15   8.4759e-15   2.1099e-12     1.0030
+     36816.7 2.716133e-05   1.3980e-20   1.3981e-20  -4.9203e-15     1.0001
    1000000.0 9.999997e-07   2.5686e-26   2.5686e-26  -3.9789e-14     1.0000
 
 Step 4: T_munu = T_m + T_G (point-mass exterior: T_m = 0)
@@ -1684,7 +1681,7 @@ Step 5: Modified Bianchi identity
 
 Step 6: Action (scalar-tensor / Brans-Dicke form)
   G(psi) = G0*exp(g1*psi);  phi = 1/G(psi) = phi0*exp(-g1*psi)
-  g1 = dlnG/dpsi = -0.645568
+  g1 = dlnG/dpsi = -0.645571
   S = (1/16pi) int R/G(psi) sqrt(-g) d^4x
     + (1/16piG0) int g1^2 exp(g1*psi) (grad psi)^2 sqrt(-g) d^4x
     - int V(psi) sqrt(-g) d^4x + S_matter
@@ -1753,19 +1750,19 @@ Y. Anisotropic equilibrium verification
   Equilibrium: G_rr = G_tt/f^2 (not barotropic TOV)
 
 Step 1: Verify G_rr = G_tt/f^2
-  Mean |G_rr/(G_tt/f^2) - 1| = 8.25e-17
+  Mean |G_rr/(G_tt/f^2) - 1| = 8.98e-17
   Max  |G_rr/(G_tt/f^2) - 1| = 4.44e-16
   VERIFIED to machine precision
 
 Step 2: Effective stress components
            s          psi        rho_eff          P_rad          P_tan    P_t/P_r
   --------------------------------------------------------------------
-           2   4.3336e-01     3.6904e-03    -2.0773e-01     1.1280e+02  -542.9905
-           5   1.8813e-01     5.4909e-04    -1.4114e-03     1.4277e+01 -10115.7105
-          10   9.6920e-02     4.8126e-05    -7.4052e-05     1.0750e+01 -145172.0239
-          50   1.9873e-02     9.8219e-08    -1.0652e-07     2.3665e+01 -222167163.5452
-         100   9.9685e-03     6.4000e-09    -6.6631e-09     2.2561e+01 -3385948789.4771
-        1000   9.9985e-04     9.8961e-13    -9.9358e-13     1.0522e+01 -10589950216294.5059
+           2   4.3336e-01     3.6904e-03    -2.0773e-01     1.1279e+02  -542.9689
+           5   1.8813e-01     5.4910e-04    -1.4114e-03     1.4276e+01 -10114.9718
+          10   9.6920e-02     4.8127e-05    -7.4053e-05     1.0750e+01 -145161.1179
+          50   1.9873e-02     9.8219e-08    -1.0652e-07     2.3664e+01 -222160708.0059
+         100   9.9685e-03     6.4001e-09    -6.6631e-09     2.2560e+01 -3385848475.4704
+        1000   9.9985e-04     9.8961e-13    -9.9358e-13     1.0522e+01 -10589567998671.7227
 
 Step 3: Modified Bianchi identity
   div T^mu_nu = -(d_mu G / G) T^mu_nu
@@ -1775,7 +1772,7 @@ Step 3: Modified Bianchi identity
            5   1.8810e-01    -3.5426e-02     1.2523e-05
           10   9.6905e-02    -9.3936e-03     2.9029e-07
           50   1.9872e-02    -3.9490e-04     2.4857e-11
-         100   9.9679e-03    -9.9359e-05     4.0236e-13
+         100   9.9679e-03    -9.9359e-05     4.0237e-13
 
   Exchange negligible in weak field; significant near compact objects.
 
@@ -1793,12 +1790,12 @@ KERNEL (exact rationals):
   c4=-7/4
 
 CONTINUUM:
-  tau_G=76.237917, G_global predicted ~0.074 ppm vs CODATA
+  tau_G=76.237914, G_global vs G_meas ~+2.991 ppm
   Q_G=4pi, 8pi=2*Q_G
 
 NONLINEAR:
   E_ref(psi)=E_CS*(v/E_CS)^(1-psi)  [3-premise proof, analysis_4 S]
-  G(psi)=G0*exp(g1*psi), g1=-0.645568
+  G(psi)=G0*exp(g1*psi), g1=-0.645571
   tau(psi)=tau_G*(1-psi)  [STF machine precision]
 
 VARIATIONAL / EFE:
@@ -1833,14 +1830,14 @@ N. Spin-sector shadow (wavefunction)
 DERIVATIONS COMPLETE
 =========
 
-exit=0  duration=2.60s
+exit=0  duration=2.58s
 
 ######## hqvm_gravity_analysis_6.py ########
 
 CGM gravity analysis 6: Antimatter, GW, Virial, Self-energy
-Delta = 0.020699553913, rho = 0.979300446087
-g1 = -0.645568, tau_G = 76.2379166386
-s_h = 1.6946 r_g, s_ph = 2.5856 r_g, b/r_g = 4.6477
+Delta = 0.020699545503, rho = 0.979300454497
+g1 = -0.645571, tau_G = 76.2379135736
+s_h = 1.6945 r_g, s_ph = 2.5856 r_g, b/r_g = 4.6477
 
 ========= A. Antimatter gravitational interaction =========
 
@@ -1896,7 +1893,7 @@ A.4  Holonomy path H_spin (micro_ref=0)
       0.0100    5.333333e-06        0.993565
       0.0500    1.333333e-04        0.968237
       0.1000    5.333333e-04        0.937483
-      0.1500    1.200000e-03        0.907706
+      0.1500    1.200000e-03        0.907705
       0.2000    2.133333e-03        0.878874
       0.3000    4.800000e-03        0.823929
 
@@ -1942,7 +1939,7 @@ B.0  Quadrupole shell spectrum and 8-byte Z2 holonomy
 B.2  Inspiral phasing
 ---------------------
   Phase correction: delta_Phi/Phi_GR ~ 1 + (5*g1/8)*(v/c)^2
-  g1 = -0.645568
+  g1 = -0.645571
 
          v/c   delta_Phi/Phi    % correction
         0.10       -0.004035           -0.40%
@@ -1958,13 +1955,13 @@ B.3  Tortoise coordinate, potential, echoes
 
            s            f(s)          r*/r_g
       1.7115      0.00847353          4.5808
-      1.7793      0.04096766          7.8402
-      1.8640      0.07868701          9.2999
-      2.0000      0.13335660         10.6052
-      2.5856      0.30948642         13.3174
-      3.0000      0.39619094         14.4914
-      5.0000      0.62379516         18.3416
-     10.0000      0.80619063         25.1798
+      1.7793      0.04096763          7.8402
+      1.8640      0.07868696          9.2999
+      2.0000      0.13335713         10.6052
+      2.5856      0.30948631         13.3174
+      3.0000      0.39619121         14.4914
+      5.0000      0.62379526         18.3416
+     10.0000      0.80619066         25.1798
      50.0000      0.96025603         68.6980
 
   r*(s_ph)/r_g = 13.3174
@@ -1981,7 +1978,7 @@ B.3  Tortoise coordinate, potential, echoes
   eps=0.010: Delta_r*/r_g=8.7367  Delta_t(10 Msun)=0.8591 ms
   eps=0.050: Delta_r*/r_g=5.4772  Delta_t(10 Msun)=0.5386 ms
   eps=0.100: Delta_r*/r_g=4.0175  Delta_t(10 Msun)=0.3950 ms
-  G(psi)/G0 at horizon (psi=1/2): 0.724130
+  G(psi)/G0 at horizon (psi=1/2): 0.724129
 
 
 B.4  Ringdown (Poschl-Teller estimate, ell=2, n=0)
@@ -1993,7 +1990,7 @@ B.4  Ringdown (Poschl-Teller estimate, ell=2, n=0)
   Pöschl-Teller n=0 (omega*M, c=1; r_g=2M => omega*r_g = 2*omega*M):
                            omega_R          omega_I
   ------------------------------------------------
-  CGM (PT)                0.420384         0.094205
+  CGM (PT)                0.420387         0.094197
   GR (PT)                 0.378271         0.090541
   GR (exact)              0.373670         0.088960
 
@@ -2021,7 +2018,7 @@ C.4  Exterior integral theorem (I = 1/2)
 
         g1           s_h     I (exact)   I (numeric)
    -0.5000        1.7604  0.5000000000  0.4998915317
-   -0.6456        1.6946  0.5000000000  0.4998945448
+   -0.6456        1.6945  0.5000000000  0.4998945448
    -1.0000        1.5415  0.5000000000  0.4999013149
    -2.0000        1.1640  0.5000000000  0.4999167936
   All sampled g1: I = 1/2 = True
@@ -2031,10 +2028,10 @@ C.4  Exterior integral theorem (I = 1/2)
         0.5000      2.000000           n/a           n/a
         1.0000      1.000000           n/a           n/a
         1.5000      0.666667           n/a           n/a
-        1.6946      0.590127           n/a           n/a
-        2.0000      0.500000      0.433264      0.866528
+        1.6945      0.590127           n/a           n/a
+        2.0000      0.500000      0.433264      0.866527
         3.0000      0.333333      0.301857      0.905571
-        5.0000      0.200000      0.188065      0.940324
+        5.0000      0.200000      0.188065      0.940323
        10.0000      0.100000      0.096875      0.968753
   CGM I -> 1/2 at s_h; Newtonian I -> inf as s -> 0.
 
@@ -2048,7 +2045,7 @@ C.5  Local self-energy (point mass)
     M_obs = M_bare + E_self/c^2 = M_bare - M_obs/4
     M_obs/M_bare = 4/5
   psi(s_h)=1/2 => E_self/M_obs c^2 = -1/4; E_rest_frame = +1/4.
-  u(s=5) = |g|^2/(8*pi*G(psi)) = 5.638226e-05 (G0=1 units)
+  u(s=5) = |g|^2/(8*pi*G(psi)) = 5.638223e-05 (G0=1 units)
 
   Self-energy vs compactness:
            Object    psi_surf        G/G0   E_self/Mc^2   E_self(3/5)
@@ -2057,15 +2054,15 @@ C.5  Local self-energy (point mass)
       White dwarf  3.0000e-04    0.999806     -0.000150     -0.000180
   NS (12 km, CGM TOV)  1.5300e-01    0.905949     -0.076500     -0.083166
   NS (12 km, Newtonian)  1.7200e-01    0.894905     -0.086000     -0.092354
-       BH horizon  5.0000e-01    0.724130     -0.250000     -0.217239
+       BH horizon  5.0000e-01    0.724129     -0.250000     -0.217239
   Shell self-energy weights:
   Shell         Pop   Tr(sigma)  ||pi|| est   Self-E prop
       0    0.015625    0.000000    0.000000  0.000000e+00
-      1    0.093750    0.416667    0.113402  8.802671e-04
-      2    0.234375    0.666667    0.181444  3.521067e-03
-      3    0.312500    0.750000    0.204124  5.281598e-03
-      4    0.234375    0.666667    0.181444  3.521067e-03
-      5    0.093750    0.416667    0.113402  8.802671e-04
+      1    0.093750    0.416667    0.113402  8.802668e-04
+      2    0.234375    0.666667    0.181444  3.521066e-03
+      3    0.312500    0.750000    0.204124  5.281596e-03
+      4    0.234375    0.666667    0.181444  3.521066e-03
+      5    0.093750    0.416667    0.113402  8.802668e-04
       6    0.015625    0.000000    0.000000  0.000000e+00
 
 C.5b Stage-mass decomposition
@@ -2116,9 +2113,9 @@ C.7  Hawking temperature and BU-Ingress
     kappa_GR  = 1/(4 r_g) = 0.250000 / r_g
     kappa_CGM/kappa_GR = 1.008713 (+0.87%)
     4*exp(g1/2)/s_h^2 check = 1.008713
-  Horizon area ratio (r_h = r_g*s_h vs 2*r_g): 0.717876
+  Horizon area ratio (r_h = r_g*s_h vs 2*r_g): 0.717875
   Hawking luminosity ~ T^4 * Area:
-    L_CGM/L_GR = (kappa ratio)^4 * area ratio = 0.743223 (-25.7%)
+    L_CGM/L_GR = (kappa ratio)^4 * area ratio = 0.743222 (-25.7%)
   Hawking T (10 Msun): T_GR = 6.1815e-09 K, T_CGM = 6.2354e-09 K (+0.87%)
   Z2 holonomy (8 bytes): BU-Egress = W2 involution at depth 4; BU-Ingress =
     depth-4 spectral memory (W2 pole-pairing). F o F restores carrier rest.
@@ -2130,7 +2127,7 @@ E.1  Falsification tests
 ------------------------
 
   Test                           | CGM Prediction                      | Current Status 
-  -------------------------------------------------------------------------------------
+  ----------
   Antimatter free-fall           | Same as matter (WEP)                | ALPHA-g pending
   Antimatter spin precession     | Opposite sign at O(psi^2)           | Untestable     
   GW scalar polarization         | None (psi slaved)                   | LIGO consistent
@@ -2169,19 +2166,19 @@ E.4  Summary
   GW HT / vacuum: analysis_5 J, P.
 ========= DONE =========
 
-exit=0  duration=1.59s
+exit=0  duration=1.64s
 
 ######## hqvm_gravity_analysis_7.py ########
 
 CGM gravity analysis 7: Refractive vacuum and time-light conversion
-Delta = 0.020699553913, rho = 0.979300446087, g1 = -0.645568
-tau_G = 76.237917
+Delta = 0.020699545503, rho = 0.979300454497, g1 = -0.645571
+tau_G = 76.237914
 Q_G = 12.566371, G_kernel = 0.523599, D = 24
 D/(4*Q_G) = 0.477465 = 3/(2*pi)
 kappa_GR*T_Z2 = 143140354.78 m/s = 0.477465 c
-kappa_CGM*T_Z2 = 144387488.29 m/s = 0.481625 c
+kappa_CGM*T_Z2 = 144387500.18 m/s = 0.481625 c
 L_0 = 4.7494e+51 W
-s_h = 1.6946 r_g, s_ph = 2.5856 r_g, b_c/r_g = 4.6477
+s_h = 1.6945 r_g, s_ph = 2.5856 r_g, b_c/r_g = 4.6477
 
 =========
 A. Gravitational permittivity and the polarizable vacuum
@@ -2190,7 +2187,7 @@ A. Gravitational permittivity and the polarizable vacuum
 Modified vacuum equation: div[exp(-g1*psi) grad psi] = 0
   => epsilon_g = G_0/G(psi) = exp(-g1*psi)
   => G(psi)/G_0 = exp(g1*psi)  (Beer-Lambert transmission)
-  => tau_opt = |g1|*psi = 0.645568*psi
+  => tau_opt = |g1|*psi = 0.645571*psi
   G/G_0 and rho_MU/rho_0: analysis_4, analysis_5 G.
 
      psi     eps_g   tau_opt          n
@@ -2198,14 +2195,14 @@ Modified vacuum equation: div[exp(-g1*psi) grad psi] = 0
 0.0000e+00   1.00000   0.00000    1.00000
 1.0000e-03   1.00065   0.00065    1.00100
 1.0000e-02   1.00648   0.00646    1.01015
-5.0000e-02   1.03280   0.03228    1.05409
+5.0000e-02   1.03281   0.03228    1.05409
 1.0000e-01   1.06669   0.06456    1.11803
 1.5000e-01   1.10168   0.09684    1.19523
 2.0000e-01   1.13782   0.12911    1.29099
 3.0000e-01   1.21370   0.19367    1.58114
 4.0000e-01   1.29463   0.25823    2.23607
 4.9000e-01   1.37208   0.31633    7.07107
-5.0000e-01   1.38097   0.32278        inf
+5.0000e-01   1.38097   0.32279        inf
 
 At psi=1/2: tau_opt = |g1|/2 = 0.3228 (finite).
 Coupling transmission T_coupl = 0.724 (coupling survives).
@@ -2233,8 +2230,8 @@ REFRACTIVE INDEX COMPARISON
 5.0000e-02   1.050000   1.100000   1.051271   1.054093   1.053169
 1.0000e-01   1.100000   1.200000   1.105171   1.118034   1.113733
 2.0000e-01   1.200000   1.400000   1.221403   1.290994   1.266132
-3.0000e-01   1.300000   1.600000   1.349859   1.581139   1.488162
-5.0000e-01   1.500000   2.000000   1.648721        inf   2.738374
+3.0000e-01   1.300000   1.600000   1.349859   1.581139   1.488161
+5.0000e-01   1.500000   2.000000   1.648721        inf   2.738368
 
 =========
 B. Wave equation, impedance, and reflection
@@ -2261,9 +2258,9 @@ POTENTIAL VALUES (Vtilde at key radii):
          s        psi          f        V_0        V_1        V_2
   ------------------------------------------------------------
     1.7115   0.495763   0.008474   0.002455   0.008240   0.019811
-    2.0000   0.433322   0.133357   0.025204   0.091882   0.225239
+    2.0000   0.433321   0.133357   0.025204   0.091882   0.225240
     2.5856   0.345257   0.309486   0.028655   0.121242   0.306417
-    3.0000   0.301905   0.396191   0.024151   0.112193   0.288278
+    3.0000   0.301904   0.396191   0.024151   0.112193   0.288278
       5.00   0.188102   0.623795   0.008839   0.058743   0.158550
      10.00   0.096905   0.806191   0.001515   0.017638   0.049886
      50.00   0.019872   0.960256   0.000015   0.000783   0.002320
@@ -2343,24 +2340,24 @@ C. Geodesic deflection and shadow
 
 Null geodesics: (dr/dlam)^2 = E^2 [1 - f(s)*beta^2/s^2]
 Deflection: Delta_phi = 2*int_{s_min}^{inf} beta/(s^2*sqrt(1-f*beta^2/s^2)) ds - pi
-  b_c/r_g = 4.647712, s_ph = 2.585592 r_g
+  b_c/r_g = 4.647709, s_ph = 2.585590 r_g
 
   Integral uses u=1/s compactification and t^2 substitution
   near the turning point to remove the sqrt singularity.
 
     beta/b_c   beta/r_g  s_min/r_g Delta_phi(rad) Delta_phi(deg)
   --------------------------------------------------------------
-       1.001     4.6524     2.6571       7.043337       403.5535
-       1.005     4.6710     2.7524       5.324847       305.0912
-       1.010     4.6942     2.8291       4.591842       263.0932
-       1.050     4.8801     3.2065       2.939979       168.4484
-       1.100     5.1125     3.5515       2.275910       130.4000
+       1.001     4.6524     2.6571       7.043339       403.5536
+       1.005     4.6709     2.7524       5.324849       305.0914
+       1.010     4.6942     2.8291       4.591844       263.0933
+       1.050     4.8801     3.2065       2.939980       168.4484
+       1.100     5.1125     3.5515       2.275911       130.4001
        1.200     5.5773     4.1403       1.667786        95.5571
-       1.500     6.9716     5.6951       0.995722        57.0507
-       2.000     9.2954     8.1194       0.617153        35.3603
-       3.000    13.9431    12.8400       0.356142        20.4054
-       5.000    23.2386    22.1818       0.194242        11.1292
-      10.000    46.4771    45.4504       0.091170         5.2237
+       1.500     6.9716     5.6951       0.995723        57.0507
+       2.000     9.2954     8.1194       0.617154        35.3603
+       3.000    13.9431    12.8400       0.356142        20.4055
+       5.000    23.2385    22.1818       0.194242        11.1292
+      10.000    46.4771    45.4504       0.091171         5.2237
 
 CONVERGENCE NEAR b_c:
   beta/b_c = 1.1000: Delta_phi = 2.2759 rad = 130.40 deg
@@ -2378,22 +2375,22 @@ CAPTURE VERIFICATION:
   beta/b_c = 1.00: CAPTURED
 
 SHADOW: b_c/r_g from photon_sphere_closed (analysis_4 N, analysis_6 B.3).
-  This script (geodesic geometry): b_c/r_g = 4.647712
+  This script (geodesic geometry): b_c/r_g = 4.647709
 
 =========
 D. Metric refractive index, impedance, escape profile
 =========
 
-Photon sphere: s_ph = 2.585592 r_g  (psi = 0.345257)
-  b_c/r_g = 4.647712
+Photon sphere: s_ph = 2.585590 r_g  (psi = 0.345257)
+  b_c/r_g = 4.647709
 
    s=r/r_g        psi          n    Z/Z_0  c_coord theta_c(deg)    P_esc
 ----------------------------------------------------------------------
-    1.7000   0.498630    19.1017   0.0524 0.002741       3.0009   0.0051
-    1.8000   0.474761     4.4509   0.2247 0.050477      12.9836   0.0927
-    2.0000   0.433322     2.7384   0.3652 0.133357      21.4187   0.2355
+    1.7000   0.498629    19.0993   0.0524 0.002741       3.0013   0.0051
+    1.8000   0.474761     4.4509   0.2247 0.050478      12.9836   0.0927
+    2.0000   0.433321     2.7384   0.3652 0.133357      21.4187   0.2355
     2.5856   0.345257     1.7975   0.5563 0.309486      33.8013   0.0000
-    3.0000   0.301905     1.5887   0.6294 0.396191      39.0086   0.6108
+    3.0000   0.301904     1.5887   0.6294 0.396191      39.0086   0.6108
       5.00   0.188102     1.2661   0.7898 0.623795      52.1675   0.8395
      10.00   0.096905     1.1137   0.8979 0.806191      63.8809   0.9544
      50.00   0.019872     1.0205   0.9799 0.960256      78.5005   0.9979
@@ -2406,11 +2403,11 @@ REDSHIFT: CGM vs GR AT SAME RADIUS
 --------------------------------------------------------------
   s=10.00  psi_N=0.100000  psi_CGM=0.096905  z_GR=0.118034  z_CGM=0.113733
   s=5.00  psi_N=0.200000  psi_CGM=0.188102  z_GR=0.290994  z_CGM=0.266132
-  s=3.0000  psi_N=0.333333  psi_CGM=0.301905  z_GR=0.732051  z_CGM=0.588721
-  s=2.5856  psi_N=0.386759  psi_CGM=0.345257  z_GR=1.101273  z_CGM=0.797543
-  s=2.0000  psi_N=0.500000  psi_CGM=0.433322  z_GR=inf  z_CGM=1.738374
-  s=1.8000  psi_N=0.555556  psi_CGM=0.474761  z_GR=inf  z_CGM=3.450945
-  s=1.7000  psi_N=0.588235  psi_CGM=0.498630  z_GR=inf  z_CGM=18.101720
+  s=3.0000  psi_N=0.333333  psi_CGM=0.301904  z_GR=0.732051  z_CGM=0.588721
+  s=2.5856  psi_N=0.386759  psi_CGM=0.345257  z_GR=1.101276  z_CGM=0.797543
+  s=2.0000  psi_N=0.500000  psi_CGM=0.433321  z_GR=inf  z_CGM=1.738368
+  s=1.8000  psi_N=0.555556  psi_CGM=0.474761  z_GR=inf  z_CGM=3.450918
+  s=1.7000  psi_N=0.588235  psi_CGM=0.498629  z_GR=inf  z_CGM=18.099329
 
 =========
 E. Optical depth: coupling vs propagation channels
@@ -2427,18 +2424,18 @@ E. Optical depth: coupling vs propagation channels
 Exterior integral I = 1/2: analysis_6 C.4 (Z2-protected).
 ODE dpsi/ds = -exp(g1*psi)/s^2: analysis_5 S step 6.
 
-  tau_coupl(horizon) = 0.322784
-  T_coupl = exp(-tau) = 0.724130 = G(psi=1/2)/G_0
-  tau_G (energy ladder) = 76.237917 (distinct scale)
+  tau_coupl(horizon) = 0.322785
+  T_coupl = exp(-tau) = 0.724129 = G(psi=1/2)/G_0
+  tau_G (energy ladder) = 76.237914 (distinct scale)
 
 =========
 F. Horizon criticality: WHERE and WHEN
 =========
 
-WHERE: s_h = 1.6946 r_g, s_ph = 2.5856 r_g (common: horizon_s, photon_sphere_closed)
+WHERE: s_h = 1.6945 r_g, s_ph = 2.5856 r_g (common: horizon_s, photon_sphere_closed)
   n -> inf, Z -> 0, c_coord -> 0, P_esc -> 0
   rho_MU/rho0 = 2.02e-17
-  epsilon_g = 1.380967
+  epsilon_g = 1.380969
 
 The vacuum microcell density drops 17 orders of magnitude
 from weak field to horizon. Flat space (mass) converts to
@@ -2482,17 +2479,17 @@ CGM SURFACE GRAVITY FROM CGM METRIC:
   kappa_CGM/kappa_GR = 4*exp(g1/2)/s_h^2 = 1.008713
 
   kappa_GR  * T_Z2 = 143140354.78 m/s = 0.477465 c
-  kappa_CGM * T_Z2 = 144387488.29 m/s = 0.481625 c
+  kappa_CGM * T_Z2 = 144387500.18 m/s = 0.481625 c
 
 DEPTH-DEPENDENT CONVERSION (kappa_CGM):
                       Depth        psi          n   k_CGM*T(m/s)  k_CGM*T/c
-------------------------------------------------------------------------
-                Far field 0.0000e+00     1.0000   144387488.29   0.481625
-              Sun surface 2.1200e-06     1.0000   144387182.19   0.481624
-               WD surface 3.0000e-04     1.0003   144344165.55   0.481480
-               NS surface 1.5000e-01     1.1952   120803239.79   0.402956
-            Photon sphere 3.4526e-01     1.7975    80324930.97   0.267935
-             Near horizon 4.9000e-01     7.0711    20419474.42   0.068112
+-----
+                Far field 0.0000e+00     1.0000   144387500.18   0.481625
+              Sun surface 2.1200e-06     1.0000   144387194.07   0.481624
+               WD surface 3.0000e-04     1.0003   144344177.43   0.481480
+               NS surface 1.5000e-01     1.1952   120803249.73   0.402956
+            Photon sphere 3.4526e-01     1.7975    80324922.97   0.267935
+             Near horizon 4.9000e-01     7.0711    20419476.10   0.068112
                   Horizon 5.0000e-01        inf           0.00   0.000000
 
 Conversion vanishes at the horizon: gravitational time
@@ -2504,7 +2501,7 @@ H. Self-energy: luminosity scale
 
 I = 1/2 and E_self = -Mc^2/4: analysis_6 C.4/C.5 (not re-derived here).
 
-Phase deficit per cycle: 0.004128963621 rad (2.0700% of m_a)
+Phase deficit per cycle: 0.004128961943 rad (2.0700% of m_a)
 Accumulated over N=3586.5: 14.8086 rad = 2.3569 cycles
 
 UNIVERSAL LUMINOSITY SCALE
@@ -2533,7 +2530,7 @@ Z2 PROTECTION OF c:
 
 DERIVATION CHAIN FOR c:
   Kernel: Q_G, G_kernel, tau_G, Delta, m_a
-  => G to 0.074 ppm => alpha_0 = delta_BU^4/m_a
+  => G from tau_G (weak-field) => alpha_0 = delta_BU^4/m_a
   => hbar from alpha = e^2/(4*pi*eps_0*hbar*c)
   => c from M_Planck = sqrt(hbar*c/G)
 
@@ -2616,12 +2613,12 @@ J.2 CAUSAL PHASE AVAILABILITY
 
          s        psi   Phi_CS  Phi_UNA    Phi_ONA   Phi_BU    r*(r_g)
   ------------------------------------------------------------------
-    1.7000   0.498630   1.3797   0.7248 1.6190e-01   0.0051     2.3197
+    1.7000   0.498629   1.3797   0.7248 1.6190e-01   0.0051     2.3202
     1.7500   0.486400   1.3689   0.7305 1.5399e-01   0.0505     6.9701
-    1.8000   0.474761   1.3586   0.7360 1.4665e-01   0.0927     8.2949
-    2.0000   0.433322   1.3228   0.7560 1.2201e-01   0.2355    10.6052
-    2.5856   0.345257   1.2497   0.8002 7.7272e-02   0.0000    13.3174
-    3.0000   0.301905   1.2152   0.8229 5.9028e-02   0.6108    14.4914
+    1.8000   0.474761   1.3587   0.7360 1.4665e-01   0.0927     8.2949
+    2.0000   0.433321   1.3228   0.7560 1.2201e-01   0.2355    10.6052
+    2.5856   0.345257   1.2497   0.8002 7.7273e-02   0.0000    13.3174
+    3.0000   0.301904   1.2152   0.8229 5.9028e-02   0.6108    14.4914
       5.00   0.188102   1.1291   0.8857 2.2870e-02   0.8395    18.3416
      10.00   0.096905   1.0646   0.9394 6.0642e-03   0.9544    25.1798
      50.00   0.019872   1.0129   0.9873 2.5494e-04   0.9979    68.6980
@@ -2742,12 +2739,12 @@ Cross-script ownership:
               four-phase causal structure
 ========== DONE ==========
 
-exit=0  duration=15.16s
+exit=0  duration=22.74s
 
 ######## hqvm_gravity_analysis_8.py ########
 
 CGM gravity analysis 8: Holonomy, curvature, BCH, spectral bridge
-delta_BU = 0.195342176580, rho = 0.979300446087, Delta = 0.020699553913
+delta_BU = 0.195342178258, rho = 0.979300454497, Delta = 0.020699545503
 |Omega| = 4096, D = 24, Q_G = 12.5663706144
 
 
@@ -2779,8 +2776,8 @@ Codeword-pair histogram (64 * C(6,k)):
 Sum popcount(d)           = 196608
 D = sum pop / (2|Omega|)  = 24.000000000000  (target 24)
 D = 24 identity           = True
-Bulk alpha sum            = 6200.942053
-Horizon alpha sum         = 200.030389
+Bulk alpha sum            = 6200.942107
+Horizon alpha sum         = 200.030391
 
 Horizon vs bulk (stress sector):
   shell 0 (horizon): Tr=0.0000  ||pi||^2=0.0000
@@ -2793,19 +2790,19 @@ Horizon vs bulk (stress sector):
 B. Regge sum -> tau_G
 =========
 Holonomy cycle (64 micro-refs, bulk steps 1/3/5/7):
-  Regge / cycle (bulk)    = 0.100300491235
-  tau_cycle (bulk)        = 0.021256806515
+  Regge / cycle (bulk)    = 0.100300492096
+  tau_cycle (bulk)        = 0.021256797878
   tau_cycle / Delta       = 7591/7392
   k_eff                   = 3.000000000000  (spatial dim 3)
 
 Conversion:
   tau_cycle = regge * 6*Delta / (k_eff * delta_BU)
   tau_G     = N_cycles * tau_cycle
-  N_cycles  = 3586.517880
+  N_cycles  = 3586.519193
 
-tau_G (Regge chain)       = 76.237916638581
-tau_G (closed form)       = 76.237916638581
-Regge / closed rel err    = 3.728e-16
+tau_G (Regge chain)       = 76.237913573567
+tau_G (closed form)       = 76.237913573567
+Regge / closed rel err    = 9.320e-16
 tau_G match               = True
 
 Horizon plaquette alpha*sw = 3.125475  (census, all pairs)
@@ -2831,7 +2828,7 @@ Explicit BCH on bytes x=0x12, y=0x34:
   q(x)                    = 100011  pop=3
   q(y)                    = 110000  pop=2
   defect d = q(x) XOR q(y) = 010011  pop=3
-  alpha(d)                = 0.097671088290 rad
+  alpha(d)                = 0.097671089129 rad
 
 Permutation action on |Omega|:
   |{s : T_y T_x(s) != T_x T_y(s)}| = 4096 / 4096
@@ -2839,21 +2836,21 @@ Permutation action on |Omega|:
   qxor(T_x T_y T_x^-1 T_y^-1)         = 000000
 
 Shell coupling BCH split (tau = Delta * shell weights along path):
-  tau(T_x T_y)            = 0.012937221196
-  tau(T_y T_x)            = 0.011320068546
-  symmetric (X+Y)/2       = 0.012128644871
-  antisymmetric [X,Y]/2   = 0.000808576325
-  tau([xyxy])-tau([xyyx]) = -0.001617152649
+  tau(T_x T_y)            = 0.012937215939
+  tau(T_y T_x)            = 0.011320063947
+  symmetric (X+Y)/2       = 0.012128639943
+  antisymmetric [X,Y]/2   = 0.000808575996
+  tau([xyxy])-tau([xyyx]) = -0.001617151992
 
 System-level Delta^n (tau_G = |Omega| Delta rho^5 f_k4):
-  f_k4 Delta^2 coeff      = -3.917201784347  ([X,Y] / K4 gauge)
+  f_k4 Delta^2 coeff      = -3.917201817989  ([X,Y] / K4 gauge)
   f_k4 Delta^4 coeff c4   = -1.750000000000  ([[X,Y],[X,Y]])
   c4 = -(1+Tr_sigma_iso)  = -1.750000000000
-  tau_G Delta^2 term      = -0.128173608748
-  tau_G Delta^4 term      = -0.000024534809
-  tau_G leading           = 76.237941173390
-  tau_G full              = 76.237916638581
-  full - leading          = -2.453480946940e-05
+  tau_G Delta^2 term      = -0.128173459116
+  tau_G Delta^4 term      = -0.000024534761
+  tau_G leading           = 76.237913573567
+  tau_G full              = 76.237889038806
+  full - leading          = -2.453476068354e-05
 
 Pair [X,Y] antisymmetric  = True
 Group word qxor closure   = True
@@ -2899,13 +2896,13 @@ BU-Ingress (T9 pole-pairing / shadow memory):
 
 UNA (global, generic bytes 0x12, 0x34):
   defect d = q(x) XOR q(y)  = 3 (non-zero)
-  antisymmetric tau/2       = 0.000808576325
+  antisymmetric tau/2       = 0.000808575996
   order swap on |Omega|      = True
   -> [X,Y] != 0 globally off S-sector
 
 Delta^n bridge (formal -> kernel f_k4):
   formal degree-2 Delta      = 2[X,Y]
-  kernel f_k4 Delta^2 coeff   = -3.917201784347
+  kernel f_k4 Delta^2 coeff   = -3.917201817989
   kernel f_k4 Delta^4 coeff   = -1.750000000000  (sl(2) trace / [[X,Y],[X,Y]])
   k_eff = 3 (bulk shells)     = spatial dim from sl(2) closure
   Q_G = 4*pi                  = 12.5663706144  (representation anchor)
@@ -2919,59 +2916,40 @@ Z2 holonomy gate F (4-byte canonical word, micro_ref=0):
   dim(+1) = dim(-1)       = True
 
 Spectral gap chain:
-  delta_BU                = 0.195342176580 rad
+  delta_BU                = 0.195342178258 rad
   m_a                     = 0.199471140201 rad
-  rho = delta_BU/m_a      = 0.979300446087
-  Delta = 1 - rho           = 0.020699553913
-  phase deficit           = 0.004128963621 rad
+  rho = delta_BU/m_a      = 0.979300454497
+  Delta = 1 - rho           = 0.020699545503
+  phase deficit           = 0.004128961943 rad
 
-  tau_G                   = 76.237916638581
-  N_cycles * tau_cycle    = 76.237916638581
+  tau_G                   = 76.237913573567
+  N_cycles * tau_cycle    = 76.237913573567
   ||pi||^2/Tr^2 (bulk)    = 2/75
 
-  G_pred                  = 6.708810e-39 GeV^-2
+  G_pred                  = 6.708830e-39 GeV^-2
   G_meas                  = 6.708810e-39 GeV^-2
-  ppm                     = -0.074
+  ppm                     = +2.991
 
-=========
-E. Complete chain verification
-=========
-Stage                                  OK  Detail
-------------------------------------------------------------
-Commutator defect -> D=24               Y  D = 24.0000
-Byte hist 1024*C(6,k)                   Y  65536 plaquettes
-Codeword hist 64*C(6,k)                 Y  4096 codeword pairs
-Horizon defect, zero tau                Y  holo=0
-Plaquette Regge -> tau_cycle            Y  tau_cycle = 0.021257
-tau_cycle x N -> tau_G                  Y  tau_G = 76.237917
-Delta^1 absent (Z2)                     Y  f_k4[1]=0
-Delta^3 absent (Z2)                     Y  f_k4[3]=0
-BCH pair explicit                       Y  x=0x12 y=0x34
-Formal Delta = 2[X,Y]                   Y  cgm_3D_6DoF
-BU-Egress q(F)=0                        Y  closure at S
-BU-Ingress W2 shadow                    Y  comp<->eq memory
-UNA global [X,Y]                        Y  generic defect
-Modal-kernel bridge                     Y  L/R -> W2/W2p
-c4 = -7/4                               Y  Tr(sigma) route
-Spectral +/-1 split                     Y  2048 + 2048
-delta_BU/m_a = rho                      Y  rho = 0.979300
-tau_G -> G_pred                         Y  ppm = -0.07
-G(psi) = G0 exp(g1 psi)                 Y  psi=0.1
-Metric f = 1 - 2 psi                    Y  f=0.8000
+--- stderr ---
+Traceback (most recent call last):
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 850, in <module>
+    main()
+    ~~~~^^
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 838, in main
+    chain_ok, _d_stats = run_kernel_chain(verbose=True)
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 814, in run_kernel_chain
+    d_stats = section_d_spectral_bridge(b_stats)
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 714, in section_d_spectral_bridge
+    "tau_g": tau_g_full,
+             ^^^^^^^^^^
+NameError: name 'tau_g_full' is not defined
 
-Chain closed at computational level: True
-
-=========
-DONE
-=========
-Sections A-E chain: OK
-QQG bridge: hqvm_gravity_analysis_9.py; Planck boundary: _10.py
-
-exit=0  duration=40.58s
+exit=1  duration=64.32s
 
 ######## hqvm_gravity_analysis_9.py ########
 
-CGM gravity analysis 9: QQG UV-completion bridge
+CGM gravity analysis 9: ultraviolet completion
 
 
 =========
@@ -3002,8 +2980,8 @@ Codeword-pair histogram (64 * C(6,k)):
 Sum popcount(d)           = 196608
 D = sum pop / (2|Omega|)  = 24.000000000000  (target 24)
 D = 24 identity           = True
-Bulk alpha sum            = 6200.942053
-Horizon alpha sum         = 200.030389
+Bulk alpha sum            = 6200.942107
+Horizon alpha sum         = 200.030391
 
 Horizon vs bulk (stress sector):
   shell 0 (horizon): Tr=0.0000  ||pi||^2=0.0000
@@ -3016,19 +2994,19 @@ Horizon vs bulk (stress sector):
 B. Regge sum -> tau_G
 =========
 Holonomy cycle (64 micro-refs, bulk steps 1/3/5/7):
-  Regge / cycle (bulk)    = 0.100300491235
-  tau_cycle (bulk)        = 0.021256806515
+  Regge / cycle (bulk)    = 0.100300492096
+  tau_cycle (bulk)        = 0.021256797878
   tau_cycle / Delta       = 7591/7392
   k_eff                   = 3.000000000000  (spatial dim 3)
 
 Conversion:
   tau_cycle = regge * 6*Delta / (k_eff * delta_BU)
   tau_G     = N_cycles * tau_cycle
-  N_cycles  = 3586.517880
+  N_cycles  = 3586.519193
 
-tau_G (Regge chain)       = 76.237916638581
-tau_G (closed form)       = 76.237916638581
-Regge / closed rel err    = 3.728e-16
+tau_G (Regge chain)       = 76.237913573567
+tau_G (closed form)       = 76.237913573567
+Regge / closed rel err    = 9.320e-16
 tau_G match               = True
 
 Horizon plaquette alpha*sw = 3.125475  (census, all pairs)
@@ -3054,7 +3032,7 @@ Explicit BCH on bytes x=0x12, y=0x34:
   q(x)                    = 100011  pop=3
   q(y)                    = 110000  pop=2
   defect d = q(x) XOR q(y) = 010011  pop=3
-  alpha(d)                = 0.097671088290 rad
+  alpha(d)                = 0.097671089129 rad
 
 Permutation action on |Omega|:
   |{s : T_y T_x(s) != T_x T_y(s)}| = 4096 / 4096
@@ -3062,21 +3040,21 @@ Permutation action on |Omega|:
   qxor(T_x T_y T_x^-1 T_y^-1)         = 000000
 
 Shell coupling BCH split (tau = Delta * shell weights along path):
-  tau(T_x T_y)            = 0.012937221196
-  tau(T_y T_x)            = 0.011320068546
-  symmetric (X+Y)/2       = 0.012128644871
-  antisymmetric [X,Y]/2   = 0.000808576325
-  tau([xyxy])-tau([xyyx]) = -0.001617152649
+  tau(T_x T_y)            = 0.012937215939
+  tau(T_y T_x)            = 0.011320063947
+  symmetric (X+Y)/2       = 0.012128639943
+  antisymmetric [X,Y]/2   = 0.000808575996
+  tau([xyxy])-tau([xyyx]) = -0.001617151992
 
 System-level Delta^n (tau_G = |Omega| Delta rho^5 f_k4):
-  f_k4 Delta^2 coeff      = -3.917201784347  ([X,Y] / K4 gauge)
+  f_k4 Delta^2 coeff      = -3.917201817989  ([X,Y] / K4 gauge)
   f_k4 Delta^4 coeff c4   = -1.750000000000  ([[X,Y],[X,Y]])
   c4 = -(1+Tr_sigma_iso)  = -1.750000000000
-  tau_G Delta^2 term      = -0.128173608748
-  tau_G Delta^4 term      = -0.000024534809
-  tau_G leading           = 76.237941173390
-  tau_G full              = 76.237916638581
-  full - leading          = -2.453480946940e-05
+  tau_G Delta^2 term      = -0.128173459116
+  tau_G Delta^4 term      = -0.000024534761
+  tau_G leading           = 76.237913573567
+  tau_G full              = 76.237889038806
+  full - leading          = -2.453476068354e-05
 
 Pair [X,Y] antisymmetric  = True
 Group word qxor closure   = True
@@ -3122,13 +3100,13 @@ BU-Ingress (T9 pole-pairing / shadow memory):
 
 UNA (global, generic bytes 0x12, 0x34):
   defect d = q(x) XOR q(y)  = 3 (non-zero)
-  antisymmetric tau/2       = 0.000808576325
+  antisymmetric tau/2       = 0.000808575996
   order swap on |Omega|      = True
   -> [X,Y] != 0 globally off S-sector
 
 Delta^n bridge (formal -> kernel f_k4):
   formal degree-2 Delta      = 2[X,Y]
-  kernel f_k4 Delta^2 coeff   = -3.917201784347
+  kernel f_k4 Delta^2 coeff   = -3.917201817989
   kernel f_k4 Delta^4 coeff   = -1.750000000000  (sl(2) trace / [[X,Y],[X,Y]])
   k_eff = 3 (bulk shells)     = spatial dim from sl(2) closure
   Q_G = 4*pi                  = 12.5663706144  (representation anchor)
@@ -3142,207 +3120,41 @@ Z2 holonomy gate F (4-byte canonical word, micro_ref=0):
   dim(+1) = dim(-1)       = True
 
 Spectral gap chain:
-  delta_BU                = 0.195342176580 rad
+  delta_BU                = 0.195342178258 rad
   m_a                     = 0.199471140201 rad
-  rho = delta_BU/m_a      = 0.979300446087
-  Delta = 1 - rho           = 0.020699553913
-  phase deficit           = 0.004128963621 rad
+  rho = delta_BU/m_a      = 0.979300454497
+  Delta = 1 - rho           = 0.020699545503
+  phase deficit           = 0.004128961943 rad
 
-  tau_G                   = 76.237916638581
-  N_cycles * tau_cycle    = 76.237916638581
+  tau_G                   = 76.237913573567
+  N_cycles * tau_cycle    = 76.237913573567
   ||pi||^2/Tr^2 (bulk)    = 2/75
 
-  G_pred                  = 6.708810e-39 GeV^-2
+  G_pred                  = 6.708830e-39 GeV^-2
   G_meas                  = 6.708810e-39 GeV^-2
-  ppm                     = -0.074
+  ppm                     = +2.991
 
-=========
-F. QQG UV-completion bridge
-=========
-Ref: Liu-Quintin-Afshordi PRL 136, 111501 (2026); CGM Analysis_Gravity
-Scope: QQG open inputs closed from kernel (not same theory as QQG).
+--- stderr ---
+Traceback (most recent call last):
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_9.py", line 1366, in <module>
+    main()
+    ~~~~^^
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_9.py", line 1340, in main
+    chain_ok, d_stats = run_kernel_chain(verbose=False)
+                        ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 814, in run_kernel_chain
+    d_stats = section_d_spectral_bridge(b_stats)
+  File "F:\Development\science\experiments\hqvm_gravity_analysis_8.py", line 714, in section_d_spectral_bridge
+    "tau_g": tau_g_full,
+             ^^^^^^^^^^
+NameError: name 'tau_g_full' is not defined
 
-F1. CGM action -> f(R), self-consistent R^2 coefficient xi_eff
-  S = (1/16piG0) int R exp(-g1 psi) sqrt(-g) d^4x  (Gravity Sec. 6.4)
-  g1 = -0.645568  (d ln G/d psi, AF when g1 < 0)
-  f(R) Taylor: c_R = 0.64557, c_R2/2 = 0.20838
-  Jordan factor exp(-g1 psi): psi=0 -> 1.0000, psi=1 -> 1.9071
-  S_eff: a(mu)=1/xi = 8.396702e-03, xi = 119.094
-  S_eff: b/a (C^2, conjecture) = 0.026667
-  xi_eff (1/[R^2 weight]) = 119.09437  (QQG xi analog)
-  psi_GR crossover |g1 psi|=1: psi_c = 1.5490
-  |R^2|/|EH| at psi=0.95: 0.6133
-  |R^2|/|EH| at psi=0.05: 0.0323
-  UV R^2-dominated (psi~1):     True
-  IR EH-dominated (psi~0):      True
-
-F1b. FLRW dS identification psi(R) [LEMMA]
-  R(psi=0.5) = 3.0039e+21  psi(R) round-trip = 0.500000
-  dpsi/dlnH via R=6H^2 vs direct: err = 0.00e+00
-  chain consistent: True
-
-F1c. QQG dictionary xi(mu), lambda(mu) [LEMMA: normalization map]
-  CGM: S=(1/16piG0) int R exp(-g1 psi);  QQG: -R^2/xi + 2C^2/lambda
-  Map: 1/xi=a2(mu), lambda(mu)=75/a2=75*xi;  b_C2=a2*(2/75)
-  psi    mu(GeV)       xi        lambda    |f_quad err|
-  0.00  2.4622e+02    119.09   8932.08  8.3967e-03
-  0.25  3.6735e+06    117.56   8817.25  1.6112e+06
-  0.50  5.4808e+10    113.20   8489.80  3.1697e+14
-  0.75  8.1771e+14    106.60   7994.96  6.3757e+22
-  1.00  1.2200e+19     98.56   7391.79  1.3062e+31
-  quad valid at IR (psi=0): True  (UV needs full f(R))
-F1d. xi(mu) running from a2(psi) dictionary [LEMMA]
-  d ln xi/d ln mu (analytic)   = -0.005152
-  d ln xi/d ln mu (numeric)    = -0.005152
-  beta_lnG (G coupling, F2)    = -0.016793
-  (beta_lnG != d ln xi/d ln mu; different running objects)
-  analytic vs numeric match:    True
-
-F2. RG scale mu = E_ref(psi) (resolves QQG mu=|R|^1/2 ambiguity)
-  E_ref(0) = v     = 246.2200 GeV
-  E_ref(1) = E_CS  = 1.2200e+19 GeV
-  E_ref(0.5)       = 5.4808e+10 GeV
-  beta_lnG = d ln(G/G0)/d ln mu = -0.016793
-  asymptotic freedom (beta_lnG < 0): True
-
-F3. Kernel N_eff with QQG field-weighting
-F3b. QQG weights from plaquette pairs [THEOREM]
-  denom = 4*C(6,2) = 60  (Section A census)
-  scalar 1/60; vector 12/60=1/5; fermion 3/60=1/20
-  vector check: True
-  fermion check: True
-  CGM sectors (trace:ONA:UNA) = 1:3:3
-  n_byte4_lift           = 6.7109e+07
-  n_holo_quotient        = 1.0486e+06
-  n_bulk_shell_weighted  = 7.4898e+05
-  n_plaquette_pairs      = 6.5536e+04
-  n_codeword_pairs       = 4.0960e+03
-  n_omega                = 4.0960e+03
-  QQG weighting N = N_s/60 + N_v/5 + N_f/20:
-    N_scalar (trace)  = 1.4980e+05
-    N_vector (ONA x3) = 4.4939e+05
-    N_fermion (UNA x3)= 4.4939e+05
-    N_qqg_weighted    = 1.1484e+05
-  QQG N window            = 1e+05 - 1e+06
-  N_qqg_weighted in window: True
-  lambda_tH_kernel (not QQG-def) = 13.5591
-  QQG lambda_tH ~ O(1); kernel anchor uses Delta*rho^5 (F9)
-
-F4. Inflationary observables
-  [LEMMA] native V(phi) from CGM R^2 limit f=R+a2 R^2 (a2 from F1):
-  (full R exp(-g1 psi) is sub-linear => V_E<0; inflation in R^2 sector)
-    N_e reached     = 55.654
-    n_s (native)    = 0.97152
-    r (native)      = 0.00238
-    a2 leading      = 8.396702e-03
-  [QQG-COMPARE] Starobinsky plateau (pure R^2 limit reference):
-    n_s (Staro)     = 0.96498
-    r (Staro)       = 0.00350
-    n_s (QQG eq.6)  = 0.97273  (not pass/fail)
-  [THEOREM] A_s = A_s^pl * Pi_H  (holographic projection)
-    A_s^pl intrinsic log10 = 2.616
-    Pi_H = rho^8 Delta^4/(pi^2|Omega|) = 3.8416e-12
-    A_s (projected) = 1.5874e-09  log10=-8.799
-    Planck A_s      = 2.10e-09  match=True
-    A_s Staro check = 9.2193e-04
-    r_weyl_boosted  = 0.00245
-    r < QQG ~0.01:  True  (shadow, not 1:1)
-    boost to ~0.01:False  (2/75 channel)
-  native n_s in (0.95, 0.99): True
-  native r in (0.0, 0.06):   True
-
-F5. Weyl sector / gravitomagnetic coupling (derived)
-  dim(+1) gravitoelectric = 2048 (R^2 sector)
-  dim(-1) gravitomagnetic = 2048 (C^2 sector)
-  eigenspace ratio (-1/+1) = 1.00000
-  bulk anisotropy ||pi||^2/Tr^2 = 0.026667 (=2/75)
-  lambda_Weyl/xi (rel weight) = 0.026667
-  C^2 vanishes on FRW background: True
-  => derived C^2/R^2 coupling ratio; inert for background, sources
-     tensor-mode corrections at the anisotropy weight 2/75.
-F5b. Tensor quadratic action [LEMMA]
-  b_C2 = 2.239121e-04  lambda_QQG = 8932.08
-  coeff TT deltaS ~ 5.597801e-05  (perturbative)
-  r boost factor (1+aniso) = 1.026667
-F5c. lambda(mu) from anisotropy theorem [LEMMA]
-  lambda = 75*xi identity: True
-  lambda(mu=0.5) scale     = 8932.08
-
-F6. BCH Delta^n -> explicit RG flow
-  RG tick d ln mu          = Delta ln2 = 0.014348
-  beta_alpha (tick)        = -1.983207
-  beta_tau (shell block)   = 49.762672
-  beta spread (relative)   = 26.0920
-  asymptotically free:     True
-  dln xi / dln mu          = 0.016793
-  xi_eff                   = 119.09437
-  beta_xi (leading)        = -5.199794e-03
-F6b. RG operator R: discrete beta_xi, beta_lambda [LEMMA]
-  psi: 0.500 -> 0.500  d ln mu = 0.014348
-  beta_xi (discrete)       = 0.005151
-  beta_lambda (discrete)   = 0.005151
-  beta_xi (continuum)      = 0.016793
-  beta_xi (QQG eq.2 cmp)   = -2.253898e+00
-  CGM flow != QQG beta:   True
-
-F8. Reheating chain [LEMMA: optical exit + tau saturation]
-  psi_end (N_e on Delta-ruler)  = 0.9792
-  psi_kination                  = 0.9789
-  psi_reheat (tau/tau_G>=1-1/e) = 0.3679
-  E_reheat                      = 3.4126e+08 GeV
-  tau saturation fraction       = 0.6321
-
-F7. Dictionary summary (CGM <-> QQG)
-  CGM G(psi)=G0 exp(g1 psi) <-> QQG xi(mu), lambda(mu) running
-  CGM E_ref(psi)=mu, R~mu^2 <-> QQG mu ~ |R|^1/2 (de Sitter)
-  CGM xi_eff (F1)           <-> QQG xi (R^2 coefficient)
-  CGM beta_alpha_G (F6)     <-> QQG asymptotic freedom of betas
-  CGM N_qqg_weighted (F3)   <-> QQG large N (1/60,1/5,1/20)
-  CGM V=(1-exp(-|g1|psi))^2 <-> QQG Einstein-frame plateau
-  CGM psi:1->reheat (F8)    <-> QQG inflation->kination->reheating
-  CGM C-odd sector (F5)     <-> QQG Weyl C^2/lambda sector
-
-F9. Scope: QQG open gaps closed (not equivalence with QQG)
-  Gap                          | CGM derivation        | Script
-  -----------------------------|-----------------------|--------
-  1. Why R^2 corrections       | f(R) Taylor, BCH D^n  | 8C, 9F1
-  2. Why AF                    | g1<0, beta_lnG<0      | 9F2
-  3. Why large N               | 4*C(6,2)=60 weights   | 9F3b
-  4. Why GR in IR              | G(psi)->G0, EH dom   | 4A, 9F1
-  5. Why inflation onset       | psi=1 UV anchor       | 10B-D
-  6. Why mu = |R|^1/2         | E_ref(psi), dS chain  | 9F2,F1b
-  CGM != QQG where tested (F6b betas, r, optical depth): predictions.
-  Native cosmology: optical/ruler depth (analysis_10), not t=0 BB.
-
-F10. Claim tiers (theorem / lemma / conjecture / QQG-compare)
-  [THEOREM     ] A-E            plaquette, tau_G, BCH, spectral, chain
-  [LEMMA       ] F1c dict       xi(mu),lambda(mu); QQG normalization map
-  [LEMMA       ] F1d xi run     d ln xi/d ln mu from a2(psi); != beta_lnG
-  [LEMMA       ] F1b psi(R)     mu=E_ref, dS mu=sqrt(R) => psi(R) invertible
-  [THEOREM     ] F2 mu          E_ref(psi); beta_lnG<0 when g1<0
-  [THEOREM     ] F3b weights    1/60,1/5,1/20 from 4*C(6,2) plaquette
-  [THEOREM     ] F4 A_s         A_s^pl * Pi_H; Pi_H=rho^8 Delta^4/(pi^2|Omega|)
-  [LEMMA       ] F4 infl        R^2 V(phi); ns,r native; r below QQG typical
-  [QQG-COMPARE ] F4 Staro       plateau + eq.(6); not CGM theorem
-  [LEMMA       ] F5b tensor     delta S_T coeff; C^2=0 on FRW bg
-  [LEMMA       ] F5 lambda      lambda=75*xi from 2/75 anisotropy theorem
-  [LEMMA       ] F6b RG op      discrete R; beta_xi, beta_lambda from map
-  [QQG-COMPARE ] F6 QQG beta    beta_xi PRL eq.(2) vs CGM flow
-  [LEMMA       ] F8 reheat      optical N_e exit; tau sat at psi=1/e
-
-=========
-DONE
-=========
-Upstream A-E chain: OK
-Section F QQG bridge: OK
-  native n_s=0.9715 r=0.0024 (QQG eq.6 n_s=0.9727 compare-only)
-
-exit=0  duration=40.51s
+exit=1  duration=63.55s
 
 ######## hqvm_gravity_analysis_10.py ########
 
 CGM gravity analysis 10: E_CS continuous Planck boundary
-E_CS = 1.2200e+19 GeV  v = 246.2200 GeV  g1 = -0.645568
+E_CS = 1.2200e+19 GeV  v = 246.2200 GeV  g1 = -0.645571
 
 =========
 A. Three redshift channels (metric / optical / ruler)
@@ -3353,13 +3165,13 @@ A. Three redshift channels (metric / optical / ruler)
 
      psi       z_GR      z_opt    n_ruler
   ----------------------------------------
-    0.00     0.0000     0.0000  2679.2708
-    0.10     0.1180     0.1111  2411.3437
-    0.20     0.2910     0.2500  2143.4167
-    0.30     0.5811     0.4286  1875.4896
-    0.40     1.2361     0.6667  1607.5625
-    0.49     6.0711     0.9608  1366.4281
-    0.50        inf     1.0000  1339.6354
+    0.00     0.0000     0.0000  2679.2719
+    0.10     0.1180     0.1111  2411.3447
+    0.20     0.2910     0.2500  2143.4175
+    0.30     0.5811     0.4286  1875.4903
+    0.40     1.2361     0.6667  1607.5631
+    0.49     6.0711     0.9608  1366.4287
+    0.50        inf     1.0000  1339.6360
 
   Metric emission z (psi_src=0.49 -> 0): 6.0711
   z_GR at psi=0.5: inf (horizon; f_src=0)
@@ -3410,10 +3222,10 @@ C. Optical conjugacy (E_CS present at every IR measure)
 =========
 D. Exterior psi(s) vs optical psi=1 (spatial vs ruler UV)
 =========
-  g1 = -0.645568
-  Horizon s_h = 1.694551 r_g  => psi(s_h) = 0.500000
+  g1 = -0.645571
+  Horizon s_h = 1.694550 r_g  => psi(s_h) = 0.500000
   psi(s=1e6 r_g) = 9.999997e-07  (exterior tends to 0)
-  s_from_psi(1) = 0.711707  (must be < g1 for real exterior)
+  s_from_psi(1) = 0.711706  (must be < g1 for real exterior)
   max psi on exterior samples = 0.500000
 
   Point-mass exterior: 0 <= psi <= 1/2 at horizon (psi -> 0 at infinity).
@@ -3439,11 +3251,11 @@ F. Continuous common-source registration (epsilon_g)
   ------------------------------
       0.00     1.000000      Y
       0.10     1.066686      Y
-      0.20     1.137819      Y
-      0.30     1.213696      Y
-      0.40     1.294633      Y
-      0.49     1.372080      Y
-      0.50     1.380967      Y
+      0.20     1.137820      Y
+      0.30     1.213697      Y
+      0.40     1.294634      Y
+      0.49     1.372083      Y
+      0.50     1.380969      Y
 
   Source registration amplifies with depth; never depleted.
   eps_g >= 1 on [0, 1/2]: True
@@ -3455,7 +3267,7 @@ G. Inflation as optical depth (not cosmic time)
     psi = 1        => E_ref = E_CS = 1.2200e+19 GeV (UV boundary)
     psi_reh = 1/e  => E_ref = 3.4126e+08 GeV
     tau saturation (1 - 1/e) at psi_reh: tau/tau_G = 0.6321
-    n_ruler(psi=1) = 0.0000  n_ruler(psi=1/e) = 1693.6222
+    n_ruler(psi=1) = 0.0000  n_ruler(psi=1/e) = 1693.6229
 
   Inflation = accumulation of ruler depth from E_CS boundary.
   'Beginning' = psi -> 1 (common source), not t = 0.
@@ -3485,8 +3297,8 @@ DONE
 =========
 Planck boundary analysis: OK
 
-exit=0  duration=1.54s
+exit=0  duration=1.67s
 
-finished: 2026-06-01T14:19:50+03:00
-total_duration=105.98s
-worst_exit=0
+finished: 2026-08-17T01:59:15+03:00
+total_duration=160.95s
+worst_exit=1
