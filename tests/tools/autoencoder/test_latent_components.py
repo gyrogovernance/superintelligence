@@ -16,12 +16,11 @@ from src.tools.autoencoder.models.narrow import TransitionModel
 def test_named_latent_components_cover_latent() -> None:
     model = K4Autoencoder(n_trivial=3, n_sign=2)
     slices = model.z_slices
-    assert set(slices) == {"z_inv", "z_chi", "z_shell", "z_irrep"}
-    # slices tile the latent exactly, in order
-    assert slices["z_inv"] == slice(0, 3)
-    assert slices["z_chi"] == slice(3, 5)
-    assert slices["z_shell"] == slice(5, 7)
-    assert slices["z_irrep"] == slice(7, 9)
+    assert set(slices) == {"z_invariant", "z_char_S", "z_char_C", "z_char_F"}
+    assert slices["z_invariant"] == slice(0, 3)
+    assert slices["z_char_S"] == slice(3, 5)
+    assert slices["z_char_C"] == slice(5, 7)
+    assert slices["z_char_F"] == slice(7, 9)
     assert model.latent_dim == 9
 
 
@@ -30,7 +29,7 @@ def test_named_components_shapes_and_equivariance() -> None:
     model = K4Autoencoder(n_trivial=2, n_sign=2)
     idx = torch.arange(0, 4096, 97)
     parts = model.named_components(idx)
-    assert set(parts) == {"z_inv", "z_chi", "z_shell", "z_irrep"}
+    assert set(parts) == {"z_invariant", "z_char_S", "z_char_C", "z_char_F"}
     for part in parts.values():
         assert part.shape == (len(idx), 2)
     # the invariant block must be exactly K4-invariant
@@ -38,7 +37,7 @@ def test_named_components_shapes_and_equivariance() -> None:
         for gate_i in range(4):
             moved = model.k4_perm[gate_i][idx]
             parts_moved = model.named_components(moved)
-            err = (parts_moved["z_inv"] - parts["z_inv"]).abs().max()
+            err = (parts_moved["z_invariant"] - parts["z_invariant"]).abs().max()
             assert float(err) < 1e-5, gate_i
 
 

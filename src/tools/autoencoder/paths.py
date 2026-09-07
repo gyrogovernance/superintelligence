@@ -5,8 +5,7 @@ Everything lives under this package's own ``data/`` directory
 shared with the rest of the project. Nothing is nested beyond one folder per
 class. The layout:
 
-- ``data/dataset_<word>/``  - labeled arrays (bytes, states, transitions,
-  signatures, actions, embeddings, ensembles). Files only, manifest beside.
+- ``data/dataset_<word>/``  - labeled arrays (bytes, states, transitions, signatures, actions, embeddings, ensembles, null). Files only, manifest beside.
 - ``data/checkpoints/``     - trained weights (``<run>_<model>.pt``) + logs.
 - ``data/reports/``         - eval / verify / audit JSON, flat.
 - ``data/tmp/``             - anything temporary or scratch.
@@ -61,5 +60,6 @@ def ensure() -> None:
         "actions",
         "embeddings",
         "ensembles",
+        "null",
     ):
         dataset_dir(name).mkdir(parents=True, exist_ok=True)

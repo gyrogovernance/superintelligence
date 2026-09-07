@@ -5,28 +5,26 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
 import torch
 from torch import nn
 
+from . import paths
 from .helpers.evals_run import (
-    json_safe,
     evaluate_checkpoint,
+    json_safe,
     save_report,
     verify_full_g_equivariance,
     verify_k4_equivariance,
 )
+from .datasets import NullCorpus
+from .helpers.training_super import SUPER_TASKS, evaluate_gates, train_super
 from .helpers.training_losses import LossWeights, weighted_total
-from . import paths
 from .helpers.training_run import (
-    BestCheckpointCallback,
-    EarlyStoppingCallback,
     TrainConfig,
     Trainer,
-    ValidationCallback,
     iterate_batches,
     set_seed,
 )
@@ -35,11 +33,8 @@ from .models import (
     TIER_MEMBERS,
     build_model,
 )
-from .models.general import K4Autoencoder
-from .models.super import (
-    SpectralAutoencoder,
-    SpectralBottleneck,
-)
+from .models.general import AffineSpectralCodec, K4Autoencoder
+from .models.super import Super
 
 
 def _provenance() -> dict:
@@ -102,8 +97,14 @@ TASK_WEIGHTS: dict[str | None, dict[str, float]] = {
     "rawbyte": dict(transition_ce=1.0),
     "word": dict(word_ce=1.0),
     "percolation_rank": dict(rank_ce=1.0),
-    "unified_multi": dict(
-        state_ce=1.0, transition_ce=1.0, word_ce=1.0, rank_ce=1.0
+    "masked_frame": dict(byte_ce=1.0, family_ce=1.0, payload_ce=0.0, signature=0.0),
+    "holonomy": dict(byte_ce=0.5, family_ce=1.0, payload_ce=3.0, signature=0.25),
+    "provenance": dict(provenance=1.0),
+    "next_byte": dict(byte_ce=1.0, family_ce=1.0, payload_ce=0.5, signature=0.25),
+    "corrupt": dict(byte_ce=0.5, family_ce=1.0, payload_ce=3.0, signature=0.25),
+    "sigword": dict(signature=1.0),
+    "super_all": dict(
+        byte_ce=1.0, family_ce=0.5, payload_ce=0.5, signature=0.25, provenance=1.0
     ),
 }
 
@@ -119,24 +120,27 @@ def cmd_train(args) -> int:
     model_kind = args.model
     if ":" in model_kind:
         model_kind = model_kind.split(":", 1)[0]
+    if model_kind in TIER_MEMBERS:
+        model_kind = TIER_MEMBERS[model_kind][0]
     _MODEL_TASK_ALLOWED: dict[str, tuple[str | None, ...]] = {
-        "mlp": (None,),
-        "k4": (None,),
-        "spectral": (None,),
+        "mlp": (None, "state_ce"),
+        "k4": (None, "state_ce"),
+        "super": tuple(SUPER_TASKS),
         "transition": ("transition",),
         "rawbyte": ("rawbyte",),
         "word": ("word",),
         "percolation": ("percolation_rank",),
-        "unified": (None, "unified_multi"),
     }
     allowed = _MODEL_TASK_ALLOWED.get(model_kind)
     if allowed is None:
         print(
             f"unknown --model {args.model!r}; expected one of "
-            f"{sorted(_MODEL_TASK_ALLOWED)} (with optional ladder suffix)",
+            f"{sorted(_MODEL_TASK_ALLOWED)}",
             file=sys.stderr,
         )
         return 2
+    if model_kind == "super" and task is None:
+        task = "masked_frame"
     if task not in allowed:
         print(
             f"--task {task!r} is not supported by --model {args.model!r}; "
@@ -144,8 +148,12 @@ def cmd_train(args) -> int:
             file=sys.stderr,
         )
         return 2
-    task_weights = TASK_WEIGHTS[task]
-    loss_weights = LossWeights(rate=args.rate_weight, **task_weights)
+    task_weights = TASK_WEIGHTS.get(task, dict(state_ce=1.0))
+    # Super losses have state_ce=0 by default when byte_ce is set.
+    if model_kind == "super":
+        loss_weights = LossWeights(state_ce=0.0, rate=args.rate_weight, **task_weights)
+    else:
+        loss_weights = LossWeights(rate=args.rate_weight, **task_weights)
     config = TrainConfig(
         epochs=args.epochs,
         batch_size=args.batch_size,
@@ -158,18 +166,49 @@ def cmd_train(args) -> int:
         log_file=str(Path(args.output_dir) / f"{args.run_name}_train_log.jsonl"),
         loss_weights=loss_weights,
     )
-    heads = ("transition", "word", "rank") if task == "unified_multi" else None
     model: nn.Module = build_model(
         args.model,
         symmetry=getattr(args, "symmetry", None),
-        heads=heads,
         hidden_dim=getattr(args, "hidden_dim", None),
+        ladder=getattr(args, "ladder", None),
     )
-    # Echo the resolved model kind so a tier/spectral selection (e.g. --model
-    # super -> spectral) is unambiguous in the run log.
     print(f"[train] requested={args.model} resolved={type(model).__name__} task={task}")
-    trainer = Trainer(model, config)
     weights = config.loss_weights
+
+    if model_kind == "super":
+        assert isinstance(model, Super)
+        assert isinstance(task, str)
+        corpus = NullCorpus()
+        fit = train_super(
+            model,
+            corpus,
+            task=task,
+            epochs=args.epochs,
+            device=device,
+            lr=args.learning_rate,
+            batch_size=args.batch_size,
+            seed=args.seed,
+            loss_weights=loss_weights,
+        )
+        gates = None
+        if getattr(args, "report_gates", False):
+            gates = evaluate_gates(model, corpus, device=device)
+            print(json.dumps({"gates": gates}, indent=2))
+        extra = {
+            **_model_metadata(model, args.model, getattr(args, "symmetry", None)),
+            "fit": fit,
+            "gates": gates,
+            "n_train": int(len(corpus.train_micros)),
+            "n_val": int(len(corpus.holdout_micros)),
+            "task": task,
+        }
+        trainer = Trainer(model, config)
+        path = trainer.save_checkpoint(args.run_name, extra=extra)
+        print(f"checkpoint: {path}")
+        print(json.dumps({"final_loss": fit.get("final_loss"), "epochs_run": fit.get("epochs_run")}))
+        return 0
+
+    trainer = Trainer(model, config)
 
     rng = np.random.default_rng(args.seed)
     all_idx = np.arange(4096, dtype=np.int64)
@@ -288,142 +327,6 @@ def cmd_train(args) -> int:
             ce = torch.nn.functional.cross_entropy(logits, batch["rank"])
             return weighted_total({"rank_ce": ce}, weights)[0], {"rank_ce": float(ce.detach())}
 
-    elif task == "unified_multi":
-        # one shared latent (the unified-full gated Walsh spectrum) across all
-        # four objectives: state reconstruction, byte-conditioned transition,
-        # per-byte word signature, and percolation rank. The task heads read
-        # per-block pooled features of the shared code, so the codec's exact
-        # equivariance is never disturbed by the heads. Per epoch, each task
-        # is sampled to one common length so the trainer's aligned batching
-        # stays uniform.
-        assert model.symmetry == "full" and model.task_heads is not None, (
-            "unified_multi requires --model unified --symmetry full"
-        )
-        from .datasets import transition_table
-        from .helpers.evals_datasets import percolation_dataset
-        from .kernel import word_signature_id
-
-        table = transition_table().astype(np.int64)
-        table_tr = table[train_idx]  # [n_state_train, 256] — restrict rows to train split
-        table_val = table[val_idx]    # [n_val_state, 256] — restrict rows to val split
-        byte_sigs = np.array([word_signature_id([b]) for b in range(256)], dtype=np.int64)
-        tau_u = (byte_sigs >> 6) & 63
-        tau_v = byte_sigs & 63
-        ds = percolation_dataset(
-            n_singletons=64, n_rank_samples=5, n_random=120, seed=args.seed
-        )
-        rank = ds["transport_rank"].astype(np.int64)
-        n_mask = len(rank)
-        n_state = len(train_idx)
-        n_val_state = max(1, int(round(n_state * val_frac))) if val_frac > 0 else 0
-
-        # full transition row space = n_state_train x 256
-        K = max(64, min(n_state, 2048))
-        # No validation rows when val_fraction is 0: keep K_val at 0 so
-        # sample_val returns empty arrays instead of crashing on an empty
-        # val_idx (rv.choice rejects an empty population even for size 0).
-        K_val = min(n_val_state, 128) if n_val_state > 0 else 0
-
-        def sample_arrays(n: int, rng_state: np.random.Generator) -> dict[str, np.ndarray]:
-            """Sample every task to exactly ``n`` rows, all from the held-out
-            training states so the transition head sees real state indices."""
-            s_idx = rng_state.choice(train_idx, size=n)
-            t_pos = rng_state.choice(len(train_idx) * 256, size=n)
-            w_byte = rng_state.choice(256, size=n)
-            m_idx = rng_state.choice(n_mask, size=n)
-            tr_state = train_idx[t_pos // 256]
-            tr_byte = (t_pos % 256).astype(np.int64)
-            return {
-                "state_index": s_idx,
-                "tr_state": tr_state,
-                "tr_byte": tr_byte,
-                "next_state": table_tr.reshape(-1)[t_pos],
-                "word_state": s_idx,
-                "word_byte": w_byte,
-                "tau_u": tau_u[w_byte],
-                "tau_v": tau_v[w_byte],
-                "allowed_mask": ds["allowed_mask"][m_idx],
-                "rank": rank[m_idx],
-            }
-
-        def sample_val(n: int) -> dict[str, np.ndarray]:
-            rv = np.random.default_rng(args.seed + 999)
-            s_idx = rv.choice(val_idx, size=n) if n else np.zeros(0, np.int64)
-            t_pos = rv.choice(len(val_idx) * 256, size=n) if n else np.zeros(0, np.int64)
-            w_byte = rv.choice(256, size=n) if n else np.zeros(0, np.int64)
-            m_idx = rv.choice(n_mask, size=n) if n else np.zeros(0, np.int64)
-            tr_state = val_idx[t_pos // 256] if n else np.zeros(0, np.int64)
-            tr_byte = (t_pos % 256).astype(np.int64) if n else np.zeros(0, np.int64)
-            return {
-                "state_index": s_idx,
-                "tr_state": tr_state,
-                "tr_byte": tr_byte,
-                "next_state": table_val.reshape(-1)[t_pos] if n else np.zeros(0, np.int64),
-                "word_state": s_idx,
-                "word_byte": w_byte,
-                "tau_u": tau_u[w_byte],
-                "tau_v": tau_v[w_byte],
-                "allowed_mask": ds["allowed_mask"][m_idx],
-                "rank": rank[m_idx],
-            }
-
-        def loss_fn(batch):
-            heads = model.task_heads
-            assert heads is not None
-            components: dict[str, torch.Tensor] = {}
-            # state reconstruction over the unified-full spectral codec
-            if len(batch["state_index"]):
-                ce = torch.nn.functional.cross_entropy(
-                    model(batch["state_index"]), batch["state_index"]
-                )
-                components["state_ce"] = ce
-            # transition head reads per-block features of the same code plus
-            # the raw source state identity (needed for a state-conditioned map)
-            if len(batch["tr_state"]):
-                feats = model.per_block_features(batch["tr_state"])
-                t_logits = heads.transition_logits(
-                    feats, batch["tr_byte"], batch["tr_state"]
-                )
-                components["transition_ce"] = torch.nn.functional.cross_entropy(
-                    t_logits, batch["next_state"]
-                )
-            # word head reads per-block features from (state, byte)
-            if len(batch["word_state"]):
-                w_feats = model.per_block_features(batch["word_state"])
-                w_logits = heads.word_logits(
-                    w_feats, batch["word_byte"], batch["word_state"]
-                )
-                components["word_ce"] = torch.nn.functional.cross_entropy(
-                    w_logits[:, :64], batch["tau_u"]
-                ) + torch.nn.functional.cross_entropy(w_logits[:, 64:], batch["tau_v"])
-            # rank head reads the packed allowed mask directly
-            if len(batch["allowed_mask"]):
-                r_logits = heads.rank_logits(batch["allowed_mask"])
-                components["rank_ce"] = torch.nn.functional.cross_entropy(
-                    r_logits, batch["rank"]
-                )
-            weights = config.loss_weights
-            total, logs = weighted_total(components, weights)
-            return total, logs
-
-        epoch_rng = {"g": np.random.default_rng(args.seed)}
-        arrays_holder: dict[str, np.ndarray] = {}
-
-        def make_batches():
-            # refresh per-epoch samples so each pass sees different rows, and
-            # advance the epoch counter so the resample is actually different.
-            seed = args.seed + epoch["n"]
-            epoch["n"] += 1
-            rng_epoch = np.random.default_rng(seed)
-            arrays_holder.clear()
-            arrays_holder.update(sample_arrays(K, rng_epoch))
-            return iterate_batches(arrays_holder, config.batch_size, seed)
-
-        val_arrays = sample_val(K_val)
-
-        def val_batches():
-            return iterate_batches(val_arrays, 1024, config.seed, shuffle=True)
-
     else:
         arrays = {"state_index": train_idx}
         val_arrays = {"state_index": val_idx}
@@ -433,12 +336,7 @@ def cmd_train(args) -> int:
             logits = model(idx)
             ce = torch.nn.functional.cross_entropy(logits, idx)
             components = {"state_ce": ce}
-            # Resolve the spectral bottleneck whether it lives on the bare
-            # model or nested under the unified model's spectral sub-module.
-            bottleneck: "SpectralBottleneck | None" = getattr(model, "bottleneck", None)
-            spectral_sub: "SpectralAutoencoder | None" = getattr(model, "spectral", None)
-            if bottleneck is None and spectral_sub is not None:
-                bottleneck = spectral_sub.bottleneck
+            bottleneck = getattr(model, "bottleneck", None)
             if bottleneck is not None and weights.rate > 0:
                 components["rate"] = bottleneck.rate_penalty()
             total, logs = weighted_total(components, weights)
@@ -446,16 +344,14 @@ def cmd_train(args) -> int:
 
     epoch = {"n": 0}
 
-    custom_batches = task == "unified_multi"
-    if not custom_batches:
-        def make_batches():
-            # Vary the shuffle seed per epoch so each pass sees a different order.
-            it = iterate_batches(arrays, config.batch_size, config.seed + epoch["n"])
-            epoch["n"] += 1
-            return it
+    def make_batches():
+        # Vary the shuffle seed per epoch so each pass sees a different order.
+        it = iterate_batches(arrays, config.batch_size, config.seed + epoch["n"])
+        epoch["n"] += 1
+        return it
 
-        def val_batches():
-            return iterate_batches(val_arrays, 1024, config.seed, shuffle=True)
+    def val_batches():
+        return iterate_batches(val_arrays, 1024, config.seed, shuffle=True)
 
     callbacks: list = []
     if n_val > 0 and getattr(args, "patience", None):
@@ -513,13 +409,10 @@ def cmd_train(args) -> int:
 def cmd_train_denoise(args) -> int:
     """Train a spectral codec on bath-corrupted states against clean targets.
 
-    The byte bath flips chirality axes independently with probability eta_i,
-    acting as (u, v) -> (u ^ delta, v ^ delta). The closed-form optimal
-    per-block denoiser gain is prod_i (1 - 2 eta_i)^((a^b)_i) (the Walsh
-    multiplier of the carrier frequency); the trained gains are compared
-    against it in the emitted report.
+    The default bath is a diagonal translation / gauge: (u, v) -> (u ^ d, v ^ d),
+    which preserves chirality. Pass --bath chirality for v -> v ^ q.
     """
-    from .helpers.evals_metrics import denoiser_gain_report
+    from .helpers.evals_metrics import assign_analytic_gains, denoiser_gain_report
 
     set_seed(args.seed)
     device = "cpu"
@@ -537,7 +430,7 @@ def cmd_train_denoise(args) -> int:
         # per-block Walsh multiplier; MSE on the one-hot target does.
         loss_weights=LossWeights(recon_mse=1.0, rate=args.rate_weight),
     )
-    model = SpectralAutoencoder(ladder=args.ladder)
+    model = AffineSpectralCodec(ladder=args.ladder, frozen=False)
     trainer = Trainer(model, config)
     weights = config.loss_weights
 
@@ -549,12 +442,44 @@ def cmd_train_denoise(args) -> int:
     clean = np.arange(4096, dtype=np.int64)
 
     def corrupt(states: np.ndarray, gen: np.random.Generator) -> np.ndarray:
-        # flip chirality axis i by XORing BOTH registers: the state index
-        # delta is 65 * d for a 6-bit flip vector d (bits i and i+6)
         d = (gen.random((len(states), 6)) < eta[None, :]).astype(np.int64) @ (
             1 << np.arange(6)
         )
-        return states ^ (65 * d)  # (u, v) -> (u ^ d, v ^ d)
+        u = (states >> 6) & 63
+        v = states & 63
+        bath = getattr(args, "bath", "diagonal_translation")
+        if bath == "chirality":
+            return (u << 6) | (v ^ d)
+        return states ^ (65 * d)
+
+    if getattr(args, "assign_analytic", False):
+        assign_analytic_gains(
+            model, eta.tolist(), bath=getattr(args, "bath", "diagonal_translation")
+        )
+        extra = {
+            **_model_metadata(
+                model,
+                f"affine_codec:{args.ladder}" if args.ladder else "affine_codec",
+            ),
+            "task": "denoise",
+            "eta": eta.tolist(),
+            "assign_analytic": True,
+            "bath": getattr(args, "bath", "diagonal_translation"),
+        }
+        path = trainer.save_checkpoint(args.run_name, extra=extra)
+        report = denoiser_gain_report(
+            model, eta.tolist(), bath=getattr(args, "bath", "diagonal_translation")
+        )
+        summary = {
+            "checkpoint": path.as_posix(),
+            "eta": eta.tolist(),
+            "assign_analytic": True,
+            **report,
+        }
+        if args.report_file:
+            save_report(summary, Path(args.report_file))
+        print(json.dumps(summary, indent=2))
+        return 0
 
     epoch = {"n": 0}
 
@@ -589,13 +514,19 @@ def cmd_train_denoise(args) -> int:
     # Save the checkpoint first; the gain report is downstream and must not
     # block the trained artifact from being persisted.
     extra = {
-        **_model_metadata(model, f"spectral:{args.ladder}" if args.ladder else "spectral"),
+        **_model_metadata(
+            model,
+            f"affine_codec:{args.ladder}" if args.ladder else "affine_codec",
+        ),
         "fit": stats,
         "task": "denoise",
         "eta": eta.tolist(),
+        "bath": getattr(args, "bath", "diagonal_translation"),
     }
     path = trainer.save_checkpoint(args.run_name, extra=extra)
-    report = denoiser_gain_report(model, eta.tolist())
+    report = denoiser_gain_report(
+        model, eta.tolist(), bath=getattr(args, "bath", "diagonal_translation")
+    )
     summary = {
         "checkpoint": path.as_posix(),
         "epochs_run": stats.get("epochs_run"),
@@ -623,9 +554,22 @@ def cmd_evaluate(args) -> int:
 def cmd_verify_equivariance(args) -> int:
     from .helpers.evals_run import load_any_checkpoint
 
-    model, _ = load_any_checkpoint(Path(args.checkpoint))
+    model, meta = load_any_checkpoint(Path(args.checkpoint))
     if isinstance(model, K4Autoencoder):
         report = verify_k4_equivariance(model)
+    elif isinstance(model, Super):
+        extra = meta.get("extra", {}) or {}
+        flags = extra.get("gate_flags") or {}
+        report = {
+            "model": "super",
+            "gate_flags": flags,
+            "gates": extra.get("gates"),
+            "passed": bool(flags) and all(bool(v) for v in flags.values()),
+            "note": (
+                "Super is certified by its gate suite; regenerate with "
+                "python -m src.tools.autoencoder.helpers.training_super gates"
+            ),
+        }
     else:
         report = verify_full_g_equivariance(model, seed=args.seed)
     print(json.dumps(json_safe(report), indent=2))
@@ -642,12 +586,13 @@ def cmd_verify_groups(args) -> int:
     has a proper inverse, and signature composition is a group of order 8192.
     """
     from src import api
+
     from .kernel import (
         apply_k4_index,
         apply_signature_index,
-        signature_inverse_id,
         signature_from_id,
         signature_id,
+        signature_inverse_id,
     )
 
     # K4 closure: composing any two gates yields one of the four gates, and
@@ -724,8 +669,8 @@ def cmd_sample_ensemble(args) -> int:
         corpus_shell_histogram,
         lambda_grid,
         sample_lambda_corpus,
+        shell_ensemble_labels,
     )
-    from .helpers.evals_datasets import shell_ensemble_labels
 
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -763,7 +708,6 @@ def cmd_sweep_lambda(args) -> int:
     corpus loses its chirality polarization), while psi_hat on the
     diagonal stabilizer stays pinned. Writes JSONL, one row per lambda."""
     from .helpers.evals_datasets import (
-        _closed_under_composition,
         sample_lambda_corpus,
         w2_word_signature_ids,
     )
@@ -855,26 +799,20 @@ def cmd_sweep_lambda(args) -> int:
     return 0
 
 
-def _load_spectral_model(checkpoint: str | None) -> "SpectralAutoencoder":
-    """Return the spectral codec for a spectral checkpoint.
+def _load_affine_codec(checkpoint: str | None) -> AffineSpectralCodec:
+    """Return an AffineSpectralCodec for export and dictionary audit.
 
-    A unified container's ``.spectral`` sub-module is extracted; a bare
-    spectral checkpoint is returned as-is. With no checkpoint path, a fresh
-    identity codec is returned.
+    Accepts a codec checkpoint, or no path (fresh identity codec).
     """
-    from .models.super import SpectralAutoencoder
     from .helpers.evals_run import load_any_checkpoint
 
     if not checkpoint:
-        return SpectralAutoencoder()
+        return AffineSpectralCodec(frozen=True)
     model, _ = load_any_checkpoint(checkpoint, device="cpu")
-    spectral = getattr(model, "spectral", None)
-    if isinstance(spectral, SpectralAutoencoder):
-        return spectral
-    if isinstance(model, SpectralAutoencoder):
+    if isinstance(model, AffineSpectralCodec):
         return model
     raise TypeError(
-        f"export-embeddings/audit-dictionary requires a spectral checkpoint; "
+        f"export-embeddings/audit-dictionary requires AffineSpectralCodec; "
         f"got {type(model).__name__} at {checkpoint}"
     )
 
@@ -884,7 +822,7 @@ def cmd_export_embeddings(args) -> int:
     from .corpus import export_embeddings
 
     set_seed(args.seed)
-    model = _load_spectral_model(args.checkpoint)
+    model = _load_affine_codec(args.checkpoint)
     out_dir = Path(args.output_dir)
     # The identity export (no checkpoint) writes the bare filenames; a trained
     # checkpoint writes "<name>_<suffix>.npy" so it never clobbers the identity.
@@ -917,7 +855,7 @@ def cmd_audit_dictionary(args) -> int:
     from .helpers.evals_run import audit_dictionary, write_audit_report
 
     set_seed(args.seed)
-    model = _load_spectral_model(args.checkpoint)
+    model = _load_affine_codec(args.checkpoint)
     report = audit_dictionary(
         model, checkpoint_hash=str(args.checkpoint or "identity"), seed=args.seed
     )
@@ -933,7 +871,9 @@ def cmd_generate(args) -> int:
     data_dir = Path(args.data_dir)
     if args.dataset == "all":
         out_paths = generate_all(data_dir)
-    elif args.dataset in ("bytes", "states", "transitions", "actions", "signatures"):
+    elif args.dataset in (
+        "bytes", "states", "transitions", "actions", "signatures", "null"
+    ):
         out_paths = [generate_dataset(args.dataset, data_dir)]
     else:
         raise ValueError(f"unknown dataset {args.dataset!r}")
@@ -951,7 +891,7 @@ def cmd_genomics(args) -> int:
     chi_shells, qubec_order, ab_horizon, boundary_keys) under one of the 24
     NCBI nucleotide encodings. Pure data transform - there is no model.
     """
-    from .helpers.genomics import (
+    from .programs.genomics.genomics import (
         all_nucleotide_encodings,
         compile_climate_summary,
         compile_interval,
@@ -989,7 +929,7 @@ def main(argv: list[str] | None = None) -> int:
     p_generate.add_argument(
         "--dataset",
         default="all",
-        help="dataset name or 'all' (bytes, states, transitions, actions, signatures)",
+        help="dataset name or 'all' (bytes, states, transitions, actions, signatures, null)",
     )
 
     p_generate.add_argument(
@@ -1002,13 +942,11 @@ def main(argv: list[str] | None = None) -> int:
     p_train = sub.add_parser("train", help="train a model on the state census")
     p_train.add_argument(
         "--model",
-        default="spectral",
-        help="individual kind: mlp | k4 | spectral | transition | rawbyte | word "
-        "| unified | percolation; or a spectral:<ladder> rung (full, diagonal, "
-        "shell, offdiagonal, trivial, shell_radial, shell_gauge, chirality_gauge); "
-        "or a tier selector narrow | general | super | all (trains the tier's "
-        "first member). unified requires --symmetry. A tier/spectral selection "
-        "is echoed in the run log so sweeps are unambiguous.",
+        default="mlp",
+        choices=tuple(MODEL_KINDS) + tuple(TIER_MEMBERS.keys()),
+        help="model kind: mlp | k4 | super | transition | rawbyte | word | "
+        "percolation; or tier selector narrow | general | super | all "
+        "(trains the tier's first member).",
     )
     p_train.add_argument("--epochs", type=int, default=5)
     p_train.add_argument("--batch-size", type=int, default=256)
@@ -1070,27 +1008,49 @@ def main(argv: list[str] | None = None) -> int:
         "--symmetry",
         default=None,
         choices=("free", "k4", "full"),
-        help="Symmetry level for the unified autoencoder: with model=unified, "
-        "selects the level directly (full = Walsh block gains, k4 = K4 Reynolds, "
-        "free = unconstrained); with model=spectral:<ladder>, wraps that spectral "
-        "model in the unified autoencoder and applies the given level.",
+        help="Optional symmetry tag stored in checkpoint metadata.",
     )
     p_train.add_argument(
         "--task",
         default=None,
-        choices=("state_ce", "transition", "rawbyte", "word", "percolation_rank", "unified_multi"),
-        help="Learning task: state_ce (default, census reconstruction), "
-        "transition/rawbyte (byte-conditioned next-state prediction), "
-        "word (per-byte tau prediction), percolation_rank (rank recovery "
-        "from the allowed byte mask), unified_multi (all four objectives "
-        "over one shared spectral latent). Requires the matching --model.",
+        choices=(
+            "state_ce",
+            "transition",
+            "rawbyte",
+            "word",
+            "percolation_rank",
+            "masked_frame",
+            "holonomy",
+            "provenance",
+            "next_byte",
+            "corrupt",
+            "sigword",
+            "super_all",
+        ),
+        help="Learning task: state_ce (default for mlp/k4), "
+        "transition/rawbyte/word/percolation_rank for narrow models, "
+        "or Super tasks including sigword (learned-signature ablation) and super_all.",
+    )
+    p_train.add_argument(
+        "--report-gates",
+        action="store_true",
+        help="After Super training, evaluate and print G1/G2/G4/bits-per-byte gates.",
+    )
+    p_train.add_argument(
+        "--ladder",
+        default=None,
+        help="Spectral codec ladder for AffineSpectralCodec (ignored for Super).",
     )
     p_train.set_defaults(func=cmd_train)
 
     p_train_denoise = sub.add_parser(
-        "train-denoise", help="train a spectral codec to denoise bath-corrupted states"
+        "train-denoise", help="train AffineSpectralCodec to denoise bath-corrupted states"
     )
-    p_train_denoise.add_argument("--ladder", default="shell_radial", help="spectral rung")
+    p_train_denoise.add_argument(
+        "--ladder",
+        default="diagonal_translation_radial",
+        help="spectral rung (alias shell_radial = diagonal_translation_radial)",
+    )
     p_train_denoise.add_argument("--epochs", type=int, default=5)
     p_train_denoise.add_argument("--batch-size", type=int, default=256)
     p_train_denoise.add_argument(
@@ -1105,6 +1065,17 @@ def main(argv: list[str] | None = None) -> int:
                                 default="0.03,0.03,0.03,0.03,0.03,0.03",
                                 help="six comma-separated axis flip probabilities (alias --eta)")
     p_train_denoise.add_argument("--rate-weight", type=float, default=0.0)
+    p_train_denoise.add_argument(
+        "--bath",
+        default="diagonal_translation",
+        choices=("diagonal_translation", "chirality"),
+        help="diagonal_translation preserves χ; chirality is v→v⊕q",
+    )
+    p_train_denoise.add_argument(
+        "--assign-analytic",
+        action="store_true",
+        help="write closed-form gains and skip empirical training",
+    )
     p_train_denoise.add_argument("--seed", type=int, default=0)
     p_train_denoise.add_argument(
         "--run-name",
@@ -1129,7 +1100,7 @@ def main(argv: list[str] | None = None) -> int:
     p_eval.add_argument(
         "--task",
         default=None,
-        choices=("state_ce", "transition", "rawbyte", "word", "percolation_rank", "unified_multi"),
+        choices=("state_ce", "transition", "rawbyte", "word", "percolation_rank"),
         help="default reconstruction/equivariance, or the matching model "
         "task inferred from the checkpoint when omitted",
     )
@@ -1188,7 +1159,7 @@ def main(argv: list[str] | None = None) -> int:
         "sweep-lambda",
         help="train per-lambda ensembles and read the psi-hat order parameter",
     )
-    p_sweep.add_argument("--model", default="mlp")
+    p_sweep.add_argument("--model", default="mlp", choices=("mlp", "k4"))
     p_sweep.add_argument("--epochs", type=int, default=3)
     p_sweep.add_argument("--n", type=int, default=8192)
     p_sweep.add_argument("--batch-size", type=int, default=512)
@@ -1207,7 +1178,7 @@ def main(argv: list[str] | None = None) -> int:
     p_export = sub.add_parser(
         "export-embeddings", help="export the verified-dictionary embedding corpus"
     )
-    p_export.add_argument("--model", default="spectral", choices=("spectral",))
+    p_export.add_argument("--model", default="affine_codec", choices=("affine_codec",))
     p_export.add_argument("--checkpoint", default=None, help="optional trained checkpoint")
     p_export.add_argument(
         "--output-dir",
@@ -1222,7 +1193,7 @@ def main(argv: list[str] | None = None) -> int:
     p_audit = sub.add_parser(
         "audit-dictionary", help="run the one-pass verified-dictionary audit"
     )
-    p_audit.add_argument("--model", default="spectral", choices=("spectral",))
+    p_audit.add_argument("--model", default="affine_codec", choices=("affine_codec",))
     p_audit.add_argument("--checkpoint", default=None, help="optional trained checkpoint")
     p_audit.add_argument(
         "--report-file",
@@ -1256,6 +1227,10 @@ def main(argv: list[str] | None = None) -> int:
     p_genomics.set_defaults(func=cmd_genomics)
 
     args = parser.parse_args(argv)
+    torch.use_deterministic_algorithms(True, warn_only=True)
+    if torch.backends.cudnn.is_available():
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
     return args.func(args)
 
 

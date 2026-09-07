@@ -105,47 +105,35 @@ def test_checkpoint_roundtrip(tmp_path, state_array) -> None:
     assert torch.allclose(out_a, out_b)
 
 
-def test_checkpoint_roundtrip_unified_via_metadata(tmp_path, state_array) -> None:
-    """Regression: unified-full checkpoints must reload with the exact
-    constructor config recorded in ``extra["model_config"]``, not a hand-
-    maintained parallel copy of defaults."""
+def test_checkpoint_roundtrip_super_via_metadata(tmp_path) -> None:
+    """Super checkpoints reload with the exact constructor config recorded in
+    ``extra["model_config"]``."""
     from src.tools.autoencoder.helpers.evals_run import load_any_checkpoint
-    from src.tools.autoencoder.models import UnifiedAutoencoder
+    from src.tools.autoencoder.models import build_model
+    from src.tools.autoencoder.models.super import Super
 
     set_seed(7)
-    config = TrainConfig(epochs=1, batch_size=512, device="cpu", seed=7,
+    model = build_model("super")
+    assert isinstance(model, Super)
+    config = TrainConfig(epochs=1, batch_size=8, device="cpu", seed=7,
                          checkpoint_dir=str(tmp_path))
-    model = UnifiedAutoencoder(symmetry="full", ladder="full")
     trainer = Trainer(model, config)
-    arrays = {"state_index": state_array}
-
-    def loss_fn(batch):
-        idx = batch["state_index"]
-        logits = model(idx)
-        ce = torch.nn.functional.cross_entropy(logits, idx)
-        total, logs = weighted_total(
-            {"state_ce": ce}, LossWeights(state_ce=1.0)
-        )
-        return total, logs
-
-    trainer.fit(
-        iterate_batches(arrays, config.batch_size, config.seed),
-        loss_fn,
-    )
     extra = {
         "model_config": model.get_config(),
-        "model_kind": "unified",
-        "symmetry": "full",
+        "model_kind": "super",
     }
-    path = trainer.save_checkpoint("unified_smoke", extra=extra)
-
+    path = trainer.save_checkpoint("super_smoke", extra=extra)
     reloaded, meta = load_any_checkpoint(path, device="cpu")
-    assert reloaded.get_config() == model.get_config()
-    probe = torch.as_tensor(state_array[:64])
-    torch.manual_seed(0)
-    out_a = model(probe)
-    out_b = reloaded(probe)
-    assert torch.allclose(out_a, out_b)
+    assert isinstance(reloaded, Super)
+    assert meta["extra"]["model_kind"] == "super"
+    cfg_a = model.get_config()
+    cfg_b = reloaded.get_config()
+    for key in ("context_dim", "atom_dim", "frame_dim"):
+        assert cfg_a[key] == cfg_b[key]
+    assert torch.equal(
+        torch.nn.utils.parameters_to_vector(reloaded.parameters()).detach(),
+        torch.nn.utils.parameters_to_vector(model.parameters()).detach(),
+    )
 
 
 def test_validation_and_early_stopping(tmp_path, state_array) -> None:

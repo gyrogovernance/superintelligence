@@ -2,11 +2,18 @@
 
 ## What this is
 
-This project trains neural networks to represent the state space of the hQVM, a holonomic virtual machine defined in the [Formalism](docs/specs/hQVM_Specs_Formalism.md), [QuBEC](docs/specs/hQVM_QuBEC_Theory.md), and [SDK](docs/specs/hQVM_SDK_Quantum_Computing.md) specifications. The machine has exactly 4096 reachable states, and each of the 256 possible input bytes selects a fixed permutation of those states. Reading a byte moves the machine from one state to another, and every such move is exact and reversible.
+This package is a neuro-symbolic group-equivariant autoencoder suite over a finite group-structured state space. It ships four certified pieces together:
 
-An autoencoder is a network that learns to compress its input into a compact code and then rebuild the input from that code. What it keeps in the code is what it decided matters. This project trains autoencoders on the 4096 states and asks each one what it must keep in order to rebuild a state exactly, so the code becomes a readable summary of the state's structure.
+1. models whose symmetries are built into the architecture (not encouraged with a penalty);
+2. an exhaustive closed-form equivariance certificate for the full affine group on the spectral codec;
+3. a Bayes-optimal spectral denoiser whose gains have a known analytic form;
+4. an exact-grammar process model (`Super`) whose learned parts are provenance discrimination and a residual climate head gated against QuBEC λ ceilings, with exact signature-coset completion.
 
-The distinguishing property of these networks is that they respect the machine's exact symmetries by construction. The hQVM state space carries group actions: the four Klein gates that permute states holonomically, and the larger affine signature group. A network is equivariant when applying a symmetry to the input and then encoding gives the same code as encoding first and then applying the corresponding symmetry to the code. The models in this project satisfy that property exactly, before and after training, because the symmetry is built into the architecture rather than encouraged with a penalty.
+The underlying machine is the hQVM, defined in the [Formalism](../../../docs/specs/hQVM_Specs_Formalism.md), [QuBEC](../../../docs/specs/hQVM_QuBEC_Theory.md), and [SDK](../../../docs/specs/hQVM_SDK_Quantum_Computing.md) specifications. It has exactly 4096 reachable states. Each of the 256 input bytes selects a fixed permutation of those states. Every move is exact and reversible.
+
+An autoencoder compresses an input into a compact code and rebuilds the input from that code. What it keeps in the code is what it decided matters. Here the networks are trained on the 4096 states (and, for Super, on byte ledgers) so the code becomes a readable summary of structure that already exists in the kernel, not a free-form black box.
+
+A network is equivariant when applying a symmetry to the input and then encoding gives the same result as encoding first and then applying the matching symmetry to the code. The models in this project satisfy that property exactly, before and after training.
 
 The kernel is the only authority for the machine. No transition rule, gate, mask, or intron is reformulated in the learning stack, and no dataset is generated outside `src/api.py`. Every dataset, group action, and evaluation routes through the kernel.
 
@@ -29,78 +36,112 @@ is one file; the registry and the symmetry selector live in `__init__.py`.
 | Tier file | Model | Symmetry built in | How it works |
 |---|---|---|---|
 | `narrow.py` | `ExactUVCodec`, `BoundaryChiralityCodec`, `ChiralityOnlyCodec`, `ShellOnlyCodec` | none (deterministic) | exact chart codecs used as information-theoretic null models - not networks at all |
-| `narrow.py` | `MLPAutoencoder` | none | a plain encoder and decoder with no architectural symmetry; the null baseline. MLP = Multi-Layer Perceptron, a stack of simple neuron layers |
+| `narrow.py` | `MLPAutoencoder` | none | plain encoder and decoder. MLP = Multi-Layer Perceptron |
 | `narrow.py` | `TransitionModel`, `RawByteTransitionModel`, `WordActionModel`, `FrameHead` | none | byte-conditioned task models (next state, raw byte, word, frame), supervised by kernel-exact targets |
 | `narrow.py` | `PercolationLearner` | none | reads the packed 256-bit allowed byte mask and predicts the kernel-exact percolation labels (transport rank, reach, full/horizon/giant flags) |
-| `general.py` | `K4Autoencoder` | exactly K4 | averages the encoder over the four Klein gates (Reynolds symmetrization), giving a latent split into `z_inv`, `z_chi`, `z_shell`, `z_irrep` |
-| `super.py` | `SpectralAutoencoder` | exactly the full affine group | applies the Walsh transform, one scalar gain per irreducible symmetry block (64 one-dimensional and 2016 two-dimensional blocks), and inverts the transform |
-| `super.py` | `MultiCellSpectral` | exactly the full affine group | the spectral model extended to a product register of cells |
-| `__init__.py` | `UnifiedAutoencoder` (optional `MultiTaskHeads`) | free, k4, or full, selectable | the symmetry selector: one class reproducing the standalone classes exactly at each level; optional multi-task heads (transition/word/percolation rank) read per-block pooled features of the shared spectral latent, leaving the codec's exact equivariance untouched |
+| `general.py` | `K4Autoencoder` | exactly K4 | averages the encoder over the four Klein gates (Reynolds symmetrization), giving a latent split into `z_invariant`, `z_char_S`, `z_char_C`, `z_char_F` |
+| `general.py` | `AffineSpectralCodec` | full affine group | Walsh occupation codec |
+| `super.py` | `Super` | affine ledger grammar | kernel scan, visible-sibling byte recovery, XOR signature registers, GRU ledger context |
 
-Flags select a model (`--model mlp`, `k4`, `spectral`, `transition`, `rawbyte`,
-`word`, `percolation`, `unified`); a tier name (`narrow`, `general`, `super`) or
+Flags select a model (`--model mlp`, `k4`, `super`, `transition`, `rawbyte`,
+`word`, `percolation`); a tier name (`narrow`, `general`, `super`) or
 `all` selects every model in that tier for sweeping.
 
-The spectral model is exact even before training: with all gains set to one it is the identity codec, rebuilding its input perfectly. Because each gain lives inside one symmetry block, the gains commute with the group action, so the model stays exactly equivariant for any gain values. The lossy-codec ladder selects which blocks stay on: `full` keeps everything, `diagonal` keeps only the 64 one-dimensional blocks, `shell`, `offdiagonal`, `shell_gauge` and `chirality_gauge` keep their named sectors, and `trivial` keeps the trivial block. Three tied rungs share one gain per symmetry class: `shell_radial` uses 7 gains keyed by the carrier weight, `shell_gauge` uses 28 keyed by the unordered shell pair, and `chirality_gauge` uses 56 keyed by the ordered shell pair and its AND parity. An optional L1 rate term learns which frequencies survive, and a denoising objective trains the gains on bath-corrupted states against clean targets, where the closed-form optimal gains are known. Byte-conditioned models predict the next state that a byte takes the machine to. Word and action models compose byte signatures through the kernel group law, so the network's composition of two word signatures equals the kernel's composition exactly.
+Super is the process model for byte ledgers. It scans a ledger with the kernel, recovers a masked canonical byte from the visible siblings and the frame position using a frozen analytic grammar, and composes the word signature with exact XOR registers. A GRU over depth-4 frames learns provenance: it separates collision ledgers that share a signature but are not the same word. Climate and sequential completion are separate residual arms. Climate is an analytic QuBEC tilt from the visible-byte q-class histogram, gated off on exact-grammar frames so G1 and G7 stay exact; a sequential MLP reads prefix-GRU context, and an opt-in previous-micro flip filter (`apply_markov`) supplies the Bayes-optimal Markov conditional without disturbing uniform/canonical certificates. Encode/decode uses a ledger-free `SuperCode` (exact signature, endpoint, climate, plus provenance). Production weights and the gate report are written by `helpers.training_super`.
+
+The measured production object is exact grammar + provenance + residual (`claim`: `exact_grammar_plus_provenance_and_residual`; checkpoint sha256 `42e8e5ba40c304e96d0b5d243dab712a0409c3bc4804d8bc86cb10185981c4ff`). Winner size is context 32 / atom 8 (106,754 parameters), regenerated by `helpers.training_super gates` (measure-gate capacity sweep, then 6 continue-train + 2 Markov-path polish epochs). λ-ensemble residual at λ=4 takes 90.0% of the closed-form ceiling. Signature-constrained completion puts mass 1.0 on the valid coset (ambiguity 2). The Markov causal filter improves 2.89 bits versus uniform (gap +0.30 bits to the `6·h₂(0.1)+2` bound on this holdout). The Markov filter is opt-in (`apply_markov`) so G6/G7 certificates stay on the grammar. See `hQVM_AE_Report.md` and `data/reports/super_gates.json`.
+
+AffineSpectralCodec is the Walsh occupation codec. `train-denoise` and dictionary export use it; the shipped denoiser gains match the closed-form Bayes-optimal multipliers.
 
 ## What the package contains
 
 ```
 src/tools/autoencoder/
-├── cli.py             all entry points: train, train-denoise, evaluate, verify, verify-groups, sample-ensemble, sweep-lambda, export-embeddings, audit-dictionary, generate, verify-full-g-exhaustive, genomics
+├── cli.py             all entry points: train, train-denoise, evaluate, verify, verify-groups, sample-ensemble, sweep-lambda, export-embeddings, audit-dictionary, generate, verify-full-g-exhaustive
 ├── kernel.py          kernel adapter: state indexing, stepping, gates, signatures, signature id packing, popcount6
-├── datasets.py        transition and inverse tables, action and signature tables, byte/state census, manifests, invariants
+├── datasets.py        kernel tables, census, null corpus (dataset_null + NullCorpus), manifests
 ├── corpus.py          the dictionary export: embeddings with exact kernel labels (charter artifact)
+├── paths.py           data/ layout
 ├── README.md          this document
 ├── __init__.py        package registry
 │
-├── models/            the only nested folder - three tiers + the plug
-│   ├── __init__.py   the plug: MODEL_KINDS registry + build_model + UnifiedAutoencoder
-│   ├── narrow.py     no structure built in: codecs, MLP, byte-mechanism predictors, percolation learner
-│   ├── general.py    builds in the K4 gate symmetry: K4Autoencoder
-│   └── super.py      builds in the full group / multi-register: SpectralAutoencoder, MultiCellSpectral
+├── models/
+│   ├── __init__.py   MODEL_KINDS registry + build_model
+│   ├── narrow.py     codecs, MLP, byte-mechanism predictors, percolation learner
+│   ├── general.py    K4Autoencoder, AffineSpectralCodec
+│   └── super.py      Super
 │
-├── helpers/           flat helper package, naming convention <domain>_<role>.py
-│   ├── training_run.py        trainer: four-hook callbacks, checkpointing, JSONL logs, seeding
-│   ├── training_losses.py     weighted multi-objective losses + popcount_tensor (torch popcount)
-│   ├── evals_run.py           checkpoint loading, evaluation, reports, benchmark suites, and verification (verify_k4/full-G, exhaustive full-G verifier, audit_dictionary, write_audit_report)
-│   ├── evals_metrics.py       reconstruction/equivariance/transition/psi_hat metrics + probe_from_latent, shadow_invariance_error + kernel-exact readouts (climate, anisotropy, gauge, Z2 sheet, lift, code, denoiser, synthesizer, operator_structure, genomics, walsh_sector_energy, shell_distribution_ensemble)
-│   ├── evals_datasets.py      eval dataset and corpus builders: ensembles, percolation, words, byte mechanism
-│   ├── genomics.py            genomics compile adapter: 9-layer GenomicCompile, 24 NCBI nucleotide encodings, climate summary
-│   └── ingest_genomics.py     populates dataset_genomics/ from the science catalog or public sources (--skip-network)
+├── helpers/           naming convention <domain>_<role>.py
+│   ├── training_run.py      shared trainer: callbacks, checkpointing, JSONL logs
+│   ├── training_losses.py   weighted multi-objective losses
+│   ├── training_super.py    Super tasks, gates G1-G9, production regeneration
+│   ├── evals_run.py         checkpoint loading, evaluation, reports, verification
+│   ├── evals_metrics.py     reconstruction/equivariance/transition/psi_hat metrics + readouts
+│   └── evals_datasets.py    eval corpus builders: ensembles, percolation, words, byte mechanism
 │
-└── data/              ACTUAL DATA ONLY: *.npy + manifest.json. Zero .py files (regenerable via `cli generate`)
-    ├── dataset_bytes/         byte census (kernel arrays)
-    ├── dataset_states/        state census (kernel arrays)
+└── data/              ACTUAL DATA ONLY: *.npy + manifest.json (regenerable via `cli generate`)
+    ├── dataset_null/          CGM null permutation atlas (see "CGM Null Dataset")
+    ├── dataset_bytes/         byte census
+    ├── dataset_states/        state census
     ├── dataset_transitions/   dense transition table
     ├── dataset_signatures/    8192-row group signature table
     ├── dataset_actions/       K4 action table
-    ├── dataset_embeddings/    verified-dictionary corpus (identity export + per-checkpoint exports)
-    ├── dataset_ensembles/     lambda-ensemble artifact (symmetry-breaking order parameter)
-    ├── dataset_genomics/      frozen genomics catalog (ingested once via `helpers.ingest_genomics`)
+    ├── dataset_embeddings/    verified-dictionary corpus
+    ├── dataset_ensembles/     lambda-ensemble artifact
     ├── checkpoints/           trained model weights (gitignored)
     ├── reports/               eval/verify/audit JSON reports (gitignored)
     └── tmp/                   scratch space (gitignored)
 ```
 
+## CGM Null Dataset (`dataset_null`)
+
+### Definition
+
+The CGM Null Dataset is the exhaustive, kernel-exact catalog of hQVM instruction and trajectory structure used as Super's training and gate corpus. It is generated by `generate_null_dataset()` in `datasets.py` and loaded through `NullCorpus`. Every field is produced by calling the kernel (`src.api`, `src.constants`, `src.family`). Nothing is sampled from outside data.
+
+"Null" means the uniform (maximum-entropy) occupation of that exact structure under the three policies in `measures.json`: uniform iid bytes, the canonical family frame sequence, and QuBEC λ-weighted micro occupation.
+
+### Construction
+
+Construction begins at the archetype and the rest state.
+
+1. Archetype. The transcription archetype is `GENE_MIC_S = 0xAA`. For any byte `b`, the intron is `b XOR 0xAA`. The invariant check `archetype_flat_zero_intron` requires that byte `0xAA` is flat and has intron `0`.
+2. Rest state. Every trajectory in the catalog starts from `GENE_MAC_REST`. Depth-4/8 cycles must return through the swapped mac state and close again at rest (`canonical_rest_swapped_rest`).
+3. `byte_fiber` (256 rows). Enumerate all instruction bytes. Record intron, family phase, micro-ref, chirality weight, fold disagreement, flat flag, shadow partner, and single-byte signature.
+4. `canonical_cycles` (64 × 8 rows). For each micro-ref `m` in `0..63`, build the eight-byte word that walks the four family phases twice: `(family 0..3 for m) repeated`. Step from rest. Store state before/after, chirality shell, prefix signature factors, and horizon flags. Step 3 must land on swapped; step 7 must land on rest.
+5. `depth2_witnesses` (256 × 256 rows). From rest, apply every ordered pair `(b0, b1)`. Store intermediate state, endpoint, signature id, and transport.
+6. `signature_words` (8192 rows). For each group signature, take one minimal representative word of length at most 4. Replay it from rest and require agreement with `action_on_rest` and with applying the signature operator to rest.
+7. `collisions`. From depth-2 witnesses and signature words, collect pairs of distinct ledgers that share a signature (and related collision kinds). These rows separate terminal action from ledger provenance.
+8. `measures.json`. Record the three occupation policies: uniform (`p_byte = 1/256`), canonical (family order `[0, 1, 2, 3]` on a fixed micro), and lambda (`p_m ∝ λ^{popcount(m)}` on a stated grid).
+9. Manifest and invariants. Write `manifest.json` with shapes, kernel fingerprint, and the boolean invariant suite (`run_null_invariants`). Generation fails if any invariant fails.
+
+`NullCorpus` wraps these arrays and adds deterministic train/holdout splits: micro-ref holdout, signature-factor holdout, and a collision connected-component ledger split.
+
+Regenerate with:
+
+```bash
+python -m src.tools.autoencoder.cli generate --dataset null
+```
+
 ## Quick start
 
 ```bash
-# Generate the kernel-derived datasets (byte census, state census, transition tables, signatures)
+# Generate the kernel-derived datasets (including the null corpus)
 python -m src.tools.autoencoder.cli generate --dataset all
 
 # Train a model
-python -m src.tools.autoencoder.cli train --model spectral --epochs 5          # identity codec baseline
-python -m src.tools.autoencoder.cli train --model spectral:shell --epochs 5    # lossy codec rung
-python -m src.tools.autoencoder.cli train --model k4 --epochs 5                # K4 equivariant
-python -m src.tools.autoencoder.cli train --model unified --symmetry full --epochs 5   # unified, full symmetry
-python -m src.tools.autoencoder.cli train --model transition --task transition --epochs 5  # byte-conditioned next-state model
-python -m src.tools.autoencoder.cli train --model word --task word --epochs 5   # per-byte signature model
-python -m src.tools.autoencoder.cli train --model percolation --task percolation_rank --epochs 5  # rank-recovery learner
-python -m src.tools.autoencoder.cli train --model unified --task unified_multi --symmetry full --epochs 5  # one shared latent, all four objectives
-python -m src.tools.autoencoder.cli train-denoise --ladder shell_radial --noise-rate 0.03,0.03,0.03,0.03,0.03,0.03  # spectral denoiser
+python -m src.tools.autoencoder.cli train --model super --task masked_frame --epochs 40
+python -m src.tools.autoencoder.cli train --model super --task super_all --epochs 40
+python -m src.tools.autoencoder.cli train --model k4 --epochs 5
+python -m src.tools.autoencoder.cli train --model transition --task transition --epochs 5
+python -m src.tools.autoencoder.cli train --model word --task word --epochs 5
+python -m src.tools.autoencoder.cli train --model percolation --task percolation_rank --epochs 5
+python -m src.tools.autoencoder.cli train-denoise --ladder diagonal_translation_radial --noise-rate 0.03,0.03,0.03,0.03,0.03,0.03
 
-# Verify that a checkpoint is exactly equivariant (closed-form full-G certificate)
+# Super gate suite (writes reports/super_gates.json and checkpoints/production/super.pt)
+python -m src.tools.autoencoder.helpers.training_super gates
+
+# Verify that a K4 checkpoint is exactly equivariant
 python -m src.tools.autoencoder.cli verify-equivariance --checkpoint checkpoints/model.pt
 
 # Export the verified dictionary and run the one-pass audit
@@ -112,16 +153,6 @@ python -m src.tools.autoencoder.cli audit-dictionary --report-file reports/embed
 
 # Run the lambda-ensemble experiment (symmetry-breaking order parameter)
 python -m src.tools.autoencoder.cli sweep-lambda --model mlp --epochs 15 --n 16384
-
-# Genomics compile adapter (data-only; no model involved)
-# 1) Populate the genomics catalog (one-time, deterministic; --skip-network hashes an existing copy):
-python -m src.tools.autoencoder.helpers.ingest_genomics
-# or point at a different science checkout:
-python -m src.tools.autoencoder.helpers.ingest_genomics --science-catalog /path/to/science/data/catalogs/genomics
-# or disable the science-copy branch entirely (download from public URLs only):
-python -m src.tools.autoencoder.helpers.ingest_genomics --science-catalog ""
-# 2) Compile any sequence file to the certified 9-layer GenomicCompile:
-python -m src.tools.autoencoder.cli genomics --input-file src/tools/autoencoder/data/dataset_genomics/ecoli_k12_cds.fna.gz --max-bases 500000 --enc 0
 ```
 
 All commands accept the long GNU-style flags (`--output-dir`, `--run-name`,
@@ -131,19 +162,18 @@ release and will be removed at the next boundary.
 
 Datasets are written to `src/tools/autoencoder/data/` with a JSON manifest per directory recording the schema version, a kernel fingerprint, array shapes and dtypes, and invariant-check results. The directory is regenerable and gitignored.
 
-Model selection is by `--model`: one of the individual kinds (`mlp`, `k4`, `spectral`, `transition`, `rawbyte`, `word`, `percolation`, `unified`) or a `spectral:<ladder>` rung. The tier names `narrow`, `general`, `super`, and `all` select every model in that tier (used for sweeps); for `train` a tier maps to its first member. `build_model` in `models/__init__.py` is the single constructor, so the CLI never keeps a parallel copy of the model defaults. `--hidden-dim` overrides the per-kind default width (default: 128 for narrow models, the codec's own value for spectral); useful when an existing checkpoint was trained at a non-default width.
+Model selection is by `--model`: one of the individual kinds (`mlp`, `k4`, `super`, `transition`, `rawbyte`, `word`, `percolation`). The tier names `narrow`, `general`, `super`, and `all` select every model in that tier (used for sweeps); for `train` a tier maps to its first member. `build_model` in `models/__init__.py` is the single constructor. `--hidden-dim` overrides the per-kind default width.
 
-Trained production artifacts live in `src/tools/autoencoder/data/checkpoints/production/` (`spectral_full`, `spectral_bottleneck`, `k4_full`, `mlp_full`, and the `spectral_denoise` denoiser), each with a per-checkpoint evaluation and equivariance report in `src/tools/autoencoder/data/reports/` and a compiled `production_summary.json`. The denoiser adds a `denoiser_gain_report` to its evaluation (machine-checked `pass` flag with the published `tol`; the trained gains track the closed-form shrinkage multipliers). Two dictionary corpora exist side by side in `src/tools/autoencoder/data/dataset_embeddings/`: the bare-filename identity export and the trained-checkpoint export whose files are suffixed with the cleaned checkpoint name (e.g. `byte_byte_spectral_bottleneck.npy`, `manifest_spectral_bottleneck.json`). The trained `spectral_bottleneck` export is audited green by `audit-dictionary`. The closed-form full-G certificate `src/tools/autoencoder/data/reports/exhaustive_full_g_verify.json` covers all three trained spectral checkpoints (full, bottleneck, denoiser). Every report path in the published JSON uses forward slashes so the bundle is portable across OSes.
+Trained production artifacts live in `src/tools/autoencoder/data/checkpoints/production/` (`super`, `k4_full`, `mlp_full`, plus `spectral_bottleneck` for the denoiser / dictionary probes), with reports in `src/tools/autoencoder/data/reports/` including `super_gates.json` and `production_summary.json`.
 
 ## Production regeneration
 
 ```bash
-# One-shot: retrain the five checkpoints and write the matching eval,
-# equivariance, and closed-form full-G reports, plus production_summary.json.
-python -m src.tools.autoencoder.scripts.make_production
+# One-shot: train narrow/general nulls, ensure Super gates, write production_summary.json.
+python -m src.tools.autoencoder.helpers.training_super production
 
 # Or: reuse the existing checkpoints and only regenerate the reports.
-python -m src.tools.autoencoder.scripts.make_production --skip-train
+python -m src.tools.autoencoder.helpers.training_super production --skip-train
 ```
 
 `tests/tools/autoencoder/test_report_schemas.py` pins the report schema so any drift between the CLI and the published JSON fails on the next `pytest` run.
@@ -151,12 +181,12 @@ python -m src.tools.autoencoder.scripts.make_production --skip-train
 ## Kernel core vs external adapters
 
 The model core knows only the carrier grammar and the kernel's exact group
-interfaces. Everything outside that - physical observables, genomics, and
-LLM-weight tensors - is an **external adapter**, not a new model and not a new
-model tier. Adapters are pure data transforms that read the census/byte
-surfaces already exposed by the package (`datasets.byte_census_arrays`,
-`helpers.evals_metrics.genomics_compile`, `helpers.genomics.compile_interval`)
-and produce the exact columns the readouts consume. They never add a kernel fact to a model file and never
+interfaces. Material outside that boundary (for example physical observables or
+weight tensors from other systems) enters only as an **external adapter**, not
+as a new model and not as a new model tier. Adapters are pure data transforms
+that read the census and byte surfaces already exposed by the package
+(`datasets.byte_census_arrays` and related helpers) and produce the columns the
+readouts consume. They never add a kernel fact to a model file and never
 reformulate a transition rule; they only convert external material into the
 structure the codec already understands. This is the boundary that keeps the
 three tiers clean: the models learn or represent hQVM structure; adapters
@@ -168,8 +198,7 @@ application-specific predictions; readouts measure the resulting structure.
 A new model joins the tier whose symmetry it builds in (a new group would
 justify a new tier file, nothing else). Before it ships it must satisfy:
 
-1. **Symmetry containment** decides the tier: `narrow` (no built-in symmetry),
-   `general` (K4 gates), `super` (full affine group / multi-register).
+1. **Symmetry containment** decides the tier: `narrow` (no built-in symmetry), `general` (K4 gates), `super` (ledger process).
 2. **Kernel authority**: every label and action comes from the kernel adapter
    (`src/api.py`); zero reformulation inside the package.
 3. **Paired null**: every structured model ships with its narrow null so the
@@ -182,20 +211,20 @@ justify a new tier file, nothing else). Before it ships it must satisfy:
 6. **Benchmark**: a suite entry with kernel-exact labels.
 
 `PercolationLearner` is the template: a supervised head on kernel-exact
-labels, sitting in `narrow`, needing no external data. Genomics and physics
-probes are adapters, not models.
+labels, sitting in `narrow`, needing no external data. Physics probes and
+similar readouts are adapters, not models.
 
 ## Where empirical data enters
 
 Base training is kernel-null: the models self-supervise on exact labels, which
-is why the four production artifacts exist. Empirical data (genomics
-sequences, LLM-weight matrices) is **not** mixed into the core models. It
-enters as a frozen-codec head fine-tune: keep the codec's exact equivariance
-intact and train only the task heads on compiled windows
+is why the four production artifacts exist. Empirical tensors from outside the
+kernel are **not** mixed into the core models. They enter as a frozen-codec
+head fine-tune: keep the codec's exact equivariance intact and train only the
+task heads on compiled windows
 (`--task empirical --init <production checkpoint>`, heads only). For LLM
 weights specifically, tile the matrix to 64-wide blocks, compile the byte
 stream through the census, keep the codec frozen, and read the block
-features - no new "LLM tier" is needed. Genomics follows the same adapter pattern: a data-only transform of the sequence through the certified 9-layer `GenomicCompile` (byte_fold_w, fold_poles, family_sheet, omega_signature, depth4_parity, chi_shells, qubec_order, ab_horizon, boundary_keys). The catalog is populated once by `python -m src.tools.autoencoder.helpers.ingest_genomics` (or `--skip-network` against an existing copy) into `data/dataset_genomics/`, and any sequence window is compiled by `cli genomics --input-file ...`. Nothing is re-derived; every value is read from the compile layers.
+features. No new model tier is required for that path.
 
 ## Verification
 
@@ -208,7 +237,7 @@ The suite asserts exact kernel relations rather than learned proxies:
 - The two-byte witness routing count is a kernel theorem cited from the Features Report (#80/#120); it is not re-derived inside the suite.
 - The dictionary audit recomposes reconstruction, equivariance, closed-form factorization probes, the H-invariance of the diagonal rung, shadow invariance, frame parity, and the psi_hat character-energy identity.
 
-The test suite lives in `tests/tools/autoencoder/`. The pytest collector is the single source of truth for the count (`pytest tests/tools/autoencoder --collect-only -q`): 204 tests are collected. The default run executes 202 (the closed-form full-G regression in `test_scale.py` and the denoiser training smoke in `test_task_training.py` are gated behind `--runslow`); all 202 pass on CPU. The suite covers the autoencoder's own objects: models, losses, metrics, bottlenecks, datasets, artifacts, the genomics compile adapter, the production report schemas, and the mapping to the kernel. Kernel feature facts are cited from the Features Report, never re-proved here.
+The test suite lives in `tests/tools/autoencoder/`. It covers the package's models, losses, metrics, datasets, reports, and the mapping to the kernel. Kernel feature facts are cited from the Features Report.
 
 ## Provenance
 

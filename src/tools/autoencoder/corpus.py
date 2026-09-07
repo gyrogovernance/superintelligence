@@ -25,8 +25,12 @@ from src.tools.autoencoder.datasets import (
     byte_census_arrays,
     state_census_arrays,
 )
-from src.tools.autoencoder.kernel import apply_signature_index, step_index, word_signature_id
-from src.tools.autoencoder.models.super import SpectralAutoencoder
+from src.tools.autoencoder.kernel import (
+    apply_signature_index,
+    step_index,
+    word_signature_id,
+)
+from src.tools.autoencoder.models.general import AffineSpectralCodec
 
 N_BYTES = 256
 N_STATES = 4096
@@ -133,7 +137,7 @@ def _word_and_ledger_rows(n_words: int = 256, seed: int = 0):
 
 
 def export_embeddings(
-    model: SpectralAutoencoder,
+    model: AffineSpectralCodec,
     out_dir: str | Path,
     device: str = "cpu",
     checkpoint_hash: str = "",

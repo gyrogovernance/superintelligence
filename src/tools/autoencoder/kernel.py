@@ -102,6 +102,8 @@ def k4_action_arrays() -> tuple[np.ndarray, np.ndarray]:
             dest = apply_k4_index(index, gate)
             action[gate_i, index] = dest
             fixed[gate_i, index] = dest == index
+    action.setflags(write=False)
+    fixed.setflags(write=False)
     return action, fixed
 
 

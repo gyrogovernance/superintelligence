@@ -280,9 +280,12 @@ _BYTE_FEATURE_CACHE: torch.Tensor | None = None
 def byte_features(byte: torch.Tensor) -> torch.Tensor:
     """Structured byte encoding: [family bits (2), micro bits (6), q bits (6)].
 
-    Uses exact kernel census tables, cached at module level. Returns [B, 14]."""
+    Uses exact kernel census tables, cached per device. Returns [B, 14]."""
     global _BYTE_FEATURE_CACHE
-    if _BYTE_FEATURE_CACHE is None:
+    if (
+        _BYTE_FEATURE_CACHE is None
+        or _BYTE_FEATURE_CACHE.device != byte.device
+    ):
         from src.tools.autoencoder.datasets import byte_census_arrays
 
         census = byte_census_arrays()
@@ -295,7 +298,9 @@ def byte_features(byte: torch.Tensor) -> torch.Tensor:
             mb = [(int(micro[b]) >> i) & 1 for i in range(6)]
             qb = [(int(q[b]) >> i) & 1 for i in range(6)]
             rows.append(fb + mb + qb)
-        _BYTE_FEATURE_CACHE = torch.tensor(rows, dtype=torch.float32)
+        _BYTE_FEATURE_CACHE = torch.tensor(
+            rows, dtype=torch.float32, device=byte.device
+        )
     return _BYTE_FEATURE_CACHE[byte]
 
 

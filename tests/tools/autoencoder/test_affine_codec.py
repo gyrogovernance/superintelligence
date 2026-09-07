@@ -1,4 +1,4 @@
-"""Full-G spectral equivariance tests (spec 6.5)."""
+"""AffineSpectralCodec readout / full-G equivariance tests."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ import pytest
 import torch
 
 from src.tools.autoencoder.kernel import apply_signature_index
-from src.tools.autoencoder.models.super import (
-    SpectralAutoencoder,
+from src.tools.autoencoder.models.general import (
+    AffineSpectralCodec,
     full_g_equivariance_error,
     irrep_block_index,
     walsh_matrix_64,
@@ -36,7 +36,7 @@ def test_irrep_blocks_cover_all_frequencies() -> None:
 
 
 def test_walsh_transform_of_onehot_is_kernel_sign() -> None:
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     x = torch.tensor([0, 1, 65, 4095], dtype=torch.long)
     onehot = torch.zeros((4, 4096))
     onehot[torch.arange(4), x] = 1.0
@@ -52,7 +52,7 @@ def test_walsh_transform_of_onehot_is_kernel_sign() -> None:
 
 
 def test_roundtrip_onehot_through_transform() -> None:
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     x = torch.arange(4096, dtype=torch.long)
     onehot = torch.zeros((4096, 4096))
     onehot[torch.arange(4096), x] = 1.0
@@ -63,7 +63,7 @@ def test_roundtrip_onehot_through_transform() -> None:
 
 
 def test_spectral_action_sign_only_matches_translation() -> None:
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     # parity-0 signature is a pure translation: coefficient signs only
     x = torch.tensor([0, 123, 4095], dtype=torch.long)
     onehot = torch.zeros((3, 4096))
@@ -81,7 +81,7 @@ def test_spectral_action_sign_only_matches_translation() -> None:
 
 
 def test_full_g_equivariance_sampled() -> None:
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     states = torch.arange(0, 4096, 128, dtype=torch.long)
     sig_ids = torch.tensor([0, 1, 64, 4131, 8191], dtype=torch.long)
     report = full_g_equivariance_error(model, states, sig_ids)
@@ -90,9 +90,9 @@ def test_full_g_equivariance_sampled() -> None:
 
 def test_signature_composition_in_spectrum() -> None:
     """rho(g) rho(h) == rho(g*h) on coefficients (group homomorphism)."""
-    model = SpectralAutoencoder()
-    from src.tools.autoencoder.kernel import sig_id_parts
+    model = AffineSpectralCodec()
     from src import api
+    from src.tools.autoencoder.kernel import sig_id_parts
 
     x = torch.tensor([0, 777, 2089], dtype=torch.long)
     onehot = torch.zeros((3, 4096))
@@ -118,7 +118,7 @@ def test_signature_composition_in_spectrum() -> None:
 
 def test_bottleneck_preserves_equivariance() -> None:
     """Sector gains commute with rho(g): gating then action == action then gating."""
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     with torch.no_grad():
         model.bottleneck.gain.copy_(torch.rand(2080))
     x = torch.tensor([0, 100, 4000], dtype=torch.long)
@@ -146,7 +146,7 @@ def test_bottleneck_preserves_equivariance() -> None:
 
 
 def test_codec_ladder_masks_structure() -> None:
-    from src.tools.autoencoder.models.super import codec_ladder_mask
+    from src.tools.autoencoder.models.general import codec_ladder_mask
 
     full = codec_ladder_mask("full")
     assert full.shape == (2080,) and int(full.sum()) == 2080
@@ -167,14 +167,22 @@ def test_codec_ladder_masks_structure() -> None:
     assert shell[0] == 1.0 and shell[1] == 0.0 and shell[3] == 1.0
     assert shell[7] == 0.0 and shell[63] == 1.0
 
+    climate = codec_ladder_mask("shell_climate")
+    assert int(climate.sum()) == 64 and climate[64:].sum() == 0
+
+    from src.tools.autoencoder.models.general import resolve_ladder
+
+    assert resolve_ladder("diagonal") == "chirality"
+    assert resolve_ladder("shell_radial") == "diagonal_translation_radial"
+    assert resolve_ladder("shell") == "w2_invariant"
+
     with pytest.raises(ValueError):
         codec_ladder_mask("nonsense")
 
 
 def test_frozen_mask_zeros_sectors_regardless_of_gain() -> None:
-    from src.tools.autoencoder.models.super import codec_ladder_mask
 
-    model = SpectralAutoencoder(ladder="trivial")
+    model = AffineSpectralCodec(ladder="trivial")
     with torch.no_grad():
         model.bottleneck.gain.copy_(torch.rand(2080) + 0.5)
     bid = model.block_id
@@ -195,23 +203,23 @@ def test_ladder_model_poses_rate_distortion_question() -> None:
     model is not, so CE training actually has something to trade off."""
     x = torch.arange(0, 4096, 97)
 
-    full = SpectralAutoencoder()
+    full = AffineSpectralCodec()
     recon_full = full(x)
     truth = torch.zeros((len(x), 4096))
     truth[torch.arange(len(x)), x] = 1.0
     assert float((recon_full - truth).abs().max().detach()) < 1e-4
 
-    diag = SpectralAutoencoder(ladder="diagonal")
+    diag = AffineSpectralCodec(ladder="diagonal")
     recon_diag = diag(x)
     # 64 of 2080 sectors retained: reconstruction must be lossy
     assert float((recon_diag - truth).abs().max().detach()) > 0.1
 
 
 def test_rate_penalty_ignores_masked_blocks() -> None:
-    from src.tools.autoencoder.models.super import codec_ladder_mask
+    from src.tools.autoencoder.models.general import codec_ladder_mask
 
     mask = codec_ladder_mask("trivial")
-    model = SpectralAutoencoder(sector_mask=mask)
+    model = AffineSpectralCodec(sector_mask=mask)
     with torch.no_grad():
         model.bottleneck.gain.copy_(torch.arange(1.0, 2081.0))
     # only block 0 (gain 1.0) is free; penalty must be 1.0
@@ -220,7 +228,7 @@ def test_rate_penalty_ignores_masked_blocks() -> None:
 
 def test_diag_model_preserves_equivariance_exactly() -> None:
     """The masked codec remains exactly equivariant under the full group."""
-    model = SpectralAutoencoder(ladder="diagonal")
+    model = AffineSpectralCodec(ladder="diagonal")
     x = torch.tensor([0, 100, 4000], dtype=torch.long)
     onehot = torch.zeros((3, 4096))
     onehot[torch.arange(3), x] = 1.0

@@ -21,18 +21,19 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from src.tools.autoencoder.models.general import K4Autoencoder
-from src.tools.autoencoder.models.narrow import MLPAutoencoder, PercolationLearner
-from src.tools.autoencoder.models import build_model
-from src.tools.autoencoder.models.super import (
-    SpectralAutoencoder,
+from src.tools.autoencoder.models import MODEL_KINDS, build_model
+from src.tools.autoencoder.models.general import (
+    AffineSpectralCodec,
+    K4Autoencoder,
     full_g_equivariance_error,
     irrep_block_index,
+    resolve_ladder,
 )
+from src.tools.autoencoder.models.narrow import PercolationLearner
+from src.tools.autoencoder.models.super import Super
 
 from .evals_datasets import percolation_dataset
 from .evals_metrics import k4_equivariance_error, percolation_rank_accuracy
-
 
 # ---------------------------------------------------------------------------
 # Checkpoint loading
@@ -45,27 +46,20 @@ def load_any_checkpoint(
     """Reconstruct a model from a checkpoint saved via Trainer.
 
     Reads the saved ``model_kind`` / ``symmetry`` metadata so the right class is
-    rebuilt (not just spectral/k4 defaults). Newer checkpoints carry the model's
-    exact constructor configuration under ``extra["model_config"]`` (captured
-    via ``model.get_config()``); that is used verbatim. Older checkpoints fall
-    back to the recorded ``hidden_dim`` / ``latent_dim`` / ``n_trivial`` /
-    ``n_sign`` / ``ladder`` fields. Accepts both the wrapped
-    ``{"model_state": ...}`` payload and a bare state_dict. The path may be
-    given as a ``str`` or a ``Path``.
+    rebuilt. Newer checkpoints carry the model's exact constructor configuration
+    under ``extra["model_config"]`` (captured via ``model.get_config()``); that
+    is used verbatim. Older checkpoints fall back to the recorded ``hidden_dim``
+    / ``latent_dim`` / ``n_trivial`` / ``n_sign`` / ``ladder`` fields. Accepts
+    both the wrapped ``{"model_state": ...}`` payload and a bare state_dict.
+    The path may be given as a ``str`` or a ``Path``.
     """
     payload = torch.load(path, map_location=device, weights_only=False)
     config = payload.get("config", {})
     extra = payload.get("extra", {})
-    model_kind = extra.get("model_kind", "spectral")
+    model_kind = extra.get("model_kind", "mlp")
     symmetry = extra.get("symmetry", None)
     model_config = extra.get("model_config", None)
 
-    # Reconstruct through the single registry entry point using the exact
-    # constructor configuration recorded at save time (``model_config`` from
-    # ``model.get_config()``). This removes the parallel per-kind switch that
-    # previously missed ``percolation`` and could disagree with the CLI's
-    # ``build_model`` on hidden widths. Older/looser checkpoints fall back to
-    # the recorded scalar fields.
     cfg = model_config if isinstance(model_config, dict) else {}
     hidden_dim = cfg.get("hidden_dim", extra.get("hidden_dim"))
     ladder = cfg.get("ladder", extra.get("ladder"))
@@ -75,33 +69,39 @@ def load_any_checkpoint(
     n_sign = cfg.get("n_sign", extra.get("n_sign"))
     sector_mask = cfg.get("sector_mask")
     orbit_index = cfg.get("orbit_index")
+    context_dim = cfg.get("context_dim", 64)
+    atom_dim = cfg.get("atom_dim", 32)
+    frame_dim = cfg.get("frame_dim", 64)
+    signature_mode = cfg.get("signature_mode", "exact")
+    analytic_grammar = cfg.get("analytic_grammar", True)
 
-    if model_kind.startswith("spectral:"):
-        ladder = model_kind.split(":", 1)[1]
-        if symmetry is not None:
-            from src.tools.autoencoder.models import UnifiedAutoencoder
-
-            model = UnifiedAutoencoder(
-                symmetry=symmetry,
-                hidden_dim=hidden_dim or 128,
-                latent_dim=latent_dim,
-                ladder=ladder,
-                sector_mask=sector_mask,
-                orbit_index=orbit_index,
-            )
-        else:
-            model = SpectralAutoencoder(
-                ladder=ladder,
-                init_gain=float(cfg.get("init_gain", 1.0)),
-                sector_mask=sector_mask,
-                orbit_index=orbit_index,
-            )
-    elif model_kind == "unified" and symmetry is None and not cfg:
-        # very old unified checkpoint with no recorded config: spectral default
-        model = SpectralAutoencoder()
+    if (
+        model_kind in ("affine_codec", "spectral")
+        or str(model_kind).startswith("affine_codec:")
+    ):
+        if str(model_kind).startswith("affine_codec:"):
+            ladder = model_kind.split(":", 1)[1]
+        model = AffineSpectralCodec(
+            init_gain=float(cfg.get("init_gain", 1.0)),
+            ladder=ladder,
+            sector_mask=sector_mask,
+            orbit_index=orbit_index,
+            frozen=bool(cfg.get("frozen", False)),
+        )
     else:
+        base_kind = model_kind.split(":", 1)[0] if ":" in model_kind else model_kind
+        if base_kind not in MODEL_KINDS and base_kind not in (
+            "narrow",
+            "general",
+            "super",
+            "all",
+        ):
+            raise ValueError(
+                f"unknown model_kind {model_kind!r} in checkpoint; "
+                f"expected one of {MODEL_KINDS} or affine_codec"
+            )
         model = build_model(
-            model_kind,
+            model_kind if ":" not in model_kind else base_kind,
             symmetry=symmetry,
             ladder=ladder,
             hidden_dim=hidden_dim,
@@ -111,10 +111,25 @@ def load_any_checkpoint(
             n_sign=n_sign,
             sector_mask=sector_mask,
             orbit_index=orbit_index,
+            context_dim=int(context_dim),
+            atom_dim=int(atom_dim),
+            frame_dim=int(frame_dim),
+            signature_mode=str(signature_mode),
+            analytic_grammar=bool(analytic_grammar),
         )
 
     state = payload.get("model_state", payload)
-    model.load_state_dict(state)
+    if model_kind == "super" and isinstance(state, dict):
+        state = {k: v for k, v in state.items() if not k.startswith("readout.")}
+        own = model.state_dict()
+        state = {
+            k: v
+            for k, v in state.items()
+            if k in own and tuple(own[k].shape) == tuple(v.shape)
+        }
+        model.load_state_dict(state, strict=False)
+    else:
+        model.load_state_dict(state)
     model.to(device)
     model.eval()
     return model, {"config": config, "extra": extra}
@@ -181,7 +196,7 @@ def evaluate_checkpoint(
     # TransitionModel) falls through to evaluate_reconstruction, which calls
     # model(state_index) and crashes because the task model needs a byte too.
     if task is None:
-        kind = (meta.get("extra") or {}).get("model_kind", "spectral")
+        kind = (meta.get("extra") or {}).get("model_kind", "mlp")
         if kind in ("transition", "rawbyte", "word", "percolation", "percolation_rank"):
             # normalize the percolation kinds to the eval routing key
             task = "percolation_rank" if kind.startswith("percolation") else kind
@@ -210,9 +225,16 @@ def evaluate_checkpoint(
     if task == "percolation_rank":
         out["percolation"] = evaluate_percolation_accuracy(model, seed=seed)
         return out
-    if task == "unified_multi":
-        out["reconstruction"] = evaluate_reconstruction(model, np.arange(4096))
-        out["equivariance"] = verify_full_g_equivariance(model)
+    if isinstance(model, Super):
+        extra = meta.get("extra", {}) or {}
+        flags = extra.get("gate_flags") or {}
+        out["gates"] = extra.get("gates")
+        out["gate_flags"] = flags
+        out["passed"] = bool(flags) and all(bool(v) for v in flags.values())
+        out["note"] = (
+            "Super is certified by its gate suite; regenerate with "
+            "python -m src.tools.autoencoder.helpers.training_super gates"
+        )
         return out
     out["reconstruction"] = evaluate_reconstruction(model, np.arange(4096))
     if isinstance(model, K4Autoencoder):
@@ -428,17 +450,13 @@ def verify_full_g_equivariance(
 ) -> dict:
     """Full-group equivariance over sampled states and signatures.
 
-    Spectral models (and unified-full, which nests a spectral carrier) expose
-    ``walsh_coefficients``, so they take the exact coefficient-level path. Any
-    other model (mlp, k4, unified-free/k4) is measured by the generic
-    output-permutation path: applying a signature to the input and then
-    decoding must equal applying that signature to the decoded output. That
-    generic path is the honest way to show a non-spectral model is *not*
-    equivariant (the intended contrast artifact), so it reports a large error
-    instead of crashing.
+    Models that expose ``walsh_coefficients`` (``AffineSpectralCodec``) take
+    the coefficient-level path. Other models (mlp, k4, Super) are measured by
+    the generic output-permutation path: applying a signature to the input and
+    then decoding must equal applying that signature to the decoded output.
     """
-    from .evals_metrics import generic_full_g_equivariance_error
     from ..kernel import apply_signature_index
+    from .evals_metrics import generic_full_g_equivariance_error
 
     if state_indices is None:
         state_indices = torch.arange(0, 4096, 17, dtype=torch.long)
@@ -462,8 +480,8 @@ def exhaustive_full_g_verify(
 ) -> dict[str, float]:
     """Offline full-scale full-G equivariance check (closed form).
 
-    The spectral autoencoder is exactly equivariant by construction: the Walsh
-    bottleneck applies a per-(a,b)-block scalar gain, and the affine group
+    ``AffineSpectralCodec`` is exactly equivariant by construction: the Walsh
+    block filter applies a per-(a,b)-block scalar gain, and the affine group
     acts on coefficients as a sign (parity 0) or a swap of the pair
     (parity 1). Equivariance holds iff the gain is symmetric under the swap
     (a,b) <-> (b,a) - which is exactly how ``block_id`` groups coefficients
@@ -480,11 +498,19 @@ def exhaustive_full_g_verify(
     confirm the code path matches the algebra.
     """
     if checkpoint is not None:
-        model, _info = load_any_checkpoint(checkpoint)
-        spectral = getattr(model, "spectral", model)
-        bottleneck = spectral.bottleneck
+        loaded, _info = load_any_checkpoint(checkpoint)
+        codec = getattr(loaded, "readout", None)
+        if not isinstance(codec, AffineSpectralCodec):
+            codec = loaded if isinstance(loaded, AffineSpectralCodec) else None
+        if codec is None:
+            raise TypeError(
+                f"exhaustive full-G verify requires AffineSpectralCodec; "
+                f"got {type(loaded).__name__}"
+            )
+        model = codec
+        bottleneck = codec.bottleneck
     else:
-        model = SpectralAutoencoder()
+        model = AffineSpectralCodec(frozen=True)
         bottleneck = model.bottleneck
 
     bid, _ = irrep_block_index()  # [64, 64], block_id per (a,b)
@@ -547,15 +573,16 @@ def audit_dictionary(
     reconstruction); for a lossy ladder checkpoint the reconstruction gate is
     reported as informational (``reconstruction_pass`` is only set for full).
     """
-    from src.tools.autoencoder.corpus import N_STATES, _embed_bytes
     from src import api
+    from src.tools.autoencoder.corpus import N_STATES, _embed_bytes
     from src.tools.autoencoder.datasets import transition_table
     from src.tools.autoencoder.kernel import apply_signature_index, k4_action_arrays
+
     from .evals_metrics import (
         factorization_target_matrix,
         probe_from_latent,
-        shadow_invariance_error,
         psi_hat,
+        shadow_invariance_error,
     )
 
     ladder = getattr(model, "ladder", None)
@@ -625,10 +652,12 @@ def audit_dictionary(
     # 4. H-invariance of the diagonal rung (headline invariant). If the audited
     #    model itself is a diagonal-rung spectral model, audit it directly;
     #    otherwise run the library self-test on a fresh diagonal model.
-    if isinstance(model, SpectralAutoencoder) and model.ladder == "diagonal":
+    if isinstance(model, AffineSpectralCodec) and resolve_ladder(
+        str(model.ladder or "")
+    ) == "chirality":
         diag = model
     else:
-        diag = SpectralAutoencoder(ladder="diagonal")
+        diag = AffineSpectralCodec(ladder="diagonal", frozen=True)
     x = torch.arange(0, N_STATES, 17, dtype=torch.long, device=device)
     base = diag(x)
     max_h = 0.0
@@ -659,8 +688,8 @@ def audit_dictionary(
     report["checks"]["shadow_invariance_err"] = shadow_err
     report["checks"]["shadow_invariance_pass"] = bool(shadow_err == 0.0)
 
-    # 6. frame-parity-zero (existing dataset check) plus the per-byte mask
-    #    geometry check
+    # 6. depth-four holonomy (rest→swapped→rest) plus the per-byte mask geometry
+    from src.tools.autoencoder.datasets import canonical_rest_swapped_rest
     from .evals_datasets import (
         depth4_frame_dataset,
         frame_masks_pair_diagonal,
@@ -669,6 +698,9 @@ def audit_dictionary(
 
     frames = depth4_frame_dataset(64, seed=seed)
     report["checks"]["frame_parity_zero"] = bool(frame_parity_zero(frames))
+    report["checks"]["canonical_cycles_rest_swapped_rest"] = bool(
+        canonical_rest_swapped_rest()
+    )
     report["checks"]["frame_masks_pair_diagonal"] = bool(
         frame_masks_pair_diagonal(frames)
     )
@@ -698,18 +730,13 @@ def audit_dictionary(
 
     # `passed` gates on the invariants that must hold for any correct
     # dictionary: full-G equivariance, shadow invariance, the kernel-label
-    # match (the dictionary's core contract), and frame-parity-zero. These are
-    # model-independent and always applicable. The 2+6 factorization probe, the
-    # diagonal-rung H-invariance, and the psi_hat character-energy check are
-    # informational (the diagonal model audited there is a fresh library
-    # self-test, not necessarily the audited artifact), so they are deliberately
-    # EXCLUDED from the gate even though their keys happen to end in `_pass`.
-    # Any non-boolean gate value fails loudly rather than silently passing.
+    # match, and rest→swapped→rest holonomy. Frame-parity-zero is metadata
+    # (word parity equals length mod 2).
     required_gates = (
         "equivariance_pass",
         "shadow_invariance_pass",
         "labels_match_kernel_census",
-        "frame_parity_zero",
+        "canonical_cycles_rest_swapped_rest",
     )
     informational_pass_keys = ("h_invariance_pass", "psi_hat_pass")
     gate_results: list[bool] = []

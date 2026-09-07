@@ -12,11 +12,11 @@ from src.tools.autoencoder.helpers.evals_run import (
     audit_dictionary,
     write_audit_report,
 )
-from src.tools.autoencoder.models.super import SpectralAutoencoder
+from src.tools.autoencoder.models.general import AffineSpectralCodec
 
 
-def _tiny_trained_model(epochs: int = 3) -> SpectralAutoencoder:
-    model = SpectralAutoencoder()
+def _tiny_trained_model(epochs: int = 3) -> AffineSpectralCodec:
+    model = AffineSpectralCodec(frozen=False)
     opt = torch.optim.Adam(model.parameters(), lr=1e-2)
     x = torch.arange(0, 4096, 16, dtype=torch.long)
     for _ in range(epochs):
@@ -28,7 +28,7 @@ def _tiny_trained_model(epochs: int = 3) -> SpectralAutoencoder:
 
 
 def test_export_embeddings_labels_match_census(tmp_path) -> None:
-    model = SpectralAutoencoder()  # exact identity codec
+    model = AffineSpectralCodec()  # exact identity codec
     arrays = ec.export_embeddings(model, tmp_path, checkpoint_hash="abc", seed=0)
     # state labels match kernel census exactly
     assert arrays["state_embedding"].shape == (4096, 4096)
@@ -45,7 +45,7 @@ def test_export_embeddings_labels_match_census(tmp_path) -> None:
 
 
 def test_audit_dictionary_green_on_exact_model(tmp_path) -> None:
-    model = SpectralAutoencoder()  # exact identity -> all checks pass
+    model = AffineSpectralCodec()  # exact identity -> all checks pass
     report = audit_dictionary(model, checkpoint_hash="def", seed=1)
     assert report["passed"]
     assert report["checks"]["reconstruction_pass"]
@@ -56,6 +56,7 @@ def test_audit_dictionary_green_on_exact_model(tmp_path) -> None:
     assert report["checks"]["factorization_probe_self_test"]
     assert report["checks"]["h_invariance_pass"]
     assert report["checks"]["shadow_invariance_pass"]
+    assert report["checks"]["canonical_cycles_rest_swapped_rest"]
     assert report["checks"]["frame_parity_zero"]
     assert report["checks"]["psi_hat_pass"]
     # two headline invariants are present
@@ -81,13 +82,12 @@ def test_audit_dictionary_on_tiny_trained_model(tmp_path) -> None:
 
 def test_audit_gate_requires_only_core_invariants() -> None:
     """The audit gate must hinge only on the model-independent core
-    invariants (equivariance, shadow invariance, kernel-label match, frame
-    parity-zero), never on the informational H-invariance / psi_hat self-tests.
+    invariants (equivariance, shadow invariance, kernel-label match, rest→swapped→rest), never on the informational H-invariance / psi_hat self-tests.
     A non-boolean required gate must fail the audit loudly rather than pass
     silently (the old gate did ``v if isinstance(v, bool) else True``)."""
     from src.tools.autoencoder.helpers.evals_run import audit_dictionary
 
-    model = SpectralAutoencoder()  # exact identity -> all core gates true
+    model = AffineSpectralCodec()  # exact identity -> all core gates true
     report = audit_dictionary(model, checkpoint_hash="jkl", seed=3)
     assert report["passed"]
     # the informational passes exist but are excluded from the gate
@@ -98,7 +98,7 @@ def test_audit_gate_requires_only_core_invariants() -> None:
         "equivariance_pass",
         "shadow_invariance_pass",
         "labels_match_kernel_census",
-        "frame_parity_zero",
+        "canonical_cycles_rest_swapped_rest",
     }
 
 
@@ -109,14 +109,14 @@ def test_audit_gate_fails_on_nonboolean_required() -> None:
     bool)`` and a non-bool is treated as a hard fail."""
     from src.tools.autoencoder.helpers.evals_run import audit_dictionary
 
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     report = audit_dictionary(model, checkpoint_hash="pqr", seed=5)
     # every required gate is genuinely boolean on a well-formed report
     for key in (
         "equivariance_pass",
         "shadow_invariance_pass",
         "labels_match_kernel_census",
-        "frame_parity_zero",
+        "canonical_cycles_rest_swapped_rest",
     ):
         assert isinstance(report["checks"][key], bool)
     # the gate contract: a non-bool required value would drop passed to False.
@@ -134,7 +134,7 @@ def test_audit_informational_pass_does_not_gate() -> None:
     contract that only the four core gates gate ``passed``."""
     from src.tools.autoencoder.helpers.evals_run import audit_dictionary
 
-    model = SpectralAutoencoder(ladder="full")
+    model = AffineSpectralCodec(ladder="full")
     report = audit_dictionary(model, checkpoint_hash="mno", seed=4)
     # even if an informational self-test were False, the audit still passes on
     # the core invariants (here all true on the identity model).

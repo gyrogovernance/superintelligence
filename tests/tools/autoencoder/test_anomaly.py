@@ -6,16 +6,9 @@ from __future__ import annotations
 from collections import Counter
 
 import numpy as np
-import pytest
-import torch
 
 from src import api, constants
-
 from src.tools.autoencoder import kernel
-from src.tools.autoencoder.helpers.evals_metrics import (
-    shell_distribution_ensemble,
-    walsh_sector_energy,
-)
 from src.tools.autoencoder.helpers.evals_datasets import (
     biased_family_bytes,
     biased_q_weight_bytes,
@@ -26,8 +19,11 @@ from src.tools.autoencoder.helpers.evals_datasets import (
     hqvm_d_transition_dataset,
     missing_q_class_alphabet,
 )
-from src.tools.autoencoder.models.super import SpectralAutoencoder
-
+from src.tools.autoencoder.helpers.evals_metrics import (
+    shell_distribution_ensemble,
+    walsh_sector_energy,
+)
+from src.tools.autoencoder.models.general import AffineSpectralCodec
 
 # ---------------------------------------------------------------------------
 # Controlled ensembles
@@ -128,7 +124,7 @@ def test_shell_distribution_ensemble_statistics() -> None:
 
 
 def test_walsh_sector_energy_partition() -> None:
-    model = SpectralAutoencoder()
+    model = AffineSpectralCodec()
     energy = walsh_sector_energy(model, 1234)
     assert abs(energy["diag_energy"] + energy["offdiag_energy"] - energy["total"]) < 1e-3
     assert energy["total"] > 0
@@ -155,7 +151,6 @@ def test_hqvm_d_dataset_shapes_and_closure() -> None:
 def test_hqvm_d6_matches_api_transitions() -> None:
     data = hqvm_d_transition_dataset(6)
     # spot check against the d=6 kernel
-    from src.tools.autoencoder.kernel import state24_from_index
 
     for i in (0, 777, 4095):
         u, v = int(data["u"][i]), int(data["v"][i])

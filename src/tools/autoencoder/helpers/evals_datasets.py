@@ -16,6 +16,7 @@ nothing here re-implements the kernel.
 
 from __future__ import annotations
 
+import math
 from collections import deque
 from functools import lru_cache
 from typing import Any, Iterable
@@ -51,9 +52,11 @@ from ..kernel import (
 # ---------------------------------------------------------------------------
 
 
-def lambda_chirality_distribution(lam: float) -> np.ndarray:
-    """Exact P(chi) proportional to lambda^wt(chi) over the 64 words."""
-    weights = np.array([chi.bit_count() for chi in range(64)], dtype=np.float64)
+def lambda_chirality_distribution(lam: float, d: int = 6) -> np.ndarray:
+    """Exact P(chi) proportional to lambda^wt(chi) over the 2^d words."""
+    if d != 6:
+        raise ValueError("lambda_chirality_distribution is hQVM(6)-specific")
+    weights = np.array([chi.bit_count() for chi in range(1 << d)], dtype=np.float64)
     p = np.power(lam, weights)
     return p / p.sum()
 
@@ -67,8 +70,10 @@ def sample_lambda_corpus(
     lam: float, n: int, seed: int = 0, d: int = 6
 ) -> np.ndarray:
     """Sample n state indices from the lambda ensemble."""
+    if d != 6:
+        raise ValueError("sample_lambda_corpus is hQVM(6)-specific")
     rng = np.random.default_rng(seed)
-    p = lambda_chirality_distribution(lam)
+    p = lambda_chirality_distribution(lam, d)
     chis = rng.choice(64, size=n, p=p)
     us = rng.integers(0, 1 << d, size=n)
     return (us.astype(np.int64) << d) | (us ^ chis).astype(np.int64)
@@ -116,6 +121,10 @@ def never_broken_group(d: int = 6, lam_grid: np.ndarray | None = None) -> dict:
     Returns the subgroup H found, its order, and the exhaustive check that
     H = {(0, t, t), (1, t, t)}.
     """
+    if d != 6:
+        raise ValueError(
+            "never_broken_group is hQVM(6)-specific; signature packing is 13-bit"
+        )
     if lam_grid is None:
         lam_grid = np.array([0.25, 0.5, 1.0, 2.0, 4.0])
     stabilizer: list[int] = []
@@ -880,3 +889,87 @@ def frame_masks_pair_diagonal(frames: dict[str, np.ndarray]) -> bool:
             if not api.is_pair_diagonal12(m12):
                 return False
     return True
+
+
+def lambda_byte_corpus(
+    lam: float, n: int, length: int = 8, seed: int = 0
+) -> np.ndarray:
+    """Ledgers with bytes drawn proportional to lam ** q_weight (QuBEC synthesis)."""
+    rng = np.random.default_rng(seed)
+    w = np.array(
+        [float(lam) ** int(api.Q_WEIGHT_BY_BYTE[b]) for b in range(256)],
+        dtype=np.float64,
+    )
+    p = w / w.sum()
+    return rng.choice(256, size=(n, length), p=p).astype(np.uint8)
+
+
+def lambda_ceiling_bits(lam: float) -> float:
+    """Exact residual ceiling over a uniform 8-bit prior: 8 - H(p_λ)."""
+    if abs(float(lam) - 1.0) < 1e-12:
+        return 0.0
+    z = 4.0 * (1.0 + float(lam)) ** 6
+    e_j = 6.0 * float(lam) / (1.0 + float(lam))
+    return 8.0 - (math.log2(z) - e_j * math.log2(float(lam)))
+
+
+def binary_entropy_bits(p: float) -> float:
+    p = min(1.0, max(0.0, float(p)))
+    if p <= 0.0 or p >= 1.0:
+        return 0.0
+    return float(-(p * math.log2(p) + (1.0 - p) * math.log2(1.0 - p)))
+
+
+def markov_ledgers(
+    n: int, length: int = 8, p_flip: float = 0.1, seed: int = 0
+) -> np.ndarray:
+    """Family-uniform ledgers whose micro-ref is a 6-bit independent-flip chain."""
+    rng = np.random.default_rng(seed)
+    m = rng.integers(0, 64, size=n, dtype=np.int64)
+    rows = np.empty((n, length), dtype=np.uint8)
+    bitw = 1 << np.arange(6)
+    for t in range(length):
+        flip = ((rng.random((n, 6)) < p_flip) @ bitw).astype(np.int64)
+        m = np.bitwise_xor(m, flip) & 63
+        fams = rng.integers(0, 4, size=n)
+        bit0 = fams & 1
+        bith = (fams >> 1) & 1
+        intron = bit0 | ((m & 63) << 1) | (bith << 7)
+        rows[:, t] = np.bitwise_xor(intron, 0xAA).astype(np.uint8)
+    return rows
+
+
+def markov_causal_bound_bits(p_flip: float) -> float:
+    """Prefix-only last-byte entropy: 6 h2(p) + 2 family bits."""
+    return 6.0 * binary_entropy_bits(p_flip) + 2.0
+
+
+def signature_validity_mask(ledger: np.ndarray, pos: int, target_sig: int) -> np.ndarray:
+    """Exact 256-candidate kernel mask: True iff substituting pos keeps signature."""
+    prefix = [int(x) for x in ledger[:pos]]
+    suffix = [int(x) for x in ledger[pos + 1 :]]
+    valid = np.zeros(256, dtype=bool)
+    for b in range(256):
+        valid[b] = word_signature_id(prefix + [b] + suffix) == int(target_sig)
+    return valid
+
+
+def boundary_rows(n: int, length: int = 8, seed: int = 0) -> list[dict[str, Any]]:
+    """Single-site signature-constrained completion rows with exact validity masks."""
+    rng = np.random.default_rng(seed)
+    out: list[dict[str, Any]] = []
+    for _ in range(n):
+        led = rng.integers(0, 256, size=length, dtype=np.uint8)
+        pos = int(rng.integers(0, length))
+        target = int(word_signature_id([int(x) for x in led]))
+        valid = signature_validity_mask(led, pos, target)
+        out.append(
+            {
+                "ledger": led,
+                "pos": pos,
+                "target_sig": target,
+                "valid_mask": valid,
+                "ambiguity": int(valid.sum()),
+            }
+        )
+    return out

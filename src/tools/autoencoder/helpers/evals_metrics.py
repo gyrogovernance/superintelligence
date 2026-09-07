@@ -20,28 +20,27 @@ package's authority remains src.api / src.constants / src.family / src.sdk.
 
 from __future__ import annotations
 
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 import torch
 
-from src import api, constants
+from src import api
 from src.tools.autoencoder.datasets import byte_census_arrays, state_census_arrays
 from src.tools.autoencoder.kernel import (
     popcount6,
     signature_inverse_id,
-    state24_from_index,
-    word_signature_id,
 )
-from src.tools.autoencoder.models.super import (
-    SpectralAutoencoder,
+from src.tools.autoencoder.models.general import (
+    AffineSpectralCodec,
     irrep_block_index,
 )
+
 from .evals_datasets import (
     shell_ensemble_labels,
     walsh_multipliers,
 )
-
 
 # ---------------------------------------------------------------------------
 # State metrics
@@ -173,7 +172,12 @@ def generic_full_g_equivariance_error(
     model.eval()
     x = state_indices.long()
     with torch.inference_mode():
-        y_x = model(x)  # invariant under g.x; compute once
+        y_x = model(x)
+        if not torch.is_tensor(y_x):
+            raise TypeError(
+                f"{type(model).__name__} does not emit state logits; ledger models "
+                "are certified through their gate suite, not state-index equivariance."
+            )
         max_err = 0.0
         mean_errs: list[float] = []
         for sig in sig_ids.tolist():
@@ -183,21 +187,14 @@ def generic_full_g_equivariance_error(
                 dtype=torch.long,
             )
             yg = model(transformed)
-        # Equivariance is ``model(g.x) = P_g . model(x)``. The canonical spectral
-        # check (full_g_equivariance_error) realizes ``P_g . y`` as
-        # ``index_add_(1, perm, y)`` which produces ``y[g^{-1}.j]``; we use the
-        # same inverse permutation here so the two paths agree. Using the forward
-        # permutation ``y[g.j]`` would be correct only for involutions (K4 gates)
-        # and would wrongly report a non-zero defect for translations, which are
-        # not their own inverse.
-        inv_sig = signature_inverse_id(sig)
-        perm = torch.tensor(
-            [apply_signature_index(j, inv_sig) for j in range(y_x.shape[1])],
-            dtype=torch.long,
-        )
-        err = (yg - y_x.index_select(1, perm)).abs().max(dim=-1).values
-        max_err = max(max_err, float(err.max()))
-        mean_errs.append(float(err.mean()))
+            inv_sig = signature_inverse_id(sig)
+            perm = torch.tensor(
+                [apply_signature_index(j, inv_sig) for j in range(y_x.shape[1])],
+                dtype=torch.long,
+            )
+            err = (yg - y_x.index_select(1, perm)).abs().max(dim=-1).values
+            max_err = max(max_err, float(err.max()))
+            mean_errs.append(float(err.mean()))
     return {
         "max": max_err,
         "mean": float(np.mean(mean_errs)) if mean_errs else 0.0,
@@ -286,8 +283,9 @@ def psi_hat(
 
         psi_hat(g) = mean_x <E(x), E(g.x)> / (|E(x)| |E(g.x)|)
 
-    A perfectly equivariant encoder with orthogonal real representation rho(g)
-    yields |psi| = 1. The signed value is the symmetry-breaking order
+    |psi| = 1 when the latent is a single character sector. Mixed-sector
+    latents yield an energy-weighted mean of the characters, so |psi| is
+    not always 1. The signed value is the symmetry-breaking order
     parameter for ensemble comparisons. ``signature_perm`` maps each
     generator's signature id to an [N] array of destination indices.
     """
@@ -361,13 +359,17 @@ def probe_from_latent(latent: torch.Tensor, target: torch.Tensor) -> torch.Tenso
     """Closed-form least-squares linear probe of ``target`` from ``latent``.
 
     Returns the predicted target values (no training). Exact on the 256-row
-    census when the latent carries the information.
+    census when the latent carries the information. Uses the dual Gram form
+    when rows < columns.
     """
     X = latent.detach().double()
     Y = target.detach().double()
-    xtx = X.t() @ X
-    xtx = xtx + 1e-8 * torch.eye(xtx.shape[0], dtype=xtx.dtype)
-    w = torch.linalg.solve(xtx, X.t() @ Y)
+    if X.shape[0] >= X.shape[1]:
+        a = X.t() @ X + 1e-8 * torch.eye(X.shape[1], dtype=X.dtype)
+        w = torch.linalg.solve(a, X.t() @ Y)
+    else:
+        k = X @ X.t() + 1e-8 * torch.eye(X.shape[0], dtype=X.dtype)
+        w = X.t() @ torch.linalg.solve(k, Y)
     return (X @ w).float()
 
 
@@ -582,17 +584,38 @@ def code_readout() -> dict[str, np.ndarray]:
 # ---------------------------------------------------------------------------
 
 
-def exact_denoiser_multipliers(axis_flip_probs: list[float]) -> np.ndarray:
-    """Closed-form spectral shrinkage multipliers eta^r under the byte bath."""
+def exact_denoiser_multipliers(
+    axis_flip_probs: list[float], bath: str = "diagonal_translation"
+) -> np.ndarray:
+    """Closed-form spectral shrinkage multipliers under a chosen bath.
+
+    ``diagonal_translation`` (default): (u,v)→(u⊕d,v⊕d); carrier is a⊕b.
+    ``chirality``: v→v⊕q; carrier is b (χ flips by q). Both return a length-4096
+    table indexed as a*64+b.
+    """
+    if bath == "chirality":
+        flip_probs = np.asarray(axis_flip_probs, dtype=np.float64)
+        damping = 1.0 - 2.0 * flip_probs
+        vals = np.empty(4096, dtype=np.float64)
+        for a in range(64):
+            for b in range(64):
+                vals[a * 64 + b] = np.prod(
+                    [damping[i] for i in range(6) if (b >> i) & 1]
+                )
+        return vals
+    if bath != "diagonal_translation":
+        raise ValueError(f"unknown bath {bath!r}")
     m = walsh_multipliers(axis_flip_probs)
     return m["walsh_multiplier"]
 
 
-def denoiser_block_multipliers(axis_flip_probs: list[float]) -> np.ndarray:
+def denoiser_block_multipliers(
+    axis_flip_probs: list[float], bath: str = "diagonal_translation"
+) -> np.ndarray:
     """Closed-form per-block codec multipliers for bath-denoising (hQVM_QuBEC_Theory.md §7.2/§9.1).
 
-    The bath flips chirality axes independently with flip probabilities
-    ``p_i``, acting on a state as ``(u, v) -> (u ^ d, v ^ d)``. A character
+    The diagonal-translation / gauge bath flips both registers together:
+    ``(u, v) -> (u ^ d, v ^ d)``, which preserves chirality χ = u⊕v. A character
     ``phi_(a, b)`` picks up the sign ``(-1)^((a^b) . d)``, so the posterior
     mean denoiser multiplies coefficient ``(a, b)`` by
 
@@ -601,7 +624,11 @@ def denoiser_block_multipliers(axis_flip_probs: list[float]) -> np.ndarray:
 
     the Walsh multiplier of the carrier frequency ``a ^ b``, with the per-axis
     damping parameters ``eta_i = 1 - 2 p_i`` (hQVM_QuBEC_Theory.md §9.1).
+
+    For ``bath="chirality"`` the law is v→v⊕q and the carrier is b.
     """
+    if bath == "chirality":
+        return exact_denoiser_multipliers(axis_flip_probs, bath="chirality")
     flip_probs = np.asarray(axis_flip_probs, dtype=np.float64)
     damping = 1.0 - 2.0 * flip_probs
     vals = np.empty(4096, dtype=np.float64)
@@ -613,12 +640,15 @@ def denoiser_block_multipliers(axis_flip_probs: list[float]) -> np.ndarray:
     return vals
 
 
-def denoiser_gain_report(model, axis_flip_probs: list[float]) -> dict[str, float]:
+def denoiser_gain_report(
+    model, axis_flip_probs: list[float], bath: str = "diagonal_translation"
+) -> dict[str, float]:
     """Compare a spectral codec's learned gains against the closed form.
 
     Pairing: for the full ladder the codec has 2080 free block gains, paired
     to the per-block mean closed-form target over the irrep block. For an
-    orbit-tied rung (shell_radial, shell_gauge, chirality_gauge) the codec has
+    orbit-tied rung (diagonal_translation_radial / shell_radial aliases,
+    shell_gauge, chirality_gauge) the codec has
     one gain per orbit (indexed by ``model.bottleneck.orbit_index[k]`` for
     coefficient k); the per-orbit target is the mean of the per-block
     closed-form targets over the coefficients belonging to that orbit.
@@ -627,7 +657,10 @@ def denoiser_gain_report(model, axis_flip_probs: list[float]) -> dict[str, float
     it, so callers (and tests) can certify that "gains track the closed form"
     without reading prose.
     """
-    target = denoiser_block_multipliers(axis_flip_probs)  # [4096]
+    if bath == "chirality":
+        target = denoiser_block_multipliers(axis_flip_probs, bath="chirality")
+    else:
+        target = denoiser_block_multipliers(axis_flip_probs)  # [4096]
     target_per_coeff = np.asarray(target, dtype=np.float64)
     bid, _ = irrep_block_index()  # bid[a, b] = irrep block id of pair (a, b); [64, 64]
     target_mat = target_per_coeff.reshape(64, 64)
@@ -652,7 +685,7 @@ def denoiser_gain_report(model, axis_flip_probs: list[float]) -> dict[str, float
         err = free - per_orbit_target
     max_abs = float(np.abs(err).max())
     mean_abs = float(np.abs(err).mean())
-    tol = 0.2  # gains must track the closed form within 0.2 to be certifiable
+    tol = 5e-2
     return {
         "max_abs_error": max_abs,
         "mean_abs_error": mean_abs,
@@ -660,6 +693,38 @@ def denoiser_gain_report(model, axis_flip_probs: list[float]) -> dict[str, float
         "pass": bool(np.isfinite(max_abs) and max_abs <= tol),
         "tol": tol,
     }
+
+
+def assign_analytic_gains(
+    model, eta: list[float], bath: str = "diagonal_translation"
+) -> None:
+    """Write closed-form denoiser gains onto a codec."""
+    target = denoiser_block_multipliers(eta, bath=bath).reshape(64, 64)
+    bid, _ = irrep_block_index()
+    block_target = np.array(
+        [target[bid == i].mean() for i in range(int(bid.max()) + 1)]
+    )
+    with torch.no_grad():
+        if model.bottleneck.orbit_index is None:
+            g = model.bottleneck.gain
+            g.copy_(torch.as_tensor(block_target[: g.numel()], dtype=g.dtype))
+        else:
+            orbit = model.bottleneck.orbit_index.cpu().numpy()
+            n = int(model.bottleneck.gain.shape[0])
+            per_orbit = np.array(
+                [
+                    block_target[orbit == o].mean() if np.any(orbit == o) else 0.0
+                    for o in range(n)
+                ]
+            )
+            model.bottleneck.gain.copy_(
+                torch.as_tensor(per_orbit, dtype=model.bottleneck.gain.dtype)
+            )
+
+
+def chirality_denoiser_block_multipliers(axis_flip_probs: list[float]) -> np.ndarray:
+    """Alias for ``exact_denoiser_multipliers(..., bath='chirality').``"""
+    return exact_denoiser_multipliers(axis_flip_probs, bath="chirality")
 
 
 # ---------------------------------------------------------------------------
@@ -744,7 +809,7 @@ def genomics_compile(window: Iterable[int]) -> dict[str, np.ndarray]:
 
 
 def walsh_sector_energy(
-    model: SpectralAutoencoder, state_index: int
+    model: AffineSpectralCodec, state_index: int
 ) -> dict[str, float]:
     """Energy per irrep sector of a state's Walsh spectrum.
 
@@ -808,23 +873,6 @@ class ScaleSuite:
 
     def operator(self) -> dict[str, np.ndarray]:
         return operator_structure()
-
-    def multicell_equivariance(self, rng: np.random.Generator) -> float:
-        from src.tools.autoencoder.models.super import MultiCellSpectral
-
-        return MultiCellSpectral(2).equivariance_check(rng)
-
-    def multicell_product(
-        self, cell_states: list[torch.Tensor]
-    ) -> dict[str, float]:
-        from src.tools.autoencoder.models.super import MultiCellSpectral
-
-        m = MultiCellSpectral(len(cell_states))
-        spectrum = m.joint_spectrum(cell_states)
-        return {
-            "equivariance_max_err": m.product_equivariance_check(cell_states),
-            **m.concentration(spectrum),
-        }
 
     def genomics(self, window: Iterable[int]) -> dict[str, np.ndarray]:
         return genomics_compile(window)

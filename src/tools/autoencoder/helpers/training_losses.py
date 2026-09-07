@@ -35,6 +35,10 @@ class LossWeights:
     rank_ce: float = 0.0
     transition_ce: float = 0.0
     word_ce: float = 0.0
+    byte_ce: float = 0.0
+    family_ce: float = 0.0
+    payload_ce: float = 0.0
+    residual_zero: float = 0.0
 
 
 @dataclass

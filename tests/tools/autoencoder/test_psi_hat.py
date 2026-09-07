@@ -45,15 +45,16 @@ def test_psi_hat_unit_for_exact_encoder() -> None:
             for name, sl in model.z_slices.items()
         }
     chars = {
-        # block -> (chi(id), chi(S), chi(C), chi(F))
-        "z_inv": (1, 1, 1, 1),
-        "z_chi": (1, -1, 1, -1),
-        "z_shell": (1, 1, -1, -1),
-        "z_irrep": (1, -1, -1, 1),
+        "z_invariant": (1, 1, 1, 1),
+        "z_char_S": (1, -1, 1, -1),
+        "z_char_C": (1, 1, -1, -1),
+        "z_char_F": (1, -1, -1, 1),
     }
     for gate_i in range(1, 4):
         predicted = sum(weights[name] * chars[name][gate_i] for name in chars)
         assert abs(out[gate_i] - predicted) < 1e-4, (gate_i, out[gate_i], predicted)
+    # Mixed sectors: |psi| is the energy-weighted character mean, not always 1.
+    assert any(abs(out[g]) < 0.999 for g in range(1, 4))
 
 
 def test_psi_hat_trivial_generator_is_plus_one() -> None:

@@ -33,6 +33,9 @@ def _args(tmp_path: Path, model: str, task=None, symmetry=None, epochs=2) -> obj
     a.patience = 5
     a.min_delta = 1e-4
     a.rate_weight = 0.0
+    a.ladder = None
+    a.hidden_dim = None
+    a.report_gates = False
     return a
 
 
@@ -53,12 +56,10 @@ def _params_changed(initial: torch.nn.Module, path: Path) -> bool:
     [
         ("mlp", None, None),
         ("k4", None, None),
-        ("spectral", None, None),
         ("transition", "transition", None),
         ("rawbyte", "rawbyte", None),
         ("word", "word", None),
         ("percolation", "percolation_rank", None),
-        ("unified", "unified_multi", "full"),
     ],
 )
 def test_task_actually_trains(tmp_path, model, task, symmetry) -> None:
@@ -69,11 +70,7 @@ def test_task_actually_trains(tmp_path, model, task, symmetry) -> None:
 
     args = _args(tmp_path, model, task, symmetry, epochs=2)
     kind = task or model
-    initial = build_model(
-        model,
-        symmetry=symmetry,
-        heads=("transition", "word", "rank") if task == "unified_multi" else None,
-    )
+    initial = build_model(model, symmetry=symmetry)
     rc = cmd_train(args)
     assert rc == 0
     path = Path(args.output_dir) / f"{args.run_name}.pt"
@@ -81,14 +78,32 @@ def test_task_actually_trains(tmp_path, model, task, symmetry) -> None:
     assert _params_changed(initial, path), f"{kind} did not train"
 
 
+def test_super_train_smoke(tmp_path) -> None:
+    """``--model super --task masked_frame`` trains and saves a checkpoint."""
+    from src.tools.autoencoder.models import build_model
+    from src.tools.autoencoder.models.super import Super
+
+    args = _args(tmp_path, "super", "masked_frame", None, epochs=1)
+    args.report_gates = False
+    rc = cmd_train(args)
+    assert rc == 0
+    path = Path(args.output_dir) / f"{args.run_name}.pt"
+    assert path.exists()
+    reloaded, meta = load_any_checkpoint(path, device="cpu")
+    assert isinstance(reloaded, Super)
+    assert meta["extra"]["model_kind"] == "super"
+    assert meta["extra"]["fit"]["epochs_run"] == 1
+    assert isinstance(build_model("super"), Super)
+
+
 def test_denoise_rate_weight_wired() -> None:
     from src.tools.autoencoder.helpers.training_losses import (
         LossWeights,
         weighted_total,
     )
-    from src.tools.autoencoder.models.super import SpectralAutoencoder
+    from src.tools.autoencoder.models.general import AffineSpectralCodec
 
-    model = SpectralAutoencoder(ladder="shell_radial")
+    model = AffineSpectralCodec(ladder="shell_radial", frozen=False)
     weights = LossWeights(state_ce=1.0, rate=1.0)
     idx = torch.arange(0, 256, dtype=torch.long)
     logits = model(idx)
@@ -133,7 +148,6 @@ def test_loss_key_parity() -> None:
         ("rawbyte", "transition_ce"),
         ("word", "word_ce"),
         ("percolation_rank", "rank_ce"),
-        ("unified_multi", "state_ce"),
     ],
 )
 def test_task_primary_loss_key_nonzero(task, primary_key) -> None:
@@ -148,16 +162,12 @@ def test_task_primary_loss_key_nonzero(task, primary_key) -> None:
 
 
 def test_denoise_smoke_passes_gain_bound(tmp_path) -> None:
-    """Smoke test for ``cmd_train_denoise`` (P0.2): trains the spectral codec
+    """Smoke test for ``cmd_train_denoise``: trains AffineSpectralCodec
     on bath-corrupted states against clean targets for a few epochs, then
     asserts the closed-form gain report passes its machine-checked bound.
-
-    This regression catches both the orbit-tied indexing bug in
-    ``denoiser_gain_report`` (which crashed the report on every tied rung)
-    and the previous CE-loss path (which left the gains nowhere near the
-    closed-form multipliers).
     """
     import json
+
     from src.tools.autoencoder.cli import cmd_train_denoise
 
     class A:
@@ -182,51 +192,4 @@ def test_denoise_smoke_passes_gain_bound(tmp_path) -> None:
     assert "pass" in report and "tol" in report, (
         "denoiser_gain_report must carry a machine-checked pass flag"
     )
-    # With a low-noise bath and the MSE loss the gains must track the closed
-    # form within the published tolerance. 0.5 is a generous smoke bound; the
-    # shipped 0.2 bound is the production-grade gate.
     assert report["mean_abs_error"] < 0.5
-
-
-def test_unified_multi_transition_labels_aligned(tmp_path) -> None:
-    """Regression for P0.1: ``cmd_train --task unified_multi`` must wire the
-    transition head to ``next_state = table[tr_state, tr_byte]``. The previous
-    code used ``table.reshape(-1)[t_pos]`` while ``tr_state`` came from the
-    filtered ``train_idx``, so the labels were wrong everywhere ``train_idx``
-    was not the identity permutation. The sampler closure is not accessible
-    from outside ``cmd_train``, so we replicate its exact construction here
-    and check the kernel invariant directly.
-    """
-    import numpy as np
-    from src.tools.autoencoder.datasets import transition_table
-
-    _args(tmp_path, "unified", "unified_multi", "full", epochs=1)
-    rng = np.random.default_rng(0)
-    n_state = 4096
-    n_val = int(round(n_state * 0.15))
-    all_idx = np.arange(n_state, dtype=np.int64)
-    perm = rng.permutation(n_state)
-    train_idx = np.sort(perm[n_val:])
-    val_idx = np.sort(perm[:n_val])
-    K = max(64, min(len(train_idx), 2048))
-    table = transition_table().astype(np.int64)
-    table_tr = table[train_idx]
-    s_idx = rng.choice(train_idx, size=K)
-    t_pos = rng.choice(len(train_idx) * 256, size=K)
-    w_byte = rng.choice(256, size=K)
-    tr_state = train_idx[t_pos // 256]
-    tr_byte = (t_pos % 256).astype(np.int64)
-    # next_state is read with a flat index because table_tr has shape
-    # [n_state_train, 256]; a 1D t_pos cannot index axis 0 directly.
-    next_state = table_tr.reshape(-1)[t_pos]
-    np.testing.assert_array_equal(
-        next_state, table[tr_state, tr_byte],
-        err_msg="P0.1: next_state != table[tr_state, tr_byte]",
-    )
-    # And the train_idx filtering must actually be active for the test to
-    # mean something -- if train_idx is the identity permutation, the bug
-    # is silent.
-    assert not np.array_equal(train_idx, all_idx), (
-        "val_fraction=0.15 did not filter train_idx; the test would not "
-        "have exercised the original bug"
-    )
