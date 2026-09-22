@@ -1,3 +1,5 @@
+> **CGM Science Documentation - Port** : This doc is copied from our science repo - all of its surrounding theory and relative paths can be found at https://github.com/gyrogovernance/science
+
 # CGM Units Analysis: Geometric Foundation of Physical Reality
 
 **Citation:** Korompilias, B. (2025). Common Governance Model: Mathematical Physics Framework. Zenodo. https://doi.org/10.5281/zenodo.17521384

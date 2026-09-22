@@ -1,0 +1,185 @@
+{
+  "status": "ok",
+  "claim": "Within fixed tripeptides from Gamble 2016 Table S1, frozen Super climate ranks synonymous expression by codon order.",
+  "passed": true,
+  "primary_read": "super_climate",
+  "gates": {
+    "primary_mean_rho_positive": true,
+    "primary_sign_flip_p_below_0_05": true,
+    "primary_holdout_mean_rho_positive": true,
+    "primary_holdout_positive_folds_at_least_half": true
+  },
+  "data": {
+    "table_path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\dataset_topology\\gamble_2016__NIHMS800838-supplement-6.xlsx",
+    "table_sha256": "0afe42a917a6e6fb8d32d726fb5ba6282b7fcac1987af14bfc7a0a94a096ff2a",
+    "n_variants_raw": 35811,
+    "n_variants_eligible": 28504,
+    "n_peptides_eligible": 2597,
+    "min_group": 5,
+    "expression_column": "synGFPSEQ",
+    "holdout_folds": 5
+  },
+  "within_peptide": {
+    "super_climate": {
+      "n_groups": 2562,
+      "n_variants": 28293,
+      "mean_rho": 0.019578936636365025,
+      "median_rho": 0.01855526287577365,
+      "positive_fraction": 0.5136612021857924,
+      "sign_flip_p_one_sided_greater": 0.003799240151969606,
+      "group_rhos_retained": false
+    },
+    "super_context_norm": {
+      "n_groups": 2399,
+      "n_variants": 27261,
+      "mean_rho": -0.0005374775947871494,
+      "median_rho": 0.0,
+      "positive_fraction": 0.46352646936223424,
+      "sign_flip_p_one_sided_greater": 0.5220955808838232,
+      "group_rhos_retained": false
+    },
+    "narrow_het": {
+      "n_groups": 2562,
+      "n_variants": 28293,
+      "mean_rho": -0.007681046854837324,
+      "median_rho": 0.0,
+      "positive_fraction": 0.48321623731459795,
+      "sign_flip_p_one_sided_greater": 0.8416316736652669,
+      "group_rhos_retained": false
+    },
+    "kernel_mean_shell": {
+      "n_groups": 2561,
+      "n_variants": 28288,
+      "mean_rho": 0.006606238140476642,
+      "median_rho": 0.0,
+      "positive_fraction": 0.4919953143303397,
+      "sign_flip_p_one_sided_greater": 0.1881623675264947,
+      "group_rhos_retained": false
+    },
+    "gc": {
+      "n_groups": 2554,
+      "n_variants": 28253,
+      "mean_rho": -0.06127636593524504,
+      "median_rho": -0.07433026545805156,
+      "positive_fraction": 0.4115113547376664,
+      "sign_flip_p_one_sided_greater": 1.0,
+      "group_rhos_retained": false
+    },
+    "codon_count_entropy": {
+      "n_groups": 405,
+      "n_variants": 6186,
+      "mean_rho": -0.008192767371003249,
+      "median_rho": 0.0,
+      "positive_fraction": 0.4567901234567901,
+      "sign_flip_p_one_sided_greater": 0.6756648670265947,
+      "group_rhos_retained": false
+    }
+  },
+  "peptide_holdout": {
+    "super_climate": {
+      "n_folds": 5,
+      "mean_rho": 0.019555001569557008,
+      "fold_means": [
+        0.020068593380486523,
+        0.03986078332997778,
+        0.0180914531925328,
+        0.019518569592874412,
+        0.00023560835191352745
+      ],
+      "positive_folds": 5
+    },
+    "super_context_norm": {
+      "n_folds": 5,
+      "mean_rho": -0.0005252033219805285,
+      "fold_means": [
+        0.026385017052269262,
+        0.018585219599237663,
+        -0.022558828971468173,
+        -0.020456137707872697,
+        -0.004581286582068701
+      ],
+      "positive_folds": 2
+    },
+    "narrow_het": {
+      "n_folds": 5,
+      "mean_rho": -0.007735206283766671,
+      "fold_means": [
+        -0.00731191595345706,
+        0.008158114287839389,
+        -0.025289101519036766,
+        0.022482528673519377,
+        -0.03671565690769829
+      ],
+      "positive_folds": 2
+    },
+    "kernel_mean_shell": {
+      "n_folds": 5,
+      "mean_rho": 0.0066139500834276445,
+      "fold_means": [
+        -0.011550348868963525,
+        0.01390208451338594,
+        0.012323126764719436,
+        -0.005111245034073037,
+        0.023506133042069405
+      ],
+      "positive_folds": 3
+    },
+    "gc": {
+      "n_folds": 5,
+      "mean_rho": -0.06120856252273375,
+      "fold_means": [
+        -0.07272329739968877,
+        -0.07012432241489516,
+        -0.04841805517696174,
+        -0.07696194984583281,
+        -0.03781518777629026
+      ],
+      "positive_folds": 0
+    },
+    "codon_count_entropy": {
+      "n_folds": 5,
+      "mean_rho": -0.005770618102955934,
+      "fold_means": [
+        -0.04165665623904712,
+        -0.02666231666565259,
+        0.05899710348221954,
+        0.011754800096064909,
+        -0.031286021188364405
+      ],
+      "positive_folds": 2
+    }
+  },
+  "controls_note": "GC and codon-count entropy are composition controls published on the same within-peptide estimand as the AE and kernel reads.",
+  "provenance": {
+    "generated_timestamp_utc": "2026-09-22T14:29:30.668095+00:00",
+    "script": {
+      "path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\programs\\genomics\\topology\\script_6_order.py",
+      "sha256": "401209dc2d0bd256ac1fa2cbb82f4912d55250e271c54bfa0167f08455e39c79"
+    },
+    "production_checkpoints": {
+      "k4": {
+        "path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\k4_full.pt",
+        "sha256": "0c47e1abd0c31689a54476bae97be4ea8bcf78d8b59c10873418418abf4ff976"
+      },
+      "mlp": {
+        "path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\mlp_full.pt",
+        "sha256": "1d052c1d54571c281cf6b139c877b20645ee8a9e0f528a376fd737953372792a"
+      },
+      "spectral": {
+        "path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\spectral_bottleneck.pt",
+        "sha256": "87bf741f86d64c63bfa20fd15caad0db5cd2af0f3dcdcb30483648c8005c51c9"
+      },
+      "super": {
+        "path": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\super.pt",
+        "sha256": "42e8e5ba40c304e96d0b5d243dab712a0409c3bc4804d8bc86cb10185981c4ff"
+      }
+    },
+    "cli": {
+      "device": "cpu",
+      "seed": 20260919,
+      "min_group": 5,
+      "holdout_folds": 5,
+      "permutations": 5000
+    }
+  }
+}

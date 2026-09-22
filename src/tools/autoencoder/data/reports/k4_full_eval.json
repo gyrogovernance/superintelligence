@@ -1,0 +1,83 @@
+{
+  "checkpoint": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\k4_full.pt",
+  "meta": {
+    "config": {
+      "epochs": 5000,
+      "batch_size": 4096,
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "device": "cpu",
+      "seed": 0,
+      "gradient_clip": null,
+      "checkpoint_dir": "checkpoints/production",
+      "log_file": "checkpoints\\production\\k4_full_train_log.jsonl",
+      "loss_weights": {
+        "state_ce": 1.0,
+        "state_bits": 0.0,
+        "enc_eq": 0.0,
+        "dec_eq": 0.0,
+        "step": 0.0,
+        "chi": 0.0,
+        "shell": 0.0,
+        "inverse": 0.0,
+        "composition": 0.0,
+        "signature": 0.0,
+        "parity": 0.0,
+        "tau_u": 0.0,
+        "tau_v": 0.0,
+        "commitment": 0.0,
+        "end_state": 0.0,
+        "provenance": 0.0,
+        "rate": 0.0
+      }
+    },
+    "extra": {
+      "model_kind": "k4",
+      "symmetry": null,
+      "latent_dim": 8,
+      "hidden_dim": 64,
+      "n_trivial": 2,
+      "n_sign": 2,
+      "ladder": null,
+      "fit": {
+        "epochs_run": 636
+      },
+      "n_train": 3482,
+      "n_val": 614,
+      "best": {
+        "monitor": "val_loss",
+        "best": 0.49802684783935547,
+        "epoch": 487
+      }
+    }
+  },
+  "reconstruction": {
+    "exact_accuracy": 0.99951171875,
+    "n_states": 4096
+  },
+  "equivariance": {
+    "max_per_gate": [
+      0.0,
+      1.9170443010807503e-11,
+      2.2353674467012752e-11,
+      3.3224978324142285e-11
+    ],
+    "mean_per_gate": [
+      0.0,
+      2.2806036573119748e-12,
+      3.939917402745463e-12,
+      4.069084479085827e-12
+    ],
+    "max": 3.3224978324142285e-11,
+    "mean": 2.5724013847858163e-12,
+    "passed": true,
+    "decoder_max": 9.396001132699894e-08,
+    "decoder_mean": 2.2270433497340036e-08
+  },
+  "_provenance": {
+    "git_commit": "c87674d30c488cce1d5d919177268aa44bffb9a1",
+    "torch_version": "2.10.0+cpu",
+    "python_version": "3.14.5",
+    "metric_schema_version": 1
+  }
+}

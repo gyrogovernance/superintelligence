@@ -95,22 +95,6 @@ It provides:
 
 ---
 
-## 🎛️ NEW - hQVM AE: Group-Equivariant Autoencoder
-
-The hQVM is a deterministic universe in miniature. Its 4,096 states, 256 byte operations, and full symmetry group are all exactly known and enumerable. That makes the kernel two things at once: an unusually clean laboratory for studying how neural networks represent structure, and a substrate whose learned representations can be checked against exact ground truth.
-
-The hQVM AE is the learning arm of the kernel program. It trains autoencoders on the kernel's state space with the kernel's symmetries built into the architecture, so a learned code cannot drift away from the algebra it is meant to describe. The product is a verified dictionary of embeddings for states, bytes, and words, together with probes that measure how structure survives compression.
-
-What we use it for:
-
-- **Mechanistic interpretability.** A machine we can fully audit is the ideal testbed for interpretability. The models show which features of a state survive in a learned code, and the symmetry diagnostics show when a network starts to break the kernel's laws.
-- **Genomics analysis.** Our science program maps the genome onto the same carrier, with codons as states and codon pairs as transitions. The AE turns that mapping into learned, testable representations, from climate-profile scoring of coding sequences to codon-pair structure.
-- **Scale.** The same machinery extends to multi-cell product registers and to any domain that maps onto the carrier, with each learned structure certified against the kernel.
-
-Every dataset and label routes through the kernel, so the learning stack re-implements none of its laws. Train, evaluate, verify, and export with one command (`python -m src.tools.autoencoder.cli`). The [autoencoder README](src/tools/autoencoder/README.md) has the full tour.
-
----
-
 ## 🔬 Why This Matters for Computer Science
 
 - **Processing**: Replayable stream-processing with deterministic recomputation, compact state updates, and composable operator signatures, suitable for event sourcing, reproducible workflows, and governance-grade logs.
@@ -145,6 +129,54 @@ All results below are verified by exhaustive computation over the entire reachab
 ✅ **[hQVM Features Report](docs/reports/hQVM_Features_Report.md)** is the master catalog: every verified feature with evidence source, verification tier, and experiment script.
 
 **Integrity and Tamper Detection:** Built-in self-dual [12,6,2] code with provenance checks. Substitutions reduce to shadow partners, adjacent swaps to shared q-class, deletions to horizon stabilizer conditions.
+
+---
+
+## 🎛️ NEW - hQVM AE: Group-Equivariant Autoencoder
+
+A neuro-symbolic autoencoder suite over a finite group-structured state space, with applications that run from mechanistic interpretability to genomics.
+
+Three model classes (narrow, general, and super) learn to compress and reconstruct symmetries and rules derived from mathematical physics and our Gyroscopic ASI theory rather than fitting them to empirical datasets. The kernel generates the datasets, the grammar, and the labels used for training and evaluation.
+
+### AE Model Classes:
+- **Narrow**: Plain encoders and deterministic codecs that serve as controls.
+- **General**: Exact symmetry groups (K4 equivariance built into the architecture).
+- **Super**: Full grammar, with a learned component that separates sequences the exact grammar treats as equivalent.
+
+Symmetry is measured after training, not assumed: the equivariant model holds to 3.32e-11 over all 4,096 states, and the spectral codec carries a closed-form certificate for the full affine group.
+
+The suite also ships a verified embedding dictionary for states, bytes, and words, and a denoiser whose gains match the closed-form Bayes-optimal multipliers. Any sequence that compiles onto the carrier reads through the same path, and weight tensors from other systems enter through a frozen adapter as tiled blocks rather than as new training data.
+
+Uses:
+
+- **Mechanistic interpretability.** The models are trained on a system whose algebra is known exactly, so a learned code can be compared directly against the kernel, and the symmetry diagnostics report where a model departs from the kernel's group action.
+- **Genomics analysis.** Codons map to states and codon pairs to transitions. The models were trained on grammar-generated sequence only, so agreement with biology carries no information; the measured quantity is how far native biological sequence departs from what the grammar alone produces, and it is small by construction.
+- **Scale.** The same models extend to multi-cell product registers and to any domain that maps onto the state space, with each structure certified against the kernel.
+
+Commands and layout live in the [autoencoder README](src/tools/autoencoder/README.md), model tiers and design rationale in the [specification](docs/specs/hQVM_AE_Specs.md), and gate records in the [evaluation report](docs/reports/hQVM_AE_Report.md).
+
+### Genomics Program
+
+The Genomics Program advances programmable nucleic acid research on DNA and RNA through grammar-trained autoencoders of the hQVM AE suite, grounded in first principles. The models read biological sequences through the group-equivariant coordinate system and a formal algebra for nucleotides, codons, and codon-pair transitions derived from our CGM theory.
+
+With training restricted to that coordinate system and no biological sequence in the corpus, every reproducible contact between readout and genomic structure that survives composition controls is a signature of the underlying physics. Even the faintest of those marks remains informative, and opens a concrete frontier for genomics.
+
+**Programs:**
+1. **Synthesis**: Artificial Gene Synthesis and Design.
+
+Synthetic genomics seeks to design and construct entire genomes to mechanistically dissect fundamental questions and advance research focused on health and medicines. Our probes aim to inform artificial gene synthesis and design, opening alternative paths for nucleic-acid work under synonymous freedom: codon-order rearrangements are scored and ranked while protein and composition remain fixed.
+
+2. **Topology**: Biological Membrane Topology Analysis.
+
+Membrane topology describes the number of membrane-spanning segments in a protein and how its parts orient relative to the inside and outside of a biological membrane. The program expands into a frontier analysis of membrane-topology inside individual *E. coli* genes.
+
+| Analysis | Result |
+| --- | --- |
+| Order memory across four organisms | Trained Super separates order-permuted pairs at a +0.19 to +0.23 margin over matched random initialization; Super climate reaches AUC 0.8408 in *E. coli* and 0.7113 in yeast against GC-matched shuffles |
+| Membrane topology in 590 *E. coli* genes | Transmembrane coding sits −0.226 shell units below cytoplasmic domains of the same gene (negative in 492 of 590; p = 0.0002); a frozen model read adds +0.009094 held-out AUC over a controlled baseline |
+| Synonymous expression (Gamble 2016, yeast) | Frozen Super climate ranks expression within fixed peptides at +0.0196 Spearman (p = 0.0038) across 28,504 variants |
+
+Program design is in the [genomics specification](docs/programs/hQVM_AE_Genomics_Specs.md), and the biological results with their limits are in the [genomics report](docs/reports/hQVM_AE_Genomics_Report.md).
 
 ---
 
@@ -193,7 +225,9 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 - 💰 [Moments Economy Whitepaper](docs/programs/AIR_Moments_Economy_Whitepaper.md) - Monetary and civil governance framework grounded in replayable coordination
 
 ### Tools
-- 🎛️ [hQVM AE: Group-Equivariant Autoencoder](src/tools/autoencoder/README.md) - The learning arm of the kernel program, from mechanistic interpretability to genomics
+- 🎛️ [hQVM AE: Group-Equivariant Autoencoder](src/tools/autoencoder/README.md) - Run guide for the learning arm of the kernel program
+  - 📘 [hQVM AE Specification](docs/specs/hQVM_AE_Specs.md) - Theory, model tiers, state space, and the CGM null dataset
+  - 🧬 [hQVM AE Genomics Specification](docs/programs/hQVM_AE_Genomics_Specs.md) - Program design for the synthesis, topology, and fixed-peptide analyses
 
 ### Core Specifications
 
@@ -238,6 +272,8 @@ All kernel properties verified by exhaustive test suites (499 tests, all passing
 - 📊 [hQVM Climate Tests Report](docs/reports/hQVM_Climate_Tests_Report.md) - Climate helper and transport diagnostics validation
 - 📊 [hQVM Speed Tests Report](docs/reports/hQVM_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
 - 📊 [Measurement Tests Report](docs/reports/Measurement_Tests_Report.md) - Governance balance metrics and epistemic vs empirical evaluation
+- 📊 [hQVM AE Evaluation Report](docs/reports/hQVM_AE_Report.md) - Shipped autoencoder checkpoints, the Super gate record, and the suite by domain
+- 📊 [hQVM AE Genomics Report](docs/reports/hQVM_AE_Genomics_Report.md) - Synthesis, membrane-topology, and fixed-peptide results
 
 ### The Human Mark (THM)
 

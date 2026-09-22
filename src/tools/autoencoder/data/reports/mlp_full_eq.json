@@ -1,0 +1,13 @@
+{
+  "max": 216.29360961914062,
+  "mean": 87.2088372366769,
+  "forward_max": 216.29360961914062,
+  "forward_mean": 87.2088372366769,
+  "passed": false,
+  "_provenance": {
+    "git_commit": "c87674d30c488cce1d5d919177268aa44bffb9a1",
+    "torch_version": "2.10.0+cpu",
+    "python_version": "3.14.5",
+    "metric_schema_version": 1
+  }
+}

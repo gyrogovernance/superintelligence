@@ -144,7 +144,7 @@ def test_walsh_multipliers_match_corpus_damping() -> None:
         assert np.isclose(float(out["eta_isotropic"]), eta)
 
 
-def test_percolation_learner_rank_recovery_smoke() -> None:
+def test_percolation_learner_rank_recovery_smoke(tmp_path) -> None:
     """A PercolationLearner trained a few epochs on the packed allowed mask
     reaches exact-rank accuracy above chance on the rank-controlled strata
     (k = 1..6, six balanced classes), and does not merely fit reach: the
@@ -176,7 +176,14 @@ def test_percolation_learner_rank_recovery_smoke() -> None:
     tr = np.concatenate([controlled[n_hold:], np.flatnonzero(nq != rank)])
 
     model = PercolationLearner(hidden_dim=128)
-    config = TrainConfig(epochs=12, batch_size=128, lr=3e-3, device="cpu", seed=0)
+    config = TrainConfig(
+        epochs=12,
+        batch_size=128,
+        lr=3e-3,
+        device="cpu",
+        seed=0,
+        checkpoint_dir=str(tmp_path),
+    )
     trainer = Trainer(model, config)
     weights = LossWeights(rank_ce=1.0)
 

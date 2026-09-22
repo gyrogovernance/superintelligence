@@ -1,3 +1,5 @@
+> **CGM Science Documentation - Port** : This doc is copied from our science repo - all of its surrounding theory and relative paths can be found at https://github.com/gyrogovernance/science
+
 # Genomics in the Common Governance Model through the Holonomic Quantum Virtual Machine
 
 ## Abstract

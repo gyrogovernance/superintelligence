@@ -1,22 +1,93 @@
 toys/health/memories/
-htmlcov/ 
+htmlcov/
 memories/private/
 memories/public/
 toys/training/knowledge/
 toys/training/Archive/
 memories/kernel/
 memories/models/
-src/app/console/ui/index.html
-src/app/console/ui/package-lock.json
-src/app/console/ui/package.json
-src/app/console/ui/postcss.config.js
-src/app/console/ui/tailwind.config.js
-src/app/console/ui/tsconfig.json
-src/app/console/ui/tsconfig.node.json
-src/app/console/ui/vite.config.ts
-src\app\console\ui\node_modules
+src/app/console/ui/
 research_backup_do_not_use/
 _backup
+**/_backup/
 src/tools/gyroscopic/backup/
 
-!external/llama.cpp/
+# Upstream / vendor (huge index bloat)
+external/
+external/llama.cpp/
+
+# Python virtual environments
+.venv/
+.venv-dml/
+venv/
+__pypackages__/
+**/site-packages/
+**/site-packages/**
+
+# Python bytecode and package metadata
+**/__pycache__/
+**/__pycache__/**
+*.pyc
+*.pyo
+*.pyd
+**/*.dist-info/
+**/*.dist-info/**
+*.egg-info/
+
+# Build artifacts
+dist/
+build/
+**/_build/
+**/_build/**
+
+# JS/TS dependencies
+**/node_modules/
+node_modules/
+.vite/
+.vite-temp/
+
+# Caches and tooling noise
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.git/
+.temp/
+.github/
+.vscode/
+.idea/
+coverage/
+htmlcov/
+typings/
+
+# Large / generated data (not source)
+assets/
+data/models/
+data/**/*.npy
+data/**/*.npz
+data/**/*.zip
+data/**/*.bytes
+data/**/*.jsonl
+data/**/*.gguf
+data/**/*.safetensors
+**/*.gguf
+**/*.safetensors
+**/*.pt
+**/*.pt.bak*
+**/*.npz
+**/*.bin
+**/*.dat
+**/*.gz
+**/*.parquet
+src/tools/autoencoder/data/
+
+# Logs and secrets
+logs/
+*.log
+*.key
+*.pem
+*.env
+secret_lab_ignore/
+
+# Scratch / temp work
+# **/_temp/
+# **/tmp/

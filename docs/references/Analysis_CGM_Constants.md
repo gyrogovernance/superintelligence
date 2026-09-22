@@ -1,3 +1,5 @@
+> **CGM Science Documentation - Port** : This doc is copied from our science repo - all of its surrounding theory and relative paths can be found at https://github.com/gyrogovernance/science
+
 # Analysis: CGM Constants: Mathematical Structure and the Aperture
 
 This document is an extensive mathematical analysis of the fundamental constants of the Common Governance Model (CGM), with particular emphasis on the aperture parameter and how all quantities derive from and connect to it. Notation uses Unicode symbols throughout; no LaTeX.

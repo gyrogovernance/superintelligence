@@ -52,6 +52,9 @@ def _state24_by_uv() -> np.ndarray:
     return tbl
 
 
+_POP6 = np.array([bin(i).count("1") for i in range(64)], dtype=np.int64)
+
+
 def prefix_factor_table(ledgers: np.ndarray) -> np.ndarray:
     """[N, T, 3] Theorem-2 signature factors of every prefix (vectorized)."""
     tbl = _byte_tables()
@@ -127,11 +130,11 @@ class ScanTrajectory:
 class ExactHQVMScan(nn.Module):
     """Zero-parameter exact scan of a byte ledger through the hQVM kernel.
 
-    For each visible step the carrier is advanced with ``step_state_by_byte``
-    and the published fields (post-state, shells, prefix signature) are filled
-    from ``src.api`` / ``src.family`` / ``kernel.word_signature_id``. Masked
-    steps do not advance the published carrier and publish zeros for those
-    post-state fields.
+    For each visible step the carrier is advanced and the published fields
+    (post-state, shells, prefix signature) are filled from the product LUTs.
+    Masked steps do not advance the published carrier and publish zeros for
+    those post-state fields. The recurrence is evaluated in batch over the
+    leading dimension (numpy on CPU, results returned on the ledger device).
     """
 
     def __init__(self) -> None:
@@ -157,74 +160,95 @@ class ExactHQVMScan(nn.Module):
         else:
             mask_t = None
 
-        batch, steps = bytes_t.shape
         device = bytes_t.device
+        led = bytes_t.detach().cpu().numpy().astype(np.int64, copy=False)
+        batch, steps = led.shape
+        if mask_t is None:
+            hid = np.zeros((batch, steps), dtype=bool)
+        else:
+            hid = mask_t.detach().cpu().numpy().astype(bool, copy=False)
 
-        intron = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        family_phase = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        micro_ref = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        q6 = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        state_before = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        state_after = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        chi_shell = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        arch_shell = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        prefix_sig = torch.zeros(batch, steps, dtype=torch.long, device=device)
-        fold_dis = torch.zeros(batch, steps, dtype=torch.long, device=device)
-
-        T = _byte_tables()
-        S24 = _state24_by_uv()
+        tables = _byte_tables()
+        s24 = _state24_by_uv()
         omega0 = api.state24_to_omega12(int(start_state))
+        u = np.full(batch, int(omega0.u6), dtype=np.int64)
+        v = np.full(batch, int(omega0.v6), dtype=np.int64)
+        su = np.zeros(batch, dtype=np.int64)
+        sv = np.zeros(batch, dtype=np.int64)
+        sp = np.zeros(batch, dtype=np.int64)
+        state = np.full(batch, int(start_state), dtype=np.int64)
 
-        for b in range(batch):
-            u = int(omega0.u6)
-            v = int(omega0.v6)
-            sp = 0
-            su = 0
-            sv = 0
-            state = int(start_state)
-            for t in range(steps):
-                byte = int(bytes_t[b, t].item())
-                hidden = bool(mask_t[b, t].item()) if mask_t is not None else False
-                state_before[b, t] = state
-                if hidden:
-                    continue
-                intron[b, t] = int(T["intron"][byte])
-                family_phase[b, t] = int(T["family"][byte])
-                micro_ref[b, t] = int(T["micro"][byte])
-                q6[b, t] = int(T["q6"][byte])
-                fold_dis[b, t] = int(T["fold"][byte])
-                u, v = (
-                    v ^ int(T["eps_a"][byte]),
-                    u ^ int(T["micro"][byte]) ^ int(T["eps_b"][byte]),
-                )
-                su, sv, sp = sv ^ int(T["tau_u"][byte]), su ^ int(T["tau_v"][byte]), sp ^ 1
-                state = int(S24[(u << 6) | v])
-                chi = u ^ v
-                chi_s = chi.bit_count()
-                state_after[b, t] = state
-                chi_shell[b, t] = chi_s
-                arch_shell[b, t] = 6 - chi_s
-                prefix_sig[b, t] = (sp << 12) | (su << 6) | sv
+        b_intron = tables["intron"][led]
+        b_family = tables["family"][led]
+        b_micro = tables["micro"][led]
+        b_q6 = tables["q6"][led]
+        b_fold = tables["fold"][led]
+        eps_a = tables["eps_a"][led]
+        eps_b = tables["eps_b"][led]
+        tau_u = tables["tau_u"][led]
+        tau_v = tables["tau_v"][led]
 
-        def _maybe_squeeze(x: torch.Tensor) -> torch.Tensor:
-            return x.squeeze(0) if squeeze else x
+        intron = np.zeros((batch, steps), dtype=np.int64)
+        family_phase = np.zeros((batch, steps), dtype=np.int64)
+        micro_ref = np.zeros((batch, steps), dtype=np.int64)
+        q6 = np.zeros((batch, steps), dtype=np.int64)
+        fold_dis = np.zeros((batch, steps), dtype=np.int64)
+        state_before = np.zeros((batch, steps), dtype=np.int64)
+        state_after = np.zeros((batch, steps), dtype=np.int64)
+        chi_shell = np.zeros((batch, steps), dtype=np.int64)
+        arch_shell = np.zeros((batch, steps), dtype=np.int64)
+        prefix_sig = np.zeros((batch, steps), dtype=np.int64)
+
+        for t in range(steps):
+            hidden = hid[:, t]
+            visible = ~hidden
+            state_before[:, t] = state
+            if not np.any(visible):
+                continue
+            u_new = v ^ eps_a[:, t]
+            v_new = u ^ b_micro[:, t] ^ eps_b[:, t]
+            su_new = sv ^ tau_u[:, t]
+            sv_new = su ^ tau_v[:, t]
+            sp_new = sp ^ 1
+            u = np.where(visible, u_new, u)
+            v = np.where(visible, v_new, v)
+            su = np.where(visible, su_new, su)
+            sv = np.where(visible, sv_new, sv)
+            sp = np.where(visible, sp_new, sp)
+            state_vis = s24[(u << 6) | v]
+            state = np.where(visible, state_vis, state)
+            chi_s = _POP6[u ^ v]
+            intron[:, t] = np.where(visible, b_intron[:, t], 0)
+            family_phase[:, t] = np.where(visible, b_family[:, t], 0)
+            micro_ref[:, t] = np.where(visible, b_micro[:, t], 0)
+            q6[:, t] = np.where(visible, b_q6[:, t], 0)
+            fold_dis[:, t] = np.where(visible, b_fold[:, t], 0)
+            state_after[:, t] = np.where(visible, state, 0)
+            chi_shell[:, t] = np.where(visible, chi_s, 0)
+            arch_shell[:, t] = np.where(visible, 6 - chi_s, 0)
+            prefix_sig[:, t] = np.where(visible, (sp << 12) | (su << 6) | sv, 0)
+
+        def _tt(arr: np.ndarray) -> torch.Tensor:
+            tensor = torch.as_tensor(arr, dtype=torch.long, device=device)
+            return tensor.squeeze(0) if squeeze else tensor
 
         mask_out = None
         if mask_t is not None:
-            mask_out = _maybe_squeeze(mask_t)
+            mask_out = _tt(hid.astype(np.int64)).bool()
+        bytes_out = bytes_t.squeeze(0) if squeeze else bytes_t
 
         return ScanTrajectory(
-            bytes=_maybe_squeeze(bytes_t),
-            intron=_maybe_squeeze(intron),
-            family_phase=_maybe_squeeze(family_phase),
-            micro_ref=_maybe_squeeze(micro_ref),
-            q6=_maybe_squeeze(q6),
-            state_before=_maybe_squeeze(state_before),
-            state_after=_maybe_squeeze(state_after),
-            chi_shell=_maybe_squeeze(chi_shell),
-            arch_shell=_maybe_squeeze(arch_shell),
-            prefix_sig=_maybe_squeeze(prefix_sig),
-            fold_disagreement=_maybe_squeeze(fold_dis),
+            bytes=bytes_out,
+            intron=_tt(intron),
+            family_phase=_tt(family_phase),
+            micro_ref=_tt(micro_ref),
+            q6=_tt(q6),
+            state_before=_tt(state_before),
+            state_after=_tt(state_after),
+            chi_shell=_tt(chi_shell),
+            arch_shell=_tt(arch_shell),
+            prefix_sig=_tt(prefix_sig),
+            fold_disagreement=_tt(fold_dis),
             mask=mask_out,
         )
 
@@ -832,6 +856,7 @@ class Super(nn.Module):
         compute_signature_posterior: bool = False,
         coset_mask: torch.Tensor | None = None,
         apply_markov: bool = False,
+        scan_extras: bool = True,
     ) -> dict[str, torch.Tensor | ScanTrajectory]:
         """Forward pass.
 
@@ -839,6 +864,8 @@ class Super(nn.Module):
         those sites are zeroed for the VisibleScan / atom path (masked grammar).
         When False (corruption recovery), the ledger bytes stay visible and
         ``corruption_mask`` (or ``mask``) only marks the predict position.
+        When ``scan_extras`` is False, scan-derived atom extras are zeroed;
+        raw byte bits remain. Default path is unchanged.
         """
         predict = corruption_mask if corruption_mask is not None else mask
         scan_mask = mask if hide_masked else None
@@ -855,6 +882,8 @@ class Super(nn.Module):
         atom_mask = mask_b if hide_masked else None
         t_len = raw_ledger.shape[1]
         extra = _scan_atom_features(traj, raw_ledger.shape[0], t_len, raw_ledger.device)
+        if not scan_extras:
+            extra = torch.zeros_like(extra)
         atoms = self.atom(raw_ledger, mask=atom_mask, extra=extra)
         pad = (4 - (t_len % 4)) % 4
         if pad:

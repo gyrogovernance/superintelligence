@@ -1,9 +1,20 @@
 # Ignore Python virtual environments
 venv/
 .venv/
+.venv-dml/
+__pypackages__/
 
-# Ignore Python bytecode
-__pycache__/
+# Ignore Python package directories inside venvs
+**/site-packages/
+**/site-packages/**
+
+# Ignore Python package metadata
+**/*.dist-info/
+**/*.dist-info/**
+
+# Ignore Python bytecode (including nested)
+**/__pycache__/
+**/__pycache__/**
 *.pyc
 *.pyo
 *.pyd
@@ -32,6 +43,9 @@ flake8_report.txt
 *.bin
 *.icns
 
+**/_build/
+**/_build/**
+
 # Ignore documentation subdirectories (keep docs/ folder)
 docs/notes/
 docs/*/
@@ -40,6 +54,17 @@ docs/*/
 assets/
 .github/
 .trae/
+external/llama.cpp/
+
+data/models/Bonsai-8B-gguf/.cache
+data/models/Bonsai-8B-gguf/.cache/huggingface
+data/models/Bonsai-8B-gguf/.eval_results
+data/models/Bonsai-8B-gguf/assets
+
+external/
+
+secret_lab_ignore/research_mechanistic_interpretability
+secret_lab_ignore/gyrocrypt
 
 # Ignore test fixtures and generated test data
 scripts/tests/
@@ -120,3 +145,5 @@ data/**/*.id
 research/*
 
 */_backup/
+
+src/app/**

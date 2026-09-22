@@ -1,0 +1,163 @@
+{
+  "checkpoint": "src/tools/autoencoder/data/checkpoints/production/super.pt",
+  "gate_version": 3,
+  "fit": {
+    "final_loss": 2.3390117166225357,
+    "epochs_run": 16
+  },
+  "gates": {
+    "G1_masked_holdout": 1.0,
+    "G2_replay": 1.0,
+    "G3_composition": 1.0,
+    "G4_provenance": 0.9961904761904762,
+    "G4_untrained_floor": 0.6047619047619047,
+    "G4_margin_over_floor": 0.39142857142857146,
+    "G4_rate_margin_0p3": 0.8961904761904762,
+    "G4_mean_cosine_distance": 0.6134222263239679,
+    "G5_provenance_margin_over_null": 0.9961904761904762,
+    "G6_uniform_bits_per_byte": 8.287139538402982,
+    "G7_canonical_bits_per_byte": 1.5446254838628821,
+    "G7_pos_0": 6.147138161095336,
+    "G7_pos_1": 0.02248629610127543,
+    "G7_pos_2": 0.004667648760049217,
+    "G7_pos_3": 0.0042098294948680805,
+    "bits_per_byte_canonical": 1.5446254838628821,
+    "bits_per_byte_uniform": 8.287139538402982,
+    "G2_iterative": 1.0,
+    "corrupt_replay_holdout": 1.0,
+    "residual_improvement_bits": -0.07453749727934778,
+    "lambda_improvement_bits": 1.5008768690750003,
+    "lambda_ceiling_bits": 1.6684314306758257,
+    "lambda_fraction_of_ceiling": 0.8995736003768794,
+    "lambda_prior_bits": 8.0,
+    "lambda_model_bits": 6.499123130925,
+    "markov_improvement_bits": 2.8866443522274494,
+    "markov_gap_to_bound_bits": 0.29938208623686346,
+    "markov_model_bits": 5.113355647772551,
+    "markov_bound_bits": 4.813973561535687,
+    "boundary_valid_completion": 1.0,
+    "boundary_exact_byte": 0.609375,
+    "boundary_mass_on_valid": 0.9999999888241291,
+    "boundary_mean_ambiguity": 2.0,
+    "context_probe_parity_accuracy": 1.0,
+    "context_probe_tau_u_accuracy": 0.0,
+    "context_probe_tau_v_accuracy": 0.25390625,
+    "context_probe_exact_13bit_accuracy": 0.0,
+    "context_probe_tau_u_mlp_accuracy": 0.0,
+    "context_probe_holdout_parity_nunique": 2.0,
+    "context_probe_holdout_tau_u_nunique": 32.0,
+    "context_probe_holdout_tau_v_nunique": 63.0
+  },
+  "g7_bits_max": 2.5,
+  "g6_uniform_tol": 0.5,
+  "residual_improvement_bits": -0.07453749727934778,
+  "lambda_fraction_of_ceiling": 0.8995736003768794,
+  "boundary_valid_completion": 1.0,
+  "claim": "exact_grammar_plus_provenance_and_residual",
+  "g1_pass": true,
+  "g2_pass": true,
+  "g3_pass": true,
+  "g4_pass": true,
+  "g5_pass": true,
+  "g6_pass": true,
+  "g7_pass": true,
+  "g9_pass": true,
+  "grid": {
+    "context_dims": [
+      16,
+      32
+    ],
+    "atom_dims": [
+      8
+    ],
+    "sweep_epochs": 8,
+    "epochs": 8,
+    "task": "super_all",
+    "capacity_eval": "measure",
+    "continue_epochs": 6,
+    "markov_path_epochs": 2
+  },
+  "g8_minimal": {
+    "context_dim": 32,
+    "atom_dim": 8,
+    "n_params": 106754,
+    "all_mandatory_pass": true,
+    "G4_margin_full": 0.39142857142857146,
+    "G4_margin_lite": 0.3276190476190476
+  },
+  "g9_probe": {
+    "parity": 1.0,
+    "tau_u": 0.0,
+    "tau_v": 0.25390625,
+    "tau_u_mlp": 0.0,
+    "exact_13bit": 0.0,
+    "note": "G9 is a linear/MLP readout of GRU context; tau_u non-recovery is documented, not a fail."
+  },
+  "grammar_ablation": {
+    "analytic_g1": 1.0,
+    "analytic_g7": 1.5031453951277955,
+    "free_g1": 0.015625,
+    "free_g7": 11.037608841602651
+  },
+  "continue_train": {
+    "epochs": 6,
+    "lr": 0.001,
+    "baseline_markov": 3.023918876424432,
+    "baseline_lambda": 0.8993341594199205,
+    "markov_path_epochs": 2,
+    "markov_gap": 0.29938208623686346,
+    "markov_improvement": 2.8866443522274494,
+    "lambda_fraction": 0.8995736003768794
+  },
+  "capacity_sweep": [
+    {
+      "context_dim": 16,
+      "atom_dim": 8,
+      "n_params": 72002,
+      "all_mandatory_pass": true,
+      "G1": 1.0,
+      "G3": 1.0,
+      "G4_margin": 0.3352380952380952,
+      "G4_rate_0p3": 0.8866666666666667,
+      "lambda_frac": 0.8993341594199205,
+      "markov_improvement": 3.016211161389947,
+      "G6": 8.282178135192579,
+      "G7": 1.5470043166715746
+    },
+    {
+      "context_dim": 32,
+      "atom_dim": 8,
+      "n_params": 106754,
+      "all_mandatory_pass": true,
+      "G1": 1.0,
+      "G3": 1.0,
+      "G4_margin": 0.3276190476190476,
+      "G4_rate_0p3": 0.9038095238095238,
+      "lambda_frac": 0.8993341594199205,
+      "markov_improvement": 3.023918876424432,
+      "G6": 8.27021467333061,
+      "G7": 1.560754486684984
+    }
+  ],
+  "multi_seed": [
+    {
+      "seed": 0,
+      "G1": 1.0,
+      "G4_margin_over_floor": 0.21619047619047627,
+      "G7": 1.5282623479495225
+    },
+    {
+      "seed": 1,
+      "G1": 1.0,
+      "G4_margin_over_floor": 0.12571428571428567,
+      "G7": 1.5133907118361845
+    },
+    {
+      "seed": 2,
+      "G1": 1.0,
+      "G4_margin_over_floor": 0.3504761904761905,
+      "G7": 1.5451518296961266
+    }
+  ],
+  "g4_margin_min": 0.12571428571428567
+}

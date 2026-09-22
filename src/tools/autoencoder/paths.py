@@ -1,21 +1,17 @@
-"""Single source of truth for where the autoencoder keeps its data on disk.
+"""Define the autoencoder package data locations.
 
-Everything lives under this package's own ``data/`` directory
-(``src/tools/autoencoder/data/``) - never the repo-root ``data/``, which is
-shared with the rest of the project. Nothing is nested beyond one folder per
-class. The layout:
+All autoencoder data live under ``src/tools/autoencoder/data/``. The repository
+root also has a ``data/`` directory, so using this module keeps package inputs
+separate from unrelated project data.
 
-- ``data/dataset_<word>/``  - labeled arrays (bytes, states, transitions, signatures, actions, embeddings, ensembles, null). Files only, manifest beside.
-- ``data/checkpoints/``     - trained weights (``<run>_<model>.pt``) + logs.
-- ``data/reports/``         - eval / verify / audit JSON, flat.
-- ``data/tmp/``             - anything temporary or scratch.
+Each generated dataset has its own ``dataset_<word>/`` directory. Model
+checkpoints and evaluation reports have dedicated directories. Temporary work
+is stored under ``data/tmp/``.
 
-Model-made datasets join the ``dataset_<word>`` family; ``checkpoints/`` holds
-weights and logs only. A manifest already records which weights produced a
-dataset (``checkpoint_hash``), so provenance is not lost.
-
-Everything here is gitignored and deterministically regenerable, so moving a
-folder is a one-command operation, never a file-by-file migration.
+The repository includes the frozen production checkpoints and evaluation
+reports needed by genomics synthesis and topology. Source catalogs and derived
+datasets remain local and can be regenerated with the relevant ingest or
+autoencoder commands.
 """
 
 from __future__ import annotations
@@ -61,5 +57,8 @@ def ensure() -> None:
         "embeddings",
         "ensembles",
         "null",
+        "genomics",
+        "riboseq",
+        "topology",
     ):
         dataset_dir(name).mkdir(parents=True, exist_ok=True)

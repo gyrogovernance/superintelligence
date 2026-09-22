@@ -1,0 +1,109 @@
+genomics topology
+
+-----
+atlas
+stage=atlas
+kernel_shell_thresholds_met=True ae_super_thresholds_met=False
+n=590 selected genes; eligible_population=590
+mean delta shell (TM-cyto)=-0.2262 p=0.0002 one-sided less (98+/492-)
+mean delta Super climate=+0.0422 p=0.0002 two-sided nonzero
+mean delta Narrow het=-0.0214 p=0.0004 one-sided less
+mean delta GC=-0.0092
+ae_truncated_windows=90; kernel_uses_full_windows=true
+clipped_topology_spans=0; genes_with_clipped_topology_spans=0; coordinate_policy=exclusion_not_clipping
+cohort_manifest_sha256=89d2b48628e7119249fb1b77fc3c02018815d671fc0537df6de1f8a89aaa5af9
+AA-null reference: RESULTS_script_2_null.json (exact selected atlas cohort; see JSON)
+
+-----
+null
+stage=null
+status=ok atlas_n=590 n=590
+atlas_sha256=5043993186c82992a71f4ca632b59a52e7eb1e5b2c49605d63d77f931a250f67
+cohort_manifest_sha256=89d2b48628e7119249fb1b77fc3c02018815d671fc0537df6de1f8a89aaa5af9
+mean_obs=-0.226162
+mean_AA_null=-0.182541
+mean_resid_atlas_minus_null=-0.043622
+usage_matched_null_mean=-0.202743
+usage_matched_residual=-0.023420 p_less=0.000200 neg=333/590 thresholds_met=False
+n_resid_neg=383 n_resid_pos=207
+resid_p_one_sided_less=0.000200
+resid_thresholds_met=True
+null_draws=80 permutations=5000 seed=20260919 permutation_seed=21260922
+dinuc_native_mean=-0.115532 dinuc_null_mean=-0.076830 dinuc_null_sd_mean=+0.143746 dinuc_adjusted_mean=-0.038702 dinuc_p=0.000200
+exact_dinuc_residual_mean=-0.001104 exact_dinuc_p=0.206359 n_exact_neg=309 exact_dinuc_resid_thresholds_met=False
+native_null_quantile_mean=+0.408 native_below_10th_fraction=0.173
+estimator=per-window mean shell; gene contrast=mean(TM) minus mean(cytoplasmic)
+dinuc control=linear junction residualization AND exact junction-matched synonymous null
+usage-matched null=host E. coli codon usage from the CDS catalog
+per-gene details are in the JSON artifact
+
+-----
+narrow
+stage=narrow
+status=ok n_genes=590 aa_null_genes=590 atlas_n=590
+cohort_manifest_sha256=89d2b48628e7119249fb1b77fc3c02018815d671fc0537df6de1f8a89aaa5af9
+role=ae_feature_source_for_holdout_topology_read ae_claim_stage=holdout
+narrow_mean_delta=-0.0214 frac_neg=0.573 p_less=0.0002
+gc_mean_delta=-0.0092 narrow_vs_gc_ratio=2.33
+narrow_AA_residual=-0.0038 p_less=0.1610
+narrow_usage_matched_AA_residual=-0.0028 p_less=0.2252
+kernel_shell_mean_delta=-0.2262
+null_draws=80 permutations=5000 seed=20260919 narrow_permutation_seed=22260922 residual_permutation_seed=21260922 usage_matched_residual_permutation_seed=23260922
+passed=True
+gates:
+  narrow_scores_complete: True
+  n_AA_null_genes_equals_n_genes: True
+  cohort_matches_atlas: True
+per-gene details are in the JSON artifact
+
+-----
+claim
+stage=claim
+status=ok n_genes=590 aa_null_genes=590 narrow_aa_null_genes=590
+cohort_manifest_sha256=89d2b48628e7119249fb1b77fc3c02018815d671fc0537df6de1f8a89aaa5af9
+kernel_mean_shell_delta=-0.2262 frac_neg=0.834 p_less=0.0002
+kernel_AA_residual=-0.0436 p_less=0.0002
+gc_mean_delta=-0.0092
+super_climate_delta=+0.0422 p_two_sided=0.0002
+narrow_het_delta=-0.0214 p_less=0.0002
+narrow_AA_residual=-0.0038 p_less=0.1610
+narrow_usage_matched_AA_residual=-0.0028 p_less=0.2252
+ae_claim_stage=holdout
+passed=True
+primary_gates:
+  kernel_mean_shell_delta_at_most_minus_0_12: True
+  kernel_mean_shell_negative_fraction_at_least_0_70: True
+  kernel_mean_shell_perm_p_one_sided_less_below_0_01: True
+  kernel_mean_shell_AA_residual_at_most_minus_0_03: True
+  kernel_mean_shell_AA_residual_p_one_sided_less_below_0_05: True
+missed_gate_reports:
+  every primary gate is met
+
+-----
+holdout
+stage=holdout
+status=ok rows=5684 genes=590 tm=4059 cytoplasmic=1625
+primary_ae_design=kernel_controls_narrow
+baseline_auc=0.758432 holdout_auc=0.767527
+incremental_auc_mean=+0.009094 sd=0.000320 positive_seeds=10/10
+incremental_auc_p_two_sided=0.001900 p_one_sided_greater=0.001000
+companion_super_incremental_auc_mean=+0.000708 companion_full_ae_incremental_auc_mean=+0.009958
+passed=True
+incremental_gate_passed=True
+ae_read_untruncated_rows=5594 genes=590 incremental_auc_mean=+0.009521
+ae_read_truncated_rows=90 status=insufficient_rows
+
+-----
+order
+stage=order
+status=ok n_variants=28504 n_peptides=2597 min_group=5
+primary_read=super_climate
+primary_mean_rho=+0.0196 positive_frac=0.514 p_greater=0.0038 n_groups=2562
+primary_holdout_mean_rho=+0.0196 positive_folds=5/5
+super_climate_mean_rho=+0.0196 holdout=+0.0196
+super_context_norm_mean_rho=-0.0005 holdout=-0.0005
+narrow_het_mean_rho=-0.0077 holdout=-0.0077
+kernel_mean_shell_mean_rho=+0.0066 holdout=+0.0066
+gc_mean_rho=-0.0613 holdout=-0.0612
+codon_count_entropy_mean_rho=-0.0082 holdout=-0.0058
+passed=True

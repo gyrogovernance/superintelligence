@@ -1,0 +1,282 @@
+genomics synthesis
+when_utc: 2026-09-20 09:54
+domain_training: none
+model_training_domain: hQVM kernel-null carrier and ledger structure
+genomic_finetuning: none
+checkpoint_policy: frozen
+evaluation_domain: community genomic catalogs (zero-shot)
+seed: 42
+device: cpu
+hosts: ecoli,yeast,sars
+max_genes: 200
+n_pairs: 400
+checkpoint_k4_sha256_16: 0c47e1abd0c31689
+checkpoint_mlp_sha256_16: 1d052c1d54571c28
+checkpoint_spectral_sha256_16: 87bf741f86d64c63
+checkpoint_super_sha256_16: 42e8e5ba40c304e9
+
+preflight
+
+census: align_k4
+  tier: preflight
+  n=4096
+  trained=0.0000
+  random=0.0000
+  tr_gap=+0.0000
+  gate_floor=0.0001
+  detail: preflight K4 equivariance max_error=3.32e-11; gate_floor<1e-04; certificate, not a genomics AUC
+  outcome: FLOOR
+
+census: domain_gap_ecoli
+  tier: preflight
+  n=219829
+  trained=0.1111
+  random=0.0000
+  tr_gap=+0.1111
+  gate_floor=0.0000
+  detail: preflight TV(uniform null atlas, genomic): byte=0.1815 family=0.0210 q6=0.1308; large TV confirms zero-shot transfer across a measure gap
+  outcome: FLOOR
+
+census: domain_gap_yeast
+  tier: preflight
+  n=326124
+  trained=0.1186
+  random=0.0000
+  tr_gap=+0.1186
+  gate_floor=0.0000
+  detail: preflight TV(uniform null atlas, genomic): byte=0.1939 family=0.0268 q6=0.1352; large TV confirms zero-shot transfer across a measure gap
+  outcome: FLOOR
+
+census: domain_gap_sars
+  tier: preflight
+  n=20232
+  trained=0.1442
+  random=0.0000
+  tr_gap=+0.1442
+  gate_floor=0.0000
+  detail: preflight TV(uniform null atlas, genomic): byte=0.2463 family=0.0123 q6=0.1741; large TV confirms zero-shot transfer across a measure gap
+  outcome: FLOOR
+
+census: depth_loc_ecoli
+  tier: preflight
+  n=51191
+  trained=1.0000
+  random=0.9823
+  tr_gap=+0.0000
+  gate_floor=0.9990
+  detail: preflight even-depth commutator identity frac=1.0000 (theorem=1.0); odd-depth non-identity frac=0.9823; path memory confined to odd depth
+  outcome: FLOOR
+
+census: depth_loc_yeast
+  tier: preflight
+  n=50813
+  trained=1.0000
+  random=0.9806
+  tr_gap=+0.0000
+  gate_floor=0.9990
+  detail: preflight even-depth commutator identity frac=1.0000 (theorem=1.0); odd-depth non-identity frac=0.9806; path memory confined to odd depth
+  outcome: FLOOR
+
+alignment
+
+census: splice_narrow_chr22
+  tier: alignment
+  n=729
+  trained=0.9528
+  random=0.9583
+  tr_gap=-0.0055
+  gate_floor=0.7500
+  detail: alignment Narrow MLP 8-bp flanks donor GT vs acceptor AG (motif floor); acc=0.8630; AUC_trained=0.9528 AUC_random=0.9583 label_null_mean=0.4974 label_null_max=0.5623; architecture floor
+  outcome: FLOOR
+
+census: splice_k4_flanks
+  tier: alignment
+  n=729
+  trained=0.9412
+  random=0.9164
+  tr_gap=+0.0248
+  gate_floor=0.7500
+  detail: alignment General K4 8-bp flanks donor GT vs acceptor AG (motif floor); acc=0.9041; AUC_trained=0.9412 AUC_random=0.9164 label_null_mean=0.4937 label_null_max=0.5439; architecture floor
+  outcome: FLOOR
+
+census: splice_super_chr22
+  tier: alignment
+  n=400
+  trained=0.9250
+  random=0.9250
+  tr_gap=+0.0000
+  gate_floor=0.7500
+  detail: alignment Super scan floor donor vs acceptor 128-bp windows; acc_trained=0.9250 acc_random=0.9250; ExactHQVMScan separates junctions; architecture floor
+  outcome: FLOOR
+
+provenance
+
+census: g4_chr22
+  tier: provenance
+  n=400
+  trained=0.2708
+  random=0.0777
+  tr_gap=+0.1931
+  detail: permutation pairs (sig+multiset fixed, order differs); last-byte-masked; threshold margin>0.05 and trained>0.1
+  outcome: PASS
+
+census: g4_ecoli
+  tier: provenance
+  n=400
+  trained=0.2880
+  random=0.0836
+  tr_gap=+0.2045
+  detail: permutation pairs (sig+multiset fixed, order differs); last-byte-masked; threshold margin>0.05 and trained>0.1
+  outcome: PASS
+
+census: g4_endpoint_ecoli
+  tier: provenance
+  n=400
+  trained=0.3498
+  random=0.1710
+  tr_gap=+0.1788
+  detail: supporting same-endpoint collision pairs (lead provenance is permutation-pair g4); gated margin>0.05; calib_non_equiv trained=0.3602 random=0.1683 (non-equiv calibration tracks context spread)
+  outcome: PASS
+
+census: prov_ecoli
+  tier: provenance
+  n=30
+  trained=0.1519
+  random=0.0784
+  tr_gap=+0.0735
+  detail: within-signature context distance T vs R; margin>0.05
+  outcome: PASS
+
+census: g4_yeast
+  tier: provenance
+  n=400
+  trained=0.3042
+  random=0.0792
+  tr_gap=+0.2250
+  detail: permutation pairs (sig+multiset fixed, order differs); last-byte-masked; threshold margin>0.05 and trained>0.1
+  outcome: PASS
+
+census: g4_endpoint_yeast
+  tier: provenance
+  n=400
+  trained=0.3646
+  random=0.1848
+  tr_gap=+0.1798
+  detail: supporting same-endpoint collision pairs (lead provenance is permutation-pair g4); gated margin>0.05; calib_non_equiv trained=0.3359 random=0.1789 (non-equiv calibration tracks context spread)
+  outcome: PASS
+
+census: prov_yeast
+  tier: provenance
+  n=28
+  trained=0.1954
+  random=0.0942
+  tr_gap=+0.1012
+  detail: within-signature context distance T vs R; margin>0.05
+  outcome: PASS
+
+census: g4_sars
+  tier: provenance
+  n=400
+  trained=0.3038
+  random=0.0768
+  tr_gap=+0.2271
+  detail: permutation pairs (sig+multiset fixed, order differs); last-byte-masked; threshold margin>0.05 and trained>0.1
+  outcome: PASS
+
+census: g4_endpoint_sars
+  tier: provenance
+  n=400
+  trained=0.3887
+  random=0.1766
+  tr_gap=+0.2120
+  detail: supporting same-endpoint collision pairs (lead provenance is permutation-pair g4); gated margin>0.05; calib_non_equiv trained=0.3781 random=0.1667 (non-equiv calibration tracks context spread)
+  outcome: PASS
+
+specialization
+
+census: climate_super_ecoli
+  tier: specialization
+  n=200
+  trained=0.8408
+  random=0.6284
+  tr_gap=+0.2124
+  gate_floor=0.5500
+  kernel_ref=0.9190
+  detail: specialization Super climate_logits real vs GC-shuffle (Analysis §22); random-init is analytic q-hist channel; AUC_trained=0.8408 AUC_random=0.6284 label_null_mean=0.4848 label_null_max=0.5447; gate_floor=0.5500 (preregistered AUC bar); kernel_ref=mean_shell pooled AUC=0.9190; mean_shell 0.9190 exceeds trained climate_logits 0.8408 on this null; need AUC>=0.55 gap_null>=0.05 T-R>=0.05
+  outcome: PASS
+
+census: radial_super_ecoli
+  tier: specialization
+  n=200
+  trained=0.6619
+  random=0.5688
+  tr_gap=+0.0931
+  gate_floor=0.5500
+  detail: specialization Super climate_logits real vs synonymous recode (Analysis §42); random-init is analytic q-hist channel; AUC_trained=0.6619 AUC_random=0.5688 label_null_mean=0.4762 label_null_max=0.5545; gate_floor=0.5500 (preregistered AUC bar); need AUC>=0.55 gap_null>=0.05 T-R>=0.05
+  outcome: PASS
+
+census: climate_super_yeast
+  tier: specialization
+  n=200
+  trained=0.7113
+  random=0.6061
+  tr_gap=+0.1052
+  gate_floor=0.5500
+  kernel_ref=0.8336
+  detail: specialization Super climate_logits real vs GC-shuffle (Analysis §22); random-init is analytic q-hist channel; AUC_trained=0.7113 AUC_random=0.6061 label_null_mean=0.4875 label_null_max=0.5855; gate_floor=0.5500 (preregistered AUC bar); kernel_ref=mean_shell pooled AUC=0.8336; mean_shell 0.8336 exceeds trained climate_logits 0.7113 on this null; need AUC>=0.55 gap_null>=0.05 T-R>=0.05
+  outcome: PASS
+
+census: radial_super_yeast
+  tier: specialization
+  n=200
+  trained=0.6987
+  random=0.5692
+  tr_gap=+0.1296
+  gate_floor=0.5500
+  detail: specialization Super climate_logits real vs synonymous recode (Analysis §42); random-init is analytic q-hist channel; AUC_trained=0.6987 AUC_random=0.5692 label_null_mean=0.4838 label_null_max=0.5517; gate_floor=0.5500 (preregistered AUC bar); need AUC>=0.55 gap_null>=0.05 T-R>=0.05
+  outcome: PASS
+
+use-reads
+
+census: shuffle_ecoli
+  tier: use-reads
+  n=200
+  trained=0.6365
+  random=0.5616
+  tr_gap=+0.1511
+  gate_floor=0.5500
+  detail: trained Super context AUC real vs gc_matched_shuffle; AUC>=0.55 and AUC-label_perm_null>=0.05 (null_mean=0.4853, null_max=0.5670); random_init_AUC=0.5616 informational
+  outcome: PASS
+
+census: recode_ecoli
+  tier: use-reads
+  n=200
+  trained=0.5754
+  random=0.5208
+  tr_gap=+0.0546
+  gate_floor=0.5500
+  kernel_ref=0.7630
+  detail: use-reads Super context AUC real vs protein_fixed_resample; preregistered on label-null bar (not spec_tr_gap); AUC>=0.55 and AUC-label_perm_null>=0.05 (null_mean=0.4920, null_max=0.5671, gap_null=0.0834); kernel_ref=mean_shell pooled AUC=0.7630; random_init_AUC=0.5208 informational; tr_gap=+0.0546
+  outcome: PASS
+
+census: shuffle_yeast
+  tier: use-reads
+  n=200
+  trained=0.6058
+  random=0.5335
+  tr_gap=+0.1356
+  gate_floor=0.5500
+  detail: trained Super context AUC real vs gc_matched_shuffle; AUC>=0.55 and AUC-label_perm_null>=0.05 (null_mean=0.4702, null_max=0.5636); random_init_AUC=0.5335 informational
+  outcome: PASS
+
+census: recode_yeast
+  tier: use-reads
+  n=200
+  trained=0.5592
+  random=0.5335
+  tr_gap=+0.0257
+  gate_floor=0.5500
+  kernel_ref=0.7304
+  detail: use-reads Super context AUC real vs protein_fixed_resample; preregistered on label-null bar (not spec_tr_gap); AUC>=0.55 and AUC-label_perm_null>=0.05 (null_mean=0.4887, null_max=0.5726, gap_null=0.0706); kernel_ref=mean_shell pooled AUC=0.7304; random_init_AUC=0.5335 informational; tr_gap=+0.0257
+  outcome: PASS
+

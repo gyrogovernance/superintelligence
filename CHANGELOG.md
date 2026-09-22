@@ -12,6 +12,28 @@
 
 ---
 
+## [v2.1.2-hQVM_AE_Genomics] – 2026-09-08 to 2026-09-22
+
+### Summary
+
+This release opens the hQVM AE Genomics program (`src/tools/autoencoder/programs/genomics/`): frozen Narrow, K4, spectral, and Super models from the group-equivariant autoencoder suite, applied unchanged to real coding DNA and RNA. The models train only on the hQVM coding-sequence coordinate system, with no biological sequence in the corpus, so every reproducible contact with genomic structure that survives composition controls is a mark of the underlying physics. Even the faintest of those marks remains informative, and opens a concrete frontier for programmable nucleic acid research.
+
+The coordinate system represents a nucleotide as a two-bit value, a codon as one of sixty-four states, and an ordered codon pair as a point of the 4096-state carrier. Adjacent codon pairs carry a local kernel cost called shell. Codon-order rearrangements under fixed protein and composition are the design freedom of the stack; path memory and climate are the primary design quantities.
+
+### Shipped
+
+- **Synthesis** (artificial gene synthesis and design): a zero-shot capability census on *E. coli*, yeast, SARS-CoV-2, and human chromosome 22 splice-flank catalogs. Exact K4 equivariance holds to `3.32e-11`. Trained Super retains order memory on permutation pairs at trained-minus-random margins of `+0.1931` to `+0.2271`. Against GC-matched shuffles, Super climate reaches AUC `0.8408` in *E. coli* and `0.7113` in yeast.
+- **Topology** (biological membrane topology): within-gene comparison of transmembrane and cytoplasmic coding windows across 590 *E. coli* integral membrane proteins. Mean shell sits `-0.2262` units lower in transmembrane windows (negative in 492 of 590 genes; `p = 0.0002`), and holds under protein-fixed and usage-matched nulls. A frozen Narrow read adds `+0.009094` held-out AUC over a controlled baseline.
+- **Fixed-peptide synonymous order** (Gamble 2016, yeast): within 28,504 variants across fixed peptides, Super climate ranks expression at mean Spearman `+0.0196` (`p = 0.0038`), holding across peptide-held-out folds.
+- Public catalogs ingest (`ingest_genomics`, `ingest_topology`), frozen production checkpoints, and regenerable result ledgers (`RESULTS.txt`, `gates.json`, topology stage JSON).
+- Program documentation: [genomics README](src/tools/autoencoder/programs/genomics/README.md), [program specification](docs/programs/hQVM_AE_Genomics_Specs.md), and [genomics report](docs/reports/hQVM_AE_Genomics_Report.md).
+
+### Continuity
+
+This program sits on [v2.1.1-Gyroscopic_AE](#v211-gyroscopic_ae--2026-04-15-to-2026-09-07) and on the CGM Genomics coordinate system ([1.3.9.7-CGM_Genomics](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Genomics.md)), whose 301 verification checks fixed the shell geometry before any biological catalog was scored.
+
+---
+
 ## [v2.1.1-Gyroscopic_AE] – 2026-04-15 to 2026-09-07
 
 ### Summary

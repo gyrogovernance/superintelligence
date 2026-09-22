@@ -1,3 +1,5 @@
+> **CGM Science Documentation - Port** : This doc is copied from our science repo - all of its surrounding theory and relative paths can be found at https://github.com/gyrogovernance/science
+
 # CGM Group Theory Analysis Applied Through the hQVM Kernel
 
 ## Abstract

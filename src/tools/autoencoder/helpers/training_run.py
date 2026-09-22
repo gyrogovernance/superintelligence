@@ -13,6 +13,7 @@ from typing import Any, Callable, Iterable, Iterator
 import numpy as np
 import torch
 
+from ..paths import checkpoints_dir
 from .training_losses import LossWeights, weighted_total
 
 
@@ -130,7 +131,7 @@ class TrainConfig:
     device: str = "cpu"
     seed: int = 0
     gradient_clip: float | None = None
-    checkpoint_dir: str = "checkpoints"
+    checkpoint_dir: str = field(default_factory=lambda: str(checkpoints_dir()))
     log_file: str | None = None
     loss_weights: LossWeights = field(default_factory=LossWeights)
 

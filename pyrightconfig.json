@@ -182,6 +182,12 @@
 
     "secret_lab_ignore/_backup/chamber",
     "typings/stubs",
-    "docs/notes/Intelligence/35/mLSTMLayer_Copy"
+    "docs/notes/Intelligence/35/mLSTMLayer_Copy",
+
+    "src/_backup/AE",
+    "src/_backup/AE/**",
+    "src/tools/autoencoder/data/**",
+    ".cursor/skills",
+    ".cursor/skills/**"
   ]
 }

@@ -42,6 +42,7 @@ venv.bak/
 *.sublime-project
 *.sublime-workspace
 *.interactive
+.cursor/
 
 # Logs and temporary files
 logs/
@@ -133,8 +134,9 @@ codebase-mcp/
 
 external/WHT_examples/
 
-# Build artifacts inside the submodule checkout and local native DLL
+# Build artifacts inside the submodule checkout (legacy; do not use) and local native DLL
 external/llama.cpp/build/
+external/llama.cpp/build-stock/
 src/tools/gyroscopic/_build/
 
 # Orphan / wrong-cwd scratch dumps (never use repo-root _build)
@@ -214,6 +216,22 @@ data/resonators/
 
 data/benchmarks/
 
+# Gyroscopic medium artifacts (HQVMLEDS sidecar, field-tables, capture scratch)
+data/gyroscopic/
+
 src/tools/gyroscopic/workflow/
 src/tools/gyroscopic/backup/
 
+# Autoencoder package: generated datasets stay local; ship frozen production weights + reports
+src/tools/autoencoder/data/**
+!src/tools/autoencoder/data/README.md
+!src/tools/autoencoder/data/checkpoints/
+src/tools/autoencoder/data/checkpoints/**
+!src/tools/autoencoder/data/checkpoints/production/
+!src/tools/autoencoder/data/checkpoints/production/**
+!src/tools/autoencoder/data/reports/
+!src/tools/autoencoder/data/reports/**
+# Vendored Ising reference scaffold (staging copy; license text is kept in third_party/)
+src/tools/autoencoder/_temp/
+
+docs/references/experiments/

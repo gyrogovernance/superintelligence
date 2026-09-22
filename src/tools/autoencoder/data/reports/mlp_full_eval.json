@@ -1,0 +1,66 @@
+{
+  "checkpoint": "F:\\Development\\superintelligence\\src\\tools\\autoencoder\\data\\checkpoints\\production\\mlp_full.pt",
+  "meta": {
+    "config": {
+      "epochs": 2000,
+      "batch_size": 4096,
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "device": "cpu",
+      "seed": 0,
+      "gradient_clip": null,
+      "checkpoint_dir": "checkpoints/production",
+      "log_file": "checkpoints\\production\\mlp_full_train_log.jsonl",
+      "loss_weights": {
+        "state_ce": 1.0,
+        "state_bits": 0.0,
+        "enc_eq": 0.0,
+        "dec_eq": 0.0,
+        "step": 0.0,
+        "chi": 0.0,
+        "shell": 0.0,
+        "inverse": 0.0,
+        "composition": 0.0,
+        "signature": 0.0,
+        "parity": 0.0,
+        "tau_u": 0.0,
+        "tau_v": 0.0,
+        "commitment": 0.0,
+        "end_state": 0.0,
+        "provenance": 0.0,
+        "rate": 0.0
+      }
+    },
+    "extra": {
+      "model_kind": "mlp",
+      "symmetry": null,
+      "latent_dim": 8,
+      "hidden_dim": 64,
+      "n_trivial": null,
+      "n_sign": null,
+      "ladder": null,
+      "fit": {
+        "epochs_run": 2000
+      },
+      "n_train": 3482,
+      "n_val": 614
+    }
+  },
+  "reconstruction": {
+    "exact_accuracy": 0.85009765625,
+    "n_states": 4096
+  },
+  "equivariance": {
+    "max": 144.51104736328125,
+    "mean": 98.37848663330078,
+    "forward_max": 144.51104736328125,
+    "forward_mean": 98.37848663330078,
+    "passed": false
+  },
+  "_provenance": {
+    "git_commit": "c87674d30c488cce1d5d919177268aa44bffb9a1",
+    "torch_version": "2.10.0+cpu",
+    "python_version": "3.14.5",
+    "metric_schema_version": 1
+  }
+}
