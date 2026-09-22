@@ -10,7 +10,7 @@ The hQVM coding-sequence coordinate system, as set out in our theoretical analys
 
 The autoencoders learn to reconstruct masked positions in grammar-generated paths and to provide learned summaries of sequence order. The coordinate system was derived from the CGM axioms, and the independent [genomics analysis](https://github.com/gyrogovernance/science/blob/main/docs/Findings/Analysis_hQVM_CGM_Genomics.md) records the derivation and its 301 verification checks.
 
-## Sub-Programs
+## Domains
 
 ### **Synthesis**: Artificial Gene Synthesis and Design.
 

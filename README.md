@@ -161,7 +161,7 @@ The Genomics Program advances programmable nucleic acid research on DNA and RNA 
 
 With training restricted to that coordinate system and no biological sequence in the corpus, every reproducible contact between readout and genomic structure that survives composition controls is a signature of the underlying physics. Even the faintest of those marks remains informative, and opens a concrete frontier for genomics.
 
-**Programs:**
+**Domains:**
 1. **Synthesis**: Artificial Gene Synthesis and Design.
 
 Synthetic genomics seeks to design and construct entire genomes to mechanistically dissect fundamental questions and advance research focused on health and medicines. Our probes aim to inform artificial gene synthesis and design, opening alternative paths for nucleic-acid work under synonymous freedom: codon-order rearrangements are scored and ranked while protein and composition remain fixed.
@@ -170,13 +170,14 @@ Synthetic genomics seeks to design and construct entire genomes to mechanistical
 
 Membrane topology describes the number of membrane-spanning segments in a protein and how its parts orient relative to the inside and outside of a biological membrane. The program expands into a frontier analysis of membrane-topology inside individual *E. coli* genes.
 
-| Analysis | Result |
-| --- | --- |
-| Order memory across four organisms | Trained Super separates order-permuted pairs at a +0.19 to +0.23 margin over matched random initialization; Super climate reaches AUC 0.8408 in *E. coli* and 0.7113 in yeast against GC-matched shuffles |
-| Membrane topology in 590 *E. coli* genes | Transmembrane coding sits −0.226 shell units below cytoplasmic domains of the same gene (negative in 492 of 590; p = 0.0002); a frozen model read adds +0.009094 held-out AUC over a controlled baseline |
-| Synonymous expression (Gamble 2016, yeast) | Frozen Super climate ranks expression within fixed peptides at +0.0196 Spearman (p = 0.0038) across 28,504 variants |
+**Results** (plain reading; full numbers and controls in the [genomics report](docs/reports/hQVM_AE_Genomics_Report.md)):
 
-Program design is in the [genomics specification](docs/programs/hQVM_AE_Genomics_Specs.md), and the biological results with their limits are in the [genomics report](docs/reports/hQVM_AE_Genomics_Report.md).
+| Domain | Result |
+| --- | --- |
+| Synthesis | Exact group symmetry holds on real catalogs (K4 error `3.32e-11`). Living genomes sit measurably off the uniform grammar atlas, yet trained Super still recovers codon order: order-permuted twins separate across *E. coli*, yeast, SARS-CoV-2, and human chr22, and Super climate distinguishes native coding from GC-matched and protein-fixed alternatives |
+| Topology | Inside the same *E. coli* membrane gene, transmembrane-helix coding prefers lower-cost codon-pair paths than cytoplasmic coding (492 of 590 genes). A frozen Narrow read improves held-out domain classification beyond shell, GC, and length. With the peptide held fixed (Gamble 2016 yeast library), the same Super climate ranks which synonymous spellings express more protein (28,504 variants) |
+
+Program design is in the [genomics specification](docs/programs/hQVM_AE_Genomics_Specs.md).
 
 ---
 
