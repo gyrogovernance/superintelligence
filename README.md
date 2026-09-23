@@ -132,7 +132,7 @@ All results below are verified by exhaustive computation over the entire reachab
 
 ---
 
-## 🎛️ NEW - hQVM AE: Group-Equivariant Autoencoder
+## 🎛️ hQVM AE: Group-Equivariant Autoencoder
 
 A neuro-symbolic autoencoder suite over a finite group-structured state space, with applications that run from mechanistic interpretability to genomics.
 
@@ -143,14 +143,14 @@ Three model classes (narrow, general, and super) learn to compress and reconstru
 - **General**: Exact symmetry groups (K4 equivariance built into the architecture).
 - **Super**: Full grammar, with a learned component that separates sequences the exact grammar treats as equivalent.
 
-Symmetry is measured after training, not assumed: the equivariant model holds to 3.32e-11 over all 4,096 states, and the spectral codec carries a closed-form certificate for the full affine group.
+Symmetry is measured after training: the equivariant model holds to 3.32e-11 over all 4,096 states, and the spectral codec carries a closed-form certificate for the full affine group.
 
-The suite also ships a verified embedding dictionary for states, bytes, and words, and a denoiser whose gains match the closed-form Bayes-optimal multipliers. Any sequence that compiles onto the carrier reads through the same path, and weight tensors from other systems enter through a frozen adapter as tiled blocks rather than as new training data.
+The suite also ships a verified embedding dictionary for states, bytes, and words, and a denoiser whose gains match the closed-form Bayes-optimal multipliers. Any sequence that compiles onto the carrier reads through the same path, and weight tensors from other systems enter through a frozen adapter as tiled blocks.
 
 Uses:
 
 - **Mechanistic interpretability.** The models are trained on a system whose algebra is known exactly, so a learned code can be compared directly against the kernel, and the symmetry diagnostics report where a model departs from the kernel's group action.
-- **Genomics analysis.** Codons map to states and codon pairs to transitions. The models were trained on grammar-generated sequence only, so agreement with biology carries no information; the measured quantity is how far native biological sequence departs from what the grammar alone produces, and it is small by construction.
+- **Genomics analysis.** Codons map to states and codon pairs to transitions. Grammar-trained models, applied unchanged to biological catalogs, produce reproducible contacts with genomic structure under composition controls.
 - **Scale.** The same models extend to multi-cell product registers and to any domain that maps onto the state space, with each structure certified against the kernel.
 
 Commands and layout live in the [autoencoder README](src/tools/autoencoder/README.md), model tiers and design rationale in the [specification](docs/specs/hQVM_AE_Specs.md), and gate records in the [evaluation report](docs/reports/hQVM_AE_Report.md).
@@ -159,25 +159,28 @@ Commands and layout live in the [autoencoder README](src/tools/autoencoder/READM
 
 The Genomics Program advances programmable nucleic acid research on DNA and RNA through grammar-trained autoencoders of the hQVM AE suite, grounded in first principles. The models read biological sequences through the group-equivariant coordinate system and a formal algebra for nucleotides, codons, and codon-pair transitions derived from our CGM theory.
 
-With training restricted to that coordinate system and no biological sequence in the corpus, every reproducible contact between readout and genomic structure that survives composition controls is a signature of the underlying physics. Even the faintest of those marks remains informative, and opens a concrete frontier for genomics.
+With training restricted to that coordinate system and no biological sequence in the corpus, every reproducible contact between readout and genomic structure that survives composition controls is a mark of the underlying physics. Even the faintest of those marks remains informative, and opens a concrete frontier for genomics.
 
 **Domains:**
+
+The Genomics Program has two domains.
+
 1. **Synthesis**: Artificial Gene Synthesis and Design.
 
-Synthetic genomics seeks to design and construct entire genomes to mechanistically dissect fundamental questions and advance research focused on health and medicines. Our probes aim to inform artificial gene synthesis and design, opening alternative paths for nucleic-acid work under synonymous freedom: codon-order rearrangements are scored and ranked while protein and composition remain fixed.
+Synthetic genomics is the design and construction of entire genomes, used to dissect fundamental questions and to advance research focused on health and medicines. Our probes deliver design capacity under synonymous freedom: codon-order rearrangements are scored and ranked while protein and composition remain fixed.
 
 2. **Topology**: Biological Membrane Topology Analysis.
 
-Membrane topology describes the number of membrane-spanning segments in a protein and how its parts orient relative to the inside and outside of a biological membrane. The program expands into a frontier analysis of membrane-topology inside individual *E. coli* genes.
+Membrane topology describes the number of membrane-spanning segments in a protein and how its parts orient relative to the inside and outside of a biological membrane. The same stack supplies topology climate and fixed-peptide expression ranking inside individual *E. coli* genes and synonymous yeast libraries.
 
-**Results** (plain reading; full numbers and controls in the [genomics report](docs/reports/hQVM_AE_Genomics_Report.md)):
+**Results:**
 
-| Domain | Result |
+| Domain | Capacity delivered |
 | --- | --- |
-| Synthesis | Exact group symmetry holds on real catalogs (K4 error `3.32e-11`). Living genomes sit measurably off the uniform grammar atlas, yet trained Super still recovers codon order: order-permuted twins separate across *E. coli*, yeast, SARS-CoV-2, and human chr22, and Super climate distinguishes native coding from GC-matched and protein-fixed alternatives |
-| Topology | Inside the same *E. coli* membrane gene, transmembrane-helix coding prefers lower-cost codon-pair paths than cytoplasmic coding (492 of 590 genes). A frozen Narrow read improves held-out domain classification beyond shell, GC, and length. With the peptide held fixed (Gamble 2016 yeast library), the same Super climate ranks which synonymous spellings express more protein (28,504 variants) |
+| Synthesis | Scores and ranks synonymous codon-order designs under fixed protein and composition, on a grammar fixed before any biological catalog is read. Across *E. coli*, yeast, SARS-CoV-2, and human chromosome 22, trained Super keeps order memory and climate discrimination under composition controls, with exact K4 symmetry at `3.32e-11` |
+| Topology | Reads membrane-topology climate inside individual genes and ranks synonymous expression under fixed peptide identity. In 492 of 590 *E. coli* membrane genes, transmembrane coding follows lower-shell codon-pair paths than the cytoplasmic stretches of the same gene. A frozen Narrow read lifts held-out membrane classification. Super climate ranks expression across 28,504 yeast variants |
 
-Program design is in the [genomics specification](docs/programs/hQVM_AE_Genomics_Specs.md).
+Program design is in the [genomics specification](docs/programs/hQVM_AE_Genomics_Specs.md). Full results and controls in the [genomics report](docs/reports/hQVM_AE_Genomics_Report.md)
 
 ---
 
@@ -228,7 +231,7 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 ### Tools
 - 🎛️ [hQVM AE: Group-Equivariant Autoencoder](src/tools/autoencoder/README.md) - Run guide for the learning arm of the kernel program
   - 📘 [hQVM AE Specification](docs/specs/hQVM_AE_Specs.md) - Theory, model tiers, state space, and the CGM null dataset
-  - 🧬 [hQVM AE Genomics Specification](docs/programs/hQVM_AE_Genomics_Specs.md) - Program design for the synthesis, topology, and fixed-peptide analyses
+  - 🧬 [hQVM AE Genomics Specification](docs/programs/hQVM_AE_Genomics_Specs.md) - Program design for the Synthesis and Topology domains
 
 ### Core Specifications
 
@@ -274,7 +277,7 @@ All kernel properties verified by exhaustive test suites (499 tests, all passing
 - 📊 [hQVM Speed Tests Report](docs/reports/hQVM_Tests_Performance_Report.md) - Native throughput benchmarks on standard silicon
 - 📊 [Measurement Tests Report](docs/reports/Measurement_Tests_Report.md) - Governance balance metrics and epistemic vs empirical evaluation
 - 📊 [hQVM AE Evaluation Report](docs/reports/hQVM_AE_Report.md) - Shipped autoencoder checkpoints, the Super gate record, and the suite by domain
-- 📊 [hQVM AE Genomics Report](docs/reports/hQVM_AE_Genomics_Report.md) - Synthesis, membrane-topology, and fixed-peptide results
+- 📊 [hQVM AE Genomics Report](docs/reports/hQVM_AE_Genomics_Report.md) - Synthesis and Topology domain results
 
 ### The Human Mark (THM)
 

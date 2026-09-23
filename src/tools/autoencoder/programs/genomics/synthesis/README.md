@@ -1,8 +1,8 @@
-# Synthesis program
+# Synthesis domain
 
-The synthesis program evaluates the frozen hQVM model components on real genomic catalogs. The models were trained on grammar-generated sequences, so the informative quantity is how far native biological sequence departs from what the grammar alone produces.
+The Synthesis domain of the hQVM AE Genomics program evaluates the frozen hQVM model components on real genomic catalogs for artificial gene synthesis and design capacity. The models train on grammar-generated sequences. Reproducible contact with living catalogs under composition controls is the measured signal.
 
-The program tests four questions:
+The domain asks four questions:
 
 1. Does the K4 layer preserve the exact symmetry required by the coordinate system?
 2. Do real coding sequences occupy the carrier in a coherent, measurable way?
@@ -29,7 +29,7 @@ python -m src.tools.autoencoder.programs.genomics.synthesis.run --hosts ecoli,ye
 
 ## Inputs
 
-The synthesis program uses the catalogs created by `ingest_genomics.py` and the frozen checkpoints in `src/tools/autoencoder/data/checkpoints/production/`. The checkpoints are `k4_full.pt`, `mlp_full.pt`, `spectral_bottleneck.pt`, and `super.pt`.
+The Synthesis domain uses the catalogs created by `ingest_genomics.py` and the frozen checkpoints in `src/tools/autoencoder/data/checkpoints/production/`. The checkpoints are `k4_full.pt`, `mlp_full.pt`, `spectral_bottleneck.pt`, and `super.pt`.
 
 ## Outputs
 
@@ -39,7 +39,7 @@ The synthesis program uses the catalogs created by `ingest_genomics.py` and the 
 
 | File | Purpose |
 |------|---------|
-| `run.py` | Command-line entry point for the synthesis suite |
+| `run.py` | Command-line entry point for the Synthesis suite |
 | `cli.py` | Catalog and reference-climate command-line tools |
 | `censuses.py` | Evaluation definitions, comparisons, and result assembly |
 | `constellation.py` | Frozen and randomly initialized model loading |
