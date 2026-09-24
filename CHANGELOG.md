@@ -12,6 +12,12 @@
 
 ---
 
+## [v2.1.3-Moments_Economy] – 2026-09-23
+
+Revisions of Moments Economy Documentation based on Moments Fiat Analysis
+
+---
+
 ## [v2.1.2-hQVM_AE_Genomics] – 2026-09-08 to 2026-09-22
 
 ### Summary

@@ -45,7 +45,7 @@ AIR produces three kinds of outputs that are useful immediately:
     
 3. **Attested work receipts**
     
-    Each contribution produces a verifiable receipt bound to the kernel's coordination state at that moment. These receipts enable sponsors and fiscal hosts to reconstruct what happened in a project through deterministic replay of the 4,096-state trajectory, without relying on informal narratives.
+    Each contribution produces a verifiable moment receipt: a short regenerable position on a deterministic kernel trajectory (anchor, depth, phase). Sponsors and fiscal hosts can reconstruct what happened by replaying the public transition rule, without relying on informal narratives. Transport layouts of 16 to 20 bytes fit commodity QR codes; the archive stores an identity anchor once and depth deltas thereafter.
     
 
 ---
@@ -175,7 +175,7 @@ Alignment Infrastructure Routes uses two canonical units of work:
 
 These units are defined in terms of work and deliverables, not employment status. Sponsors fund outputs that correspond to one or more of these units.
 
-In transition contexts, sponsors may express funding in conventional currency. Natively, within the Moments Economy framework, these units are denominated in Moment-Units (MU) using the international dollar legibility convention, settled through the hQVM Kernel.
+In transition contexts, sponsors may express funding in conventional currency. Natively, within the Moments Economy framework, these units are denominated in Moment-Units (MU) at the reference value of 1 MU = 1 international dollar (int$), settled through the hQVM Kernel.
 
 ---
 

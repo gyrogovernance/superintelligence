@@ -15,7 +15,7 @@ The framework builds upon a suite of interconnected components developed through
 
 - The **Common Governance Model** provides the theoretical foundation. It formalises the minimal conditions required for coherent governance and demonstrates that these conditions require four distinct capacities operating in balance.
 
-- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in [Gyroscopic ASI Foundations](docs/Gyroscopic_ASI_Foundations.md), Appendix G.
+- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in the AIR Moments Economy Whitepaper, Appendix A.
 
 - The **Gyroscope Protocol** provides the work classification system. It categorises human contribution into four types corresponding to the governance capacities, ensuring that labour supports the requirements of coherent governance.
 
@@ -125,7 +125,7 @@ The kernel's coordination medium has structural properties that strengthen its g
 
 #### 4.2 Genealogies
 
-A **Genealogy** is a byte-complete replay record for an actor, project, or system. Its canonical kernel-native core is the byte log. Application-layer event logs may be bound to hQVM Kernel states or depth-4 frames, but they are not part of the kernel-native definition.
+A **Genealogy** is a complete byte record that can be replayed end to end for an actor, project, or system. Its canonical kernel-native core is the byte log. Application-layer event logs may be bound to hQVM Kernel states or depth-4 frames, but they are not part of the kernel-native definition.
 
 Because the router is deterministic, the genealogy can be replayed at any time. An auditor, regulator, or third party can load the byte log, run it through a conforming router implementation, and verify that the claimed trajectory is accurate. The event log can then be checked against this trajectory to confirm that events are correctly bound.
 
@@ -137,9 +137,9 @@ When two parties share the same byte-log prefix, they compute the same hQVM Kern
 
 #### 4.3 Physical Grounding of Capacity
 
-The Moments Economy grounds coordination capacity in physical constants rather than institutional policy. The foundation is the caesium-133 hyperfine transition frequency, which defines the SI second. This frequency establishes the finest temporal resolution at which coordination events can be physically distinguished.
+The Moments Economy grounds coordination capacity in physical constants. The foundation is the caesium-133 hyperfine transition frequency, the atomic standard that also defines the SI second. This frequency establishes the physical resolution at which coordination events can be distinguished.
 
-From this frequency, the framework derives a quantity called the **Common Source Moment**. This represents the total coordination capacity of a one-second causal region at atomic resolution, divided by the number of reachable states in the router. The result is a fixed total capacity of approximately 7.94 times ten to the twenty-sixth power coordination moments.
+From this frequency, the framework derives a quantity called the **Common Source Moment**. This represents the total coordination capacity of the light-sphere at atomic resolution, divided by the settlement system's 4,096 checkable states (reachable from rest under the public transition rule). The result is a fixed total capacity of approximately 7.94 × 10²⁶ Moment-Units.
 
 This grounding matters because it removes capacity from institutional discretion. In conventional systems, the authority to issue currency or allocate resources rests with institutions whose decisions cannot be independently verified. In the Moments Economy, capacity is derived from physical constants that anyone can check. The total available capacity is fixed by physics, not policy.
 
@@ -147,9 +147,9 @@ In practice, this capacity is inexhaustible on any human timescale. The Common S
 
 Because baseline capacity is abundant, the primary operational risk is the exclusion of real humans through defensive access mechanisms, rather than the fraudulent claiming of excess capacity. The design order is therefore: accessibility first, coherence second, repair third, exclusion last.
 
-#### 4.4 Shared Moments, Frame Commitments, and Divergence Detection
+#### 4.4 Shared Moments, Frame Commitments, Receipts, and Divergence Detection
 
-AIR uses three operational certification layers.
+AIR uses three kernel-native certification layers, plus a transport and archive profile layered above them.
 
 First, the hQVM Kernel state gives a shared moment for coordination. When two parties share the same byte-log prefix, they compute the same hQVM Kernel state and therefore share a structural "now."
 
@@ -157,7 +157,9 @@ Second, depth-4 frame records (mask48, φ_a, φ_b) give stronger provenance and 
 
 Third, parity commitments provide compact algebraic integrity checks over longer trajectories. A trajectory parity commitment is a triple (O, E, parity), where O and E are 12-bit XOR sums of masks at even and odd byte positions, and parity is the trajectory length modulo 2.
 
-These layers are replayable from the byte log and do not require an external ledger geometry to operate. Because each certification layer is computed from exact integer arithmetic on the byte log, verification is portable across implementations and platforms without numerical precision concerns.
+The operational settlement object is the **moment receipt**: a short position on a deterministic identity trajectory, specified by an anchor, a depth, and a phase, with seal, parity, and event-class fields regenerable by replay. The manifold address inside the transport time field is state-derived and regenerable; sec32 recovery and discriminator allocation remain open items, and the compact depth-delta storage math depends on resolving them. Measured transport layouts occupy 16 to 20 bytes and fit commodity QR codes. An identity's archive stores the anchor once and one depth delta per receipt; each trajectory epoch carries a 512-byte occupancy bitmap for local duplicate detection. Transport layouts, QR enclosure, and the derived name layer for archive append control are **implementation profiles** layered above replay. Conformance remains defined by byte replay and canonical serialization (SHA-256 for Identity Identifier computation). The name layer names content for append control; it does not address the manifold.
+
+These layers are replayable from the byte log and do not require an external ledger geometry to operate. Because each certification layer is computed from exact integer arithmetic on the byte log, verification is portable across implementations and platforms without numerical precision concerns. Publication in coordinate-ledger form (anchors, depth deltas, occupancy state) satisfies full-object publication requirements for kernel-native structural objects that replay regenerates; Event Logs, payloads, and policy bases must still be published as data. Measurements and open implementation items are recorded in the Moment Receipts, QR Transport, and FNV Profile analysis.
 
 The four-domain AIR organisation remains valid, but AIR no longer depends on an externally imposed K₄ measurement layer or aperture computation for operational verification.
 
@@ -179,17 +181,19 @@ The **Gyroscope Protocol** classifies work and contribution according to the fou
 
 Every contribution can be classified according to which of these capacities it supports. The classification ensures that the human labour sustaining governance is visible and that gaps in any capacity can be identified.
 
-#### 4.6 Grants, Shells, and Moments
+#### 4.6 Grants, Shells, and Moment Receipts
 
-For economic and resource allocations, AIR uses three constructs:
+For economic and resource allocations, AIR uses the following constructs:
 
-A **Grant** is a record of a single allocation: a payment, a capacity assignment, or a resource transfer. It includes the identity of the recipient (linked to a router state via an identity anchor), the quantity allocated, and the genealogical binding that establishes when the allocation occurred. In canonical serialization, a Grant receipt is encoded as identity_id || kernel_anchor || amount_mu.
+A **Grant** is a record of a single allocation: a payment, a capacity assignment, or a resource transfer. It includes the identity of the recipient (linked to a kernel state via an Identity Anchor), the quantity allocated, and the genealogical binding that establishes when the allocation occurred. In canonical serialization, a Grant is encoded as `identity_id || kernel_anchor || amount_mu`. Grant fields, including the amount, are carried in the payload whose routed state forms the moment-receipt seal. The default payload schema is that canonical Grant receipt; other payload schemas are implementation profiles. The receipt position itself carries no amount field. Offline verification and counterparty amount-knowledge therefore require the payload to travel and archive alongside the 16-to-20-byte transport form.
 
-A **Shell** is a container that groups grants over a defined scope, such as a time period or a programme. It carries a cryptographic seal computed by routing its contents through the alignment router. This seal binds the shell to a specific coordination state, making it tamper-evident. Anyone can verify a shell by replaying its contents and checking that the computed seal matches. Shell seals are computed over canonically sorted Grant receipts. Grant insertion order does not affect the seal.
+An **Identity Anchor** links an identity to a fixed starting position on the deterministic settlement record. The identity bytes routed for anchor derivation are the SHA-256 Identity Identifier; verification regenerates receipt fields from those identity bytes and the payload.
 
-A **Moment** is a reproducible hQVM Kernel state at a specific byte-log prefix. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. Moments are the shared temporal anchors of AIR replay.
+A **Shell** is a container that groups grants over a defined scope, such as a time period or a programme. It carries a seal computed by routing its canonical contents through the public kernel. This seal binds the shell to a specific coordination state, making it tamper-evident. Anyone can verify a shell by replaying its contents and checking that the computed seal matches. Shell seals are order-invariant container commitments computed over canonically sorted Grant receipts; Grant insertion order does not affect the seal. Trajectory coordinates are order-sensitive per-identity positions. The two views are reconciled by replay.
 
-These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moments provide anchors for before-and-after comparisons. The entire system operates without requiring trust in any particular institution: verification is computational.
+A **Moment** is a reproducible hQVM Kernel state at a specific byte-log prefix. The **moment receipt** is its transport form: a regenerable coordinate specified by anchor, depth, and phase. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. The receipt's event-class byte is a transport chirality/gauge field derived from the payload; it is distinct from the application-layer Event Log, which annotates meaning, decisions, and justifications.
+
+These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moment receipts provide portable anchors for offline presentation and later synchronisation. The entire system operates without requiring trust in any particular institution: verification is computational. The normative economic layer is specified in the Moments Economy Architecture Specification.
 
 ---
 
@@ -245,7 +249,7 @@ AIR is a general framework applicable wherever human and artificial systems must
 
 **Without AIR:** An organisation implements an unconditional income programme. Payments are issued monthly. Recipients must trust that the organisation is calculating and issuing payments correctly. The organisation must maintain internal records and submit to periodic audits.
 
-**With AIR:** Payments are grants within shells. Each shell carries a cryptographic seal derived from the router. Recipients receive not just payments but verifiable receipts bound to router states. The organisation publishes shells and genealogies. Any party can replay the genealogy to verify that the correct payments were issued. Audits become computational rather than investigative.
+**With AIR:** Payments are grants within shells. Each shell carries a seal derived from the public kernel. Recipients receive not just payments but verifiable moment receipts (anchor, depth, phase) whose proof fields regenerate by replay. The organisation publishes shells, genealogies, and, where appropriate, coordinate-ledger archives. Any party can replay the genealogy to verify that the correct payments were issued. Audits become computational rather than investigative.
 
 Where physical resources are constrained, AIR enables fair-use governance rules within Community Shells, ensuring settlement verification does not default to exclusionary price escalation.
 
@@ -255,13 +259,13 @@ Where physical resources are constrained, AIR enables fair-use governance rules 
 
 AIR is designed for organisations that deploy or regulate artificial intelligence and that need governance to be demonstrable rather than merely claimed. Adoption can proceed incrementally.
 
-**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track replayable genealogies, shell seals, and frame commitments over time. Publish shells and genealogies for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
+**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track replayable genealogies, shell seals, frame commitments, and moment receipts over time. Where inference hosts already run the kernel in the model execution path, receipt creation and local archive maintenance can attach to that installed base without a dedicated ledger-node buy-in. Publish shells, genealogies, and coordinate-ledger archives for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
 
 **For regulators and auditors:** Request genealogies from regulated organisations. Replay them using conforming router implementations. Verify that classifications are consistent with claims. Compare replay integrity, shell verification results, and frame-localized divergences across organisations to identify outliers. This shifts regulatory practice from reviewing documents to verifying computations.
 
 **For researchers and developers:** Extend the framework to new domains. Develop tools for genealogy analysis. Investigate the relationship between coordination structure and governance outcomes. Contribute to the open specifications.
 
-The technical specifications for all components are published through the Gyro Governance repository. The alignment router specification, The Human Mark classification system, the Gyroscope Protocol, and the Moments Economy architecture are documented in detail. Reference implementations are available for testing and integration.
+The technical specifications for all components are published through the Gyro Governance repositories. The public kernel specification, The Human Mark classification system, the Gyroscope Protocol, and the Moments Economy architecture are documented in detail. Reference implementations are available for testing and integration.
 
 ---
 
@@ -273,7 +277,7 @@ Alignment Infrastructure Routes addresses this challenge by treating governance 
 
 The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that human and artificial roles are correctly classified under The Human Mark, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
 
-In AIR, replayable byte logs establish shared moments, and depth-4 frame commitments provide the stronger provenance needed when final-state agreement alone is insufficient.
+In AIR, replayable byte logs establish shared moments, depth-4 frame commitments provide stronger provenance when final-state agreement alone is insufficient, and moment receipts carry those coordinates in transport form under optional implementation profiles.
 
 In this way, AIR provides the logistical infrastructure for artificial intelligence governance: the rigorous planning, tracking, and verification that allows complex systems to operate transparently and accountably.
 

@@ -192,7 +192,7 @@ AIR serves as a practical bridge between human contribution, programme administr
 
 While most funding routes require institutional access, credentials, or existing lab affiliation, AIR addresses this accessibility gap by providing a reliable way to turn distributed human contribution into stable paid AI safety work.
 
-**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (class classification for Direct and Indirect Authority and Agency) to produce attested work receipts so sponsors can verify what was done without relying on informal reports.
+**Safety work and pay:** AIR helps labs, fiscal hosts (organisations that hold and disburse funds for projects), and contributors turn safety work (evaluations, red-teaming, interpretability, documentation) into paid, verifiable contributions. It uses the Gyroscope Protocol and **The Human Mark** (class classification for Direct and Indirect Authority and Agency) to produce attested moment receipts (anchor, depth, phase) so sponsors can verify what was done by replay, without relying on informal reports.
 
 Contributors map their work to four governance capacities, which act as a career ladder to unlock higher funding tiers: 
 - 🤝 Intelligence Cooperation, 
@@ -208,11 +208,11 @@ Contributors map their work to four governance capacities, which act as a career
 
 ## 💰 Moments Economy
 
-Moments Economy is part of Gyroscopic Collective Superintelligence broader framework. It extends the same replayable coordination infrastructure into economic distribution, making money a function of verified coordination capacity rather than debt issuance.
+Moments Economy is part of the broader Gyroscopic Collective Superintelligence framework. It extends the same replayable coordination infrastructure into economic distribution, making money a function of verified coordination capacity.
 
-A fixed total supply of **7.94 × 10²⁶ Moment-Units (MU)**, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the finite verification space of the hQVM. This gives the system a physically anchored capacity envelope rather than a discretionary monetary base. Its native commodity is the **AI Generated Token**: a verified inference event from the intersection of human experience and AI processing. No debt issuance, no discretionary monetary policy. Every settlement is a replayable, verifiable history.
+A fixed total supply of **7.94 × 10²⁶ Moment-Units (MU)**, the **Common Source Moment (CSM)**, is derived once from the caesium-133 atomic frequency standard and the hQVM's **4,096 checkable states**. This gives the system a physically anchored capacity envelope. The unit of account is the MU. Its native commodity is the **verified AI inference event**: a governed alignment record at the intersection of human experience and AI processing, under human oversight. The first live market is **Quality Human Data**. Every settlement is a replayable, verifiable history.
 
-CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person, tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years. Every settlement is a replayable, verifiable history rather than an opaque update on a central ledger.
+CSM supports a global **Unconditional High Income (UHI)** of 240 MU per day per person, tiered distributions for wider responsibility, and complete governance records. Under verified capacity analysis, this supply supports global UHI for approximately 1.12 trillion years.
 
 Moments Economy builds on the same infrastructure as AIR, but adds the economic layer: unit definition, issuance logic, settlement structure, and long-horizon distribution design.
 
@@ -251,7 +251,7 @@ Read in layer order: **Foundations** → **SDK** → **QuBEC Theory** → **Runt
 - 🚛 [AIR Logistics Framework](docs/programs/AIR_Logistics.md) - Governance flows and verification
 - 💰 [Moments Economy Architecture](docs/programs/AIR_Moments_Economy_Specs.md) - Monetary settlement from coordination
 - 📜 [Moments Genealogies Specification](docs/programs/AIR_Moments_Genealogies_Specs.md) - Replayable coordination history
-- 💳 [Pulse Wallet Specification](docs/programs/AIR_Moments_Wallet.md) - Capacity wallet for grammar-compliant recognition and repair
+- 💳 [Pulse Wallet Specification](docs/programs/AIR_Moments_Wallet.md) - Capacity wallet for recognition, routing, and repair under a public event format
 
 
 ### Additional SDK surfaces
