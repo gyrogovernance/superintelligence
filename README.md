@@ -27,24 +27,24 @@
 
 ## 🌐 Artificial Superintelligence
 
-Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) and Artificial General Intelligence (AGI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).
+**Gyroscopic ASI is an infrastructure for multi-domain network coordination that establishes the structural conditions for collective superintelligence governance and seamless cooperation between humans and machines in the era of Transformative AI (TAI) and Artificial General Intelligence (AGI) (see Bostrom, Superintelligence, 2014; Korompilias, Gyroscopic Global Governance, 2025).**
 
 **Technical core:**
 
-- [**⚙️ hQVM Kernel:**](#hqvm-kernel) A compact Holonomic Quantum Virtual Machine that turns byte logs into a single, reproducible state. 
-- [**🎛️ hQVM AE:**](#hqvm-ae) A group-equivariant autoencoder suite over the kernel's finite state space, used for mechanistic interpretability and domain programs such as genomics.
+- [**⚙️ hQVM Kernel:**](#hqvm-kernel) A Holonomic Quantum Virtual Machine for transparent Governance. 
+- [**🎛️ hQVM AE:**](#hqvm-ae) Autoencoder Extension for Science, from Mechanistic Interpretability to Genomics.
 
-**Supporting Theory**:
+**Foundations**:
 
-- **[🌐 Common Governance Model (CGM):](#foundations)** An axiomatic framework for fundamental physics and information science.
-- **[ Gyroscopic Global Governance:](https://github.com/gyrogovernance/tools#ggg)** A Post-AGI/ASI governance framework and simulator showing that aligned human–AI systems can resolve poverty, unemployment, misinformation, and ecological degradation.
+- **[🌐 Common Governance Model (CGM):](#foundations)** Axiomatic Theory for fundamental physics and information science.
+- **[🌀 Gyroscopic Global Governance:](https://github.com/gyrogovernance/tools#ggg)** A Post-AGI/ASI governance framework and simulator showing that aligned human–AI systems can resolve poverty, unemployment, misinformation, and ecological degradation.
 
 **Programs & Applications:**
 
 - **[🍃 Alignment Infrastructure Routes (AIR):](#air)** A coordination layer for work, provenance, and governance logistics.
 - **[💰 Moments Economy:](#moments-economy)** A monetary and settlement framework grounded in replayable coordination. This development is part of the Gyroscopic Global Governance (GGG) framework, which coordinates across four domains: Economy, Employment, Education, and Ecology. 
 
-> ***Gyroscopic ASI is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with humans at the application layer.***
+> ***Gyroscopic ASI is not an autonomous agent, and does not interpret content or set policy. It provides shared state, verifiable provenance, and replayable measurement. Authority and accountability stay with Humans.***
 
 ---
 
@@ -217,6 +217,8 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 | 🚛 [AIR Brief](docs/programs/AIR_Brief.md) | AI Safety Operationalization |
 | 💰 [Moments Economy Whitepaper](docs/programs/AIR_Moments_Economy_Whitepaper.md) | Monetary and civil governance framework grounded in replayable coordination |
 
+---
+
 <a id="specs"></a>
 ### Specifications
 
@@ -228,6 +230,8 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 | [🧪 QuBEC Theory](docs/specs/hQVM_QuBEC_Theory.md) | Mathematical foundation: thermodynamics, hardware-tier architecture, transport, transforms, operator lowering, quantum structure |
 | [🌐 Holographic Algorithm Formalization](docs/specs/hQVM_QuBEC_Holography.md) | State-space encoding and holographic dictionaries |
 
+---
+
 <a id="extensions"></a>
 ### Extensions
 
@@ -237,6 +241,8 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 | 📘 [hQVM AE Specification](docs/specs/hQVM_AE_Specs.md) | Theory, model tiers, state space, and the CGM null dataset |
 | 🧬 [hQVM AE Genomics Specification](docs/programs/hQVM_AE_Genomics_Specs.md) | Program design for the Synthesis and Topology domains |
 | [⚙️ Gyroscopic Runtime Specification](docs/specs/Gyroscopic_ASI_Runtime_Specs.md) | Multicellular QCA execution, bridges, and operational lowering |
+
+---
 
 <a id="applications"></a>
 ### Applications
@@ -248,14 +254,60 @@ Moments Economy builds on the same infrastructure as AIR, but adds the economic 
 | 📜 [Moments Genealogies Specification](docs/programs/AIR_Moments_Genealogies_Specs.md) | Replayable coordination history |
 | 💳 [Pulse Wallet Specification](docs/programs/AIR_Moments_Wallet.md) | Capacity wallet for recognition, routing, and repair under a public event format |
 
+---
+
+<a id="foundations"></a>
+### Foundations
+
+**Theory**
+
+| Document | Description |
+|---|---|
+| 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) | Shared coordination theory |
+| 📖 [CGM Logic](docs/references/CGM_Logic.md) | Construction chain from common source to operational structure |
+| 📖 [CGM Research Program](docs/references/CGM_Program.md) | Comprehensive research guide and derivation map |
+
+**Analyses**
+
+| Document | Description |
+|---|---|
+| 📖 [Analysis: CGM Constants](docs/references/Analysis_CGM_Constants.md) | Mathematical structure of fundamental constants and the aperture parameter |
+| 📖 [Analysis: CGM Units](docs/references/Analysis_CGM_Units.md) | Geometric foundation of physical units and energy scales |
+| 📖 [Analysis: CGM Holonomy](docs/references/Analysis_Holonomy.md) | Path memory across closed loops, with the BU dual-pole loop angle in closed form |
+| 📖 [Analysis: Gravity](docs/references/Analysis_Gravity.md) | Gravitational theory from causal preservation of ancestry |
+| 📖 [Analysis: Gravity Note](docs/references/Analysis_Gravity_Note.md) | Work-in-progress companion to the gravity analysis |
+| 📖 [Analysis: hQVM CGM Trestleboard](docs/references/Analysis_hQVM_CGM_Trestleboard.md) | Nuclear isomer physics and the Delta-ruler on the CGM/hQVM carrier |
+| 📖 [Analysis: hQVM Percolation](docs/references/Analysis_hQVM_Percolation.md) | Generator-restricted percolation and universality of ancestry preservation |
+| 📖 [Analysis: hQVM Percolation Note](docs/references/Analysis_hQVM_Percolation_Note.md) | Companion note to the percolation analysis |
+| 📖 [Analysis: hQVM Wavefunction](docs/references/Analysis_hQVM_Wavefunction.md) | Wavefunction chart analysis of the hQVM kernel |
+| 📖 [Analysis: hQVM CGM Group Theory](docs/references/Analysis_hQVM_CGM_Group_Theory.md) | Finite symmetry group of the byte alphabet and its representation structure |
+| 📖 [Analysis: hQVM CGM Genomics](docs/references/Analysis_hQVM_CGM_Genomics.md) | The genome read as a scale-recursive realization of the hQVM carrier |
+
+For more analyses check out our [Science Repo](https://github.com/gyrogovernance/science)
+
+---
+
+### Additional Applications
+
+| Document | Description |
+|---|---|
+| 🔗 [Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) | Distributed model testing |
+| 🌐 [The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) | Internet coordination layer |
+
+### Experimental Applications
+
+| Document | Description |
+|---|---|
+| 🧬 [Substrate: Physical Memory Specification](docs/specs/Gyroscopic_ASI_Physical_Substrate_Specs.md) | Memory and carrier layout |
+
+---
+
 <a id="verifications"></a>
 ### Verifications
 
-All kernel properties verified by exhaustive test suites (499 tests).
+All kernel properties have been verified by exhaustive test suites (500+ tests).
 
-## hQVM Verified Features
-
-Structural results are established by exhaustive computation over all 4,096 states, all 256 byte operations, and more than one million state-byte pairs, backed by the repository's 499 passing tests. Performance results are measured on commodity hardware and in live integrations.
+Structural results are established by exhaustive computation over all 4,096 states, all 256 byte operations, and more than one million state-byte pairs. Performance results are measured on commodity hardware and in live integrations. 
 
 | Verified result | What it means |
 |-----------------|---------------|
@@ -289,48 +341,6 @@ Structural results are established by exhaustive computation over all 4,096 stat
 | 📊 [hQVM AE Genomics Report](docs/reports/hQVM_AE_Genomics_Report.md) | Synthesis and Topology domain results |
 
 > Algebraic quantum structure, holographic compression, and universal quantum computation ingredients do not require a multi-million-dollar cryogenic chandelier. They are geometric properties of discrete information processing on standard silicon. Standard "quantum-inspired" methods, including Tensor Networks, Digital Annealing, and Quantum-Inspired Monte Carlo, are heuristic approximations. They use floating-point mathematics to simulate continuous physical quantum systems. This project does not belong to those categories. This Kernel is a tiny module that bypasses the hardware scaling nightmare of the quantum computing industry by treating "quantumness" not as a physical anomaly of subatomic particles, but as an algebraic necessity of structured information. It offers straightforward AI Optimizations and provides an infrastructure for Safe Superintelligence by Design.
-
-### Additional Applications
-
-| Document | Description |
-|---|---|
-| 🔗 [Multi-Agent Holographic Networks](docs/Gyroscopic_ASI_SDK_Network.md) | Distributed model testing |
-| 🌐 [The Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) | Internet coordination layer |
-
-### Experimental Applications
-
-| Document | Description |
-|---|---|
-| 🧬 [Substrate: Physical Memory Specification](docs/specs/Gyroscopic_ASI_Physical_Substrate_Specs.md) | Memory and carrier layout |
-
-<a id="foundations"></a>
-### Foundations
-
-**Theory**
-
-| Document | Description |
-|---|---|
-| 📖 [Common Governance Model (CGM)](docs/references/CGM_Paper.md) | Shared coordination theory |
-| 📖 [CGM Logic](docs/references/CGM_Logic.md) | Construction chain from common source to operational structure |
-| 📖 [CGM Research Program](docs/references/CGM_Program.md) | Comprehensive research guide and derivation map |
-
-**Analyses**
-
-| Document | Description |
-|---|---|
-| 📖 [Analysis: CGM Constants](docs/references/Analysis_CGM_Constants.md) | Mathematical structure of fundamental constants and the aperture parameter |
-| 📖 [Analysis: CGM Units](docs/references/Analysis_CGM_Units.md) | Geometric foundation of physical units and energy scales |
-| 📖 [Analysis: CGM Holonomy](docs/references/Analysis_Holonomy.md) | Path memory across closed loops, with the BU dual-pole loop angle in closed form |
-| 📖 [Analysis: Gravity](docs/references/Analysis_Gravity.md) | Gravitational theory from causal preservation of ancestry |
-| 📖 [Analysis: Gravity Note](docs/references/Analysis_Gravity_Note.md) | Work-in-progress companion to the gravity analysis |
-| 📖 [Analysis: hQVM CGM Trestleboard](docs/references/Analysis_hQVM_CGM_Trestleboard.md) | Nuclear isomer physics and the Delta-ruler on the CGM/hQVM carrier |
-| 📖 [Analysis: hQVM Percolation](docs/references/Analysis_hQVM_Percolation.md) | Generator-restricted percolation and universality of ancestry preservation |
-| 📖 [Analysis: hQVM Percolation Note](docs/references/Analysis_hQVM_Percolation_Note.md) | Companion note to the percolation analysis |
-| 📖 [Analysis: hQVM Wavefunction](docs/references/Analysis_hQVM_Wavefunction.md) | Wavefunction chart analysis of the hQVM kernel |
-| 📖 [Analysis: hQVM CGM Group Theory](docs/references/Analysis_hQVM_CGM_Group_Theory.md) | Finite symmetry group of the byte alphabet and its representation structure |
-| 📖 [Analysis: hQVM CGM Genomics](docs/references/Analysis_hQVM_CGM_Genomics.md) | The genome read as a scale-recursive realization of the hQVM carrier |
-
-For more analyses check our [Science Repo](https://github.com/gyrogovernance/science)
 
 ---
 
