@@ -52,8 +52,10 @@
 
 - [**Start Here**](#start-here)
 - [**Specifications**](#specs)
-- [**Extensions**](#extensions)
-- [**Applications**](#applications)
+
+- [**Extensions**](#hqvm-extensions)
+- [**Applications**](#hqvm-applications)
+
 - [**Verifications**](#verifications)
 - [**Foundations**](#foundations)
 
@@ -72,6 +74,7 @@
 ---
 
 <a id="hqvm-kernel"></a>
+
 # ⚙️ Gyroscopic AGI/ASI hQVM Kernel
 
 **A Compact Holonomic Quantum Virtual Machine (hQVM) for post-AGI coordination. Byte-driven, deterministically replayable, and runs on ordinary hardware.**
@@ -92,7 +95,10 @@ The state space is fixed and small, with **4,096 reachable states** built from a
 
 ---
 
+<a id="hqvm-extensions"></a>
+
 ## Gyroscopic ASI hQVM Runtime
+
 **Intelligence-Agnostic Meta-Computing**
 
 A multicellular AI runtime built on the hQVM router. It organizes the kernel's state space into a resonance-defined cell pool for runtime intelligence and structural observability.
@@ -168,11 +174,14 @@ Reads membrane-topology climate inside individual genes and ranks synonymous exp
 
 ---
 
+<a id="hqvm-applications"></a>
+
 ## 🧩 hQVM Applications
 
 The following frameworks apply the kernel's capacity for verifiable governance to coordinate safety work and economic distribution.
 
 <a id="air"></a>
+
 ### 🍃 Alignment Infrastructure Routes (AIR)
 
 Alignment Infrastructure Routes (AIR) is a framework for R&D processes, funding, provenance, and governance across AI safety and public-interest programmes. AIR serves as a practical bridge between human contribution, programme administration, and verifiable machine-assisted workflows.
@@ -389,4 +398,4 @@ MIT Licence - see [LICENSE](LICENSE) for details.
   <p>All foundational ideas, design decisions, and conceptual frameworks originate from the Author.</p>
   <p>Responsibility for the validity, coherence, and ethical direction of this project remains fully human.</p>
   <p><strong>Acknowledgements:</strong><br>
-  This project benefited from AI language model services accessed through LMArena, Cursor IDE, Moonshot AI (Kimi), Z.ai (GLM) OpenAI (ChatGPT), Anthropic (Opus), and Google (Gemini).</p>
+  This project benefited from AI language model services accessed through Cursor IDE, Z.ai (GLM) OpenAI (ChatGPT), Anthropic (Opus), Google (Gemini), Moonshot AI (Kimi), and others.</p>
