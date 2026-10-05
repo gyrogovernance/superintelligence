@@ -12,7 +12,7 @@
 
 ---
 
-## [v2.1.3-Moments_Economy] – 2026-09-23
+## [v2.1.3-Moments_Economy] – 2026-09-23 & 2026-10-05
 
 Revisions of Moments Economy Documentation based on Moments Fiat Analysis
 

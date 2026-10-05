@@ -1,12 +1,14 @@
 # The Turning Point: Collective Superintelligence Activation through AIR Genealogies
 
-## A Strategic Orientation for Global AI Governance Logistics
+## A strategic orientation for governance logistics and MU settlement
 
 ---
 
 ### Purpose
 
-This document explains how Alignment Infrastructure Routes (AIR), a replayable coordination system for grants, work receipts, and project histories, enters existing markets and how widespread adoption enables an economic transition. It is intended for anyone who needs to understand why the system exists, how it spreads, and what happens when enough of the world uses it.
+This document explains how Alignment Infrastructure Routes (AIR), a replayable coordination system for grants, work receipts, and project histories, supports audit, mutual aid, and programme administration, and how widespread use of the same records enables MU settlement under the Moments Economy. It is intended for anyone who needs to understand why the system exists, how it spreads, and what changes when enough participants treat genealogies as the common reference for entitlements and correction.
+
+The Moments Economy itself is the caesium-grounded capacity medium with MU as its unit of account. Artificial processing, application markets, and fiat payment rails connect to that medium when participants choose to use them; they are not prerequisites for keeping or verifying a genealogy.
 
 For technical specifications, see the linked documents throughout this text and listed at the end.
 
@@ -30,36 +32,29 @@ For technical specifications, see the linked documents throughout this text and 
 
 ---
 
-### What Collective Superintelligence Means Here
+### Collective superintelligence and distributed capacities
 
-In this framework, superintelligence describes a governance regime in which humans and artificial systems coordinate coherently across all domains of activity.
+A reproducible record permits participants to check the sequence of an activity. To assess its governance, they also need to examine the information available within the process and the opportunities to contribute or revise a conclusion. That assessment covers the relations among participants, including the effects of artificial processing on the information they provide and receive.
 
-The regime reaches this state when four conditions hold:
+The Human Mark (THM) is the AI safety and alignment framework used here to classify those relations. Authority denotes the information available for inference and intelligence, while Agency denotes the capacity to receive or process it. They are epistemic capacities exercised across providers and receivers. Human forms are classified as Direct, and artificial forms as Indirect because they depend on human intelligence. This dependence is termed ancestry. The canonical definitions appear in [AIR Moments Economy Whitepaper](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
-- Authority remains traceable to Direct Authority and Agency, that is, to human observational access and accountable human decision-making.
-- Information from diverse origins remains distinguishable.
-- Responsibility for inferences remains with accountable human agents.
-- Coordination remains coherent across time and context.
+Alignment is the preservation of this ancestry through traceability of information variety, inference accountability, and intelligence integrity. These conditions are expressed through four governance capacities. Participants exercise them by examining sources, retaining different forms of information, assessing inferences, and maintaining coherence across contexts. Collective superintelligence denotes coherent coordination at scale under these conditions.
 
-When authority ceases to be traceable, when processed outputs are treated as direct observations, when responsibility shifts from people to opaque processes, or when local decisions drift away from their governing context, governance loses its footing. The four conditions above exist to avoid these failures.
+Uniform power distribution follows from continued exercise of the capacities across providers and receivers. Power concentrates when a specific system, institution, or individual is treated as exhausting an entire category of Authority or Agency, with consequent loss of ancestry measurement. The four displacement risks defined in THM are systematic forms of this error. The same classification applies within households, informal groups, governments, and other institutions.
 
-A central distinction is that between human and artificial contributions under The Human Mark. Human access to a situation, whether through direct observation or through expertise, is Direct Authority. Human capacity to reason, commit, and accept responsibility is Direct Agency. Outputs of artificial systems, however capable, are Indirect. They depend on Direct Authority for validity and on Direct Agency for accountability. The system treats this distinction as a basic condition for coherent governance. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
-
-Current AI safety practice often evaluates systems through single scores and similar scalar measures. These methods are tuned to outcomes, such as pass rates on tests or average helpfulness ratings, but do not capture how authority, information, and responsibility move through a process. A system can appear satisfactory on such measures while still failing to maintain the balance between global coherence and local differentiation that governance requires. The [Measurement Tests Report](docs/reports/Measurement_Tests_Report.md) explains this limitation and shows how the underlying geometry is measured in the full specification.
-
-The hQVM Kernel provides a shared reference for this balance. It gives every participating system the same way to record and replay coordination. The genealogies provide replayable evidence that these conditions are being maintained. Shared moments establish common state, while depth-4 frame records provide stronger provenance when final states alone are insufficient. Once that evidence is widespread and trusted, the regime can be said to have reached its turning point.
+Genealogies are relevant because participants can retain the sequence and context needed to examine these relationships. Assessment includes both the result and the procedures through which information was introduced or an inference challenged. The [Measurement Tests Report](https://github.com/gyrogovernance/superintelligence/blob/main/docs/reports/Measurement_Tests_Report.md) contains the relevant measurement analysis. Computational verification uses byte replay, with depth-4 frame comparison where final-state comparison leaves the history underdetermined.
 
 ---
 
 ### The Core Insight
 
-The hQVM Kernel and AIR provide two capabilities through a single deployment:
+A single implementation can be used for two purposes:
 
 1. **Immediate capability:** Verifiable coordination records for compliance, audit, safety, and dispute resolution. These address present needs in regulated industries, AI governance, financial oversight, and community coordination. The kernel's exact two-step uniformization property ensures that coordination convergence is structurally guaranteed rather than probabilistically approximated, reducing the verification burden for institutions adopting the system.
 
 2. **Latent capability:** A complete, replayable history of economic activity that can serve as the accounting basis for a new unit of account and settlement system.
 
-These capabilities draw on the same records. Every byte log and event record that institutions create for compliance purposes is simultaneously a genealogy that can underpin Moment-based entitlements. The capacity for such records is large enough that histories do not need to be compressed or discarded. Detailed histories of consultations, versions, and decisions can be retained indefinitely. This completeness allows monetary distributions to be audited and corrected by replay, using the same data that supports compliance.
+These capabilities draw on the same records. Records kept for a local activity or a programme review can also support settlement under the applicable distribution rules. The capacity for such records is large enough that histories do not need to be compressed or discarded. Detailed histories of consultations, versions, and decisions can be retained indefinitely. This completeness allows monetary distributions to be audited and corrected by replay, using the same data that supports compliance.
 
 Adoption for the first purpose automatically builds the infrastructure for the second.
 
@@ -71,73 +66,67 @@ The same byte logs that support audit and compliance can also be published as fr
 
 People adopt AIR because it solves problems they already have:
 
-**Regulators** require traceability for AI systems, algorithmic trading, and automated decisions. Replay-based audit provides higher assurance than narrative documentation. The genealogical approach is compatible with emerging AI governance standards. It provides a practical way for organisations to demonstrate traceability, auditability, and human oversight, rather than relying on narrative reports or ad hoc logging.
+**Communities and fiscal hosts** need transparent tracking of grants and mutual aid. Shells and Grants provide verifiable distribution records without central databases.
 
 **Institutions** seek clear records when facing claims of misconduct. A cryptographically sealed, independently verifiable record of decisions strengthens legal defence and simplifies regulatory examination.
 
-**AI developers** need evidence that human oversight was maintained. Binding model outputs and human approvals to hQVM Kernel states provides that evidence. As AI systems become more capable, the central questions concern how outputs are produced and where human judgement enters the process. Genealogies make that process visible. They separate human decisions from machine outputs and allow both to be inspected in order and in context.
+**Regulators** require traceability for automated decisions and high-stakes workflows. Replay-based audit provides higher assurance than narrative documentation alone.
 
-**Communities and fiscal hosts** need transparent tracking of grants and mutual aid. Shells and Grants provide verifiable distribution records without central databases.
+**Individuals and informal groups** can use genealogies to keep the context of shared work. People arranging care, shared budgets, or dispute repair can record what they observed, compare conclusions, and revisit decisions together.
 
-**Individual users** of AI and internet services want to know what happened and who decided what. Genealogies make that visible.
+**Teams working with artificial processing** can bind machine outputs and human approvals to replayable kernel states when that scope is part of the programme. Genealogies then make the sequence visible: human contributions, indirect processing, and review steps can be inspected in order and in context. This use is optional and programme-specific; the same record format applies to activities with no artificial component.
 
 Coordination through shared hQVM Kernel states replaces reliance on timestamps, external time sources, and opaque internal state. Parties coordinate by sharing genealogy prefixes and computing identical states. Agreement is verified by replay and comparison, using a public specification. A claimed state, seal, or history is validated by replay from the rest state under the public transition rule and canonical serialization rules. Where two histories share a final state, frame records still distinguish them.
 
-The final hQVM Kernel state remains fixed in size, while genealogy strength scales through byte-complete replay, frame records, and compact integrity commitments. A single implementation serves local tasks and global distributions alike. The [hQVM Kernel Specification](docs/Gyroscopic_ASI_Foundations.md) describes this property in detail.
+The final hQVM Kernel state remains fixed in size, while genealogy strength scales through byte-complete replay, frame records, and compact integrity commitments. A single implementation serves local tasks and global distributions alike. The [hQVM Kernel Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_Foundations.md) describes this property in detail.
 
-The GGG Console is a reference implementation that demonstrates how identity, economic distribution, AI coordination, and governance operate on the shared hQVM Kernel medium. It provides concrete patterns for institutions that wish to integrate AIR into existing applications.
+The GGG Console is a reference implementation that demonstrates how identity, economic distribution, and governance records operate on the shared hQVM Kernel medium. Participants and developers can use its patterns to integrate AIR into local tools or existing applications, including optional artificial processing where programmes define that scope.
 
-The hQVM Kernel plugs into infrastructure that already exists. Where inference hosts already run the kernel in the model execution path, receipts are a readout of positions those workloads already trace: creation, scanning, verification, routing, and local archive maintenance attach to that installed base without a dedicated ledger-node buy-in. Browsers, assistants, financial applications, and enterprise systems can also integrate the kernel for ordinary logging where co-execution is not yet present. Users need not install separate tools or change their behaviour; their normal activity creates the record. Adoption can therefore scale once key institutions integrate the system and the benefits become apparent. Measured transport layouts, coordinate-ledger storage, and the append gate are specified in [Moments Economy Architecture Specification](AIR_Moments_Economy_Specs.md) §9 and [Analysis: Moment Receipts, QR Transport, and the FNV Profile](../Findings/Analysis_hQVM_Moments_Fiat.md).
+Operators can integrate hQVM computation into existing infrastructure. Where inference hosts already run the kernel in the model execution path, receipts are a readout of positions those workloads already trace: creation, scanning, verification, routing, and local archive maintenance attach to that installed base using the existing host infrastructure. Browsers, assistants, financial applications, and enterprise systems can also integrate the kernel for ordinary logging where co-execution is not yet present. Users need not install separate tools or change their behaviour; their normal activity creates the record. Adoption can spread through local acceptance circles and shared tools, alongside integrations by larger service providers. Measured transport layouts, coordinate-ledger storage, and the append gate are specified in [Moments Economy Architecture Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md) §9 and [Analysis: Moment Receipts, QR Transport, and the FNV Profile](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md).
 
 ---
 
 ### The Turning Point
 
-The Moments Economy is a reinterpretation of records that are already being created.
+Participants can use existing coordination records as the accounting basis for MU settlement under shared distribution rules.
 
 The transition proceeds through three phases:
 
-**Phase 1: Measurement.** Institutions run pilots to build genealogies. They publish replayable genealogies, shell seals, and frame commitments but continue to settle in conventional currency. This phase builds verification capacity and establishes norms for genealogy construction.
+**Phase 1: Measurement.** Participants begin with genealogies of a shared activity. Local groups and institutional teams can run pilots using the same format. They publish replayable genealogies, shell seals, and frame commitments but continue to settle in conventional currency. This phase builds verification capacity and establishes norms for genealogy construction.
 
-**Phase 2: Distribution.** The baseline income is introduced as a parallel distribution. Registries issue Grants within Shells. Shells are published for independent verification. Recipients receive payments together with verifiable receipts bound to hQVM Kernel states. This phase establishes the circulation loop and shows that entitlements can flow from genealogical evidence.
+**Phase 2: Distribution.** The baseline income is introduced as a parallel distribution. Registries issue Grants within Shells. Shells are published for independent verification. Recipients receive payments together with verifiable receipts bound to hQVM Kernel states. This phase establishes the circulation loop and makes baseline allocations verifiable through recognition records.
 
 **Phase 3: Expansion.** Tiered distributions are introduced. Additional functions such as pensions, grants, and scholarships migrate to Moment-Unit channels, using the verification infrastructure established in earlier phases. Over time, the genealogical account becomes the preferred source of truth for entitlements and long-horizon commitments.
 
 Existing currencies continue to be used for pricing and contracts. Moment-Units provide a way to express entitlements where genealogies provide the underlying record. The shift occurs when people and institutions prefer the genealogical account over opaque alternatives.
 
-The timeline is uncertain. Given the current appetite for AI governance solutions and the ease of integrating the hQVM Kernel into existing systems, deployment could scale rapidly once key institutions adopt it. The speed depends on how urgently institutions and regulators feel the need for verifiable coordination.
+Adoption develops as participants find the records useful and agree on how to accept them across activities. Shared terminals and local support can make entry practical, while service providers can extend access through their existing tools. The pace depends on these working relationships and the usefulness of the resulting records.
 
 ---
 
 ### Participation Tiers
 
-The Moments Economy provides entitlements at multiple levels, each corresponding to different scopes of responsibility. The four tiers correspond to four capacities that coherent governance must maintain.
+Participants receive a baseline allocation and further allocations for recognised contributions under the Moments Economy schedule. A person may exercise all four capacities within one task. In assessing further allocations, participants consider the scope of the activity and preserve the evidence needed to review the assessment.
 
-**Tier 1: Intelligence Cooperation.** This tier provides a baseline income to every person. It amounts to 240 Moment-Units per day, corresponding to four hours at the base rate. This baseline requires no application, no institutional approval, and no employment status. It flows from verified existence within the genealogical record: a confirmed identity and recorded participation in coordinated activity. The associated capacity is the maintenance of shared systems and cultural continuity.
+**Tier 1: Intelligence Cooperation.** This tier provides a baseline income to every person. It amounts to 240 Moment-Units per day, corresponding to four hours at the base rate. Participants make the baseline usable through registry recognition of identity and continuity. Recognition records the person for settlement, while their everyday exercise of Direct Authority and Direct Agency is already present. The associated capacity is the maintenance of shared systems and cultural continuity.
 
 **Tier 2: Inference Interaction.** This tier provides double the baseline for those engaged in work that reconciles meaning and resolves conflicts across contexts. It covers activities such as negotiation, care, teaching, and human review of artificial outputs.
 
 **Tier 3: Information Curation.** This tier provides triple the baseline for those engaged in selecting, verifying, and contextualising information. It covers activities such as research, editing, data stewardship, and the design of measurement systems.
 
-**Tier 4: Governance Management.** This tier provides sixty times the baseline for those directing authority and maintaining traceability across large-scale systems. It covers activities such as leadership, oversight, administration, and resource allocation.
+**Tier 4: Governance Management.** This tier provides sixty times the baseline for contributions that maintain traceability and coordinate shared responsibilities at the relevant scope. It covers activities such as leadership, oversight, administration, and resource allocation.
 
 Tier assignments are governance decisions made by identifiable human agents and recorded in the event log. They are revisable and accountable. The capacity for all tiers is drawn from the same fixed envelope.
 
-In this framework, entitlement does not come from institutional favour, employment status, or credit history. It comes from the existence of a replayable genealogical record that shows participation in coordinated activity.
-
-The transition concerns all tiers. It is the moment when the baseline becomes universally accessible and when higher tiers are allocated through transparent, replayable governance rather than opaque institutional discretion.
+Baseline allocation follows registry recognition. Relevant genealogies support the assessment of further contributions, with participants able to inspect and challenge the basis of an allocation. The transition develops as these arrangements become usable across connected groups.
 
 ---
 
-### Stakeholders
+### Participants
 
-A common error is to imagine that only large institutions or regulators matter.
+Providers and receivers exercise the four capacities throughout shared activity. Their records should preserve the relations among contributions, including differences in evidence and interpretation. Continued access to the procedures for providing and reviewing information is part of this distribution.
 
-Every person who uses the internet or interacts with AI systems is a stakeholder. The genealogies they generate through daily use are as significant as those generated by banks or governments. In the Moments Economy, entitlement flows from verified participation in coordinated activity, not from institutional approval.
-
-Institutional stakeholders with high exposure (regulators, banks, AI laboratories, fiscal hosts) are important because they set norms and create precedents. The economic transition, however, depends on ordinary users recognising that their own genealogies have value.
-
-The target is therefore universal. The pathway is through immediate adoption by institutions facing regulatory or safety pressure, followed by normalisation, followed by recognition that the same records belong to individuals as much as to organisations.
+Within institutions, administrative positions specify particular functions within the wider distribution of capacities. Participants can examine how each function relates to the information supplied and received. Local groups and service providers can extend acceptance arrangements while retaining these relationships in the record.
 
 ---
 
@@ -145,7 +134,7 @@ The target is therefore universal. The pathway is through immediate adoption by 
 
 Once the transition is complete, several changes follow:
 
-**Entitlements become verifiable without institutional gatekeepers.** Anyone with a genealogy can demonstrate their participation. Verification is computational and based on the record itself. A presented entitlement is valid when its supporting genealogy, shell seal, and any claimed moments can be reproduced by replay under the public specification.
+Participants can verify allocation records by replaying the supporting genealogy and Shell seal under the public specification. Baseline recognition and the shared rules for further allocations establish the basis of the entitlement, while replay checks the recorded computation.
 
 **Genealogies replace sessions and cookies.** Current internet coordination relies on opaque session tokens and cookies stored by platforms. Genealogies provide a portable, self-owned history. This history can be transmitted to any system running a conforming hQVM Kernel implementation, which will replay it and arrive at the identical state. Shared coordination does not depend on shared databases, synchronisation protocols, or trusted intermediaries.
 
@@ -161,7 +150,7 @@ Genealogies support selective disclosure. A user can prove continuity, ancestry,
 
 **Coordination across borders becomes straightforward.** The hQVM Kernel state is the same regardless of jurisdiction. Parties in different countries share the same reference and can verify each other's histories without intermediaries.
 
-**AI systems become auditable participants.** Every action an AI system takes within the genealogical record advances the hQVM Kernel state and is therefore traceable. The distinction between human decisions and machine outputs remains visible. This supports long-term alignment by keeping human judgement connected to increasingly capable AI behaviour. Frame-level genealogy publication also makes it possible to localize where an AI-assisted process diverged, not just that it diverged. The kernel's 6-bit chirality register provides an additional layer of divergence detection: it tracks structural drift between coordination parties through an exact transport rule, enabling early warning of misalignment before full state disagreement becomes visible. The [hQVM Kernel Specification](docs/Gyroscopic_ASI_Foundations.md) and the [Holographic Web](docs/Gyroscopic_ASI_SDK_Holographic_Web.md) describe how AI systems interact with this coordination layer.
+**Machine-assisted steps become inspectable when recorded.** Every byte applied under the public transition rule advances the hQVM Kernel state. Programmes that include artificial processing can keep human and indirect contributions distinguishable in the same genealogy. Frame-level publication makes it possible to localise where an assisted process diverged, not only that it diverged. The kernel's 6-bit chirality register tracks structural drift between coordination parties through an exact transport rule. The [hQVM Kernel Specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_Foundations.md) and the [Holographic Web](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_SDK_Holographic_Web.md) describe coordination on this layer.
 
 ---
 
@@ -189,11 +178,11 @@ In all contexts:
 
 ### Openness and Neutrality
 
-All core specifications and reference implementations of the hQVM Kernel, AIR, and the Moments Economy are published openly. No single institution needs to be trusted as a central ledger-keeper. Any party can implement the hQVM Kernel, verify genealogies, and participate in the system on equal technical footing.
+All core specifications and reference implementations of the hQVM Kernel, AIR, and the Moments Economy are published openly. Any participant can implement the kernel and verify genealogies under the same public rules. Independent implementations give people a common computational basis for checking their records.
 
 Verification scales because of the hQVM Kernel's compact structure. The shared-moment space has 4,096 reachable states and a 64-state horizon, satisfying the holographic identity |H|² = |Ω|. Any state in this space encodes in 8 bits (6-bit horizon anchor plus 2-bit dictionary index) rather than the 24 bits required for the full kernel state, yielding 33 percent structural compression that reduces verification and transmission costs. Operational verification remains replay-based: parties verify byte logs, shell seals, frame commitments, and final states directly under the public specification.
 
-Openness is integral to the design. A coordination medium that depended on a single operator would reintroduce the opacity and gatekeeping that the system is intended to remove.
+Participants can inspect the specifications and maintain their own implementations. This supports continuity as they change tools or connect with other groups.
 
 ---
 
@@ -201,21 +190,21 @@ Openness is integral to the design. A coordination medium that depended on a sin
 
 The following documents are referenced throughout this orientation and provide the technical foundations:
 
-- [**hQVM Kernel Specification**](../Gyroscopic_ASI_Foundations.md): Defines the 24-bit kernel, the 4,096-state reachable shared-moment space, the 64-state horizon, the spinorial transition rules, and replay semantics. Resolve from the repository root if this relative path is absent in a given checkout.
-- [**Common Governance Model**](../CGM_Paper.md): Provides the theoretical foundation for the four governance capacities and the balance that coherent systems maintain.
-- [**Moments Economy Specification**](AIR_Moments_Economy_Specs.md): Defines the Moment-Unit, Identity Anchors, Grants, Shells, Archives, receipt transport, and the Common Source Moment based on |Ω| = 4,096.
-- [**Moment Receipts Analysis**](../Findings/Analysis_hQVM_Moments_Fiat.md): Records measured QR layouts, coordinate-ledger storage, name-layer behaviour, and open implementation items.
-- [**Holographic Web**](../Gyroscopic_ASI_SDK_Holographic_Web.md): Describes how hQVM Kernel-based coordination could underpin a new internet architecture, including the replacement of sessions and cookies with genealogies.
-- [**SDK for Multi-Agent Networks**](../Gyroscopic_ASI_SDK_Network.md): Provides guidance for developers building on the hQVM Kernel, including experiment designs for testing alignment hypotheses.
+- [**hQVM Kernel Specification**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_Foundations.md): Defines the 24-bit kernel, the 4,096-state reachable shared-moment space, the 64-state horizon, the spinorial transition rules, and replay semantics.
+- [**Common Governance Model**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/references/CGM_Paper.md): Provides the theoretical foundation for the four governance capacities and the balance that coherent systems maintain.
+- [**Moments Economy Specification**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md): Defines the Moment-Unit, Identity Anchors, Grants, Shells, Archives, receipt transport, and the Common Source Moment based on |Ω| = 4,096.
+- [**Moment Receipts Analysis**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md): Records measured QR layouts, coordinate-ledger storage, name-layer behaviour, and open implementation items.
+- [**Holographic Web**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_SDK_Holographic_Web.md): Describes how hQVM Kernel-based coordination could underpin a new internet architecture, including the replacement of sessions and cookies with genealogies.
+- [**SDK for Multi-Agent Networks**](https://github.com/gyrogovernance/superintelligence/blob/main/docs/Gyroscopic_ASI_SDK_Network.md): Provides guidance for developers building on the hQVM Kernel, including experiment designs for testing alignment hypotheses.
 
 ---
 
 ### Summary
 
-The hQVM Kernel and AIR address immediate needs in compliance, audit, and AI safety. Adoption for these purposes creates a comprehensive, replayable record of coordinated activity. Once such records are widespread, they can serve as the basis for a new economic accounting grounded in physical capacity.
+Participants can use AIR records for audit and AI safety work, and retain the same history for MU accounting under shared rules. Review of that history should include the distribution of capacities and the preservation of their ancestry throughout the activity.
 
-The transition is not a single policy announcement. It occurs when enough of the world relies on genealogies that their economic interpretation becomes natural. At that point, a baseline income becomes feasible for every person, higher responsibilities are compensated through transparent tiers, and coordination across all domains becomes verifiable.
+The transition develops through connected local practices. People record recognition for baseline allocations and review further contributions under shared rules. Wider circulation becomes practical as counterparties agree to accept and verify those records.
 
-The revised genealogy layer turns replayable byte logs into a three-layer certification medium: final shared moments, depth-4 frame commitments, and compact parity commitments. Parity commitments are compact integrity checks. They are not unique history certificates. When provenance collisions matter, frame records take precedence over final-state or parity-only comparison.
+Genealogy verification uses three certification layers: final shared moments, depth-4 frame commitments, and compact parity commitments. Parity commitments are compact integrity checks. They are not unique history certificates. When provenance collisions matter, frame records take precedence over final-state or parity-only comparison.
 
-The design is explicit. The infrastructure is useful for present purposes and opens future possibilities. When enough of the world uses it, the transition follows from practice rather than from decree.
+A local deployment can test whether participants can preserve context and resolve errors with the tools available to them. Results from that work give other groups a practical basis for deciding how to join or adapt the arrangement.

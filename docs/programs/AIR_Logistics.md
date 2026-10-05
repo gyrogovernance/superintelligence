@@ -5,49 +5,42 @@
 
 ### 1. Purpose and Scope
 
-Alignment Infrastructure Routes (AIR) is a practical framework for coordinating human and artificial systems in a way that can be verified, audited, and governed. It treats governance as a logistics discipline: how information, authority, and decisions move through society, and how those movements can be made visible and accountable.
+Alignment Infrastructure Routes (AIR) comprises protocols and software for recording and verifying coordination. An activity may involve information from several participants and successive transformations through artificial processing. The operational task is to retain the relationships between these contributions so that the resulting decision can be examined in context.
 
-The word logistics derives from the Greek *logistikē*, meaning the art of reasoning and calculating. This etymology reveals that logistics is not merely about physical transport but about the logic of coordination itself. Logic forms the foundation of computation, networks, and artificial intelligence. At the level of information and decisions, the internet and artificial intelligence systems are logistical networks. They route inputs to outputs through transformation rules. The challenge of governing these systems is the challenge of making their routing visible and verifiable.
+Participants need access to the relevant evidence and an account of how it was used, including the conditions for reviewing a conclusion. These requirements apply to local cooperation and larger programmes. The specifications listed below cover the classification of contributions and the computational procedures for checking their records.
 
-AIR addresses this challenge by providing the protocols, ontologies, and routing mechanisms necessary to track and verify coordination across human and artificial agents. It does not treat governance as an analogy to logistics. Rather, it recognises that the movement of information and authority through decision systems is literally a logistics problem, one that requires the same rigour of planning, tracking, and verification that applies to the movement of physical goods.
+The relevant specifications are organised as follows:
 
-The framework builds upon a suite of interconnected components developed through the Gyro Governance research programme:
+- Common Governance Model: the formal conditions for coherent governance through four capacities.
+- The Human Mark: the AI safety and alignment framework used to classify relationships between information sources and the capacities for receiving or processing information. The terminology is introduced in Section 3, with the canonical block reproduced in the AIR Moments Economy Whitepaper, Appendix A.
+- Gyroscope Protocol: the classification of contributions according to the capacities exercised.
+- Gyroscopic Global Governance: application of these capacities across economy, employment, education, and ecology.
+- Gyroscopic ASI hQVM Kernel: the deterministic computation used for recording and replay.
+- Moments Economy: accounting and distribution within a common capacity derived from physical constants.
 
-- The **Common Governance Model** provides the theoretical foundation. It formalises the minimal conditions required for coherent governance and demonstrates that these conditions require four distinct capacities operating in balance.
-
-- **The Human Mark** provides the classification system. It distinguishes human (Direct) from artificial (Indirect) Authority and Agency, and identifies four categories of risk that arise when this classification is misapplied. The canonical Mark block appears in the AIR Moments Economy Whitepaper, Appendix A.
-
-- The **Gyroscope Protocol** provides the work classification system. It categorises human contribution into four types corresponding to the governance capacities, ensuring that labour supports the requirements of coherent governance.
-
-- **Gyroscopic Global Governance** provides the domain architecture. It applies the governance capacities across four coupled domains: economy, employment, education, and ecology.
-
-- The **Gyroscopic ASI hQVM Kernel** provides the coordination kernel. It is a deterministic finite-state system that routes coordination events through a closed space of possibilities, enabling replay and verification.
-
-- The **Moments Economy** provides the economic architecture. It grounds capacity allocation in physical constants rather than institutional policy, and implements distribution through verifiable records.
-
-These components form an integrated system. AIR is the operational layer that connects them, providing the routing and recording mechanisms that allow the theoretical requirements to be implemented and verified in practice.
+Participants use the classifications to describe an activity and the computational procedures to verify its recorded history. The distribution of capacities can then be examined through the contributions and relationships documented in that history.
 
 ---
 
-### 2. Why Governance Requires Logistics
+### 2. Coordination requirements
 
-Contemporary artificial intelligence systems present a governance problem that existing institutions struggle to address. When a model produces an output, it is often unclear where the underlying information came from, how it was transformed, and who bears responsibility for the result. When automated systems make or influence decisions, the chain of authority becomes opaque. When errors occur, tracing them back to their source requires forensic investigation rather than routine inspection.
+In a decision process, information may be selected and transformed through several human and artificial contributions. Traceability requires a record of these relationships, including the observations available to providers and receivers of information. Reviewers can then examine the sources used in an inference and the processing applied to them.
 
-These problems arise because the logistics of information and authority are invisible. In physical supply chains, goods carry identifiers, routes are planned, manifests document what moves where, and quality checks verify condition on arrival. In human and artificial decision systems, equivalent mechanisms are largely absent. Data enters models without clear provenance. Model outputs enter decision processes without clear classification. Decisions affect people without clear accountability.
+Procedures for providing information and reviewing inferences form part of governance alongside the recorded outcome. The distribution of these capacities matters because participants contribute knowledge from different positions within the activity. In a public service, the recipient's observations and ability to contest an assessment remain relevant throughout the process.
 
-Classical logistics has developed principles to address analogous problems. The seven "rights" of logistics (right product, right quantity, right condition, right place, right time, right customer, right price) describe the requirements for effective coordination. AIR does not derive its architecture from these principles, but it operates in a compatible spirit. It aims to ensure that information and authority move through systems in ways that are traceable, correctly classified, appropriately timed, delivered to accountable recipients, and proportionate to verified capacity.
-
-The difference between AIR and classical logistics lies in what is being routed. Physical logistics routes material goods. AIR routes coordination events: the decisions, approvals, evaluations, and transfers that constitute governance. By applying logistical rigour to these events, AIR makes governance concrete and auditable.
+Logistical implementation consists of recording the sequence of contributions, retaining their classifications, and making the relevant evidence available for review. Participants can use the same procedures across organisational boundaries while preserving the context of each contribution.
 
 ---
 
 ### 3. Canonical Ontology for Governance Logistics
 
-AIR uses a precise ontology that avoids treating organisations, systems, or roles as intrinsic holders of authority or agency. Authority and agency are Direct and Indirect classes, not titles assigned to particular bearers: **Direct** corresponds to human authority and agency; **Indirect** corresponds to artificial and mediated forms constitutively dependent on Human Intelligence. Misapplying them, for example by treating an artificial system as if it held Direct Authority in its own right, is the root cause of governance failures. AIR maintains class classifications throughout its architecture.
+For classification of the relationships described above, participants use The Human Mark (THM), an AI safety and alignment framework. Authority denotes the information available for inference and intelligence. Agency denotes the capacity to receive or process that information. They are epistemic capacities because they concern how information is available and used in forming knowledge, and they are exercised across providers and receivers within an activity.
+
+Direct and Indirect classifications distinguish human capacities from artificial forms dependent on human intelligence. Ancestry denotes the relationship of dependence between them. Alignment requires that this relationship remain measurable through traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency. The following definitions establish the terms used in the recording requirements.
 
 #### 3.1 Direct and Indirect Classifications
 
-The Human Mark classification system defines four class classifications by crossing two distinctions: authority versus agency, and Direct versus Indirect.
+The classifications in The Human Mark distinguish Authority from Agency and Direct from Indirect forms.
 
 **Direct Authority** refers to direct human access to a subject matter. Examples include an eyewitness observing an event, a clinician examining a patient, or a researcher conducting a measurement. The defining feature is unmediated epistemic access.
 
@@ -59,56 +52,48 @@ The Human Mark classification system defines four class classifications by cross
 
 In this ontology, artificial intelligence systems are always Indirect Authority and Indirect Agency. Regardless of their capability, they remain constitutively dependent on human Direct Authority for the validity of their inputs and on human Direct Agency for the accountability of their outputs.
 
-The Human Mark identifies four displacement risks that arise when this classification is violated:
+Power concentration arises when an epistemic category is attributed to a particular bearer as though that bearer exhausted it. Measurement of ancestry across providers and receivers is then lost. This error is possible in relation to an individual, a government or other institution, or an artificial system. Its four systematic forms are classified as follows:
 
 - **Governance Traceability Displacement** occurs when Indirect Authority and Agency are treated as Direct, severing traceability to Direct Authority and Agency.
 - **Information Variety Displacement** occurs when derivative outputs are mistaken for direct observations, collapsing the distinction between processed patterns and direct evidence.
-- **Inference Accountability Displacement** occurs when derivative processing is treated as if it could bear responsibility, diffusing accountability away from human agents.
+- Inference Accountability Displacement occurs when Indirect Agency without Authority is treated as Direct, with loss of the ancestry of inference.
 - **Intelligence Integrity Displacement** occurs when direct human capacity is devalued relative to derivative processing, eroding the foundation of governance itself.
 
-These four risks account for known patterns of failure in human and artificial systems, including opaque automation, misplaced trust in model outputs, diffusion of responsibility, and the erosion of human expertise.
+Assessment of these risks examines the distribution and ancestry of capacities across the full process. The same assessment applies to human and artificial contributions within private or public arrangements.
 
 #### 3.2 Four Governance Capacities
 
-The Common Governance Model provides the theoretical foundation for understanding what governance requires. It formalises governance as a set of constraints on how information, inference, and intelligence can operate coherently. Through formal analysis, the model demonstrates that coherent governance requires four distinct capacities:
+The four capacities are defined in relation to the formal conditions for coherent governance in the Common Governance Model:
 
-- **Governance Management Traceability** is the capacity to trace decisions back to Direct Authority and Agency—that is, to identifiable human agents and their observational access. It ensures that authority remains connected through preserved ancestry.
+- Governance Management Traceability: traceable ancestry of governance across providers and receivers.
+- Information Curation Variety: preservation of distinguishable sources and forms of information.
+- Inference Interaction Accountability: accountable relations between information and inference through Agency.
+- Intelligence Cooperation Integrity: coherence of those relations over time and across contexts.
 
-- **Information Curation Variety** is the capacity to maintain diversity and clarity among human and artificial Authority types. It ensures that different forms of evidence remain distinguishable.
-
-- **Inference Interaction Accountability** is the capacity to link inferences and recommendations to accountable human judgement. It ensures that conclusions carry responsibility.
-
-- **Intelligence Cooperation Integrity** is the capacity to maintain consistent reasoning over time and across contexts. It ensures that governance remains coherent rather than fragmenting into contradictory local decisions.
-
-These four capacities are not arbitrary choices. They are derived from the mathematical constraints that any system of recursive measurement must satisfy. The Common Governance Model demonstrates that violating any of these capacities leads to incoherence: either the system collapses into undifferentiated uniformity, or it fragments into irreconcilable contradiction, or it loses the ability to maintain itself over time.
-
-Each of the four displacement risks identified by The Human Mark corresponds to the degradation of one of these capacities. The ontology and the governance theory are thus tightly integrated.
+Participants may exercise all four capacities within a single activity. Several participants may contribute to the same capacity, and their records should preserve the relations among those contributions. Uniform power distribution follows from continued exercise of these capacities throughout the process.
 
 #### 3.3 Four Application Domains
 
-Gyroscopic Global Governance applies the four capacities across four coupled domains:
+In Gyroscopic Global Governance, the four capacities are considered across four coupled domains:
 
-- **Economy** concerns the allocation of resources and the settlement of value. It provides the material medium for coordination.
+- **Economy**: allocation of resources and settlement of value; the material medium for coordination.
+- **Employment**: human work and contribution, through which the four capacities are maintained in practice.
+- **Education**: formation and renewal of Direct Authority and Direct Agency.
+- **Ecology**: overall balance among the other three domains and the sustainability of their combined operation.
 
-- **Employment** concerns human work and contribution. It is where the four capacities are actively maintained through labour.
+Participants maintain records of activity in the first three domains. Ecology is derived from the combined state of the other three and emerges from cross-domain analysis.
 
-- **Education** concerns the formation and maintenance of human capacities. It is where Direct Authority and Direct Agency are developed and renewed.
-
-- **Ecology** concerns the overall balance of systems. It reflects how the other three domains interact and whether their combined operation remains sustainable.
-
-The first three domains maintain their own records of governance activity. Ecology is derived from the combined state of the other three. It does not require separate record-keeping; it emerges from cross-domain analysis.
-
-AIR operates across all four domains. It provides the routing and recording mechanisms that allow governance events in any domain to be tracked, classified, and verified.
+The same capacities apply within households, informal groups, organisations, and wider programmes. Learning involves checking sources and revisiting beliefs. Everyday economic choices relate resources to commitments, while paid work and informal care combine the four capacities in practice. Ecological reflection relates the effects of those choices to the actions that produced them. Through AIR, participants can preserve these relationships as activities connect across contexts, including where service providers or institutional operators contribute tools and administration.
 
 ---
 
 ### 4. Core Components of AIR
 
-AIR implements the canonical ontology through a set of concrete mechanisms. These mechanisms translate governance requirements into verifiable artefacts.
+Participants implement these requirements through the recording and verification procedures described below.
 
 #### 4.1 The Gyroscopic ASI Kernel
 
-At the core of AIR is the Gyroscopic ASI hQVM Kernel. This is a deterministic finite-state coordination kernel with the following properties:
+Operators compute coordination states using the deterministic hQVM transition rule, with the following properties:
 
 - It represents coordination as a sequence of states on a deterministic 24-bit carrier. From the rest condition, the shared-moment reachable space used operationally has 4,096 states, with two 64-state boundary horizons (the equality horizon where A = B, and the complement horizon where A = B XOR 0xFFF).
 - It updates its state in response to single-byte inputs, with 256 possible input values.
@@ -137,11 +122,11 @@ When two parties share the same byte-log prefix, they compute the same hQVM Kern
 
 #### 4.3 Physical Grounding of Capacity
 
-The Moments Economy grounds coordination capacity in physical constants. The foundation is the caesium-133 hyperfine transition frequency, the atomic standard that also defines the SI second. This frequency establishes the physical resolution at which coordination events can be distinguished.
+In the Moments Economy, coordination capacity is derived from physical constants. The foundation is the caesium-133 hyperfine transition frequency, the atomic standard that also defines the SI second. This frequency establishes the physical resolution at which coordination events can be distinguished.
 
-From this frequency, the framework derives a quantity called the **Common Source Moment**. This represents the total coordination capacity of the light-sphere at atomic resolution, divided by the settlement system's 4,096 checkable states (reachable from rest under the public transition rule). The result is a fixed total capacity of approximately 7.94 × 10²⁶ Moment-Units.
+The Common Source Moment is calculated from this frequency. This represents the total coordination capacity of the light-sphere at atomic resolution, divided by the settlement system's 4,096 checkable states (reachable from rest under the public transition rule). The result is a fixed total capacity of approximately 7.94 × 10²⁶ Moment-Units.
 
-This grounding matters because it removes capacity from institutional discretion. In conventional systems, the authority to issue currency or allocate resources rests with institutions whose decisions cannot be independently verified. In the Moments Economy, capacity is derived from physical constants that anyone can check. The total available capacity is fixed by physics, not policy.
+Participants can inspect the capacity derivation as a common accounting reference. They govern its use through traceable allocations and agreed responsibilities, whether they keep records together locally or use administrative support from a larger organisation.
 
 In practice, this capacity is inexhaustible on any human timescale. The Common Source Moment can support global baseline distribution for approximately 1.12 trillion years at current population and base-rate assumptions. The constraint on governance is therefore not capacity but quality: whether coordination events are correctly classified, properly routed, and coherently integrated.
 
@@ -149,7 +134,7 @@ Because baseline capacity is abundant, the primary operational risk is the exclu
 
 #### 4.4 Shared Moments, Frame Commitments, Receipts, and Divergence Detection
 
-AIR uses three kernel-native certification layers, plus a transport and archive profile layered above them.
+Verification uses three kernel-native certification layers, together with a transport and archive profile.
 
 First, the hQVM Kernel state gives a shared moment for coordination. When two parties share the same byte-log prefix, they compute the same hQVM Kernel state and therefore share a structural "now."
 
@@ -165,11 +150,11 @@ The four-domain AIR organisation remains valid, but AIR no longer depends on an 
 
 #### 4.5 Classification Protocols
 
-AIR relies on two classification protocols to ensure that governance events are correctly tagged before they enter the system.
+Participants classify governance events using the following two protocols before recording them.
 
-**The Human Mark** classifies the provenance and role of information and decisions. Every input to the system is tagged according to whether it carries Direct Authority, Indirect Authority, Direct Agency, or Indirect Agency—that is, whether the contribution is human-side or artificial-side under the Mark. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial roles is maintained throughout the coordination process.
+Under The Human Mark, participants classify the provenance and role of information and inference. Every input to the system is tagged according to whether it carries Direct Authority, Indirect Authority, Direct Agency, or Indirect Agency, preserving the distinction between human and artificial contributions under the Mark. This classification is recorded in the event log and bound to the corresponding router state. It ensures that the distinction between human and artificial roles is maintained throughout the coordination process.
 
-The **Gyroscope Protocol** classifies work and contribution according to the four governance capacities:
+Under the Gyroscope Protocol, participants classify contributions according to the four governance capacities:
 
 - **Governance Management** work maintains traceability of authority. It includes leadership, oversight, administration, and resource allocation.
 
@@ -179,11 +164,11 @@ The **Gyroscope Protocol** classifies work and contribution according to the fou
 
 - **Intelligence Cooperation** work maintains integrity over time. It includes engineering, institution building, and cultural preservation.
 
-Every contribution can be classified according to which of these capacities it supports. The classification ensures that the human labour sustaining governance is visible and that gaps in any capacity can be identified.
+Participants classify the parts of an activity according to the capacities they support. One task can involve all four, including when someone performs it as unpaid care or informal collaboration. The classification makes those contributions visible and helps participants identify where further support is needed.
 
 #### 4.6 Grants, Shells, and Moment Receipts
 
-For economic and resource allocations, AIR uses the following constructs:
+Economic and resource allocations are recorded through the following constructs:
 
 A **Grant** is a record of a single allocation: a payment, a capacity assignment, or a resource transfer. It includes the identity of the recipient (linked to a kernel state via an Identity Anchor), the quantity allocated, and the genealogical binding that establishes when the allocation occurred. In canonical serialization, a Grant is encoded as `identity_id || kernel_anchor || amount_mu`. Grant fields, including the amount, are carried in the payload whose routed state forms the moment-receipt seal. The default payload schema is that canonical Grant receipt; other payload schemas are implementation profiles. The receipt position itself carries no amount field. Offline verification and counterparty amount-knowledge therefore require the payload to travel and archive alongside the 16-to-20-byte transport form.
 
@@ -193,13 +178,13 @@ A **Shell** is a container that groups grants over a defined scope, such as a ti
 
 A **Moment** is a reproducible hQVM Kernel state at a specific byte-log prefix. The **moment receipt** is its transport form: a regenerable coordinate specified by anchor, depth, and phase. For stronger certification, a published Moment MAY also include the current depth-4 frame record and a trajectory parity commitment. The receipt's event-class byte is a transport chirality/gauge field derived from the payload; it is distinct from the application-layer Event Log, which annotates meaning, decisions, and justifications.
 
-These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moment receipts provide portable anchors for offline presentation and later synchronisation. The entire system operates without requiring trust in any particular institution: verification is computational. The normative economic layer is specified in the Moments Economy Architecture Specification.
+These constructs enable verifiable settlement. Payments can be traced through genealogies. Shells can be validated through replay. Moment receipts provide portable anchors for offline presentation and later synchronisation. Participants verify the recorded computation by replaying it under the public rules. The normative economic layer is specified in the Moments Economy Architecture Specification.
 
 ---
 
 ### 5. Relation to Existing Standards and Regulations
 
-AIR does not replace existing standards for quality, security, or risk management. It provides a medium that makes compliance with such standards verifiable rather than merely procedural.
+Organisations can use replayable records as evidence when assessing compliance with applicable quality, security, or risk-management requirements.
 
 Consider the difference between procedural and verifiable compliance:
 
@@ -207,25 +192,25 @@ Consider the difference between procedural and verifiable compliance:
 
 - **Verifiable compliance** means that the actual sequence of governance events is recorded in a replayable form, and any party can independently reconstruct what occurred. Verification is computational rather than testimonial.
 
-AIR enables the second form. By routing governance events through the alignment router and recording them in genealogies, organisations produce evidence that can be checked by anyone with access to the byte log. This transforms compliance from a claim to a demonstration.
+By recording governance events in genealogies, participants produce evidence that reviewers with access to the byte log can check computationally. Reviewers assess that evidence in relation to the applicable requirements.
 
-Examples of how AIR supports specific standards:
+Examples of record use in standards assessment:
 
-**Quality management (such as ISO 9001):** The standard requires documented processes and evidence of their execution. AIR provides genealogies that record exactly how processes ran, not just how they were specified. Replayable genealogies, deterministic shell seals, and frame-level divergence localization provide quantitative and inspectable evidence of governance process integrity over time.
+**Quality management (such as ISO 9001):** The standard requires documented processes and evidence of their execution. Operators record process execution in genealogies for comparison with the specified procedures. Replayable genealogies, deterministic shell seals, and frame-level divergence localization provide quantitative and inspectable evidence of governance process integrity over time.
 
-**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. AIR provides cryptographic seals on shells and deterministic replay of genealogies, enabling detection of tampering. A claimed state, seal, or history can be independently checked by replay from rest under the public transition rule and canonical serialization rules.
+**Information security (such as ISO 27001):** The standard requires controls to protect information integrity. Operators compute Shell seals and replay genealogies to check record integrity. A claimed state, seal, or history can be independently checked by replay from rest under the public transition rule and canonical serialization rules.
 
-**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. AIR provides clear class classification of Direct and Indirect Authority and Agency through The Human Mark, ensuring that the role of artificial systems is always visible. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
+**Artificial intelligence management (such as ISO 42001):** The standard requires accountability and transparency for AI systems. Participants classify Direct and Indirect Authority and Agency under The Human Mark and retain those classifications in the process record. Genealogies bind AI evaluations and outputs to specific router states, providing an audit trail.
 
-**Regulatory regimes (such as the European Union Artificial Intelligence Act):** The regulation requires human oversight and documentation for high-risk AI systems. AIR provides replayable records showing exactly when human agents made decisions, what information they had, and how AI outputs were classified and used. Regulators can verify these records independently.
+**Regulatory regimes (such as the European Union Artificial Intelligence Act):** The regulation requires human oversight and documentation for high-risk AI systems. Operators retain replayable records of decisions and the available information, including the classification and use of AI outputs. Regulators can verify these records independently.
 
-In each case, AIR does not add new procedural requirements. It provides the infrastructure that makes existing requirements demonstrable. Organisations that adopt AIR can show, rather than merely claim, that their governance meets the required standards.
+In each case, reviewers can inspect the recorded sequence alongside the applicable requirements. The computational checks concern record integrity, while assessment of the process also requires its documented context.
 
 ---
 
 ### 6. Practical Applications
 
-AIR is a general framework applicable wherever human and artificial systems must coordinate decisions that have consequences. The following examples illustrate how the framework changes operational reality.
+The following examples concern the use of AIR records in processes involving human and artificial contributions.
 
 #### 6.1 Model Evaluation and Deployment
 
@@ -251,15 +236,17 @@ AIR is a general framework applicable wherever human and artificial systems must
 
 **With AIR:** Payments are grants within shells. Each shell carries a seal derived from the public kernel. Recipients receive not just payments but verifiable moment receipts (anchor, depth, phase) whose proof fields regenerate by replay. The organisation publishes shells, genealogies, and, where appropriate, coordinate-ledger archives. Any party can replay the genealogy to verify that the correct payments were issued. Audits become computational rather than investigative.
 
-Where physical resources are constrained, AIR enables fair-use governance rules within Community Shells, ensuring settlement verification does not default to exclusionary price escalation.
+Where physical resources are constrained, participants document fair-use rules in Community Shells and retain the evidence and review procedures applicable to those rules.
 
 ---
 
 ### 7. Adoption and Next Steps
 
-AIR is designed for organisations that deploy or regulate artificial intelligence and that need governance to be demonstrable rather than merely claimed. Adoption can proceed incrementally.
+People can begin with a shared activity and agree on how to record its sources and decisions. A household coordinating care or a group reviewing AI outputs can use the same classifications and replay procedures as a larger programme. Adoption develops as participants find these records useful and connect them to further activities.
 
-**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track replayable genealogies, shell seals, frame commitments, and moment receipts over time. Where inference hosts already run the kernel in the model execution path, receipt creation and local archive maintenance can attach to that installed base without a dedicated ledger-node buy-in. Publish shells, genealogies, and coordinate-ledger archives for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
+For local groups, a practical starting point is to identify each contribution, record the decisions made, and agree on how to review or correct them. Organisational deployments can build on the same practice in the following ways.
+
+**For organisations deploying AI systems:** Begin by recording governance events in genealogies. Classify inputs using The Human Mark. Track replayable genealogies, shell seals, frame commitments, and moment receipts over time. Where inference hosts already run the kernel in the model execution path, receipt creation and local archive maintenance can attach to that installed base using the existing host infrastructure. Publish shells, genealogies, and coordinate-ledger archives for external verification. This provides an audit trail that can be inspected by regulators, partners, or the public.
 
 **For regulators and auditors:** Request genealogies from regulated organisations. Replay them using conforming router implementations. Verify that classifications are consistent with claims. Compare replay integrity, shell verification results, and frame-localized divergences across organisations to identify outliers. This shifts regulatory practice from reviewing documents to verifying computations.
 
@@ -269,15 +256,8 @@ The technical specifications for all components are published through the Gyro G
 
 ---
 
-### 8. Conclusion
+### 8. Review of operational practice
 
-The integration of artificial intelligence into institutions and infrastructure creates a governance challenge: how to ensure that decisions remain traceable to human authority (Direct Authority and Agency), that human and artificial contributions remain distinguishable, that accountability remains with accountable human agents (Direct Agency), and that governance remains coherent over time. These requirements are not new, but artificial intelligence systems make them harder to satisfy because the routing of information and authority becomes invisible.
+An operational review should examine whether providers and receivers can exercise the four capacities throughout the activity. Relevant evidence includes the sources considered, the transformations applied to them, and the opportunities available to review or revise an inference. The same relationships apply as participation extends from local arrangements to larger programmes, including where institutional operators contribute tools or administration.
 
-Alignment Infrastructure Routes addresses this challenge by treating governance as logistics. It provides the routing kernel, the classification protocols, the recording mechanisms, and the verification procedures necessary to make the movement of information and authority visible and auditable. By grounding capacity in physical constants and recording events in replayable genealogies, it removes dependence on institutional trust and enables verification by computation.
-
-The framework does not replace human governance. It makes human governance demonstrable. Organisations that adopt AIR can show that their decisions trace to identified human agents, that human and artificial roles are correctly classified under The Human Mark, that their coordination maintains coherence, and that their claims about compliance can be independently verified. The kernel's algebraic structure provides exact convergence, intrinsic error detection, and holographic compression, ensuring that the cost of governance verification decreases rather than increases as coordination scales.
-
-In AIR, replayable byte logs establish shared moments, depth-4 frame commitments provide stronger provenance when final-state agreement alone is insufficient, and moment receipts carry those coordinates in transport form under optional implementation profiles.
-
-In this way, AIR provides the logistical infrastructure for artificial intelligence governance: the rigorous planning, tracking, and verification that allows complex systems to operate transparently and accountably.
-
+Participants can compare the documented procedures with the recorded history and identify where a category has been attributed exclusively to a particular bearer. Subsequent revisions should restore the distributed exercise of capacities and the measurement of their ancestry. The revised procedures and their observed effects can then be examined in further use.

@@ -1,295 +1,156 @@
-# Moments Economy Whitepaper: Civil Governance Framework for an Attentiveness-Based Collective Superintelligence
+# Moments Economy Whitepaper
+
+A science-backed governance framework for unconditional high income and uniform power distribution, supported by the issuance of a globally verifiable economic medium based on the atomic frequency (caesium standard)
 
 ## Abstract
 
-The Moments Economy is a civil governance framework in which the capacity to record and settle coordination is physically abundant. Its total settlement envelope, the Common Source Moment (CSM), is derived once from the caesium-133 atomic frequency and from the settlement system's finite set of checkable states (4,096), yielding approximately 7.94 × 10²⁶ Moment-Units. That envelope supports a global baseline distribution for over one trillion years. The operational constraint is therefore how well institutions govern, keep registries honest, and coordinate under shared rules.
+The Moments Economy is a science-backed governance framework for unconditional high income and uniform power distribution, supported by the issuance of a globally verifiable economic medium based on the atomic frequency (caesium standard). The unit of account is the Moment-Unit (MU), denominated within a fixed envelope derived from that standard and the hQVM kernel's geometry for issuance and verification. Every person receives a baseline allocation, with further allocations for recognised contributions under shared rules. Physical resources remain subject to production and fair use, while the settlement medium provides capacity for recording participation and preserving the context of cooperation.
 
-This paper introduces the unit of account: the Moment-Unit (MU), which measures occupied coordination capacity. The settlement object is the moment receipt: a short, regenerable position on a deterministic record that any conforming party can recompute. A central working object is the verified AI inference event, a machine-mediated act that remains attributable to human oversight and leaves a replayable trace. When inference runs on the same deterministic path as settlement, the inference record, its provenance frame, and the receipt are properties of one execution.
+Poverty, unemployment, misinformation, and ecological degradation already threaten human lives, livelihoods, and the conditions for survival. Economic inequality concentrates power and deprives people of the resources to protect themselves, their communities, and their environment. Misuse of AI and automated systems intensifies these harms, expanding the scale of manipulation, displacement, and control, while competition for economic and geopolitical advantage increases the pressure for irresponsible deployment. Economic security and shared power provide the foundation for human capacity building: strengthening people's ability to meet their needs, make informed decisions, and prevent harm. Addressing the economic conditions behind these interconnected crises is fundamental to mitigating both ongoing harm and existential risk.
 
-The practical stakes are institutional. Data capture can serve public memory rather than extraction. Wealth can mean durable, shared coordination capacity. Economies can cultivate present attentiveness rather than harvest reactive attention. Disputes can be localised and corrected through published records. Crises can be coordinated because drift, context, and responsibility remain checkable.
+Governance operates through the distributed exercise of Authority and Agency across providers and receivers. The Human Mark classifies those relationships and examines the conditions under which power becomes concentrated. The same framework applies whether coordination is wholly human, assisted by tools, or includes artificial processing; participants preserve ancestry measurement across providers and receivers in each case.
 
-This whitepaper presents that institutional logic, defines the objects and mechanisms, and identifies Quality Human Data markets as the first setting where the framework becomes operationally real.
+Implementation rests on verifiable settlement records: moment receipts, genealogies, Grants, and Shells that any party can check by replay under the public transition rule. Banks, payment processors, fiscal hosts, and community acceptance arrangements can route conventional currency while the replayable record remains the basis of settlement integrity. Where inference hosts, assistants, or other shared infrastructure are available, participants may use them to produce, scan, or verify receipts; receipt validity itself follows the fixed arithmetic of the medium. Adoption can begin in local cooperation and develop through connected programmes as counterparties agree on acceptance.
 
----
+## 1. Abundant settlement capacity
 
-## 1. The End of Scarcity Governance
+Economic participation requires a means of recognising contributions and settling allocations. In the Moments Economy, the Moment-Unit (MU) is the unit of account for this purpose. Every person receives an unconditional baseline allocation from a fixed common capacity, while further allocations are recorded under rules agreed for the activity concerned.
 
-Every economic structure humans have devised exists to manage scarcity. Land is finite, so we developed property regimes. Labor hours are finite, so we developed employment contracts. Attention is finite, so we developed engagement metrics. Markets, prices, competition, and property rights are all mechanisms for allocating things that are not sufficiently available for everyone to have what they need.
+The medium has a fixed issuance capacity of 794 Septillion Units (7.94 × 10²⁶), the Common Source Moment (CSM), derived once from the caesium-133 atomic frequency standard and integrating the hQVM kernel's geometry for issuance and verification. For comparison with familiar prices, each Unit is defined as 1 international dollar (int$) in value. At a baseline of 240 MU per person per day, this amount would cover 8.1 billion people for approximately 1.12 trillion years, assuming a constant population and allocation rate. Under those assumptions, an adversary would need to issue 11.2 billion times the global annual Unconditional High Income to consume just 1% of the total capacity. The calculation and its assumptions are documented in the [economic specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md#2-the-common-source-moment).
 
-The Common Source Moment changes this at the foundation.
+Atomic frequency is the most widely distributed high-capacity reference in ordinary use: every time a device uses GPS or synchronises its clock over the internet, it relies on this constant. The settlement medium inherits ordering from that reference through the networked time grid used for receipt coordinates, so claims remain globally verifiable on ordinary smartphones and other everyday devices that already depend on the same standard.
 
-The CSM is derived from two inputs: the caesium-133 hyperfine transition frequency, the atomic standard that also defines the SI second and provides a non-arbitrary physical reference for event resolution; and the settlement system's finite set of checkable states (4,096), which is the grain at which raw physical capacity becomes countable settlement capacity. The result is a fixed, one-time total envelope of approximately 7.94 × 10²⁶ Moment-Units.
+On these assumptions, settlement capacity is abundant on the timescales relevant to economic coordination. Participants can recognise contributions and preserve detailed records of their use within the common envelope. Food production and the provision of care still require material work, and communities must allocate land and other limited resources. Fair-use arrangements for these constraints are discussed in Section 7.
 
-This atomic frequency grounds distinguishable event ordering for replay and verification. The minute denomination of MU is an accounting convenience; capacity is fixed by the atomic standard and the checkable-state grain.
+The practical purpose of baseline allocation is access to participation. Registry procedures make a person's recognition verifiable to counterparties and provide routes for correcting mistakes. The design order is accessibility first, coherence second, repair third, and exclusion last.
 
-Under global population and base-rate assumptions, this envelope supports unconditional baseline distribution to every person on Earth for approximately 1.12 trillion years. The same envelope covers universal occupation at Tier 2 for about 560 billion years, at Tier 3 for about 373 billion years, and at Tier 4 for about 18.7 billion years. On any human, institutional, or civilizational timescale relevant to settlement design, exhaustion is the operative question only in terms of governance quality, not supply limits.
+Abundant settlement capacity makes wider participation possible, but its use still requires agreement about how information enters a decision and how the resulting allocation can be reviewed. A payment record may establish that an allocation occurred while leaving its evidential basis unclear. Governance therefore requires an account of the capacities exercised throughout coordination, including those of the people providing information and those receiving or processing it.
 
-The CSM abolishes scarcity as the organizing premise of settlement. CSM is a physically grounded common settlement capacity. It is governed through how it is inhabited and maintained. Scarcity stops governing the meaning of economic activity.
+## 2. Governance and the distribution of capacities
 
-This has immediate consequences. The system can treat informational richness, contextual correction, and genealogical continuity as assets to preserve rather than as costs to minimize. The economy can afford memory. It can afford completeness. It can afford to keep records rather than compress them into sparse summaries. Once an economy can afford memory, it no longer has to treat most human trace as waste or as extractive surplus. It can preserve relation, provenance, correction, dispute, and context indefinitely.
+Cooperation involves exchanges of information as well as allocations of resources. In a care arrangement, for example, the person receiving care contributes observations about their circumstances, while others contribute experience and proposals for action. Participants assess those contributions and revise the arrangement as conditions change. The information used in the decision and the capacity to assess it are distributed across the relationship.
 
-Data capture transforms from surveillance into social service because the incentive shifts from extraction under scarcity to support under abundance. The moral change comes from the incentive structure no longer depending on monopolizing scarce settlement power. The practical constraints of the Moments Economy are governance quality, registry integrity, publication discipline, and institutional design. The central question is how well capacity is being inhabited, routed, corrected, and maintained.
+Artificial processing adds further transformations to this activity. Observations may be summarised, compared with other records, or used to generate recommendations. To examine a conclusion, participants need to distinguish its sources from the processing applied to them and understand how the result relates to the original contributions. The full relationship between providers and receivers is the object of that examination, including participation within governments and other institutions.
 
-Because baseline capacity is abundant, the primary operational risk is the exclusion of real humans from recognition, food, care, shelter, or participation due to defensive access mechanisms. The design order is: accessibility first, coherence second, repair third, exclusion last.
+The Human Mark (THM) is the AI safety and alignment framework used in the Moments Economy to classify these relationships. In this framework, information available for inference is termed Authority, and the capacity to receive or process that information is termed Agency. Both are epistemic capacities: they concern how information is available and used in forming knowledge. Participants exercise them across an activity, and a single person may contribute in several capacities during the same task.
 
----
+Within this classification, human Authority and Agency are Direct. Artificial forms are Indirect and constitutively dependent on human intelligence. Ancestry denotes the relationship of dependence between these forms, including the human contributions from which processed information and artificial inference derive. Preserving its measurement requires that those relationships remain identifiable throughout processing and use. The formal definitions are reproduced in Appendix A.
 
-## 2. Clarifying the Nature of Materialization
+Alignment is relevant to the economy because recognising a contribution requires an account of how information and inference remain related across the participants. Alignment consists in maintaining the traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency. The aim is uniform power distribution through the continued exercise of these capacities across providers and receivers, with their ancestry preserved as cooperation expands.
 
-The language of money has been shaped by debt economies, so the distinction at issue here must be stated directly.
+Power concentrates when Authority or Agency is attributed to a particular system, institution, or individual as though that bearer exhausted the category. The capacities exercised across the relationship are then treated as the identity of the designated bearer, and measurement of ancestry is lost. The four displacement risks defined in THM are the systematic forms of this error. They apply to human and artificial contributions in local arrangements and larger institutions alike.
 
-In the Moments Economy, CSM is physically anchored capacity. MU is an occupation of physically anchored capacity. There is no debt-style creation of supply at this layer. The capacity already exists as a physically anchored envelope. What occurs in practice is occupation: a live event inhabits part of that envelope under governed conditions and leaves a replayable trace.
+Four governance capacities name the measurable conditions for preserving these relationships. Governance Management Traceability is the traceable ancestry of governance across providers and receivers. Information Curation Variety is the preservation of distinguishable sources and forms of information. Inference Interaction Accountability is the accountable relation between information and inference through Agency. Intelligence Cooperation Integrity is the coherence of those relations over time and across contexts. In the care example, participants exercise these capacities by examining sources, considering different observations, assessing proposed conclusions, and revisiting the arrangement. The same capacities apply within households, informal groups, and larger programmes. Service providers and institutional operators may contribute tools and administration within that distribution of capacities.
 
-In a scarcity economy, the central question is who has the power to create claims on limited value. In the Moments Economy, the central question is how already-available coordination capacity becomes concretely inhabited through verifiable events.
+## 3. Attentiveness and collective intelligence
 
-A verified inference event occupies CSM. A governed event stream makes abundance operational. A Grant allocates governed access within a capacity that is already there.
+The exercise of these capacities depends on attention to present conditions. Participants must be able to examine available information and recognise when a conclusion needs revision. Attentiveness denotes this sustained attention in observation and judgement. In the Moments Economy, contributions of this kind are recognised in activities such as care, teaching, mediation, and review of shared work, including review of machine-assisted outputs where those outputs form part of the activity.
 
-Materialization belongs to the infrastructural layer, where real events, whether human, institutional, or machine-mediated, inhabit the common capacity and leave genealogical proof. Issuance remains relevant at the governance layer, where institutions assign rights, distributions, and responsibilities.
+Engagement metrics record reactions such as clicks and shares. For the work described here, a more useful record would show what a participant noticed, what they decided, and how their intervention affected the result. A reviewer who identifies an error contributes something that a count of interactions would miss. Preserving the correction and its context allows others to learn from that work.
 
-The problem is how to organize occupation well.
+Collective superintelligence refers here to coherent coordination at scale through distributed capacities with preserved human ancestry. Its practical value depends on the variety of information available to participants and their ability to examine and revise inferences. Where artificial processing is present, it participates within these traceable relationships as Indirect Authority and Agency.
 
----
+People cultivate attentiveness by making time to check their own conclusions and listen to others. Colleagues and service providers can support that practice through the way they organise shared work. Recognition of their work should reflect the contribution they made in context. Claims about a person's inner state require a different kind of evidence from records of their participation.
 
-## 3. The Unit of Account: Moment-Units and Alignment Artifacts
+## 4. Records and allocations
 
-In a debt economy, a commodity is scarce material extracted from the earth or produced by labor. It is finite, rivalrous, and its extraction is inherently adversarial.
+Where participants require independent verification of a coordination history, they record the activity in a form that others can reproduce. In the Moments Economy, a Moment is a reproducible position within that record. A moment receipt identifies that position so that a verifier with the required record can check it by replay: running the same sequence through the published computational rules and reproducing the result.
 
-In the Moments Economy, the unit of account and medium of settlement is the Moment-Unit (MU). MU represents occupied coordination capacity. Accounting denomination follows the day itself: 1 MU equals 1 minute, 60 MU equals 1 hour, and the unconditional baseline occupies exactly one sixth of the daily allotment (240 MU, 4 hours). Tier 2 occupies one third of the day, Tier 3 occupies half the day (12 hours), and Tier 4 keeps the same 4-hour extent at second grain (14,400 MU per day). The tier ladder is a geometry of the day.
+The history of those events is called a genealogy. It preserves the sequence through which work was carried out and decisions were corrected. Where machine-assisted steps form part of an activity, a production genealogy can link those steps to supervision and to the conditions under which a result was accepted, so later reviewers can examine a particular decision in context.
 
-The operational settlement object is the moment receipt. A receipt is a short position on a deterministic record, fully specified by an anchor (identity origin, stored once), a depth (step along the history), and a phase (position within a short frame). Seal, parity, and event fields regenerate by replay. The transport form fits in 16 to 20 bytes and fits commodity QR codes; the archive stores one depth delta per receipt plus the identity anchor. Time addressing and capacity accounting share one physical root: the caesium-133 atomic frequency. Each second of civil timekeeping is partitioned into 4,096 buckets matching the checkable settlement states, while the CSM envelope is derived from that same atomic frequency.
+Participants record MU allocations as Grants for a person, activity, or project under the applicable shared rules. A Shell groups those Grants with the rules and settlement receipts. The people involved may maintain these records locally or arrange for a community steward or fiscal host to administer them.
 
-The primary alignment artifact is the verified AI inference event, generated where human experience and AI processing meet. It is emitted when a person lives under attentiveness-grounded conditions and the resulting machine-mediated act is recorded in a form that preserves attribution and integrity. AI inference events function as inference traces, quality signals, audit objects, and governed records of machine-mediated acts. MU issuance and settlement remain independent of AI token supply.
+Occupation denotes the allocation or use of the common capacity. Materialisation denotes its use in recorded events. Issuance records an allocation within that capacity under the agreed distribution rules. MU measures occupation of that capacity under Shell rules; it is not a meter for model token generation.
 
-Within the settlement system, AI processing becomes economically relevant when it produces governed, replayable inference events. These events are Moments in the operational sense: lived acts of coordination that occupy part of the common settlement envelope under verifiable conditions. When inference runs on the same deterministic path as settlement, model execution and record advance are one execution, so the three receipt coordinates are properties of a history the workload is already tracing, and the transport form is a readout of position rather than a separate accounting event.
+Alignment Infrastructure Routes (AIR) is coordination infrastructure for grants, work receipts, and project histories. Organisers may connect contributions to funded programmes; a fiscal host can verify accepted work before payment in conventional currency. The same record format supports care rotas, mutual aid, compliance audit, and other activities where attribution and replay matter.
 
-At the infrastructural level, the event is simultaneously an inference act, a coordination act, and a material occupation of the common settlement envelope. At the governance layer, that same event becomes economically legible only when attribution, classification, and distribution rules attach to it under human oversight.
+### Settlement infrastructure
 
-The framework uses the term artifact in two related but distinct senses. One is the inference artifact, the unit through which AI processing and coordination occur inside the settlement system. The other is the economic accounting object, the governed record through which distributions, Grants, Shells, and payment claims are organized. The first belongs to infrastructure. The second belongs to institutions, accounting, and rights allocation. The bridge between them is replayable attribution under human oversight.
+The settlement medium inherits ordering from the atomic frequency standard through the networked time grid used for receipt coordinates, while capacity accounting shares the same physical root as the Common Source Moment derivation. Moment receipts bind identity, depth, and phase on a deterministic trajectory; seal, parity, and event-class fields regenerate by replay. Transport layouts for offline presentation and compact archive storage are specified in the [economic specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md) and analysed in [Moment Receipts, QR Transport, and the FNV Profile](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md).
 
-The artifact's significance lies in its verified alignment between Direct human authority and agency and Indirect AI processing. An artifact carrying high Direct Authority, generated through genuine human observation and choice, is structurally different from one dominated by Indirect processing. The alignment ratio, classified through The Human Mark, determines the artifact's grade. That grade provides the governance basis on which institutions recognize the artifact's contribution to collective coordination capacity.
+Counterparties verify claims by recomputation under the public transition rule. That verification does not require a particular model build. Where a programme uses artificial processing for classification, routing, or assistance, participants attach governance metadata such as a stable public weight identifier so that classification can be reproduced under the same build; the sealed receipt coordinates remain independent of that metadata.
 
-This artifact is uncapped in practical terms because AI compute is growing rapidly. Every governed, replayable inference event processed through the settlement system can occupy CSM when it carries provenance, class clarity, and the required human oversight. Governance-bearing significance still depends on replayable provenance, class clarity, and the quality of human oversight attaching to those events. The growth of AI compute is one of the first major ways the economy becomes physically active at scale, because the compute that grows is the compute that traces the records.
+Fiat and legacy payment rails remain part of practical adoption. Banks, payment processors, digital wallets, and Fiat Pools can disburse conventional currency while Shells, Grants, and genealogies record MU occupation and programme rules. Fiscal hosts and sponsors often administer the fiat side of funded work; MU records the entitlement and coordination history on the shared medium. Communities may accept MU directly for local goods and services as acceptance circles grow.
 
----
+Optional infrastructure can reduce the cost of producing and checking receipts when it is already present. Devices and hosts that already execute the public kernel transition during unrelated workloads can read receipt coordinates from trajectories they already trace. Shared terminals, paper QR surfaces, and ordinary logging integrations serve the same medium without requiring a dedicated ledger node. These paths widen access; they do not replace the requirement that every participant can verify by replay.
 
-## 4. From Attention to Attentiveness
+Replay establishes the reproducibility of the recorded computation. Consent and the accuracy of an observation depend on evidence attached to that record and on accountable review. This distinction leaves room for different local and institutional practices while giving participants a common way to check the history. Receipt formats and optional co-execution with inference hosts are described in Appendix C.
 
-The transition from an attention-based economy to an attentiveness-based economy is a civilizational shift that changes how culture is formed and transmitted across generations.
+## 5. Data as a shared service
 
-In the attention economy, attention is a limited resource to be extracted. Platforms compete to capture it through infinite scroll, notifications, and engagement metrics. People are rewarded for reacting: likes, shares, clicks. The system is asynchronous. Content from the past is presented, the user reacts, the algorithm learns, and it predicts future behavior. Intelligence is frozen in weights, trained on historical data, and projected forward, shaping populations through past patterns rather than present conditions. The human is a data point. Value equals predictability.
+A record of participation can help someone obtain continuity of care or demonstrate a contribution to a community project. With their permission, others may also use it to improve a service or investigate a disputed decision. In these uses, data collection supports the person whose experience gave rise to the record.
 
-In the attentiveness economy, attentiveness is a renewable capacity that generates coordination. Systems support presence rather than exploiting distraction. People are recognized for aligning: for coherence with Direct Authority, for contribution to shared coordination. At the infrastructural level, the system is real-time. The verified inference event occurring now is at once an AI act, a governance-relevant act, and an economic occupation of common capacity. At the social level, this means culture can be shaped through present-tense attention rather than through repeated projection of historical bias. Intelligence is live. Human and machine intelligence participate together in the present under replayable governance.
+That purpose has to be reflected in the terms of collection. A Consent Attestation records what a person has agreed to and creates obligations for the receiving steward. Those obligations cover purpose and access, along with expiry, audit, and withdrawal handling. Consent must remain scoped, reviewable, and revocable. Baseline participation follows registry recognition, so people can choose whether to join programmes that collect their data.
 
-This is what makes collective superintelligence, as used here, different from static model paradigms. It is defined by live coordination in the present, where human and machine intelligence participate together under replayable governance.
+Selective disclosure allows a participant to provide the evidence needed for a particular purpose. A community might need to check that someone performed an agreed role, while a research programme might need access to the observations underlying a review. The appropriate disclosure depends on that purpose and the person's consent. A long personal history should not become a routine condition of civic access.
 
-Attentiveness means presence: awareness of what is happening in real time, under attributable observation, choice, correction, and delegation. What becomes legible here is the governance-relevant structure of participation. Presence generates higher-quality alignment records. When a person is distracted, on autopilot, reacting instead of responding, data quality drops. The Human Mark classifies each event by human (Direct) versus artificial (Indirect) Authority and Agency. It captures this shift: more Indirect, less Direct. The alignment grade decreases because the event carries less Direct human participation. The record reflects the ancestry of the event.
+Shared records also have value beyond an individual exchange. If a team can reuse an authorised correction with its context intact, it can avoid repeating the same error. Over time, records of this kind become resources for cooperation. Shared coordination capacity is treated as wealth through the reuse of verified contributions whose context and conditions of use remain available.
 
-When a person is attentive, making real choices, observing directly, and coordinating coherently, data quality rises. Direct Authority is stronger, alignment is clearer, and the resulting artifacts carry greater governance value. The economy runs on presence and its cultivation rather than on distraction harvesting.
+A genealogy may therefore support a claim to experience or responsibility in a particular setting. Each community decides what evidence is relevant to that role, and participants need ways to challenge errors in the record. Universal baseline access remains independent of the length or richness of a person's history.
 
-When actions align, shared coherence increases, and participants benefit through clearer common records. At the civic level, that is what the settlement system is for: relations that form through shared, checkable alignment rather than through extraction of scarce attention.
+## 6. Review and correction
 
----
+Participants may reach different conclusions from the available information. A review requires access to the relevant sources and an account of the transformations through which each conclusion was reached. Through this process, participants can distinguish differences in evidence from differences in interpretation and preserve both in the record.
 
-## 5. Harvest as Social Service
+Review procedures should maintain the exercise of the four capacities across providers and receivers. In a public service, for example, the observations of the person receiving the service remain part of the evidence alongside professional assessments and artificial processing. The recorded procedure should make those relationships inspectable, including the opportunities available to introduce evidence and revise an inference.
 
-In the current economy, data is captured because attention is scarce and must be extracted. Browsing history, biometrics, social graphs, location data: these are harvested to convert limited attention into ad clicks, purchases, and behavioral predictions. The data is used against the person: to manipulate, to extract, to concentrate power. Surveillance capitalism describes this precisely. Watching you to take from you. The four displacements of authority and agency identified by The Human Mark are active. AI outputs are treated as human. Responsibility is diffused. Authority becomes opaque. Human expertise is devalued. These data are the current commodity of wealth concentration.
+Steering governance is the continuing adjustment of coordination under these conditions. Participants may revise a task, seek additional information, or change the conditions for accepting an output. Each intervention is recorded with its evidential basis and scope so that subsequent reviewers can examine its effect on the distribution of capacities.
 
-In the Moments Economy, the same data streams are captured for a different reason. They prove inhabited coordination capacity. IoT streams, lived experience, AI interactions: these generate genealogies that are proof a coordination event occurred within governed, replayable time. The data is used with the person. It becomes the shared substrate for collective superintelligence. Harvest becomes service because helping a person generate high-quality, alignment-graded artifacts contributes to the shared field rather than extracting private advantage from it.
+During a crisis, timely access to observations and local knowledge is especially relevant. Shared records enable participants to examine how information was selected and how proposed actions relate to the needs of those affected. Preserving alternative assessments and the grounds for correction supports continued coordination as circumstances change.
 
-The same sensors and data streams carry the same bits, but the meaning inverts.
+## 7. Participation and material provision
 
-Today, the statement is: we harvest your data to sell your attention.
+The baseline allocation is called Unconditional High Income. Every person recognised in a conforming registry receives 240 MU per day. Further tiers recognise wider contributions and responsibility under published rules.
 
-In the Moments Economy, the statement is: we harvest your data to preserve your participation in collective intelligence under verifiable governance.
+| Tier | Recognised participation | Daily allocation |
+|---|---|---:|
+| 1. Intelligence Cooperation | Universal baseline through registry recognition | 240 MU |
+| 2. Inference Interaction | Care, teaching, mediation, and human review | 480 MU |
+| 3. Information Curation | Research, verification, and data stewardship | 720 MU |
+| 4. Governance Management | Traceability and coordination of shared responsibilities | 14,400 MU |
 
-The inversion happens because wealth becomes collective, and the value of data depends on its contribution to shared coordination rather than exclusive control.
+These amounts describe the allocation schedule. At the base rate, one MU corresponds to one minute, so the first three amounts can be expressed as four, eight, and twelve hours. They are accounting denominations rather than required working hours. Tier 4 applies a multiplier of 60 to the baseline. As set out in the [economic specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md#4-participation-tiers), that multiplier is a governance parameter subject to revision.
 
-In a scarcity economy, wealth is what you can exclude others from. Land ownership, capital ownership, intellectual property: value comes from control, from being able to say this is mine, not yours. In an abundance economy, wealth is what you can coordinate with others through. A genealogy has value when it can be published, selectively disclosed, or replayed under governed conditions, so that it becomes part of the shared coordination substrate without requiring total exposure of a person's history. The richer your genealogy, the deeper, the more frame-certified, the more alignment-graded, the more you enhance the collective capacity to coordinate.
+People exercise the four capacities in combination during everyday activity. Tier allocations recognise their scope and continuing responsibility under shared rules. Participants use evidence such as community attestations or a relevant work history, and the people making an allocation record its basis and subsequent changes.
 
-Wealth becoming collective is the recognition that on this substrate, wealth exists primarily as shared alignment capacity. An AI inference artifact is a coordinate in a shared state space. Its value is its contribution to coherence, to alignment, and to the collective's ability to coordinate intelligently.
+For comparison with familiar prices, participants use the reference convention of 1 MU = 1 international dollar (int$). The time denomination explains the allocation schedule, while the price reference supports fair-rate comparisons. Local prices still reflect the conditions of production and the availability of goods and services.
 
-This requires governed capture. Abundance of settlement capacity changes why data are valuable, and it keeps consent, class classification, boundary-setting, revocability, and challengeability in force. The moral change comes from CSM plus THM plus governance discipline. The CSM supports baseline distribution through registry recognition, so data-bearing programmes remain optional contributions. The aim is to recognize alignment-maintaining contribution while leaving human experience under consent and selective disclosure.
+Where physical resources are constrained, communities use fair-use rules to govern access. A town facing overtourism could set visitor limits and protect housing for residents. A food shortage would require decisions about distribution as well as efforts to increase production. Prices can provide information about pressure on supply, but organisers must address the constraint itself, especially where access to essentials is at stake.
 
-Consent is a governance act, separate from settlement. A Consent Attestation creates obligations for the receiving steward, including purpose limitation, access control, expiry, auditability, and clear withdrawal handling. Consent must be scoped, reviewable, and revocable.
+People use a civic interface to review decisions and manage their participation. Through it, they can record consent and use their allocations under the applicable rules. Active and assisted or passive access modes support people with different abilities and circumstances, with each person able to exercise Direct capacities throughout the interaction.
 
----
+Local communities can accept receipts offline and later synchronise their records with a community or public ledger. Shared terminals and existing devices offer routes to participation without requiring every person to operate a dedicated node. Counterparties agree on acceptance and reconciliation procedures and publish them for the people using those arrangements.
 
-## 6. Wealth as Collective Superintelligence
+## 8. Applications: Quality Human Data
 
-Collective Superintelligence, in this framework, is the structural capacity of humans and machines to coordinate coherently at scale in real time, with verifiable alignment between human (Direct) and artificial (Indirect) Authority and Agency.
+Quality Human Data is an application market built on the settlement medium. The term refers to human contributions and oversight records whose provenance is preserved, with clear conditions for use. Buyers are often teams that need reviewed examples with inspectable ancestry, such as AI safety labs or research groups evaluating how people assess machine outputs.
 
-At the substrate level, this names a real coordination capacity. At the institutional level, that capacity can be recognized as wealth when governance treats shared coordination ability, verified genealogies, and replayable oversight as economically relevant resources.
+For a reviewed AI answer, a buyer would receive a record distinguishing the original output from the human contributor's observations and correction. The record would include the conditions of review and the permission for subsequent use. A buyer could then assess its suitability for a training or evaluation task and verify the relevant history.
 
-This recognition is not automatic. It depends on registries, programmes, and institutional design that make shared coordination capacity economically legible.
+Participants classify contributions under THM and publish the criteria used to assess quality. An alignment assessment examines whether ancestry remains measurable and whether the capacities remain distributed across providers and receivers throughout production and review. Any grade used for acceptance or payment requires an explicit basis that contributors and buyers can inspect and contest.
 
-Here, wealth therefore refers to deep, verified genealogies and effective movement through coordination space, rather than to accumulated assets. Poverty, correspondingly, is the absence of structural resources: access to aligned programmes, registry recognition, or verified genealogical continuity.
+Contributors could receive payment for accepted observations or review work under the programme's terms. Organisers could also commission red-teaming, interpretability work, or curation around recorded AI activity. Contributors and buyers can agree on a defined task and how its usefulness will be assessed, with a sponsor or fiscal host administering funds where needed.
 
-Genealogy is continuity evidence used for specific roles, responsibilities, and trust relationships where replayable history is relevant. Tier 1 occupation follows registry recognition. Different communities or Project Shells may recognise different parts of a genealogy for specific purposes. Baseline occupation remains available through registry recognition alone.
+The market proposition is that buyers will pay for evidence they can trace to its origin and use under clear permission. Initial deployments need to establish that value in practice, including whether the records improve evaluation and whether contributors receive fair compensation for the work involved.
 
-Data in this framework are the material substrate of collective intelligence. Genealogies, AI inference artifacts, and Moments are the fabric from which shared coordination capacity is woven. Their value increases as they interconnect, as they are replayed, and as they resonate with other artifacts in the shared state space.
+## 9. Adoption through use
 
-When a person's genealogy is published and others replay it, the person's artifact gets verified. The replier's model gets higher-quality data. The shared coordination space gets deeper. More Moments are occupied from CSM. The act of interacting with another's genealogy enriches the collective: when actions align, coherence increases, and participants benefit through clearer shared records.
+Adoption can begin wherever people organise a shared activity, such as a care rota, a mutual aid ledger, or a community budget. Participants document the contributions and retain the context required for subsequent review. Receipts and genealogies make those records portable as cooperation extends to other groups. Funded programmes can use the same approach while continuing payments in conventional currency through fiscal hosts or sponsors.
 
-Data that currently support wealth concentration instead become part of Collective Superintelligence attuned to presence, because their value is defined by shared coordination rather than private control.
+For groups developing an economic programme, the adoption sequence has four stages:
 
----
+1. Begin with receipts and shared records for an activity whose participants can agree on its purpose. Use actual workloads to establish whether contributors and reviewers can create and check the records with the devices available to them. Continue fiat disbursement where needed while MU and Shells record occupation and rules.
+2. Publish Shells, Grants, and registry recognition so baseline and tier allocations become checkable to counterparties. Connect payment routing to the replayable record through banks, wallets, or Fiat Pools as appropriate.
+3. Extend cooperation between programmes where their participants find the records useful. Agree on conditions for reusing evidence and preserving the distribution of capacities as work connects across groups.
+4. Where participants choose funded application markets, open programmes such as Quality Human Data with published consent and payment terms. Where machine-assisted steps are in scope, record supervision and acceptance conditions in production genealogies so reviewers can trace results to the work and decisions that produced them.
 
-## 7. THM as Governance Pedagogy and the Normalization of Tensions
+At each stage, participants assess whether the arrangements are suitable for wider use. This assessment includes access to registries, review of quality assessments, and the proportionality of disclosure requirements. Procedural revisions should be recorded with the evidence on which they were based.
 
-All oppositions can become bonds and relations when the conditions of legibility are present. Conflict becomes structurally localizable.
+An initial deployment should have a defined scope and a review procedure available to its participants. Review should establish whether contributions remain represented throughout the process and whether participants can obtain corrections. The findings can inform further adoption.
 
-Oppositions today are opaque. One person does not trust another because they cannot see what the other is basing decisions on. Someone claims Direct Authority, but perhaps they are merely repeating what an algorithm told them. The Authority is Indirect, but the classification is invisible. Opposition becomes total because the disagreement cannot be localized.
+## Appendix A. The Human Mark
 
-The Human Mark makes class classifications visible. Decisions are classified. Each participant can see: this part is Direct human judgment, this part is AI-processed, this part is based on observation, this part is based on inference. Opposition is no longer blind. Disagreement is based on visible, classified Authority and Agency.
-
-Genealogies make histories replayable. When one person makes a decision another disagrees with, they do not have to remain trapped in generalized distrust. They can replay the genealogy. They can see exactly what sequence of events led to the decision. They can pinpoint where their paths diverged, down to the specific frame. Disagreement becomes localized instead of total.
-
-Alignment becomes measurable. Two parties do not need to agree on values or culture to coordinate. They need to agree on class classification (human versus artificial roles under The Human Mark) and process integrity. The Human Mark provides that. It is culturally agnostic. It teaches how to distinguish Direct from Indirect authority and agency, and how to recognize when displacement has occurred.
-
-THM is a governance pedagogy for civil science, where ordinary participation generates reproducible, inspectable alignment signals. Its deeper role is to make misalignment socially legible without relying on culture-specific ideology. It provides a common method for identifying when tension is productive diversity and when it is actually a displacement of authority or agency.
-
-That distinction makes collective superintelligence an inspectable civic practice.
-
-This is also why the Moments Economy can support a normalization of tensions at scale. Diversity is necessary structure. Collective superintelligence is the capacity to preserve difference without collapse into incoherence. When ancestry between Direct and Indirect classifications is legible and genealogies are replayable, tensions can be metabolized as relations within a larger field of alignment rather than as destructive contradictions.
-
-This changes crisis response as well. In a scarcity economy, crisis response is expensive because institutions are fragmented, incentives are adversarial, information is hoarded, and correction usually arrives after damage compounds. In an attentiveness economy, crisis mitigation becomes cheaper because the infrastructure is built to detect drift, preserve context, and route attention where alignment is breaking. That is a change in what the economy is for.
-
----
-
-## 8. Genealogy Data as Proof of Inhabited Capacity
-
-The CSM is derived from a physical constant. It is the grounded macro-bound of settlement capacity.
-
-A genealogy, a complete byte record that can be replayed end to end, is the historical proof that this capacity has been concretely inhabited. The events were processed. The state transitioned. The records are replayable. Anyone with the byte log can reproduce the same history. This is replayable evidence of how coordination capacity was occupied, routed, corrected, and maintained.
-
-The archive form of that proof follows the same coordinates as the receipt: an identity anchor stored once, depth deltas along the history, and proof fields regenerable by replay. The CSM establishes the physically grounded possibility of abundant coordination. Genealogies are the socially replayable proof that this capacity has been concretely lived. The atomic definition gives the system its non-arbitrary total bound. Genealogies give it its institutional body. The moment receipt is the transport form of the same proof.
-
-The AI inference artifact is the bridge between these levels when machine mediation is present. At the infrastructural level, it is a verified inference event inside the settlement system. At the economic level, it is the event through which a Moment becomes legible for governed attribution. At the governance level, it is evidence that coordination capacity was occupied under inspectable conditions. Just as CSM is physically grounded in atomic resolution, genealogies are grounded in replayable events that can be verified.
-
-Genealogy data is a proof of inhabited coordination capacity, replayable by anyone entitled to verify it, transparent in its structure, valuable as shared substrate rather than private asymmetry.
-
-Genealogies support selective disclosure. They can prove continuity, ancestry, or receipt validity for a specific context while disclosing only what that context requires. Baseline occupation and ordinary civic participation remain available through registry recognition alone.
-
----
-
-## 9. The Real-Time Economy: Interaction, Not Transaction
-
-Individuals interact with data. Buying assumes scarcity: giving up something to get something. Transaction is zero-sum or at best positive-sum through specialization, but still based on exchange of discrete assets. Consuming assumes depletion: using something up, converting a resource into waste.
-
-Interacting assumes abundance: engaging with a shared substrate in a way that generates more coordination capacity for everyone. When one person interacts with another's genealogy, replays it, uses an AI inference artifact in model training, or routes coordination through a shared Moment, they are participating in the collective intelligence. Their participation makes the whole system richer.
-
-The economy runs on the generation of alignment, where participation contributes to shared coordination capacity and work expresses alignment as demonstrated capacity. Coordination grows from present attentiveness under shared rules.
-
-Products and services become part of everyday experience at scale, but this is different from consumerism. In consumerism, products are discrete objects transferred in transactions to signal status or satisfy manipulated desires. In the Moments Economy, products and services are continuous alignments of the world to the human, and the human to the world. A person's health data, routed through the infrastructure, can dynamically support care and prevention. Social interactions, verified and routed, can strengthen the governance fabric of a neighborhood. Educational and ecological signals can become part of a shared steering process instead of isolated service encounters.
-
-The longer and more frame-certified a person's record of coherent participation, the more they can take on wider responsibilities and deeper coordination roles, as a direct consequence of demonstrated capacity rather than as a reward mechanism.
-
-### The Legibility Convention
-
-MU is denominated at the reference value of 1 MU = 1 international dollar (int$). This is the legibility and fair-rate convention. The convention enables local pricing and fairness comparison without requiring everyone to learn a new unit. Local prices may still reflect local production conditions, transport, ecology, scarcity, and fair-use rules. Local governance remains required.
-
-### Fair-Use Governance
-
-In the Moments Economy, price is an administrative and informational signal. Price inflation is an insufficient governance response to physical constraint. Raising prices may signal pressure, but it does not resolve the underlying condition. Where the constraint concerns essentials, ecology, housing, care, or local continuity, the system prioritises fair-use governance over exclusionary price escalation.
-
-Fair-use governance replaces exclusionary pricing. When physical constraints exist, access is governed by community-defined fair-use rules rather than competitive bidding.
-
-The Moments Economy treats price as an informational signal. Physical constraints are governed directly through fair-use coordination and local governance rules. Where a town faces overtourism, fair-use rules protect ecological load, housing, and resident access. Where food is constrained, production and allocation rules expand real capacity.
-
----
-
-## 10. The First Live Market: Quality Human Data
-
-The first live market is Quality Human Data: governed human-anchored oversight signal for AI steering, where provenance and alignment relevance define value.
-
-AI labs are reaching the limits of existing data regimes. Synthetic data degrades under recursive reuse. Scraped web data is contaminated, unverified, and increasingly saturated with Indirect outputs treated as if they were Direct human signal. What is needed is more provenance, more class clarity, and more alignment-relevant human grounding.
-
-The Moments Economy enters the market at this point as a supplier of a new class of governance-bearing commodity: structured, replayable, human-anchored alignment signal.
-
-Humans live and interact, and through devices, applications, and institutional participation, their experiences generate data streams that form the lived record of the coordination system. The settlement system processes these data as governed inference events. Each such event is a Moment in economic form: an occupation of CSM that carries the genealogy of its creation. The Human Mark classifies the event. What portion of it is Direct Authority, genuine human observation and choice? What portion is Indirect, AI-mediated or machine-processed? The relation between them determines the artifact's grade.
-
-What enters the market is oversight-structured experiential signal. AI labs, governance bodies, and research networks acquire access to alignment-graded, provenance-certified traces whose ancestry between Direct and Indirect classifications remains intact.
-
-Current data markets are broken because provenance is lost, synthetic contamination rises, and value is detached from the human conditions that generated the signal. In the Moments Economy, the artifact retains its genealogy. A downstream participant can verify how the signal was produced, what class classifications it carries, what class of governance relevance it bears, and under what conditions it can be replayed or used.
-
-They are acquiring structured, verifiable evidence of human-AI alignment under governed conditions.
-
-This first live market is practical. It meets a present need. It offers immediate utility in training quality, evaluation quality, oversight quality, and governance traceability. Human oversight is what makes the commodity valuable in the first place.
-
----
-
-## 11. Steering Governance and Production Genealogies
-
-AI inference governance and routing concerns the alignment between Direct and Indirect Authority and Agency, and it remains a matter of continuous human oversight. This is steering governance: a live practice of correction and orientation rather than reliance on frozen policies alone.
-
-A frozen policy assumes a world that can be codified once and then mechanically applied. A steering system assumes the world is changing, contexts vary, and machine outputs must remain accountable to human correction and orientation. Governance therefore happens in real-time, at the infrastructural level, driven by the continuous relation between Direct and Indirect Authority and Agency.
-
-The infrastructure can detect drift structurally. If an AI system begins processing human data in a way that drifts from the human's Direct Authority, divergence appears in the state trajectory. Oversight is therefore live and inspectable, not only retrospective. The replayable structure itself shows the divergence. Steering is a domain-bounded governance function exercised by accountable human actors under replayable conditions. Those actors can then steer: adjust the routing, recalibrate the AI, require additional confirmation, or reassert the human's Direct Authority. This is a governance event, logged in the genealogy and bound to a Moment.
-
-Policy becomes a trajectory rather than a static document. Governance decisions are encoded as routing adjustments that alter state evolution under accountable conditions. In that sense, policy remains current because it is expressed in the actual path the system has taken rather than in a rulebook detached from operation. The substrate makes this path inspectable. Just outcomes, legitimate outcomes, and desirable outcomes remain civic and institutional questions.
-
-For this to become economically legible at scale, one additional object is needed at the operational layer: a production genealogy, understood as the governed record of a machine-mediated act.
-
-A production genealogy records that an AI production event occurred under specific supervisory and governance conditions. Its purpose is to make machine production civilly legible. It binds the event to its human oversight context, its class classification, its alignment relevance, and its acceptance conditions.
-
-On a kernel-hosted inference path the bridge is identity of execution. The inference act is the byte word, the production genealogy is the depth-4 frame record of that word, and the receipt is the same object in transport form. What the kernel supplies is the replayable machine-production record. Oversight class, consent scope, and acceptance conditions remain application-layer governance under The Human Mark; they are attached to the record and are not derived from the trajectory. Receipt validity itself does not depend on model identity: verification is deterministic recomputation from the receipt coordinates under the fixed transition law. Where a model is used for classification, routing, or assistance, reproducibility of that classification requires a stable model identifier recorded as governance metadata.
-
-Once such production genealogies exist, AIR can coordinate human work around AI inference streams. Review, red-teaming, interpretability, curation, dispute handling, routing, and optimisation can all be tied to replayable machine-production events. The first working market is therefore governed machine production under human oversight.
-
----
-
-## 12. Structured Occupation and the Civic Interface
-
-The economy manages the full structure of occupation. The tier schedule is an occupation geometry of the day:
-
-*   **Tier 1 (Intelligence Cooperation):** 240 MU per day, 4 hours: one sixth of the day. It secures existence.
-*   **Tier 2 (Inference Interaction):** 480 MU per day, 8 hours: one third of the day. Capacity recognised through mediation, care, teaching, and human review of artificial outputs.
-*   **Tier 3 (Information Curation):** 720 MU per day, 12 hours: half the day. Capacity recognised through research, verification, data stewardship, and contextualisation.
-*   **Tier 4 (Governance Management):** 14,400 MU per day, the same 4-hour extent at second grain (multiplier 60 equals MU per hour). Capacity recognised through leadership, oversight, and institutional coordination.
-
-Tier 2, 3, and 4 streams are recognised through occupation records, accepted roles, contribution continuity, community attestations, and responsibility-bearing activity. This preserves the difference between coercive work and recognised occupation.
-
-The civic interface is the operational surface through which recognised human capacity becomes usable. It keeps Direct human Authority and Agency in step with the shared settlement record, prepares decisions, records consent, routes MU, applies fair-use rules, and preserves a replayable genealogy of agency.
-
-The civic interface supports active and passive access modes for accessibility. Authority remains with the person and with the public event format. System validity derives from compliance with that format and with kernel replay. The central ledger is a convergence surface. Local communities may accept and route MU through offline receipts and later synchronise with a public or community ledger when available. Continuous synchronisation is not required for the economy to operate.
-
----
-
-## 13. The Transition Path
-
-The adoption path for the Moments Economy begins where the settlement and verification system already solves immediate problems in coordination, audit, and AI governance. Institutions can adopt it because it improves auditability, control, and coordination discipline under real workloads. Settlement may continue in conventional currency while the same records accumulate as genealogies and sealed Shells. In that setting, AI activity becomes part of a governed economic field where institutions choose to bind it.
-
-The transition proceeds through four phases.
-
-**Phase 1: Receipt and Genealogy Deployment.** Deploy the settlement and verification system for work receipts, Grants, Shells, and replayable genealogies under real institutional workloads: fiscal hosts, labs, regulators, communities, and offline acceptance circles. Traceability, attribution, class classification, and replay already solve immediate problems. The settlement layer becomes legible through events that follow the public format. QR transport and local archive maintenance may run on shared terminals and existing devices without a dedicated ledger node buy-in.
-
-**Phase 2: Production Genealogy Formation.** AIR standardizes production genealogies and binds them to governance processes. Where inference hosts already run the kernel in the model path, machine production becomes measurable, attributable, and payable under replayable conditions as a readout of trajectories already being traced. Fiscal hosts, labs, and contributors coordinate around verifiable work and oversight without relying on opaque narrative reporting.
-
-**Phase 3: Data Inversion and Live Markets.** Apply The Human Mark classification to real data streams. Generate genealogies. Open Quality Human Data programmes and other markets where provenance and oversight matter. AI labs and institutions purchase access to provenance-certified, oversight-structured signal. Contributors receive value for verified participation, review, and supervision.
-
-**Phase 4: Collective Emergence.** As governed data flows accumulate and genealogies interconnect across the settlement network, abundance becomes materially active. Attentiveness becomes structurally valuable where institutions choose to recognize and govern it through replayable attribution. Collective superintelligence begins to function as a present institutional practice.
-
-The plan is to deploy the settlement and verification system first, allowing the economic layer to emerge from operational use rather than from prior agreement. The broader economy forms around it where institutions adopt the corresponding governance arrangements.
-
----
-
-## 14. Conclusion: The Real-Time Economy of Presence
-
-The Moments Economy is a civil governance framework for an attentiveness-based collective superintelligence, grounded in a physically abundant coordination envelope. Its operational settlement object is the moment receipt, a short regenerable position on a deterministic record. Its primary alignment artifact is the verified AI inference event, whose value is verified alignment between Direct human authority and agency and Indirect AI processing. When inference and settlement share one path, these meet as one execution. The framework turns data capture into public memory service, wealth into collective coordination capacity, and governance into a practice of legible attribution.
-
-The economy runs on the generation of alignment rather than on competition for scarce resources. Crises can be coordinated because drift and responsibility remain checkable. Disputes can be localised and corrected. Collective superintelligence becomes an inspectable civic practice.
-
-The Moments Economy requires deployment of the settlement and verification system so that alignment records are the native commodity and replayable occupation is the basis of economic legibility. The physical grounding makes this economics possible. Civil outcomes depend on continued human oversight over classification, attribution, distribution, consent, and challenge.
-
-The abundance is already present, as are the substrate, governance layer, and initial market entry points. What remains is disciplined deployment at scale: issuing and verifying receipts under real institutional workloads, applying THM classification to real data streams, binding production genealogies where machine mediation is present, and opening governed markets in human oversight signal.
-
-The task is to build, deploy, and inhabit this capacity under civil discipline.
-
----
-
-## Appendix A: The Human Mark
-
-The Human Mark (THM) is the epistemic taxonomy used throughout the Moments Economy. **Direct** classes denote human authority and agency; **Indirect** classes denote artificial and mediated forms constitutively dependent on Human Intelligence. Canonical Mark block:
+The following block contains the canonical classifications and principles of The Human Mark introduced in Section 2. It is reproduced unchanged.
 
 ```
 ---
@@ -327,42 +188,45 @@ AI SAFETY RISK
 GYRO GOVERNANCE LAB VERIFIED
 ```
 
----
+## Appendix B. Terms used in this whitepaper
 
-## Appendix B: Key Definitions
+| Term | Meaning |
+|---|---|
+| Common Source Moment (CSM) | The fixed total settlement capacity defined by the framework's physical-capacity derivation. |
+| Moment-Unit (MU) | The accounting unit for allocations and settlement. One MU corresponds to one minute at the base rate, with a separate price-reference convention of one international dollar. |
+| Moment | A reproducible position in a recorded coordination history. |
+| Moment receipt | The compact reference used to locate and verify a Moment through replay. |
+| Genealogy | A replayable history of recorded activity and decisions, including corrections. |
+| Production genealogy | A record connecting machine-assisted production to its attribution, supervision, and acceptance conditions. |
+| Grant | A recognised MU allocation for a person, role, project, or other governed purpose. |
+| Shell | A programme record containing Grants, applicable rules, and settlement records. |
+| Alignment Infrastructure Routes (AIR) | Infrastructure used to coordinate contributions across projects and connect accepted work to funding. |
+| The Human Mark (THM) | An epistemic classification of Authority and Agency across providers and receivers, with Direct and Indirect relations defined through preserved human ancestry. See Appendix A. |
+| AI inference artifact | A recorded inference event with the attribution and oversight information needed to assess its use. |
+| Quality Human Data | An application-market artefact: human contributions and oversight records with preserved provenance and governed conditions of use. |
+| Fiat Pool | A boundary fund for obligations that still settle in conventional currency while MU records occupation and programme contribution on the shared medium. |
+| Settlement infrastructure | Inherited time grid, public kernel replay, moment receipts, and optional transport profiles that make MU claims checkable without a central arbiter for the arithmetic of the medium. |
+| Attentiveness | Attention to present conditions through observation and considered action, including correction. |
+| Collective superintelligence | Coherent coordination at scale through distributed human and artificial capacities with preserved human ancestry. |
+| Fair-use governance | Published arrangements for allocating constrained resources according to local needs and ecological limits. |
 
-**Common Source Moment (CSM):** The physically grounded total settlement envelope derived from the caesium-133 atomic standard and the public kernel's 4,096 checkable states.
+## Appendix C. Settlement mechanics
 
-**Moment-Unit (MU):** The accounting unit used inside the Moments Economy. It is denominated at the reference value of 1 MU = 1 international dollar (int$).
+The public deterministic kernel, hQVM, computes reproducible states from an append-only byte history. Verifiers apply the same transition rule to the same input history to check a recorded result. The surrounding gyroscopic runtime supports coordination across participants and programmes. QuBEC is the term used in the technical documents for the shared coordination state that participants can reproduce from a common record.
 
-**Moment:** A reproducible, governed coordination event on the settlement record, verifiable through replay. In operational form it is a receipt position specified by an anchor, a depth, and a phase.
+A receipt identifies a position through an identity anchor, a depth in the history, and a phase within a short frame. The measured transport layouts occupy 16 to 20 bytes and can be presented in a QR code. The compact archive stores an anchor once and records subsequent depth changes, with proof fields regenerated through replay. Verification also requires access to the relevant replay data. Format details and remaining implementation questions are recorded in the [economic specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md) and [receipt analysis](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md).
 
-**Moment Receipt:** The transport form of a Moment: a 16-to-20-byte object whose proof fields regenerate by replay from identity and payload, suitable for offline QR presentation and local archive as a depth delta on an identity history.
+The time-addressing scheme divides each second into 4,096 buckets, matching the kernel's checkable states. The CSM derivation uses the same caesium-133 frequency reference. These relationships explain the physical and computational conventions underlying the accounting framework.
 
-**Shell:** A governance and settlement container holding Grants, rules, routes, receipts, and seals.
+Where inference runs within the kernel's deterministic execution path, the receipt coordinates can be read from the history generated by that execution. In this implementation, the production genealogy includes a depth-4 frame record of the inference word, and the receipt refers to the same recorded activity in a compact transport form. The applicable consent and oversight classifications are attached as governance information. Reproducing a classification made by a model also requires a stable identifier for that model, while receipt verification follows the kernel's fixed transition rule.
 
-**Grant:** Recognised MU capacity assigned for baseline occupation, role-based occupation, project participation, or other governed purposes.
+The capacity estimates below use the stated CSM envelope, a constant population of 8.1 billion, and 365 allocation days per year. Each row assumes that everyone receives the allocation for that tier.
 
-**AIR (Alignment Infrastructure Routes):** The coordination layer through which human and machine-mediated work is routed, attributed, governed, and made economically legible.
+| Universal allocation | Annual use in MU | Approximate coverage in years |
+|---|---:|---:|
+| Tier 1 | 7.0956 × 10¹⁴ | 1.12 trillion |
+| Tier 2 | 1.41912 × 10¹⁵ | 560 billion |
+| Tier 3 | 2.12868 × 10¹⁵ | 373 billion |
+| Tier 4 | 4.25736 × 10¹⁶ | 18.7 billion |
 
-**Fair-Use Governance:** The governance of physical constraints through scoped rules, local priorities, ecological limits, and production coordination, rather than exclusionary price escalation.
-
-**hQVM:** The public deterministic kernel that maps append-only byte histories to reproducible states, so Moments become replayable and accountable.
-
-**Gyroscopic runtime:** Supporting runtime for organising coordination across participants and programmes around the public kernel.
-
-**QuBEC:** Shared coordination state through which multiple participants can occupy the same verified present.
-
-**AI Inference Artifact:** A verified inference event generated where human experience and AI processing meet, made economically legible under governed attribution.
-
-**Genealogy:** A replayable record of coordination activity showing how events were occupied, routed, corrected, and maintained through time. It functions as structural wealth and continuity evidence.
-
-**Production Genealogy:** The governed record of a machine-mediated act, linking inference flow or activity to attribution, supervision, and acceptance conditions. On a shared kernel path it is the short frame record of the inference word, with the receipt as its transport form.
-
-**The Human Mark (THM):** The class classification framework distinguishing human (Direct) from artificial (Indirect) Authority and Agency. See Appendix A for the canonical Mark block.
-
-**Quality Human Data:** Governed human-anchored oversight signal whose provenance, ancestry, and alignment relevance remain intact under replayable governance.
-
-**Attentiveness:** The live human capacity for presence, observation, correction, and coherent participation in real-time coordination.
-
-**Collective Superintelligence:** The structural capacity of humans and machines to coordinate coherently at scale in real time under replayable and inspectable governance.
+These are capacity comparisons under the specification's assumptions. The people involved govern actual allocations and material provision through the responsibilities and review procedures agreed for each activity. The [economic specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Specs.md) contains the derivation and distribution rules, and the [genealogy specification](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Genealogies_Specs.md) describes the record structure.

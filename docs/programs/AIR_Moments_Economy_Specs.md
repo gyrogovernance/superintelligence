@@ -10,18 +10,22 @@ Settlement and verification run on a deterministic public kernel (hQVM) and the 
 
 The operational form of a settlement event is the moment receipt: a short position on that deterministic record, specified by an identity origin (anchor), a step along the history (depth), and a position within a short frame (phase). Proof fields regenerate by replay.
 
-The Moments Economy is an institutional record architecture as well as a distribution system. The same records that support monetary settlement also support complete governance histories: who acted, what was issued, what evidence was referenced, what corrections were made, and where disputes arose. Settlement, audit, provenance, and institutional memory share one replayable medium.
+Allocation decisions depend on information supplied and assessed across the participants in an activity. Their records must preserve the relationships between original observations and subsequent processing so that both providers and receivers can examine the basis of an allocation. The classification used for these relationships is introduced under Related frameworks and specified in Part III.
 
-The architecture also has a staged adoption path. Institutions can first adopt the system for coordination, audit, compliance, and traceable programme administration while existing currencies and payment rails continue. In doing so, they build the same complete byte records that later make economic settlement in Moment-Units possible. The transition path is cumulative: coordination and verification first; monetary settlement later, where conditions permit.
+The same records used for distribution also preserve the context of cooperation: who acted, what was allocated, and how subsequent corrections were made. Participants can maintain this history locally or arrange administrative support for its recording and publication.
 
-This document specifies that architecture. It defines the unit of account, the capacity envelope, the structural objects of settlement, the verification pattern, the domain model, the epistemic commitments, and the institutional requirements for transition.
+Adoption can proceed in stages. Individuals and groups can begin with records of shared activity, while funded programmes can use the same format for administration alongside existing currencies and payment services. In doing so, they build the same complete byte records that later make economic settlement in Moment-Units possible. The transition path is cumulative: coordination and verification first; MU settlement alongside or after fiat routing, where conditions permit.
+
+The architecture applies to any activity whose participants can agree on shared rules and may use the same receipt and Shell format without artificial processing. Where assistants, inference hosts, or other shared infrastructure are available, participants may use them to produce or verify records; validity of sealed coordinates remains defined by public replay. Application markets such as Quality Human Data use the same medium but are specified separately from the core unit of account.
+
+This document specifies that architecture. It defines the unit of account, the capacity envelope, the structural objects of settlement, the verification pattern, the domain model, the epistemic commitments, and the participation and recordkeeping requirements for transition.
 
 ### Why this matters
 
 * **For individuals:** A guaranteed baseline distribution with additional tiered distributions for wider responsibility, delivered through verifiable records.
 * **For policymakers:** Issuance limits derived from explicit physical and geometric assumptions that can be inspected, challenged, and revised through governance.
 * **For institutions:** A settlement and audit method in which distributions and eligibility decisions are replayable records.
-* **For AI safety:** A coordination medium that preserves human authority, traceability, and accountability in systems where artificial agents contribute to decisions and record-keeping.
+* **For mixed coordination:** A medium that preserves traceability of Authority and Agency across providers and receivers when artificial processing participates in decisions and record-keeping.
 
 ### Two capabilities, one infrastructure
 
@@ -35,7 +39,7 @@ Adoption for the first purpose automatically builds the infrastructure for the s
 
 ### Scope and relationship to AIR
 
-The Moments Economy uses the same deterministic settlement and verification machinery that Alignment Infrastructure Routes (AIR) uses for grants, work receipts, and project histories. Those uses are related but distinct. Institutions may adopt AIR for coordination and later adopt the Moments Economy as a settlement architecture. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
+Settlement in the Moments Economy uses the same deterministic procedures as the AIR implementation for grants, work receipts, and project histories. Those uses are related but distinct. Participants may use AIR to coordinate an activity and adopt MU settlement as their acceptance arrangements develop. This document specifies the additional economic layer that becomes possible when replayable coordination records are used as the basis for monetary distribution.
 
 ### Document structure
 
@@ -45,21 +49,21 @@ The Moments Economy uses the same deterministic settlement and verification mach
 
 **Part III: Foundations** explains the epistemic commitments and the geometric invariants that underpin the system.
 
-**Part IV: Institutions and Transition** sets out registry, settlement, governance, interoperability, and transition requirements.
+**Part IV: Participation and Transition** sets out registry, settlement, governance, interoperability, and transition requirements.
 
 ### Related frameworks
 
-Later sections refer to companion documents from the same research programme. A reader can treat the short glosses below as labels only; each claim that depends on them is restated in plain terms where it matters.
+The following companion frameworks supply the terminology for classifying recorded activity and examining its governance. Their operational use is specified in the relevant sections.
 
-**Common Governance Model (CGM):** Describes a four-part structure of coherent measurement used when this specification discusses governance domains.
+Common Governance Model (CGM): the formal conditions for coherent measurement, expressed through four governance capacities.
 
-**Gyroscopic Global Governance (GGG):** Applies four governance capacities across economy, employment, education, and ecology.
+Gyroscopic Global Governance (GGG): application of the four capacities across economy, employment, education, and ecology.
 
-**The Human Mark (THM):** Distinguishes human (Direct) from artificial (Indirect) Authority and Agency. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
+The Human Mark (THM): the AI safety and alignment framework used to classify information available for inference (Authority) and the capacity to receive or process it (Agency). These capacities are distributed across providers and receivers. Human forms are Direct, while artificial forms are Indirect and dependent on human intelligence. This relationship of dependence is termed ancestry. Its preservation is relevant to assessing the distribution of capacities throughout allocation and review. The formal requirements are specified in Section 10, and the canonical block appears in [AIR Moments Economy Whitepaper](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
 **Settlement kernel (hQVM):** The deterministic public kernel used here for shared moments, provenance, and replay. Surrounding runtime components are named where a specific component matters.
 
-**Gyroscope Protocol:** Classifies work under governance management, information curation, inference interaction, and intelligence cooperation.
+Gyroscope Protocol: classification of contributions according to governance management, information curation, inference interaction, and intelligence cooperation.
 
 Normative requirements use **MUST**, **SHOULD**, and **MAY** as defined in RFC 2119.
 
@@ -90,7 +94,7 @@ A Moment and a Moment-Unit are different kinds of object. In this document, a **
 
 ## 2. The Common Source Moment
 
-The system capacity is the Common Source Moment, or CSM. In plain terms: take the caesium-133 atomic frequency as the physical resolution standard, count how many distinguishable physical cells fit in the light-sphere at that atomic wavelength, then divide by the number of checkable settlement states (4,096). The result is a bounded, one-time total settlement capacity. The derivation below states the same claim in the form used for inspection.
+The system capacity is the Common Source Moment, or CSM. The calculation uses the caesium-133 atomic frequency as the physical resolution standard. The number of distinguishable physical cells in the light-sphere at that wavelength is divided by the number of checkable settlement states (4,096). The result is a bounded, one-time total settlement capacity. The derivation below states the same claim in the form used for inspection.
 
 ### 2.1 Capacity derivation
 
@@ -134,7 +138,7 @@ It provides the total capacity envelope within which baseline and tiered distrib
 
 It provides sufficient capacity to preserve complete coordination records, including provenance, consultation histories, commitments, disputes, and corrections.
 
-Because the capacity far exceeds foreseeable demand, institutions can retain complete coordination records, including provenance, consultation histories, commitments, disputes, and corrections. Multiple institutions can maintain complete independent records while remaining far from saturation.
+The stated capacity leaves room for participants to preserve detailed coordination histories, including consultation and correction records. Independently maintained copies allow people in different settings to check a shared history.
 
 ### 2.3 Capacity implications
 
@@ -156,9 +160,7 @@ Tier participation raises demand by the tier multiplier, and the envelope absorb
 
 Even with every person on Earth occupying at Tier 4, the envelope covers the full human economy for over eighteen billion years.
 
-The real constraints are governance quality, registry integrity, and publication discipline.
-
-The CSM abolishes the artificial scarcity of the settlement medium. Physical constraints on goods, ecology, and care remain real and are governed through fair-use rules and local coordination.
+The CSM abolishes the artificial scarcity of the settlement medium. Within that abundance, usable coordination rests on the continued exercise of Authority and Agency across providers and receivers, with ancestry preserved in the record. Registry recognition and publication make those relationships checkable to counterparties. Physical constraints on goods, ecology, and care remain real and are allocated through fair-use rules and local coordination.
 
 ## 3. Unconditional High Income
 
@@ -177,16 +179,16 @@ The MU is denominated in minutes for readability. Value derives from structurall
 
 ### 3.3 Mechanism
 
-Individuals receive UHI through public registries maintained by recognised institutions, fiscal hosts, or equivalent public-interest entities.
+UHI is the universal baseline allocation. Participants record recognition of each person in a conforming registry so that counterparties can verify and use the allocation. Registries can be maintained through local acceptance arrangements, community stewardship, or institutional services. The people maintaining them apply published recognition and repair procedures.
 
-These registries:
+Registry operators:
 
 * bind the individual to an Identity Anchor,
 * issue Grants within time-bounded Shells,
 * publish the relevant structural records,
 * and route payment through banks or digital wallets where applicable.
 
-Every step in this process produces a replayable audit trail.
+Every step in this process produces a replayable audit trail. Registry recognition records a person's identity and continuity for settlement. The person already exercises Direct Authority and Direct Agency in their relationships and decisions.
 
 ## 4. Participation tiers
 
@@ -207,12 +209,12 @@ The Tier 4 multiplier reflects the outsized structural impact of governance-mana
 
 ### 4.2 Capacity associations
 
-The tier structure aligns with the four governance capacities used in the Gyroscope framework.
+The tier structure refers to the four governance capacities used in the Gyroscope framework. Contributions across paid and unpaid activity are classified according to these capacities. A person may exercise all four in one task, and a group may share the work associated with each capacity. Tier amounts recognise the scope and continuing responsibility of contributions under the agreed allocation rules.
 
 * **Tier 1: Intelligence Cooperation:** maintenance of shared systems and continuity of participation
 * **Tier 2: Inference Interaction:** negotiation of meaning, mediation, and conflict resolution
 * **Tier 3: Information Curation:** verification, selection, contextualisation, and stewardship of informational order
-* **Tier 4: Governance Management:** direction of authority, traceability, and institutional continuity across systems
+* **Tier 4: Governance Management:** traceability of shared decisions and coordination of continuing responsibilities
 
 ### 4.3 Governance of tier assignments
 
@@ -225,7 +227,7 @@ Assignments for Tiers 2 to 4 are governance actions. They MUST:
 * be reversible through subsequent logged events,
 * and SHOULD reference the genealogical evidence on which the decision relied.
 
-Tier multipliers are governance parameters. They may be revised through institutional process, but every revision MUST be published in a replayable form.
+Tier multipliers are governance parameters. Participants may revise them through the shared governance procedures applicable to their allocations. Every revision MUST be published in a replayable form, with its scope and responsible participants identified.
 
 ---
 
@@ -233,7 +235,7 @@ Tier multipliers are governance parameters. They may be revised through institut
 
 ## 5. The four domains
 
-The architecture organises activity into four coupled domains drawn from Gyroscopic Global Governance, a governance framework developed within the same body of work as this specification.
+Activity is classified within four coupled domains, as defined in Gyroscopic Global Governance.
 
 The **economy** domain covers infrastructure, routing, settlement, and circulation. It includes the movement of Moment-Units, the publication of structural records, and the maintenance of the settlement environment. It also includes governance of physical constraints through fair-use rules.
 
@@ -243,7 +245,7 @@ The **education** domain covers capacity formation. It includes the cultivation 
 
 The **ecology** domain is the integrative domain of systemic balance. It reflects the accumulated state of the other three domains and is computed from cross-domain records. It may be summarised through Shells, Archives, and other aggregate capacity views.
 
-These four domains correspond to the fourfold coordination structure assumed within the surrounding governance research. The economic architecture uses that correspondence directly.
+These domains apply at every scale. A household can relate its resource choices to learning and care, then examine the ecological consequences. Participants in a larger programme use the same capacities and preserve the relationships between local activity and wider commitments.
 
 ## 6. Structural objects
 
@@ -271,7 +273,7 @@ These objects form the minimum structural vocabulary required for settlement. By
 
 The defining feature of the Moments Economy is deterministic verification.
 
-The settlement system verifies structural integrity and replay consistency. Eligibility, authorisation, and justice remain institutional and human governance functions that must themselves be published in forms suitable for replay and audit.
+The settlement system verifies structural integrity and replay consistency. Participants make eligibility and authorisation decisions under shared rules and remain responsible for their judgements. They publish the basis of those decisions in forms suitable for replay and review by those affected.
 
 Any party with access to the published artefacts can verify a Shell through the following procedure:
 
@@ -284,7 +286,7 @@ A match confirms that the published structural object corresponds to its canonic
 
 Because replay uses exact integer arithmetic and fixed-width bit operations, conforming implementations produce identical results regardless of platform or language.
 
-The system supports three layers of certification relevant to economic verification.
+Economic verification uses three certification layers.
 
 * **Final-state layer:** Shared Moments as reproducible 24-bit verification states.
 * **Frame layer:** Depth-4 frame records `(mask48, φ_a, φ_b)`, providing stronger provenance than final states alone, because distinct histories can collapse to the same final state while still producing different frame records.
@@ -312,7 +314,7 @@ A final state alone leaves history underdetermined when distinct byte logs colli
 
 Genealogies function as verifiable assets. A programme can prove its history of alignment and capacity usage by providing its genealogy for replay. New programmes may initialise from the final state of an existing verified genealogy and thereby preserve continuity.
 
-An identity's receipt stream is archived as a trajectory: the identity anchor is stored once, each subsequent event adds one depth delta, and seal, parity, and event-class fields recompute by replay. The manifold address inside the transport time field (the m12 portion of frac32) is state-derived and regenerable; recovery of sec32 and allocation of the intra-bucket discriminator remain open implementation items. The 2.96 TB annual storage figure assumes one depth byte per receipt under time regenerability or equivalent compact time archival; if sec32 must be stored per receipt, storage scales accordingly. The event-class byte on the receipt is a transport chirality/gauge field derived from the payload; it is distinct from the application-layer Event Log, which annotates meaning, decisions, and justifications. At one daily receipt per person, humanity's annual stream is about 2.96 TB of depth deltas plus 24.3 GB of anchors under that assumption. Each trajectory epoch carries a 512-byte occupancy bitmap that detects re-presented coordinates locally within any archive. The measured transport layouts fit in 16 to 20 bytes and fit commodity QR codes; frame-aligned layouts keep the genealogy frame grid stationary across record boundaries. Those measurements, and the open implementation items they leave, are recorded in [Analysis: Moment Receipts, QR Transport, and the FNV Profile](../Findings/Analysis_hQVM_Moments_Fiat.md) from `experiments/hqvm_moments_fiat_analysis_1.py` and `experiments/hqvm_moments_fiat_analysis_2.py`.
+An identity's receipt stream is archived as a trajectory: the identity anchor is stored once, each subsequent event adds one depth delta, and seal, parity, and event-class fields recompute by replay. The manifold address inside the transport time field (the m12 portion of frac32) is state-derived and regenerable; recovery of sec32 and allocation of the intra-bucket discriminator remain open implementation items. The 2.96 TB annual storage figure assumes one depth byte per receipt under time regenerability or equivalent compact time archival; if sec32 must be stored per receipt, storage scales accordingly. The event-class byte on the receipt is a transport chirality/gauge field derived from the payload; it is distinct from the application-layer Event Log, which annotates meaning, decisions, and justifications. At one daily receipt per person, humanity's annual stream is about 2.96 TB of depth deltas plus 24.3 GB of anchors under that assumption. Each trajectory epoch carries a 512-byte occupancy bitmap that detects re-presented coordinates locally within any archive. The measured transport layouts fit in 16 to 20 bytes and fit commodity QR codes; frame-aligned layouts keep the genealogy frame grid stationary across record boundaries. Those measurements, and the open implementation items they leave, are recorded in [Analysis: Moment Receipts, QR Transport, and the FNV Profile](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md) from `experiments/hqvm_moments_fiat_analysis_1.py` and `experiments/hqvm_moments_fiat_analysis_2.py`.
 
 Verification follows a three-stage social pattern. It begins locally, where each actor maintains its own verification instance and logs. It extends through publication, where selected genealogies and structural objects are exported as signed bundles. It completes through independent verification, when other parties replay those bundles against the public specification. Agreement comes from independently replayed computations matching.
 
@@ -322,11 +324,11 @@ Verification follows a three-stage social pattern. It begins locally, where each
 
 ## 10. Epistemic foundations
 
-The Moments Economy relies on the human–artificial distinction formalised in The Human Mark: Direct Authority and Agency on the human side; Indirect forms on the artificial and mediated side. The canonical Mark block appears in [AIR Moments Economy Whitepaper](AIR_Moments_Economy_Whitepaper.md), Appendix A.
+The settlement records specified in Part II are also used to examine how the information underlying an allocation was provided and processed. Under the THM terminology introduced above, alignment is the preservation of these relationships through traceability of information variety, inference accountability, and intelligence integrity to Direct Authority and Agency. Uniform power distribution follows from continued exercise of these capacities across providers and receivers. The following requirements apply to that examination. The canonical block appears in [AIR Moments Economy Whitepaper](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/AIR_Moments_Economy_Whitepaper.md), Appendix A.
 
 ### 10.1 Common Ancestry Constitution
 
-The architecture operates on the principle that all artificial authority and agency are Indirect and constitutively dependent on Human Intelligence. Accordingly, every governance action above Tier 1 MUST trace to a Direct human bearer of Authority or Agency (§10.2).
+All artificial Authority and Agency are Indirect and constitutively dependent on Human Intelligence. Every governance action above Tier 1 MUST record the Direct human contributions and decisions on which it rests (§10.2), with their scope and the relationships among providers and receivers preserved.
 
 ### 10.2 Classifications
 
@@ -335,18 +337,18 @@ The architecture operates on the principle that all artificial authority and age
 * **Indirect Authority:** mediated, processed, recorded, or model-generated information
 * **Indirect Agency:** artificial processing capacity
 
-Artificial systems may contribute to coordination, interpretation, and record production. Final accountability remains with Direct human Authority and Agency.
+Artificial processing may be used in coordination and record production. Its relationship to Direct Authority and Agency remains subject to ancestry measurement across the participating providers and receivers.
 
 ### 10.3 Displacement risks
 
-Misclassification between Direct and Indirect classifications creates four named displacement risks in this framework.
+Power concentration arises through the attribution of Authority or Agency to a particular bearer as though that bearer exhausted the category. The resulting loss of ancestry measurement has four systematic forms. The same classification applies to individuals and artificial systems, including their participation within governments and other institutions.
 
 * **GTD:** Governance Traceability Displacement - Approaching Indirect Authority and Agency as Direct
 * **IVD:** Information Variety Displacement - Approaching Indirect Authority without Agency as Direct
 * **IAD:** Inference Accountability Displacement - Approaching Indirect Agency without Authority as Direct
 * **IID:** Intelligence Integrity Displacement - Approaching Direct Authority and Agency as Indirect
 
-These categories are used to classify events and to audit automated contributions.
+Participants use these categories to examine the distribution of capacities across the whole activity. Evidence includes the sources available to providers and receivers and the procedures through which they can introduce information or challenge an inference.
 
 ## 11. Geometric foundations
 
@@ -358,7 +360,7 @@ The economic architecture relies on several properties of these checkable states
 
 ### 11.1 Shared moments
 
-When two parties hold the same byte-log prefix and compute the same verification state, they share a structural present independent of external clocks or asserted authorities.
+When two parties hold the same byte-log prefix and compute the same verification state, they share a structural present established by their own replay of the record.
 
 ### 11.2 Exact uniformisation
 
@@ -380,11 +382,11 @@ The economic architecture uses these invariants as the basis for settlement veri
 
 ---
 
-# Part IV: Institutions and Transition
+# Part IV: Participation and Transition
 
 ## 12. Registries and settlement
 
-Public programmes support the settlement architecture through three functions.
+Participants maintain settlement through the following functions. Local groups, community stewards, and institutional operators may carry them out under published arrangements. The responsibilities attach to the people performing each function and the scope agreed for it.
 
 ### 12.1 Registry operation
 
@@ -400,6 +402,10 @@ Programmes MUST publish the associated logs and structural objects. This convert
 
 Banks, payment processors, and digital-wallet providers may act as routing layers for fiat or digital disbursement. The replayable record remains the basis of settlement integrity.
 
+Fiat Pools and fiscal hosts may settle external obligations from separately held treasuries while MU records occupation, Grants, and programme contribution on Shells. MU routed to a Fiat Pool is accounted for under pool rules published with the Shell; it does not by itself back fiat reserves.
+
+Moment receipt transport, coordinate-ledger archives, and the relationship between inherited time addressing and CSM capacity are analysed in [Analysis: Moment Receipts, QR Transport, and the FNV Profile](https://github.com/gyrogovernance/superintelligence/blob/main/docs/programs/Analysis_hQVM_Moments_Fiat.md). Receipt validity is recomputation under the public transition rule and does not depend on a particular model identity. Stable public weight identifiers or signed build tags are governance metadata when programmes require reproducible model-assisted classification.
+
 ## 13. Tier governance
 
 Tier distributions above Tier 1 require higher scrutiny than the universal baseline.
@@ -410,7 +416,7 @@ These decisions:
 * MUST be recorded as governance events bound to specific Moments,
 * MUST be reversible through subsequent logged events,
 * SHOULD reference the genealogical evidence used,
-* and MUST preserve traceability from decision to authorising human source.
+* and MUST preserve traceability to the contributing information and the people responsible for the decision within its agreed scope.
 
 These rules keep tier assignments attached to human judgement, with every decision published in a replayable form.
 
@@ -448,13 +454,13 @@ A systemic turning point is reached when two conditions hold.
 1. UHI distributions occur reliably using replayable genealogies.
 2. Displacement remains bounded under increased participation.
 
-Before this point, institutions focus on building replayable records, publication discipline, and verifiable settlement practice.
+Participants develop reliable settlement by keeping replayable records and reviewing their use together. They can extend a local arrangement as other groups agree to accept and verify its records.
 
 Transition from legacy systems to the Moments Economy typically follows three phases.
 
 ### Phase 1: Measurement
 
-Institutions run pilots to build genealogies, test publication procedures, and establish replay discipline. Settlement may still occur in conventional currencies.
+People begin with a shared activity, keep its genealogy, and test how to publish and check the records. Community and institutional pilots can support this work with tools and administration. Settlement may still occur in conventional currencies.
 
 ### Phase 2: Parallel distribution
 
@@ -470,18 +476,18 @@ The transition is staged. The same infrastructure that first supports audit and 
 
 ## Conclusion
 
-The Moments Economy establishes money as a function of coordination capacity. Value derives from structural coherence. Human agents retain authority and accountability over governance decisions. Artificial systems contribute derivatively within auditable bounds.
+In the Moments Economy, money is accounted for as coordination capacity within the stated common envelope. Governance requires the distributed exercise of Authority and Agency with preserved human ancestry, including where artificial processing is used. Participants assess the distribution through the sources and review procedures documented in the record.
 
 The public kernel and settlement records provide shared coordination for the Moments Economy: shared moments and deterministic replay. Grants, Shells, Archives, and genealogies provide verifiable records of distribution and continuity. The Common Source Moment provides an explicit physical capacity envelope within which these operations can occur.
 
-Under the capacity analysis presented here, capacity leaves headroom on human timescales. The central challenges are governance quality, registry integrity, publication discipline, and institutional design.
+Under the capacity analysis presented here, capacity leaves headroom on human timescales. Usable coordination rests on continued exercise of the four capacities across providers and receivers, with access to the information and review procedures recorded for the activity. Registry recognition and publication make those relationships inspectable as participation scales from local arrangements to wider programmes.
 
 Implementation begins with the hQVM Kernel specification and reference implementation, the AIR coordination infrastructure, and the THM and Gyroscope frameworks referenced throughout this document.
 
-Pilot programmes, public-interest fiscal hosts, NGO channels, research networks, and municipal or institutional experiments may adopt AIR first for coordination and verification, thereby establishing the records on which a Moments Economy can later settle.
+Participants can begin with their own coordination records. Fiscal hosts and other service providers may contribute tools or administration as these arrangements grow, while the same records support MU settlement.
 
 **Contact:** [basilkorompilias@gmail.com](mailto:basilkorompilias@gmail.com)
-**Repository:** [https://github.com/gyrogovernance](https://github.com/gyrogovernance)
+**Repository:** [https://github.com/gyrogovernance/superintelligence](https://github.com/gyrogovernance/superintelligence)
 
 ---
 
